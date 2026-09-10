@@ -1,0 +1,347 @@
+{
+  "schema_version": "1.2.0",
+  "advisory_id": "ADV-2026-0015",
+  "source": {
+    "source_type": "nca",
+    "publisher": "NCA / NECC / OFSI (JMLIT+ Sanctions Facilitators Cell)",
+    "title": "Red Alert: Financial Sanctions Evasion Typologies, Russian Elites and Enablers (0697-NECC)",
+    "published_on": "2022-07-01",
+    "published_on_precision": "month",
+    "url": "https://www.nationalcrimeagency.gov.uk/who-we-are/publications/605-necc-financial-sanctions-evasion-russian-elites-and-enablers/file",
+    "document_sha256": "bf6b4afaa6dcb2327d8547f01ff0ff78d4e59e24a782d7f1a25dfdd963585ad6",
+    "page_count": 15
+  },
+  "summary": "GOLDEN LABEL, hand-drafted against the PDF. UK red alert on how designated Russian elites and their UK enablers evade financial sanctions: transferring shareholdings to relatives, employees and nominees before or just after designation, diluting stakes below the 50% control threshold, trusts and offshore structures that leave the designated person in indirect control, movement to non-sanctioning jurisdictions, crypto-assets, and thirty-four detection indicators for frozen-asset transfers, enablers and suspicious payments, including open-account third-party trade payments.",
+  "jurisdictions": [
+    "GB",
+    "RU",
+    "AE",
+    "TR",
+    "CN",
+    "BR",
+    "IN",
+    "BY",
+    "CH",
+    "VG",
+    "CY"
+  ],
+  "typologies": [
+    {
+      "family": "sanctions",
+      "typology_id": "SAN001",
+      "label": "Ownership Evasion",
+      "emergent": false,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 3,
+          "printed_folio": "3",
+          "paragraph": null,
+          "quote": "Transfer assets such as shareholdings in holding companies to trusted proxies such as relatives or employees"
+        },
+        {
+          "page": 10,
+          "printed_folio": "10",
+          "paragraph": null,
+          "quote": "DPs communicating changes to the beneficial ownership of their corporate structures such as Private Investment Companies (PICs) and Joint Stock Companies (JSC) to non-Russian or dual national family members or associates, or nominee directors/shareholders, prior to, or shortly after sanctions taking effect."
+        }
+      ]
+    },
+    {
+      "family": "sanctions",
+      "typology_id": "SAN009",
+      "label": "Complex Ownership Structures",
+      "emergent": false,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 10,
+          "printed_folio": "10",
+          "paragraph": null,
+          "quote": "Complex ownership structures could include circular ownership structures, shell companies and trust structures, with varying combinations of relatives or other close business associates of DPs operating as PSC, trustee, beneficiary, settlor, protector or other connected person."
+        }
+      ]
+    },
+    {
+      "family": "network",
+      "typology_id": "PAT010",
+      "label": "Hidden Controller",
+      "emergent": false,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 3,
+          "printed_folio": "3",
+          "paragraph": null,
+          "quote": "Although a DP may claim to have relinquished the asset, it is highly likely that they will retain their influence through trusted proxies and enablers."
+        },
+        {
+          "page": 10,
+          "printed_folio": "10",
+          "paragraph": null,
+          "quote": "These new individuals are likely to be a front, with the DP maintaining indirect control."
+        }
+      ]
+    },
+    {
+      "family": "network",
+      "typology_id": "PAT007",
+      "label": "Shell Company Network",
+      "emergent": false,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 11,
+          "printed_folio": "11",
+          "paragraph": null,
+          "quote": "A large number of off-the-shelf corporations with no trading record with nominee ownership used as throughputs."
+        }
+      ]
+    },
+    {
+      "family": "sanctions",
+      "typology_id": "SAN008",
+      "label": "High Risk Jurisdictions",
+      "emergent": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 4,
+          "printed_folio": "4",
+          "paragraph": null,
+          "quote": "DPs will seek to transfer assets and funds directly and indirectly to jurisdictions where sanctions are not in place, such as the UAE, Turkey, China, Brazil, India and the former Soviet Union (excluding the Baltic States and Ukraine)."
+        }
+      ]
+    },
+    {
+      "family": "sanctions",
+      "typology_id": "CMI010",
+      "label": "Cryptocurrency Evasion",
+      "emergent": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 4,
+          "printed_folio": "4",
+          "paragraph": null,
+          "quote": "it is likely that DPs will explore alternative payment methods, including the use of crypto-assets, to move funds to circumvent sanctions and mitigate reduced access to the SWIFT payment system."
+        }
+      ]
+    },
+    {
+      "family": "sanctions",
+      "typology_id": "SAN005",
+      "label": "Name Screening Evasion",
+      "emergent": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 10,
+          "printed_folio": "10",
+          "paragraph": null,
+          "quote": "Change in address and names for Russian entities in the lead up to the Russian invasion of Ukraine."
+        }
+      ]
+    },
+    {
+      "family": "sanctions",
+      "typology_id": "SAN006",
+      "label": "Trade Based Sanctions Evasion",
+      "emergent": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 12,
+          "printed_folio": "12",
+          "paragraph": null,
+          "quote": "Circumvention attempts through Open Account Trade-Based Money Laundering (TBML) typology, such as increases in third party open account payments."
+        }
+      ]
+    },
+    {
+      "family": "tbml",
+      "typology_id": "TBML008",
+      "label": "Third Party Payment Abuse",
+      "emergent": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 12,
+          "printed_folio": "12",
+          "paragraph": null,
+          "quote": "such as increases in third party open account payments."
+        }
+      ]
+    },
+    {
+      "family": "network",
+      "typology_id": "PAT005",
+      "label": "Common Address",
+      "emergent": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 11,
+          "printed_folio": "11",
+          "paragraph": null,
+          "quote": "involving corporations incorporated by the same people and company (often with a registered office at the same physical address)."
+        }
+      ]
+    },
+    {
+      "family": "network",
+      "typology_id": "PAT001",
+      "label": "Shared Director",
+      "emergent": false,
+      "confidence": "low",
+      "citations": [
+        {
+          "page": 11,
+          "printed_folio": "11",
+          "paragraph": null,
+          "quote": "Material on open source, such as Companies House, indicating work for multiple sanctioned entities, such as multiple directorships."
+        }
+      ]
+    },
+    {
+      "family": "correspondent_banking",
+      "typology_id": "BA008",
+      "label": "Layering",
+      "emergent": false,
+      "confidence": "low",
+      "citations": [
+        {
+          "page": 10,
+          "printed_folio": "10",
+          "paragraph": null,
+          "quote": "such as the sale of high value assets, where funds are then disbursed offshore through secrecy jurisdictions."
+        }
+      ]
+    },
+    {
+      "family": "sanctions",
+      "typology_id": null,
+      "label": "Enabler-facilitated sanctions evasion by professional services",
+      "emergent": true,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 3,
+          "printed_folio": "3",
+          "paragraph": null,
+          "quote": "Enablers are individuals or businesses facilitating sanctions evasion and associated money laundering."
+        },
+        {
+          "page": 11,
+          "printed_folio": "11",
+          "paragraph": null,
+          "quote": "Trust and Company Service Providers (TCSPs) offering nominees and trustee services to DPs and close family members or business associates."
+        }
+      ]
+    },
+    {
+      "family": "sanctions",
+      "typology_id": null,
+      "label": "Pre-designation asset transfer exploiting designation timing gaps",
+      "emergent": true,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 3,
+          "printed_folio": "3",
+          "paragraph": null,
+          "quote": "differing timescales in designating individuals between jurisdictions created opportunities for DPs to facilitate the movement of funds/assets."
+        },
+        {
+          "page": 3,
+          "printed_folio": "3",
+          "paragraph": null,
+          "quote": "Sell or transfer assets at a loss in order to realise their value before sanctions take effect;"
+        }
+      ]
+    },
+    {
+      "family": "sanctions",
+      "typology_id": null,
+      "label": "Ownership dilution below the 50% control threshold",
+      "emergent": true,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 3,
+          "printed_folio": "3",
+          "paragraph": null,
+          "quote": "Divest investments to ensure ownership stakes are below the 50% threshold, or relinquishing previous controlling stakes."
+        },
+        {
+          "page": 11,
+          "printed_folio": "11",
+          "paragraph": null,
+          "quote": "Beneficial ownership changes to just below aggregated thresholds."
+        }
+      ]
+    }
+  ],
+  "actors": [
+    {
+      "name": "Designated persons (Russian elites)",
+      "actor_type": "category",
+      "aliases": [
+        "DPs",
+        "Russian HNWIs"
+      ],
+      "jurisdiction": "RU",
+      "role": "Sanctioned Russian elites and HNWIs moving personal and commercial holdings before and after designation",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 3,
+          "printed_folio": "3",
+          "paragraph": null,
+          "quote": "some Designated Persons (DPs) are using a range of techniques in order to evade sanctions impacting on their personal and commercial holdings."
+        }
+      ]
+    },
+    {
+      "name": "UK enablers (professional services)",
+      "actor_type": "category",
+      "aliases": [
+        "enablers"
+      ],
+      "jurisdiction": "GB",
+      "role": "Legal, financial, TCSP, estate agent, auction house and family office professionals facilitating evasion; complicit, wilfully blind or unwitting",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 3,
+          "printed_folio": "3",
+          "paragraph": null,
+          "quote": "Key professions include (but are not limited to) legal (barristers and solicitors), financial (relationship managers, accountants, investment advisors, wealth managers, payment processors, private equity, trust and company service providers), estate agents, auction houses, company directors, intermediaries/agents and private family offices."
+        }
+      ]
+    },
+    {
+      "name": "Russian money launderers",
+      "actor_type": "category",
+      "aliases": [],
+      "jurisdiction": "RU",
+      "role": "Professional launderers providing cash to crypto-asset services on behalf of Russian clients",
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 4,
+          "printed_folio": "4",
+          "paragraph": null,
+          "quote": "Russian money launderers have increasingly been observed in UK intelligence and operational activity providing cash to crypto-asset services, with the ability to move significant volumes of funds."
+        }
+      ]
+    }
+  ],
+  "indicators": [],
+  "suggested_desks": [
+    "sanctions_desk",
+    "fiu_liaison"
+  ],
+  "overall_confidence": "high",
+  "extraction_notes": "Golden label. Pages 6-9 and 13-15 are threat-response, supervisor and handling boilerplate with no typology content. PAT004 Circular Ownership is mentioned once inside the SAN009 quote and is not labelled separately (convention: indicators are not typologies); PAT005 and PAT001 kept at medium/low for consistency with ADV-2026-0013. SAN006 chosen over TBML010 per the twin convention; TBML008 kept because the alert names third-party open-account payments as the specific technique. Three emergent labels: enabler facilitation, pre-designation timing arbitrage, threshold dilution. Ukraine, US and EU appear as victim or designating parties only and are not jurisdictions."
+}

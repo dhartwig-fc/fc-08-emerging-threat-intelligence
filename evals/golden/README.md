@@ -47,6 +47,21 @@ each tier 1 and 2 publisher's own catalogue, choosing documents that:
 Tier 3 (BIS, OECD, WEF, UN, Geopolitical Monitor) is strategic foresight and
 is out of scope for extraction.
 
+## Labelling conventions (owner decisions, applied to all twenty)
+
+- **Twins across families.** The library holds sanctions/TBML pairs (SAN006
+  Trade Based Sanctions Evasion and TBML010 Sanctions Evasion Through Trade;
+  SAN007 and TBML007 Dual Use Goods; SAN002 and PAT008 Shadow Fleet). An
+  advisory framed as sanctions or export-control evasion labels the
+  **sanctions** twin. Decided 2026-09-10 on ADV-2026-0013.
+- **Actors are threat actors.** Named evaders, their networks and actor
+  classes. Enforcement bodies, task forces and regulators are not actors.
+- **A victim state is not a jurisdiction.** Jurisdictions are where the risk
+  or the case sits, not who was harmed.
+- **Indicators are not typologies.** A red flag the advisory lists is a
+  typology only when the advisory is about that behaviour, not when it
+  mentions it once.
+
 ## Rules
 
 - Never edit `advisory_list.json` by hand to change a hash or a date. Re-fetch

@@ -223,7 +223,7 @@
       "bytes": 397474,
       "pages": 6,
       "selection_rationale": "sanctions and tbml; transshipment, intermediaries, dual-use goods; short",
-      "label_status": "unlabelled"
+      "label_status": "draft, awaiting owner review"
     },
     {
       "advisory_id": "ADV-2026-0014",
@@ -255,7 +255,7 @@
       "bytes": 297285,
       "pages": 15,
       "selection_rationale": "sanctions and network; ownership dilution below 50%, UBO changes; typology-list format",
-      "label_status": "unlabelled"
+      "label_status": "draft, awaiting owner review"
     },
     {
       "advisory_id": "ADV-2026-0016",
