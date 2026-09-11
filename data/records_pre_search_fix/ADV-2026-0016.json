@@ -1,0 +1,359 @@
+{
+  "schema_version": "1.3.0",
+  "advisory_id": "ADV-2026-0016",
+  "source": {
+    "source_type": "nca",
+    "publisher": "National Crime Agency (National Economic Crime Centre)",
+    "title": "Red Alert: Exporting High Risk Goods",
+    "published_on": "2023-12-01",
+    "published_on_precision": "month",
+    "url": null,
+    "document_sha256": "7448d062adfcdaaee29c1b83dd1d4b678bb14ff31df17d6b04ebaeeed6e9161d",
+    "page_count": 7
+  },
+  "summary": "The UK NECC, working through JMLIT and with OFSI and the FCDO, warns the financial sector and trade/logistics providers that Russia is using complex supply chains, alternative routes and third-country intermediaries to procure Western dual-use and other high-risk goods for its military despite sanctions. It cites UK sanctions on Turkey-, UAE- and Russia-based entities for exporting microelectronics, drones and dual-use goods, and lists 14 red flags covering diversionary destinations, overpayment, front companies with no web presence, letter-of-credit misuse, OFSI list similarity/co-location, and transshipment or last-minute rerouting of payments.",
+  "jurisdictions": [
+    "GB",
+    "RU",
+    "UA",
+    "TR",
+    "AE",
+    "CN",
+    "BY",
+    "RS",
+    "UZ"
+  ],
+  "typologies": [
+    {
+      "family": "sanctions",
+      "typology_id": "SAN007",
+      "label": "Dual Use Goods",
+      "emergent": false,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 2,
+          "printed_folio": "2",
+          "paragraph": null,
+          "quote": "“High-risk goods” refers to Western items critical to Russian weapons systems and its military development. It includes, but is not exclusive to, dual-use goods."
+        },
+        {
+          "page": 4,
+          "printed_folio": "4",
+          "paragraph": null,
+          "quote": "Transactions involve a purported civil end-user, but research indicates customers with counterparties with connections with the military, such as an address that is a military facility or is co-located with military facilities in a country of concern."
+        }
+      ]
+    },
+    {
+      "family": "sanctions",
+      "typology_id": "SAN006",
+      "label": "Trade Based Sanctions Evasion",
+      "emergent": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 4,
+          "printed_folio": "4",
+          "paragraph": null,
+          "quote": "A customer that significantly overpays for a Common High Priority list item, compared to known market prices."
+        },
+        {
+          "page": 4,
+          "printed_folio": "4",
+          "paragraph": null,
+          "quote": "Purchases under a letter of credit that are consigned to the issuing bank, not to the actual end user. In addition, supporting documents, such as a commercial invoice, do not list the actual end-user."
+        }
+      ]
+    },
+    {
+      "family": "sanctions",
+      "typology_id": "SAN004",
+      "label": "Front Companies",
+      "emergent": false,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 4,
+          "printed_folio": "4",
+          "paragraph": null,
+          "quote": "Transactions involving entities with little to no web presence, such as a website or a domain-based email account."
+        },
+        {
+          "page": 4,
+          "printed_folio": "4",
+          "paragraph": null,
+          "quote": "Transactions involving companies that are physically co-located, or have shared ownership, with an entity on the OFSI consolidated list."
+        }
+      ]
+    },
+    {
+      "family": "sanctions",
+      "typology_id": "SAN003",
+      "label": "Transshipment",
+      "emergent": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 3,
+          "printed_folio": "3",
+          "paragraph": null,
+          "quote": "Russia is deploying complex supply chains and alternative supply routes to acquire sanctioned products."
+        },
+        {
+          "page": 5,
+          "printed_folio": "6",
+          "paragraph": null,
+          "quote": "Transactions involving payments being made from entities located at known tranship ment points or involve atypical shipping routes to reach a destination."
+        }
+      ]
+    }
+  ],
+  "actors": [
+    {
+      "name": "TURKIK UNION",
+      "actor_type": "organisation",
+      "aliases": [],
+      "jurisdiction": "TR",
+      "role": "Sanctioned entity exporting microelectronics to Russia",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 3,
+          "printed_folio": "3",
+          "paragraph": null,
+          "quote": "Among those sanctioned included two Turkey based businesses, TURKIK UNION and AZU INTERNATIONAL, for their role in exporting microelectronics to Russia that are essential for Russia’s military activity in Ukraine"
+        }
+      ]
+    },
+    {
+      "name": "AZU INTERNATIONAL",
+      "actor_type": "organisation",
+      "aliases": [],
+      "jurisdiction": "TR",
+      "role": "Sanctioned entity exporting microelectronics to Russia",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 3,
+          "printed_folio": "3",
+          "paragraph": null,
+          "quote": "Among those sanctioned included two Turkey based businesses, TURKIK UNION and AZU INTERNATIONAL, for their role in exporting microelectronics to Russia that are essential for Russia’s military activity in Ukraine"
+        }
+      ]
+    },
+    {
+      "name": "AEROMOTUS UNMANNED AERIAL VEHICLES TRADING LLC",
+      "actor_type": "organisation",
+      "aliases": [],
+      "jurisdiction": "AE",
+      "role": "Sanctioned Dubai-based supplier of drones and drone components to Russia",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 3,
+          "printed_folio": "3",
+          "paragraph": null,
+          "quote": "Dubai -based AEROMOTUS UNMANNED AERIAL VEHICLES TRADING LLC, for its role in supplying dro nes and drone components to Russia."
+        }
+      ]
+    },
+    {
+      "name": "LIMITED LIABILITY COMPANY TECHNOLOGICAL COMPANY FLY BRIDGE",
+      "actor_type": "organisation",
+      "aliases": [],
+      "jurisdiction": "RU",
+      "role": "Russian company procuring dual-use goods for Russian electronics producers",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 3,
+          "printed_folio": "3",
+          "paragraph": null,
+          "quote": "the UK also sanctioned LIMITED LIABILITY COMPANY TECHNOLOGICAL COMPANY FLY BRIDGE, a Russian company procuring dual-use goods for Russian electronics producers NPP ISTOK and ECITECH."
+        }
+      ]
+    },
+    {
+      "name": "NPP ISTOK",
+      "actor_type": "organisation",
+      "aliases": [],
+      "jurisdiction": "RU",
+      "role": "Russian electronics producer receiving procured dual-use goods",
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 3,
+          "printed_folio": "3",
+          "paragraph": null,
+          "quote": "a Russian company procuring dual-use goods for Russian electronics producers NPP ISTOK and ECITECH."
+        }
+      ]
+    },
+    {
+      "name": "ECITECH",
+      "actor_type": "organisation",
+      "aliases": [],
+      "jurisdiction": "RU",
+      "role": "Russian electronics producer receiving procured dual-use goods",
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 3,
+          "printed_folio": "3",
+          "paragraph": null,
+          "quote": "a Russian company procuring dual-use goods for Russian electronics producers NPP ISTOK and ECITECH."
+        }
+      ]
+    },
+    {
+      "name": "Russian oligarchs",
+      "actor_type": "category",
+      "aliases": [],
+      "jurisdiction": "RU",
+      "role": "Sanctioned wealthy individuals connected to the Russian regime",
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 3,
+          "printed_folio": "3",
+          "paragraph": null,
+          "quote": "sanctioned over 1900 individuals and entities under the Russian Sanctions regime, including over 130 oligarchs with a combined net worth of over £140 billion in February 2022"
+        }
+      ]
+    }
+  ],
+  "indicators": [
+    {
+      "indicator_type": "transactional",
+      "description": "Payments for Common High Priority list goods from a company incorporated after 24 February 2022 and based in a known diversionary destination.",
+      "detectable_in_transaction_data": true,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 4,
+          "printed_folio": "4",
+          "paragraph": null,
+          "quote": "Transactions related to payments for goods on the Common High Priority list, from a company incorporated after 24 February 2022 and based in known diversionary destinations."
+        }
+      ]
+    },
+    {
+      "indicator_type": "behavioural",
+      "description": "Customer lacks or refuses to provide details on banks, shippers or third parties, including end users, intended end-use, or company ownership.",
+      "detectable_in_transaction_data": false,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 4,
+          "printed_folio": "4",
+          "paragraph": null,
+          "quote": "A customer who lacks or refuses to provide details on banks, shippers, or third parties, including about end users, intended end-use, or company ownership."
+        }
+      ]
+    },
+    {
+      "indicator_type": "transactional",
+      "description": "A customer significantly overpays for a Common High Priority list item compared to known market prices.",
+      "detectable_in_transaction_data": true,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 4,
+          "printed_folio": "4",
+          "paragraph": null,
+          "quote": "A customer that significantly overpays for a Common High Priority list item, compared to known market prices."
+        }
+      ]
+    },
+    {
+      "indicator_type": "documentary",
+      "description": "Letter-of-credit purchases consigned to the issuing bank rather than the actual end user, with supporting documents such as commercial invoices omitting the true end-user.",
+      "detectable_in_transaction_data": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 4,
+          "printed_folio": "4",
+          "paragraph": null,
+          "quote": "Purchases under a letter of credit that are consigned to the issuing bank, not to the actual end user. In addition, supporting documents, such as a commercial invoice, do not list the actual end-user."
+        }
+      ]
+    },
+    {
+      "indicator_type": "network",
+      "description": "Entities transacting with little to no web presence, such as no website or domain-based email account.",
+      "detectable_in_transaction_data": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 4,
+          "printed_folio": "4",
+          "paragraph": null,
+          "quote": "Transactions involving entities with little to no web presence, such as a website or a domain -based email account."
+        }
+      ]
+    },
+    {
+      "indicator_type": "documentary",
+      "description": "Customer name or address is similar to a party on the OFSI consolidated list, or the company is co-located or shares ownership with a listed entity.",
+      "detectable_in_transaction_data": true,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 4,
+          "printed_folio": "4",
+          "paragraph": null,
+          "quote": "The customer’s name or its address is similar to one of the parties on the OFSI consolidated list."
+        },
+        {
+          "page": 4,
+          "printed_folio": "4",
+          "paragraph": null,
+          "quote": "Transactions involving companies that are physically co-located, or have shared ownership, with an entity on the OFSI consolidated list."
+        }
+      ]
+    },
+    {
+      "indicator_type": "geographic",
+      "description": "Payments made from entities located at known transshipment points, or involving atypical shipping routes, or a last-minute change in payment routing away from a country of concern.",
+      "detectable_in_transaction_data": true,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 5,
+          "printed_folio": "6",
+          "paragraph": null,
+          "quote": "Transactions involving payments being made from entities located at known tranship ment points or involve atypical shipping routes to reach a destination."
+        },
+        {
+          "page": 5,
+          "printed_folio": "5",
+          "paragraph": null,
+          "quote": "Transactions involving a last-minute change in payment routing that was previously scheduled from a country of concern, but now routed through a different country or company."
+        }
+      ]
+    },
+    {
+      "indicator_type": "product",
+      "description": "The commodity, software, service or technology purchased does not fit the purchaser's line of business.",
+      "detectable_in_transaction_data": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 4,
+          "printed_folio": "4",
+          "paragraph": null,
+          "quote": "The item or service (commodity, software, service or technology) does not fit the purchaser’s line of business."
+        }
+      ]
+    }
+  ],
+  "suggested_desks": [
+    "sanctions_desk",
+    "trade_desk",
+    "correspondent_desk"
+  ],
+  "overall_confidence": "high",
+  "extraction_notes": "This is a UK NCA/OFSI Red Alert on sanctions circumvention, not a TBML-family document per se, so all four typology links were made in the 'sanctions' family rather than the label-sharing 'tbml' family (TBML007/TBML010) per the Knowledge Centre's family-preference rule. The 14 numbered red flags on pages 4-5 were consolidated into 8 representative indicators to keep citations well-supported rather than listing all 14; a reviewer may want the remaining flags (e.g. multiple similar suppliers, open lines of credit, phone country-code mismatch) added individually if the desk wants full coverage. Page-vs-printed-folio note: the printed page footer numbering runs one behind the PDF page index from page 2 onward, so PDF page 6 (where the transshipment red flag sits) is printed folio '5' on the page above it in sequence but the document's own page break placed it under the '=== PAGE 5 ===' marker for red flag 14 — verified against the '=== PAGE n ===' markers, not assumed; flagged here in case the printed_folio value needs correction on review. 'Russian oligarchs' is recorded as a category actor per the ActorType.CATEGORY rule since it describes a class, not a named entity. Jurisdictions list reflects countries explicitly implicated in sanctions-evasion routes or sanctioned entities (Turkey, UAE, China, Belarus, Serbia, Uzbekistan per page 3), plus Russia, Ukraine and the UK (issuer)."
+}

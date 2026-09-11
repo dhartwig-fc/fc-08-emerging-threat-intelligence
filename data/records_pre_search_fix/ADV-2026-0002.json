@@ -1,0 +1,323 @@
+{
+  "schema_version": "1.3.0",
+  "advisory_id": "ADV-2026-0002",
+  "source": {
+    "source_type": "fatf",
+    "publisher": "FATF and Egmont Group of Financial Intelligence Units",
+    "title": "Trade-Based Money Laundering: Risk Indicators",
+    "published_on": "2021-03-01",
+    "published_on_precision": "month",
+    "url": "https://www.fatf-gafi.org/publications/methodandtrends/documents/trade-based-money-laundering-risk-indicators.html",
+    "document_sha256": "670b80270b33354b17263d44393cd65386a96bdb1a171365f217048e7cca6afb",
+    "page_count": 10
+  },
+  "summary": "This FATF-Egmont Group advisory (March 2021) sets out risk indicators for identifying trade-based money laundering (TBML), drawn from a sample of data gathered during the FATF/Egmont TBML project. It groups indicators into four categories: structural indicators about the trade entity itself (e.g. shell companies, mass registration addresses, nominee owners concealing beneficial ownership); trade activity indicators (e.g. activity inconsistent with stated business, unreasonably low profit margins, sudden high-volume trade by newly formed entities); trade document and commodity indicators (e.g. inconsistent invoices/contracts, vague commodity descriptions, missing or falsified customs documents); and account/transaction indicators (e.g. pay-through or transit accounts, cash structured below reporting thresholds, and circular payment routing). The document states no single indicator is conclusive and indicators should be assessed against the totality of the customer and transaction profile.",
+  "jurisdictions": [],
+  "typologies": [
+    {
+      "family": "tbml",
+      "typology_id": "TBML001",
+      "label": "Over Invoicing",
+      "emergent": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 7,
+          "printed_folio": "5",
+          "paragraph": null,
+          "quote": "Contracts, invoices, or other trade documents display fees or prices that do not seem to be in line with commercial considerations, are inconsistent with market value, or significantly fluctuate from previous comparable transactions."
+        },
+        {
+          "page": 6,
+          "printed_folio": "4",
+          "paragraph": null,
+          "quote": "A trade entity consistently displays unreasonably low profit margins"
+        }
+      ]
+    },
+    {
+      "family": "tbml",
+      "typology_id": "TBML002U",
+      "label": "Under Invoicing",
+      "emergent": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 6,
+          "printed_folio": "4",
+          "paragraph": null,
+          "quote": "importing wholesale commodities at or above retail value, or re-selling commodities at the same or below purchase price"
+        },
+        {
+          "page": 7,
+          "printed_folio": "5",
+          "paragraph": null,
+          "quote": "Contracts, invoices, or other trade documents display fees or prices that do not seem to be in line with commercial considerations, are inconsistent with market value, or significantly fluctuate from previous comparable transactions."
+        }
+      ]
+    },
+    {
+      "family": "tbml",
+      "typology_id": "TBML009",
+      "label": "Shell Company Trading",
+      "emergent": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 5,
+          "printed_folio": "3",
+          "paragraph": null,
+          "quote": "The corporate structure of a trade entity appears unusually complex and illogical, such as the involvement of shell companies"
+        },
+        {
+          "page": 5,
+          "printed_folio": "3",
+          "paragraph": null,
+          "quote": "A trade entity maintains a minimal number of working staff, inconsistent with its volume of traded commodities."
+        }
+      ]
+    },
+    {
+      "family": "correspondent_banking",
+      "typology_id": "BA005",
+      "label": "Rapid Movement",
+      "emergent": false,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 8,
+          "printed_folio": "6",
+          "paragraph": null,
+          "quote": "An account of a trade entity appears to be a \"pay-through\" or \"transit\" account with a rapid movement of high-volume transactions and a small end-of-day balance without clear business reasons"
+        }
+      ]
+    },
+    {
+      "family": "correspondent_banking",
+      "typology_id": "BA004",
+      "label": "Circular Funds Flow",
+      "emergent": false,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 8,
+          "printed_folio": "6",
+          "paragraph": null,
+          "quote": "Payments are routed in a circle – funds are sent out from one country and received back in the same country, after passing through another country or countries."
+        }
+      ]
+    },
+    {
+      "family": "correspondent_banking",
+      "typology_id": "BA001",
+      "label": "Structuring",
+      "emergent": false,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 8,
+          "printed_folio": "6",
+          "paragraph": null,
+          "quote": "Cash deposits or other transactions of a trade entity are consistently just below relevant reporting thresholds."
+        }
+      ]
+    },
+    {
+      "family": "tbml",
+      "typology_id": "TBML008",
+      "label": "Third Party Payment Abuse",
+      "emergent": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 8,
+          "printed_folio": "6",
+          "paragraph": null,
+          "quote": "Payment for imported commodities is made by an entity other than the consignee of the commodities with no clear economic reasons, e.g. by a shell or front company not involved in the trade transaction."
+        }
+      ]
+    }
+  ],
+  "actors": [
+    {
+      "name": "Criminals engaged in trade-based money laundering",
+      "actor_type": "category",
+      "aliases": [],
+      "jurisdiction": null,
+      "role": "Exploit trade transactions to move money rather than goods",
+      "confidence": "low",
+      "citations": [
+        {
+          "page": 3,
+          "printed_folio": "1",
+          "paragraph": null,
+          "quote": "it explains the ways in which criminals exploit trade transactions to move money, rather than goods"
+        }
+      ]
+    },
+    {
+      "name": "Trade entities used as laundering vehicles",
+      "actor_type": "category",
+      "aliases": [],
+      "jurisdiction": null,
+      "role": "Corporate entities (often shell companies) through which TBML transactions and payments are routed",
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 5,
+          "printed_folio": "3",
+          "paragraph": null,
+          "quote": "The corporate structure of a trade entity appears unusually complex and illogical, such as the involvement of shell companies"
+        }
+      ]
+    }
+  ],
+  "indicators": [
+    {
+      "indicator_type": "documentary",
+      "description": "Corporate structure of a trade entity is unusually complex or illogical, involving shell companies or entities registered in high-risk jurisdictions.",
+      "detectable_in_transaction_data": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 5,
+          "printed_folio": "3",
+          "paragraph": null,
+          "quote": "The corporate structure of a trade entity appears unusually complex and illogical, such as the involvement of shell companies"
+        }
+      ]
+    },
+    {
+      "indicator_type": "geographic",
+      "description": "Trade entity is registered or has offices in a jurisdiction with weak AML/CFT compliance.",
+      "detectable_in_transaction_data": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 5,
+          "printed_folio": "3",
+          "paragraph": null,
+          "quote": "A trade entity is registered or has offices in a jurisdiction with weak AML/CFT compliance."
+        }
+      ]
+    },
+    {
+      "indicator_type": "behavioural",
+      "description": "Owners or senior managers of a trade entity appear to be nominees acting to conceal the actual beneficial owners.",
+      "detectable_in_transaction_data": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 5,
+          "printed_folio": "3",
+          "paragraph": null,
+          "quote": "Owners or senior managers of a trade entity appear to be nominees acting to conceal the actual beneficial owners"
+        }
+      ]
+    },
+    {
+      "indicator_type": "transactional",
+      "description": "Trade entity consistently displays unreasonably low profit margins, e.g. importing at or above retail value or reselling at/below purchase price.",
+      "detectable_in_transaction_data": true,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 6,
+          "printed_folio": "4",
+          "paragraph": null,
+          "quote": "A trade entity consistently displays unreasonably low profit margins"
+        }
+      ]
+    },
+    {
+      "indicator_type": "documentary",
+      "description": "Inconsistencies across contracts, invoices or other trade documents, including contradictions between exporting entity and payment recipient names, and differing prices between invoices and underlying contracts.",
+      "detectable_in_transaction_data": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 7,
+          "printed_folio": "5",
+          "paragraph": null,
+          "quote": "Inconsistencies across contracts, invoices or other trade documents, e.g. contradictions between the name of the exporting entity and the name of the recipient of the payment; differing prices on invoices and underlying contracts"
+        }
+      ]
+    },
+    {
+      "indicator_type": "transactional",
+      "description": "Account of a trade entity behaves as a pay-through or transit account, with rapid movement of high-volume transactions and a small end-of-day balance.",
+      "detectable_in_transaction_data": true,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 8,
+          "printed_folio": "6",
+          "paragraph": null,
+          "quote": "An account of a trade entity appears to be a \"pay-through\" or \"transit\" account with a rapid movement of high-volume transactions and a small end-of-day balance without clear business reasons"
+        }
+      ]
+    },
+    {
+      "indicator_type": "transactional",
+      "description": "Cash deposits or other transactions of a trade entity are consistently kept just below relevant reporting thresholds.",
+      "detectable_in_transaction_data": true,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 8,
+          "printed_folio": "6",
+          "paragraph": null,
+          "quote": "Cash deposits or other transactions of a trade entity are consistently just below relevant reporting thresholds."
+        }
+      ]
+    },
+    {
+      "indicator_type": "transactional",
+      "description": "Payments are routed in a circle, sent from one country and received back in the same country after passing through another country or countries.",
+      "detectable_in_transaction_data": true,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 8,
+          "printed_folio": "6",
+          "paragraph": null,
+          "quote": "Payments are routed in a circle – funds are sent out from one country and received back in the same country, after passing through another country or countries."
+        }
+      ]
+    },
+    {
+      "indicator_type": "product",
+      "description": "Trade entity makes unconventional or overly complex use of financial products, such as letters of credit held open for unusually long or repeatedly extended periods without apparent reason.",
+      "detectable_in_transaction_data": true,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 6,
+          "printed_folio": "4",
+          "paragraph": null,
+          "quote": "A trade entity makes unconventional or overly complex use of financial products, e.g. use of letters of credit for unusually long or frequently extended periods without any apparent reason"
+        }
+      ]
+    },
+    {
+      "indicator_type": "transactional",
+      "description": "Payment for imported commodities is made by an entity other than the consignee, with no clear economic reason, e.g. via a shell or front company not involved in the trade transaction.",
+      "detectable_in_transaction_data": true,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 8,
+          "printed_folio": "6",
+          "paragraph": null,
+          "quote": "Payment for imported commodities is made by an entity other than the consignee of the commodities with no clear economic reasons, e.g. by a shell or front company not involved in the trade transaction."
+        }
+      ]
+    }
+  ],
+  "suggested_desks": [
+    "trade_desk",
+    "general_intel"
+  ],
+  "overall_confidence": "medium",
+  "extraction_notes": "This is a generic, non-case-specific FATF/Egmont risk-indicator advisory: it names no specific persons, organisations, vessels, wallets or jurisdictions by ISO code, so the jurisdictions list is intentionally empty and actors are limited to the two generic classes the document itself describes (criminals; trade entities used as vehicles). The document does not distinguish over- vs under-invoicing direction when describing price/margin anomalies (pages 6-7), so both TBML001 and TBML002U are linked against the same underlying text pending reviewer judgement on which direction (or both) applies. TBML008 (Third Party Payment Abuse) and TBML009 (Shell Company Trading) were returned by knowledge_centre_search_typologies at modest scores (0.26 and 0.47) but were confirmed as strong textual matches against the retrieved doctrine summaries via knowledge_centre_get_typology before linking. Several generic indicators on pages 5-8 (e.g. negative news, dormancy, non-compliance with VAT filing, missing/counterfeit customs documents, shipments routed through multiple jurisdictions without justification) were not mapped to a specific governed typology because the match to any single library entry was too weak to clear the bar for a confident link; they are omitted from both typologies and indicators per the 'fewer, well-cited items' guidance rather than forced into an ill-fitting or emergent category. Page count and citations verified against the PAGE markers in the supplied document text (PAGE 3 = printed folio 1 through PAGE 8 = printed folio 6); pages 1-2 (cover/front matter) and pages 9-10 (blank/back cover) carry no substantive citable content."
+}

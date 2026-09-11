@@ -34,6 +34,7 @@ sys.path.insert(0, str(ROOT))
 from schemas.advisory import AdvisoryRecord  # noqa: E402
 
 from claude_agent_sdk import AssistantMessage, ClaudeAgentOptions, ResultMessage, ToolUseBlock, query  # noqa: E402
+from claude_agent_sdk import ClaudeSDKError  # noqa: E402
 
 SERVER_KEY = "knowledge_centre"
 SERVER_PATH = ROOT / "mcp_server" / "knowledge_centre_server.py"
@@ -145,6 +146,7 @@ async def extract(path: Path, advisory_id: str, model: str, max_budget_usd: floa
     )
 
     structured = None
+    failure: str | None = None
     tool_calls: Counter = Counter()
     result: ResultMessage | None = None
     async for message in query(prompt=build_prompt(advisory_id, path, pages), options=options):
@@ -155,9 +157,18 @@ async def extract(path: Path, advisory_id: str, model: str, max_budget_usd: floa
         elif isinstance(message, ResultMessage):
             result = message
             if message.is_error:
-                raise RuntimeError("Agent run failed: %s" % (message.errors or message.result))
-            structured = message.structured_output
+                # Recorded, NOT raised here. Raising from inside `async for`
+                # abandons the SDK's generator mid-iteration, and its teardown
+                # then prints "aclose(): asynchronous generator is already
+                # running" ABOVE the real error -- which is how a credit-balance
+                # failure came to look like an async bug. Let the loop end, then
+                # raise.
+                failure = "Agent run failed: %s" % (message.errors or message.result)
+            else:
+                structured = message.structured_output
 
+    if failure:
+        raise RuntimeError(failure)
     if structured is None:
         raise RuntimeError("Agent returned no structured output (stop_reason=%s)" % (result.stop_reason if result else None))
     record = AdvisoryRecord.model_validate(structured)
@@ -191,7 +202,36 @@ def main() -> int:
         print("MCP server not found: %s" % SERVER_PATH, file=sys.stderr)
         return 2
 
-    record, telemetry = asyncio.run(extract(args.pdf, args.advisory_id, args.model, args.max_budget_usd, args.max_turns))
+    # FAIL ON THE EXIT CODE, NOT ON A GREP.
+    #
+    # This used to let the RuntimeError escape, so a failed run printed a Python
+    # traceback. A batch loop filtering stdout for "Agent run failed" saw nothing
+    # match -- the message is mid-traceback on stderr, not at the start of a line
+    # -- and reported a bare FAILED that read like a soft error. Measured
+    # 2026-09-11: five runs died on "Credit balance is too low", the loop exited 0,
+    # and the scores were then compared as though the runs had happened. A null
+    # result nearly became a finding.
+    #
+    # So: one line on stderr saying what happened, and a non-zero exit any caller
+    # can test. Week 4's batch runner and any CI step get this for free.
+    try:
+        record, telemetry = asyncio.run(
+            extract(args.pdf, args.advisory_id, args.model, args.max_budget_usd, args.max_turns))
+    except (RuntimeError, ClaudeSDKError) as exc:
+        # ClaudeSDKError too: the SDK raises ResultError from inside its own
+        # receive loop before the ResultMessage reaches us, so catching only
+        # RuntimeError let a credit-balance failure escape as a traceback.
+        detail = str(exc)
+        print("extraction FAILED for %s: %s" % (args.advisory_id, detail), file=sys.stderr)
+        # These are recoverable and nothing to do with the advisory or the agent,
+        # so say which, or a caller is left diagnosing the wrong thing.
+        low = detail.lower()
+        if "credit balance" in low or "quota" in low or "rate_limit" in low:
+            print("  the account needs credit or has hit a limit; the run never reached the model.",
+                  file=sys.stderr)
+        elif "authenticate" in low or "oauth" in low or "api key" in low:
+            print("  the claude CLI is not authenticated. Check `claude auth status`.", file=sys.stderr)
+        return 1
 
     out = args.out or (ROOT / "data" / "records" / ("%s.json" % args.advisory_id))
     out.parent.mkdir(parents=True, exist_ok=True)

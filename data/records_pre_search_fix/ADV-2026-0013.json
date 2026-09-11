@@ -1,0 +1,321 @@
+{
+  "schema_version": "1.3.0",
+  "advisory_id": "ADV-2026-0013",
+  "source": {
+    "source_type": "other",
+    "publisher": "U.S. Department of Commerce, Department of the Treasury, and Department of Justice",
+    "title": "Tri-Seal Compliance Note: Cracking Down on Third-Party Intermediaries Used to Evade Russia-Related Sanctions and Export Controls",
+    "published_on": "2023-03-02",
+    "published_on_precision": "day",
+    "url": null,
+    "document_sha256": "826d69174369f68372b92031fcc27ebfdf61649da0730d5e4382593ae59d1e3e",
+    "page_count": 6
+  },
+  "summary": "A joint Commerce/Treasury/Justice compliance note describing how malign actors use third-party intermediaries, front/shell companies and transshipment points in third countries (e.g. China/Hong Kong/Macau, Armenia, Turkey, Uzbekistan) to evade Russia-related sanctions and export controls. It sets out red flags for compliance programs and summarizes OFAC/BIS civil enforcement (AO PKK Milandr procurement network, Vorago Technologies shipping via a Bulgarian front company, Iranian drone entities) and DOJ criminal indictments (Orekhov, Grinin) alleging shell-company networks, falsified shipping documents including under-invoicing, shipment splitting, and rapid movement of funds through U.S. accounts to obscure the audit trail.",
+  "jurisdictions": [
+    "US",
+    "RU",
+    "BY",
+    "CN",
+    "HK",
+    "MO",
+    "AM",
+    "TR",
+    "UZ",
+    "BG",
+    "ES",
+    "VE",
+    "IR"
+  ],
+  "typologies": [
+    {
+      "family": "sanctions",
+      "typology_id": "SAN003",
+      "label": "Transshipment",
+      "emergent": false,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 1,
+          "printed_folio": "1",
+          "paragraph": null,
+          "quote": "One of the most common tactics is the use of third- party intermediaries or transshipment points to circumvent restrictions, disguise the involvement of Specially Designated Nationals and Blocked Persons (SDNs) or parties on the Entity List in transactions, and obscure the true identities of Russian end users."
+        },
+        {
+          "page": 3,
+          "printed_folio": "3",
+          "paragraph": null,
+          "quote": "Routing purchases through certain transshipment points commonly used to illegally redirect restricted items to Russia or Belarus.  Such locations may include China (including Hong Kong and Macau) and jurisdictions close to Russia, including Armenia, Turkey, and Uzbekistan."
+        }
+      ]
+    },
+    {
+      "family": "sanctions",
+      "typology_id": "SAN004",
+      "label": "Front Companies",
+      "emergent": false,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 4,
+          "printed_folio": "4",
+          "paragraph": null,
+          "quote": "which used a front company to transfer funds from Milandr to another front in a third country, which purchased microchips to divert to Russia."
+        },
+        {
+          "page": 4,
+          "printed_folio": "4",
+          "paragraph": null,
+          "quote": "BIS imposed an administrative penalty of $497,000 on Vorago Technologies, an Austin, Texas company, for shipping integrated circuit components, which are critical components in missiles and military satellites, to Russia via a Bulgarian front company."
+        },
+        {
+          "page": 5,
+          "printed_folio": "5",
+          "paragraph": null,
+          "quote": "Claiming that shell companies located in third countries were intermediaries or end users; in one case, DOJ alleges that only one of the five intermediary parties had any visible signage and consisted of an empty room in a strip mall"
+        }
+      ]
+    },
+    {
+      "family": "sanctions",
+      "typology_id": "SAN007",
+      "label": "Dual Use Goods",
+      "emergent": false,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 4,
+          "printed_folio": "4",
+          "paragraph": null,
+          "quote": "operation of a network of shell companies designed to enable them to illegally export military and sensitive dual-use items to Russia and embargoed Venezuelan oil to Russian and Chinese end users"
+        },
+        {
+          "page": 5,
+          "printed_folio": "5",
+          "paragraph": null,
+          "quote": "The sensitive items at issue included advanced electronics and sophisticated testing equipment used in quantum computing, hypersonic, and nuclear weapons development as well as advanced semiconductors and microprocessors used in fighter aircraft, missile systems, smart munitions, radar, and satellites."
+        }
+      ]
+    },
+    {
+      "family": "tbml",
+      "typology_id": "TBML002U",
+      "label": "Under Invoicing",
+      "emergent": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 5,
+          "printed_folio": "5",
+          "paragraph": null,
+          "quote": "Making false or misleading statements on shipping forms, including underestimating the purchase price of merchandise by more than five times the actual amount"
+        }
+      ]
+    },
+    {
+      "family": "correspondent_banking",
+      "typology_id": "BA005",
+      "label": "Rapid Movement",
+      "emergent": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 5,
+          "printed_folio": "5",
+          "paragraph": null,
+          "quote": "Transferring funds from shell companies in foreign jurisdictions into U.S. bank accounts and quickly forwarding or distributing funds to obfuscate the audit trail or the foreign source of the money"
+        }
+      ]
+    },
+    {
+      "family": "sanctions",
+      "typology_id": null,
+      "label": "Shipment Structuring to Evade Detection",
+      "emergent": true,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 5,
+          "printed_folio": "5",
+          "paragraph": null,
+          "quote": "Dividing shipments of controlled items into multiple, smaller shipments to try to avoid law enforcement detection"
+        }
+      ]
+    }
+  ],
+  "actors": [
+    {
+      "name": "AO PKK Milandr",
+      "actor_type": "organisation",
+      "aliases": [],
+      "jurisdiction": "RU",
+      "role": "Russian microelectronics company maintaining a global procurement network that used front companies to divert microchip purchases to Russia",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 4,
+          "printed_folio": "4",
+          "paragraph": null,
+          "quote": "OFAC designated individuals and entities involved in a global procurement network maintained by a Russian microelectronics company, AO PKK Milandr, which used a front company to transfer funds from Milandr to another front in a third country, which purchased microchips to divert to Russia."
+        }
+      ]
+    },
+    {
+      "name": "Vorago Technologies",
+      "actor_type": "organisation",
+      "aliases": [],
+      "jurisdiction": "US",
+      "role": "Austin, Texas company penalized $497,000 by BIS for shipping missile/satellite-grade integrated circuits to Russia via a Bulgarian front company",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 4,
+          "printed_folio": "4",
+          "paragraph": null,
+          "quote": "BIS imposed an administrative penalty of $497,000 on Vorago Technologies, an Austin, Texas company, for shipping integrated circuit components, which are critical components in missiles and military satellites, to Russia via a Bulgarian front company."
+        }
+      ]
+    },
+    {
+      "name": "Seven Iranian drone entities",
+      "actor_type": "category",
+      "aliases": [],
+      "jurisdiction": "IR",
+      "role": "Unnamed group of Iranian entities producing UAVs used by Russia against Ukraine, sanctioned by BIS and OFAC for using diverted U.S.-branded parts",
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 4,
+          "printed_folio": "4",
+          "paragraph": null,
+          "quote": "BIS has also imposed restrictions on seven Iranian drone entities in January 2023 due to their production of Iranian unmanned aerial vehicles (\"UAVs\") used by Russia against Ukraine."
+        }
+      ]
+    },
+    {
+      "name": "Russian and Spanish nationals indicted for shell-company export network (Orekhov)",
+      "actor_type": "category",
+      "aliases": [],
+      "jurisdiction": "RU",
+      "role": "Six Russian nationals and one Spanish national indicted for operating a network of shell companies to illegally export military/dual-use items to Russia and embargoed Venezuelan oil",
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 4,
+          "printed_folio": "4",
+          "paragraph": null,
+          "quote": "DOJ unsealed an indictment charging six Russian nationals and one Spanish national with multiple offenses arising from the defendants’ alleged operation of a network of shell companies designed to enable them to illegally export military and sensitive dual-use items to Russia and embargoed Venezuelan oil to Russian and Chinese end users."
+        }
+      ]
+    },
+    {
+      "name": "Third-party intermediaries and transshipment points",
+      "actor_type": "category",
+      "aliases": [],
+      "jurisdiction": null,
+      "role": "Generic class of intermediaries and transshipment locations used to circumvent restrictions and obscure Russian end users",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 1,
+          "printed_folio": "1",
+          "paragraph": null,
+          "quote": "One of the most common tactics is the use of third- party intermediaries or transshipment points to circumvent restrictions, disguise the involvement of Specially Designated Nationals and Blocked Persons (SDNs) or parties on the Entity List in transactions, and obscure the true identities of Russian end users."
+        }
+      ]
+    }
+  ],
+  "indicators": [
+    {
+      "indicator_type": "geographic",
+      "description": "Routing purchases through transshipment points commonly used to redirect restricted items to Russia/Belarus, including China (Hong Kong, Macau) and jurisdictions near Russia such as Armenia, Turkey and Uzbekistan.",
+      "detectable_in_transaction_data": true,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 3,
+          "printed_folio": "3",
+          "paragraph": null,
+          "quote": "Routing purchases through certain transshipment points commonly used to illegally redirect restricted items to Russia or Belarus.  Such locations may include China (including Hong Kong and Macau) and jurisdictions close to Russia, including Armenia, Turkey, and Uzbekistan."
+        }
+      ]
+    },
+    {
+      "indicator_type": "documentary",
+      "description": "Payment coming from a third-party country or business not listed on the End-User Statement or other applicable end-user form.",
+      "detectable_in_transaction_data": true,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 2,
+          "printed_folio": "2",
+          "paragraph": null,
+          "quote": "Payment coming from a third-party country or business not listed on the End-User Statement3 or other applicable end-user form;"
+        }
+      ]
+    },
+    {
+      "indicator_type": "behavioural",
+      "description": "A customer's reluctance to share information about the end use of a product, including reluctance to complete an end-user form.",
+      "detectable_in_transaction_data": false,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 2,
+          "printed_folio": "2",
+          "paragraph": null,
+          "quote": "A customer’s reluctance to share information about the end use of a product, including reluctance to complete an end-user form;"
+        }
+      ]
+    },
+    {
+      "indicator_type": "transactional",
+      "description": "Dividing shipments of controlled items into multiple, smaller shipments to try to avoid law enforcement detection.",
+      "detectable_in_transaction_data": true,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 5,
+          "printed_folio": "5",
+          "paragraph": null,
+          "quote": "Dividing shipments of controlled items into multiple, smaller shipments to try to avoid law enforcement detection"
+        }
+      ]
+    },
+    {
+      "indicator_type": "documentary",
+      "description": "False or misleading statements on shipping forms, including underestimating the purchase price of merchandise by more than five times the actual amount.",
+      "detectable_in_transaction_data": true,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 5,
+          "printed_folio": "5",
+          "paragraph": null,
+          "quote": "Making false or misleading statements on shipping forms, including underestimating the purchase price of merchandise by more than five times the actual amount"
+        }
+      ]
+    },
+    {
+      "indicator_type": "network",
+      "description": "Operation of complex and/or international businesses using residential addresses or addresses common to multiple closely-held corporate entities.",
+      "detectable_in_transaction_data": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 3,
+          "printed_folio": "3",
+          "paragraph": null,
+          "quote": "Operation of complex and/or international businesses using residential addresses or addresses common to multiple closely-held corporate entities;"
+        }
+      ]
+    }
+  ],
+  "suggested_desks": [
+    "sanctions_desk",
+    "trade_desk",
+    "correspondent_desk"
+  ],
+  "overall_confidence": "medium",
+  "extraction_notes": "Family choice for the dual-use goods finding: chose SAN007 (sanctions family) over the higher-scoring TBML007 (tbml family) because the source document frames diversion of dual-use items entirely as export-control/sanctions enforcement (OFAC/BIS/DOJ actions), not as a trade-finance/invoice analysis; a reviewer may prefer TBML007 or both. 'Shipment Structuring to Evade Detection' returned no match above the search floor (closest TBML003 Multiple Invoicing at 0.17, which concerns invoices not physical shipments) and is proposed as emergent. Several actors are unnamed classes described by the indictments (e.g. 'six Russian nationals and one Spanish national', 'seven Iranian drone entities') and are recorded as actor_type category per the class-of-actor rule rather than as named organisations/persons. Source_type recorded as 'other' because this is a joint Commerce/Treasury/Justice Tri-Seal note rather than a single-agency (OFAC/BIS/FinCEN) product. Page numbers equal printed folios throughout this PDF (both run 1-6), so citation.page and printed_folio coincide. Footnote-only enforcement examples (Sojitz, Alfa Laval, Nordgas on p.4) were not separately extracted as citations since the body text only names the case titles, not verbatim technique descriptions."
+}

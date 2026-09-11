@@ -1,0 +1,393 @@
+{
+  "schema_version": "1.3.0",
+  "advisory_id": "ADV-2026-0017",
+  "source": {
+    "source_type": "nca",
+    "publisher": "National Crime Agency (NCA)",
+    "title": "Shadow Fleet Sanctions Evasion and Avoidance Network (Red Alert, Ref. 0774-NECC)",
+    "published_on": "2025-07-01",
+    "published_on_precision": "month",
+    "url": null,
+    "document_sha256": "317a20b59dcae8b090b37d329b08f221f6458bbd763749b5844c50fb6723991a",
+    "page_count": 8
+  },
+  "summary": "NCA/OFSI/FCDO Red Alert 0774-NECC (July 2025) describes a Russian oil sanctions evasion network split into 'blue' companies (2RIVERS DMCC and 2RIVERS PTE, UK-sanctioned Dec 2024) that access Western banks, insurers and trading platforms, and 'red' companies (led by NORD AXIS, UK-sanctioned May 2025) that trade Russian oil directly through opaque, easily-replaced front companies. The network is run by UK-sanctioned Azeris Etibar EYYUB and Tahir GARAYEV, who hold personal relationships with UK-sanctioned ROSNEFT CEO Igor SECHIN and in 2024 traded more Russian oil than any other entity, including most of ROSNEFT's output. Over 100 Shadow Fleet tankers (part of a wider 400+ sanctioned fleet) use deceptive practices - switching off AIS, ship-to-ship transfers, frequent flag changes - plus transhipment and mixing to disguise the oil's Russian origin before it reaches Western buyers. The alert lists red flag indicators (rapid high-volume trading by new entities, opaque ownership, obscure inter-company transfers, high-risk jurisdictions, minimal online presence) and directs recipients to file SARs with the NCA and reports with OFSI.",
+  "jurisdictions": [
+    "RU",
+    "GB",
+    "AZ"
+  ],
+  "typologies": [
+    {
+      "family": "sanctions",
+      "typology_id": "SAN002",
+      "label": "Shadow Fleet",
+      "emergent": false,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 3,
+          "printed_folio": "3",
+          "paragraph": null,
+          "quote": "The 2RIVERS network utilises over 100 Shadow Fleet oil tankers, vessels which are usually over 15 years old and use deceptive shipping practices to carry Russian oil."
+        },
+        {
+          "page": 5,
+          "printed_folio": "5",
+          "paragraph": null,
+          "quote": "Companies registered or operating in known jurisdictions of high risk, including those where shadow fleet entities are known to operate;"
+        }
+      ]
+    },
+    {
+      "family": "sanctions",
+      "typology_id": "SAN004",
+      "label": "Front Companies",
+      "emergent": false,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 3,
+          "printed_folio": "3",
+          "paragraph": null,
+          "quote": "The “red” side of the network, with deliberately obscure ownership structures and many front companies designed to be replaced with ease if they are subject to Western sanctions, trades Russian oil directly."
+        },
+        {
+          "page": 5,
+          "printed_folio": "5",
+          "paragraph": null,
+          "quote": "The companies often have a limited online presence with no company website or contact information. If a website does exist, generally it will contain generic stock photos, and no details on the individuals operating the company."
+        }
+      ]
+    },
+    {
+      "family": "sanctions",
+      "typology_id": "SAN003",
+      "label": "Transshipment",
+      "emergent": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 3,
+          "printed_folio": "3",
+          "paragraph": null,
+          "quote": "Money and oil move between the companies through transhipments of oil and mixing operations to hide the Russian origin."
+        },
+        {
+          "page": 4,
+          "printed_folio": "4",
+          "paragraph": null,
+          "quote": "This company moves it on a Shadow Fleet vessel to a terminal in a third-party location, the refined product is “sold” to another company within the same network which then sells the oil on the open market to the ultimate customer who may have no sight of its Russian origins."
+        }
+      ]
+    },
+    {
+      "family": "network",
+      "typology_id": null,
+      "label": "Dual-Sided (Blue/Red) Sanctions Evasion Trading Network",
+      "emergent": true,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 3,
+          "printed_folio": "3",
+          "paragraph": null,
+          "quote": "the sanctions evasion and avoidance network is resilient and consciously split between two sides, and known to its affiliated traders/brokers as “blue” and “red”."
+        },
+        {
+          "page": 4,
+          "printed_folio": "4",
+          "paragraph": null,
+          "quote": "Each trade carried out by the network will differ depending on the source of the oil, oil product, end customer and market conditions but often there will be a red-blue interaction (or multiple interactions) somewhere in the trading chain."
+        }
+      ]
+    }
+  ],
+  "actors": [
+    {
+      "name": "Etibar EYYUB",
+      "actor_type": "person",
+      "aliases": [],
+      "jurisdiction": "AZ",
+      "role": "UK-sanctioned network figure; ran, with Tahir GARAYEV, the company network that traded more Russian oil than any other entity in 2024",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 3,
+          "printed_folio": "3",
+          "paragraph": null,
+          "quote": "In 2024, a network of companies run by UK-sanctioned Azeris Etibar EYYUB and Tahir GARAYEV1 traded more Russian oil than any other entity."
+        }
+      ]
+    },
+    {
+      "name": "Tahir GARAYEV",
+      "actor_type": "person",
+      "aliases": [],
+      "jurisdiction": "AZ",
+      "role": "UK-sanctioned network figure; ran, with Etibar EYYUB, the company network that traded more Russian oil than any other entity in 2024",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 3,
+          "printed_folio": "3",
+          "paragraph": null,
+          "quote": "In 2024, a network of companies run by UK-sanctioned Azeris Etibar EYYUB and Tahir GARAYEV1 traded more Russian oil than any other entity."
+        }
+      ]
+    },
+    {
+      "name": "Igor SECHIN",
+      "actor_type": "person",
+      "aliases": [],
+      "jurisdiction": null,
+      "role": "UK-sanctioned ROSNEFT CEO with personal relationships to EYYUB and GARAYEV enabling privileged access to Russian oil",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 3,
+          "printed_folio": "3",
+          "paragraph": null,
+          "quote": "EYYUB and GARAYEV themselves have personal relationships with UK-sanctioned ROSNEFT CEO Igor SECHIN which enables this privileged access to Russia’s largest state-owned oil company."
+        }
+      ]
+    },
+    {
+      "name": "ROSNEFT",
+      "actor_type": "organisation",
+      "aliases": [],
+      "jurisdiction": "RU",
+      "role": "Russia's largest state-owned oil company; source of most of the oil traded by the EYYUB/GARAYEV network",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 3,
+          "printed_folio": "3",
+          "paragraph": null,
+          "quote": "which enables this privileged access to Russia’s largest state-owned oil company."
+        }
+      ]
+    },
+    {
+      "name": "2RIVERS DMCC",
+      "actor_type": "organisation",
+      "aliases": [],
+      "jurisdiction": null,
+      "role": "Leading 'blue' side company giving the network access to Western banks, insurers and trading platforms; UK-sanctioned December 2024",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 3,
+          "printed_folio": "3",
+          "paragraph": null,
+          "quote": "The leading companies of this side of the network were 2RIVERS DMCC and 2RIVERS PTE, both sanctioned by the UK in December 2024."
+        }
+      ]
+    },
+    {
+      "name": "2RIVERS PTE",
+      "actor_type": "organisation",
+      "aliases": [],
+      "jurisdiction": null,
+      "role": "Leading 'blue' side company giving the network access to Western banks, insurers and trading platforms; UK-sanctioned December 2024",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 3,
+          "printed_folio": "3",
+          "paragraph": null,
+          "quote": "The leading companies of this side of the network were 2RIVERS DMCC and 2RIVERS PTE, both sanctioned by the UK in December 2024."
+        }
+      ]
+    },
+    {
+      "name": "NORD AXIS",
+      "actor_type": "organisation",
+      "aliases": [],
+      "jurisdiction": null,
+      "role": "Leading 'red' side company trading Russian oil directly with deliberately obscure ownership; UK-sanctioned May 2025",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 3,
+          "printed_folio": "3",
+          "paragraph": null,
+          "quote": "The leading company on this side of the network was NORD AXIS, sanctioned by the UK in May 2025."
+        }
+      ]
+    },
+    {
+      "name": "'Blue' side network companies",
+      "actor_type": "category",
+      "aliases": [
+        "Blue companies"
+      ],
+      "jurisdiction": null,
+      "role": "Class of network companies working with Global West entities - banks, insurers and trading platforms",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 3,
+          "printed_folio": "3",
+          "paragraph": null,
+          "quote": "The “blue” side works with entities in the Global West, including banks, insurers and trading platforms."
+        }
+      ]
+    },
+    {
+      "name": "'Red' side network companies",
+      "actor_type": "category",
+      "aliases": [
+        "Red companies"
+      ],
+      "jurisdiction": null,
+      "role": "Class of network companies with deliberately obscure ownership and many replaceable front companies that trade Russian oil directly",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 3,
+          "printed_folio": "3",
+          "paragraph": null,
+          "quote": "The “red” side of the network, with deliberately obscure ownership structures and many front companies designed to be replaced with ease if they are subject to Western sanctions, trades Russian oil directly."
+        }
+      ]
+    },
+    {
+      "name": "Shadow Fleet oil tankers",
+      "actor_type": "vessel",
+      "aliases": [],
+      "jurisdiction": null,
+      "role": "Over 100 tankers used by the 2RIVERS network, usually over 15 years old, using deceptive shipping practices to carry Russian oil",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 3,
+          "printed_folio": "3",
+          "paragraph": null,
+          "quote": "The 2RIVERS network utilises over 100 Shadow Fleet oil tankers, vessels which are usually over 15 years old and use deceptive shipping practices to carry Russian oil."
+        }
+      ]
+    }
+  ],
+  "indicators": [
+    {
+      "indicator_type": "transactional",
+      "description": "Companies with limited trading history very quickly trading large volumes of oil",
+      "detectable_in_transaction_data": true,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 5,
+          "printed_folio": "5",
+          "paragraph": null,
+          "quote": "Companies with limited trading history very quickly trading large volumes of oil;"
+        }
+      ]
+    },
+    {
+      "indicator_type": "documentary",
+      "description": "Limited information available on a company's ownership, directors or beneficiaries",
+      "detectable_in_transaction_data": false,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 5,
+          "printed_folio": "5",
+          "paragraph": null,
+          "quote": "Limited information on ownership, directors or beneficiaries;"
+        }
+      ]
+    },
+    {
+      "indicator_type": "transactional",
+      "description": "Multiple transfers of oil or funds between obscure companies",
+      "detectable_in_transaction_data": true,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 5,
+          "printed_folio": "5",
+          "paragraph": null,
+          "quote": "Multiple transfers between obscure companies;"
+        }
+      ]
+    },
+    {
+      "indicator_type": "geographic",
+      "description": "Companies registered or operating in known high-risk jurisdictions, including those where shadow fleet entities are known to operate",
+      "detectable_in_transaction_data": true,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 5,
+          "printed_folio": "5",
+          "paragraph": null,
+          "quote": "Companies registered or operating in known jurisdictions of high risk, including those where shadow fleet entities are known to operate;"
+        }
+      ]
+    },
+    {
+      "indicator_type": "documentary",
+      "description": "Company has a limited online presence, no website or contact information, or a website with only generic stock photos and no details on the individuals operating it",
+      "detectable_in_transaction_data": false,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 5,
+          "printed_folio": "5",
+          "paragraph": null,
+          "quote": "The companies often have a limited online presence with no company website or contact information. If a website does exist, generally it will contain generic stock photos, and no details on the individuals operating the company."
+        }
+      ]
+    },
+    {
+      "indicator_type": "behavioural",
+      "description": "Vessel switches off its automatic identification system (AIS) to avoid its movements being tracked",
+      "detectable_in_transaction_data": false,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 3,
+          "printed_folio": "3",
+          "paragraph": null,
+          "quote": "switching off the ship's automatic identification system (AIS) to avoid the ship's movements being tracked"
+        }
+      ]
+    },
+    {
+      "indicator_type": "behavioural",
+      "description": "Ship-to-ship transfers used to obscure the origin of the oil before it reaches its destination",
+      "detectable_in_transaction_data": false,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 3,
+          "printed_folio": "3",
+          "paragraph": null,
+          "quote": "engaging in ship-to-ship transfers to obscure the origin of the oil before it reaches its destination"
+        }
+      ]
+    },
+    {
+      "indicator_type": "behavioural",
+      "description": "Vessel regularly changes flags",
+      "detectable_in_transaction_data": false,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 3,
+          "printed_folio": "3",
+          "paragraph": null,
+          "quote": "and regularly changing flags"
+        }
+      ]
+    }
+  ],
+  "suggested_desks": [
+    "sanctions_desk",
+    "trade_desk",
+    "correspondent_desk"
+  ],
+  "overall_confidence": "high",
+  "extraction_notes": "2RIVERS DMCC and 2RIVERS PTE's corporate suffixes conventionally imply UAE (Dubai Multi Commodities Centre) and Singapore incorporation respectively, but the document does not itself state a jurisdiction for these entities or for NORD AXIS, so actor jurisdiction was left null pending reviewer confirmation. Igor SECHIN's personal nationality is not stated in the text (only his role as ROSNEFT CEO), so his jurisdiction was left null. The 'blue/red' dual-network structure (p.3-4) is proposed as an emergent typology: Knowledge Centre search for this specific two-tier structural pattern returned no result above the 0.25 floor. Footnoted URLs on pages 3 and 5 (Notice_Russia_090525.pdf and an OCCRP investigation) are cited by the source document but were not independently fetched or verified as part of this extraction."
+}
