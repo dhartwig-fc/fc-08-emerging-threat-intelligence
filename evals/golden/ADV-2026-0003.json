@@ -248,6 +248,21 @@
     },
     {
       "family": "tbml",
+      "typology_id": "TBML002U",
+      "label": "Under Invoicing",
+      "emergent": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 32,
+          "printed_folio": "30",
+          "paragraph": null,
+          "quote": "Falsifying the number and/or value of goods being shipped to be higher or lower than the corresponding payment, allowing for the transfer or receipt of the value of proceeds of crime (also known as over or under-invoicing)"
+        }
+      ]
+    },
+    {
+      "family": "tbml",
       "typology_id": "TBML009",
       "label": "Shell Company Trading",
       "emergent": false,
@@ -818,5 +833,5 @@
     "fiu_liaison"
   ],
   "overall_confidence": "high",
-  "extraction_notes": "Golden label. Actor classes (PMLs, PMLOs, PMLNs, cash controller, mule and proxy networks, complicit insiders) are categories; anonymised case parties (Subject X, Person A, Person G, J.B.P.C.) and unnamed syndicates (Operation Kandil, the Nigerian syndicate) are not actors; Khanani's terrorist clients are named only in his role. CMI010 not used: the virtual currency content is laundering, not sanctions evasion, so it is emergent under family crypto. Account settlement, underground banking, bulk cash transport, fictitious-contract justification, BMPE and insider compromise have no governed twin and are emergent. Mirror trading (Box 19) is not CM005 Wash Trading; emergent at low. TBML002U rests on one clause inside the over-invoicing sentence and is not labelled; PAT005 and PAT001 rest on one Box 11 sentence and are kept at low as in ADV-2026-0013/0015. Jurisdictions are case locations; fraud victims (the Bahamas, worldwide), the delegation list, meeting venues and the unnamed Country A are excluded."
+  "extraction_notes": "Golden label. Actor classes (PMLs, PMLOs, PMLNs, cash controller, mule and proxy networks, complicit insiders) are categories; anonymised case parties (Subject X, Person A, Person G, J.B.P.C.) and unnamed syndicates (Operation Kandil, the Nigerian syndicate) are not actors; Khanani's terrorist clients are named only in his role. CMI010 not used: the virtual currency content is laundering, not sanctions evasion, so it is emergent under family crypto. Account settlement, underground banking, bulk cash transport, fictitious-contract justification, BMPE and insider compromise have no governed twin and are emergent. Mirror trading (Box 19) is not CM005 Wash Trading; emergent at low. TBML002U rests on one clause inside the over-invoicing sentence and is not labelled; PAT005 and PAT001 rest on one Box 11 sentence and are kept at low as in ADV-2026-0013/0015. Jurisdictions are case locations; fraud victims (the Bahamas, worldwide), the delegation list, meeting venues and the unnamed Country A are excluded. REVIEWED 2026-09-11. Added TBML002U Under Invoicing at medium. The report names both directions explicitly in one technique list on p32 -- '(also known as over or under-invoicing)' -- and the label carried TBML001 off that same sentence while omitting its twin. Omissions otherwise tested and sound: TBML003, TBML005, TBML006, BA006 and BA010 are absent from the document. BA007 was checked and correctly left out -- its only trigger is Al Zarooni Exchange named as a DESIGNATED ENTITY in the Khanani case study (p16), not a description of cash-intensive business as a technique, which is the same mechanism test that removed BA007 from ADV-2026-0001. Mirror trading (p42) stays emergent rather than CM005 Wash Trading: it moves value across borders, where CM005's doctrine is trading with no genuine change in beneficial ownership to create false market activity. Contestable, and recorded rather than silently resolved."
 }
