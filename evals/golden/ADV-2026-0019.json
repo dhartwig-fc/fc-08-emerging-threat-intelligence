@@ -100,6 +100,12 @@
       "confidence": "high",
       "citations": [
         {
+          "page": 25,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "including free trade zones (FTZs), shell companies, trade misinvoicing, and opaque supply chains — to launder money, evade sanctions, and finance illicit activities"
+        },
+        {
           "page": 78,
           "printed_folio": "78",
           "paragraph": null,
@@ -223,7 +229,7 @@
           "page": 77,
           "printed_folio": "77",
           "paragraph": null,
-          "quote": "It is likely that criminal networks increasingly leverage tools such as encrypted communications, anonymised financial transactions, cryptocurrencies and blockchain technologies, and cyber-enabled trade-based money laundering."
+          "quote": "Criminals active in sanctions evasion will continue exploiting cooperation gaps, taking advantage of the complexity of sanctions enforcement arising from the wide range of criminal activities and actors it involves. It is likely that criminal networks increasingly leverage tools such as encrypted communications, anonymised financial transactions, cryptocurrencies and blockchain technologies"
         }
       ]
     },
@@ -761,5 +767,5 @@
     "trade_desk"
   ],
   "overall_confidence": "medium",
-  "extraction_notes": "Golden label. Scoped to financial-crime typologies only: fraud crime areas (investment, BEC, romance, payment-system fraud), corruption, drugs, THB, cyber, CSE and firearms are not labelled as typologies even though they dominate the page count; MTIC/VAT fraud is kept because it is a corporate-structure and trade scheme. SAN006 chosen over TBML010 per the twin convention; SAN007 at medium because the text says 'military-grade' and 'strategic' goods, never 'dual-use'. TBML001 not labelled: 'trade misinvoicing' (p25) and 'inflating the price of waste' (p65) are single mentions. PAT004 Circular Ownership not labelled; the carousel is circular TRADE (TBML006). Cash couriers (p25) mentioned once, not labelled. LockBit and hybrid threat actors kept as actors because ransom payments in crypto and outsourced laundering are named; Hydra Market folded into ChipMixer's role. Ukraine is a risk location here (drug labs, firearms source, post-war), not only a victim state. Eurasian Economic Union, Caucasus, West/Central Asia and Western Balkans have no ISO code and are omitted."
+  "extraction_notes": "Golden label. Scoped to financial-crime typologies only: fraud crime areas (investment, BEC, romance, payment-system fraud), corruption, drugs, THB, cyber, CSE and firearms are not labelled as typologies even though they dominate the page count; MTIC/VAT fraud is kept because it is a corporate-structure and trade scheme. SAN006 chosen over TBML010 per the twin convention; SAN007 at medium because the text says 'military-grade' and 'strategic' goods, never 'dual-use'. TBML001 not labelled: 'trade misinvoicing' (p25) and 'inflating the price of waste' (p65) are single mentions. PAT004 Circular Ownership not labelled; the carousel is circular TRADE (TBML006). Cash couriers (p25) mentioned once, not labelled. LockBit and hybrid threat actors kept as actors because ransom payments in crypto and outsourced laundering are named; Hydra Market folded into ChipMixer's role. Ukraine is a risk location here (drug labs, firearms source, post-war), not only a victim state. Eurasian Economic Union, Caucasus, West/Central Asia and Western Balkans have no ISO code and are omitted. REVIEWED 2026-09-11. SAN006 was held at HIGH on a p78 quote describing sanctions evasion's crime-as-a-service model -- enablers and a division of roles -- which is not the doctrine's mechanism of manipulating the trade transaction. p25 carries that mechanism outright ('trade misinvoicing... to launder money, evade sanctions') and is now the lead citation, so the confidence is earned rather than assumed. CMI010's quote began one sentence too late, listing tools generically; extended to include the sentence that places them inside sanctions evasion, which is what distinguishes CMI010 from ordinary crypto laundering. The strategic scope was checked and the label is disciplined: drug trafficking, firearms and migrant smuggling appear throughout the document as crime areas and are correctly absent as typologies."
 }
