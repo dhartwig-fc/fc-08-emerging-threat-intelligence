@@ -237,27 +237,6 @@
     },
     {
       "family": "correspondent_banking",
-      "typology_id": "BA007",
-      "label": "Cash Intensive Activity",
-      "emergent": false,
-      "confidence": "medium",
-      "citations": [
-        {
-          "page": 27,
-          "printed_folio": "25",
-          "paragraph": null,
-          "quote": "front companies offer convenient opportunities to integrate physical cash into a business and then exploit its banking relationships to move the cash across jurisdictions."
-        },
-        {
-          "page": 64,
-          "printed_folio": "62",
-          "paragraph": null,
-          "quote": "both public and private parties work together in combatting the cash integration variant of TBML in the automotive sector."
-        }
-      ]
-    },
-    {
-      "family": "correspondent_banking",
       "typology_id": "BA001",
       "label": "Structuring",
       "emergent": false,
@@ -574,5 +553,5 @@
     "fiu_liaison"
   ],
   "overall_confidence": "high",
-  "extraction_notes": "Golden label. Printed folio runs two behind the PDF index; pages 1, 2 and 66 carry none. Over-/under-shipment (quantity misrepresentation short of phantom) is a FATF foundation technique the library lacks; cited under TBML004, not made emergent. Sanctions evasion, dual-use goods (fn 11) and FTZs are mentioned once and not labelled; TBML010/SAN006 deliberately absent. Front companies are TBML009/PAT007, not SAN004: ML framing, not sanctions. Offsetting kept separate from BMPE as the report names it as its own scheme with a case. SBML labelled emergent (family other) although the report says it is not TBML, because it gets its own sector list. Anonymised case parties (Peruvian, Colombian, Italian, Brazilian/Portuguese nationals) are not actors; the Box 2.6 Mafia link is too thin. Jurisdictions are case and risk locations only; Peru, Canada and Mexico are actor origins or enforcement bodies and are excluded. BA007 carries the cash-integration theme; BA008 (Box 2.8 only) not labelled."
+  "extraction_notes": "Golden label. Printed folio runs two behind the PDF index; pages 1, 2 and 66 carry none. Over-/under-shipment (quantity misrepresentation short of phantom) is a FATF foundation technique the library lacks; cited under TBML004, not made emergent. Sanctions evasion, dual-use goods (fn 11) and FTZs are mentioned once and not labelled; TBML010/SAN006 deliberately absent. Front companies are TBML009/PAT007, not SAN004: ML framing, not sanctions. Offsetting kept separate from BMPE as the report names it as its own scheme with a case. SBML labelled emergent (family other) although the report says it is not TBML, because it gets its own sector list. Anonymised case parties (Peruvian, Colombian, Italian, Brazilian/Portuguese nationals) are not actors; the Box 2.6 Mafia link is too thin. Jurisdictions are case and risk locations only; Peru, Canada and Mexico are actor origins or enforcement bodies and are excluded. BA007 carries the cash-integration theme; BA008 (Box 2.8 only) not labelled. REVIEWED 2026-09-11. Removed BA007 Cash Intensive Activity on the mechanism test. Its doctrine is a legitimate cash-heavy BUSINESS used as cover (cash & carry, exchange houses); both quotes described front companies integrating cash and a public-private partnership on the automotive sector's 'cash integration variant'. Measured: the report's only use of 'cash-intensive' (p56) is 'cash-intensive criminal activities', not a business model. Cash integration is the report's own framing and has no governed home; it is already represented by the three emergent cash-integration methods labelled here (Black Market Peso Exchange, offsetting/compensation, surrogate shopping), so no new emergent was added. Omissions checked and sound: TBML006, PAT001 and BA004 are absent from the document; TBML007, TBML010, TBML011, PAT005, PAT010, BA008 and SAN003 appear once or twice in passing, which the narrative half of the indicator rule does not admit. TBML011 would have been a real error - p55 names freight cost as a LEGITIMATE cause of mirror-statistic misalignment."
 }
