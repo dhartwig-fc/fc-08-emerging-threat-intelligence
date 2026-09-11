@@ -80,15 +80,26 @@ is out of scope for extraction.
 
 ## State of the set (2026-09-11)
 
-All twenty labelled and mechanically clean: every label validates against
-schema 1.3.0, and all 818 citations resolve to the page they name (a handful
+ALL TWENTY REVIEWED label by label, 2026-09-11. Every label validates against
+schema 1.3.0, and all 820 citations resolve to the page they name (a handful
 match only after pypdf's mid-word spacing is normalised, which the checker
 reports separately). Three were drafted in-session, seventeen by subagents
-working from this README and the first three as exemplars. **Every one is a
-draft awaiting owner review**; `label_status` says which.
+working from this README and the first three as exemplars, then every one was
+reviewed against its PDF: each typology checked against the doctrine it claims
+and each quote checked against the claim attached to it.
 
-What the set contains, after the 2026-09-11 re-check AND the label-by-label
-review of 11 of the 20: 224 governed typology mentions across 37 of the
+**They remain Claude's work, reviewed by Claude.** The review found and fixed
+real defects, but it cannot break the correlation between the labeller and the
+thing being measured. An owner pass is still what makes a published score a
+statement about the agent rather than about Claude's reading habits.
+
+What the review changed, across the twenty: four mappings removed on the
+mechanism test (a quote naming the doctrine's words while describing something
+else), four citations replaced or extended where the label was right and the
+span proved nothing, three typologies added that the documents name and the
+labels had missed, and one disagreement BETWEEN labels resolved.
+
+What the set contains after review: 224 governed typology mentions across 37 of the
 library's 57 typologies, 110 emergent labels, 158 actors.
 
 | Family | Exercised | Never appears |

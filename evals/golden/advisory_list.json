@@ -32,7 +32,7 @@
       "bytes": 3108080,
       "pages": 66,
       "selection_rationale": "tbml; week-1/2 reference record",
-      "label_status": "drafted by subagent, awaiting owner review"
+      "label_status": "reviewed 2026-09-11 (Claude-drafted, Claude-reviewed); awaiting owner review"
     },
     {
       "advisory_id": "ADV-2026-0002",
@@ -48,7 +48,7 @@
       "bytes": 2079148,
       "pages": 10,
       "selection_rationale": "tbml; indicator-dense, short",
-      "label_status": "drafted by subagent, awaiting owner review"
+      "label_status": "reviewed 2026-09-11 (Claude-drafted, Claude-reviewed); awaiting owner review"
     },
     {
       "advisory_id": "ADV-2026-0003",
@@ -64,7 +64,7 @@
       "bytes": 2116040,
       "pages": 53,
       "selection_rationale": "network; actor classes; hawala and account settlement",
-      "label_status": "drafted by subagent, awaiting owner review"
+      "label_status": "reviewed 2026-09-11 (Claude-drafted, Claude-reviewed); awaiting owner review"
     },
     {
       "advisory_id": "ADV-2026-0004",
@@ -80,7 +80,7 @@
       "bytes": 2781480,
       "pages": 190,
       "selection_rationale": "network; beneficial ownership, nominees, shell companies; longest document",
-      "label_status": "drafted by subagent, awaiting owner review"
+      "label_status": "reviewed 2026-09-11 (Claude-drafted, Claude-reviewed); awaiting owner review"
     },
     {
       "advisory_id": "ADV-2026-0005",
@@ -96,7 +96,7 @@
       "bytes": 1132000,
       "pages": 24,
       "selection_rationale": "emergent: crypto family has no governed typologies",
-      "label_status": "drafted by subagent, awaiting owner review"
+      "label_status": "reviewed 2026-09-11 (Claude-drafted, Claude-reviewed); awaiting owner review"
     },
     {
       "advisory_id": "ADV-2026-0006",
@@ -112,7 +112,7 @@
       "bytes": 2017971,
       "pages": 70,
       "selection_rationale": "tbml via trade fraud and front companies; predicate outside the library",
-      "label_status": "drafted by subagent, awaiting owner review"
+      "label_status": "reviewed 2026-09-11 (Claude-drafted, Claude-reviewed); awaiting owner review"
     },
     {
       "advisory_id": "ADV-2026-0007",
@@ -128,7 +128,7 @@
       "bytes": 2670081,
       "pages": 72,
       "selection_rationale": "correspondent_banking: mule accounts, funnel accounts, rapid movement; fraud predicate emergent",
-      "label_status": "drafted by subagent, awaiting owner review"
+      "label_status": "reviewed 2026-09-11 (Claude-drafted, Claude-reviewed); awaiting owner review"
     },
     {
       "advisory_id": "ADV-2026-0008",
@@ -144,7 +144,7 @@
       "bytes": 1396091,
       "pages": 76,
       "selection_rationale": "network; newest FATF report, published a week before this list",
-      "label_status": "drafted by subagent, awaiting owner review"
+      "label_status": "reviewed 2026-09-11 (Claude-drafted, Claude-reviewed); awaiting owner review"
     },
     {
       "advisory_id": "ADV-2026-0009",
@@ -160,7 +160,7 @@
       "bytes": 473798,
       "pages": 13,
       "selection_rationale": "network and sanctions; PEPs, shell companies, named jurisdictions",
-      "label_status": "drafted by subagent, awaiting owner review"
+      "label_status": "reviewed 2026-09-11 (Claude-drafted, Claude-reviewed); awaiting owner review"
     },
     {
       "advisory_id": "ADV-2026-0010",
@@ -176,7 +176,7 @@
       "bytes": 636645,
       "pages": 18,
       "selection_rationale": "sanctions and tbml; shadow fleet, front companies, oil; named actors",
-      "label_status": "drafted by subagent, awaiting owner review"
+      "label_status": "reviewed 2026-09-11 (Claude-drafted, Claude-reviewed); awaiting owner review"
     },
     {
       "advisory_id": "ADV-2026-0011",
@@ -192,7 +192,7 @@
       "bytes": 624126,
       "pages": 15,
       "selection_rationale": "network and tbml; mirror-swap laundering, BMPE-like value transfer; tests the emergent BMPE label from week 1",
-      "label_status": "drafted by subagent, awaiting owner review"
+      "label_status": "reviewed 2026-09-11 (Claude-drafted, Claude-reviewed); awaiting owner review"
     },
     {
       "advisory_id": "ADV-2026-0012",
@@ -208,7 +208,7 @@
       "bytes": 929083,
       "pages": 35,
       "selection_rationale": "sanctions; AIS manipulation, ship-to-ship transfers, flag hopping; SAN002",
-      "label_status": "drafted by subagent, awaiting owner review"
+      "label_status": "reviewed 2026-09-11 (Claude-drafted, Claude-reviewed); awaiting owner review"
     },
     {
       "advisory_id": "ADV-2026-0013",
@@ -224,7 +224,7 @@
       "bytes": 397474,
       "pages": 6,
       "selection_rationale": "sanctions and tbml; transshipment, intermediaries, dual-use goods; short",
-      "label_status": "drafted in-session, awaiting owner review"
+      "label_status": "reviewed 2026-09-11 (Claude-drafted, Claude-reviewed); awaiting owner review"
     },
     {
       "advisory_id": "ADV-2026-0014",
@@ -240,7 +240,7 @@
       "bytes": 4010468,
       "pages": 29,
       "selection_rationale": "sanctions; UK ownership-and-control evasion, enablers",
-      "label_status": "drafted by subagent, awaiting owner review"
+      "label_status": "reviewed 2026-09-11 (Claude-drafted, Claude-reviewed); awaiting owner review"
     },
     {
       "advisory_id": "ADV-2026-0015",
@@ -256,7 +256,7 @@
       "bytes": 297285,
       "pages": 15,
       "selection_rationale": "sanctions and network; ownership dilution below 50%, UBO changes; typology-list format",
-      "label_status": "drafted in-session, awaiting owner review"
+      "label_status": "reviewed 2026-09-11 (Claude-drafted, Claude-reviewed); awaiting owner review"
     },
     {
       "advisory_id": "ADV-2026-0016",
@@ -272,7 +272,7 @@
       "bytes": 257561,
       "pages": 7,
       "selection_rationale": "tbml and sanctions; dual-use goods diversion; date from PDF metadata, confirm at labelling",
-      "label_status": "drafted by subagent, awaiting owner review"
+      "label_status": "reviewed 2026-09-11 (Claude-drafted, Claude-reviewed); awaiting owner review"
     },
     {
       "advisory_id": "ADV-2026-0017",
@@ -288,7 +288,7 @@
       "bytes": 631843,
       "pages": 8,
       "selection_rationale": "sanctions; shadow fleet network; date from PDF metadata, confirm at labelling",
-      "label_status": "drafted in-session, awaiting owner review"
+      "label_status": "reviewed 2026-09-11 (Claude-drafted, Claude-reviewed); awaiting owner review"
     },
     {
       "advisory_id": "ADV-2026-0018",
@@ -304,7 +304,7 @@
       "bytes": 567708,
       "pages": 30,
       "selection_rationale": "capital_markets; the only advisory-shaped document for that family in the matrix's publishers",
-      "label_status": "drafted by subagent, awaiting owner review"
+      "label_status": "reviewed 2026-09-11 (Claude-drafted, Claude-reviewed); awaiting owner review"
     },
     {
       "advisory_id": "ADV-2026-0019",
@@ -320,7 +320,7 @@
       "bytes": 27122610,
       "pages": 100,
       "selection_rationale": "network; named in the Source Matrix itself; 100 pages, broadest scope",
-      "label_status": "drafted by subagent, awaiting owner review"
+      "label_status": "reviewed 2026-09-11 (Claude-drafted, Claude-reviewed); awaiting owner review"
     },
     {
       "advisory_id": "ADV-2026-0020",
@@ -336,7 +336,7 @@
       "bytes": 1815393,
       "pages": 83,
       "selection_rationale": "tbml; industry guidance rather than an advisory, included as the plan's 'industry' slot",
-      "label_status": "drafted by subagent, awaiting owner review"
+      "label_status": "reviewed 2026-09-11 (Claude-drafted, Claude-reviewed); awaiting owner review"
     }
   ]
 }

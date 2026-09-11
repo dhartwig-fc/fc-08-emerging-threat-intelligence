@@ -91,7 +91,7 @@
           "page": 12,
           "printed_folio": "12",
           "paragraph": null,
-          "quote": "This may simply involve omitting information from the relevant documentation or deliberately disguising or falsifying it."
+          "quote": "Deliberate obfuscation of the Type of Goods Parties may structure a transaction in a way to avoid alerting any suspicion to FIs or to other third parties which become involved."
         },
         {
           "page": 45,
@@ -181,7 +181,7 @@
           "page": 12,
           "printed_folio": "12",
           "paragraph": null,
-          "quote": "Generally, these techniques rely upon collusion between the seller and buyer, since the intended outcome from such arrangements is obtaining a benefit in e xce ss of what would be expected from an arm's length transaction. The collusion may arise because both parties are controlled by the same persons."
+          "quote": "The collusion may arise because both parties are controlled by the same persons."
         },
         {
           "page": 45,
@@ -292,5 +292,5 @@
     "sanctions_desk"
   ],
   "overall_confidence": "high",
-  "extraction_notes": "Golden label. Typology content is the p12 method table, the sanctions section (pp 14-21) and the appendix risk-indicator tables (pp 45, 56-57, 67, 79); the rest is process and glossary. Twin rule mirrored: framed as trade finance, so TBML007 and TBML010 not SAN007 and SAN006, although dual-use goods sit under the sanctions and export-controls headings. Short and over shipping are emergent: the library holds price and description misrepresentation but no quantity twin; the document says their effect is similar to over or under invoicing. End-user concealment (p16) is emergent, not SAN004, as no front company is described. SAN003 and SAN008 are low: transhipment points and high-risk countries recur as screening data points, not techniques. BA002 rests on one substantive glossary passage; its single mention of layering is not labelled. Open-account opacity, back-to-back DCs and guarantee claim tactics are indicators, not typologies. No threat actors (the bodies named are issuers or regulators); no risk jurisdictions."
+  "extraction_notes": "Golden label. Typology content is the p12 method table, the sanctions section (pp 14-21) and the appendix risk-indicator tables (pp 45, 56-57, 67, 79); the rest is process and glossary. Twin rule mirrored: framed as trade finance, so TBML007 and TBML010 not SAN007 and SAN006, although dual-use goods sit under the sanctions and export-controls headings. Short and over shipping are emergent: the library holds price and description misrepresentation but no quantity twin; the document says their effect is similar to over or under invoicing. End-user concealment (p16) is emergent, not SAN004, as no front company is described. SAN003 and SAN008 are low: transhipment points and high-risk countries recur as screening data points, not techniques. BA002 rests on one substantive glossary passage; its single mention of layering is not labelled. Open-account opacity, back-to-back DCs and guarantee claim tactics are indicators, not typologies. No threat actors (the bodies named are issuers or regulators); no risk jurisdictions. REVIEWED 2026-09-11, the last of the twenty. Two citations replaced with spans from the same page. TBML005 cited 'This may simply involve omitting information from the relevant documentation', the second sentence of an entry whose HEADING is 'Deliberate obfuscation of the Type of Goods' -- the quote lost the words naming the technique. PAT009 cited 'these techniques rely upon collusion between the seller and buyer'; colluding parties need not be connected, and the doctrine is entities connected through ownership, control or directors. The page says it directly one sentence earlier: 'The collusion may arise because both parties are controlled by the same persons.' TWIN CONVENTION APPLIED IN MIRROR and verified: this is trade-framed guidance, so TBML007 and TBML010 are used over SAN007 and SAN006. SAN003 and SAN008 remain sanctions ids because the library holds no TBML twin for either. No actors and no jurisdictions is correct -- this is control guidance naming no party and no case location."
 }
