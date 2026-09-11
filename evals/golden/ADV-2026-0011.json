@@ -162,6 +162,42 @@
       ]
     },
     {
+      "family": "correspondent_banking",
+      "typology_id": "BA005",
+      "label": "Rapid Movement",
+      "emergent": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 9,
+          "printed_folio": "9",
+          "paragraph": null,
+          "quote": "A customer’s account, especially a Chinese national, receives numerous transfers or deposits, and has a significant number of withdrawals or transfers, none of which appear to be related to routine payroll, living expenses, or customer’s stated expected activity."
+        }
+      ]
+    },
+    {
+      "family": "correspondent_banking",
+      "typology_id": "BA010",
+      "label": "Peer Group Anomalies",
+      "emergent": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 7,
+          "printed_folio": "7",
+          "paragraph": null,
+          "quote": "Such businesses may have income that is not commensurate with that of other businesses of a similar size."
+        },
+        {
+          "page": 10,
+          "printed_folio": "10",
+          "paragraph": null,
+          "quote": "A business that sells electronics or other luxury goods has income that is not commensurate with the size and scale of the business."
+        }
+      ]
+    },
+    {
       "family": "tbml",
       "typology_id": "TBML009",
       "label": "Shell Company Trading",
@@ -200,6 +236,48 @@
           "printed_folio": "10",
           "paragraph": null,
           "quote": "A business that sells electronics or other luxury goods makes payments for multiple credit cards associated with various individuals, who are seemingly unrelated to the business."
+        }
+      ]
+    },
+    {
+      "family": "network",
+      "typology_id": "PAT007",
+      "label": "Shell Company Network",
+      "emergent": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 6,
+          "printed_folio": "6",
+          "paragraph": null,
+          "quote": "Alternatively, CMLNs may purchase cashier’s checks listing the payee as a shell company the CMLNs beneficially own or listing the payee as a U.S.-based company or individual in the real estate industry."
+        },
+        {
+          "page": 10,
+          "printed_folio": "10",
+          "paragraph": null,
+          "quote": "A customer that is a U.S.-based escrow company receives funds from an unaffiliated, foreign-based shell company or entity in a disparate line of business that are used to purchase real estate in the United States."
+        }
+      ]
+    },
+    {
+      "family": "network",
+      "typology_id": "PAT009",
+      "label": "Related Party Trading",
+      "emergent": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 4,
+          "printed_folio": "4",
+          "paragraph": null,
+          "quote": "CMLNs also coordinate and network with CMLNs or PMLs in other countries through IVTS and TBML to launder illicit proceeds, which obviates the need to physically transport cash or execute cross-border wire transfers."
+        },
+        {
+          "page": 7,
+          "printed_folio": "7",
+          "paragraph": null,
+          "quote": "These exports serve as a form of value exchange between CMLN operators that avoids cross-border money movements and serves as a revenue source for the CMLNs."
         }
       ]
     },
@@ -458,5 +536,5 @@
     "trade_desk"
   ],
   "overall_confidence": "high",
-  "extraction_notes": "Golden label. Printed folio equals the PDF index on every page. Pages 11-15 are BSA reporting, due diligence and information-sharing boilerplate with no typology content. The mirror transaction is the advisory's central mechanism and has no governed home: it is an IVTS swap, not trade, so it is emergent under family other (as ADV-2026-0008's BMPE entry) rather than tbml; the advisory's own SAR box (36(l) TBML/Black Market Peso Exchange) is the reason the name says BMPE-style. The goods-export leg is a separate emergent tbml entry because the advisory says exports substitute for a mirror transfer; daigou kept as its own emergent label for consistency with ADV-2026-0001. CMI010 not used: the CVC content is laundering, not sanctions evasion, so emergent under crypto as in ADV-2026-0001/0003. BA001 rests on 'smurfing' (p6) and 'structuring' (p8); the p6 quote keeps the inline footnote marker '35' verbatim. BA002 is the weaker of the mule-account pair: deposits across many branches into one account then dispersed by P2P and wire fit the funnel shape, but the advisory never uses the term, so medium. BA008 rests on cashier's checks re-deposited at a second institution and wire/ACH/P2P onward moves; medium. TBML009 covers shell and front companies reselling or exporting goods and the HK shell-like trading companies red flag; PAT007 not labelled separately (same evidence, TBML framing). TBML008 is the most contestable governed entry: CMLN or complicit-business payoff of mule credit cards is a third-party payer settling a purchase, kept at medium because it appears in the typology section and again as a red flag. Real estate purchase through mules and shell companies (p6, case study p8, three red flags) is deliberately not a typology: the library has no home and it is integration of proceeds rather than a distinct technique; reviewer may promote it. Colombian peso brokers and shadow banking networks (p1) and healthcare fraud and illicit gaming (p4) are mentioned once and not labelled. Chinese citizens buying USD to evade PRC currency controls are the demand side and customers, not threat actors; not labelled. Enforcement bodies (FinCEN, Treasury, DOJ, DEA, HSI) are not actors. CMLN jurisdiction is CN by nationality, as AZ was used in ADV-2026-0017, although the networks operate in the U.S. Jurisdictions are US (where the cash is laundered), MX (cartel side of the swap), CN (RMB leg and PRC currency controls), HK and AE (export counterparties and shell trading companies, p7 and p10); Colombia is an actor origin mentioned once and excluded.  Indicators left empty per slice 1."
+  "extraction_notes": "Golden label. Printed folio equals the PDF index on every page. Pages 11-15 are BSA reporting, due diligence and information-sharing boilerplate with no typology content. The mirror transaction is the advisory's central mechanism and has no governed home: it is an IVTS swap, not trade, so it is emergent under family other (as ADV-2026-0008's BMPE entry) rather than tbml; the advisory's own SAR box (36(l) TBML/Black Market Peso Exchange) is the reason the name says BMPE-style. The goods-export leg is a separate emergent tbml entry because the advisory says exports substitute for a mirror transfer; daigou kept as its own emergent label for consistency with ADV-2026-0001. CMI010 not used: the CVC content is laundering, not sanctions evasion, so emergent under crypto as in ADV-2026-0001/0003. BA001 rests on 'smurfing' (p6) and 'structuring' (p8); the p6 quote keeps the inline footnote marker '35' verbatim. BA002 is the weaker of the mule-account pair: deposits across many branches into one account then dispersed by P2P and wire fit the funnel shape, but the advisory never uses the term, so medium. BA008 rests on cashier's checks re-deposited at a second institution and wire/ACH/P2P onward moves; medium. TBML009 covers shell and front companies reselling or exporting goods and the HK shell-like trading companies red flag; PAT007 not labelled separately (same evidence, TBML framing). TBML008 is the most contestable governed entry: CMLN or complicit-business payoff of mule credit cards is a third-party payer settling a purchase, kept at medium because it appears in the typology section and again as a red flag. Real estate purchase through mules and shell companies (p6, case study p8, three red flags) is deliberately not a typology: the library has no home and it is integration of proceeds rather than a distinct technique; reviewer may promote it. Colombian peso brokers and shadow banking networks (p1) and healthcare fraud and illicit gaming (p4) are mentioned once and not labelled. Chinese citizens buying USD to evade PRC currency controls are the demand side and customers, not threat actors; not labelled. Enforcement bodies (FinCEN, Treasury, DOJ, DEA, HSI) are not actors. CMLN jurisdiction is CN by nationality, as AZ was used in ADV-2026-0017, although the networks operate in the U.S. Jurisdictions are US (where the cash is laundered), MX (cartel side of the swap), CN (RMB leg and PRC currency controls), HK and AE (export counterparties and shell trading companies, p7 and p10); Colombia is an actor origin mentioned once and excluded.  Indicators left empty per slice 1.  RE-CHECKED 2026-09-11 under the restated indicator rule: pp9-10 are FinCEN's red-flag groups, so one bullet now supports a typology. ADDED, all medium: BA005 (p9 — numerous deposits, significant withdrawals, none matching stated expected activity: through-volume vs normal profile, not BA003's controller relationship); BA010 (p7 'businesses of a similar size', p10 'not commensurate with the size and scale of the business' — peer segment, not threshold); PAT007 (declined before as TBML009's evidence; these citations are not the trade leg — CMLN-owned shell as cashier's-check payee p6, foreign shell funding a real-estate escrow p10); PAT009 (p4 CMLNs coordinating with PMLs abroad through TBML, p7 exports as 'value exchange between CMLN operators'; the emergent export entry stays, PAT009 not carrying the mirror-transfer substitution). DECLINED on mechanism: BA007 (placement is via mule personal accounts, not a business's own cash), BA009 (the p10 marketplace flag is a front company selling real goods, not card-rail processing for others), BA004 (fn31 replenishes peso supply between operators; nothing returns to origin), PAT010 (control of accounts, not of an organisation), SAN008 (doctrine excludes jurisdiction as an aggravating detail, all p9 offers), SAN004 (framed as laundering, not sanctions evasion). Nothing removed or downgraded. Governed 6 to 10."
 }

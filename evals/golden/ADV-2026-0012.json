@@ -148,6 +148,48 @@
     },
     {
       "family": "sanctions",
+      "typology_id": "SAN004",
+      "label": "Front Companies",
+      "emergent": false,
+      "confidence": "low",
+      "citations": [
+        {
+          "page": 3,
+          "printed_folio": "3",
+          "paragraph": null,
+          "quote": "through the use of complex business structures, including those involving shell companies"
+        },
+        {
+          "page": 12,
+          "printed_folio": "12",
+          "paragraph": null,
+          "quote": "Conducting cyclical checks on vessel companies to determine if the companies are still registered."
+        }
+      ]
+    },
+    {
+      "family": "sanctions",
+      "typology_id": "SAN007",
+      "label": "Dual Use Goods",
+      "emergent": false,
+      "confidence": "low",
+      "citations": [
+        {
+          "page": 32,
+          "printed_folio": "32",
+          "paragraph": null,
+          "quote": "if such metals or materials are provided for certain end-uses or end-users"
+        },
+        {
+          "page": 5,
+          "printed_folio": "5",
+          "paragraph": null,
+          "quote": "they should consider requesting copies of export licenses (where applicable)"
+        }
+      ]
+    },
+    {
+      "family": "sanctions",
       "typology_id": null,
       "label": "AIS disablement and spoofing to mask vessel identity and movement",
       "emergent": true,
@@ -423,5 +465,5 @@
     "trade_desk"
   ],
   "overall_confidence": "high",
-  "extraction_notes": "Golden label. SAN002 over PAT008 per the twin convention. AIS spoofing, STS transfers, flag hopping and painted-over identities are marked emergent as well as cited under SAN002: the library's SAN002 describes ownership and logistics networks, not the vessel-level deceptions this advisory is about, and each is a numbered tactic repeated across Annex A. Shell companies appear once (p3) so SAN004 is folded into SAN009. Below-market prices (p15) is a single red flag, not TBML002U. Falsified origin documents go to SAN006 not TBML005. Old-vessel acquisition and non-AIS barges (pp29-30) are cited under SAN002 rather than labelled. Payment offsetting (p35) kept emergent at low: one mention, but a settlement mechanism the library does not hold. Hizballah and HAMAS are proceeds recipients, the Government of Syria a sanctions target, neither labelled as actors. US is the designating state; Liberia, Panama and Marshall Islands are registry-compact members; none are jurisdictions."
+  "extraction_notes": "Golden label. SAN002 over PAT008 per the twin convention. AIS spoofing, STS transfers, flag hopping and painted-over identities are marked emergent as well as cited under SAN002: the library's SAN002 describes ownership and logistics networks, not the vessel-level deceptions this advisory is about, and each is a numbered tactic repeated across Annex A. Shell companies appear once (p3) so SAN004 is folded into SAN009. Below-market prices (p15) is a single red flag, not TBML002U. Falsified origin documents go to SAN006 not TBML005. Old-vessel acquisition and non-AIS barges (pp29-30) are cited under SAN002 rather than labelled. Payment offsetting (p35) kept emergent at low: one mention, but a settlement mechanism the library does not hold. Hizballah and HAMAS are proceeds recipients, the Government of Syria a sanctions target, neither labelled as actors. US is the designating state; Liberia, Panama and Marshall Islands are registry-compact members; none are jurisdictions. RE-CHECKED 2026-09-11 against the restated indicator-list convention. This is an indicator-list document — seven numbered deceptive shipping practices plus per-industry red-flag bullets in Annex A — so a single bullet now carries a typology at low/medium. ADDED SAN004 Front Companies (low, p3 + p12): the old note folded it into SAN009 because shell companies appear once, which is exactly the reasoning the restatement retires; the advisory never develops front-company mechanics, hence low. ADDED SAN007 Dual Use Goods (low, p32 + p5): sanctionability of coal, graphite and semi-finished metals turns on end-use and end-user, with export-licence and end-use verification practices in Annex A — the doctrine's own pivot. REMOVED nothing: every existing citation was re-read against its page and supports its mapping. Three mechanism-level rejections held on re-check, each a surface match only: TBML002U (below-market petroleum prices at p15 are a discount for sanctions risk, not invoice deflation transferring value to an importer); SAN005 (spoofed and painted-over vessel names and IMO numbers substitute a false identity outright, whereas SAN005 is name-FORM variation that still resolves to a listed party — so these stay emergent); TBML005 (falsified certificates of origin misstate ORIGIN, not the commodity, HS code or control status, so they stay with SAN006 and SAN003). PAT003 and PAT010 not added: the advisory is framed as sanctions evasion, so the layered-ownership and concealed-control mechanism sits with SAN009 and SAN001 per the twin convention. BA010 not added: p17's deviation from a client's own typical business practices is self-history, not peer-group comparison."
 }

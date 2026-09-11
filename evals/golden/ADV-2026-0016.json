@@ -241,6 +241,51 @@
           "quote": "this list are at high risk of being used in Russian sanctions circumvention efforts. UK businesses"
         }
       ]
+    },
+    {
+      "family": "tbml",
+      "typology_id": "TBML001",
+      "label": "Over Invoicing",
+      "emergent": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 4,
+          "printed_folio": "4",
+          "paragraph": null,
+          "quote": "A customer that significantly overpays for a Common High Priority list item, compared to known market prices."
+        }
+      ]
+    },
+    {
+      "family": "sanctions",
+      "typology_id": "SAN005",
+      "label": "Name Screening Evasion",
+      "emergent": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 4,
+          "printed_folio": "4",
+          "paragraph": null,
+          "quote": "The customer’s name or its address is similar to one of the parties on the OFSI consolidated list."
+        }
+      ]
+    },
+    {
+      "family": "network",
+      "typology_id": "PAT005",
+      "label": "Common Address",
+      "emergent": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 4,
+          "printed_folio": "4",
+          "paragraph": null,
+          "quote": "Transactions involving companies that are physically co-located, or have shared ownership, with an entity on the OFSI consolidated list."
+        }
+      ]
     }
   ],
   "actors": [
@@ -410,5 +455,5 @@
     "trade_desk"
   ],
   "overall_confidence": "high",
-  "extraction_notes": "Golden label. The document states its own date on page 1, 'Date: December 2023', which agrees with the list's PDF-metadata date; month precision kept because no day is printed. Page 1 has no printed folio; pages 2-7 print their number. Pages 6-7 are data-protection, SAR and handling boilerplate with no typology content; page 1 is the cover. Sanctions twins chosen over TBML twins per the convention (SAN007 not TBML007, SAN006 not TBML010): the alert is framed entirely as export-sanctions circumvention. SAN003 at high because third-country diversion is the alert's core mechanism (complex supply chains, alternative supply routes, diversionary destinations, transhipment points), not a single red flag; the page 5 quote is cut after 'tranship ment' where pypdf broke the word. SAN004 medium: the named Turkey and Dubai intermediaries plus the post-invasion-incorporation, no-web-presence and wrong-line-of-business flags describe fronts, but the alert never uses the words front or shell. TBML008 medium on flags 13 (payment re-routed through a different company) and 3 (one end user's account paying multiple similar suppliers); flag 3 also has a distributed-procurement flavour that the library does not hold and was not labelled emergent because it appears once. SAN001 low from two flags (refusal to disclose ownership, shared ownership with a listed entity). Single-mention flags deliberately NOT labelled as typologies: flag 4 overpayment against market price (would be TBML001), flag 9 name or address similar to the OFSI list (SAN005), flag 11 co-location (PAT005), flag 7 mismatched phone country codes, flag 5 letter-of-credit consignment to the issuing bank (cited under the end-user emergent instead). Two emergent labels: 'False end-user and end-use declarations' reuses the ADV-2026-0013 label for scorer consistency, since flags 2, 5 and 10 are about the same technique; 'Diversion of Common High Priority items to Russian military end users' is labelled because the footnote on page 2 says high-risk goods include but are not limited to dual-use goods, so the CHPL scope is wider than SAN007. Actors: seven named designated parties and two categories; NPP Istok and Ecitech are named once as end users and kept at medium. NCA, NECC, OFSI, FCDO, HMRC, DBT, JMLIT, the G7 and the Export Control Joint Unit are enforcement bodies, not actors. Jurisdictions: RU as destination; TR, AE and RU for the named intermediaries; BY, CN, RS and UZ from the 6 December 2023 designations as diversionary destinations; GB kept because the goods originate in the UK and the exposed exporters and financial institutions are UK businesses, matching ADV-2026-0013's inclusion of US as goods origin. UA is the victim state and US, EU and JP are co-designating authorities, so none is a jurisdiction."
+  "extraction_notes": "Golden label. The document states its own date on page 1, 'Date: December 2023', which agrees with the list's PDF-metadata date; month precision kept because no day is printed. Page 1 has no printed folio; pages 2-7 print their number. Pages 6-7 are data-protection, SAR and handling boilerplate with no typology content; page 1 is the cover. Sanctions twins chosen over TBML twins per the convention (SAN007 not TBML007, SAN006 not TBML010): the alert is framed entirely as export-sanctions circumvention. SAN003 at high because third-country diversion is the alert's core mechanism (complex supply chains, alternative supply routes, diversionary destinations, transhipment points), not a single red flag; the page 5 quote is cut after 'tranship ment' where pypdf broke the word. SAN004 medium: the named Turkey and Dubai intermediaries plus the post-invasion-incorporation, no-web-presence and wrong-line-of-business flags describe fronts, but the alert never uses the words front or shell. TBML008 medium on flags 13 (payment re-routed through a different company) and 3 (one end user's account paying multiple similar suppliers); flag 3 also has a distributed-procurement flavour that the library does not hold and was not labelled emergent because it appears once. SAN001 low from two flags (refusal to disclose ownership, shared ownership with a listed entity). Single-mention flags deliberately NOT labelled as typologies: flag 4 overpayment against market price (would be TBML001), flag 9 name or address similar to the OFSI list (SAN005), flag 11 co-location (PAT005), flag 7 mismatched phone country codes, flag 5 letter-of-credit consignment to the issuing bank (cited under the end-user emergent instead). Two emergent labels: 'False end-user and end-use declarations' reuses the ADV-2026-0013 label for scorer consistency, since flags 2, 5 and 10 are about the same technique; 'Diversion of Common High Priority items to Russian military end users' is labelled because the footnote on page 2 says high-risk goods include but are not limited to dual-use goods, so the CHPL scope is wider than SAN007. Actors: seven named designated parties and two categories; NPP Istok and Ecitech are named once as end users and kept at medium. NCA, NECC, OFSI, FCDO, HMRC, DBT, JMLIT, the G7 and the Export Control Joint Unit are enforcement bodies, not actors. Jurisdictions: RU as destination; TR, AE and RU for the named intermediaries; BY, CN, RS and UZ from the 6 December 2023 designations as diversionary destinations; GB kept because the goods originate in the UK and the exposed exporters and financial institutions are UK businesses, matching ADV-2026-0013's inclusion of US as goods origin. UA is the victim state and US, EU and JP are co-designating authorities, so none is a jurisdiction. RE-CHECKED 2026-09-11 against the restated indicator rule (README): in an indicator-list document each numbered flag may carry a typology at low/medium. Added TBML001 (flag 4, overpayment against market price), SAN005 (flag 9, name or address similar to an OFSI-listed party) and PAT005 (flag 11, co-location with a listed entity) — the three this label had deliberately omitted under the old strict rule and recorded as stricter than its siblings. Flags 3 and 12 were considered and left out: split payments to similar suppliers and open-account usage are already carried by TBML008."
 }

@@ -58,9 +58,25 @@ is out of scope for extraction.
   classes. Enforcement bodies, task forces and regulators are not actors.
 - **A victim state is not a jurisdiction.** Jurisdictions are where the risk
   or the case sits, not who was harmed.
-- **Indicators are not typologies.** A red flag the advisory lists is a
-  typology only when the advisory is about that behaviour, not when it
-  mentions it once.
+- **Whether an indicator is a typology depends on the shape of the document.**
+  Restated 2026-09-11 after review; the first wording was written with long
+  narrative reports in mind and did not transfer.
+  - In a **narrative report**, a red flag mentioned once in passing is not a
+    typology. Label what the report is about.
+  - In an **indicator-list document** — a red alert, a FATF risk-indicator
+    paper, a FinCEN red-flag section — the indicators ARE the content. Each
+    indicator, or each group of related indicators, may carry a typology, and
+    a single bullet is sufficient evidence. Declining to label them would mean
+    labelling almost nothing in the documents whose whole purpose is the list.
+  - Confidence still carries the weight. One bullet supports a typology at
+    `low` or `medium`; `high` needs the document to develop the technique.
+
+  Why it was restated: 6 of 10 governed typologies in ADV-2026-0013 and 8 of 12
+  in ADV-2026-0015 rest on a single indicator bullet, so the old rule condemned
+  most of two labels. Worse, a labeller following it strictly on ADV-2026-0016
+  omitted three typologies the alert's own numbered flags describe, and said so
+  in its notes. A rule that makes the careful labeller produce the thinner
+  label is the wrong rule.
 
 ## State of the set (2026-09-11)
 
@@ -71,16 +87,23 @@ reports separately). Three were drafted in-session, seventeen by subagents
 working from this README and the first three as exemplars. **Every one is a
 draft awaiting owner review**; `label_status` says which.
 
-What the set contains: 214 governed typology mentions across 38 of the
-library's 57 typologies, 106 emergent labels, 159 actors.
+What the set contains, after the 2026-09-11 re-check: 225 governed typology
+mentions across 39 of the library's 57 typologies, 109 emergent labels, 158
+actors, 821 citations.
 
 | Family | Exercised | Never appears |
 |---|---|---|
 | sanctions | 10 of 10 | - |
 | tbml | 10 of 12 | TBML002 (borrows TBML001's doctrine), TBML011 |
-| correspondent_banking | 8 of 10 | BA006, BA010 |
+| correspondent_banking | 9 of 10 | BA006 |
 | network | 7 of 15 | the five FND foundation pipes, PAT004, PAT006, PAT008 |
 | capital_markets | 3 of 10 | CM003, CM004, CM006-CM010 |
+
+Regenerate these numbers after any label changes; the re-check moved every
+one of them, and the earlier table wrongly said BA010 never appeared.
+
+`extraction_notes` on two labels now sits at the 4000-character cap. Trim
+before appending, or raise the cap deliberately with a schema bump.
 
 Two coverage facts worth knowing before scoring. The five FND entries are
 foundation capabilities rather than typologies an advisory describes, so

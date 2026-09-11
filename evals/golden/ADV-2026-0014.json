@@ -180,12 +180,6 @@
           "printed_folio": "19",
           "paragraph": null,
           "quote": "Company Y is also a UK registered company incorporated and located at the same Property."
-        },
-        {
-          "page": 22,
-          "printed_folio": "21",
-          "paragraph": null,
-          "quote": "Company L Investments has no presence in the EU but makes use of an address in an EU country."
         }
       ]
     },
@@ -206,7 +200,7 @@
           "page": 20,
           "printed_folio": "19",
           "paragraph": null,
-          "quote": "Funds are regularly transferred between Companies X, Y and Z as working capital loans or reimbursement of expenditure, indicating that the three companies share their source of wealth."
+          "quote": "The DP is the sole and/or majority client of all three companies."
         }
       ]
     },
@@ -228,6 +222,48 @@
           "printed_folio": "20",
           "paragraph": null,
           "quote": "Frequent or unexplained changes of name or declared location of operation"
+        }
+      ]
+    },
+    {
+      "family": "correspondent_banking",
+      "typology_id": "BA008",
+      "label": "Layering",
+      "emergent": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 26,
+          "printed_folio": "25",
+          "paragraph": null,
+          "quote": "Networks used to process the funds of UK sanctioned individuals"
+        },
+        {
+          "page": 23,
+          "printed_folio": "22",
+          "paragraph": null,
+          "quote": "a system for exchange of cash to crypto (and vice versa) and the laundering of funds linked to property purchases in the UK"
+        }
+      ]
+    },
+    {
+      "family": "network",
+      "typology_id": "PAT007",
+      "label": "Shell Company Network",
+      "emergent": false,
+      "confidence": "low",
+      "citations": [
+        {
+          "page": 22,
+          "printed_folio": "21",
+          "paragraph": null,
+          "quote": "Company L is therefore suspected to be part of an enabler network operating on behalf Company A and Individual S."
+        },
+        {
+          "page": 22,
+          "printed_folio": "21",
+          "paragraph": null,
+          "quote": "Company L Investments has no presence in the EU but makes use of an address in an EU country."
         }
       ]
     },
@@ -312,6 +348,57 @@
           "printed_folio": "10",
           "paragraph": null,
           "quote": "Designed by the Central Bank of Russia as an alternative to SWIFT, SPFS could be used to breach UK financial sanctions prohibitions."
+        }
+      ]
+    },
+    {
+      "family": "sanctions",
+      "typology_id": null,
+      "label": "Non-resident banking in intermediary jurisdictions",
+      "emergent": true,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 27,
+          "printed_folio": "26",
+          "paragraph": null,
+          "quote": "non-resident banking refers to banking services provided to individuals or entities that do not reside in the jurisdiction where the bank is located."
+        },
+        {
+          "page": 26,
+          "printed_folio": "25",
+          "paragraph": null,
+          "quote": "Non-resident banking"
+        }
+      ]
+    },
+    {
+      "family": "sanctions",
+      "typology_id": null,
+      "label": "Replacement of closed companies with freshly incorporated copies elsewhere",
+      "emergent": true,
+      "confidence": "low",
+      "citations": [
+        {
+          "page": 26,
+          "printed_folio": "25",
+          "paragraph": null,
+          "quote": "The setting up of new companies which appear to be copies of the companies that have been closed down in other jurisdictions"
+        }
+      ]
+    },
+    {
+      "family": "sanctions",
+      "typology_id": null,
+      "label": "Cash couriering and unexplained cash deposits to fund designated persons",
+      "emergent": true,
+      "confidence": "low",
+      "citations": [
+        {
+          "page": 15,
+          "printed_folio": "14",
+          "paragraph": null,
+          "quote": "Attempts to deposit large sums of cash without adequate explanation"
         }
       ]
     }
@@ -435,8 +522,9 @@
   "indicators": [],
   "suggested_desks": [
     "sanctions_desk",
+    "correspondent_desk",
     "fiu_liaison"
   ],
   "overall_confidence": "high",
-  "extraction_notes": "Golden label. Pages 1-4, 24 and 29 are cover, copyright, contents and section dividers; pages 5-9 and 28 are scope, reporting statistics and resources with no typology content. Printed folios run one behind the PDF index from page 2; page 12 carries a stray '12' footnote marker mid-page and its folio is 11. Trade sanctions and the Oil Price Cap are explicitly out of scope (footnote 1), so SAN003/006/007 and every TBML twin are absent by design, not omission. Every named party in the three case studies is fictional by the document's own statement on page 5, so Company X, Company L, Individual M, Manager Y and the rest are not actors; the only real named parties are the December 2024 NCA-disrupted network (Operation Destabilise, named in footnote 15) and Garantex, which is designated rather than an evader but is kept as the named counterparty. Case study techniques ARE labelled as typologies because OFSI presents them as observed patterns. GB is a jurisdiction here, against the default for OFSI documents: the assessment explicitly places the risk in UK residential property, UK-registered service companies, UK NBPSPs used for international payments and UK property purchases, not merely in the UK as designating authority. Libya, Belarus, Iran and DPRK appear once (page 8) as sanctions regimes with recent compliance threats and are the targets of sanctions, not risk locations, so excluded; Russia is included because the document's subject is Russian DPs and their Moscow-based fronts. Monaco appears only in a fictional case study and is excluded; BVI, Cyprus and Austria appear in both a case study and the intermediary table and stand on the table. Isle of Man and Cayman Islands are included from the 2023-24 trend paragraph and table. Four emergent labels: enabler lifestyle and asset maintenance payments (the document's central observed pattern, not in the library); fronting to claim frozen assets; citizenship-by-investment concealment (red flag plus case study, so twice, medium); and SPFS exposure (one paragraph, hypothetical, low). Enabler facilitation itself is carried as two actor categories plus the first emergent label rather than as a separate 'enabler' typology, so this differs in shape from ADV-2026-0015 while covering the same behaviour. PAT002, PAT005 and PAT009 rest on case study 2 and one red flag each and are medium/low accordingly. SAN005 is low: two fronting red flags about name spelling and name changes, not a described screening-defeat technique. Deliberately NOT labelled: improper maintenance of frozen assets and licence-condition breaches (key judgement 2), which are firm compliance failures rather than evasion techniques; inaccurate UK-nexus assessments (same reason); 'non-resident banking' and 'offshore account payments' in the intermediary table, folded into SAN008; the UAE table bullet on companies re-established as copies of ones closed elsewhere, a single mention of the phoenix pattern labelled emergent in ADV-2026-0017; cash deposit and cash courier red flags, which are not BA007. Correspondent-banking Regulation 17A is regulatory context."
+  "extraction_notes": "Golden label. Pages 1-4, 24 and 29 are cover, copyright, contents and section dividers; pages 5-9 and 28 are scope, reporting statistics and resources with no typology content. Printed folios run one behind the PDF index from page 2; page 12 carries a stray '12' footnote marker mid-page and its folio is 11. Trade sanctions and the Oil Price Cap are explicitly out of scope (footnote 1), so SAN003/006/007 and every TBML twin are absent by design, not omission. Every named party in the three case studies is fictional by the document's own statement on page 5, so Company X, Company L, Individual M, Manager Y and the rest are not actors; the only real named parties are the December 2024 NCA-disrupted network (Operation Destabilise, named in footnote 15) and Garantex, which is designated rather than an evader but is kept as the named counterparty. Case study techniques ARE labelled as typologies because OFSI presents them as observed patterns. GB is a jurisdiction here, against the default for OFSI documents: the assessment explicitly places the risk in UK residential property, UK-registered service companies, UK NBPSPs used for international payments and UK property purchases, not merely in the UK as designating authority. Libya, Belarus, Iran and DPRK appear once (page 8) as sanctions regimes with recent compliance threats and are the targets of sanctions, not risk locations, so excluded; Russia is included because the document's subject is Russian DPs and their Moscow-based fronts. Monaco appears only in a fictional case study and is excluded; BVI, Cyprus and Austria appear in both a case study and the intermediary table and stand on the table. Isle of Man and Cayman Islands are included from the 2023-24 trend paragraph and table. Four emergent labels: enabler lifestyle and asset maintenance payments (the document's central observed pattern, not in the library); fronting to claim frozen assets; citizenship-by-investment concealment (red flag plus case study, so twice, medium); and SPFS exposure (one paragraph, hypothetical, low). Enabler facilitation itself is carried as two actor categories plus the first emergent label rather than as a separate 'enabler' typology, so this differs in shape from ADV-2026-0015 while covering the same behaviour. PAT002, PAT005 and PAT009 rest on case study 2 and one red flag each and are medium/low accordingly. SAN005 is low: two fronting red flags about name spelling and name changes, not a described screening-defeat technique. Deliberately NOT labelled: improper maintenance of frozen assets and licence-condition breaches (key judgement 2), which are firm compliance failures rather than evasion techniques; inaccurate UK-nexus assessments (same reason); 'non-resident banking' and 'offshore account payments' in the intermediary table, folded into SAN008; the UAE table bullet on companies re-established as copies of ones closed elsewhere, a single mention of the phoenix pattern labelled emergent in ADV-2026-0017; cash deposit and cash courier red flags, which are not BA007. Correspondent-banking Regulation 17A is regulatory context. RE-CHECKED 2026-09-11 under the restated indicator rule: the red-flag boxes (pp14-15, 21), the case studies and the intermediary table (pp26-27) are indicator lists, so one bullet now carries a typology. Added BA008 (medium: a network processing sanctioned persons' funds into UK property), PAT007 (low: the named enabler network of no-substance vehicles, beside SAN004's single front), and the three emergent labels this file had declined - non-resident banking (medium), copy companies replacing closed ones (low), cash couriering and cash deposits (low). PAT003 stays out as the network twin of SAN001/SAN009; TBML008 fails on mechanism (no trade). Nothing removed. Two citations corrected: PAT005's EU-address quote is an accommodation address, not a shared one, so it moves to PAT007; PAT009's working-capital-loans quote is intra-group funding, not trading."
 }

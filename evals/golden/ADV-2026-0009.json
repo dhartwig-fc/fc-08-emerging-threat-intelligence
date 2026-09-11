@@ -141,6 +141,21 @@
     },
     {
       "family": "network",
+      "typology_id": "PAT002",
+      "label": "Shared Beneficial Owner",
+      "emergent": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 8,
+          "printed_folio": "8",
+          "paragraph": null,
+          "quote": "to the same legal entity or entities that share similar beneficial ownership structures"
+        }
+      ]
+    },
+    {
+      "family": "network",
       "typology_id": "PAT003",
       "label": "Layered Ownership",
       "emergent": false,
@@ -151,6 +166,12 @@
           "printed_folio": "7",
           "paragraph": null,
           "quote": "the potential use of layered and opaque transactions to obfuscate a property’s ultimate beneficial owner."
+        },
+        {
+          "page": 9,
+          "printed_folio": "9",
+          "paragraph": null,
+          "quote": "Assets held in the name of intermediate legal entities whose beneficial owner or owners are tied to a kleptocrat or his or her family member."
         }
       ]
     },
@@ -187,12 +208,21 @@
           "printed_folio": "5",
           "paragraph": null,
           "quote": "with the bribes paid through a complex network of shell companies, off-book transactions, and off-shore bank accounts."
-        },
+        }
+      ]
+    },
+    {
+      "family": "tbml",
+      "typology_id": "TBML001",
+      "label": "Over Invoicing",
+      "emergent": false,
+      "confidence": "low",
+      "citations": [
         {
-          "page": 7,
-          "printed_folio": "7",
+          "page": 9,
+          "printed_folio": "9",
           "paragraph": null,
-          "quote": "From these offshore financial centers, the funds are integrated into the broader financial system through investments and acquisitions."
+          "quote": "contracts (e.g., invoices) that include charges at substantially higher prices than market rates"
         }
       ]
     },
@@ -527,5 +557,5 @@
     "sanctions_desk"
   ],
   "overall_confidence": "high",
-  "extraction_notes": "Golden label. The library holds no corruption-family typology, so the advisory's two headline typologies (bribery/extortion; misappropriation/embezzlement) and laundering through real estate and high-value assets are emergent under family corruption. 'Wealth Extraction' is the advisory's umbrella heading; the Lukashenka patronage/kickback example is folded under embezzlement because the advisory lists it there, and Recinos' procurement scheme likewise. PAT007 over TBML009 because no trade is described. PAT010 covers family members and nominees fronting accounts while the official retains control (p.6, p.4). SAN001 Ownership Evasion was considered and rejected: the techniques are described in a laundering frame, not a sanctions-evasion frame, although p.2 names the Russia sanctions nexus and p.4 says accounts are opened abroad to evade sanctions screening; a reviewer may prefer SAN001 beside PAT010. SAN008 kept at medium on the offshore low-transparency jurisdictions passage (p.7) and the p.8 red flag; contestable because the library's SAN008 is a sanctions-exposure measure. BA008 low on the Odebrecht offshore network and the p.7 integration sentence. TBML004 Phantom Shipping was considered for the TENEX fake invoices for services never provided and rejected: there is no shipment and the invoice is a bribe cover, so it is emergent. TBML001 over-pricing on government contract invoices is one red flag on p.9 and is not labelled (indicators are not typologies); the same applies to PAT002-shaped 'entities that share similar beneficial ownership structures' on p.8. PAT003 rests on the p.7 layered-transaction sentence; the p.9 'intermediate legal entities' flag supports it but pypdf splits 'beneficial' there so it is not quoted. Actors: Putin labelled as head of the named regime; TENEX at medium because its official, not the company, was charged; Peskov enters via his family's designation; Rosatom and Petrobras are not labelled separately. OFAC, DOJ, FBI, BIS, Task Force KleptoCapture and the REPO Task Force are enforcement bodies, not actors. Jurisdictions: US kept because the advisory is about proceeds entering the U.S. financial system and U.S. real estate, and TLI/Lambert are U.S.; Ukraine excluded as victim state; Venezuela, Nicaragua and South Sudan appear in footnote 7 as earlier advisories only (VE enters via Odebrecht); the twelve Odebrecht bribe countries are included as case locations; LV, CY, CH as the TENEX shell-company locations. Pages 9-13 after the red flags are BSA obligations with no typology content. Quotes avoid the pypdf mid-word splits on pp.8-9 ('gov ernment', 'compani es', 'o fficials', 'invo ices', 'be neficial')."
+  "extraction_notes": "Golden label. The library holds no corruption-family typology, so the advisory's two headline typologies (bribery/extortion; misappropriation/embezzlement) and laundering through real estate and high-value assets are emergent under family corruption. 'Wealth Extraction' is the advisory's umbrella heading; the Lukashenka patronage/kickback example is folded under embezzlement because the advisory lists it there, and Recinos' procurement scheme likewise. PAT007 over TBML009 because no trade is described. PAT010 covers family members and nominees fronting accounts while the official retains control (p.6, p.4). SAN001 Ownership Evasion was considered and rejected: the techniques are described in a laundering frame, not a sanctions-evasion frame, although p.2 names the Russia sanctions nexus and p.4 says accounts are opened abroad to evade sanctions screening; a reviewer may prefer SAN001 beside PAT010. SAN008 kept at medium on the offshore low-transparency jurisdictions passage (p.7) and the p.8 red flag; contestable because the library's SAN008 is a sanctions-exposure measure. BA008 low on the Odebrecht offshore network and the p.7 integration sentence. TBML004 Phantom Shipping was considered for the TENEX fake invoices for services never provided and rejected: there is no shipment and the invoice is a bribe cover, so it is emergent. TBML001 over-pricing on government contract invoices is one red flag on p.9 and is not labelled (indicators are not typologies); the same applies to PAT002-shaped 'entities that share similar beneficial ownership structures' on p.8. PAT003 rests on the p.7 layered-transaction sentence; the p.9 'intermediate legal entities' flag supports it but pypdf splits 'beneficial' there so it is not quoted. Actors: Putin labelled as head of the named regime; TENEX at medium because its official, not the company, was charged; Peskov enters via his family's designation; Rosatom and Petrobras are not labelled separately. OFAC, DOJ, FBI, BIS, Task Force KleptoCapture and the REPO Task Force are enforcement bodies, not actors. Jurisdictions: US kept because the advisory is about proceeds entering the U.S. financial system and U.S. real estate, and TLI/Lambert are U.S.; Ukraine excluded as victim state; Venezuela, Nicaragua and South Sudan appear in footnote 7 as earlier advisories only (VE enters via Odebrecht); the twelve Odebrecht bribe countries are included as case locations; LV, CY, CH as the TENEX shell-company locations. Pages 9-13 after the red flags are BSA obligations with no typology content. Quotes avoid the pypdf mid-word splits on pp.8-9 ('gov ernment', 'compani es', 'o fficials', 'invo ices', 'be neficial'). RE-CHECKED 2026-09-11 against the restated indicator rule, which supersedes two sentences above: in an indicator-list document the red flags ARE the content, so one numbered flag carries a typology at low or medium. ADDED PAT002 (medium) on flag 1 p.8 — contracts repeatedly awarded to commonly-owned bidders is PAT002's mechanism exactly; TBML001 (low) on flag 7 p.9 — price inflated above market rate is TBML001's mechanism, low because the frame is a procurement contract not a trade and nothing develops it. PAT003 gains flag 10 p.9 ('intermediate legal entities' tied to a kleptocrat), a closer mechanism match than its p.7 layered-transactions sentence; still medium (matches modulo pypdf's 'be neficial' split). REMOVED BA008's p.7 citation on funds being 'integrated into the broader financial system': that is INTEGRATION, which BA008's own doctrine places after layering, so it did not support the mapping; BA008 stays low on the p.5 Odebrecht chain alone. Kept on re-check: SAN008 (flag 2 names registration in high-risk jurisdictions = its footprint mechanism), PAT007/PAT010 high. Flags NOT labelled for mechanism mismatch: embassy business through personal accounts (not BA003, controller-instructed pass-through); funds to/from countries with no ties (geographic anomaly); fictitious emails (not PAT006)."
 }
