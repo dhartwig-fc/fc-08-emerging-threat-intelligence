@@ -1,0 +1,826 @@
+{
+  "schema_version": "1.3.0",
+  "advisory_id": "ADV-2026-0004",
+  "source": {
+    "source_type": "fatf",
+    "publisher": "FATF / Egmont Group",
+    "title": "Concealment of Beneficial Ownership",
+    "published_on": "2018-07-01",
+    "published_on_precision": "month",
+    "url": "https://www.fatf-gafi.org/content/dam/fatf-gafi/reports/FATF-Egmont-Concealment-beneficial-ownership.pdf",
+    "document_sha256": "d4b32cb09bf89d0b6db7638d533862d888720dcd8ecd7d2031388f5cf1a61cac",
+    "page_count": 190
+  },
+  "summary": "GOLDEN LABEL, hand-drafted against the PDF. Joint FATF and Egmont Group study of how legal persons, legal arrangements and professional intermediaries are used to conceal beneficial ownership, built on 106 case studies from 34 jurisdictions. Three methods: complex ownership chains across jurisdictions using shell, shelf and front companies and trusts; individuals and instruments that misrepresent control, chiefly formal and informal nominees (straw men, sold or stolen identities), bearer shares and professional intermediaries; and falsified activity, chiefly false invoices and loan-back (round-robin) schemes. Section 3 assesses lawyers, accountants and TCSPs along a continuum of complicity; Section 4 covers low-tax jurisdictions, trade and finance centres and non-face-to-face services. Annex B is a supervision survey, Annex C the case summaries, Annex D detection techniques, Annex E a red-flag list. Named parties are few: Bank Melli and the Alavi Foundation (US forfeiture), the Sinaloa cartel and a Camorra-linked group; most entities are anonymised.",
+  "jurisdictions": [
+    "AR",
+    "AU",
+    "BE",
+    "BO",
+    "CA",
+    "KY",
+    "CN",
+    "HR",
+    "EC",
+    "EG",
+    "FJ",
+    "GH",
+    "GI",
+    "GG",
+    "IL",
+    "IT",
+    "JE",
+    "LV",
+    "MX",
+    "NA",
+    "NL",
+    "NZ",
+    "NO",
+    "PA",
+    "PE",
+    "RU",
+    "RS",
+    "SI",
+    "CH",
+    "TT",
+    "TR",
+    "UA",
+    "US",
+    "VA",
+    "VG",
+    "HK",
+    "CY",
+    "LU",
+    "BZ",
+    "SC",
+    "VU",
+    "LI",
+    "WS",
+    "BS",
+    "UY",
+    "EE",
+    "IE",
+    "GB",
+    "ES",
+    "IR",
+    "VN",
+    "KH",
+    "ZA",
+    "BR",
+    "AD",
+    "ME",
+    "MD",
+    "CR",
+    "HN",
+    "NU",
+    "AT",
+    "FR"
+  ],
+  "typologies": [
+    {
+      "family": "network",
+      "typology_id": "PAT007",
+      "label": "Shell Company Network",
+      "emergent": false,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 31,
+          "printed_folio": "29",
+          "paragraph": null,
+          "quote": "shell companies are the most common type of legal person used in schemes and structures designed to obscure beneficial ownership"
+        },
+        {
+          "page": 140,
+          "printed_folio": "138",
+          "paragraph": null,
+          "quote": "A network of 42 shell companies with different lines of business was dismantled, with companies located in Mexico and others abroad."
+        }
+      ]
+    },
+    {
+      "family": "network",
+      "typology_id": "PAT003",
+      "label": "Layered Ownership",
+      "emergent": false,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 28,
+          "printed_folio": "26",
+          "paragraph": null,
+          "quote": "Adding numerous layers of ownership between an asset and the beneficial owner in different jurisdictions, and using different types of legal structures, can prevent detection and frustrate investigations."
+        },
+        {
+          "page": 64,
+          "printed_folio": "62",
+          "paragraph": null,
+          "quote": "often a chain of companies was established, with one company the shareholder of another, which was the shareholder of another, which added complexity to the structure, and further removed the beneficial owner from the assets."
+        }
+      ]
+    },
+    {
+      "family": "network",
+      "typology_id": "PAT010",
+      "label": "Hidden Controller",
+      "emergent": false,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 8,
+          "printed_folio": "6",
+          "paragraph": null,
+          "quote": "The role of the nominee, in many cases, is to protect or conceal the identity of the beneficial owner and controller of a company or asset."
+        },
+        {
+          "page": 85,
+          "printed_folio": "83",
+          "paragraph": null,
+          "quote": "This effectively disguises the beneficial owner of the account and allows the controller to circumvent CDD obligations altogether."
+        }
+      ]
+    },
+    {
+      "family": "network",
+      "typology_id": "PAT005",
+      "label": "Common Address",
+      "emergent": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 181,
+          "printed_folio": "179",
+          "paragraph": null,
+          "quote": "large numbers of shell companies, particularly those with foreign beneficial owners, will be registered to the same address and telephone number."
+        },
+        {
+          "page": 42,
+          "printed_folio": "40",
+          "paragraph": null,
+          "quote": "The address listed on the companies’ register was the same virtual office in Auckland as the TCSP."
+        }
+      ]
+    },
+    {
+      "family": "network",
+      "typology_id": "PAT001",
+      "label": "Shared Director",
+      "emergent": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 39,
+          "printed_folio": "37",
+          "paragraph": null,
+          "quote": "or by creating false links between companies that share nominees."
+        },
+        {
+          "page": 42,
+          "printed_folio": "40",
+          "paragraph": null,
+          "quote": "using the same nominee director, nominee shareholder and virtual office address as the shell company."
+        }
+      ]
+    },
+    {
+      "family": "network",
+      "typology_id": "PAT002",
+      "label": "Shared Beneficial Owner",
+      "emergent": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 45,
+          "printed_folio": "43",
+          "paragraph": null,
+          "quote": "the scheme serves the purpose of disguising the fact that the lender and borrower are beneficially owned by the same natural person."
+        },
+        {
+          "page": 188,
+          "printed_folio": "186",
+          "paragraph": null,
+          "quote": "involves two legal persons with similar or identical directors, shareholders, or beneficial owners"
+        }
+      ]
+    },
+    {
+      "family": "network",
+      "typology_id": "PAT009",
+      "label": "Related Party Trading",
+      "emergent": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 81,
+          "printed_folio": "79",
+          "paragraph": null,
+          "quote": "The two companies traded with each other exclusively and did not have any other source of income."
+        },
+        {
+          "page": 187,
+          "printed_folio": "185",
+          "paragraph": null,
+          "quote": "is occurring between two or more parties that are connected without an apparent business or trade rationale"
+        }
+      ]
+    },
+    {
+      "family": "correspondent_banking",
+      "typology_id": "BA004",
+      "label": "Circular Funds Flow",
+      "emergent": false,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 45,
+          "printed_folio": "43",
+          "paragraph": null,
+          "quote": "principally involves money being sent to companies which are owned or controlled by, or on behalf of, the same individual, and returned in the guise of a loan."
+        },
+        {
+          "page": 72,
+          "printed_folio": "70",
+          "paragraph": null,
+          "quote": "This “round robin” scheme aimed to make funds movements appear as payments to other parties while, in reality, the funds ultimately returned to the original beneficiary."
+        }
+      ]
+    },
+    {
+      "family": "correspondent_banking",
+      "typology_id": "BA008",
+      "label": "Layering",
+      "emergent": false,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 43,
+          "printed_folio": "41",
+          "paragraph": null,
+          "quote": "channelled funds to a shadow financial scheme consisting of multiple layers of shell companies. The funds were finally withdrawn in cash."
+        },
+        {
+          "page": 43,
+          "printed_folio": "41",
+          "paragraph": null,
+          "quote": "indicating a co-ordinated layering process being undertaken."
+        }
+      ]
+    },
+    {
+      "family": "correspondent_banking",
+      "typology_id": "BA007",
+      "label": "Cash Intensive Activity",
+      "emergent": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 32,
+          "printed_folio": "30",
+          "paragraph": null,
+          "quote": "the most common form of front company is one that operates in the customer service industry (such as a restaurant, night club, or salon) as these businesses commonly handle cash."
+        },
+        {
+          "page": 32,
+          "printed_folio": "30",
+          "paragraph": null,
+          "quote": "often by disguising the illegitimate funds as cash sales made during the course of business."
+        }
+      ]
+    },
+    {
+      "family": "correspondent_banking",
+      "typology_id": "BA005",
+      "label": "Rapid Movement",
+      "emergent": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 35,
+          "printed_folio": "33",
+          "paragraph": null,
+          "quote": "several accounts were opened in different countries for companies incorporated in foreign jurisdictions, enabling rapid movement of funds over numerous frontiers"
+        },
+        {
+          "page": 141,
+          "printed_folio": "139",
+          "paragraph": null,
+          "quote": "The funds were generally withdrawn in less than 48 hours after deposit."
+        }
+      ]
+    },
+    {
+      "family": "correspondent_banking",
+      "typology_id": "BA003",
+      "label": "Mule Accounts",
+      "emergent": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 85,
+          "printed_folio": "83",
+          "paragraph": null,
+          "quote": "criminals will often coerce “straw men” to establish bank accounts for use by the criminal at a later time."
+        },
+        {
+          "page": 167,
+          "printed_folio": "165",
+          "paragraph": null,
+          "quote": "The straw men are paid a certain amount of money for the use of their accounts. The intermediary accounts are changed constantly."
+        }
+      ]
+    },
+    {
+      "family": "tbml",
+      "typology_id": "TBML004",
+      "label": "Phantom Shipping",
+      "emergent": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 44,
+          "printed_folio": "42",
+          "paragraph": null,
+          "quote": "The use of false loans and invoices to fraudulently disguise the beneficial ownership of a transaction is the most common"
+        },
+        {
+          "page": 79,
+          "printed_folio": "77",
+          "paragraph": null,
+          "quote": "including those that do not result in the actual movement of goods, or which purport to involve the provision and/or acquisition of services to or from other international businesses."
+        }
+      ]
+    },
+    {
+      "family": "tbml",
+      "typology_id": "TBML001",
+      "label": "Over Invoicing",
+      "emergent": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 66,
+          "printed_folio": "64",
+          "paragraph": null,
+          "quote": "The managers approved inflated invoices for maintenance work to be carried out by the construction companies"
+        },
+        {
+          "page": 70,
+          "printed_folio": "68",
+          "paragraph": null,
+          "quote": "the defendant altered invoices directed to one of the entities by inflating the cost of the work listed on the original invoices"
+        }
+      ]
+    },
+    {
+      "family": "tbml",
+      "typology_id": "TBML008",
+      "label": "Third Party Payment Abuse",
+      "emergent": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 42,
+          "printed_folio": "40",
+          "paragraph": null,
+          "quote": "The majority of transactions were payments being made on behalf of Vietnamese entities for imported goods"
+        },
+        {
+          "page": 152,
+          "printed_folio": "150",
+          "paragraph": null,
+          "quote": "However, the cash flow goes through a Panamanian entity with a bank account in Latvia."
+        }
+      ]
+    },
+    {
+      "family": "tbml",
+      "typology_id": "TBML009",
+      "label": "Shell Company Trading",
+      "emergent": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 81,
+          "printed_folio": "79",
+          "paragraph": null,
+          "quote": "The suspects used a TCSP to register and operate two international shell companies (Company A and Company B) to create the false appearance that the revenues from their international trading did not belong to the local Israeli company which they controlled"
+        },
+        {
+          "page": 42,
+          "printed_folio": "40",
+          "paragraph": null,
+          "quote": "Trade transactions were conducted with several Ukrainian companies"
+        }
+      ]
+    },
+    {
+      "family": "capital_markets",
+      "typology_id": "CM002",
+      "label": "Market Manipulation",
+      "emergent": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 120,
+          "printed_folio": "118",
+          "paragraph": null,
+          "quote": "who manipulated the stock price by making misleading representations and/or omissions."
+        },
+        {
+          "page": 170,
+          "printed_folio": "168",
+          "paragraph": null,
+          "quote": "1) fraudulent stock promotion and price manipulation"
+        }
+      ]
+    },
+    {
+      "family": "sanctions",
+      "typology_id": "SAN004",
+      "label": "Front Companies",
+      "emergent": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 34,
+          "printed_folio": "32",
+          "paragraph": null,
+          "quote": "U.S. authorities identified front companies used to conceal the ownership of certain U.S. assets by Bank Melli, which was previously designated by US authorities"
+        },
+        {
+          "page": 172,
+          "printed_folio": "170",
+          "paragraph": null,
+          "quote": "OFAC designated shell companies tied to the straw man that were used to hold real estate."
+        }
+      ]
+    },
+    {
+      "family": "sanctions",
+      "typology_id": "SAN001",
+      "label": "Ownership Evasion",
+      "emergent": false,
+      "confidence": "low",
+      "citations": [
+        {
+          "page": 138,
+          "printed_folio": "136",
+          "paragraph": null,
+          "quote": "the designated individual was the holder of assets and economic resources in his own name or otherwise available through corporate vehicles that had been under freezing orders since 2014."
+        }
+      ]
+    },
+    {
+      "family": "sanctions",
+      "typology_id": "SAN008",
+      "label": "High Risk Jurisdictions",
+      "emergent": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 81,
+          "printed_folio": "79",
+          "paragraph": null,
+          "quote": "FIUs, law enforcement, and other competent authorities regularly identify criminals using legal persons and bank accounts established in low-tax jurisdictions."
+        },
+        {
+          "page": 79,
+          "printed_folio": "77",
+          "paragraph": null,
+          "quote": "criminals will often establish legal persons and bank accounts in cities that are considered to be major regional and global trade and financial centres."
+        }
+      ]
+    },
+    {
+      "family": "network",
+      "typology_id": null,
+      "label": "Formal and informal nominee directors and shareholders (straw men, sold or stolen identities)",
+      "emergent": true,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 8,
+          "printed_folio": "6",
+          "paragraph": null,
+          "quote": "Nominee directors and shareholders, particularly informal nominees (or “straw men”), are a key vulnerability, and were identified in a large majority of case studies assessed for this report."
+        },
+        {
+          "page": 41,
+          "printed_folio": "39",
+          "paragraph": null,
+          "quote": "A related phenomenon reported by some law enforcement agencies is the use of stolen identities to establish legal persons."
+        }
+      ]
+    },
+    {
+      "family": "network",
+      "typology_id": null,
+      "label": "Professional intermediary facilitation by lawyers, accountants and TCSPs",
+      "emergent": true,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 8,
+          "printed_folio": "6",
+          "paragraph": null,
+          "quote": "The use of specialists and professional intermediaries is a key feature of schemes designed to conceal beneficial ownership, particularly in cases where the proceeds of crime are significant."
+        },
+        {
+          "page": 51,
+          "printed_folio": "49",
+          "paragraph": null,
+          "quote": "Approximately one-third of all cases were assessed as involving a complicit professional intermediary."
+        }
+      ]
+    },
+    {
+      "family": "correspondent_banking",
+      "typology_id": null,
+      "label": "False loans (loan-back) disguising the return of own funds as third-party lending",
+      "emergent": true,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 45,
+          "printed_folio": "43",
+          "paragraph": null,
+          "quote": "they are returned to the original company/individual, or a close family relation (commonly a spouse or child) or associate, in the form of a private loan."
+        },
+        {
+          "page": 73,
+          "printed_folio": "71",
+          "paragraph": null,
+          "quote": "false documents were created purporting to be international loan agreements with a foreign lender, which are not assessed as income and have no tax liability."
+        }
+      ]
+    },
+    {
+      "family": "network",
+      "typology_id": null,
+      "label": "Trusts and legal arrangements interposed to separate legal from beneficial ownership",
+      "emergent": true,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 35,
+          "printed_folio": "33",
+          "paragraph": null,
+          "quote": "In a trust, the legal title and control of an asset are separated from the equitable interests in the asset."
+        },
+        {
+          "page": 36,
+          "printed_folio": "34",
+          "paragraph": null,
+          "quote": "trusts appear to enter a company’s shareholder register in place of the beneficial owner, thereby disguising the beneficial owner of the shares."
+        }
+      ]
+    },
+    {
+      "family": "network",
+      "typology_id": null,
+      "label": "Bearer shares and bearer share warrants",
+      "emergent": true,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 38,
+          "printed_folio": "36",
+          "paragraph": null,
+          "quote": "Ownership and control of bearer shares can be exchanged anonymously between parties by way of physical exchange alone, as no record of the exchange needs to be documented or reported."
+        },
+        {
+          "page": 164,
+          "printed_folio": "162",
+          "paragraph": null,
+          "quote": "hid stolen bearer shares in accounts opened in the name of offshore companies."
+        }
+      ]
+    },
+    {
+      "family": "network",
+      "typology_id": null,
+      "label": "Shelf companies sold with pre-established bank accounts and nominee directors",
+      "emergent": true,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 31,
+          "printed_folio": "29",
+          "paragraph": null,
+          "quote": "some shelf companies may already have established customer relationships with financial institutions, facilitating access to the international financial system."
+        },
+        {
+          "page": 62,
+          "printed_folio": "60",
+          "paragraph": null,
+          "quote": "many TCSPs will establish bank accounts registered to the shelf company, which are retained by the shelf company following its sale."
+        }
+      ]
+    },
+    {
+      "family": "network",
+      "typology_id": null,
+      "label": "Professional trust, client and escrow accounts used to place and pass through funds",
+      "emergent": true,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 65,
+          "printed_folio": "63",
+          "paragraph": null,
+          "quote": "as it places the burden of integrating the cash into the regulated finance sector on the legal professional (via the law firm’s trust or client account)."
+        },
+        {
+          "page": 66,
+          "printed_folio": "64",
+          "paragraph": null,
+          "quote": "laundering more than USD 250 million in profits through unidentifiable debit cards and attorney escrow accounts."
+        }
+      ]
+    },
+    {
+      "family": "other",
+      "typology_id": null,
+      "label": "Real estate acquired through nominees, companies or trusts to hold illicit wealth",
+      "emergent": true,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 67,
+          "printed_folio": "65",
+          "paragraph": null,
+          "quote": "purchase of assets through intermediaries, such as companies, trusts, family members, associates, or other complicit third parties"
+        },
+        {
+          "page": 67,
+          "printed_folio": "65",
+          "paragraph": null,
+          "quote": "Approximately one- third of the case studies analysed for this report involved the acquisition of real estate, and most of these cases involved the use of a professional intermediary to execute the purchase."
+        }
+      ]
+    }
+  ],
+  "actors": [
+    {
+      "name": "Bank Melli",
+      "actor_type": "organisation",
+      "aliases": [],
+      "jurisdiction": "IR",
+      "role": "Iranian bank designated for financing Iran's nuclear and ballistic missile programme; used front companies to conceal ownership of US assets including a Manhattan office tower",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 34,
+          "printed_folio": "32",
+          "paragraph": null,
+          "quote": "U.S. authorities identified front companies used to conceal the ownership of certain U.S. assets by Bank Melli, which was previously designated by US authorities"
+        }
+      ]
+    },
+    {
+      "name": "Alavi Foundation",
+      "actor_type": "organisation",
+      "aliases": [],
+      "jurisdiction": "US",
+      "role": "Sixty per cent owner of 650 5th Avenue; provided services to the Iranian government, including transferring funds from the office tower to Bank Melli",
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 34,
+          "printed_folio": "32",
+          "paragraph": null,
+          "quote": "The ownership of the office tower was split between Bank Melli (40%) and the Alavi Foundation (60%), which provided services to the Iranian government"
+        }
+      ]
+    },
+    {
+      "name": "Sinaloa cartel",
+      "actor_type": "network",
+      "aliases": [
+        "Sinaloa drug cartel"
+      ],
+      "jurisdiction": "MX",
+      "role": "Mexican drug cartel for which four New Zealand shell companies registered by a Vanuatu-based TCSP laundered USD 40 million, per news reports",
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 42,
+          "printed_folio": "40",
+          "paragraph": null,
+          "quote": "News reports indicated that all four shell companies had been involved in laundering USD 40 million for the Sinaloa drug cartel based in Mexico."
+        }
+      ]
+    },
+    {
+      "name": "Camorra-linked organised crime group",
+      "actor_type": "network",
+      "aliases": [
+        "Camorra"
+      ],
+      "jurisdiction": "IT",
+      "role": "Drug-transport group moving funds through company and foundation accounts via middlemen, with trade-based laundering through companies, vehicles and jewellery",
+      "confidence": "low",
+      "citations": [
+        {
+          "page": 128,
+          "printed_folio": "126",
+          "paragraph": null,
+          "quote": "An organised crime group linked to the “Camorra” was involved in the transport of large amounts of drugs to Italy."
+        }
+      ]
+    },
+    {
+      "name": "Professional intermediaries (lawyers, accountants, TCSPs)",
+      "actor_type": "category",
+      "aliases": [
+        "gatekeepers",
+        "DNFBPs",
+        "TCSPs"
+      ],
+      "jurisdiction": null,
+      "role": "Establish and manage legal persons, arrangements and bank accounts for criminal clients; roughly half complicit, the rest unwitting or negligent; accountants most often the scheme designer",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 44,
+          "printed_folio": "42",
+          "paragraph": null,
+          "quote": "The use of specialists and professional intermediaries, including lawyers, accountants, and TCSPs, is a key feature of the money laundering and broader organised crime environment."
+        },
+        {
+          "page": 9,
+          "printed_folio": "7",
+          "paragraph": null,
+          "quote": "Accounting professionals represented the highest proportion of scheme designers and promoters in the case studies"
+        }
+      ]
+    },
+    {
+      "name": "Professional money launderers (business finders)",
+      "actor_type": "category",
+      "aliases": [
+        "business finders"
+      ],
+      "jurisdiction": null,
+      "role": "Unregulated intermediaries who source professionals to build legal structures for criminal clients; about 20% of cases",
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 59,
+          "printed_folio": "57",
+          "paragraph": null,
+          "quote": "professional money laundering facilitators whose role in the establishment of legal structures is specifically designed to facilitate criminality."
+        }
+      ]
+    },
+    {
+      "name": "Politically exposed persons and corrupt public officials",
+      "actor_type": "category",
+      "aliases": [
+        "PEPs"
+      ],
+      "jurisdiction": null,
+      "role": "Officials laundering embezzled funds and bribes through family-owned companies, foreign structures and real estate (cases from Russia, Ecuador, Egypt, Peru, Honduras, Ukraine)",
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 30,
+          "printed_folio": "28",
+          "paragraph": null,
+          "quote": "Company R, a Delaware corporation, was owned and managed by the Russian wife of the suspect, a state official."
+        },
+        {
+          "page": 172,
+          "printed_folio": "170",
+          "paragraph": null,
+          "quote": "designated a foreign PEP under the Foreign Narcotics Kingpin Designation Act for playing a significant role in international narcotics trafficking, with a straw man also designated"
+        }
+      ]
+    },
+    {
+      "name": "Organised crime groups",
+      "actor_type": "category",
+      "aliases": [
+        "OCGs"
+      ],
+      "jurisdiction": null,
+      "role": "Drug syndicates and other groups using shell-company networks, straw men and complicit facilitators, sometimes renting an existing laundering network ad hoc",
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 128,
+          "printed_folio": "126",
+          "paragraph": null,
+          "quote": "A variety of OCGs used this network, on some ad -hoc basis for specific periods of time."
+        }
+      ]
+    }
+  ],
+  "indicators": [],
+  "suggested_desks": [
+    "fiu_liaison",
+    "general_intel"
+  ],
+  "overall_confidence": "high",
+  "extraction_notes": "Golden label. Printed folio is PDF page minus 2. Not sanctions-framed, so network twins used: PAT003 rather than SAN009; SAN001/SAN004 kept only for the designated-party cases (48, 99, 105) at low/medium. FND003 not labelled: a foundation capability, not a behaviour, though Annex D is its doctrine. TBML004 is the nearest id for false invoices for services never rendered; noted as an imperfect fit. Dropped as single-mention: PAT006 (IP/email nexus, Annex D), BA001 (case 90), TBML002U (case 73), TBML003 (case 67), CM007 (subsumed by CM002), and 'declaring numerous beneficiaries' (case 38). Mossack Fonseca and Appleby are named only as leak sources and are not actors. Jurisdictions are every country where a case was reported or an entity or account sat; Europol cases carry no code. Annex B (supervision survey) and Annex E (red flags) hold no typology beyond those cited."
+}

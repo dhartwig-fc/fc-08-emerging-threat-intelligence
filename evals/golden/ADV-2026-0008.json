@@ -1,0 +1,750 @@
+{
+  "schema_version": "1.3.0",
+  "advisory_id": "ADV-2026-0008",
+  "source": {
+    "source_type": "fatf",
+    "publisher": "FATF",
+    "title": "Investigating Professional Money Laundering, Underground Banking, and the Use of Hawala and Other Similar Service Providers",
+    "published_on": "2026-09-03",
+    "published_on_precision": "day",
+    "url": "https://www.fatf-gafi.org/content/dam/fatf-gafi/reports/pml-underground-banking-hawala-fatf-report-2026.pdf.coredownload.pdf",
+    "document_sha256": "bba97bfa9c50143d069a2bf3cbde2d516782e1b815110268869526786d5c821d",
+    "page_count": 76
+  },
+  "summary": "GOLDEN LABEL, hand-drafted against the PDF. FATF typologies report, from a 46-jurisdiction survey, on how professional money launderers misuse hawala, underground banking and similar providers. Its central finding is an updated five-way typology of how operators settle net balances: bilateral offsetting, triangular or network settlement through third jurisdictions, settlement through value (cash couriers, over- and under-invoicing, phantom trade, gold and luxury goods, BMPE-style three-way exchange), formal-channel settlement via shell companies, mules, structured deposits, cuckoo smurfing and crowdfunding narratives, and digital settlement in stablecoins. Global trends are digitalisation (encrypted messaging, hawala apps, AI-driven routing), professionalisation with enablers, and deep integration with banks, PSPs, vIBANs, prepaid cards and mobile money; regional patterns cover mobile-money hawala in Africa and Asia, VA-plus-gold hybrids in the Middle East, BMPE in Latin America, Chinese-speaking laundering networks and emerging settlement hubs in Asia and the Middle East. Sections 2 and 3 cover challenges and good practice and carry no new typologies beyond the case boxes.",
+  "jurisdictions": [
+    "NL",
+    "BE",
+    "ES",
+    "MA",
+    "AE",
+    "IN",
+    "DE",
+    "TR",
+    "JP",
+    "IT",
+    "OM",
+    "PK",
+    "CN",
+    "GB",
+    "VE",
+    "CW",
+    "AF",
+    "NG",
+    "SY",
+    "GH",
+    "BJ",
+    "CI"
+  ],
+  "typologies": [
+    {
+      "family": "tbml",
+      "typology_id": "TBML002U",
+      "label": "Under Invoicing",
+      "emergent": false,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 26,
+          "printed_folio": "24",
+          "paragraph": null,
+          "quote": "Trading entities imported genuine goods at deliberately understated values, leaving an undisclosed balance payable"
+        },
+        {
+          "page": 70,
+          "printed_folio": "68",
+          "paragraph": null,
+          "quote": "while traders benefited from off-book payments and the undervaluation of imported goods."
+        }
+      ]
+    },
+    {
+      "family": "tbml",
+      "typology_id": "TBML001",
+      "label": "Over Invoicing",
+      "emergent": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 25,
+          "printed_folio": "23",
+          "paragraph": null,
+          "quote": "In trade- based settlement schemes, underground bankers or HOSSPs use import–export front companies to manipulate invoices—through over- or under-invoicing and falsified cargo descriptions"
+        },
+        {
+          "page": 41,
+          "printed_folio": "39",
+          "paragraph": null,
+          "quote": "Use of import/export fronts and wholesale trading structures to balance accounts through over - or under-invoicing, falsified cargo descriptions and commercial offsets;"
+        }
+      ]
+    },
+    {
+      "family": "tbml",
+      "typology_id": "TBML004",
+      "label": "Phantom Shipping",
+      "emergent": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 39,
+          "printed_folio": "37",
+          "paragraph": null,
+          "quote": "False invoices for goods such as pharmaceuticals and clothing were used to simulate legitimate purchases, although no goods were delivered."
+        },
+        {
+          "page": 63,
+          "printed_folio": "61",
+          "paragraph": null,
+          "quote": "The settlement model evolved from courier -based cash smuggling to non -physical mechanisms, including fictitious t rade transactions, multi -jurisdictional financial triangulation, and internal offsetting."
+        }
+      ]
+    },
+    {
+      "family": "tbml",
+      "typology_id": "TBML006",
+      "label": "Circular Trade",
+      "emergent": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 26,
+          "printed_folio": "24",
+          "paragraph": null,
+          "quote": "Goods were exported to related entities in a third jurisdiction, where payment was deliberately withheld on the basis of fictitious commercial disputes, before the goods were re -exported to entities controlled by the same network."
+        }
+      ]
+    },
+    {
+      "family": "tbml",
+      "typology_id": "TBML008",
+      "label": "Third Party Payment Abuse",
+      "emergent": false,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 24,
+          "printed_folio": "22",
+          "paragraph": null,
+          "quote": "A related manifestation involves clearing via third -party transfers i.e. the settlement of balances through unconnected third parties"
+        },
+        {
+          "page": 25,
+          "printed_folio": "23",
+          "paragraph": null,
+          "quote": "a distinction exists between third-party payments—where the exporter is paid by an entity other than the invoiced customer, often controlled by the PML network—and TBML itself"
+        }
+      ]
+    },
+    {
+      "family": "tbml",
+      "typology_id": "TBML009",
+      "label": "Shell Company Trading",
+      "emergent": false,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 26,
+          "printed_folio": "24",
+          "paragraph": null,
+          "quote": "In March 2022, Indian authorities identified a transnational PML scheme that used shell companies and trade transactions to transfer value across jurisdictions."
+        },
+        {
+          "page": 26,
+          "printed_folio": "24",
+          "paragraph": null,
+          "quote": "The companies were incorporated through nominees, often using stolen or forged Know your customer  (KYC) documents, and had limited or no genuine business activity."
+        }
+      ]
+    },
+    {
+      "family": "correspondent_banking",
+      "typology_id": "BA001",
+      "label": "Structuring",
+      "emergent": false,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 26,
+          "printed_folio": "24",
+          "paragraph": null,
+          "quote": "Third party money mules are commonly used to fragment large-sum criminal cash into multiple small deposits and transfer them to designated accounts, avoiding the AML monitoring thresholds of FIs."
+        },
+        {
+          "page": 41,
+          "printed_folio": "39",
+          "paragraph": null,
+          "quote": "Money mule networks, including students or temporary residents abroad, used to fragment deposits and reduce suspicion;"
+        }
+      ]
+    },
+    {
+      "family": "correspondent_banking",
+      "typology_id": "BA003",
+      "label": "Mule Accounts",
+      "emergent": false,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 28,
+          "printed_folio": "26",
+          "paragraph": null,
+          "quote": "Mule accounts, including accounts held by young persons or migrants, are used across banks, payment institutions, and VASPs to receive and move funds."
+        },
+        {
+          "page": 71,
+          "printed_folio": "69",
+          "paragraph": null,
+          "quote": "The schemes were supported by mule accounts, accounts held in false or third -party names, unregistered VA exchange activity"
+        }
+      ]
+    },
+    {
+      "family": "correspondent_banking",
+      "typology_id": "BA002",
+      "label": "Funnel Accounts",
+      "emergent": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 32,
+          "printed_folio": "30",
+          "paragraph": null,
+          "quote": "Multiple ‘alias accounts’  may route incoming payments to a central master account, creating a nesting effect and shielding illicit activity behind regulated intermediation."
+        },
+        {
+          "page": 71,
+          "printed_folio": "69",
+          "paragraph": null,
+          "quote": "Corporate vehicles and cover accounts were also used to channel funds through the banking system, often showing many- to-one transfers and cash activity inconsistent with the stated customer profile."
+        }
+      ]
+    },
+    {
+      "family": "correspondent_banking",
+      "typology_id": "BA005",
+      "label": "Rapid Movement",
+      "emergent": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 29,
+          "printed_folio": "27",
+          "paragraph": null,
+          "quote": "this threshold -triggered “sweeping” helps move funds rapidly through multiple accounts, reducing the time proceeds remain in any single account and limiting manual intervention by operators."
+        },
+        {
+          "page": 19,
+          "printed_folio": "17",
+          "paragraph": null,
+          "quote": "Professional money launderers leverage these characteristics to consolid ate, convert, and move illicit proceeds rapidly, facilitating swift layering and distribution while bypassing regulated channels."
+        }
+      ]
+    },
+    {
+      "family": "correspondent_banking",
+      "typology_id": "BA007",
+      "label": "Cash Intensive Activity",
+      "emergent": false,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 17,
+          "printed_folio": "15",
+          "paragraph": null,
+          "quote": "jurisdictions report that underground banking systems and HOSSPs operate ancillary businesses, most commonly import/export and trading companies, followed by professional service firms"
+        },
+        {
+          "page": 27,
+          "printed_folio": "25",
+          "paragraph": null,
+          "quote": "Cash- intensive businesses, such as kiosks, hookah bars, mobile phone shops or souvenir shops, provided cover for cash deposits, third-party payments, and mixed funding sources."
+        },
+        {
+          "page": 63,
+          "printed_folio": "61",
+          "paragraph": null,
+          "quote": "Criminal cash was collected through front businesses in the import -export sector, particularly clothing and fashion, which acted as covert cash collection hubs despite limited genuine activity."
+        }
+      ]
+    },
+    {
+      "family": "correspondent_banking",
+      "typology_id": "BA008",
+      "label": "Layering",
+      "emergent": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 26,
+          "printed_folio": "24",
+          "paragraph": null,
+          "quote": "Settlement may be disguised as legitimate commercial activity and facilitated through shell companies, money-mule accounts, virtual IBANs (vIBANs), or corporate structures. Wire transfers, batch payments, and layered transactions are common features."
+        },
+        {
+          "page": 30,
+          "printed_folio": "28",
+          "paragraph": null,
+          "quote": "More complex layering: Digital tools enable rapid combination of multiple channels (PSPs, VAs, mule accounts, trade), increasing transaction complexity and hindering reconstruction."
+        }
+      ]
+    },
+    {
+      "family": "correspondent_banking",
+      "typology_id": "BA009",
+      "label": "Transaction Laundering",
+      "emergent": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 32,
+          "printed_folio": "30",
+          "paragraph": null,
+          "quote": "Criminals may deploy terminals through complicit or fictitious businesses to process sham transactions, introducing illicit funds into regulated systems under the guise of legitimate revenue."
+        }
+      ]
+    },
+    {
+      "family": "network",
+      "typology_id": "PAT007",
+      "label": "Shell Company Network",
+      "emergent": false,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 10,
+          "printed_folio": "8",
+          "paragraph": null,
+          "quote": "Professional money launderers typically establish and maintain enduring ML infrastructure, including shell companies and other legal persons or arrangements, and rely on facilitators and multiple layers of intermediaries"
+        },
+        {
+          "page": 51,
+          "printed_folio": "49",
+          "paragraph": null,
+          "quote": "rapid freezing, seizure, and potential confiscation of funds held by short -lived shell companies suspected of being used for ML"
+        }
+      ]
+    },
+    {
+      "family": "network",
+      "typology_id": "PAT010",
+      "label": "Hidden Controller",
+      "emergent": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 71,
+          "printed_folio": "69",
+          "paragraph": null,
+          "quote": "criminal cash was introduced into the financial system through business bank accounts linked to shell or sham companies, often controlled by nominees."
+        },
+        {
+          "page": 31,
+          "printed_folio": "29",
+          "paragraph": null,
+          "quote": "Networks often maintain multiple bank accounts, including those held by nominees or shell entities, and use tools such as vIBANs to facilitate rapid cross-border transfers."
+        }
+      ]
+    },
+    {
+      "family": "other",
+      "typology_id": null,
+      "label": "Hawala net settlement by compensation between counterpart operators",
+      "emergent": true,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 15,
+          "printed_folio": "13",
+          "paragraph": null,
+          "quote": "Instead, counterpart operators in different jurisdict ions settle obligations through internal book -entries and subsequent compensation, which may involve trade transactions, cash pooling, or alternative asset movements."
+        },
+        {
+          "page": 24,
+          "printed_folio": "22",
+          "paragraph": null,
+          "quote": "In its most basic form, settlement occurs through direct, bilateral offsetting of obligations between two service providers."
+        }
+      ]
+    },
+    {
+      "family": "other",
+      "typology_id": null,
+      "label": "Triangular or multi-node settlement through third jurisdictions",
+      "emergent": true,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 24,
+          "printed_folio": "22",
+          "paragraph": null,
+          "quote": "A core method in contemporary underground banking and HOSSPs involves multilateral compensation across a network of brokers , in which balances between HOSSPs are settled indirectly through third jurisdictions."
+        }
+      ]
+    },
+    {
+      "family": "other",
+      "typology_id": null,
+      "label": "Cash-courier and bulk-cash settlement between service providers",
+      "emergent": true,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 25,
+          "printed_folio": "23",
+          "paragraph": null,
+          "quote": "Cash couriers, namely individuals who physically transport cash or bearer negotiable instruments on behalf of others, often across borders, to rebalance positions between service providers;"
+        },
+        {
+          "page": 72,
+          "printed_folio": "70",
+          "paragraph": null,
+          "quote": "One scheme involved couriers transporting over GBP 130 million  (approximately USD 171 million) in cash to the UAE over a three-month period."
+        }
+      ]
+    },
+    {
+      "family": "other",
+      "typology_id": null,
+      "label": "Commodity and gold-backed settlement, including luxury-goods repurchase",
+      "emergent": true,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 38,
+          "printed_folio": "36",
+          "paragraph": null,
+          "quote": "gold functions both as a reserve asset underpinning VA settlement balances and as a physical medium used to reconcile outstanding obligations between HOSSPs"
+        },
+        {
+          "page": 41,
+          "printed_folio": "39",
+          "paragraph": null,
+          "quote": "Daigou-style luxury -goods repurchase networks, whereby criminal cash is converted into high-value goods purchased in Europe and resold in Asia;"
+        },
+        {
+          "page": 74,
+          "printed_folio": "72",
+          "paragraph": null,
+          "quote": "Nigerian funds were transferred to gold traders, who co-ordinated with counterparts in the United Kingdom to deliver equivalent cash to a nominee."
+        }
+      ]
+    },
+    {
+      "family": "crypto",
+      "typology_id": null,
+      "label": "Virtual-asset and stablecoin settlement between underground banking operators",
+      "emergent": true,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 27,
+          "printed_folio": "25",
+          "paragraph": null,
+          "quote": "Increasingly, obligations between HOSSPs are settled using digital value -transfer mechanisms , including VAs (particularly stablecoins to reduce price volatility), online PSPs, and digital banking platforms."
+        },
+        {
+          "page": 42,
+          "printed_folio": "40",
+          "paragraph": null,
+          "quote": "VA transfers were used to compensate the cash -providing branch, allowing the network to balance obligations without direct bank transfers."
+        }
+      ]
+    },
+    {
+      "family": "correspondent_banking",
+      "typology_id": null,
+      "label": "Cuckoo smurfing through unwitting legitimate remitters",
+      "emergent": true,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 27,
+          "printed_folio": "25",
+          "paragraph": null,
+          "quote": "‘cuckoo smurfing’ , a form of third -party payment whereby illicit cash is deposited into the bank account of an unsuspecting legitimate remitter. The remitter’s genuine outbound transfer is then used to settle obligations offshore"
+        }
+      ]
+    },
+    {
+      "family": "other",
+      "typology_id": null,
+      "label": "Black market peso exchange and three-way exchange exploiting capital controls",
+      "emergent": true,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 25,
+          "printed_folio": "23",
+          "paragraph": null,
+          "quote": "Three-way exchange and mirror -transaction models, in which illicit funds generated in one jurisdiction are exchanged for local funds from individuals seeking to transfer value overseas (e.g. to circumvent capital controls)."
+        },
+        {
+          "page": 39,
+          "printed_folio": "37",
+          "paragraph": null,
+          "quote": "BMPE mirrors underground banking and HOSSP systems by transferring value across borders without the physical movement of funds, relying instead on commercial trade flows to settle obligations."
+        },
+        {
+          "page": 41,
+          "printed_folio": "39",
+          "paragraph": null,
+          "quote": "Three-way exchange in which cartel- generated US dollars are sold to individuals seeking to circumvent capital controls."
+        }
+      ]
+    },
+    {
+      "family": "other",
+      "typology_id": null,
+      "label": "Digital hawala: encrypted-messaging co-ordination, hawala apps and AI-driven routing",
+      "emergent": true,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 28,
+          "printed_folio": "26",
+          "paragraph": null,
+          "quote": "“Digital hawala” broadly refers to the use of digital technologies to facilitate the co-ordination, execution, settlement, or concealment of informal value transfer."
+        },
+        {
+          "page": 29,
+          "printed_folio": "27",
+          "paragraph": null,
+          "quote": "Some jurisdictions report the use of AI -based tools to facilitate PML, including automated structuring of transactions, dynamic routing across mule accounts and payment platforms"
+        }
+      ]
+    },
+    {
+      "family": "other",
+      "typology_id": null,
+      "label": "Mobile-money integration with hawala for cash-in and cash-out",
+      "emergent": true,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 35,
+          "printed_folio": "33",
+          "paragraph": null,
+          "quote": "In most cases, mobile money is used by customers to cash in and cash out funds to and from underground banking operators and HOSSPs, with end users experiencing near -instant transfers through mobile wallets."
+        },
+        {
+          "page": 37,
+          "printed_folio": "35",
+          "paragraph": null,
+          "quote": "The hawaladars then sent screenshots evidencing payment through an e -wallet to a corresponding e -wallet maintained with a payment service provider in Jurisdiction A."
+        }
+      ]
+    },
+    {
+      "family": "terrorist_financing",
+      "typology_id": null,
+      "label": "Terrorist financing through hawala networks",
+      "emergent": true,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 33,
+          "printed_folio": "31",
+          "paragraph": null,
+          "quote": "HOSSPs remain a core TF method, particularly in high-risk contexts."
+        },
+        {
+          "page": 35,
+          "printed_folio": "33",
+          "paragraph": null,
+          "quote": "Türkiye identified a ‘digital hawala’ network used to finance members of the terrorist organisation Islamic State in Iraq and the Levant (ISIL)."
+        }
+      ]
+    }
+  ],
+  "actors": [
+    {
+      "name": "Professional money launderers",
+      "actor_type": "category",
+      "aliases": [
+        "PML networks",
+        "money laundering as a service"
+      ],
+      "jurisdiction": null,
+      "role": "Third-party launderers selling ML services to criminals for a fee or commission; the threat the report is about",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 10,
+          "printed_folio": "8",
+          "paragraph": null,
+          "quote": "refers to individuals, organisations or networks providing ML services to criminals in exchange for a commission, fee, or other profit."
+        }
+      ]
+    },
+    {
+      "name": "Hawaladars and underground bankers",
+      "actor_type": "category",
+      "aliases": [
+        "underground bankers",
+        "HOSSP operators"
+      ],
+      "jurisdiction": null,
+      "role": "Network brokers controlling cash pools and ledgers, usually behind legitimate ancillary businesses",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 16,
+          "printed_folio": "14",
+          "paragraph": null,
+          "quote": "Underground bankers/Hawaladars : Network brokers controlling cash pools and ledgers, frequently operating from legitimate ancillary businesses (e.g., travel agencies, money exchange shops, import/export firms, wholesalers)."
+        }
+      ]
+    },
+    {
+      "name": "Controllers and international controller networks",
+      "actor_type": "category",
+      "aliases": [
+        "money brokers",
+        "superfacilitators",
+        "ICNs",
+        "money laundering network controllers"
+      ],
+      "jurisdiction": null,
+      "role": "Trusted individuals who arrange collection of criminal proceeds and delivery of equivalent value, co-ordinating brokers, collectors and transmitters across jurisdictions",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 21,
+          "printed_folio": "19",
+          "paragraph": null,
+          "quote": "controllers—also referred to in some jurisdictions as ‘money brokers’ or ‘superfacilitators’—are trusted individuals who arrange the collection of criminal proceeds and the delivery of equivalent value to the intended destination."
+        }
+      ]
+    },
+    {
+      "name": "Cash couriers",
+      "actor_type": "category",
+      "aliases": [],
+      "jurisdiction": null,
+      "role": "Individuals physically transporting cash or bearer instruments across borders to rebalance positions between service providers",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 67,
+          "printed_folio": "65",
+          "paragraph": null,
+          "quote": "Individual who physically transports cash or bearer negotiable instruments on behalf of others, often across borders, to rebalance positions between service providers."
+        }
+      ]
+    },
+    {
+      "name": "Money mules",
+      "actor_type": "category",
+      "aliases": [
+        "third party money mules",
+        "money mule networks"
+      ],
+      "jurisdiction": null,
+      "role": "Persons moving criminal proceeds through their own accounts to fragment deposits and settle balances via formal channels",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 68,
+          "printed_folio": "66",
+          "paragraph": null,
+          "quote": "Person who transfers, moves, deposits, withdraws, or converts criminal proceeds on behalf of another person or criminal network, typically through their own financial accounts"
+        }
+      ]
+    },
+    {
+      "name": "Chinese-speaking money laundering networks",
+      "actor_type": "category",
+      "aliases": [
+        "Chinese money laundering organisations",
+        "Chinese underground banking networks"
+      ],
+      "jurisdiction": null,
+      "role": "High-capacity transnational PML networks with operational links to East Asia, running cash consolidation hubs and displacing BMPE brokers",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 40,
+          "printed_folio": "38",
+          "paragraph": null,
+          "quote": "Jurisdictions also identify a distinct and growing pattern involving PML networks with operational links to East Asia, including money launderers in these jurisdictions, facilitators based in the region and/or abroad"
+        },
+        {
+          "page": 32,
+          "printed_folio": "30",
+          "paragraph": null,
+          "quote": "Italian authorities have identified cases involving Chinese underground banking networks, where illicit proc eeds were transferred abroad through non -EU PSPs"
+        }
+      ]
+    },
+    {
+      "name": "Professional enablers",
+      "actor_type": "category",
+      "aliases": [
+        "professional service providers",
+        "professional intermediaries"
+      ],
+      "jurisdiction": null,
+      "role": "Lawyers, accountants, notaries, corporate formation agents and similar professionals facilitating PML schemes, knowingly or through wilful blindness",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 30,
+          "printed_folio": "28",
+          "paragraph": null,
+          "quote": "Jurisdictions also report increasing involvement of professional service providers—including lawyers, accountants, auditors, notaries, corporate formation agents, financial consultants, real estate agents"
+        },
+        {
+          "page": 49,
+          "printed_folio": "47",
+          "paragraph": null,
+          "quote": "Professional money launderers are diverse and often include legal professionals (such as lawyers and notaries), financial intermediaries (including accountants and financial advisers), and individuals operating informal networks."
+        }
+      ]
+    },
+    {
+      "name": "Islamic State in Iraq and the Levant",
+      "actor_type": "organisation",
+      "aliases": [
+        "ISIL"
+      ],
+      "jurisdiction": null,
+      "role": "Terrorist organisation financed through a digital hawala network in Türkiye using jeweller and mobile-phone-shop fronts",
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 35,
+          "printed_folio": "33",
+          "paragraph": null,
+          "quote": "A jeweller and two mobile phone shops were identified as fronts for hawala transactions."
+        }
+      ]
+    },
+    {
+      "name": "Transnational organised crime groups",
+      "actor_type": "category",
+      "aliases": [
+        "drug-trafficking organisations"
+      ],
+      "jurisdiction": null,
+      "role": "Primary clients of hawala-based PML, chiefly drug traffickers",
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 18,
+          "printed_folio": "16",
+          "paragraph": null,
+          "quote": "Across multiple jurisdictions, transnational organised crime groups remain the primary users of underground banking and HOSSPs for PML."
+        }
+      ]
+    }
+  ],
+  "indicators": [],
+  "suggested_desks": [
+    "correspondent_desk",
+    "trade_desk",
+    "fiu_liaison"
+  ],
+  "overall_confidence": "high",
+  "extraction_notes": "Golden label. Printed folio is PDF page minus 2 for pages 3-75. VA settlement is NOT labelled CMI010: the library entry is sanctions-scoped and the report frames VAs as PML settlement, so it is emergent under crypto. Front companies are not SAN004 (sanctions-scoped); they are labelled BA007 and TBML009. TBML001 kept at medium: over-invoicing is named in the settlement typology (p25, p41) but every worked case is under-invoicing. TBML005 false cargo descriptions, crowdfunding-as-settlement (Box 4), banknote-serial tokens and prepaid-card bridging are mentioned but not labelled (indicators or single boxes). vIBAN nesting is cited under BA002 rather than as its own emergent. Chinese-speaking networks carry no jurisdiction: the report calls them a linguistic/diaspora category with East Asia links. Operation names (Klaver, Karasu, Whitewall, Fei Ch'ien, Cymbal) and Box 29 panel operators are anonymised, not actors. Jurisdictions are case and hub locations; survey respondents and good-practice states (SE, FR, BD, LU, MY, CH, PT, ID, KE) are excluded."
+}

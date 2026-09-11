@@ -1,0 +1,578 @@
+{
+  "schema_version": "1.3.0",
+  "advisory_id": "ADV-2026-0001",
+  "source": {
+    "source_type": "fatf",
+    "publisher": "FATF / Egmont Group",
+    "title": "Trade-Based Money Laundering: Trends and Developments",
+    "published_on": "2020-12-01",
+    "published_on_precision": "month",
+    "url": "https://www.fatf-gafi.org/content/dam/fatf-gafi/reports/Trade-Based-Money-Laundering-Trends-and-Developments.pdf.coredownload.inline.pdf",
+    "document_sha256": "0969e49877a1937a7bc49ac02ab10a444adca2c2ff2c7803ee6a35adea9f6828",
+    "page_count": 66
+  },
+  "summary": "GOLDEN LABEL, hand-drafted against the PDF. Joint FATF and Egmont Group survey of trade-based money laundering trends since the 2006 study: the four common techniques (over- and under-invoicing, over- and under-shipment including phantom shipments, multiple invoicing, false description of goods), Black Market Peso Exchange and its offsetting variant, newer illicit cash integration methods (surrogate shopping networks, infiltration of legitimate supply chains that use no misrepresentation), third-party intermediaries settling invoices, shell and front companies, exploitation of open account trade and MVTS/hawala, and trade-based terrorist financing. Fifteen case studies from the US, Europe, Australia, New Zealand and Israel; the remainder is challenges, FIU analytics and public-private partnership practice.",
+  "jurisdictions": [
+    "US",
+    "DE",
+    "SG",
+    "ES",
+    "IT",
+    "CH",
+    "MA",
+    "NL",
+    "HK",
+    "CN",
+    "CO",
+    "FR",
+    "BE",
+    "AU",
+    "NZ",
+    "IL"
+  ],
+  "typologies": [
+    {
+      "family": "tbml",
+      "typology_id": "TBML001",
+      "label": "Over Invoicing",
+      "emergent": false,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 28,
+          "printed_folio": "26",
+          "paragraph": null,
+          "quote": "The key element of this technique is the misrepresentation of the price of the good or service, in order to transfer value. In this type of arrangement, the critical enabling aspect is that the importer and exporter are complicit in the misrepresentation."
+        },
+        {
+          "page": 44,
+          "printed_folio": "42",
+          "paragraph": null,
+          "quote": "in which criminals list a higher or lower price for the traded commodity compared to the usual market prices in an attempt to move additional value under the guise of the trade operation."
+        }
+      ]
+    },
+    {
+      "family": "tbml",
+      "typology_id": "TBML002U",
+      "label": "Under Invoicing",
+      "emergent": false,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 26,
+          "printed_folio": "24",
+          "paragraph": null,
+          "quote": "The undervaluation of exported devices exaggerated the illicit value being transferred offshore."
+        },
+        {
+          "page": 23,
+          "printed_folio": "21",
+          "paragraph": null,
+          "quote": "The OCGs were appropriately declaring the right price at the point of export but were declaring a considerably lower value at transhipment points."
+        }
+      ]
+    },
+    {
+      "family": "tbml",
+      "typology_id": "TBML003",
+      "label": "Multiple Invoicing",
+      "emergent": false,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 29,
+          "printed_folio": "27",
+          "paragraph": null,
+          "quote": "rather it centres on the reuse of existing documentation to justify multiple payments for the same shipment of goods or delivery of services. Criminals or terrorist financiers exploit this further by reusing these documents across multiple FIs, making it difficult for one institution to identify it."
+        }
+      ]
+    },
+    {
+      "family": "tbml",
+      "typology_id": "TBML004",
+      "label": "Phantom Shipping",
+      "emergent": false,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 29,
+          "printed_folio": "27",
+          "paragraph": null,
+          "quote": "this involves the misrepresentation of the quantity of goods or services, including ‘phantom shipments’ where no product is moved at all."
+        },
+        {
+          "page": 22,
+          "printed_folio": "20",
+          "paragraph": null,
+          "quote": "a criminal organisation may execute legitimate shipments of cosmetic goods, creating enough valid documentation to allow for subsequent phantom shipments and misuse of that previous documentation."
+        }
+      ]
+    },
+    {
+      "family": "tbml",
+      "typology_id": "TBML005",
+      "label": "False Description Of Goods",
+      "emergent": false,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 29,
+          "printed_folio": "27",
+          "paragraph": null,
+          "quote": "This involves the misrepresentation of the quality or type of a good or service, such as the shipment of a relatively inexpensive good, which is described as a more expensive item, or an entirely different item, to justify value movement."
+        },
+        {
+          "page": 34,
+          "printed_folio": "32",
+          "paragraph": null,
+          "quote": "these invoices were clearly fraudulent and depicted the transactions as payments for export of ‘ceramic tiles’ from the New Zealand company to a company in Eastern Europe."
+        }
+      ]
+    },
+    {
+      "family": "tbml",
+      "typology_id": "TBML008",
+      "label": "Third Party Payment Abuse",
+      "emergent": false,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 33,
+          "printed_folio": "31",
+          "paragraph": null,
+          "quote": "the OCG may pay for those goods by involving a previously unknown third-party (usually the company responsible for integrating criminal cash) into the transaction."
+        },
+        {
+          "page": 34,
+          "printed_folio": "32",
+          "paragraph": null,
+          "quote": "the company representatives could not explain why the payments were originating from shell company accounts, which had no known relation to the company actually receiving the exported goods."
+        },
+        {
+          "page": 53,
+          "printed_folio": "51",
+          "paragraph": null,
+          "quote": "a number of payments on behalf of sales partner A located in country X were made from various third -party accounts at banks in different countries."
+        }
+      ]
+    },
+    {
+      "family": "tbml",
+      "typology_id": "TBML009",
+      "label": "Shell Company Trading",
+      "emergent": false,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 27,
+          "printed_folio": "25",
+          "paragraph": null,
+          "quote": "do construct their TBML scheme around shell companies or involve them as part of the financial settlement process, anonymising the ultimate beneficial owner to maximum effect."
+        },
+        {
+          "page": 54,
+          "printed_folio": "52",
+          "paragraph": null,
+          "quote": "By determining with some certainty that an “international trading corporation” was nothing more than a complex set of shell companies, FIUs may be able to assume that the various trade transactions conducted between these “subsidiaries” are fictitious."
+        }
+      ]
+    },
+    {
+      "family": "network",
+      "typology_id": "PAT007",
+      "label": "Shell Company Network",
+      "emergent": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 43,
+          "printed_folio": "41",
+          "paragraph": null,
+          "quote": "TBML schemes can consist of a large number of front companies, with funds transmitted between several banks, meaning each of the involved FIs can see only a small part of the network."
+        },
+        {
+          "page": 60,
+          "printed_folio": "58",
+          "paragraph": null,
+          "quote": "may rely on myriad transactions and trade operations, and numerous frontmen and shell companies, whose only purpose may be to disguise the illicit nature of the transferred funds and confuse the authorities."
+        }
+      ]
+    },
+    {
+      "family": "network",
+      "typology_id": "PAT009",
+      "label": "Related Party Trading",
+      "emergent": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 44,
+          "printed_folio": "42",
+          "paragraph": null,
+          "quote": "Many TBML techniques require both the buyer and the seller to be complicit, sometimes meaning that the same person or a group of persons execute control over the different parties of a transaction."
+        },
+        {
+          "page": 54,
+          "printed_folio": "52",
+          "paragraph": null,
+          "quote": "the relationship between corporate networks, such as common representatives, overlapping ownership structures, identical registration addresses, and joint bank accounts."
+        }
+      ]
+    },
+    {
+      "family": "network",
+      "typology_id": "PAT002",
+      "label": "Shared Beneficial Owner",
+      "emergent": false,
+      "confidence": "low",
+      "citations": [
+        {
+          "page": 53,
+          "printed_folio": "51",
+          "paragraph": null,
+          "quote": "shared the same ultimate beneficial owner, a national of Country X. Third-party payments on behalf of B amounted to over EUR 30 mi llion."
+        }
+      ]
+    },
+    {
+      "family": "correspondent_banking",
+      "typology_id": "BA007",
+      "label": "Cash Intensive Activity",
+      "emergent": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 27,
+          "printed_folio": "25",
+          "paragraph": null,
+          "quote": "front companies offer convenient opportunities to integrate physical cash into a business and then exploit its banking relationships to move the cash across jurisdictions."
+        },
+        {
+          "page": 64,
+          "printed_folio": "62",
+          "paragraph": null,
+          "quote": "both public and private parties work together in combatting the cash integration variant of TBML in the automotive sector."
+        }
+      ]
+    },
+    {
+      "family": "correspondent_banking",
+      "typology_id": "BA001",
+      "label": "Structuring",
+      "emergent": false,
+      "confidence": "low",
+      "citations": [
+        {
+          "page": 29,
+          "printed_folio": "27",
+          "paragraph": null,
+          "quote": "or may place the cash into multiple bank accounts using structured deposits and then forward these funds to the suppliers via wire transfers."
+        },
+        {
+          "page": 21,
+          "printed_folio": "19",
+          "paragraph": null,
+          "quote": "German authorities noted significant cash payments, just under the due diligence threshold of EUR 10 000."
+        }
+      ]
+    },
+    {
+      "family": "tbml",
+      "typology_id": null,
+      "label": "Black Market Peso Exchange",
+      "emergent": true,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 29,
+          "printed_folio": "27",
+          "paragraph": null,
+          "quote": "Usually in Black Market Peso Exchange schemes, the broker takes receipt of the dollars from the drug cartel’s network of cash controllers and uses them to pay the US supplier."
+        },
+        {
+          "page": 30,
+          "printed_folio": "28",
+          "paragraph": null,
+          "quote": "The merchant exported roughly the equivalent value of consumer products to the importers in Colombia, who in turn arranged to pay for the products by delivering pesos to the money brokers in Colombia, who passed this to the drug trafficking organisation."
+        }
+      ]
+    },
+    {
+      "family": "tbml",
+      "typology_id": null,
+      "label": "Offsetting or compensation schemes between criminal groups",
+      "emergent": true,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 31,
+          "printed_folio": "29",
+          "paragraph": null,
+          "quote": "A variation of Black Market Peso Exchange is called offsetting or compensation , whereby OCGs or PMLs dispose of illicit cash by cooperating with OCGs or PMLs looking for cash."
+        },
+        {
+          "page": 32,
+          "printed_folio": "30",
+          "paragraph": null,
+          "quote": "These companies take receipt of criminal cash from other criminal networks, providing a veneer of legitimacy by invoicing for building maintenance services; the funds are then transferred to wholesalers in Asia."
+        }
+      ]
+    },
+    {
+      "family": "tbml",
+      "typology_id": null,
+      "label": "Surrogate shopping (Daigou) networks for illicit cash integration",
+      "emergent": true,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 33,
+          "printed_folio": "31",
+          "paragraph": null,
+          "quote": "whereby OCGs or PMLs provide local currency (the proceeds of crime) to these surrogate shoppers, who pay for desirable goods that are transported to another jurisdiction and passed to the OCG or PML."
+        },
+        {
+          "page": 33,
+          "printed_folio": "31",
+          "paragraph": null,
+          "quote": "students were making multiple purchases of portable electronics, such as smart phones and tablets. Their credit card balances were subsequently settled via electronic funds from companies suspected of laundering the proceeds of drug trafficking."
+        }
+      ]
+    },
+    {
+      "family": "tbml",
+      "typology_id": null,
+      "label": "Infiltration of legitimate supply chains without trade misrepresentation",
+      "emergent": true,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 33,
+          "printed_folio": "31",
+          "paragraph": null,
+          "quote": "an OCG or PML purchases a stake in a legitimate business, which may or may not be struggling financially, and continues using its supply chain as a method of integrating illicit cash into the financial system."
+        },
+        {
+          "page": 24,
+          "printed_folio": "22",
+          "paragraph": null,
+          "quote": "They do not use any of the common TBML techniques, instead they exploit these legitimate supply chains to move their criminal proceeds to different jurisdictions."
+        }
+      ]
+    },
+    {
+      "family": "tbml",
+      "typology_id": null,
+      "label": "Exploitation of MVTS and hawala for trade settlement",
+      "emergent": true,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 31,
+          "printed_folio": "29",
+          "paragraph": null,
+          "quote": "conspirators involved in a false invoicing TBML scheme have used MVTS to facilitate payment for the goods, rather than attempt payment via a bank"
+        },
+        {
+          "page": 35,
+          "printed_folio": "33",
+          "paragraph": null,
+          "quote": "a network of MVTS and hawala was used in order to arrange settlements for the trade of goods between importer s in Country A and exporter s in Country B."
+        }
+      ]
+    },
+    {
+      "family": "terrorist_financing",
+      "typology_id": null,
+      "label": "Trade-based terrorist financing",
+      "emergent": true,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 14,
+          "printed_folio": "12",
+          "paragraph": null,
+          "quote": "the report defines TBTF as “disguising the movement of value through the use of trade transactions in an attempt to finance terrorism , whether from legitimate or illegitimate sources”."
+        },
+        {
+          "page": 35,
+          "printed_folio": "33",
+          "paragraph": null,
+          "quote": "In this way, the terrorist organisation was able to transfer cash from country C to country A through the legitimate trade system by using commodity as currency."
+        }
+      ]
+    },
+    {
+      "family": "other",
+      "typology_id": null,
+      "label": "Services-based money laundering",
+      "emergent": true,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 37,
+          "printed_folio": "35",
+          "paragraph": null,
+          "quote": "SBML schemes rely on exploiting the trade in services or other intangibles to disguise and justify the movement of illicit proceeds."
+        }
+      ]
+    }
+  ],
+  "actors": [
+    {
+      "name": "Organised Criminal Groups",
+      "actor_type": "category",
+      "aliases": [
+        "OCGs"
+      ],
+      "jurisdiction": null,
+      "role": "Exploit trade supply chains to launder proceeds of drug trafficking, smuggling and tax evasion; own lower-value supply chains end to end",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 12,
+          "printed_folio": "10",
+          "paragraph": null,
+          "quote": "OCGs, PMLs and terrorist financiers will exploit any sector, commodity, or service where they perceive an opportunity."
+        },
+        {
+          "page": 22,
+          "printed_folio": "20",
+          "paragraph": null,
+          "quote": "Supply chains moving lower-value goods are most at risk to end-to end ownership by a criminal organisation or PML network."
+        }
+      ]
+    },
+    {
+      "name": "Professional Money Launderers",
+      "actor_type": "category",
+      "aliases": [
+        "PMLs",
+        "PML networks"
+      ],
+      "jurisdiction": null,
+      "role": "Specialist launderers taking receipt of OCG proceeds and moving them via TBML for a fee; TBML is one of their most preferred methods",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 14,
+          "printed_folio": "12",
+          "paragraph": null,
+          "quote": "These PMLs take receipt of the criminal proceeds on behalf of the OCG and transfer or convert those proceeds, including via TBML schemes"
+        },
+        {
+          "page": 42,
+          "printed_folio": "40",
+          "paragraph": null,
+          "quote": "In professional ML networks, ML activity, including TBML, is carried out by one group of criminals, while the predicate offences are committed by other criminals."
+        }
+      ]
+    },
+    {
+      "name": "Terrorist financing networks",
+      "actor_type": "category",
+      "aliases": [
+        "terrorist financiers",
+        "TF networks"
+      ],
+      "jurisdiction": null,
+      "role": "Penetrate existing trade chains and complicit MVTS to move value to terrorist organisations without direct payments",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 35,
+          "printed_folio": "33",
+          "paragraph": null,
+          "quote": "using complicit MVTS to inject funds intended for TF purpose into the trade transactions, while avoiding making direct payments to the terrorist organisation."
+        }
+      ]
+    },
+    {
+      "name": "Mexican and European transnational criminal organizations",
+      "actor_type": "category",
+      "aliases": [
+        "TCOs"
+      ],
+      "jurisdiction": null,
+      "role": "Drug trafficking organisations named as the TBML threat in the U.S. national risk assessment; increasingly rely on Asian PMLs as money brokers",
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 20,
+          "printed_folio": "18",
+          "paragraph": null,
+          "quote": "Threats like Mexican and European transnational criminal organizations (TCOs) and their associated drug trafficking activity, employ TBML schemes because their sophistication makes it difficult for authorities to detect."
+        }
+      ]
+    },
+    {
+      "name": "Central and South American drug cartels",
+      "actor_type": "category",
+      "aliases": [
+        "drug cartels"
+      ],
+      "jurisdiction": null,
+      "role": "Launder US drug proceeds through Black Market Peso Exchange using complicit money brokers, cash controllers and importers",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 29,
+          "printed_folio": "27",
+          "paragraph": null,
+          "quote": "Another traditional type of TBML is Black Market Peso Exchange, which Central and South American drug cartels have used to launder drug proceeds generated in the United States."
+        }
+      ]
+    },
+    {
+      "name": "Asian professional money launderers (money brokers)",
+      "actor_type": "category",
+      "aliases": [
+        "Asian PMLs"
+      ],
+      "jurisdiction": null,
+      "role": "Money brokers in traditional TBML schemes on whom TCOs increasingly rely, per the 2020 U.S. National Illicit Finance Strategy",
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 20,
+          "printed_folio": "18",
+          "paragraph": null,
+          "quote": "the 2020 National Illicit Finance Strategy noted that TCOs are relying more on Asian PMLs who ser ve as money brokers in traditional TBML schemes."
+        }
+      ]
+    },
+    {
+      "name": "Surrogate shopper networks",
+      "actor_type": "category",
+      "aliases": [
+        "Daigou",
+        "surrogate shoppers"
+      ],
+      "jurisdiction": null,
+      "role": "Individuals or syndicated groups buying luxury and portable electronic goods on behalf of OCGs or PMLs with criminal cash, with at least some knowledge of whom they act for",
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 33,
+          "printed_folio": "31",
+          "paragraph": null,
+          "quote": "Some shoppers may also make purchases on behalf of OCGs to distance them from the asset, suggesting the surrogate shopper has at least some knowledge that what they are doing is on behalf of an OCG."
+        },
+        {
+          "page": 6,
+          "printed_folio": "4",
+          "paragraph": null,
+          "quote": "One such example of this is known as Daigou (which literally means surrogate shopping) whereby individuals or syndicated groups of exporters outside Asian countries purchase mainly luxury goods for customers in those countries."
+        }
+      ]
+    }
+  ],
+  "indicators": [],
+  "suggested_desks": [
+    "trade_desk",
+    "fiu_liaison"
+  ],
+  "overall_confidence": "high",
+  "extraction_notes": "Golden label. Printed folio runs two behind the PDF index; pages 1, 2 and 66 carry none. Over-/under-shipment (quantity misrepresentation short of phantom) is a FATF foundation technique the library lacks; cited under TBML004, not made emergent. Sanctions evasion, dual-use goods (fn 11) and FTZs are mentioned once and not labelled; TBML010/SAN006 deliberately absent. Front companies are TBML009/PAT007, not SAN004: ML framing, not sanctions. Offsetting kept separate from BMPE as the report names it as its own scheme with a case. SBML labelled emergent (family other) although the report says it is not TBML, because it gets its own sector list. Anonymised case parties (Peruvian, Colombian, Italian, Brazilian/Portuguese nationals) are not actors; the Box 2.6 Mafia link is too thin. Jurisdictions are case and risk locations only; Peru, Canada and Mexico are actor origins or enforcement bodies and are excluded. BA007 carries the cash-integration theme; BA008 (Box 2.8 only) not labelled."
+}

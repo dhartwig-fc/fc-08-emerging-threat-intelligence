@@ -1,0 +1,414 @@
+{
+  "schema_version": "1.3.0",
+  "advisory_id": "ADV-2026-0016",
+  "source": {
+    "source_type": "nca",
+    "publisher": "NCA / NECC / OFSI / FCDO (JMLIT+ Financial Sanctions Circumvention Cell)",
+    "title": "Red Alert: Exporting High Risk Goods",
+    "published_on": "2023-12-01",
+    "published_on_precision": "month",
+    "url": "https://www.nationalcrimeagency.gov.uk/who-we-are/publications/687-necc-red-alert-exporting-high-risk-goods/file",
+    "document_sha256": "7448d062adfcdaaee29c1b83dd1d4b678bb14ff31df17d6b04ebaeeed6e9161d",
+    "page_count": 7
+  },
+  "summary": "GOLDEN LABEL, hand-drafted against the PDF. UK red alert (0737-NECC, December 2023) to the financial sector on techniques used to evade export sanctions on high-risk goods, meaning Western items critical to Russian weapons systems including but not limited to dual-use goods, which Russia procures from third countries through complex supply chains and alternative supply routes after direct UK-Russia trade collapsed. Anchors on the UK/US/EU/Japan Common High Priority items list (integrated circuits and other electrical and mechanical components), names UK-designated third-country procurement intermediaries in Turkey, Dubai and Russia, and sets out fourteen red flags for banks, card operators, FX dealers and payment providers: post-February-2022 companies in diversionary destinations, refusal to disclose end users or ownership, split payments to similar suppliers, overpayment against market price, letter-of-credit goods consigned to the issuing bank, no web presence, mismatched phone country codes, goods outside the buyer's line of business, names or addresses near the OFSI list, purported civil end users with military links, co-location or shared ownership with listed entities, open-account payments with diversionary destinations, last-minute payment re-routing, and payments from known transhipment points or atypical shipping routes.",
+  "jurisdictions": [
+    "RU",
+    "GB",
+    "TR",
+    "AE",
+    "BY",
+    "CN",
+    "RS",
+    "UZ"
+  ],
+  "typologies": [
+    {
+      "family": "sanctions",
+      "typology_id": "SAN007",
+      "label": "Dual Use Goods",
+      "emergent": false,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 2,
+          "printed_folio": "2",
+          "paragraph": null,
+          "quote": "refers to Western items critical to Russian weapons systems and its military development. It includes, but"
+        },
+        {
+          "page": 3,
+          "printed_folio": "3",
+          "paragraph": null,
+          "quote": "a Russian company procuring dual-use goods for Russian electronics"
+        },
+        {
+          "page": 3,
+          "printed_folio": "3",
+          "paragraph": null,
+          "quote": "and includes integrated circuits, as well as other electrical and mechanical components. Items on"
+        }
+      ]
+    },
+    {
+      "family": "sanctions",
+      "typology_id": "SAN006",
+      "label": "Trade Based Sanctions Evasion",
+      "emergent": false,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 2,
+          "printed_folio": "2",
+          "paragraph": null,
+          "quote": "The purpose of this Alert is to provide information to UK businesses on common techniques"
+        },
+        {
+          "page": 3,
+          "printed_folio": "3",
+          "paragraph": null,
+          "quote": "Russia is deploying complex supply chains and alternative supply routes to acquire sanctioned"
+        },
+        {
+          "page": 4,
+          "printed_folio": "4",
+          "paragraph": null,
+          "quote": "Transactions that use open accounts/open lines of credit when the payment services are"
+        }
+      ]
+    },
+    {
+      "family": "sanctions",
+      "typology_id": "SAN003",
+      "label": "Transshipment",
+      "emergent": false,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 3,
+          "printed_folio": "3",
+          "paragraph": null,
+          "quote": "significant effort to procure sanctioned goods from other countries, including goods originating in the"
+        },
+        {
+          "page": 4,
+          "printed_folio": "4",
+          "paragraph": null,
+          "quote": "company incorporated after 24 February 2022 and based in known diversionary destinations."
+        },
+        {
+          "page": 5,
+          "printed_folio": "5",
+          "paragraph": null,
+          "quote": "points or involve atypical shipping routes to reach a destination."
+        }
+      ]
+    },
+    {
+      "family": "sanctions",
+      "typology_id": "SAN004",
+      "label": "Front Companies",
+      "emergent": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 3,
+          "printed_folio": "3",
+          "paragraph": null,
+          "quote": "two Turkey based businesses, TURKIK UNION and AZU INTERNATIONAL, for their role in exporting"
+        },
+        {
+          "page": 4,
+          "printed_folio": "4",
+          "paragraph": null,
+          "quote": "Transactions involving entities with little to no web presence, such as a website or a domain"
+        },
+        {
+          "page": 4,
+          "printed_folio": "4",
+          "paragraph": null,
+          "quote": "The item or service (commodity, software, service or technology) does not fit the purchaser’s"
+        }
+      ]
+    },
+    {
+      "family": "sanctions",
+      "typology_id": "SAN008",
+      "label": "High Risk Jurisdictions",
+      "emergent": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 3,
+          "printed_folio": "3",
+          "paragraph": null,
+          "quote": "Belarus, China, Serbia, Turkey, the UAE and Uzbekistan, who continue to support Russia’s illegal"
+        },
+        {
+          "page": 4,
+          "printed_folio": "4",
+          "paragraph": null,
+          "quote": "or is co-located with military facilities in a country of concern."
+        }
+      ]
+    },
+    {
+      "family": "tbml",
+      "typology_id": "TBML008",
+      "label": "Third Party Payment Abuse",
+      "emergent": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 5,
+          "printed_folio": "5",
+          "paragraph": null,
+          "quote": "scheduled from a country of concern, but now routed through a different country or"
+        },
+        {
+          "page": 4,
+          "printed_folio": "4",
+          "paragraph": null,
+          "quote": "Transactions involving smaller value payments, all from the same end user’s foreign bank"
+        }
+      ]
+    },
+    {
+      "family": "sanctions",
+      "typology_id": "SAN001",
+      "label": "Ownership Evasion",
+      "emergent": false,
+      "confidence": "low",
+      "citations": [
+        {
+          "page": 4,
+          "printed_folio": "4",
+          "paragraph": null,
+          "quote": "including about end users, intended end-use, or company ownership."
+        },
+        {
+          "page": 4,
+          "printed_folio": "4",
+          "paragraph": null,
+          "quote": "Transactions involving companies that are physically co-located, or have shared ownership,"
+        }
+      ]
+    },
+    {
+      "family": "sanctions",
+      "typology_id": null,
+      "label": "False end-user and end-use declarations",
+      "emergent": true,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 4,
+          "printed_folio": "4",
+          "paragraph": null,
+          "quote": "Transactions involve a purported civil end-user, but research indicates customers with"
+        },
+        {
+          "page": 4,
+          "printed_folio": "4",
+          "paragraph": null,
+          "quote": "end user. In addition, supporting documents, such as a commercial invoice, do not list the"
+        },
+        {
+          "page": 4,
+          "printed_folio": "4",
+          "paragraph": null,
+          "quote": "A customer who lacks or refuses to provide details on banks, shippers, or third parties,"
+        }
+      ]
+    },
+    {
+      "family": "sanctions",
+      "typology_id": null,
+      "label": "Diversion of Common High Priority items to Russian military end users",
+      "emergent": true,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 3,
+          "printed_folio": "3",
+          "paragraph": null,
+          "quote": "To address this, the UK, US, EU and Japan have developed a Common High Priority items list. The"
+        },
+        {
+          "page": 3,
+          "printed_folio": "3",
+          "paragraph": null,
+          "quote": "this list are at high risk of being used in Russian sanctions circumvention efforts. UK businesses"
+        }
+      ]
+    }
+  ],
+  "actors": [
+    {
+      "name": "Russian military procurement",
+      "actor_type": "category",
+      "aliases": [
+        "Russian procurement activity",
+        "Russia’s military industrial complex"
+      ],
+      "jurisdiction": "RU",
+      "role": "The Russian state and its defence industry procuring sanctioned Western high-risk goods from third countries through complex supply chains",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 3,
+          "printed_folio": "3",
+          "paragraph": null,
+          "quote": "Russia is deploying complex supply chains and alternative supply routes to acquire sanctioned"
+        },
+        {
+          "page": 4,
+          "printed_folio": "4",
+          "paragraph": null,
+          "quote": "protect their business from Russian"
+        }
+      ]
+    },
+    {
+      "name": "Turkik Union",
+      "actor_type": "organisation",
+      "aliases": [
+        "TURKIK UNION"
+      ],
+      "jurisdiction": "TR",
+      "role": "Turkey-based business UK-sanctioned 8 August 2023 for exporting microelectronics to Russia essential to its military activity in Ukraine",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 3,
+          "printed_folio": "3",
+          "paragraph": null,
+          "quote": "two Turkey based businesses, TURKIK UNION and AZU INTERNATIONAL, for their role in exporting"
+        }
+      ]
+    },
+    {
+      "name": "AZU International",
+      "actor_type": "organisation",
+      "aliases": [
+        "AZU INTERNATIONAL"
+      ],
+      "jurisdiction": "TR",
+      "role": "Turkey-based business UK-sanctioned 8 August 2023 for exporting microelectronics to Russia essential to its military activity in Ukraine",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 3,
+          "printed_folio": "3",
+          "paragraph": null,
+          "quote": "two Turkey based businesses, TURKIK UNION and AZU INTERNATIONAL, for their role in exporting"
+        }
+      ]
+    },
+    {
+      "name": "Aeromotus Unmanned Aerial Vehicles Trading LLC",
+      "actor_type": "organisation",
+      "aliases": [
+        "AEROMOTUS UNMANNED AERIAL VEHICLES TRADING LLC",
+        "Aeromotus"
+      ],
+      "jurisdiction": "AE",
+      "role": "Dubai-based company UK-sanctioned 8 August 2023 for supplying drones and drone components to Russia",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 3,
+          "printed_folio": "3",
+          "paragraph": null,
+          "quote": "based AEROMOTUS UNMANNED AERIAL VEHICLES TRADING LLC, for its role in supplying"
+        }
+      ]
+    },
+    {
+      "name": "Technological Company Fly Bridge LLC",
+      "actor_type": "organisation",
+      "aliases": [
+        "LIMITED LIABILITY COMPANY TECHNOLOGICAL COMPANY FLY BRIDGE",
+        "Fly Bridge"
+      ],
+      "jurisdiction": "RU",
+      "role": "Russian company UK-sanctioned 8 November 2023 for procuring dual-use goods for Russian electronics producers NPP Istok and Ecitech",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 3,
+          "printed_folio": "3",
+          "paragraph": null,
+          "quote": "On 8 November 2023, the UK also sanctioned LIMITED LIABILITY COMPANY TECHNOLOGICAL"
+        }
+      ]
+    },
+    {
+      "name": "NPP Istok",
+      "actor_type": "organisation",
+      "aliases": [
+        "NPP ISTOK"
+      ],
+      "jurisdiction": "RU",
+      "role": "Russian electronics producer; end user of dual-use goods procured by Fly Bridge",
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 3,
+          "printed_folio": "3",
+          "paragraph": null,
+          "quote": "producers NPP ISTOK and ECITECH. On 6 December 2023, the UK announced sanctions against"
+        }
+      ]
+    },
+    {
+      "name": "Ecitech",
+      "actor_type": "organisation",
+      "aliases": [
+        "ECITECH"
+      ],
+      "jurisdiction": "RU",
+      "role": "Russian electronics producer; end user of dual-use goods procured by Fly Bridge",
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 3,
+          "printed_folio": "3",
+          "paragraph": null,
+          "quote": "producers NPP ISTOK and ECITECH. On 6 December 2023, the UK announced sanctions against"
+        }
+      ]
+    },
+    {
+      "name": "Third-country businesses supplying Russia's war machine",
+      "actor_type": "category",
+      "aliases": [
+        "diversionary destination companies"
+      ],
+      "jurisdiction": null,
+      "role": "Businesses in Belarus, China, Serbia, Turkey, the UAE and Uzbekistan UK-sanctioned 6 December 2023 for supplying and funding Russia's military; the class of intermediary the red flags target",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 3,
+          "printed_folio": "3",
+          "paragraph": null,
+          "quote": "Belarus, China, Serbia, Turkey, the UAE and Uzbekistan, who continue to support Russia’s illegal"
+        },
+        {
+          "page": 4,
+          "printed_folio": "4",
+          "paragraph": null,
+          "quote": "company incorporated after 24 February 2022 and based in known diversionary destinations."
+        }
+      ]
+    }
+  ],
+  "indicators": [],
+  "suggested_desks": [
+    "sanctions_desk",
+    "trade_desk"
+  ],
+  "overall_confidence": "high",
+  "extraction_notes": "Golden label. The document states its own date on page 1, 'Date: December 2023', which agrees with the list's PDF-metadata date; month precision kept because no day is printed. Page 1 has no printed folio; pages 2-7 print their number. Pages 6-7 are data-protection, SAR and handling boilerplate with no typology content; page 1 is the cover. Sanctions twins chosen over TBML twins per the convention (SAN007 not TBML007, SAN006 not TBML010): the alert is framed entirely as export-sanctions circumvention. SAN003 at high because third-country diversion is the alert's core mechanism (complex supply chains, alternative supply routes, diversionary destinations, transhipment points), not a single red flag; the page 5 quote is cut after 'tranship ment' where pypdf broke the word. SAN004 medium: the named Turkey and Dubai intermediaries plus the post-invasion-incorporation, no-web-presence and wrong-line-of-business flags describe fronts, but the alert never uses the words front or shell. TBML008 medium on flags 13 (payment re-routed through a different company) and 3 (one end user's account paying multiple similar suppliers); flag 3 also has a distributed-procurement flavour that the library does not hold and was not labelled emergent because it appears once. SAN001 low from two flags (refusal to disclose ownership, shared ownership with a listed entity). Single-mention flags deliberately NOT labelled as typologies: flag 4 overpayment against market price (would be TBML001), flag 9 name or address similar to the OFSI list (SAN005), flag 11 co-location (PAT005), flag 7 mismatched phone country codes, flag 5 letter-of-credit consignment to the issuing bank (cited under the end-user emergent instead). Two emergent labels: 'False end-user and end-use declarations' reuses the ADV-2026-0013 label for scorer consistency, since flags 2, 5 and 10 are about the same technique; 'Diversion of Common High Priority items to Russian military end users' is labelled because the footnote on page 2 says high-risk goods include but are not limited to dual-use goods, so the CHPL scope is wider than SAN007. Actors: seven named designated parties and two categories; NPP Istok and Ecitech are named once as end users and kept at medium. NCA, NECC, OFSI, FCDO, HMRC, DBT, JMLIT, the G7 and the Export Control Joint Unit are enforcement bodies, not actors. Jurisdictions: RU as destination; TR, AE and RU for the named intermediaries; BY, CN, RS and UZ from the 6 December 2023 designations as diversionary destinations; GB kept because the goods originate in the UK and the exposed exporters and financial institutions are UK businesses, matching ADV-2026-0013's inclusion of US as goods origin. UA is the victim state and US, EU and JP are co-designating authorities, so none is a jurisdiction."
+}

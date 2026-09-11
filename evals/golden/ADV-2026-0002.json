@@ -1,0 +1,221 @@
+{
+  "schema_version": "1.3.0",
+  "advisory_id": "ADV-2026-0002",
+  "source": {
+    "source_type": "fatf",
+    "publisher": "FATF / Egmont Group",
+    "title": "Trade-Based Money Laundering: Risk Indicators",
+    "published_on": "2021-03-01",
+    "published_on_precision": "month",
+    "url": "https://www.fatf-gafi.org/content/dam/fatf-gafi/reports/Trade-Based-Money-Laundering-Risk-Indicators.pdf",
+    "document_sha256": "670b80270b33354b17263d44393cd65386a96bdb1a171365f217048e7cca6afb",
+    "page_count": 10
+  },
+  "summary": "GOLDEN LABEL, hand-drafted against the PDF. FATF-Egmont Group list of trade-based money laundering risk indicators, drawn from data sampled in the 2020 TBML project, in four groups: structural (shell companies, mass-registration addresses, nominee owners, no online presence or payroll, dormancy), trade activity (business-line mismatch, numerous third-party intermediaries, unreasonably low margins, purchases beyond economic capacity), trade document and commodity (prices inconsistent with market value, vague or falsified descriptions, customs-value versus bank-transfer mismatches, temporary-importation abuse, unjustified routing) and account and transaction activity (last-minute payment redirection, transit accounts, third-party payers, sub-threshold cash deposits, circular payments). No cases, actors or jurisdictions are named.",
+  "jurisdictions": [],
+  "typologies": [
+    {
+      "family": "tbml",
+      "typology_id": "TBML001",
+      "label": "Over Invoicing",
+      "emergent": false,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 7,
+          "printed_folio": "5",
+          "paragraph": null,
+          "quote": "Contracts, invoices, or other trade documents display fees or prices that do not seem to be in line with commercial considerations, are inconsistent with market value, or significantly fluctuate from previous comparable transactions."
+        },
+        {
+          "page": 6,
+          "printed_folio": "4",
+          "paragraph": null,
+          "quote": "importing wholesale commodities at or above retail value"
+        }
+      ]
+    },
+    {
+      "family": "tbml",
+      "typology_id": "TBML002U",
+      "label": "Under Invoicing",
+      "emergent": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 6,
+          "printed_folio": "4",
+          "paragraph": null,
+          "quote": "A trade entity consistently displays unreasonably low profit margins"
+        },
+        {
+          "page": 6,
+          "printed_folio": "4",
+          "paragraph": null,
+          "quote": "selling commodities at the same or below purchase price"
+        }
+      ]
+    },
+    {
+      "family": "tbml",
+      "typology_id": "TBML005",
+      "label": "False Description Of Goods",
+      "emergent": false,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 7,
+          "printed_folio": "5",
+          "paragraph": null,
+          "quote": "discrepancies between the quantity, quality, volume, or value of the actual commodities and their descriptions."
+        },
+        {
+          "page": 7,
+          "printed_folio": "5",
+          "paragraph": null,
+          "quote": "Contracts, invoices, or other trade documents have vague descriptions of the traded commodities"
+        }
+      ]
+    },
+    {
+      "family": "tbml",
+      "typology_id": "TBML008",
+      "label": "Third Party Payment Abuse",
+      "emergent": false,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 8,
+          "printed_folio": "6",
+          "paragraph": null,
+          "quote": "Payment for imported commodities is made by an entity other than the consignee of the commodities with no clear economic reasons, e.g. by a shell or front company not involved in the trade transaction."
+        },
+        {
+          "page": 7,
+          "printed_folio": "5",
+          "paragraph": null,
+          "quote": "contradictions between the name of the exporting entity and the name of the recipient of the payment"
+        }
+      ]
+    },
+    {
+      "family": "tbml",
+      "typology_id": "TBML009",
+      "label": "Shell Company Trading",
+      "emergent": false,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 5,
+          "printed_folio": "3",
+          "paragraph": null,
+          "quote": "The corporate structure of a trade entity appears unusually complex and illogical, such as the involvement of shell companies"
+        },
+        {
+          "page": 5,
+          "printed_folio": "3",
+          "paragraph": null,
+          "quote": "A trade entity maintains a minimal number of working staff, inconsistent with its volume of traded commodities."
+        }
+      ]
+    },
+    {
+      "family": "tbml",
+      "typology_id": "TBML004",
+      "label": "Phantom Shipping",
+      "emergent": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 7,
+          "printed_folio": "5",
+          "paragraph": null,
+          "quote": "Conversely, the value of registered exports shows a significant mismatch with incoming foreign bank transfers."
+        }
+      ]
+    },
+    {
+      "family": "tbml",
+      "typology_id": "TBML006",
+      "label": "Circular Trade",
+      "emergent": false,
+      "confidence": "low",
+      "citations": [
+        {
+          "page": 8,
+          "printed_folio": "6",
+          "paragraph": null,
+          "quote": "Payments are routed in a circle – funds are sent out from one country and received back in the same country, after passing through another country or countries."
+        }
+      ]
+    },
+    {
+      "family": "correspondent_banking",
+      "typology_id": "BA005",
+      "label": "Rapid Movement",
+      "emergent": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 8,
+          "printed_folio": "6",
+          "paragraph": null,
+          "quote": "“transit” account with a rapid movement of high-volume transactions"
+        }
+      ]
+    },
+    {
+      "family": "correspondent_banking",
+      "typology_id": "BA001",
+      "label": "Structuring",
+      "emergent": false,
+      "confidence": "low",
+      "citations": [
+        {
+          "page": 8,
+          "printed_folio": "6",
+          "paragraph": null,
+          "quote": "Cash deposits or other transactions of a trade entity are consistently just below relevant reporting thresholds."
+        }
+      ]
+    },
+    {
+      "family": "network",
+      "typology_id": "PAT010",
+      "label": "Hidden Controller",
+      "emergent": false,
+      "confidence": "low",
+      "citations": [
+        {
+          "page": 5,
+          "printed_folio": "3",
+          "paragraph": null,
+          "quote": "Owners or senior managers of a trade entity appear to be nominees acting to conceal the actual beneficial owners"
+        }
+      ]
+    },
+    {
+      "family": "tbml",
+      "typology_id": null,
+      "label": "Abuse of temporary importation and inward processing regimes",
+      "emergent": true,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 7,
+          "printed_folio": "5",
+          "paragraph": null,
+          "quote": "Commodities imported into a country within the framework of temporary importation and inward processing regime are subsequently exported with falsified documents."
+        }
+      ]
+    }
+  ],
+  "actors": [],
+  "indicators": [],
+  "suggested_desks": [
+    "trade_desk",
+    "fiu_liaison"
+  ],
+  "overall_confidence": "high",
+  "extraction_notes": "Golden label. Pages 1-2 and 9-10 are cover, imprint and back cover; pages 3-4 (folios 1-2) are handling notes with no typology content; the indicators sit on pages 5-8 (folios 3-6). The document never uses the words over-invoicing, under-invoicing, multiple invoicing, phantom shipping or dual-use, so every governed id is inferred from what an indicator group describes. TBML001 rests on prices inconsistent with market value and importing at or above retail; TBML002U on unreasonably low margins and reselling at or below purchase price; TBML001 is used rather than TBML002 (the cross-domain duplicate). TBML004 is medium on the customs-value versus bank-transfer mismatch, the canonical detection indicator for paying for goods that never moved, but the same line also fits over-invoicing and the text nowhere says goods were not shipped. TBML003 Multiple Invoicing is NOT labelled: no indicator describes more than one invoice against one shipment. TBML007 Dual Use Goods is NOT labelled: dual-use, military and proliferation goods appear nowhere except the FATF boilerplate on page 2. Both were expected before reading; the text does not support them. Twins: the document is framed as TBML throughout and never mentions sanctions, so TBML009 is labelled rather than SAN004 Front Companies or PAT007 Shell Company Network (the whole structural block is shell characteristics at trade grain), and SAN006/TBML010 are not labelled at all. TBML006 low rather than BA004 Circular Funds Flow for the one-line circular-payments indicator, because it is framed on a trade entity's payments. BA005 medium for the pay-through/transit account indicator; BA001 low for sub-threshold cash deposits, one line but the literal definition. BA006 Dormant Reactivation considered (three dormancy/burst lines across the groups) and folded into TBML009 as a shell signal rather than labelled. PAT010 low for nominee owners concealing beneficial owners; PAT005 Common Address (mass registration address, TCSP address in footnote 4) folded into TBML009. One-line indicators deliberately not labelled: shipments routed through jurisdictions without justification (SAN003 has no TBML twin and the sanctions framing is absent), letters of credit held or extended without reason, name-mimicry of well-known corporations, split-and-forward wires to unrelated accounts. One emergent: temporary importation / inward processing regime abuse, since the library holds no customs-regime typology. Letter-of-credit misuse considered as a second emergent and left out as a single line. No actors: no named parties and no actor class beyond the generic trade entity. No jurisdictions: high-risk jurisdictions, free trade zones and offshore jurisdictions are generic, and France appears only as the FATF address. Publisher expanded to FATF / Egmont Group because every page is co-branded."
+}

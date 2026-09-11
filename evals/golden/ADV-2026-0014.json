@@ -1,0 +1,442 @@
+{
+  "schema_version": "1.3.0",
+  "advisory_id": "ADV-2026-0014",
+  "source": {
+    "source_type": "ofsi",
+    "publisher": "OFSI",
+    "title": "Sanctions Compliance in the Financial Services Sector: Threat Assessment",
+    "published_on": "2025-02-13",
+    "published_on_precision": "day",
+    "url": "https://assets.publishing.service.gov.uk/media/6835db1f3dd61280f46c0408/OFSI_Financial_Services_Threat_Assessment_Report.pdf",
+    "document_sha256": "386469b594eb84795a785838877c91e14ce2acf82e5c6cc04a9f6aaa29a3b51e",
+    "page_count": 29
+  },
+  "summary": "GOLDEN LABEL, hand-drafted against the PDF. OFSI's sector threat assessment of UK financial sanctions compliance in financial services, February 2022 to March 2024. Six key judgements: under-reporting of suspected breaches, most non-compliance arising from improper maintenance of frozen assets and licence-condition breaches, Russian designated persons turning to new professional and non-professional enablers, enablers paying through non-bank payment service providers to maintain superyachts and UK residential property, a small number of enablers fronting to claim ownership of frozen assets, and enablers using cryptoassets. Enabler activity is split into lifestyle and asset maintenance, fronting and other money laundering (the December 2024 NCA-disrupted Russian laundering network exposed to Garantex and Tether). Two fictional case studies show a BVI nominee-held superyacht company and three UK property-service companies controlled by a designated person; a third shows an EU investment vehicle and golden-passport holder fronting for a designated Kremlin official. Closes with the intermediary jurisdictions that feature most in suspected breach reports and the activity seen in each.",
+  "jurisdictions": [
+    "GB",
+    "RU",
+    "VG",
+    "CY",
+    "CH",
+    "AE",
+    "GG",
+    "LU",
+    "AT",
+    "TR",
+    "IM",
+    "KY"
+  ],
+  "typologies": [
+    {
+      "family": "sanctions",
+      "typology_id": "SAN001",
+      "label": "Ownership Evasion",
+      "emergent": false,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 17,
+          "printed_folio": "16",
+          "paragraph": null,
+          "quote": "Although Associate is the nominee owner of Company X, the DP holds ultimate beneﬁcial ownership and control of Company X."
+        },
+        {
+          "page": 10,
+          "printed_folio": "9",
+          "paragraph": null,
+          "quote": "OFSI has observed failures to identify subsidiaries owned by Russian conglomerates which are either designated themselves or majority owned by an individual Russian DP."
+        }
+      ]
+    },
+    {
+      "family": "network",
+      "typology_id": "PAT010",
+      "label": "Hidden Controller",
+      "emergent": false,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 20,
+          "printed_folio": "19",
+          "paragraph": null,
+          "quote": "All three companies are ultimately funded by the DP, provide services for the sole beneﬁt of the DP and their family at the direction of the DP. It is therefore reasonable to expect that all three companies are controlled by the DP"
+        },
+        {
+          "page": 17,
+          "printed_folio": "16",
+          "paragraph": null,
+          "quote": "Neo-Bank fails to detect that the regular deposits it receives from Global Bank into the account of Seafarer Z are made by Manager Y, which is funded by Company X, and therefore indirectly by the DP."
+        }
+      ]
+    },
+    {
+      "family": "sanctions",
+      "typology_id": "SAN009",
+      "label": "Complex Ownership Structures",
+      "emergent": false,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 16,
+          "printed_folio": "15",
+          "paragraph": null,
+          "quote": "OFSI also notes that high value assets such as superyachts are often owned through opaque ownership and control structures."
+        },
+        {
+          "page": 26,
+          "printed_folio": "25",
+          "paragraph": null,
+          "quote": "Use of complex corporate structures such as trust arrangements or complex corporate structures involving offshore companies"
+        }
+      ]
+    },
+    {
+      "family": "sanctions",
+      "typology_id": "CMI010",
+      "label": "Cryptocurrency Evasion",
+      "emergent": false,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 23,
+          "printed_folio": "22",
+          "paragraph": null,
+          "quote": "the Russian money laundering group had significant exposure to the UK-designated cryptocurrency exchange Garantex. The group also extensively exploited dollar-backed stablecoins such as Tether (USDT)"
+        },
+        {
+          "page": 7,
+          "printed_folio": "6",
+          "paragraph": null,
+          "quote": "Enablers have almost certainly used alternative payment methods, in particular cryptoassets, to breach UK financial sanctions prohibitions on Russia."
+        }
+      ]
+    },
+    {
+      "family": "sanctions",
+      "typology_id": "SAN008",
+      "label": "High Risk Jurisdictions",
+      "emergent": false,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 25,
+          "printed_folio": "24",
+          "paragraph": null,
+          "quote": "The following jurisdictions feature most often: British Virgin Islands (BVI); the Republic of Cyprus; Switzerland; United Arab Emirates (UAE); Guernsey; Luxembourg; Austria; and Türkiye."
+        },
+        {
+          "page": 25,
+          "printed_folio": "24",
+          "paragraph": null,
+          "quote": "driven by several factors, including Russian capital flight to jurisdictions which do not have sanctions on Russia, such as the UAE and Türkiye."
+        }
+      ]
+    },
+    {
+      "family": "sanctions",
+      "typology_id": "SAN004",
+      "label": "Front Companies",
+      "emergent": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 22,
+          "printed_folio": "21",
+          "paragraph": null,
+          "quote": "Company L is registered to a Moscow-based individual with no relevant business experience, who is also the daughter of a board member of a Russian company"
+        },
+        {
+          "page": 22,
+          "printed_folio": "21",
+          "paragraph": null,
+          "quote": "Company L acts as an investment vehicle for Company Rus to acquire a significant stake in a strategic EU manufacturing company, thereby breaching EU sectoral sanctions prohibitions."
+        }
+      ]
+    },
+    {
+      "family": "network",
+      "typology_id": "PAT002",
+      "label": "Shared Beneficial Owner",
+      "emergent": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 20,
+          "printed_folio": "19",
+          "paragraph": null,
+          "quote": "All three companies are owned by a non-designated UK individual and bank with a large UK retail bank."
+        }
+      ]
+    },
+    {
+      "family": "network",
+      "typology_id": "PAT005",
+      "label": "Common Address",
+      "emergent": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 20,
+          "printed_folio": "19",
+          "paragraph": null,
+          "quote": "Company Y is also a UK registered company incorporated and located at the same Property."
+        },
+        {
+          "page": 22,
+          "printed_folio": "21",
+          "paragraph": null,
+          "quote": "Company L Investments has no presence in the EU but makes use of an address in an EU country."
+        }
+      ]
+    },
+    {
+      "family": "network",
+      "typology_id": "PAT009",
+      "label": "Related Party Trading",
+      "emergent": false,
+      "confidence": "low",
+      "citations": [
+        {
+          "page": 14,
+          "printed_folio": "13",
+          "paragraph": null,
+          "quote": "Frequent payments between companies owned or controlled by a DP"
+        },
+        {
+          "page": 20,
+          "printed_folio": "19",
+          "paragraph": null,
+          "quote": "Funds are regularly transferred between Companies X, Y and Z as working capital loans or reimbursement of expenditure, indicating that the three companies share their source of wealth."
+        }
+      ]
+    },
+    {
+      "family": "sanctions",
+      "typology_id": "SAN005",
+      "label": "Name Screening Evasion",
+      "emergent": false,
+      "confidence": "low",
+      "citations": [
+        {
+          "page": 21,
+          "printed_folio": "20",
+          "paragraph": null,
+          "quote": "Inconsistencies in name spellings or transliterations, particularly those stemming from Cyrillic spellings"
+        },
+        {
+          "page": 21,
+          "printed_folio": "20",
+          "paragraph": null,
+          "quote": "Frequent or unexplained changes of name or declared location of operation"
+        }
+      ]
+    },
+    {
+      "family": "sanctions",
+      "typology_id": null,
+      "label": "Enabler payments to maintain designated persons' lifestyles and assets",
+      "emergent": true,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 14,
+          "printed_folio": "13",
+          "paragraph": null,
+          "quote": "Russian DPs have relied on both professional and non-professional enablers to make payments to maintain their lifestyles and assets. Such payments could include those relating to: superyachts; concierge and personal security services; other property management services; school fees; and high-value goods."
+        },
+        {
+          "page": 16,
+          "printed_folio": "15",
+          "paragraph": null,
+          "quote": "OFSI has identified payments being made through the UK financial services sector to staff on superyachts linked to Russian DPs following their designation."
+        },
+        {
+          "page": 18,
+          "printed_folio": "17",
+          "paragraph": null,
+          "quote": "the provision of property maintenance services; the provision of concierge or security services; property letting services; and the collection of rent from a frozen property asset, all without or outside the scope of an OFSI licence."
+        }
+      ]
+    },
+    {
+      "family": "sanctions",
+      "typology_id": null,
+      "label": "Fronting by enablers to claim ownership of frozen assets",
+      "emergent": true,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 21,
+          "printed_folio": "20",
+          "paragraph": null,
+          "quote": "In these scenarios, an enabler presenting themselves as a legitimate businessperson unconnected to a Russian DP could come forward and claim to be the owner of frozen assets."
+        },
+        {
+          "page": 22,
+          "printed_folio": "21",
+          "paragraph": null,
+          "quote": "This would leave Company L Investments as the sole creditor of Company UK, and the sole beneficiary from the realisations of Company UK's remaining assets going forwards."
+        }
+      ]
+    },
+    {
+      "family": "sanctions",
+      "typology_id": null,
+      "label": "Citizenship-by-investment used to conceal links to designated persons",
+      "emergent": true,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 21,
+          "printed_folio": "20",
+          "paragraph": null,
+          "quote": "Recently acquired non-Russian citizenships, including from countries which offer golden visa schemes"
+        },
+        {
+          "page": 22,
+          "printed_folio": "21",
+          "paragraph": null,
+          "quote": "Individual M acquires citizenship of an EU candidate country through a golden passport programme."
+        }
+      ]
+    },
+    {
+      "family": "sanctions",
+      "typology_id": null,
+      "label": "SPFS messaging as an alternative to SWIFT for sanctioned payments",
+      "emergent": true,
+      "confidence": "low",
+      "citations": [
+        {
+          "page": 11,
+          "printed_folio": "10",
+          "paragraph": null,
+          "quote": "Designed by the Central Bank of Russia as an alternative to SWIFT, SPFS could be used to breach UK financial sanctions prohibitions."
+        }
+      ]
+    }
+  ],
+  "actors": [
+    {
+      "name": "Russian designated persons",
+      "actor_type": "category",
+      "aliases": [
+        "DPs",
+        "Russian DPs"
+      ],
+      "jurisdiction": "RU",
+      "role": "UK-designated Russian individuals and entities, including Russian banks and conglomerates, using enablers to maintain assets, front for frozen assets and obtain liquidity",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 12,
+          "printed_folio": "11",
+          "paragraph": null,
+          "quote": "firms should remain alert to the threat posed by Russian DPs as well as the increasingly sophisticated methods employed by DPs and their enablers to breach UK financial sanctions prohibitions."
+        },
+        {
+          "page": 10,
+          "printed_folio": "9",
+          "paragraph": null,
+          "quote": "Firms should also be alert to Russian DPs, including Russian banks, establishing new subsidiaries in intermediary countries."
+        }
+      ]
+    },
+    {
+      "name": "Professional enablers",
+      "actor_type": "category",
+      "aliases": [
+        "enablers"
+      ],
+      "jurisdiction": null,
+      "role": "Professional service providers enabling breaches: wealth managers in intermediary jurisdictions, small UHNW-lifestyle service companies, property managers and fronts",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 12,
+          "printed_folio": "11",
+          "paragraph": null,
+          "quote": "Professional enabler activity in the financial services sector has traditionally been associated with wealth management and other kinds of financial advisory services, particularly those based in intermediary jurisdictions offering greater secrecy through their financial and legal systems."
+        },
+        {
+          "page": 14,
+          "printed_folio": "13",
+          "paragraph": null,
+          "quote": "Professional enablers engaging in this kind of activity are typically small companies providing services related to ultra-high-net-worth lifestyles and whose relationship with a DP likely predates designation."
+        }
+      ]
+    },
+    {
+      "name": "Non-professional enablers",
+      "actor_type": "category",
+      "aliases": [
+        "family members",
+        "proxies"
+      ],
+      "jurisdiction": null,
+      "role": "Family members, ex-spouses, associates and other proxies of designated persons making payments and holding nominee ownership with less sophisticated methods",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 13,
+          "printed_folio": "12",
+          "paragraph": null,
+          "quote": "such enablers are defined as individuals with close personal ties to DPs, such as their family members, ex-spouses, associates, or other proxies."
+        },
+        {
+          "page": 14,
+          "printed_folio": "13",
+          "paragraph": null,
+          "quote": "Non- professional enablers are typically family members, particularly children, spouses, ex-spouses and in-laws, but can also include associates."
+        }
+      ]
+    },
+    {
+      "name": "Russian money laundering network (Operation Destabilise)",
+      "actor_type": "network",
+      "aliases": [
+        "Russian money laundering group"
+      ],
+      "jurisdiction": "RU",
+      "role": "Internationally operating criminal network disrupted by the NCA in December 2024, exchanging cash for crypto and laundering funds for UK property purchases for sanctioned Russians",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 23,
+          "printed_folio": "22",
+          "paragraph": null,
+          "quote": "an NCA-l ed investigation exposed and disrupted a Russian money laundering network employing complex methods to breach financial sanctions implemented by the UK Government and international partners."
+        },
+        {
+          "page": 23,
+          "printed_folio": "22",
+          "paragraph": null,
+          "quote": "this group provided a variety of services, including a system for exchange of cash to crypto (and vice versa) and the laundering of funds linked to property purchases in the UK. Cryptoassets and cash couriers played a central role in these activities."
+        }
+      ]
+    },
+    {
+      "name": "Garantex",
+      "actor_type": "organisation",
+      "aliases": [],
+      "jurisdiction": null,
+      "role": "UK-designated cryptocurrency exchange to which the Russian money laundering network had significant exposure",
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 23,
+          "printed_folio": "22",
+          "paragraph": null,
+          "quote": "the Russian money laundering group had significant exposure to the UK-designated cryptocurrency exchange Garantex."
+        }
+      ]
+    }
+  ],
+  "indicators": [],
+  "suggested_desks": [
+    "sanctions_desk",
+    "fiu_liaison"
+  ],
+  "overall_confidence": "high",
+  "extraction_notes": "Golden label. Pages 1-4, 24 and 29 are cover, copyright, contents and section dividers; pages 5-9 and 28 are scope, reporting statistics and resources with no typology content. Printed folios run one behind the PDF index from page 2; page 12 carries a stray '12' footnote marker mid-page and its folio is 11. Trade sanctions and the Oil Price Cap are explicitly out of scope (footnote 1), so SAN003/006/007 and every TBML twin are absent by design, not omission. Every named party in the three case studies is fictional by the document's own statement on page 5, so Company X, Company L, Individual M, Manager Y and the rest are not actors; the only real named parties are the December 2024 NCA-disrupted network (Operation Destabilise, named in footnote 15) and Garantex, which is designated rather than an evader but is kept as the named counterparty. Case study techniques ARE labelled as typologies because OFSI presents them as observed patterns. GB is a jurisdiction here, against the default for OFSI documents: the assessment explicitly places the risk in UK residential property, UK-registered service companies, UK NBPSPs used for international payments and UK property purchases, not merely in the UK as designating authority. Libya, Belarus, Iran and DPRK appear once (page 8) as sanctions regimes with recent compliance threats and are the targets of sanctions, not risk locations, so excluded; Russia is included because the document's subject is Russian DPs and their Moscow-based fronts. Monaco appears only in a fictional case study and is excluded; BVI, Cyprus and Austria appear in both a case study and the intermediary table and stand on the table. Isle of Man and Cayman Islands are included from the 2023-24 trend paragraph and table. Four emergent labels: enabler lifestyle and asset maintenance payments (the document's central observed pattern, not in the library); fronting to claim frozen assets; citizenship-by-investment concealment (red flag plus case study, so twice, medium); and SPFS exposure (one paragraph, hypothetical, low). Enabler facilitation itself is carried as two actor categories plus the first emergent label rather than as a separate 'enabler' typology, so this differs in shape from ADV-2026-0015 while covering the same behaviour. PAT002, PAT005 and PAT009 rest on case study 2 and one red flag each and are medium/low accordingly. SAN005 is low: two fronting red flags about name spelling and name changes, not a described screening-defeat technique. Deliberately NOT labelled: improper maintenance of frozen assets and licence-condition breaches (key judgement 2), which are firm compliance failures rather than evasion techniques; inaccurate UK-nexus assessments (same reason); 'non-resident banking' and 'offshore account payments' in the intermediary table, folded into SAN008; the UAE table bullet on companies re-established as copies of ones closed elsewhere, a single mention of the phoenix pattern labelled emergent in ADV-2026-0017; cash deposit and cash courier red flags, which are not BA007. Correspondent-banking Regulation 17A is regulatory context."
+}

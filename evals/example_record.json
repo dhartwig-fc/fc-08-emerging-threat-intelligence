@@ -1,5 +1,5 @@
 {
-  "schema_version": "1.2.0",
+  "schema_version": "1.3.0",
   "advisory_id": "ADV-2026-0001",
   "source": {
     "source_type": "fatf",
@@ -12,7 +12,11 @@
     "page_count": 66
   },
   "summary": "The report sets out how criminals exploit international trade to move value, describing invoice manipulation, phantom shipments and the use of front companies across multiple jurisdictions. It emphasises the role of documentary review and cross-border information sharing.",
-  "jurisdictions": ["GB", "US", "AE"],
+  "jurisdictions": [
+    "GB",
+    "US",
+    "AE"
+  ],
   "typologies": [
     {
       "family": "tbml",
@@ -21,7 +25,12 @@
       "emergent": false,
       "confidence": "high",
       "citations": [
-        {"page": 14, "printed_folio": "12", "paragraph": 2, "quote": "Over-invoicing and under-invoicing of goods remains the most common TBML technique observed."}
+        {
+          "page": 14,
+          "printed_folio": "12",
+          "paragraph": 2,
+          "quote": "Over-invoicing and under-invoicing of goods remains the most common TBML technique observed."
+        }
       ]
     },
     {
@@ -31,7 +40,11 @@
       "emergent": true,
       "confidence": "medium",
       "citations": [
-        {"page": 41, "paragraph": 1, "quote": "Several jurisdictions reported the misuse of carbon credit trading to legitimise proceeds."}
+        {
+          "page": 41,
+          "paragraph": 1,
+          "quote": "Several jurisdictions reported the misuse of carbon credit trading to legitimise proceeds."
+        }
       ]
     }
   ],
@@ -39,23 +52,36 @@
     {
       "name": "Professional money launderers",
       "actor_type": "category",
-      "aliases": ["PMLs"],
+      "aliases": [
+        "PMLs"
+      ],
       "jurisdiction": null,
       "role": "Specialists who take receipt of criminal proceeds and move them through trade",
       "confidence": "high",
       "citations": [
-        {"page": 14, "printed_folio": "12", "paragraph": 1, "quote": "PMLs offer specialist expertise using a range of ML techniques to diversify their risk exposure."}
+        {
+          "page": 14,
+          "printed_folio": "12",
+          "paragraph": 1,
+          "quote": "PMLs offer specialist expertise using a range of ML techniques to diversify their risk exposure."
+        }
       ]
     },
     {
       "name": "Example Trading FZE",
       "actor_type": "organisation",
-      "aliases": ["Example Trading Free Zone Establishment"],
+      "aliases": [
+        "Example Trading Free Zone Establishment"
+      ],
       "jurisdiction": "AE",
       "role": "Intermediary re-invoicing goods between related parties",
       "confidence": "medium",
       "citations": [
-        {"page": 22, "paragraph": 3, "quote": "A free zone entity acted as an intermediary, re-invoicing the same consignment three times."}
+        {
+          "page": 22,
+          "paragraph": 3,
+          "quote": "A free zone entity acted as an intermediary, re-invoicing the same consignment three times."
+        }
       ]
     }
   ],
@@ -66,11 +92,17 @@
       "detectable_in_transaction_data": false,
       "confidence": "high",
       "citations": [
-        {"page": 15, "paragraph": 1, "quote": "Prices that deviate significantly from market benchmarks should prompt further enquiry."}
+        {
+          "page": 15,
+          "paragraph": 1,
+          "quote": "Prices that deviate significantly from market benchmarks should prompt further enquiry."
+        }
       ]
     }
   ],
-  "suggested_desks": ["trade_desk"],
+  "suggested_desks": [
+    "trade_desk"
+  ],
   "overall_confidence": "high",
   "extraction_notes": "Actor name is illustrative in the source; treat as pattern not designation."
 }

@@ -1,0 +1,585 @@
+{
+  "schema_version": "1.3.0",
+  "advisory_id": "ADV-2026-0007",
+  "source": {
+    "source_type": "fatf",
+    "publisher": "FATF / Egmont Group / INTERPOL",
+    "title": "Illicit Financial Flows from Cyber-Enabled Fraud",
+    "published_on": "2023-11-01",
+    "published_on_precision": "month",
+    "url": "https://www.fatf-gafi.org/content/dam/fatf-gafi/reports/Illicit-financial-flows-cyber-enabled-fraud.pdf.coredownload.inline.pdf",
+    "document_sha256": "6888bb2e4d14d6935d2cb17bbd145b818bb10e6116f70675a8aeeb7e765356e6",
+    "page_count": 72
+  },
+  "summary": "GOLDEN LABEL, hand-drafted against the PDF. Joint FATF, Egmont Group and INTERPOL report on how the proceeds of cyber-enabled fraud (BEC, phishing, impersonation, online trading platform, romance and employment scams) are laundered: syndicates structured into fraud and laundering sub-groups, professional money laundering networks and enablers, money mules recruited online and herded at scale, shell companies with strawman directors as first-layer accounts, rapid pass-through layering across banks, PSPs and remitters, cash-out at ATMs, trade-based laundering through third-party invoice payments and fictitious invoices, virtual-asset laundering, virtual IBAN abuse, and streaming-platform credits. Names the QQAAZZ laundering network and DPRK IT workers selling phishing tools; forty-eight case boxes and an annex of risk indicators.",
+  "jurisdictions": [
+    "NG",
+    "PH",
+    "TR",
+    "SK",
+    "IN",
+    "CN",
+    "IE",
+    "DE",
+    "JP",
+    "GH",
+    "SG",
+    "AT",
+    "FR",
+    "LU",
+    "GB",
+    "US",
+    "TH",
+    "KP",
+    "KR",
+    "LV",
+    "BG",
+    "IT",
+    "ES",
+    "RS",
+    "CL",
+    "MT",
+    "KH"
+  ],
+  "typologies": [
+    {
+      "family": "correspondent_banking",
+      "typology_id": "BA003",
+      "label": "Mule Accounts",
+      "emergent": false,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 18,
+          "printed_folio": "16",
+          "paragraph": null,
+          "quote": "Individual money mules are often recruited by criminals via various means, including through job offers and advertisements"
+        },
+        {
+          "page": 22,
+          "printed_folio": "20",
+          "paragraph": null,
+          "quote": "money mules would surrender banking credentials, cards, and tokens, or provide power of attorney to the CEF syndicate to allow them direct control over the accounts."
+        },
+        {
+          "page": 21,
+          "printed_folio": "19",
+          "paragraph": null,
+          "quote": "The elderly woman provided her internet banking credentials to the fraudster and her bank account was then used to launder other crime proceeds."
+        }
+      ]
+    },
+    {
+      "family": "correspondent_banking",
+      "typology_id": "BA005",
+      "label": "Rapid Movement",
+      "emergent": false,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 18,
+          "printed_folio": "16",
+          "paragraph": null,
+          "quote": "Typically, CEF-proceeds are rapidly laundered through a network of accounts."
+        },
+        {
+          "page": 49,
+          "printed_folio": "47",
+          "paragraph": null,
+          "quote": "one of the most challenging aspects of CEF investigations is the rapid speed at which CEF proceeds can be laundered."
+        }
+      ]
+    },
+    {
+      "family": "correspondent_banking",
+      "typology_id": "BA008",
+      "label": "Layering",
+      "emergent": false,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 44,
+          "printed_folio": "42",
+          "paragraph": null,
+          "quote": "Pass-through transactions and account hopping across multiple FIs increases law enforcement tracing efforts"
+        },
+        {
+          "page": 24,
+          "printed_folio": "22",
+          "paragraph": null,
+          "quote": "the funds were transferred into 26 secondary bank accounts, and then withdrawn in cash over the bank counters or via ATM, transferred to third-party payment platforms, as well as used to buy gold and fuel cards."
+        }
+      ]
+    },
+    {
+      "family": "correspondent_banking",
+      "typology_id": "BA002",
+      "label": "Funnel Accounts",
+      "emergent": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 26,
+          "printed_folio": "24",
+          "paragraph": null,
+          "quote": "Funds of USD 3 million were transferred to various money mule bank accounts in Japan. A Japanese man, who acted as the local mule herder, laundered the funds into Ghana, where the scam syndicate was based."
+        },
+        {
+          "page": 31,
+          "printed_folio": "29",
+          "paragraph": null,
+          "quote": "vIBAN holders can  also have several unique virtual IBANs, which reroute and centralise all payments into a single physical bank account"
+        }
+      ]
+    },
+    {
+      "family": "correspondent_banking",
+      "typology_id": "BA009",
+      "label": "Transaction Laundering",
+      "emergent": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 20,
+          "printed_folio": "18",
+          "paragraph": null,
+          "quote": "To facilitate receipt of transactions from victims, these companies established virtual point-of-sale accounts."
+        },
+        {
+          "page": 19,
+          "printed_folio": "17",
+          "paragraph": null,
+          "quote": "In cases of online trading fraud, criminals may also use these shell companies to open virtual point -of-sale accounts with merchant services companies to process payments and transfers from victims."
+        }
+      ]
+    },
+    {
+      "family": "correspondent_banking",
+      "typology_id": "BA001",
+      "label": "Structuring",
+      "emergent": false,
+      "confidence": "low",
+      "citations": [
+        {
+          "page": 30,
+          "printed_folio": "28",
+          "paragraph": null,
+          "quote": "Splitting the amounts between several accounts enables criminals to circumvent restrictions imposed by the PSP regarding their services such as cash withdrawal limits or remaining under operations monitoring threshold defined internally by the PSP."
+        },
+        {
+          "page": 22,
+          "printed_folio": "20",
+          "paragraph": null,
+          "quote": "CEF syndicates employ various techniques and mechanisms:  e.g., smurfing; hopping through  accounts across different financial, remittance or payment service providers"
+        }
+      ]
+    },
+    {
+      "family": "network",
+      "typology_id": "PAT007",
+      "label": "Shell Company Network",
+      "emergent": false,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 20,
+          "printed_folio": "18",
+          "paragraph": null,
+          "quote": "Underpinning this scheme was a network of 209 companies, that had laundered proceeds amongst each other."
+        },
+        {
+          "page": 23,
+          "printed_folio": "21",
+          "paragraph": null,
+          "quote": "Another 34 entities were identified to be linked to these two entities. Out of the 36 entities, 28 entities had foreign nationals as directors."
+        },
+        {
+          "page": 18,
+          "printed_folio": "16",
+          "paragraph": null,
+          "quote": "The QQAAZZ network had opened and maintained hundreds of shell company  and personal bank accounts at financial institutions throughout the world, which were used to receive money from CEF cyber criminals."
+        }
+      ]
+    },
+    {
+      "family": "network",
+      "typology_id": "PAT010",
+      "label": "Hidden Controller",
+      "emergent": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 19,
+          "printed_folio": "17",
+          "paragraph": null,
+          "quote": "Shell companies are under the control of CEF criminal s, typically through strawmen or nominee directors. Individual money mules recruited may also be instructed to act as such strawmen, and open corporate accounts in a bid to further obscure criminal ownership."
+        },
+        {
+          "page": 27,
+          "printed_folio": "25",
+          "paragraph": null,
+          "quote": "The syndicates then used the digital identity to open bank accounts remotely and exert direct control over these mule accounts to launder CEF proceeds."
+        }
+      ]
+    },
+    {
+      "family": "tbml",
+      "typology_id": "TBML008",
+      "label": "Third Party Payment Abuse",
+      "emergent": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 25,
+          "printed_folio": "23",
+          "paragraph": null,
+          "quote": "Person MS’ Irish accounts would make payment for the relevant invoices, with the goods finally shipped to the accomplice company in Nigeria."
+        },
+        {
+          "page": 24,
+          "printed_folio": "22",
+          "paragraph": null,
+          "quote": "some jurisdictions reported fraudulent wire transfers to legitimate businesses, ranging from well-known luxury or electronics brands to small local businesses for purchase of goods. These goods can be moved across borders and converted back into cash for further layering and integration."
+        }
+      ]
+    },
+    {
+      "family": "tbml",
+      "typology_id": "TBML004",
+      "label": "Phantom Shipping",
+      "emergent": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 24,
+          "printed_folio": "22",
+          "paragraph": null,
+          "quote": "The provision of overpriced or fictitious invoices for IT or consultancy services may also be part of the ML techniques adopted."
+        },
+        {
+          "page": 26,
+          "printed_folio": "24",
+          "paragraph": null,
+          "quote": "the Japanese man presented fictitious invoices to his Japanese bank, and falsely declared them to be for a legitimate bus iness activity (purchase of cacao beans)."
+        }
+      ]
+    },
+    {
+      "family": "fraud",
+      "typology_id": null,
+      "label": "Cyber-enabled fraud predicates: BEC, phishing, impersonation, online trading platform, romance and employment scams",
+      "emergent": true,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 7,
+          "printed_folio": "5",
+          "paragraph": null,
+          "quote": "Business Email Compromise (BEC) fraud: Victims receive email instructions that purport to be from their clients or suppliers’ asking victims to transfer funds to new payments accounts."
+        },
+        {
+          "page": 13,
+          "printed_folio": "11",
+          "paragraph": null,
+          "quote": "Pig butchering is a combination of romance scam and investment fraud. With this modus operandi, criminals build a trust relationship with the victim and convince them to invest savings in fraudulent cryptocurrency trading platforms."
+        }
+      ]
+    },
+    {
+      "family": "correspondent_banking",
+      "typology_id": null,
+      "label": "Mule herding: online recruitment and remote control of mule account networks at scale",
+      "emergent": true,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 18,
+          "printed_folio": "16",
+          "paragraph": null,
+          "quote": "Money mule recruiters are also known as mule ‘herders.’ Money mules may be knowingly complicit in the laundering of funds or work unwittingly (through deception), or negligently"
+        },
+        {
+          "page": 27,
+          "printed_folio": "25",
+          "paragraph": null,
+          "quote": "Criminals can rapidly expand the (often transnational) magnitude of a money mule network by leveraging digital tools to scale up mule recruitment across borders."
+        }
+      ]
+    },
+    {
+      "family": "other",
+      "typology_id": null,
+      "label": "Human trafficking into forced-labour scam call centres",
+      "emergent": true,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 15,
+          "printed_folio": "13",
+          "paragraph": null,
+          "quote": "There is also a rising link between CEF and human trafficking, where victims are lured through fake job ads to online call centres and forced to commit CEF on an industrial scale."
+        },
+        {
+          "page": 16,
+          "printed_folio": "14",
+          "paragraph": null,
+          "quote": "On arrival, however, they were locked up and forced to work 14-hour days as scammers."
+        }
+      ]
+    },
+    {
+      "family": "correspondent_banking",
+      "typology_id": null,
+      "label": "Virtual IBAN abuse to obscure the master account and beneficial owner",
+      "emergent": true,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 30,
+          "printed_folio": "28",
+          "paragraph": null,
+          "quote": "several jurisdictions have flagged the abuse of vIBANs as a tool used for CEF-related ML."
+        },
+        {
+          "page": 32,
+          "printed_folio": "30",
+          "paragraph": null,
+          "quote": "criminals can abuse vIBANs to mask ultimate beneficial ownership information and obscure the movement of illicit monies."
+        }
+      ]
+    },
+    {
+      "family": "crypto",
+      "typology_id": null,
+      "label": "Virtual-asset laundering of fraud proceeds via unhosted wallets, peel chains, mixers and Bitcoin ATMs",
+      "emergent": true,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 25,
+          "printed_folio": "23",
+          "paragraph": null,
+          "quote": "The use of unhosted wallets, peer-to-peer transactions, peel chains, and high -risk exchanges are the preferred methods to quickly launder VA-related CEF-proceeds out of a jurisdiction, and are often used in combination."
+        },
+        {
+          "page": 18,
+          "printed_folio": "16",
+          "paragraph": null,
+          "quote": "converted to cryptocurrency using “tumbling” services designed to hide the original source of the funds."
+        }
+      ]
+    },
+    {
+      "family": "other",
+      "typology_id": null,
+      "label": "Laundering through social media, streaming and gaming platform credits and gifts",
+      "emergent": true,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 33,
+          "printed_folio": "31",
+          "paragraph": null,
+          "quote": "The widespread use of social media, streaming or gaming platforms allows users to receive donations, gifts, tokens or credits from viewers and the public. Criminals may take advantage of the absence of AML/CFT requirements and use such platforms to launder proceeds of crime."
+        },
+        {
+          "page": 34,
+          "printed_folio": "32",
+          "paragraph": null,
+          "quote": "The funds were used to recharge user accounts held at the streaming platform with “coins” (serving as a type of native currency among users of the platform) that can be used to purchase virtual gifts."
+        }
+      ]
+    },
+    {
+      "family": "fraud",
+      "typology_id": null,
+      "label": "Stolen, synthetic and relinquished digital identities used to open and directly control accounts",
+      "emergent": true,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 27,
+          "printed_folio": "25",
+          "paragraph": null,
+          "quote": "Criminals then directly set up and control accounts  using these stolen or falsified identities."
+        },
+        {
+          "page": 28,
+          "printed_folio": "26",
+          "paragraph": null,
+          "quote": "accounts were created with VASPs in the victim’s name, without their knowledge. The criminals did this by using data stolen through the remote access tools."
+        }
+      ]
+    },
+    {
+      "family": "correspondent_banking",
+      "typology_id": null,
+      "label": "Small-value test transactions before moving the bulk of proceeds",
+      "emergent": true,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 21,
+          "printed_folio": "19",
+          "paragraph": null,
+          "quote": "criminals may perform “tests” by carrying out small value transactions so that they can change the destination of the funds if the tests fail."
+        },
+        {
+          "page": 30,
+          "printed_folio": "28",
+          "paragraph": null,
+          "quote": "by trying first to carry out transactions of small amounts and change the funds destination if necessary. They then transfer fraudulently acquired funds quickly to one or several accounts."
+        }
+      ]
+    },
+    {
+      "family": "correspondent_banking",
+      "typology_id": null,
+      "label": "Cash-out by ATM withdrawal and cross-border cash couriers after layering",
+      "emergent": true,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 23,
+          "printed_folio": "21",
+          "paragraph": null,
+          "quote": "Multiple case studies in this report feature the withdrawal of cash by mules and CEF syndicates. The movement of cash outside of FIs can be difficult to track."
+        },
+        {
+          "page": 23,
+          "printed_folio": "21",
+          "paragraph": null,
+          "quote": "These funds may be couriered across borders by cash couriers and be deposited for further laundering."
+        }
+      ]
+    }
+  ],
+  "actors": [
+    {
+      "name": "QQAAZZ",
+      "actor_type": "network",
+      "aliases": [
+        "QQAAZZ network",
+        "QQAAZZ criminal network"
+      ],
+      "jurisdiction": null,
+      "role": "Professional laundering network advertising a global bank-drops service on Russian-speaking cybercrime forums; hundreds of shell and personal accounts, fee up to 50 percent; 20 arrests November 2020",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 18,
+          "printed_folio": "16",
+          "paragraph": null,
+          "quote": "The QQAAZZ advertised its services as a “global, complicit bank drops service” on Russian -speaking online cybercriminal forums"
+        }
+      ]
+    },
+    {
+      "name": "Cyber-enabled fraud syndicates",
+      "actor_type": "category",
+      "aliases": [
+        "CEF syndicates",
+        "CEF criminal syndicates"
+      ],
+      "jurisdiction": null,
+      "role": "Transnational organised crime groups structured into leadership, ML operations (facilitators, herders) and CEF operations (hackers, catchers) sub-groups",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 5,
+          "printed_folio": "3",
+          "paragraph": null,
+          "quote": "CEF criminal syndicates are often well structured into distinct sub-groups with specialised areas of criminal expertise, including money laundering."
+        },
+        {
+          "page": 13,
+          "printed_folio": "11",
+          "paragraph": null,
+          "quote": "CEF and related ML are often executed by transnational organised criminal groups or syndicates."
+        }
+      ]
+    },
+    {
+      "name": "Professional money laundering networks",
+      "actor_type": "category",
+      "aliases": [
+        "professional ML groups",
+        "professional ML networks"
+      ],
+      "jurisdiction": null,
+      "role": "Laundering-as-a-service providers, either inside the CEF syndicate or a separate de-centralised organisation under the crime-as-a-service model",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 17,
+          "printed_folio": "15",
+          "paragraph": null,
+          "quote": "The professional ML groups may be part of the CEF criminal syndicate, or a separate de- centralised organisation that provides ML services under the “crime -as-a-service” model (professional ML networks)."
+        }
+      ]
+    },
+    {
+      "name": "Mule herders",
+      "actor_type": "category",
+      "aliases": [
+        "money mule recruiters",
+        "herders"
+      ],
+      "jurisdiction": null,
+      "role": "Recruit witting and unwitting money mules, collect cards and credentials, and control the mule accounts on behalf of the syndicate",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 18,
+          "printed_folio": "16",
+          "paragraph": null,
+          "quote": "It is challenging to identify the mule’s controller (i.e., mule herder), who recruit both witting and unwitt ing participants, or determine the origin of fraudulent funds."
+        }
+      ]
+    },
+    {
+      "name": "Third-party professional enablers",
+      "actor_type": "category",
+      "aliases": [
+        "professional enablers"
+      ],
+      "jurisdiction": null,
+      "role": "Lawyers, accountants, tax advisors, company secretaries and bankers who lend laundering transactions an air of legitimacy, for example in creating powers of attorney",
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 17,
+          "printed_folio": "15",
+          "paragraph": null,
+          "quote": "Jurisdictions have observed the involvement of professional ML groups as well as third- party professional enablers including lawyers, accountants, tax adviso rs, company secretaries and bankers."
+        }
+      ]
+    },
+    {
+      "name": "DPRK IT workers linked to the Munitions Industry Department",
+      "actor_type": "category",
+      "aliases": [
+        "DPRK IT worker"
+      ],
+      "jurisdiction": "KP",
+      "role": "Earn foreign currency for weapons programmes by selling voice phishing hacking applications and harvested personal data to CEF criminal groups",
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 17,
+          "printed_folio": "15",
+          "paragraph": null,
+          "quote": "information technology (IT) workers of the Democratic People’s Republic of Korea linked to the Munitions Industry Department have been earning foreign currency by selling voice phishing hacking applications and operating multiple overseas servers and Internet Protocol addresses."
+        }
+      ]
+    }
+  ],
+  "indicators": [],
+  "suggested_desks": [
+    "correspondent_desk",
+    "fraud_desk",
+    "fiu_liaison"
+  ],
+  "overall_confidence": "high",
+  "extraction_notes": "Golden label. Printed folio is PDF page minus 2 (pages 1-3 and 71-72 carry none). Pages 35-64 are national responses, international co-operation and conclusions; Annex A (65-68) is risk indicators and Annex B controls, none labelled as typologies. BA002 is medium because the word funnel never appears: labelled on the mules-to-herder-account pattern (Box 14) and the vIBAN centralisation. BA001 kept at low: smurfing (p22) and threshold splitting across PSP accounts (p30) are electronic, not the cash deposits BA001 describes. Virtual-asset laundering marked emergent rather than CMI010, which is a sanctions twin; no sanctions framing here. Fictitious invoices labelled TBML004; overpriced invoices appear once and TBML001 is not labelled. Unlicensed remitters and hawala, deepfakes and PSP displacement each appear once or twice and are not labelled. Mr. O, Person MS, the Japanese mule herder and the Operation Falcon suspects are anonymised case-study parties, not actors. Jurisdictions are where laundering or the syndicate sat; Malaysia, Australia, Saudi Arabia, Brazil, Sri Lanka, Hong Kong and Portugal appear as enforcement or victim states only."
+}

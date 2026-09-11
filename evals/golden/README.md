@@ -62,6 +62,47 @@ is out of scope for extraction.
   typology only when the advisory is about that behaviour, not when it
   mentions it once.
 
+## State of the set (2026-09-11)
+
+All twenty labelled and mechanically clean: every label validates against
+schema 1.3.0, and all 797 citations resolve to the page they name (a handful
+match only after pypdf's mid-word spacing is normalised, which the checker
+reports separately). Three were drafted in-session, seventeen by subagents
+working from this README and the first three as exemplars. **Every one is a
+draft awaiting owner review**; `label_status` says which.
+
+What the set contains: 214 governed typology mentions across 38 of the
+library's 57 typologies, 106 emergent labels, 159 actors.
+
+| Family | Exercised | Never appears |
+|---|---|---|
+| sanctions | 10 of 10 | - |
+| tbml | 10 of 12 | TBML002 (borrows TBML001's doctrine), TBML011 |
+| correspondent_banking | 8 of 10 | BA006, BA010 |
+| network | 7 of 15 | the five FND foundation pipes, PAT004, PAT006, PAT008 |
+| capital_markets | 3 of 10 | CM003, CM004, CM006-CM010 |
+
+Two coverage facts worth knowing before scoring. The five FND entries are
+foundation capabilities rather than typologies an advisory describes, so
+their absence is correct. Capital markets is genuinely thin: one document
+(ADV-2026-0018) carries the family, so precision and recall for CM ids will
+rest on a single advisory and should not be quoted as a family-level number.
+
+**The emergent labels are not normalised, and this constrains the scorer.**
+106 emergent labels, 105 distinct strings. Only one string recurs verbatim
+across advisories, yet clustering finds the same technique named three ways
+(Black Market Peso Exchange in 0001, 0003 and 0008), and twice more for
+hawala and for cargo blending. An exact-string scorer will therefore score
+emergent recall near zero and report a defect that is in the labels, not the
+agent. Either normalise the emergent vocabulary across the set first, or
+score emergent matches on token overlap and say so in the published number.
+
+Genuine Knowledge Centre gaps the set surfaces, each described by more than
+one publisher: Black Market Peso Exchange and mirror-swap value transfer,
+informal value transfer through hawala, blending or relabelling cargo to
+disguise sanctioned origin, false end-user and end-use declarations, and
+professional enablers as a class.
+
 ## Rules
 
 - Never edit `advisory_list.json` by hand to change a hash or a date. Re-fetch

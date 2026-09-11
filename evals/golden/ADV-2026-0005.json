@@ -1,0 +1,537 @@
+{
+  "schema_version": "1.3.0",
+  "advisory_id": "ADV-2026-0005",
+  "source": {
+    "source_type": "fatf",
+    "publisher": "FATF",
+    "title": "Virtual Assets Red Flag Indicators of Money Laundering and Terrorist Financing",
+    "published_on": "2020-09-01",
+    "published_on_precision": "month",
+    "url": "https://www.fatf-gafi.org/content/dam/fatf-gafi/reports/Virtual-Assets-Red-Flag-Indicators.pdf",
+    "document_sha256": "d758cb6128239f3628a0aff5e1cc1bbdecd38973338f6c7784a8100dc59841b3",
+    "page_count": 24
+  },
+  "summary": "GOLDEN LABEL, hand-drafted against the PDF. FATF red flag indicator report on the misuse of virtual assets, drawn from over one hundred case studies contributed 2017-2020, grouped by transaction size and frequency, transaction patterns, anonymity, sender and recipient profile, source of funds or wealth, and geographical risk. The techniques it describes are mostly crypto-native and absent from the governed library: mixing and tumbling services (Helix), conversion across multiple virtual assets and exchanges, immediate swaps into anonymity-enhanced coins, unregistered peer-to-peer exchange and unlicensed money transmission, unhosted and hardware wallets carried across borders, VASPs relocating to jurisdictions without AML/CFT rules, darknet marketplace exposure (AlphaBay, DeepDotWeb), virtual asset ATMs, crypto-to-plastic card cash-out, shell wallets controlled from one IP address, and forged identity documents to defeat VASP KYC. Conventional typologies carry over: structuring below thresholds, mule accounts recruited by professional launderers or converted from scam victims, funnel-style accumulation wallets, rapid movement through multiple VASPs, layering, and shell companies holding the bank accounts. Sanctions evasion and terrorist financing are named as observed uses but not developed. Thirteen case studies sourced from South Africa, South Korea, the Czech Republic, the Cayman Islands, the United States, Russia, Italy and Finland.",
+  "jurisdictions": [
+    "ZA",
+    "KR",
+    "CZ",
+    "KY",
+    "US",
+    "RU",
+    "IT",
+    "FI"
+  ],
+  "typologies": [
+    {
+      "family": "sanctions",
+      "typology_id": "CMI010",
+      "label": "Cryptocurrency Evasion",
+      "emergent": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 6,
+          "printed_folio": "4",
+          "paragraph": null,
+          "quote": "Notwithstanding, criminals did make use of VAs to evade financial sanctions and to raise funds to support terrorism."
+        },
+        {
+          "page": 14,
+          "printed_folio": "12",
+          "paragraph": null,
+          "quote": "IP addresses from sanctioned jurisdictions, or IP addresses previously flagged as suspicious."
+        }
+      ]
+    },
+    {
+      "family": "correspondent_banking",
+      "typology_id": "BA001",
+      "label": "Structuring",
+      "emergent": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 7,
+          "printed_folio": "5",
+          "paragraph": null,
+          "quote": "Structuring VA transactions (e.g. exchange or transfer) in small amounts, or in amounts under record-keeping or reporting thresholds, similar to structuring cash transactions."
+        },
+        {
+          "page": 20,
+          "printed_folio": "18",
+          "paragraph": null,
+          "quote": "he and others imported into the US a total of over USD 1 million"
+        }
+      ]
+    },
+    {
+      "family": "correspondent_banking",
+      "typology_id": "BA002",
+      "label": "Funnel Accounts",
+      "emergent": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 10,
+          "printed_folio": "8",
+          "paragraph": null,
+          "quote": "Incoming transactions from many unrelated wallets in relatively small amounts (accumulation of funds) with subsequent transfer to another wallet or full exchange for fiat currency."
+        }
+      ]
+    },
+    {
+      "family": "correspondent_banking",
+      "typology_id": "BA003",
+      "label": "Mule Accounts",
+      "emergent": false,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 8,
+          "printed_folio": "6",
+          "paragraph": null,
+          "quote": "indicating the potential use of money mules by professional money launderers to launder the illicit proceeds."
+        },
+        {
+          "page": 10,
+          "printed_folio": "8",
+          "paragraph": null,
+          "quote": "the personal account holder appeared to be a money mule recruited by criminals on a social media platform to help receive claimed payments for goods sold online."
+        },
+        {
+          "page": 16,
+          "printed_folio": "14",
+          "paragraph": null,
+          "quote": "Such persons could be money mules recruited by professional money launderers, or scam victims turned mules who are deceived into transferring illicit proceeds without knowledge of their origins."
+        }
+      ]
+    },
+    {
+      "family": "correspondent_banking",
+      "typology_id": "BA005",
+      "label": "Rapid Movement",
+      "emergent": false,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 8,
+          "printed_folio": "6",
+          "paragraph": null,
+          "quote": "Transferring VAs immediately to multiple VASPs, especially to VASPs registered or operated in another jurisdiction where"
+        },
+        {
+          "page": 8,
+          "printed_folio": "6",
+          "paragraph": null,
+          "quote": "withdrawing the VAs from a VASP immediately to a private wallet. This effectively turns the exchange/VASP into an ML mixer."
+        }
+      ]
+    },
+    {
+      "family": "correspondent_banking",
+      "typology_id": "BA008",
+      "label": "Layering",
+      "emergent": false,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 6,
+          "printed_folio": "4",
+          "paragraph": null,
+          "quote": "either with sales transacted directly in VAs or the use of VAs as an ML layering technique."
+        },
+        {
+          "page": 9,
+          "printed_folio": "7",
+          "paragraph": null,
+          "quote": "attempted to obfuscate the source of funds by transferring funds an additional 55 times through 48 separate accounts"
+        }
+      ]
+    },
+    {
+      "family": "network",
+      "typology_id": "PAT007",
+      "label": "Shell Company Network",
+      "emergent": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 18,
+          "printed_folio": "16",
+          "paragraph": null,
+          "quote": "to other Bitcoin wallets, as well as to bank accounts that they controlled in the names of shell companies."
+        },
+        {
+          "page": 17,
+          "printed_folio": "15",
+          "paragraph": null,
+          "quote": "Lack of transparency or insufficient information on the origin and owners of the funds, such as those involving the use of shell companies"
+        }
+      ]
+    },
+    {
+      "family": "sanctions",
+      "typology_id": "SAN008",
+      "label": "High Risk Jurisdictions",
+      "emergent": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 19,
+          "printed_folio": "17",
+          "paragraph": null,
+          "quote": "have exploited the gaps in AML/CFT regimes on VAs and VASPs by moving their illicit funds to VASPs domiciled or operated in jurisdictions with"
+        },
+        {
+          "page": 19,
+          "printed_folio": "17",
+          "paragraph": null,
+          "quote": "Customer sends funds to VASPs operating in jurisdictions that have no VA regulation, or have not implemented AML/CFT controls."
+        }
+      ]
+    },
+    {
+      "family": "crypto",
+      "typology_id": null,
+      "label": "Mixing and tumbling services",
+      "emergent": true,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 12,
+          "printed_folio": "10",
+          "paragraph": null,
+          "quote": "Transactions making use of mixing and tumbling services, suggesting an intent to obscure the flow of illicit funds"
+        },
+        {
+          "page": 13,
+          "printed_folio": "11",
+          "paragraph": null,
+          "quote": "A darknet-based VASP, Helix, provided a mixing or tumbling service that helped customers conceal the source or owners of VAs"
+        }
+      ]
+    },
+    {
+      "family": "crypto",
+      "typology_id": null,
+      "label": "Chain hopping: conversion across multiple virtual assets and exchanges",
+      "emergent": true,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 10,
+          "printed_folio": "8",
+          "paragraph": null,
+          "quote": "Converting a large amount of fiat currency into VAs, or a large amount of one type of VA into other types of VAs, with no logical business explanation."
+        },
+        {
+          "page": 9,
+          "printed_folio": "7",
+          "paragraph": null,
+          "quote": "The stolen funds in fiat currency were first exchanged to three different types of VAs and then deposited to the suspect’s VA wallet held with a local VASP."
+        }
+      ]
+    },
+    {
+      "family": "crypto",
+      "typology_id": null,
+      "label": "Anonymity-enhanced cryptocurrency and privacy coin swaps",
+      "emergent": true,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 11,
+          "printed_folio": "9",
+          "paragraph": null,
+          "quote": "Moving a VA that operates on a public, transparent blockchain, such as Bitcoin, to a centralised exchange and then immediately trading it for an AEC or privacy coin."
+        }
+      ]
+    },
+    {
+      "family": "crypto",
+      "typology_id": null,
+      "label": "Unregistered peer-to-peer exchange and unlicensed money transmission",
+      "emergent": true,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 11,
+          "printed_folio": "9",
+          "paragraph": null,
+          "quote": "Customers that operate as an unregistered/unlicensed VASP on peer-to-peer (P2P) exchange websites"
+        },
+        {
+          "page": 20,
+          "printed_folio": "18",
+          "paragraph": null,
+          "quote": "The defendant advertised his services on websites for VA users, meeting some customers in person to accept cash in exchange for VAs."
+        }
+      ]
+    },
+    {
+      "family": "crypto",
+      "typology_id": null,
+      "label": "Unhosted and hardware wallets to obscure and transport value across borders",
+      "emergent": true,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 12,
+          "printed_folio": "10",
+          "paragraph": null,
+          "quote": "The use of decentralised /unhosted, hardware or paper wallets to transport VAs across borders."
+        },
+        {
+          "page": 14,
+          "printed_folio": "12",
+          "paragraph": null,
+          "quote": "they were first transferred to decentralised Bitcoin wallets held by the criminals concerned, before being further transferred to other Bitcoin wallets at different exchanges. This increases the difficulty of tracing and tracking the funds."
+        }
+      ]
+    },
+    {
+      "family": "crypto",
+      "typology_id": null,
+      "label": "VASP relocation to jurisdictions without AML/CFT regulation",
+      "emergent": true,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 20,
+          "printed_folio": "18",
+          "paragraph": null,
+          "quote": "March 2018, the VASP announced its intentions to relocate its headquarters to Jurisdiction C in Europe (a jurisdiction which had not yet introduced a comprehensive AML/CFT regime in relation to VAs and VASPs at the time)."
+        }
+      ]
+    },
+    {
+      "family": "crypto",
+      "typology_id": null,
+      "label": "Darknet marketplace proceeds and wallet exposure",
+      "emergent": true,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 12,
+          "printed_folio": "10",
+          "paragraph": null,
+          "quote": "Funds deposited or withdrawn from a VA address or wallet with direct and indirect exposure links to known suspicious sources, including darknet marketplaces, mixing/tumbling services"
+        },
+        {
+          "page": 13,
+          "printed_folio": "11",
+          "paragraph": null,
+          "quote": "AlphaBay, the largest criminal darknet market dismantled by authorities in 2017, was used by hundreds of thousands of people to buy and sell illegal drugs"
+        }
+      ]
+    },
+    {
+      "family": "crypto",
+      "typology_id": null,
+      "label": "Virtual asset ATM and kiosk cash-in",
+      "emergent": true,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 12,
+          "printed_folio": "10",
+          "paragraph": null,
+          "quote": "despite the higher transaction fees and including those commonly used by mules or scam victims"
+        },
+        {
+          "page": 16,
+          "printed_folio": "14",
+          "paragraph": null,
+          "quote": "victims were instructed to exchange fiat currency to Bitcoin using a VA ATM and send the funds to an address specified by the criminals."
+        }
+      ]
+    },
+    {
+      "family": "crypto",
+      "typology_id": null,
+      "label": "Crypto-to-plastic: card and prepaid-card cash-out of virtual assets",
+      "emergent": true,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 17,
+          "printed_folio": "15",
+          "paragraph": null,
+          "quote": "The use of one or multiple credit and/or debit cards that are linked to a VA wallet to withdraw large amounts of fiat currency (crypto-to-plastic), or funds for purchasing VAs are sourced from cash deposits into credit cards."
+        },
+        {
+          "page": 18,
+          "printed_folio": "16",
+          "paragraph": null,
+          "quote": "were also used to purchase prepaid cards, which could be exchanged for VAs."
+        }
+      ]
+    },
+    {
+      "family": "crypto",
+      "typology_id": null,
+      "label": "Shell wallets controlled from a common IP or device",
+      "emergent": true,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 12,
+          "printed_folio": "10",
+          "paragraph": null,
+          "quote": "A large number of seemingly unrelated VA wallets controlled from the same IP-address (or MAC -address), which may involve the use of shell wallets registered to different users to conceal their relation to each other."
+        }
+      ]
+    },
+    {
+      "family": "crypto",
+      "typology_id": null,
+      "label": "Forged identity documents to circumvent VASP KYC",
+      "emergent": true,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 18,
+          "printed_folio": "16",
+          "paragraph": null,
+          "quote": "The launderers used doctored photographs and falsified identification documents in some cases to circumvent KYC procedures at the VA exchanges."
+        },
+        {
+          "page": 14,
+          "printed_folio": "12",
+          "paragraph": null,
+          "quote": "Customer has provided forged documents or has edited photographs and/or identification documents as part of the on-boarding process."
+        }
+      ]
+    }
+  ],
+  "actors": [
+    {
+      "name": "Professional money launderers",
+      "actor_type": "category",
+      "aliases": [
+        "professional ML networks"
+      ],
+      "jurisdiction": null,
+      "role": "Professional laundering networks exploiting virtual assets to transfer, collect or layer proceeds, recruiting money mules to buy and move VAs",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 8,
+          "printed_folio": "6",
+          "paragraph": null,
+          "quote": "indicating the potential use of money mules by professional money launderers to launder the illicit proceeds."
+        },
+        {
+          "page": 16,
+          "printed_folio": "14",
+          "paragraph": null,
+          "quote": "Such persons could be money mules recruited by professional money launderers"
+        }
+      ]
+    },
+    {
+      "name": "AlphaBay",
+      "actor_type": "organisation",
+      "aliases": [
+        "Alpha Bay"
+      ],
+      "jurisdiction": null,
+      "role": "Largest criminal darknet marketplace, a TOR hidden service facilitating over USD 1 billion in VA transactions 2015-2017; dismantled July 2017",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 13,
+          "printed_folio": "11",
+          "paragraph": null,
+          "quote": "AlphaBay, the largest criminal darknet market dismantled by authorities in 2017, was used by hundreds of thousands of people to buy and sell illegal drugs"
+        }
+      ]
+    },
+    {
+      "name": "Helix",
+      "actor_type": "organisation",
+      "aliases": [],
+      "jurisdiction": null,
+      "role": "Darknet-based mixing and tumbling service that moved over 350,000 Bitcoin and partnered with AlphaBay; operator charged February 2020",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 13,
+          "printed_folio": "11",
+          "paragraph": null,
+          "quote": "A darknet-based VASP, Helix, provided a mixing or tumbling service that helped customers conceal the source or owners of VAs"
+        }
+      ]
+    },
+    {
+      "name": "DeepDotWeb",
+      "actor_type": "organisation",
+      "aliases": [
+        "DDW",
+        "Deep Dot Web"
+      ],
+      "jurisdiction": null,
+      "role": "Darknet referral website whose owners took over USD 15 million in Bitcoin kickbacks and laundered them through wallets and shell-company bank accounts; seized May 2019",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 18,
+          "printed_folio": "16",
+          "paragraph": null,
+          "quote": "The alleged owners and operators of DDW were charged in an ML conspiracy related to millions of dollars in kickbacks they received for referring individuals to darknet marketplaces from the DDW website."
+        }
+      ]
+    },
+    {
+      "name": "Unregistered VASP operators and peer-to-peer dealers",
+      "actor_type": "category",
+      "aliases": [
+        "unlicensed money transmitters"
+      ],
+      "jurisdiction": null,
+      "role": "Individuals operating as unregistered VASPs on P2P exchange sites or selling VAs for cash at a premium without money-transmitter registration",
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 11,
+          "printed_folio": "9",
+          "paragraph": null,
+          "quote": "Customers that operate as an unregistered/unlicensed VASP on peer-to-peer (P2P) exchange websites"
+        },
+        {
+          "page": 20,
+          "printed_folio": "18",
+          "paragraph": null,
+          "quote": "The defendant advertised his services on websites for VA users, meeting some customers in person to accept cash in exchange for VAs."
+        }
+      ]
+    },
+    {
+      "name": "Money mules and scam victims turned mules",
+      "actor_type": "category",
+      "aliases": [
+        "VA money mule"
+      ],
+      "jurisdiction": null,
+      "role": "Persons unfamiliar with VA technology, often older or financially vulnerable, recruited by launderers or deceived by investment scams into moving illicit proceeds",
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 16,
+          "printed_folio": "14",
+          "paragraph": null,
+          "quote": "A customer significantly older than the average age of platform users opens an account and engages in large numbers of transactions, suggesting their potential role as a VA money mule or a victim of elder financial exploitation."
+        }
+      ]
+    }
+  ],
+  "indicators": [],
+  "suggested_desks": [
+    "fiu_liaison",
+    "sanctions_desk",
+    "correspondent_desk"
+  ],
+  "overall_confidence": "high",
+  "extraction_notes": "Golden label. Pages 1-5, 21-24 are cover, contents, acronyms, introduction, conclusion, references and back matter; printed folio is the PDF index minus two for pages 4-22 and absent elsewhere. The whole report is a list of red flags, so the convention that indicators are not typologies was applied as: label a behaviour when the report gives it a heading, a case study or repeated treatment, not a single bullet. CMI010 is the library's only crypto entry and is defined as sanctions evasion; the report names VA sanctions evasion only in passing (p6 trends box, sanctioned IPs p14, sanctioned addresses p17), so it is medium and everything crypto-native is emergent in the crypto family, one label per technique. BA001 is medium because the report itself equates VA structuring with cash structuring and case 13 is genuine sub-USD 10,000 cash importation; the correspondent-banking family is applied to VA flows by analogy the report draws explicitly (p7). BA002 rests on the accumulation-wallet bullet (p10) and the DDW pattern of 40,000 deposits out through 2,700 withdrawals; medium because no case is framed as a funnel account. PAT007 chosen over TBML009 because the shell companies hold bank accounts for laundering, not trade. SAN008 is applied in its general high-risk-jurisdiction sense to the geographic risk section, though the report explicitly declines to name high-risk jurisdictions (p19), so no jurisdiction enters the list on risk grounds. The VASP relocation case (p20, jurisdictions A-D) is labelled separately from SAN008 because the actor moving is the VASP, not the customer. Not labelled: ransomware, gambling and ICO proceeds (bullets only, source-of-funds rather than technique), terrorist financing (named, never developed), PAT005 shared residential address in case 1 (single indicator of a mule ring), BA006 previously inactive account (one line). The Finland investment scam (case 10) is folded into BA003 and the mule actor rather than labelled as a fraud typology, since the report's interest is the laundering leg. Jurisdictions are the eight case-contributing states, on the reading that the case sits where it was investigated and reported; KY and FI are the weakest, since the Cayman case was an attempted theft frozen abroad and the Finnish victims were pensioners, but both cases and their mules ran there. Case 9's Asia, Europe, Africa and Middle East, case 13's Asian exchange and US-bordering jurisdiction, and case 3's onward account in the Czech Republic (already listed) are not resolved further. France appears only as FATF's address. Actors: AlphaBay, Helix and DeepDotWeb are named criminal enterprises with no stated jurisdiction; the Helix operator, DDW owners, bitcoin dealer, and relocating VASP are anonymised and not labelled. FATF, FIUs, LEAs and reporting entities are not actors."
+}

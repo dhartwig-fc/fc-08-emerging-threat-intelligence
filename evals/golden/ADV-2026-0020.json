@@ -1,0 +1,296 @@
+{
+  "schema_version": "1.3.0",
+  "advisory_id": "ADV-2026-0020",
+  "source": {
+    "source_type": "wolfsberg",
+    "publisher": "Wolfsberg Group / ICC / BAFT",
+    "title": "The Wolfsberg Group, ICC and BAFT Trade Finance Principles (2019 amendment)",
+    "published_on": "2019-01-01",
+    "published_on_precision": "year",
+    "url": "https://db.wolfsberg-group.org/assets/5c770f68-6277-4443-931b-7750478f08e7/Trade%20Finance%20Principles.pdf",
+    "document_sha256": "6a4a9e7a9f2d160e741c887859e75e182e746fe71c0bf476b5200a6ac46c5e68",
+    "page_count": 83
+  },
+  "summary": "GOLDEN LABEL, hand-drafted against the PDF. Industry control guidance, not an advisory: the joint Wolfsberg, ICC and BAFT principles for managing financial crime risk in trade finance, with product appendices on documentary credits, bills for collection, guarantees and standby letters of credit, open account receivables purchase, and bank-to-bank trade loans. The core paper names the TBML value-transfer methods (over and under invoicing, multiple invoicing, short and over shipping, obfuscation of the type of goods, phantom shipping), collusion between connected buyer and seller, trade-based sanctions and embargoes, dual-use goods and export controls, diversion-risk transit countries, and concealment of the end user through intermediaries. Each appendix carries a risk-indicator table repeating third-party funding of settlement, connected parties, unexplained third parties, and attempts to disguise the countries in the trade. Describes no threat actors and names no risk jurisdictions.",
+  "jurisdictions": [],
+  "typologies": [
+    {
+      "family": "tbml",
+      "typology_id": "TBML001",
+      "label": "Over Invoicing",
+      "emergent": false,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 12,
+          "printed_folio": "12",
+          "paragraph": null,
+          "quote": "Over Invoicing By misrepresenting the price of the goods in the invoice and other documentation (stating it at above the true value) the seller gains excess value as a result of the payment."
+        },
+        {
+          "page": 44,
+          "printed_folio": "44",
+          "paragraph": null,
+          "quote": "In determining whether transactions are unusual due to over or under invoicing (or any other circumstances where there is misrepresentation of value) it needs to be understood that Banks are not generally equipped to make this assessment."
+        }
+      ]
+    },
+    {
+      "family": "tbml",
+      "typology_id": "TBML002U",
+      "label": "Under Invoicing",
+      "emergent": false,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 12,
+          "printed_folio": "12",
+          "paragraph": null,
+          "quote": "Under Invoicing By misrepresenting the price of the goods in the invoice and other documentation (stating it as below the true value) the buyer gains excess value when the payment is made."
+        }
+      ]
+    },
+    {
+      "family": "tbml",
+      "typology_id": "TBML003",
+      "label": "Multiple Invoicing",
+      "emergent": false,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 12,
+          "printed_folio": "12",
+          "paragraph": null,
+          "quote": "By issuing more than one invoice for the same goods a seller can justify the receipt of multiple payments."
+        }
+      ]
+    },
+    {
+      "family": "tbml",
+      "typology_id": "TBML004",
+      "label": "Phantom Shipping",
+      "emergent": false,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 12,
+          "printed_folio": "12",
+          "paragraph": null,
+          "quote": "Phantom Shipping No goods are shipped and all documentation is completely falsified."
+        }
+      ]
+    },
+    {
+      "family": "tbml",
+      "typology_id": "TBML005",
+      "label": "False Description Of Goods",
+      "emergent": false,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 12,
+          "printed_folio": "12",
+          "paragraph": null,
+          "quote": "This may simply involve omitting information from the relevant documentation or deliberately disguising or falsifying it."
+        },
+        {
+          "page": 45,
+          "printed_folio": "45",
+          "paragraph": null,
+          "quote": "Goods descriptions differ significantly"
+        }
+      ]
+    },
+    {
+      "family": "tbml",
+      "typology_id": "TBML007",
+      "label": "Dual Use Goods",
+      "emergent": false,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 16,
+          "printed_folio": "16",
+          "paragraph": null,
+          "quote": "Dual use items are goods, software, technology, documents and diagrams, which may have both civil and military applications. Identification of dual use goods in a trade transaction is challenging"
+        },
+        {
+          "page": 21,
+          "printed_folio": "21",
+          "paragraph": null,
+          "quote": "goods descriptions may appear in the documents using a wording which does not allow the identification of such goods as"
+        }
+      ]
+    },
+    {
+      "family": "tbml",
+      "typology_id": "TBML010",
+      "label": "Sanctions Evasion Through Trade",
+      "emergent": false,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 14,
+          "printed_folio": "14",
+          "paragraph": null,
+          "quote": "Trade based sanctions : Embargoes on the provision of certain g oods, services, or expertise to certain countries."
+        },
+        {
+          "page": 45,
+          "printed_folio": "45",
+          "paragraph": null,
+          "quote": "Any attempt to disguise or circumvent countries involved in the actual trade"
+        }
+      ]
+    },
+    {
+      "family": "tbml",
+      "typology_id": "TBML008",
+      "label": "Third Party Payment Abuse",
+      "emergent": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 45,
+          "printed_folio": "45",
+          "paragraph": null,
+          "quote": "Third parties are funding or part funding the DC value (just in time account credits to the settlement account)"
+        },
+        {
+          "page": 31,
+          "printed_folio": "31",
+          "paragraph": null,
+          "quote": "Unexplained Third Party:  Person or entity that appears in a transaction or payment instruction where the re has been no previous identification of that person or entity in the structure or documentation relating to the transaction."
+        },
+        {
+          "page": 40,
+          "printed_folio": "40",
+          "paragraph": null,
+          "quote": "in the event that Party Y requests transfer of funds to an account with a bank not involved in the DC, that bank's name should be subjected to screening by Bank A."
+        }
+      ]
+    },
+    {
+      "family": "network",
+      "typology_id": "PAT009",
+      "label": "Related Party Trading",
+      "emergent": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 12,
+          "printed_folio": "12",
+          "paragraph": null,
+          "quote": "Generally, these techniques rely upon collusion between the seller and buyer, since the intended outcome from such arrangements is obtaining a benefit in e xce ss of what would be expected from an arm's length transaction. The collusion may arise because both parties are controlled by the same persons."
+        },
+        {
+          "page": 45,
+          "printed_folio": "45",
+          "paragraph": null,
+          "quote": "Connected applicant and beneficiary"
+        }
+      ]
+    },
+    {
+      "family": "correspondent_banking",
+      "typology_id": "BA002",
+      "label": "Funnel Accounts",
+      "emergent": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 30,
+          "printed_folio": "30",
+          "paragraph": null,
+          "quote": "Often the funnel accounts are not in the trade financing bank, with transfers of money from funnel accounts being made against false invoice s or processes to bring the money into the account of the trade relationship in order to fund the legitimate trade"
+        }
+      ]
+    },
+    {
+      "family": "sanctions",
+      "typology_id": "SAN003",
+      "label": "Transshipment",
+      "emergent": false,
+      "confidence": "low",
+      "citations": [
+        {
+          "page": 21,
+          "printed_folio": "21",
+          "paragraph": null,
+          "quote": "countries which are technology producers or are \"diversion risk\" countries used for the transit or re-export of goods may well not appe ar on any warning lists."
+        },
+        {
+          "page": 38,
+          "printed_folio": "38",
+          "paragraph": null,
+          "quote": "The country where goods are shipped from, disclosed transhipment points and destination points"
+        }
+      ]
+    },
+    {
+      "family": "sanctions",
+      "typology_id": "SAN008",
+      "label": "High Risk Jurisdictions",
+      "emergent": false,
+      "confidence": "low",
+      "citations": [
+        {
+          "page": 13,
+          "printed_folio": "13",
+          "paragraph": null,
+          "quote": "FIs should take into consideration country factors such as the Corruption Perception Index, the FATF Deficient Countries list, sovereign and credit risk, country national risk assessment and the overall FCR environment."
+        },
+        {
+          "page": 38,
+          "printed_folio": "38",
+          "paragraph": null,
+          "quote": "The countries, which are rated as high risk for other reasons, in which: o Bank B or Party Y are located o The transportation of goods occurs"
+        }
+      ]
+    },
+    {
+      "family": "tbml",
+      "typology_id": null,
+      "label": "Short shipping and over shipping (quantity or quality misrepresentation)",
+      "emergent": true,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 12,
+          "printed_folio": "12",
+          "paragraph": null,
+          "quote": "Short Shipping The seller ships less than the invoiced quantity or quality of goods thereby misrepresenting the true value of goods in the documents. The effect is similar to over invoicing."
+        },
+        {
+          "page": 12,
+          "printed_folio": "12",
+          "paragraph": null,
+          "quote": "Over Shipping The seller ships more than the invoiced quantity or quality of goods thereby misrepresenting the true value of goods in the documents. The effect is similar to under invoicing."
+        }
+      ]
+    },
+    {
+      "family": "sanctions",
+      "typology_id": null,
+      "label": "End-user concealment through intermediaries and ownership transfers",
+      "emergent": true,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 16,
+          "printed_folio": "16",
+          "paragraph": null,
+          "quote": "Any methods used to hide the ultimate user of a product  (such as through the use of intermediaries or the ultimate application or use of a product) often present a FCR in Trade Finance.  Transactions involving multiple parties and transfers of ownership may disguise the true nature of a transaction"
+        }
+      ]
+    }
+  ],
+  "actors": [],
+  "indicators": [],
+  "suggested_desks": [
+    "trade_desk",
+    "sanctions_desk"
+  ],
+  "overall_confidence": "high",
+  "extraction_notes": "Golden label. Typology content is the p12 method table, the sanctions section (pp 14-21) and the appendix risk-indicator tables (pp 45, 56-57, 67, 79); the rest is process and glossary. Twin rule mirrored: framed as trade finance, so TBML007 and TBML010 not SAN007 and SAN006, although dual-use goods sit under the sanctions and export-controls headings. Short and over shipping are emergent: the library holds price and description misrepresentation but no quantity twin; the document says their effect is similar to over or under invoicing. End-user concealment (p16) is emergent, not SAN004, as no front company is described. SAN003 and SAN008 are low: transhipment points and high-risk countries recur as screening data points, not techniques. BA002 rests on one substantive glossary passage; its single mention of layering is not labelled. Open-account opacity, back-to-back DCs and guarantee claim tactics are indicators, not typologies. No threat actors (the bodies named are issuers or regulators); no risk jurisdictions."
+}

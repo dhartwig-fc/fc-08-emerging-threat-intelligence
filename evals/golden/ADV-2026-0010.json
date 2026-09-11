@@ -1,0 +1,723 @@
+{
+  "schema_version": "1.3.0",
+  "advisory_id": "ADV-2026-0010",
+  "source": {
+    "source_type": "fincen",
+    "publisher": "FinCEN",
+    "title": "Advisory on the Iranian Regime's Illicit Oil Smuggling Activities, Shadow Banking Networks, and Weapons Procurement (FIN-2025-A002)",
+    "published_on": "2025-06-06",
+    "published_on_precision": "day",
+    "url": "https://www.fincen.gov/system/files/FinCEN-Advisory-Illicit-Oil-Smuggling-508.pdf",
+    "document_sha256": "5ae3f6928535b91fc38af7d71983e71a97d63fda292e94eb5234d2357ec6678b",
+    "page_count": 18
+  },
+  "summary": "GOLDEN LABEL, hand-drafted against the PDF. FinCEN advisory replacing its 2018 Iran advisory, issued with OFAC's 6 June 2025 designation of the Zarringhalam shadow banking network. Three linked mechanisms: a shadow fleet of old, uninsured tankers moving Iranian oil with AIS manipulation, ship-to-ship transfers, name and flag changes, false flags, blending and relabelling as 'Malaysian blend', nearly all of it to Chinese teapot refineries; multi-jurisdictional shadow banking networks of Iranian exchange houses, third-country trading companies and front companies in the UAE and Hong Kong that receive oil proceeds, convert them to dollars through regional banks' U.S. correspondent relationships using forged source-of-funds documents, and remit without repatriating; and weapons procurement networks that spend the proceeds on dual-use goods and components for ballistic missile and UAV programmes through layering, falsified documents and transshipment via China, Hong Kong, Türkiye and Southeast Asia. Oil is allocated directly to MODAFL, the AFGS and the IRGC-QF. Case studies: the Zarringhalam brothers' GCM and Berelian exchange houses; Sahara Thunder's UAV sales to Russia's Alabuga facility. Sixteen red flags across oil smuggling, shadow banking and procurement.",
+  "jurisdictions": [
+    "IR",
+    "CN",
+    "HK",
+    "AE",
+    "SG",
+    "TR",
+    "RU",
+    "VE"
+  ],
+  "typologies": [
+    {
+      "family": "sanctions",
+      "typology_id": "SAN002",
+      "label": "Shadow Fleet",
+      "emergent": false,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 4,
+          "printed_folio": "4",
+          "paragraph": null,
+          "quote": "To transport its oil, Iran typically uses a fleet of old and poorly maintained vessels sometimes referred to as the “shadow fleet,” “ghost fleet,” or “dark fleet,” given their opaque ownership and obfuscation tactics"
+        },
+        {
+          "page": 4,
+          "printed_folio": "4",
+          "paragraph": null,
+          "quote": "vessels often engage in deceptive shipping practices, like falsifying cargo and vessel documents, disabling or manipulating automatic identification systems (AIS) on vessels, voyage irregularities, and ship-to-ship transfers."
+        },
+        {
+          "page": 4,
+          "printed_folio": "4",
+          "paragraph": null,
+          "quote": "Vessels may also claim a flag of a jurisdiction in which they are not registered, called a “false flag,” or may have been flagged by registries that are not authorized to provide flagging services for a particular jurisdiction."
+        }
+      ]
+    },
+    {
+      "family": "sanctions",
+      "typology_id": "SAN004",
+      "label": "Front Companies",
+      "emergent": false,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 3,
+          "printed_folio": "3",
+          "paragraph": null,
+          "quote": "These networks establish and use front companies in third-country jurisdictions to obscure Iranian involvement and layer transactions, often exploiting free trade zones that offer favorable conditions for company formation."
+        },
+        {
+          "page": 5,
+          "printed_folio": "5",
+          "paragraph": null,
+          "quote": "These front companies—which are often recently incorporated, have minimal to no web presence, and transact in large amounts with no clear business purpose or using falsified invoices—are used to establish bank accounts outside of Iran"
+        }
+      ]
+    },
+    {
+      "family": "sanctions",
+      "typology_id": "SAN006",
+      "label": "Trade Based Sanctions Evasion",
+      "emergent": false,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 3,
+          "printed_folio": "3",
+          "paragraph": null,
+          "quote": "money laundering networks to surreptitiously access international markets and financial systems to sell crude oil and petroleum products and to use the proceeds to finance weapons development and terrorist activity."
+        },
+        {
+          "page": 4,
+          "printed_folio": "4",
+          "paragraph": null,
+          "quote": "facilitate access to the international financial system for sanctioned Iranian entities such as MODAFL and the IRGC, enabling them to obfuscate their trade with foreign customers and disguise the revenue they generate abroad."
+        }
+      ]
+    },
+    {
+      "family": "sanctions",
+      "typology_id": "SAN007",
+      "label": "Dual Use Goods",
+      "emergent": false,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 6,
+          "printed_folio": "6",
+          "paragraph": null,
+          "quote": "The Iranian regime uses revenue generated through Iranian oil sales to procure weapons components, dual-use goods, and chemicals from the international market, primarily for its ballistic missile and UAV programs."
+        },
+        {
+          "page": 5,
+          "printed_folio": "5",
+          "paragraph": null,
+          "quote": "The dollars are then delivered to regime personnel or proxies outside of Iran to facilitate the movement of commodities like oil or the procurement of sensitive dual-use goods."
+        }
+      ]
+    },
+    {
+      "family": "sanctions",
+      "typology_id": "SAN003",
+      "label": "Transshipment",
+      "emergent": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 7,
+          "printed_folio": "7",
+          "paragraph": null,
+          "quote": "variety of techniques to further obscure Iran as the end user, including transaction layering, falsifying documentation, and transshipping through third countries."
+        },
+        {
+          "page": 6,
+          "printed_folio": "6",
+          "paragraph": null,
+          "quote": "which Iran seeks to evade via elaborate, long-standing networks of procurement agents, front companies, intermediaries, and suppliers operating in third countries and regions, including China, including Hong Kong, Türkiye, and Southeast Asia."
+        }
+      ]
+    },
+    {
+      "family": "sanctions",
+      "typology_id": "SAN001",
+      "label": "Ownership Evasion",
+      "emergent": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 7,
+          "printed_folio": "7",
+          "paragraph": null,
+          "quote": "Iranian procurement networks also often use corporate vehicles, like front companies, to hide the source of funds, countries involved, and the identity of the end user."
+        },
+        {
+          "page": 9,
+          "printed_folio": "9",
+          "paragraph": null,
+          "quote": "Other indicators of possible front companies include opaque ownership structures, individuals/entities with obscure names that direct the company"
+        }
+      ]
+    },
+    {
+      "family": "sanctions",
+      "typology_id": "SAN005",
+      "label": "Name Screening Evasion",
+      "emergent": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 4,
+          "printed_folio": "4",
+          "paragraph": null,
+          "quote": "To further obfuscate their connections to Iran, vessels may undergo frequent name changes, changes in nominal ownership, or frequent reflagging in different third-country jurisdictions to disguise their illicit activity."
+        },
+        {
+          "page": 8,
+          "printed_folio": "8",
+          "paragraph": null,
+          "quote": "vessels that, according to maritime databases, have undergone recent or multiple name or flag changes, or transfer of ownership or operation to another person following OFAC’s designation of its owner or operator, but the designated owner or operator appears to maintain an interest in the vessel."
+        }
+      ]
+    },
+    {
+      "family": "sanctions",
+      "typology_id": "SAN008",
+      "label": "High Risk Jurisdictions",
+      "emergent": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 5,
+          "printed_folio": "5",
+          "paragraph": null,
+          "quote": "Hong Kong-based companies that bank with China-based financial institutions using non-resident accounts and UAE-based general trading companies registered in commercial free trade zones are commonly used as front companies by Iranian actors."
+        },
+        {
+          "page": 5,
+          "printed_folio": "5",
+          "paragraph": null,
+          "quote": "These exchange houses and trading companies often are located in jurisdictions in close geographical proximity to Iran and primarily process commercial transactions rather than personal remittances."
+        }
+      ]
+    },
+    {
+      "family": "correspondent_banking",
+      "typology_id": "BA008",
+      "label": "Layering",
+      "emergent": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 7,
+          "printed_folio": "7",
+          "paragraph": null,
+          "quote": "Proceeds from these sales were laundered through exchange houses in Iran and then transferred through shadow banking networks to be used at the direction of MODAFL to acquire weapons components and other materiel on the international market."
+        },
+        {
+          "page": 8,
+          "printed_folio": "8",
+          "paragraph": null,
+          "quote": "A customer makes transactions that move through multiple exchange houses and/or trading companies, adding additional fees and costs as the transactions progress, where the fees, number of transactions, and pattern of transactions do not reflect standard and customary commercial practices."
+        }
+      ]
+    },
+    {
+      "family": "tbml",
+      "typology_id": "TBML008",
+      "label": "Third Party Payment Abuse",
+      "emergent": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 4,
+          "printed_folio": "4",
+          "paragraph": null,
+          "quote": "which also help facilitate Iranian oil sales by making payments on behalf of the ultimate Iranian beneficiaries for services like storage facilities."
+        },
+        {
+          "page": 5,
+          "printed_folio": "5",
+          "paragraph": null,
+          "quote": "By using front company accounts outside of Iran to both receive and remit payments, sanctioned Iranian entities may be able to conduct transactions through the international financial system without ever repatriating funds to Iran."
+        }
+      ]
+    },
+    {
+      "family": "network",
+      "typology_id": "PAT007",
+      "label": "Shell Company Network",
+      "emergent": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 6,
+          "printed_folio": "6",
+          "paragraph": null,
+          "quote": "through which they oversee a sprawling network of front companies, largely operating out of the UAE and Hong Kong."
+        },
+        {
+          "page": 9,
+          "printed_folio": "9",
+          "paragraph": null,
+          "quote": "Multiple companies incorporated at roughly the same time share counterparties, addresses, owners, or name similarities and demonstrate similar transaction profiles."
+        }
+      ]
+    },
+    {
+      "family": "network",
+      "typology_id": "PAT005",
+      "label": "Common Address",
+      "emergent": false,
+      "confidence": "low",
+      "citations": [
+        {
+          "page": 5,
+          "printed_folio": "5",
+          "paragraph": null,
+          "quote": "indications that front companies are controlled by Iranian actors may include links to Iranian companies, such as shared counterparties, addresses, and name similarities"
+        },
+        {
+          "page": 9,
+          "printed_folio": "9",
+          "paragraph": null,
+          "quote": "business addresses that are residential or co-located with other companies, especially companies that have been previously sanctioned."
+        }
+      ]
+    },
+    {
+      "family": "correspondent_banking",
+      "typology_id": null,
+      "label": "Third-country exchange houses accessing U.S. dollars through regional banks' correspondent relationships",
+      "emergent": true,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 5,
+          "printed_folio": "5",
+          "paragraph": null,
+          "quote": "These third-country exchange houses and trading companies rely on their regional banks, which have correspondent banking relationships with U.S. financial institutions, to access the U.S. financial system."
+        },
+        {
+          "page": 5,
+          "printed_folio": "5",
+          "paragraph": null,
+          "quote": "The exchange houses convert the foreign currency into U.S. dollars using forged documents that falsify the source of the funds."
+        }
+      ]
+    },
+    {
+      "family": "sanctions",
+      "typology_id": null,
+      "label": "Blending and relabelling of cargo to disguise sanctioned origin ('Malaysian blend')",
+      "emergent": true,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 4,
+          "printed_folio": "4",
+          "paragraph": null,
+          "quote": "Iranian oil is blended with oil from third countries to further disguise its origins, or forged documents will relabel the oil as the product of another jurisdiction, most commonly as “Malaysian blend.”"
+        },
+        {
+          "page": 8,
+          "printed_folio": "8",
+          "paragraph": null,
+          "quote": "“Malaysian blend” oil, particularly if the vessel is bound for China by way of Southeast Asia and if maritime databases indicate that the vessel displayed AIS irregularities during its voyage"
+        }
+      ]
+    },
+    {
+      "family": "sanctions",
+      "typology_id": null,
+      "label": "Oil-for-arms proliferation financing: state oil allocations to military entities laundered to procure weapons components",
+      "emergent": true,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 7,
+          "printed_folio": "7",
+          "paragraph": null,
+          "quote": "The Iranian government allocates billions of dollars’ worth of oil and other commodities to Iranian military entities including MODAFL and the AFGS as part of the Iranian military’s annual budget."
+        },
+        {
+          "page": 5,
+          "printed_folio": "5",
+          "paragraph": null,
+          "quote": "Revenue generated through oil sales are laundered through these shadow banking networks and financial facilitators, funding the procurement of components for advanced weapons systems and support to Iran’s regional proxy groups."
+        }
+      ]
+    }
+  ],
+  "actors": [
+    {
+      "name": "Islamic Revolutionary Guard Corps",
+      "actor_type": "organisation",
+      "aliases": [
+        "IRGC"
+      ],
+      "jurisdiction": "IR",
+      "role": "Sanctioned Iranian military institution whose trade and revenue the shadow banking networks obfuscate; SDGT and FTO",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 4,
+          "printed_folio": "4",
+          "paragraph": null,
+          "quote": "facilitate access to the international financial system for sanctioned Iranian entities such as MODAFL and the IRGC, enabling them to obfuscate their trade with foreign customers"
+        }
+      ]
+    },
+    {
+      "name": "IRGC-Qods Force",
+      "actor_type": "organisation",
+      "aliases": [
+        "IRGC-QF",
+        "Qods Force"
+      ],
+      "jurisdiction": "IR",
+      "role": "Receives oil allocations from the state budget and smuggles oil with proxy groups; front company accounts make payments on its behalf",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 6,
+          "printed_folio": "6",
+          "paragraph": null,
+          "quote": "to facilitate payments for blocked Iranian entities engaged in the sale of Iranian oil and petrochemicals, among other goods, including the IRGC-QF."
+        },
+        {
+          "page": 3,
+          "printed_folio": "3",
+          "paragraph": null,
+          "quote": "MODAFL and the IRGC-QF, often in conjunction with terrorist partner and proxy groups such as the Houthis and Hizballah, smuggle oil to international buyers"
+        }
+      ]
+    },
+    {
+      "name": "Ministry of Defense and Armed Forces Logistics",
+      "actor_type": "organisation",
+      "aliases": [
+        "MODAFL"
+      ],
+      "jurisdiction": "IR",
+      "role": "Sanctioned ministry allotted oil for sale; directs shadow banking proceeds to weapons procurement and UAV sales through Sahara Thunder",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 7,
+          "printed_folio": "7",
+          "paragraph": null,
+          "quote": "Sahara Thunder, acting on behalf of MODAFL, relied on a vast shipping network involved in the sale and shipment of Iranian commodities to multiple jurisdictions, including China, Russia, and Venezuela."
+        }
+      ]
+    },
+    {
+      "name": "Iranian Armed Forces General Staff",
+      "actor_type": "organisation",
+      "aliases": [
+        "AFGS"
+      ],
+      "jurisdiction": "IR",
+      "role": "Military entity allotted Iranian oil for sale on the international market to supplement its budget",
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 7,
+          "printed_folio": "7",
+          "paragraph": null,
+          "quote": "The Iranian government allocates billions of dollars’ worth of oil and other commodities to Iranian military entities including MODAFL and the AFGS"
+        }
+      ]
+    },
+    {
+      "name": "National Iranian Oil Company",
+      "actor_type": "organisation",
+      "aliases": [
+        "NIOC"
+      ],
+      "jurisdiction": "IR",
+      "role": "Sells most of Iran's oil; responsible for exploration, production, refining and export; designated under E.O. 13224",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 3,
+          "printed_folio": "3",
+          "paragraph": null,
+          "quote": "Most of Iran’s oil is sold by the National Iranian Oil Company (NIOC)"
+        }
+      ]
+    },
+    {
+      "name": "Zarringhalam shadow banking network",
+      "actor_type": "network",
+      "aliases": [
+        "Zarringhalam brothers"
+      ],
+      "jurisdiction": "IR",
+      "role": "Over 40 individuals and entities designated 6 June 2025; exchange houses and UAE/Hong Kong front companies laundering billions in oil and petrochemical proceeds",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 6,
+          "printed_folio": "6",
+          "paragraph": null,
+          "quote": "On June 6, 2025, OFAC designated over 40 individuals and entities tied to Iranian brothers Mansour, Nasser, and Fazlolah Zarringhalam, who, primarily through Iranian exchange houses they control, have collectively laundered billions of dollars’ worth of funds through the international financial system"
+        },
+        {
+          "page": 6,
+          "printed_folio": "6",
+          "paragraph": null,
+          "quote": "Through a network of front companies in the UAE and Hong Kong, the Zarringhalam brothers assisted sanctioned regime officials and affiliated businessmen in receiving payments from the sale of petroleum, petroleum products, and other commodities from foreign purchasers."
+        }
+      ]
+    },
+    {
+      "name": "Mansour Zarringhalam",
+      "actor_type": "person",
+      "aliases": [],
+      "jurisdiction": "IR",
+      "role": "Operates GCM Exchange and oversees the network's front companies in the UAE and Hong Kong",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 6,
+          "printed_folio": "6",
+          "paragraph": null,
+          "quote": "based exchange houses Mansour Zarrin Ghalam and Partners Company (also known as GCM Exchange), and Nasser Zarrin Ghalam and Partners Company (also known as Berelian Exchange), respectively, through which they oversee a sprawling network of front companies"
+        }
+      ]
+    },
+    {
+      "name": "Nasser Zarringhalam",
+      "actor_type": "person",
+      "aliases": [],
+      "jurisdiction": "IR",
+      "role": "Operates Berelian Exchange and oversees the network's front companies in the UAE and Hong Kong",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 6,
+          "printed_folio": "6",
+          "paragraph": null,
+          "quote": "Nasser Zarrin Ghalam and Partners Company (also known as Berelian Exchange), respectively, through which they oversee a sprawling network of front companies, largely operating out of the UAE and Hong Kong."
+        }
+      ]
+    },
+    {
+      "name": "Fazlolah Zarringhalam",
+      "actor_type": "person",
+      "aliases": [],
+      "jurisdiction": "IR",
+      "role": "Third of the designated brothers; named once, no role beyond membership of the network stated",
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 6,
+          "printed_folio": "6",
+          "paragraph": null,
+          "quote": "OFAC designated over 40 individuals and entities tied to Iranian brothers Mansour, Nasser, and Fazlolah Zarringhalam"
+        }
+      ]
+    },
+    {
+      "name": "GCM Exchange",
+      "actor_type": "organisation",
+      "aliases": [
+        "Mansour Zarrin Ghalam and Partners Company"
+      ],
+      "jurisdiction": "IR",
+      "role": "Iran-based exchange house run by Mansour Zarringhalam; hub of the front company network",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 6,
+          "printed_folio": "6",
+          "paragraph": null,
+          "quote": "based exchange houses Mansour Zarrin Ghalam and Partners Company (also known as GCM Exchange)"
+        }
+      ]
+    },
+    {
+      "name": "Berelian Exchange",
+      "actor_type": "organisation",
+      "aliases": [
+        "Nasser Zarrin Ghalam and Partners Company"
+      ],
+      "jurisdiction": "IR",
+      "role": "Iran-based exchange house run by Nasser Zarringhalam; hub of the front company network",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 6,
+          "printed_folio": "6",
+          "paragraph": null,
+          "quote": "Nasser Zarrin Ghalam and Partners Company (also known as Berelian Exchange)"
+        }
+      ]
+    },
+    {
+      "name": "Sahara Thunder",
+      "actor_type": "organisation",
+      "aliases": [],
+      "jurisdiction": "IR",
+      "role": "MODAFL's main front company for clandestine UAV sales, including thousands of UAVs transferred to Russia; designated April 2024",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 7,
+          "printed_folio": "7",
+          "paragraph": null,
+          "quote": "In April 2024, OFAC designated Sahara Thunder, the main front company that oversaw MODAFL’s commercial activities in support of the clandestine sale of Iranian UAVs."
+        }
+      ]
+    },
+    {
+      "name": "Joint Stock Company Special Economic Zone of Industrial Production Alabuga",
+      "actor_type": "organisation",
+      "aliases": [
+        "Alabuga"
+      ],
+      "jurisdiction": "RU",
+      "role": "U.S.-sanctioned Russian facility financing and producing Iranian-designed one-way attack UAVs with MODAFL under a $1.75 billion contract",
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 7,
+          "printed_folio": "7",
+          "paragraph": null,
+          "quote": "at the U.S.-sanctioned Joint Stock Company Special Economic Zone of Industrial Production Alabuga facility in Russia under an approximately $1.75 billion contract."
+        }
+      ]
+    },
+    {
+      "name": "Chinese teapot refineries",
+      "actor_type": "category",
+      "aliases": [
+        "small independent oil refineries in China"
+      ],
+      "jurisdiction": "CN",
+      "role": "Buyers of the overwhelming majority of Iranian oil, some with touchpoints to the U.S. financial system",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 3,
+          "printed_folio": "3",
+          "paragraph": null,
+          "quote": "The overwhelming majority of this oil is sold to small independent oil refineries in China, sometimes referred to as “teapot refineries,” some of which have touchpoints with the U.S. financial system."
+        }
+      ]
+    },
+    {
+      "name": "Iranian and third-country exchange houses and trading companies",
+      "actor_type": "category",
+      "aliases": [
+        "shadow banking networks"
+      ],
+      "jurisdiction": null,
+      "role": "Manage front companies in Hong Kong and the UAE, launder oil revenue, convert to dollars via regional correspondent banks, and pay for weapons procurement",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 5,
+          "printed_folio": "5",
+          "paragraph": null,
+          "quote": "Exchange houses in Iran are often used to manage numerous front companies and trading companies registered in key third-country jurisdictions such as Hong Kong or the UAE to launder the revenue generated through the illicit sale of Iranian oil and other petroleum products."
+        }
+      ]
+    },
+    {
+      "name": "Sanctions facilitators (MSBs, legal entities, TCSPs)",
+      "actor_type": "category",
+      "aliases": [
+        "facilitators"
+      ],
+      "jurisdiction": null,
+      "role": "Orchestrate money laundering and sanctions evasion schemes and provide liquidity across jurisdictions for the shadow banking networks",
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 5,
+          "printed_folio": "5",
+          "paragraph": null,
+          "quote": "money services businesses (MSBs), legal entities, and trust and company service providers (TCSPs), that have played pivotal roles in orchestrating complex money laundering and sanctions evasion schemes"
+        }
+      ]
+    },
+    {
+      "name": "Shadow fleet vessel owners and managers",
+      "actor_type": "category",
+      "aliases": [
+        "shipping facilitators"
+      ],
+      "jurisdiction": null,
+      "role": "Operating and shipping companies mostly in the UAE and Southeast Asia that own, manage and lease the tankers and pay for services on behalf of Iranian beneficiaries",
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 4,
+          "printed_folio": "4",
+          "paragraph": null,
+          "quote": "These vessels are often owned and managed by operating or shipping companies in countries outside Iran, mostly in the United Arab Emirates (UAE) and Southeast Asia"
+        }
+      ]
+    },
+    {
+      "name": "Iranian weapons procurement networks",
+      "actor_type": "category",
+      "aliases": [
+        "procurement agents"
+      ],
+      "jurisdiction": "IR",
+      "role": "Long-standing networks of agents, front companies, intermediaries and suppliers in China, Hong Kong, Türkiye and Southeast Asia sourcing missile and UAV components",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 6,
+          "printed_folio": "6",
+          "paragraph": null,
+          "quote": "elaborate, long-standing networks of procurement agents, front companies, intermediaries, and suppliers operating in third countries and regions, including China, including Hong Kong, Türkiye, and Southeast Asia."
+        }
+      ]
+    },
+    {
+      "name": "Houthis",
+      "actor_type": "organisation",
+      "aliases": [
+        "Ansarallah"
+      ],
+      "jurisdiction": "YE",
+      "role": "Iran-backed proxy that smuggles oil with MODAFL and the IRGC-QF and receives UAVs and network-funded support",
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 3,
+          "printed_folio": "3",
+          "paragraph": null,
+          "quote": "often in conjunction with terrorist partner and proxy groups such as the Houthis and Hizballah, smuggle oil to international buyers and use the proceeds to fund weapons development and terrorist activity in the region."
+        }
+      ]
+    },
+    {
+      "name": "Hizballah",
+      "actor_type": "organisation",
+      "aliases": [
+        "Lebanese Hizballah"
+      ],
+      "jurisdiction": "LB",
+      "role": "Iran-backed proxy that smuggles oil with MODAFL and the IRGC-QF",
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 3,
+          "printed_folio": "3",
+          "paragraph": null,
+          "quote": "often in conjunction with terrorist partner and proxy groups such as the Houthis and Hizballah, smuggle oil to international buyers"
+        }
+      ]
+    }
+  ],
+  "indicators": [],
+  "suggested_desks": [
+    "sanctions_desk",
+    "trade_desk",
+    "correspondent_desk"
+  ],
+  "overall_confidence": "high",
+  "extraction_notes": "Golden label. Pages 10-13 are BSA obligations, SAR instructions and contact boilerplate; 14-18 are endnotes, used only to confirm designations. Sanctions twins per the convention: SAN002 over PAT008, SAN006 over TBML010, SAN007 over TBML007. TBML008 kept because paying for bunkering, storage and insurance on behalf of Iranian beneficiaries, and receiving and remitting through front company accounts without repatriating, is the specific mechanism; there is no sanctions twin. BA008 at medium: 'transaction layering' and movement through multiple exchange houses is named in the body and as a red flag, but the advisory does not describe the layering chain in detail. SAN009 NOT labelled: 'opaque ownership' appears only as a red-flag phrase; the structures described are flat front companies, not deep layering. PAT010 NOT labelled: the designated owner retaining an interest in a transferred vessel is a single red flag on page 8. TBML009 NOT labelled: shell trading is carried by SAN004 and PAT007; the advisory frames the companies as payment fronts rather than trade counterparties. TBML005 NOT labelled: 'Malaysian blend' is false origin, not false description of goods, and is the emergent blending/relabelling entry, which mirrors the ADV-2026-0017 emergent label so the two shadow-fleet documents score consistently. Below-market oil pricing (p3) is a genuine discount to entice buyers, not invoice manipulation, so not TBML002U. Three emergent labels. The exchange-house correspondent access is filed under correspondent_banking because the technique is nested access to U.S. dollars through regional banks, which no BA typology holds; it could equally sit under sanctions. The oil-for-arms entry is proliferation financing, which no family names; filed under sanctions because the advisory frames it as sanctions evasion. Actors: IRGC and IRGC-QF kept separate because the advisory names and cites them separately. AFGS at medium, named twice with no operational role. Fazlolah Zarringhalam is named once and kept at medium so the three designated brothers are complete. Hamas, PIJ and the Iraq/Syria militias are recipients and context only (p2), not labelled; Houthis and Hizballah are labelled because page 3 says they smuggle oil with MODAFL and the IRGC-QF. Russia the state is a customer for UAVs, not an evader; only the Alabuga facility is an actor. OFAC, Treasury, DOJ, FinCEN are not actors. Jurisdictions: US excluded as the designating and targeted state, though the advisory is about access to the U.S. financial system. Malaysia excluded: it is the false origin claimed on documents, not where the risk sits; the relabelling happens in Southeast Asia, which has no code, so SG stands for the region alongside the page 9 Singapore counterparties. Yemen and Lebanon carried only as actor jurisdictions for the proxies, not as risk locations. VE from the Sahara Thunder shipments; RU from Alabuga and the UAV transfers; TR from the procurement networks."
+}

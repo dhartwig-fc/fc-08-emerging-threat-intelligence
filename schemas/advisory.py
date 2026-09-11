@@ -15,7 +15,10 @@ from typing import List, Optional
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
-SCHEMA_VERSION = "1.2.0"
+SCHEMA_VERSION = "1.3.0"
+# 1.3.0 (2026-09-11, week 3 golden set): extraction_notes cap 1000 -> 4000. Six golden
+#   labels on 50-190 page reports failed validation on reviewer notes alone; truncating
+#   them would discard the judgement calls the owner review exists to read.
 # 1.2.0 (2026-09-10, week 2, on importing the governed FC10 library):
 #   - typology_id pattern allows one trailing letter: the governed library carries
 #     TBML002U (under-invoicing, re-slotted beside fc-10's load-bearing TBML002)
@@ -218,7 +221,7 @@ class AdvisoryRecord(BaseModel):
     indicators: List[Indicator] = Field(default_factory=list)
     suggested_desks: List[Desk] = Field(..., min_length=1)
     overall_confidence: Confidence
-    extraction_notes: Optional[str] = Field(None, max_length=1000, description="Agent caveats for the human reviewer")
+    extraction_notes: Optional[str] = Field(None, max_length=4000, description="Agent caveats for the human reviewer")
 
     @field_validator("jurisdictions")
     @classmethod

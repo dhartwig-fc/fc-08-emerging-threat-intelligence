@@ -1,0 +1,417 @@
+{
+  "schema_version": "1.3.0",
+  "advisory_id": "ADV-2026-0018",
+  "source": {
+    "source_type": "fca",
+    "publisher": "FCA",
+    "title": "TR19/4: Understanding the Money Laundering Risks in the Capital Markets",
+    "published_on": "2019-06-01",
+    "published_on_precision": "month",
+    "url": "https://www.fca.org.uk/publication/thematic-reviews/tr19-004.pdf",
+    "document_sha256": "45645a37a4f9a3a44b130d689db7463bcf701ba0bb8e4e4bc84e576b366a4111",
+    "page_count": 30
+  },
+  "summary": "GOLDEN LABEL, hand-drafted against the PDF. FCA thematic review of money-laundering risk in the secondary capital markets, from visits to 19 participants. Findings: the customer, not the product, drives risk; firms see only their own customer in a multi-firm trading chain; market-abuse suspicions (insider dealing, manipulation, wash trading) can also be money-laundering suspicions but surveillance and AML sit apart; free-of-payment asset transfers, third-party instructions, non-standard settlement, remote booking and omnibus accounts weaken monitoring; markets SARs are scarce. The Annex gives seven illustrative typologies: free-of-payment movement of securities, mirror trading on-platform and off-market (the Deutsche Bank case), debt issuance via an MTN with coupons routed through an offshore agent, an equity placement converting a small loan into shares worth ten times more for a connected investor, intermediation through an offshore broker's omnibus account, neutralising FX option premiums, and account funding through over-collateralisation and cash parked then withdrawn to a third party.",
+  "jurisdictions": [
+    "GB"
+  ],
+  "typologies": [
+    {
+      "family": "capital_markets",
+      "typology_id": "CM002",
+      "label": "Market Manipulation",
+      "emergent": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 15,
+          "printed_folio": "15",
+          "paragraph": null,
+          "quote": "The participant didn’t carry out the trade and subsequently submitted a STOR for attempted market manipulation."
+        },
+        {
+          "page": 4,
+          "printed_folio": "4",
+          "paragraph": null,
+          "quote": "many participants had not considered that potential market-abuse suspicions could also be indicative of money-laundering suspicions."
+        }
+      ]
+    },
+    {
+      "family": "capital_markets",
+      "typology_id": "CM001",
+      "label": "Insider Trading",
+      "emergent": false,
+      "confidence": "low",
+      "citations": [
+        {
+          "page": 14,
+          "printed_folio": "14",
+          "paragraph": null,
+          "quote": "capital markets SARs are mostly submitted following a suspicion of market abuse, in relation to the proceeds of crime generated – for example, from suspected insider trading."
+        }
+      ]
+    },
+    {
+      "family": "capital_markets",
+      "typology_id": "CM005",
+      "label": "Wash Trading",
+      "emergent": false,
+      "confidence": "low",
+      "citations": [
+        {
+          "page": 10,
+          "printed_folio": "10",
+          "paragraph": null,
+          "quote": "Some market-abuse practices (eg wash trading) may also be indicative of money laundering."
+        },
+        {
+          "page": 21,
+          "printed_folio": "21",
+          "paragraph": null,
+          "quote": "the two customers choose to trade on the same market in the same security at illiquid times of the day, at which times they are the whole market."
+        }
+      ]
+    },
+    {
+      "family": "network",
+      "typology_id": "PAT009",
+      "label": "Related Party Trading",
+      "emergent": false,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 21,
+          "printed_folio": "21",
+          "paragraph": null,
+          "quote": "These two individuals are associates of each other."
+        },
+        {
+          "page": 25,
+          "printed_folio": "25",
+          "paragraph": null,
+          "quote": "This individual has connections with a senior director of the company, though this was not disclosed publicly."
+        },
+        {
+          "page": 24,
+          "printed_folio": "24",
+          "paragraph": null,
+          "quote": "the key controllers/ shareholders of the foreign investor are the same as the controllers/shareholders of the borrower"
+        }
+      ]
+    },
+    {
+      "family": "network",
+      "typology_id": "PAT002",
+      "label": "Shared Beneficial Owner",
+      "emergent": false,
+      "confidence": "low",
+      "citations": [
+        {
+          "page": 24,
+          "printed_folio": "24",
+          "paragraph": null,
+          "quote": "It later becomes known that the underlying investor of the MTN is from a higher-risk jurisdiction and has significant links with the borrower"
+        }
+      ]
+    },
+    {
+      "family": "sanctions",
+      "typology_id": "SAN008",
+      "label": "High Risk Jurisdictions",
+      "emergent": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 12,
+          "printed_folio": "12",
+          "paragraph": null,
+          "quote": "Settlement into high-risk jurisdictions is a risk factor that we observed some participants starting to include within their automated monitoring processes."
+        },
+        {
+          "page": 27,
+          "printed_folio": "27",
+          "paragraph": null,
+          "quote": "An offshore broker (based in a high-risk jurisdiction) regularly facilitates trading in government bonds on behalf of its customers."
+        }
+      ]
+    },
+    {
+      "family": "correspondent_banking",
+      "typology_id": "BA008",
+      "label": "Layering",
+      "emergent": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 28,
+          "printed_folio": "28",
+          "paragraph": null,
+          "quote": "The neutralising effect of the trading raises concerns that the intended purpose is to facilitate the layering stage of a money-laundering scheme."
+        },
+        {
+          "page": 27,
+          "printed_folio": "27",
+          "paragraph": null,
+          "quote": "the bank has potentially been facilitating the transfer of economic value from one account to another, cross-jurisdiction, without realising that this might have been linked to financial crime."
+        }
+      ]
+    },
+    {
+      "family": "capital_markets",
+      "typology_id": null,
+      "label": "Mirror trading: associates transfer value through offsetting trades, on-platform or off-market",
+      "emergent": true,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 21,
+          "printed_folio": "21",
+          "paragraph": null,
+          "quote": "The result is that both customers are flat in the security, ie neither had net bought or sold. However, money has moved from the customer in Country A to the customer in Country B."
+        },
+        {
+          "page": 23,
+          "printed_folio": "23",
+          "paragraph": null,
+          "quote": "Profit transfers from Customer 1 to Customer 2, though neither customer had a position in the security at the end of the transactions. The trading effectively acts as a mechanism for moving money from customer 1 to customer 2."
+        },
+        {
+          "page": 4,
+          "printed_folio": "4",
+          "paragraph": null,
+          "quote": "This followed Deutsche Bank’s Final Notice in 2017 for AML failings relating to ‘mirror trading’."
+        }
+      ]
+    },
+    {
+      "family": "capital_markets",
+      "typology_id": null,
+      "label": "Free-of-payment movement of securities of unverified ownership between brokers before sale",
+      "emergent": true,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 9,
+          "printed_folio": "9",
+          "paragraph": null,
+          "quote": "One vulnerability we have identified is the movement of assets (free of payment) between different accounts before being sold, eg if a UK firm allows a customer to transfer offshore securities into their UK trading account."
+        },
+        {
+          "page": 20,
+          "printed_folio": "20",
+          "paragraph": null,
+          "quote": "Broker 2 accepts the government bonds into the customer’s portfolio, without speaking to Broker 1 about their origin or ownership."
+        }
+      ]
+    },
+    {
+      "family": "capital_markets",
+      "typology_id": null,
+      "label": "Equity placement: convertible debt converted into shares worth far more than the loan for a connected investor",
+      "emergent": true,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 26,
+          "printed_folio": "26",
+          "paragraph": null,
+          "quote": "It appears the activity was undertaken to wash illicit funds through the markets (and cross-jurisdiction) by lending money to the company, which was exchanged for shares that can be sold for more than the value of the loan."
+        },
+        {
+          "page": 26,
+          "printed_folio": "26",
+          "paragraph": null,
+          "quote": "The issuer simply needs to transfer new shares to connected parties, and then sell those shares in the market."
+        }
+      ]
+    },
+    {
+      "family": "capital_markets",
+      "typology_id": null,
+      "label": "Debt issuance: loan repackaged as an MTN with coupons routed through an offshore agent to connected holders",
+      "emergent": true,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 24,
+          "printed_folio": "24",
+          "paragraph": null,
+          "quote": "the payments are not paid to the MTN holder/foreign investor directly, rather an offshore agent receives the funds and then transmits these on to the MTN holders, which could be different from the initial MTN investors."
+        },
+        {
+          "page": 24,
+          "printed_folio": "24",
+          "paragraph": null,
+          "quote": "The arrangement suggests a strong link between the borrower and underlying “lender” which could indicate potential embezzlement, money laundering or both."
+        }
+      ]
+    },
+    {
+      "family": "capital_markets",
+      "typology_id": null,
+      "label": "Intermediation through an offshore broker's omnibus account with settlement in another jurisdiction and currency",
+      "emergent": true,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 27,
+          "printed_folio": "27",
+          "paragraph": null,
+          "quote": "The UK-based bank allows the offshore broker to settle their transactions in a different jurisdiction in a different currency. This bank could simply see the offshore broker as its customer, ie an omnibus account; it could not see the broker’s underlying customers."
+        }
+      ]
+    },
+    {
+      "family": "capital_markets",
+      "typology_id": null,
+      "label": "Neutralising FX option positions to receive and return premium through a prime brokerage account",
+      "emergent": true,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 28,
+          "printed_folio": "28",
+          "paragraph": null,
+          "quote": "The effect of the activity is that the customer receives an initial premium payment into their prime brokerage account at a separate bank, only for this to be paid back upon the almost immediate expiry of the FX options."
+        },
+        {
+          "page": 28,
+          "printed_folio": "28",
+          "paragraph": null,
+          "quote": "selling both an in-the-money call position and an out -of-the money put position in the same currency, at the same strike price and with the same expiry date."
+        }
+      ]
+    },
+    {
+      "family": "capital_markets",
+      "typology_id": null,
+      "label": "Account funding abuse: over-collateralisation and cash parked without trading then withdrawn to a third party",
+      "emergent": true,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 29,
+          "printed_folio": "29",
+          "paragraph": null,
+          "quote": "On a regular basis, a corporate customer provides too much collateral to its prime broker. The excess collateral is returned to the customer, but no questions are asked."
+        },
+        {
+          "page": 29,
+          "printed_folio": "29",
+          "paragraph": null,
+          "quote": "The customer does not then trade on the account. Instead, two months later, it withdraws the cash to a third-party account."
+        }
+      ]
+    }
+  ],
+  "actors": [
+    {
+      "name": "Associated customers trading against each other across jurisdictions",
+      "actor_type": "category",
+      "aliases": [
+        "mirror-trading counterparties"
+      ],
+      "jurisdiction": null,
+      "role": "Pairs of associates with accounts at different brokers in different jurisdictions, one high-risk, who only ever trade against each other to move value between them",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 21,
+          "printed_folio": "21",
+          "paragraph": null,
+          "quote": "These two individuals are associates of each other."
+        },
+        {
+          "page": 22,
+          "printed_folio": "22",
+          "paragraph": null,
+          "quote": "Can exchanges and platforms identify that two (or more) customers may be acting in concert, and only ever trade against each other?"
+        }
+      ]
+    },
+    {
+      "name": "Third parties instructing trades not for their own account",
+      "actor_type": "category",
+      "aliases": [
+        "unconnected third parties"
+      ],
+      "jurisdiction": null,
+      "role": "Parties outside the account relationship who instruct brokers to execute pre-arranged trades, or who receive the proceeds, without the executing firm seeing the underlying customers",
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 8,
+          "printed_folio": "8",
+          "paragraph": null,
+          "quote": "Our review identified instances of potential suspicious activity involving orders from unconnected third parties."
+        },
+        {
+          "page": 22,
+          "printed_folio": "22",
+          "paragraph": null,
+          "quote": "Broker 3 does not have sight of Customers 1 or 2."
+        }
+      ]
+    },
+    {
+      "name": "Offshore brokers in high-risk jurisdictions fronting undisclosed underlying customers",
+      "actor_type": "category",
+      "aliases": [
+        "offshore broker"
+      ],
+      "jurisdiction": null,
+      "role": "Regulated intermediaries in high-risk jurisdictions whose omnibus trading through a UK bank hides politically connected customers to whom the broker's directors may be tied",
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 27,
+          "printed_folio": "27",
+          "paragraph": null,
+          "quote": "It was also noted that the directors of the broker may have had close ties with some of those customers."
+        }
+      ]
+    },
+    {
+      "name": "Politically connected high-net-worth individuals",
+      "actor_type": "category",
+      "aliases": [],
+      "jurisdiction": null,
+      "role": "Underlying customers of an offshore broker whose value is moved cross-jurisdiction through a UK bank's execution and settlement",
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 27,
+          "printed_folio": "27",
+          "paragraph": null,
+          "quote": "the underlying customers of the offshore broker were extremely high net worth individuals, some with political connections."
+        }
+      ]
+    },
+    {
+      "name": "Enabling lawyers, including struck-off practitioners",
+      "actor_type": "category",
+      "aliases": [
+        "professional enablers"
+      ],
+      "jurisdiction": null,
+      "role": "Legal professionals whose involvement lends legitimacy to primary-market deals; the UK NRA rates abuse of legal services high-risk",
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 18,
+          "printed_folio": "18",
+          "paragraph": null,
+          "quote": "One example of suspicious activity a participant told us about showed how the involvement of a lawyer, practising despite being struck off, gave the illusion of legitimacy to a deal."
+        }
+      ]
+    }
+  ],
+  "indicators": [],
+  "suggested_desks": [
+    "markets_desk",
+    "fiu_liaison"
+  ],
+  "overall_confidence": "high",
+  "extraction_notes": "Golden label. Pages 1-2 are cover and contents, 5-6 legal obligations and next steps, 14-17 SAR reporting, behaviour and training, 30 the imprint; typology content sits in chapter 2 findings (7-13, 18) and the Annex (19-29). The Annex examples are explicitly fictitious composites, so no named parties exist and every actor is a class. Governed capital-markets ids: CM002 medium on the one real case study (the OTC bond outside bid/offer with a prearranged counterparty, p15, STOR for attempted manipulation); CM001 low because insider trading appears only as the predicate offence whose proceeds generate markets SARs (p4, p5, p14), never as a described technique; CM005 low on a single parenthetical (p10) plus the on-platform mirror trade where two associates are the whole market and end flat, which is matched trading in substance. Mirror trading itself is EMERGENT per the owner's instruction that laundering through the markets is not in the library, so the CM005 entry is deliberately thin rather than absorbing the mirror-trading case. Not labelled: CM003, CM004, CM006-CM010, none described; the pre-arranged trading and counterparty concentration red flags on p19-20 are indicators, not CM010. PAT009 high: three of the seven examples turn on undisclosed connections (associates, investor tied to a director, shared controllers of borrower and lender). PAT002 low on the p24 shared-controllers point only. SAN008 medium: every example places one party in a high-risk jurisdiction and settlement into such jurisdictions is a stated risk factor (p12), but the family framing is AML not sanctions. BA008 medium: the review itself calls the option-premium pattern layering (p28); the intermediation example is the same cross-jurisdiction value transfer. SAN009 (complex structures, p9, p18, p25) and FND003 (UBO invisibility, p8) are mentioned as risk factors and not labelled. Seven emergent entries, one per Annex example except the two mirror-trading variants merged, since both realise the same transfer; the account-funding pair (over-collateralisation, cash parked then withdrawn) merged as the review presents them. The no-trading withdrawal was considered against BA003 Mule Accounts and BA006 Dormant Reactivation and kept emergent: the account is a corporate trading account used once, not a recruited personal account or a reactivated one. Remote booking, non-standard settlement and omnibus accounts (p12) are findings about monitoring blind spots and are cited inside the intermediation entry rather than labelled separately. Actors: Deutsche Bank is a fined firm, not a threat actor; the 19 participants, exchanges, NCA, JMLIT, JMLSG and the Hong Kong SFC are not actors. GB is the only jurisdiction: the risk is placed in UK brokers, banks and bank accounts throughout; Country A/B and Country 1/2 are placeholders and Hong Kong appears only as a regulator's enforcement. Desks: markets first, FIU liaison because the SAR/STOR gap is the review's second theme."
+}
