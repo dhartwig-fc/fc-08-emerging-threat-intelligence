@@ -197,14 +197,53 @@ def _search_index() -> tuple:
 
 
 def rank_typologies(query: str) -> List[tuple]:
-    """Every typology scored 0..1 against the query, best first. Pure; used by the tool and by evals."""
+    """Every typology scored 0..1 against the query, best first. Pure; used by the tool and by evals.
+
+    TWO SCORES, and the better one wins. Measured 2026-09-11 over the 413 governed
+    citations in the golden set, which is real FATF/OFAC/NCA sentences rather than
+    phrases written here:
+
+        query length    1-10 words   11-20   21-35   36+
+        mean score of
+        the CORRECT id       0.425   0.250   0.193   0.180
+
+    The first score divides by the whole query's weight, so a long sentence dilutes
+    itself: most of its words are not doctrine terms, and the denominator grows
+    while the numerator does not. Advisories write long sentences. The twelve
+    hand-written probes in evals/search_probes.py are short phrases, which is
+    exactly why they scored 12 of 12 and hid this.
+
+    The second score asks the question the other way round: how much of the
+    TYPOLOGY'S LABEL does this sentence contain? A label is two or three
+    distinctive words ("Phantom Shipping", "Under Invoicing"), so a sentence
+    naming the technique scores high however long it runs. That is length
+    invariant, which is what lets a single floor mean the same thing for a
+    six-word phrase and a forty-word paragraph.
+
+    Lowering the floor instead was tried and rejected: it lifts top-5 recall from
+    0.351 to 0.625 but weakens the "no match, treat as emergent" answer the floor
+    exists to give, which evals/search_probes.py guards.
+    """
     docs, idf = _search_index()
     q = list(dict.fromkeys(_stems(query)))
+    q_set = set(q)
     denom = sum(idf(t) for t in q) or 1.0
     ranked = []
     for r, label, terms in docs:
         num = sum(idf(t) * (2.0 if t in label else 1.0) for t in q if t in terms)
-        ranked.append((min(num / denom, 1.0), r))
+        by_query = num / denom
+        # TWO label terms, or the whole of a one-term label. A single shared word
+        # is not a match: measured, "Black Market Peso Exchange" hit CM002 Market
+        # Manipulation at 0.39 on the word "market" alone, and "surrogate shoppers
+        # purchasing luxury goods" hit Dual Use Goods at 0.34 on "goods". Both are
+        # emergent techniques the floor exists to send to emergent, and both
+        # regressed the moment this second score was added without this guard.
+        hits = [t for t in label if t in q_set]
+        by_label = 0.0
+        if len(hits) >= 2 or (len(label) == 1 and hits):
+            label_denom = sum(idf(t) for t in label)
+            by_label = (sum(idf(t) for t in hits) / label_denom) if label_denom else 0.0
+        ranked.append((min(max(by_query, by_label), 1.0), r))
     ranked.sort(key=lambda x: (-x[0], x[1]["typology_id"]))
     return ranked
 
