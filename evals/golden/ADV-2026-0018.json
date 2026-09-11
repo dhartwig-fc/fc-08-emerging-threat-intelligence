@@ -38,42 +38,6 @@
       ]
     },
     {
-      "family": "capital_markets",
-      "typology_id": "CM001",
-      "label": "Insider Trading",
-      "emergent": false,
-      "confidence": "low",
-      "citations": [
-        {
-          "page": 14,
-          "printed_folio": "14",
-          "paragraph": null,
-          "quote": "capital markets SARs are mostly submitted following a suspicion of market abuse, in relation to the proceeds of crime generated – for example, from suspected insider trading."
-        }
-      ]
-    },
-    {
-      "family": "capital_markets",
-      "typology_id": "CM005",
-      "label": "Wash Trading",
-      "emergent": false,
-      "confidence": "low",
-      "citations": [
-        {
-          "page": 10,
-          "printed_folio": "10",
-          "paragraph": null,
-          "quote": "Some market-abuse practices (eg wash trading) may also be indicative of money laundering."
-        },
-        {
-          "page": 21,
-          "printed_folio": "21",
-          "paragraph": null,
-          "quote": "the two customers choose to trade on the same market in the same security at illiquid times of the day, at which times they are the whole market."
-        }
-      ]
-    },
-    {
       "family": "network",
       "typology_id": "PAT009",
       "label": "Related Party Trading",
@@ -413,5 +377,5 @@
     "fiu_liaison"
   ],
   "overall_confidence": "high",
-  "extraction_notes": "Golden label. Pages 1-2 are cover and contents, 5-6 legal obligations and next steps, 14-17 SAR reporting, behaviour and training, 30 the imprint; typology content sits in chapter 2 findings (7-13, 18) and the Annex (19-29). The Annex examples are explicitly fictitious composites, so no named parties exist and every actor is a class. Governed capital-markets ids: CM002 medium on the one real case study (the OTC bond outside bid/offer with a prearranged counterparty, p15, STOR for attempted manipulation); CM001 low because insider trading appears only as the predicate offence whose proceeds generate markets SARs (p4, p5, p14), never as a described technique; CM005 low on a single parenthetical (p10) plus the on-platform mirror trade where two associates are the whole market and end flat, which is matched trading in substance. Mirror trading itself is EMERGENT per the owner's instruction that laundering through the markets is not in the library, so the CM005 entry is deliberately thin rather than absorbing the mirror-trading case. Not labelled: CM003, CM004, CM006-CM010, none described; the pre-arranged trading and counterparty concentration red flags on p19-20 are indicators, not CM010. PAT009 high: three of the seven examples turn on undisclosed connections (associates, investor tied to a director, shared controllers of borrower and lender). PAT002 low on the p24 shared-controllers point only. SAN008 medium: every example places one party in a high-risk jurisdiction and settlement into such jurisdictions is a stated risk factor (p12), but the family framing is AML not sanctions. BA008 medium: the review itself calls the option-premium pattern layering (p28); the intermediation example is the same cross-jurisdiction value transfer. SAN009 (complex structures, p9, p18, p25) and FND003 (UBO invisibility, p8) are mentioned as risk factors and not labelled. Seven emergent entries, one per Annex example except the two mirror-trading variants merged, since both realise the same transfer; the account-funding pair (over-collateralisation, cash parked then withdrawn) merged as the review presents them. The no-trading withdrawal was considered against BA003 Mule Accounts and BA006 Dormant Reactivation and kept emergent: the account is a corporate trading account used once, not a recruited personal account or a reactivated one. Remote booking, non-standard settlement and omnibus accounts (p12) are findings about monitoring blind spots and are cited inside the intermediation entry rather than labelled separately. Actors: Deutsche Bank is a fined firm, not a threat actor; the 19 participants, exchanges, NCA, JMLIT, JMLSG and the Hong Kong SFC are not actors. GB is the only jurisdiction: the risk is placed in UK brokers, banks and bank accounts throughout; Country A/B and Country 1/2 are placeholders and Hong Kong appears only as a regulator's enforcement. Desks: markets first, FIU liaison because the SAR/STOR gap is the review's second theme."
+  "extraction_notes": "Golden label. Pages 1-2 are cover and contents, 5-6 legal obligations and next steps, 14-17 SAR reporting, behaviour and training, 30 the imprint; typology content sits in chapter 2 findings (7-13, 18) and the Annex (19-29). The Annex examples are explicitly fictitious composites, so no named parties exist and every actor is a class. Governed capital-markets ids: CM002 medium on the one real case study (the OTC bond outside bid/offer with a prearranged counterparty, p15, STOR for attempted manipulation); CM001 low because insider trading appears only as the predicate offence whose proceeds generate markets SARs (p4, p5, p14), never as a described technique; CM005 low on a single parenthetical (p10) plus the on-platform mirror trade where two associates are the whole market and end flat, which is matched trading in substance. Mirror trading itself is EMERGENT per the owner's instruction that laundering through the markets is not in the library, so the CM005 entry is deliberately thin rather than absorbing the mirror-trading case. Not labelled: CM003, CM004, CM006-CM010, none described; the pre-arranged trading and counterparty concentration red flags on p19-20 are indicators, not CM010. PAT009 high: three of the seven examples turn on undisclosed connections (associates, investor tied to a director, shared controllers of borrower and lender). PAT002 low on the p24 shared-controllers point only. SAN008 medium: every example places one party in a high-risk jurisdiction and settlement into such jurisdictions is a stated risk factor (p12), but the family framing is AML not sanctions. BA008 medium: the review itself calls the option-premium pattern layering (p28); the intermediation example is the same cross-jurisdiction value transfer. SAN009 (complex structures, p9, p18, p25) and FND003 (UBO invisibility, p8) are mentioned as risk factors and not labelled. Seven emergent entries, one per Annex example except the two mirror-trading variants merged, since both realise the same transfer; the account-funding pair (over-collateralisation, cash parked then withdrawn) merged as the review presents them. The no-trading withdrawal was considered against BA003 Mule Accounts and BA006 Dormant Reactivation and kept emergent: the account is a corporate trading account used once, not a recruited personal account or a reactivated one. Remote booking, non-standard settlement and omnibus accounts (p12) are findings about monitoring blind spots and are cited inside the intermediation entry rather than labelled separately. Actors: Deutsche Bank is a fined firm, not a threat actor; the 19 participants, exchanges, NCA, JMLIT, JMLSG and the Hong Kong SFC are not actors. GB is the only jurisdiction: the risk is placed in UK brokers, banks and bank accounts throughout; Country A/B and Country 1/2 are placeholders and Hong Kong appears only as a regulator's enforcement. Desks: markets first, FIU liaison because the SAR/STOR gap is the review's second theme. REVIEWED 2026-09-11. Removed CM001 and CM005, leaving CM002 as the set's only capital-markets typology. CM001 Insider Trading rested on one sentence describing insider trading as the PREDICATE generating proceeds that firms then report -- not as a laundering method the review found. That is the predicate-versus-method distinction ADV-2026-0006 applied correctly to illegal logging. CM005 Wash Trading rested on a parenthetical example ('eg wash trading') and on p21's case study, which this same label already carries as the emergent Mirror trading entry; ADV-2026-0003 recorded that mirror trading moves value across borders where wash trading fakes market activity, so one case cannot be both. THE UNDERLYING REASON, which matters beyond this label: the library's capital markets family covers MARKET ABUSE (insider dealing, spoofing, wash trading, front running), while this review covers MONEY LAUNDERING THROUGH markets. They are different subjects that share a vocabulary, which is why seven of this label's f"
 }

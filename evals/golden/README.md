@@ -81,15 +81,15 @@ is out of scope for extraction.
 ## State of the set (2026-09-11)
 
 All twenty labelled and mechanically clean: every label validates against
-schema 1.3.0, and all 797 citations resolve to the page they name (a handful
+schema 1.3.0, and all 818 citations resolve to the page they name (a handful
 match only after pypdf's mid-word spacing is normalised, which the checker
 reports separately). Three were drafted in-session, seventeen by subagents
 working from this README and the first three as exemplars. **Every one is a
 draft awaiting owner review**; `label_status` says which.
 
-What the set contains, after the 2026-09-11 re-check: 225 governed typology
-mentions across 39 of the library's 57 typologies, 109 emergent labels, 158
-actors, 821 citations.
+What the set contains, after the 2026-09-11 re-check AND the label-by-label
+review of 11 of the 20: 224 governed typology mentions across 37 of the
+library's 57 typologies, 110 emergent labels, 158 actors.
 
 | Family | Exercised | Never appears |
 |---|---|---|
@@ -97,7 +97,7 @@ actors, 821 citations.
 | tbml | 10 of 12 | TBML002 (borrows TBML001's doctrine), TBML011 |
 | correspondent_banking | 9 of 10 | BA006 |
 | network | 7 of 15 | the five FND foundation pipes, PAT004, PAT006, PAT008 |
-| capital_markets | 3 of 10 | CM003, CM004, CM006-CM010 |
+| capital_markets | **1 of 10** | everything but CM002 |
 
 Regenerate these numbers after any label changes; the re-check moved every
 one of them, and the earlier table wrongly said BA010 never appeared.
@@ -107,12 +107,20 @@ before appending, or raise the cap deliberately with a schema bump.
 
 Two coverage facts worth knowing before scoring. The five FND entries are
 foundation capabilities rather than typologies an advisory describes, so
-their absence is correct. Capital markets is genuinely thin: one document
-(ADV-2026-0018) carries the family, so precision and recall for CM ids will
-rest on a single advisory and should not be quoted as a family-level number.
+their absence is correct.
+
+**Capital markets cannot be scored at all, and that is a finding rather than
+a gap in the set.** One document carries the family, and reviewing it on
+2026-09-11 reduced it from three typologies to one. The reason is structural:
+the library's CM family covers MARKET ABUSE -- insider dealing, spoofing, wash
+trading, front running -- while the only capital-markets advisory available
+covers MONEY LAUNDERING THROUGH markets. They are different subjects sharing a
+vocabulary, which is why seven of that label's fourteen entries are emergent.
+Slice 2 needs a market-abuse document (an FCA Market Watch issue, a market
+abuse enforcement notice) before any CM number means anything.
 
 **The emergent labels are not normalised, and this constrains the scorer.**
-106 emergent labels, 105 distinct strings. Only one string recurs verbatim
+110 emergent labels, almost all distinct strings. Only one string recurs verbatim
 across advisories, yet clustering finds the same technique named three ways
 (Black Market Peso Exchange in 0001, 0003 and 0008), and twice more for
 hawala and for cargo blending. An exact-string scorer will therefore score
