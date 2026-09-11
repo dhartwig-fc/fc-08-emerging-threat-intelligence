@@ -155,6 +155,21 @@
     },
     {
       "family": "tbml",
+      "typology_id": "TBML001",
+      "label": "Over Invoicing",
+      "emergent": false,
+      "confidence": "low",
+      "citations": [
+        {
+          "page": 31,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "the trend to over or under declare goods being shipped and the use of false descriptions are common threads of both trade fraud and TBML activity"
+        }
+      ]
+    },
+    {
+      "family": "tbml",
       "typology_id": "TBML002U",
       "label": "Under Invoicing",
       "emergent": false,
@@ -556,5 +571,5 @@
     "fiu_liaison"
   ],
   "overall_confidence": "high",
-  "extraction_notes": "Golden label. The predicates (illegal logging, mining, waste trafficking) are not typologies; only the laundering methods are labelled. Front companies are labelled BA007, not SAN004: the report is not sanctions-framed and its front companies are real cash-intensive businesses used as cover, so the sanctions twin convention does not apply; the physical co-mingling of goods is emergent. TBML004 at medium: the Italian USD 68m false invoices simulate trade that never happened, which is phantom shipping rather than a governed 'false invoicing' entry. TBML001 not labelled: 'over or under declare' and 'higher declared values' on p58 are one indicator each. SAN008 kept for the repeated offshore-arbitrage theme despite the family. Considered and dropped as single mentions: correspondent-banking nesting (p25), sports sponsorship (p33), PAT009 transfer pricing, PAT001, BA005, BA006 (Annex A). Mr. L, Ms. C, Country A/B kingpin and the Madagascar networks are anonymised and not actors; enforcement bodies (FBI, Guardia di Finanza, SAMIFIN, FIUs) are not actors. CH, NL, SG, DE, NO appear as prosecuting, regulating or donor states and are not jurisdictions; GN is where Steinmetz's bribes sat."
+  "extraction_notes": "Golden label. The predicates (illegal logging, mining, waste trafficking) are not typologies; only the laundering methods are labelled. Front companies are labelled BA007, not SAN004: the report is not sanctions-framed and its front companies are real cash-intensive businesses used as cover, so the sanctions twin convention does not apply; the physical co-mingling of goods is emergent. TBML004 at medium: the Italian USD 68m false invoices simulate trade that never happened, which is phantom shipping rather than a governed 'false invoicing' entry. TBML001 not labelled: 'over or under declare' and 'higher declared values' on p58 are one indicator each. SAN008 kept for the repeated offshore-arbitrage theme despite the family. Considered and dropped as single mentions: correspondent-banking nesting (p25), sports sponsorship (p33), PAT009 transfer pricing, PAT001, BA005, BA006 (Annex A). Mr. L, Ms. C, Country A/B kingpin and the Madagascar networks are anonymised and not actors; enforcement bodies (FBI, Guardia di Finanza, SAMIFIN, FIUs) are not actors. CH, NL, SG, DE, NO appear as prosecuting, regulating or donor states and are not jurisdictions; GN is where Steinmetz's bribes sat. REVIEWED 2026-09-11. Added TBML001 Over Invoicing at LOW. p31 names both directions in one sentence -- 'the trend to over or under declare goods being shipped' -- which is the sentence this label already cited for TBML002U, so the twin was evidenced and unlabelled, the same asymmetry corrected in ADV-2026-0003. LOW rather than medium because the asymmetry is real: under-invoicing also has p58's specific 'exported at below market prices', where over-declaration has only the shared generic phrase. That matches the report's emphasis -- environmental crime undervalues exports. Omissions otherwise: TBML003, BA001, BA003, BA004, PAT001 and PAT005 are absent. The predicate crimes (illegal logging, mining, waste trafficking) are correctly NOT labelled as typologies; the library holds laundering methods, not predicates. BA007 Cash Intensive Activity is CORRECT here -- p29/p30 name cash intensive sectors explicitly."
 }
