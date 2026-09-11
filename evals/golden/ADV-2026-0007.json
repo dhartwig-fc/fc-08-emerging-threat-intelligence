@@ -245,9 +245,9 @@
     },
     {
       "family": "tbml",
-      "typology_id": "TBML004",
-      "label": "Phantom Shipping",
-      "emergent": false,
+      "typology_id": null,
+      "label": "Fictitious and overpriced invoicing for IT and consultancy services",
+      "emergent": true,
       "confidence": "medium",
       "citations": [
         {
@@ -581,5 +581,5 @@
     "fiu_liaison"
   ],
   "overall_confidence": "high",
-  "extraction_notes": "Golden label. Printed folio is PDF page minus 2 (pages 1-3 and 71-72 carry none). Pages 35-64 are national responses, international co-operation and conclusions; Annex A (65-68) is risk indicators and Annex B controls, none labelled as typologies. BA002 is medium because the word funnel never appears: labelled on the mules-to-herder-account pattern (Box 14) and the vIBAN centralisation. BA001 kept at low: smurfing (p22) and threshold splitting across PSP accounts (p30) are electronic, not the cash deposits BA001 describes. Virtual-asset laundering marked emergent rather than CMI010, which is a sanctions twin; no sanctions framing here. Fictitious invoices labelled TBML004; overpriced invoices appear once and TBML001 is not labelled. Unlicensed remitters and hawala, deepfakes and PSP displacement each appear once or twice and are not labelled. Mr. O, Person MS, the Japanese mule herder and the Operation Falcon suspects are anonymised case-study parties, not actors. Jurisdictions are where laundering or the syndicate sat; Malaysia, Australia, Saudi Arabia, Brazil, Sri Lanka, Hong Kong and Portugal appear as enforcement or victim states only."
+  "extraction_notes": "Golden label. Printed folio is PDF page minus 2 (pages 1-3 and 71-72 carry none). Pages 35-64 are national responses, international co-operation and conclusions; Annex A (65-68) is risk indicators and Annex B controls, none labelled as typologies. BA002 is medium because the word funnel never appears: labelled on the mules-to-herder-account pattern (Box 14) and the vIBAN centralisation. BA001 kept at low: smurfing (p22) and threshold splitting across PSP accounts (p30) are electronic, not the cash deposits BA001 describes. Virtual-asset laundering marked emergent rather than CMI010, which is a sanctions twin; no sanctions framing here. Fictitious invoices labelled TBML004; overpriced invoices appear once and TBML001 is not labelled. Unlicensed remitters and hawala, deepfakes and PSP displacement each appear once or twice and are not labelled. Mr. O, Person MS, the Japanese mule herder and the Operation Falcon suspects are anonymised case-study parties, not actors. Jurisdictions are where laundering or the syndicate sat; Malaysia, Australia, Saudi Arabia, Brazil, Sri Lanka, Hong Kong and Portugal appear as enforcement or victim states only. REVIEWED 2026-09-11. TBML004 Phantom Shipping replaced by an emergent label carrying its own two citations. Both describe fictitious or overpriced invoices for IT and CONSULTANCY SERVICES; the doctrine requires a trade in GOODS that were never shipped, and measured, this report never describes goods failing to move -- the p24 context says the opposite, that purchased goods 'can be moved across borders'. Services-based false invoicing has no governed home, which ADV-2026-0001 and ADV-2026-0003 also found; kept emergent rather than forced into a goods typology."
 }
