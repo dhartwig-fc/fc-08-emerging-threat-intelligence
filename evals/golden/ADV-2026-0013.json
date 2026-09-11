@@ -97,6 +97,12 @@
           "printed_folio": "1",
           "paragraph": null,
           "quote": "disguise the involvement of Specially Designated Nationals and Blocked Persons (SDNs) or parties on the Entity List in transactions, and obscure the true identities of Russian end users."
+        },
+        {
+          "page": 5,
+          "printed_folio": "5",
+          "paragraph": null,
+          "quote": "Making false or misleading statements on shipping forms, including underestimating the purchase price of merchandise by more than five times the actual amount"
         }
       ]
     },
@@ -157,21 +163,6 @@
           "printed_folio": "2",
           "paragraph": null,
           "quote": "Payment coming from a third-party country or business not listed on the End-User Statement"
-        }
-      ]
-    },
-    {
-      "family": "tbml",
-      "typology_id": "TBML002U",
-      "label": "Under Invoicing",
-      "emergent": false,
-      "confidence": "high",
-      "citations": [
-        {
-          "page": 5,
-          "printed_folio": "5",
-          "paragraph": null,
-          "quote": "Making false or misleading statements on shipping forms, including underestimating the purchase price of merchandise by more than five times the actual amount"
         }
       ]
     },
@@ -286,6 +277,12 @@
           "printed_folio": "4",
           "paragraph": null,
           "quote": "DOJ unsealed an indictment charging six Russian nationals and one Spanish national with multiple offenses arising from the defendants"
+        },
+        {
+          "page": 4,
+          "printed_folio": "4",
+          "paragraph": null,
+          "quote": "See Indictment, United States v. Orekhov, et al, Case 1:22-cr-00434-EK (E.D.N.Y. Sept. 26, 2022)"
         }
       ]
     },
@@ -304,6 +301,12 @@
           "printed_folio": "4",
           "paragraph": null,
           "quote": "DOJ unsealed an indictment charging five Russian nationals, including a suspected Federal Security Service officer, and two U.S. citizens"
+        },
+        {
+          "page": 4,
+          "printed_folio": "4",
+          "paragraph": null,
+          "quote": "See Indictment, United States v. Grinin, et al., Case 1:22-cr-00409-HG (E.D.N.Y. Dec. 5, 2022)"
         }
       ]
     },
@@ -320,22 +323,6 @@
           "printed_folio": "4",
           "paragraph": null,
           "quote": "BIS has also imposed restrictions on seven Iranian drone entities in January 2023 due to their production of Iranian unmanned aerial vehicles"
-        }
-      ]
-    },
-    {
-      "name": "Sojitz (Hong Kong) Ltd.",
-      "actor_type": "organisation",
-      "aliases": [],
-      "jurisdiction": "HK",
-      "role": "OFAC civil enforcement example: falsifying transactional documents",
-      "confidence": "low",
-      "citations": [
-        {
-          "page": 4,
-          "printed_folio": "4",
-          "paragraph": null,
-          "quote": "falsifying transactional documents,9 omitting information from internal correspondence,10 and shipping goods through third countries.11"
         }
       ]
     }
