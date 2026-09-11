@@ -337,12 +337,6 @@
       "confidence": "medium",
       "citations": [
         {
-          "page": 44,
-          "printed_folio": "42",
-          "paragraph": null,
-          "quote": "The use of false loans and invoices to fraudulently disguise the beneficial ownership of a transaction is the most common"
-        },
-        {
           "page": 79,
           "printed_folio": "77",
           "paragraph": null,
@@ -409,7 +403,7 @@
           "page": 42,
           "printed_folio": "40",
           "paragraph": null,
-          "quote": "Trade transactions were conducted with several Ukrainian companies"
+          "quote": "Transactions were also made with three other New Zealand shell companies registered by the same TCSP, using the same nominee director, nominee shareholder and virtual office address as the shell company."
         }
       ]
     },
@@ -822,5 +816,5 @@
     "general_intel"
   ],
   "overall_confidence": "high",
-  "extraction_notes": "Golden label. Printed folio is PDF page minus 2. Not sanctions-framed, so network twins used: PAT003 rather than SAN009; SAN001/SAN004 kept only for the designated-party cases (48, 99, 105) at low/medium. FND003 not labelled: a foundation capability, not a behaviour, though Annex D is its doctrine. TBML004 is the nearest id for false invoices for services never rendered; noted as an imperfect fit. Dropped as single-mention: PAT006 (IP/email nexus, Annex D), BA001 (case 90), TBML002U (case 73), TBML003 (case 67), CM007 (subsumed by CM002), and 'declaring numerous beneficiaries' (case 38). Mossack Fonseca and Appleby are named only as leak sources and are not actors. Jurisdictions are every country where a case was reported or an entity or account sat; Europol cases carry no code. Annex B (supervision survey) and Annex E (red flags) hold no typology beyond those cited."
+  "extraction_notes": "Golden label. Printed folio is PDF page minus 2. Not sanctions-framed, so network twins used: PAT003 rather than SAN009; SAN001/SAN004 kept only for the designated-party cases (48, 99, 105) at low/medium. FND003 not labelled: a foundation capability, not a behaviour, though Annex D is its doctrine. TBML004 is the nearest id for false invoices for services never rendered; noted as an imperfect fit. Dropped as single-mention: PAT006 (IP/email nexus, Annex D), BA001 (case 90), TBML002U (case 73), TBML003 (case 67), CM007 (subsumed by CM002), and 'declaring numerous beneficiaries' (case 38). Mossack Fonseca and Appleby are named only as leak sources and are not actors. Jurisdictions are every country where a case was reported or an entity or account sat; Europol cases carry no code. Annex B (supervision survey) and Annex E (red flags) hold no typology beyond those cited. REVIEWED 2026-09-11. TBML004 Phantom Shipping lost its p44 citation: 'the use of false loans and invoices to fraudulently disguise the beneficial ownership of a transaction' is a criminal-technique category, not goods that never shipped, and it is the evidence for this label's own False loans (loan-back) emergent entry. TBML004 keeps p79, which does say 'do not result in the actual movement of goods'. TBML009's p42 citation was replaced: 'Trade transactions were conducted with several Ukrainian companies' names no shell company, so it could not be verified from the quote alone; the page's own sentence naming three New Zealand shell companies sharing a TCSP, nominee director and virtual office does. BA007 Cash Intensive Activity is CORRECT here, unlike in ADV-2026-0001: p32 describes front companies in the customer service industry disguising funds as cash sales, which is the doctrine's own mechanism. CM002 over CM007 Pump and Dump for 'fraudulent stock promotion and price manipulation' (p170) is contestable; the broader parent was kept."
 }
