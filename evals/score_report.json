@@ -1,0 +1,676 @@
+{
+  "golden_dir": "/Users/danhartwig/fc-08-emerging-threat-intelligence/evals/golden",
+  "predicted_dir": "/Users/danhartwig/fc-08-emerging-threat-intelligence/data/records",
+  "emergent_threshold": 0.6,
+  "actor_threshold": 0.6,
+  "scored": [
+    "ADV-2026-0001",
+    "ADV-2026-0002",
+    "ADV-2026-0009",
+    "ADV-2026-0013",
+    "ADV-2026-0016",
+    "ADV-2026-0017"
+  ],
+  "not_scored_no_prediction": [
+    "ADV-2026-0003",
+    "ADV-2026-0004",
+    "ADV-2026-0005",
+    "ADV-2026-0006",
+    "ADV-2026-0007",
+    "ADV-2026-0008",
+    "ADV-2026-0010",
+    "ADV-2026-0011",
+    "ADV-2026-0012",
+    "ADV-2026-0014",
+    "ADV-2026-0015",
+    "ADV-2026-0018",
+    "ADV-2026-0019",
+    "ADV-2026-0020"
+  ],
+  "ignored_no_golden": [],
+  "totals": {
+    "typologies": {
+      "tp": 25,
+      "fp": 2,
+      "fn": 30,
+      "precision": 0.9259259259259259,
+      "recall": 0.45454545454545453,
+      "f1": 0.6097560975609756
+    },
+    "emergent": {
+      "tp": 9,
+      "fp": 1,
+      "fn": 11,
+      "precision": 0.9,
+      "recall": 0.45,
+      "f1": 0.6
+    },
+    "actors": {
+      "tp": 32,
+      "fp": 7,
+      "fn": 10,
+      "precision": 0.8205128205128205,
+      "recall": 0.7619047619047619,
+      "f1": 0.7901234567901233
+    },
+    "jurisdictions": {
+      "tp": 54,
+      "fp": 5,
+      "fn": 6,
+      "precision": 0.9152542372881356,
+      "recall": 0.9,
+      "f1": 0.9075630252100839
+    }
+  },
+  "per_advisory": {
+    "ADV-2026-0001": {
+      "typologies": {
+        "tp": 7,
+        "fn": 4,
+        "fp": 0,
+        "missed": [
+          "BA001",
+          "PAT002",
+          "PAT007",
+          "PAT009"
+        ],
+        "spurious": [],
+        "matched": [
+          "TBML001",
+          "TBML002U",
+          "TBML003",
+          "TBML004",
+          "TBML005",
+          "TBML008",
+          "TBML009"
+        ]
+      },
+      "emergent": {
+        "tp": 5,
+        "fn": 2,
+        "fp": 0,
+        "missed": [
+          "Offsetting or compensation schemes between criminal groups",
+          "Exploitation of MVTS and hawala for trade settlement"
+        ],
+        "spurious": [],
+        "matched": [
+          {
+            "gold": "Black Market Peso Exchange",
+            "predicted": "Black Market Peso Exchange",
+            "score": 1.0
+          },
+          {
+            "gold": "Infiltration of legitimate supply chains without trade misrepresentation",
+            "predicted": "Infiltration of Legitimate Supply Chains",
+            "score": 1.0
+          },
+          {
+            "gold": "Services-based money laundering",
+            "predicted": "Services-Based Money Laundering",
+            "score": 1.0
+          },
+          {
+            "gold": "Surrogate shopping (Daigou) networks for illicit cash integration",
+            "predicted": "Surrogate Shopping Networks",
+            "score": 1.0
+          },
+          {
+            "gold": "Trade-based terrorist financing",
+            "predicted": "Trade-Based Terrorist Financing",
+            "score": 1.0
+          }
+        ]
+      },
+      "actors": {
+        "tp": 3,
+        "fn": 4,
+        "fp": 0,
+        "missed": [
+          "Terrorist financing networks",
+          "Mexican and European transnational criminal organizations",
+          "Central and South American drug cartels",
+          "Surrogate shopper networks"
+        ],
+        "spurious": [],
+        "matched": [
+          {
+            "gold": "Asian professional money launderers (money brokers)",
+            "predicted": "Professional Money Launderers (PMLs)",
+            "score": 1.0
+          },
+          {
+            "gold": "Organised Criminal Groups",
+            "predicted": "Organised Criminal Groups (OCGs)",
+            "score": 1.0
+          },
+          {
+            "gold": "Professional Money Launderers",
+            "predicted": "Terrorist Financing (TF) networks",
+            "score": 1.0
+          }
+        ]
+      },
+      "jurisdictions": {
+        "tp": 12,
+        "fn": 4,
+        "fp": 2,
+        "missed": [
+          "CH",
+          "CN",
+          "HK",
+          "MA"
+        ],
+        "spurious": [
+          "CA",
+          "PE"
+        ],
+        "matched": [
+          "AU",
+          "BE",
+          "CO",
+          "DE",
+          "ES",
+          "FR",
+          "IL",
+          "IT",
+          "NL",
+          "NZ",
+          "SG",
+          "US"
+        ]
+      }
+    },
+    "ADV-2026-0002": {
+      "typologies": {
+        "tp": 6,
+        "fn": 3,
+        "fp": 1,
+        "missed": [
+          "PAT010",
+          "TBML005",
+          "TBML006"
+        ],
+        "spurious": [
+          "BA004"
+        ],
+        "matched": [
+          "BA001",
+          "BA005",
+          "TBML001",
+          "TBML002U",
+          "TBML008",
+          "TBML009"
+        ]
+      },
+      "emergent": {
+        "tp": 0,
+        "fn": 1,
+        "fp": 0,
+        "missed": [
+          "Abuse of temporary importation and inward processing regimes"
+        ],
+        "spurious": [],
+        "matched": []
+      },
+      "actors": {
+        "tp": 0,
+        "fn": 0,
+        "fp": 2,
+        "missed": [],
+        "spurious": [
+          "Criminals engaged in trade-based money laundering",
+          "Trade entities used as laundering vehicles"
+        ],
+        "matched": []
+      },
+      "jurisdictions": {
+        "tp": 0,
+        "fn": 0,
+        "fp": 0,
+        "missed": [],
+        "spurious": [],
+        "matched": []
+      }
+    },
+    "ADV-2026-0009": {
+      "typologies": {
+        "tp": 1,
+        "fn": 6,
+        "fp": 0,
+        "missed": [
+          "BA008",
+          "PAT002",
+          "PAT003",
+          "PAT010",
+          "SAN008",
+          "TBML001"
+        ],
+        "spurious": [],
+        "matched": [
+          "PAT007"
+        ]
+      },
+      "emergent": {
+        "tp": 3,
+        "fn": 2,
+        "fp": 0,
+        "missed": [
+          "Fictitious invoices for services never provided, disguising bribe payments",
+          "Professional service providers and complicit intermediaries enabling the laundering of corruption proceeds"
+        ],
+        "spurious": [],
+        "matched": [
+          {
+            "gold": "Bribery and extortion involving foreign public officials",
+            "predicted": "Bribery and Extortion of Foreign Public Officials",
+            "score": 1.0
+          },
+          {
+            "gold": "Misappropriation or embezzlement of public assets",
+            "predicted": "Misappropriation or Embezzlement of Public Assets",
+            "score": 1.0
+          },
+          {
+            "gold": "Laundering corruption proceeds through real estate, luxury goods and high-value assets",
+            "predicted": "Purchase of Real Estate, Luxury Goods and High-Value Assets to Launder Corruption Proceeds",
+            "score": 0.9
+          }
+        ]
+      },
+      "actors": {
+        "tp": 12,
+        "fn": 2,
+        "fp": 0,
+        "missed": [
+          "JSC Techsnabexport",
+          "Professional service providers and third-party facilitators"
+        ],
+        "spurious": [],
+        "matched": [
+          {
+            "gold": "Aliaksei Aleksin",
+            "predicted": "Aliaksei Aleksin",
+            "score": 1.0
+          },
+          {
+            "gold": "Alyaksandr Ryhorovich Lukashenka",
+            "predicted": "Alyaksandr Ryhorovich Lukashenka",
+            "score": 1.0
+          },
+          {
+            "gold": "Braskem S.A.",
+            "predicted": "Braskem S.A.",
+            "score": 1.0
+          },
+          {
+            "gold": "Dmitriy Sergeevich Peskov",
+            "predicted": "Dmitriy Sergeevich Peskov",
+            "score": 1.0
+          },
+          {
+            "gold": "Mark Lambert",
+            "predicted": "Mark Lambert",
+            "score": 1.0
+          },
+          {
+            "gold": "Martha Carolina Recinos De Bernal",
+            "predicted": "Martha Carolina Recinos De Bernal",
+            "score": 1.0
+          },
+          {
+            "gold": "Odebrecht S.A.",
+            "predicted": "Odebrecht S.A.",
+            "score": 1.0
+          },
+          {
+            "gold": "Russian elites and oligarchs",
+            "predicted": "Russia's elites and oligarchs",
+            "score": 1.0
+          },
+          {
+            "gold": "Transportation Logistics Inc.",
+            "predicted": "Transportation Logistics Inc. (TLI)",
+            "score": 1.0
+          },
+          {
+            "gold": "Vadim Mikerin",
+            "predicted": "Vadim Mikerin",
+            "score": 1.0
+          },
+          {
+            "gold": "Vladimir Putin",
+            "predicted": "Vladimir Putin",
+            "score": 1.0
+          },
+          {
+            "gold": "Kleptocrats and corrupt foreign public officials",
+            "predicted": "Kleptocratic regimes and corrupt public officials",
+            "score": 0.6
+          }
+        ]
+      },
+      "jurisdictions": {
+        "tp": 19,
+        "fn": 0,
+        "fp": 1,
+        "missed": [],
+        "spurious": [
+          "UA"
+        ],
+        "matched": [
+          "AO",
+          "AR",
+          "BR",
+          "BY",
+          "CH",
+          "CO",
+          "CY",
+          "DO",
+          "EC",
+          "GT",
+          "LV",
+          "MX",
+          "MZ",
+          "PA",
+          "PE",
+          "RU",
+          "SV",
+          "US",
+          "VE"
+        ]
+      }
+    },
+    "ADV-2026-0013": {
+      "typologies": {
+        "tp": 4,
+        "fn": 6,
+        "fp": 1,
+        "missed": [
+          "PAT005",
+          "SAN001",
+          "SAN005",
+          "SAN006",
+          "TBML008",
+          "TBML009"
+        ],
+        "spurious": [
+          "TBML002U"
+        ],
+        "matched": [
+          "BA005",
+          "SAN003",
+          "SAN004",
+          "SAN007"
+        ]
+      },
+      "emergent": {
+        "tp": 0,
+        "fn": 2,
+        "fp": 1,
+        "missed": [
+          "False end-user and end-use declarations",
+          "Splitting controlled shipments to avoid detection"
+        ],
+        "spurious": [
+          "Shipment Structuring to Evade Detection"
+        ],
+        "matched": []
+      },
+      "actors": {
+        "tp": 4,
+        "fn": 1,
+        "fp": 1,
+        "missed": [
+          "Grinin procurement network"
+        ],
+        "spurious": [
+          "Third-party intermediaries and transshipment points"
+        ],
+        "matched": [
+          {
+            "gold": "AO PKK Milandr",
+            "predicted": "AO PKK Milandr",
+            "score": 1.0
+          },
+          {
+            "gold": "Vorago Technologies",
+            "predicted": "Vorago Technologies",
+            "score": 1.0
+          },
+          {
+            "gold": "Iranian UAV entities",
+            "predicted": "Seven Iranian drone entities",
+            "score": 0.667
+          },
+          {
+            "gold": "Orekhov procurement network",
+            "predicted": "Russian and Spanish nationals indicted for shell-company export network (Orekhov)",
+            "score": 0.667
+          }
+        ]
+      },
+      "jurisdictions": {
+        "tp": 13,
+        "fn": 0,
+        "fp": 0,
+        "missed": [],
+        "spurious": [],
+        "matched": [
+          "AM",
+          "BG",
+          "BY",
+          "CN",
+          "ES",
+          "HK",
+          "IR",
+          "MO",
+          "RU",
+          "TR",
+          "US",
+          "UZ",
+          "VE"
+        ]
+      }
+    },
+    "ADV-2026-0016": {
+      "typologies": {
+        "tp": 4,
+        "fn": 6,
+        "fp": 0,
+        "missed": [
+          "PAT005",
+          "SAN001",
+          "SAN005",
+          "SAN008",
+          "TBML001",
+          "TBML008"
+        ],
+        "spurious": [],
+        "matched": [
+          "SAN003",
+          "SAN004",
+          "SAN006",
+          "SAN007"
+        ]
+      },
+      "emergent": {
+        "tp": 0,
+        "fn": 2,
+        "fp": 0,
+        "missed": [
+          "False end-user and end-use declarations",
+          "Diversion of Common High Priority items to Russian military end users"
+        ],
+        "spurious": [],
+        "matched": []
+      },
+      "actors": {
+        "tp": 6,
+        "fn": 2,
+        "fp": 1,
+        "missed": [
+          "Russian military procurement",
+          "Third-country businesses supplying Russia's war machine"
+        ],
+        "spurious": [
+          "Russian oligarchs"
+        ],
+        "matched": [
+          {
+            "gold": "AZU International",
+            "predicted": "AZU INTERNATIONAL",
+            "score": 1.0
+          },
+          {
+            "gold": "Aeromotus Unmanned Aerial Vehicles Trading LLC",
+            "predicted": "AEROMOTUS UNMANNED AERIAL VEHICLES TRADING LLC",
+            "score": 1.0
+          },
+          {
+            "gold": "Ecitech",
+            "predicted": "ECITECH",
+            "score": 1.0
+          },
+          {
+            "gold": "NPP Istok",
+            "predicted": "NPP ISTOK",
+            "score": 1.0
+          },
+          {
+            "gold": "Technological Company Fly Bridge LLC",
+            "predicted": "LIMITED LIABILITY COMPANY TECHNOLOGICAL COMPANY FLY BRIDGE",
+            "score": 1.0
+          },
+          {
+            "gold": "Turkik Union",
+            "predicted": "TURKIK UNION",
+            "score": 1.0
+          }
+        ]
+      },
+      "jurisdictions": {
+        "tp": 8,
+        "fn": 0,
+        "fp": 1,
+        "missed": [],
+        "spurious": [
+          "UA"
+        ],
+        "matched": [
+          "AE",
+          "BY",
+          "CN",
+          "GB",
+          "RS",
+          "RU",
+          "TR",
+          "UZ"
+        ]
+      }
+    },
+    "ADV-2026-0017": {
+      "typologies": {
+        "tp": 3,
+        "fn": 5,
+        "fp": 0,
+        "missed": [
+          "PAT007",
+          "PAT009",
+          "SAN006",
+          "SAN008",
+          "SAN009"
+        ],
+        "spurious": [],
+        "matched": [
+          "SAN002",
+          "SAN003",
+          "SAN004"
+        ]
+      },
+      "emergent": {
+        "tp": 1,
+        "fn": 2,
+        "fp": 0,
+        "missed": [
+          "Replacement of designated entities with freshly incorporated companies",
+          "Blending of cargo to disguise sanctioned origin"
+        ],
+        "spurious": [],
+        "matched": [
+          {
+            "gold": "Split evasion network: sanctions-facing 'blue' and Russia-facing 'red' companies",
+            "predicted": "Dual-Sided (Blue/Red) Sanctions Evasion Trading Network",
+            "score": 0.625
+          }
+        ]
+      },
+      "actors": {
+        "tp": 7,
+        "fn": 1,
+        "fp": 3,
+        "missed": [
+          "2Rivers network"
+        ],
+        "spurious": [
+          "'Blue' side network companies",
+          "'Red' side network companies",
+          "Shadow Fleet oil tankers"
+        ],
+        "matched": [
+          {
+            "gold": "2Rivers DMCC",
+            "predicted": "2RIVERS DMCC",
+            "score": 1.0
+          },
+          {
+            "gold": "2Rivers PTE",
+            "predicted": "2RIVERS PTE",
+            "score": 1.0
+          },
+          {
+            "gold": "Etibar Eyyub",
+            "predicted": "Etibar EYYUB",
+            "score": 1.0
+          },
+          {
+            "gold": "Igor Sechin",
+            "predicted": "Igor SECHIN",
+            "score": 1.0
+          },
+          {
+            "gold": "Nord Axis",
+            "predicted": "NORD AXIS",
+            "score": 1.0
+          },
+          {
+            "gold": "Rosneft",
+            "predicted": "ROSNEFT",
+            "score": 1.0
+          },
+          {
+            "gold": "Tahir Garayev",
+            "predicted": "Tahir GARAYEV",
+            "score": 1.0
+          }
+        ]
+      },
+      "jurisdictions": {
+        "tp": 2,
+        "fn": 2,
+        "fp": 1,
+        "missed": [
+          "AE",
+          "SG"
+        ],
+        "spurious": [
+          "GB"
+        ],
+        "matched": [
+          "AZ",
+          "RU"
+        ]
+      }
+    }
+  }
+}

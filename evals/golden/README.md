@@ -145,6 +145,51 @@ informal value transfer through hawala, blending or relabelling cargo to
 disguise sanctioned origin, false end-user and end-use declarations, and
 professional enablers as a class.
 
+## First baseline, 2026-09-11
+
+Six of the twenty have a predicted record: ADV-2026-0001 from week 2, plus the
+five shortest run after the review. $2.59 and 144 turns for the five.
+`evals/score_report.json` holds the full breakdown.
+
+| field | precision | recall | F1 |
+|---|---|---|---|
+| typologies | 0.926 | 0.455 | 0.610 |
+| emergent | 0.900 | 0.450 | 0.600 |
+| actors | 0.821 | 0.762 | 0.790 |
+| jurisdictions | 0.915 | 0.900 | 0.908 |
+
+Read it as: what the agent says is nearly always right, and it says less than
+half of what is there. Actors and jurisdictions, which are named on the page,
+it finds. Typologies, which require mapping a described technique onto a
+governed id, it does not.
+
+**The most useful result is a false positive.** On ADV-2026-0013 the agent
+labelled TBML002U Under Invoicing, citing "underestimating the purchase price
+of merchandise by more than five times the actual amount". That is the exact
+quote, on the exact typology, that the review REMOVED from the golden label,
+because understating a price to evade export licensing is not the doctrine's
+value transfer to an importer. The agent made the same mechanism error the
+first draft of the label made.
+
+Had the label not been reviewed, this would have scored as a true positive and
+the shared blind spot would have been invisible. It is direct evidence for the
+warning at the top of this section: labeller and agent share failure modes, and
+only review separates them.
+
+**One false positive is arguably the agent being right.** On ADV-2026-0002 it
+labelled BA004 Circular Funds Flow for "Payments are routed in a circle - funds
+are sent out from one country and received back in the same country". The
+golden label carries TBML006 Circular Trade for that same sentence, and its own
+notes record the choice as contestable ("TBML006 low over BA004... trade-entity
+framing"). Funds circulating with no goods described fits BA004's doctrine at
+least as well. The scorer counts it against the agent; a reviewer might not.
+
+**The recall gap is concentrated in indicator lists.** The typologies most
+often missed are the single-bullet ones the restated rule admits: PAT005,
+SAN005, SAN001 across both red alerts. The agent appears to read indicator
+lists as context rather than as content, which is the same judgement the
+original strict rule made and the review overturned.
+
 ## Rules
 
 - Never edit `advisory_list.json` by hand to change a hash or a date. Re-fetch
