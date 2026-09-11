@@ -81,6 +81,27 @@
     },
     {
       "family": "tbml",
+      "typology_id": "TBML005",
+      "label": "False Description Of Goods",
+      "emergent": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 25,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "use import–export front companies to manipulate invoices—through over- or under-invoicing and falsified cargo descriptions"
+        },
+        {
+          "page": 41,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "Use of import/export fronts and wholesale trading structures to balance accounts through over - or under-invoicing, falsified cargo descriptions and commercial offsets"
+        }
+      ]
+    },
+    {
+      "family": "tbml",
       "typology_id": "TBML004",
       "label": "Phantom Shipping",
       "emergent": false,
@@ -111,7 +132,7 @@
           "page": 26,
           "printed_folio": "24",
           "paragraph": null,
-          "quote": "Goods were exported to related entities in a third jurisdiction, where payment was deliberately withheld on the basis of fictitious commercial disputes, before the goods were re -exported to entities controlled by the same network."
+          "quote": "Goods were exported to related entities in a third jurisdiction, where payment was deliberately withheld on the basis of fictitious commercial disputes, before the goods were re-exported to entities controlled by the same network."
         }
       ]
     },
@@ -746,5 +767,5 @@
     "fiu_liaison"
   ],
   "overall_confidence": "high",
-  "extraction_notes": "Golden label. Printed folio is PDF page minus 2 for pages 3-75. VA settlement is NOT labelled CMI010: the library entry is sanctions-scoped and the report frames VAs as PML settlement, so it is emergent under crypto. Front companies are not SAN004 (sanctions-scoped); they are labelled BA007 and TBML009. TBML001 kept at medium: over-invoicing is named in the settlement typology (p25, p41) but every worked case is under-invoicing. TBML005 false cargo descriptions, crowdfunding-as-settlement (Box 4), banknote-serial tokens and prepaid-card bridging are mentioned but not labelled (indicators or single boxes). vIBAN nesting is cited under BA002 rather than as its own emergent. Chinese-speaking networks carry no jurisdiction: the report calls them a linguistic/diaspora category with East Asia links. Operation names (Klaver, Karasu, Whitewall, Fei Ch'ien, Cymbal) and Box 29 panel operators are anonymised, not actors. Jurisdictions are case and hub locations; survey respondents and good-practice states (SE, FR, BD, LU, MY, CH, PT, ID, KE) are excluded."
+  "extraction_notes": "Golden label. Printed folio is PDF page minus 2 for pages 3-75. VA settlement is NOT labelled CMI010: the library entry is sanctions-scoped and the report frames VAs as PML settlement, so it is emergent under crypto. Front companies are not SAN004 (sanctions-scoped); they are labelled BA007 and TBML009. TBML001 kept at medium: over-invoicing is named in the settlement typology (p25, p41) but every worked case is under-invoicing. TBML005 false cargo descriptions, crowdfunding-as-settlement (Box 4), banknote-serial tokens and prepaid-card bridging are mentioned but not labelled (indicators or single boxes). vIBAN nesting is cited under BA002 rather than as its own emergent. Chinese-speaking networks carry no jurisdiction: the report calls them a linguistic/diaspora category with East Asia links. Operation names (Klaver, Karasu, Whitewall, Fei Ch'ien, Cymbal) and Box 29 panel operators are anonymised, not actors. Jurisdictions are case and hub locations; survey respondents and good-practice states (SE, FR, BD, LU, MY, CH, PT, ID, KE) are excluded. REVIEWED 2026-09-11. Added TBML005 False Description Of Goods at medium: 'falsified cargo descriptions' is named twice, both times inside the report's own enumerations of trade-based settlement techniques. TBML006's citation was extended: it stopped at 'payment was deliberately withheld', which does not close a circle; the sentence continues 'before the goods were re-exported to entities controlled by the same network', and the paragraph opens by naming 'circular trade flows' outright. PAT009 Related Party Trading was considered on that same sentence and left out: the related-entity trade is the vehicle for the circular flow the report names as the technique, and PAT009 is nowhere described as a technique in its own right in a 76-page narrative. BA007 is correct here on p27's kiosks, hookah bars and mobile phone shops -- the fourth document in this set to settle that mapping on its evidence."
 }
