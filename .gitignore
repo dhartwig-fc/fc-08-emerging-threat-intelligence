@@ -1,5 +1,6 @@
 data/advisories/
 data/records/
+data/repeats/
 data/proposals.jsonl
 .venv/
 __pycache__/
