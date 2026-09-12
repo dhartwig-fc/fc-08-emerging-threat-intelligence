@@ -177,12 +177,54 @@ def _stems(text: str) -> List[str]:
     return [_stem(w) for w in re.findall(r"[a-z0-9]+", text.lower()) if w not in _STOPWORDS and len(w) > 2]
 
 
+# Vocabulary the doctrine does not carry, added to the search index only.
+#
+# WHY THIS EXISTS. Traced 2026-09-12 on ADV-2026-0016. The alert's red flag 4
+# reads "a customer that significantly OVERPAYS for a Common High Priority list
+# item". TBML001 Over Invoicing describes itself as "the price of goods is
+# intentionally inflated beyond their true market value" and never says overpay,
+# so the document's own sentence could not reach it: the tool returned only
+# TBML002U Under Invoicing, the agent correctly rejected that on the mechanism
+# test ("the opposite direction of value distortion"), and the typology was
+# missed in 13 of 13 runs.
+#
+# Worse, TBML002U's doctrine DOES mention overpayment, in a mirror-image
+# contrast. `overpa` is the highest-IDF term in such a query (4.06), so the
+# OPPOSITE-direction typology outranked the right one 0.78 to 0.42. A typology
+# pair differing only in direction was the one case the scorer could not separate.
+#
+# RULES FOR THIS MAP, because it is the kind of thing that rots into a hack:
+#   1. Aliases are hand-written from the DOCTRINE'S MEANING, never mined from
+#      evals/golden/. Mining the eval corpus and then measuring recall on it
+#      would be circular, and the resulting number would be a fiction.
+#   2. Direction pairs are added SYMMETRICALLY. Giving TBML001 payment-side
+#      vocabulary while leaving TBML002U without its own biases the pair rather
+#      than fixing it.
+#   3. It goes in the SEARCH INDEX only. data/typologies.json is a governed
+#      export from fc-10 and is never edited here; get_typology still returns
+#      the governed doctrine verbatim, so nothing the agent cites changes.
+#   4. The proper home for most of these is fc-10's doctrine, where the
+#      description genuinely under-describes the technique. This layer is the
+#      fast fix; the upstream one is the correct fix.
+#
+# Guarded by evals/search_aliases_probe.py, and evals/search_probes.py must stay
+# 12 of 12 -- an alias that buys recall by matching everything is a regression.
+SEARCH_ALIASES = {
+    "TBML001": ["overpayment", "overpays", "overpaid", "pays above market value",
+                "price inflated above market value"],
+    "TBML002U": ["underpayment", "underpays", "underpaid", "pays below market value",
+                 "price deflated below market value"],
+}
+
 def _search_index() -> tuple:
     """(docs, idf) over the current library. 57 records; rebuilt per call on purpose."""
     docs = []
     for r in _typologies():
         label = set(_stems(r["label"]))
-        body = set(_stems(" ".join([r.get("summary", ""), r.get("intelligence_question", "")] + r.get("indicators", []))))
+        body = set(_stems(" ".join(
+            [r.get("summary", ""), r.get("intelligence_question", "")]
+            + r.get("indicators", [])
+            + SEARCH_ALIASES.get(r["typology_id"], []))))
         docs.append((r, label, body | label))
     df: dict = {}
     for _, _, terms in docs:
