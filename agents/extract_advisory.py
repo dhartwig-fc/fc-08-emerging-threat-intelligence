@@ -14,6 +14,21 @@ enforced three times, on purpose:
   3. `_refuse_unknown_ids` below raises if the returned record names an id the
      library does not hold, whatever the prompt said.
 Only 1 and 3 are governance. 2 is advice.
+
+2026-09-12: the advice changed, and this is the one prompt edit today with a
+measured reason. "Prefer fewer, well-cited items over many weakly supported
+ones" was suppressing assertions the golden set expects -- the agent cited that
+rule back in its own extraction_notes as why it did not reproduce all fourteen
+of ADV-2026-0016's numbered red flags. Replaced with the document-shape rule,
+which was an owner decision taken on 2026-09-11 for LABELLERS (see
+evals/golden/README.md) and never propagated here, so the label and the agent
+were applying different rules to the same document and the scorer called the
+difference "recall".
+
+Evidence: SAN006 on ADV-2026-0016 was RETRIEVED by search, CONFIRMED with
+get_typology, then dropped -- 0 of 7 runs under the old prompt, 3 of 3 under the
+new one, with indicators rising 9.9 -> 13.3 of the document's 14 and zero new
+false positives. Probe: evals/probe_prompt_variant.py.
 """
 
 from __future__ import annotations
@@ -56,7 +71,8 @@ Rules:
 - Citation page is the n in the "=== PAGE n ===" marker above the text, never the number printed on the page. Put the printed number in printed_folio.
 - published_on_precision says how much of the date the document states. "December 2020" is 2020-12-01 with precision month.
 - A class of actor the document describes (organised crime groups, professional money launderers) is actor_type category, not organisation.
-- Prefer fewer, well-cited items over many weakly supported ones.
+- Whether an indicator is a typology depends on the shape of the document. In a narrative report, a red flag mentioned once in passing is not a typology: label what the report is about. In an indicator-list document (a red alert, a FATF risk-indicator paper, a FinCEN red-flag section) the indicators ARE the content -- each indicator, or each group of related indicators, may carry a typology, and a single bullet is sufficient evidence.
+- Confidence carries the weight, not omission. One bullet supports a typology at low or medium; high needs the document to develop the technique.
 - Jurisdictions are ISO 3166-1 alpha-2 codes.
 - Put caveats for the human reviewer in extraction_notes.
 
