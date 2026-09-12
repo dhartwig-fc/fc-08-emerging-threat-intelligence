@@ -127,11 +127,33 @@ def mcp_servers() -> dict:
     }
 
 
-async def extract(path: Path, advisory_id: str, model: str, max_budget_usd: float, max_turns: int) -> tuple:
-    pages = pdf_to_pages(path)
-    proposals_before = _count_lines(PROPOSALS_PATH)
+def agent_options(model: str, max_budget_usd: float, max_turns: int) -> ClaudeAgentOptions:
+    """The agent's whole capability surface, in one place a guard can read.
 
-    options = ClaudeAgentOptions(
+    THE EXTRACTION AGENT HAS NO BUILT-IN TOOLS. `tools=[]` emits `--tools ""`
+    (see the SDK's subprocess_cli.py), which removes the base set -- Bash, Write,
+    Read, Edit, WebFetch, everything -- and leaves only the MCP tools supplied
+    through `mcp_servers`.
+
+    Why this is not what `allowed_tools` does, measured 2026-09-12. With
+    `allowed_tools` naming only the four Knowledge Centre tools, the agent still
+    HELD Bash and Write and used them: on ADV-2026-0002 it ran
+    `echo -n "<sha256>" | wc -c` successfully and attempted to write
+    /tmp/adv_record.json. `allowed_tools` governs whether a call PROMPTS, not
+    whether the tool exists. The Write was refused by a hook on the operator's
+    machine, which is not this pipeline's governance and would not exist in CI or
+    on anyone else's clone.
+
+    `setting_sources=[]` is the other half: the run must not inherit settings,
+    hooks or permissions from the machine it happens to be on, or the contract
+    differs per developer. It also stops the run depending on the hook that
+    masked the defect above.
+
+    An extraction agent that can write files and run shell commands is outside
+    its own contract whether or not it chooses to use them. Guarded by
+    `evals/check_tool_surface.py`, which proves both directions.
+    """
+    return ClaudeAgentOptions(
         system_prompt=SYSTEM_PROMPT,
         model=model,
         max_turns=max_turns,
@@ -141,9 +163,19 @@ async def extract(path: Path, advisory_id: str, model: str, max_budget_usd: floa
         # this folder, giving the model two copies with different names and four
         # permission denials per run (measured 2026-09-10). Only the one passed in.
         strict_mcp_config=True,
+        # Capability, not permission. See the docstring.
+        tools=[],
+        setting_sources=[],
         allowed_tools=["mcp__%s__%s" % (SERVER_KEY, t) for t in KC_TOOLS],
         output_format={"type": "json_schema", "schema": AdvisoryRecord.model_json_schema()},
     )
+
+
+async def extract(path: Path, advisory_id: str, model: str, max_budget_usd: float, max_turns: int) -> tuple:
+    pages = pdf_to_pages(path)
+    proposals_before = _count_lines(PROPOSALS_PATH)
+
+    options = agent_options(model, max_budget_usd, max_turns)
 
     structured = None
     failure: str | None = None
