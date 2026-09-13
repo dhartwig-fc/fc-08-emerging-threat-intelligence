@@ -37,6 +37,7 @@ evals/check_citations.py           proves every citation quote exists on the PDF
 evals/score.py                     scores predicted records against the golden set (P/R/F1 per field)
 evals/check_tool_surface.py        proves the agent cannot reach Bash/Write/Read; run with --live --mutate
 evals/search_aliases_probe.py       guards SEARCH_ALIASES: direction pair fixed, emergent guard intact; --mutate
+evals/check_twin_pairs.py           guards the cross-family twin relation and the propose_link refusal; --mutate
 evals/search_recall.py              search measured against the golden set's real advisory sentences, not hand-written probes
 evals/probe_prompt_variant.py       A/B a prompt change without editing the agent; INVERTED 2026-09-12, now builds the pre-adoption prompt
 evals/traces/                       where recall goes: the full baseline, three traced mechanisms, and the ADV-2026-0004 label triage
@@ -112,9 +113,44 @@ claude mcp add knowledge-centre -- "$PWD/.venv/bin/python" "$PWD/mcp_server/know
      literal label "Shadow Fleet" and resolve correctly 10 of 10. SAN006 "Trade Based Sanctions
      Evasion" and TBML010 "Sanctions Evasion Through Trade" are the same concept reordered, so the
      rule NEVER FIRES. One wrong decision yields a false negative AND a false positive together, so
-     it inflates the measured gap twice. **Fix belongs in the tool, not the prompt** (rule 2): the
-     library should declare twin pairs and `propose_link` should enforce family. A rule whose
-     predicate is string equality is fc-10's guardrail-3 defect in a new place.
+     it inflates the measured gap twice. A rule whose predicate is string equality is fc-10's
+     guardrail-3 defect in a new place: correct English, wrong test, satisfied by the pair that
+     does not need it.
+
+     **FIXED 2026-09-13 in `df8d4aa`, and it only half worked — read this before planning against
+     it.** `_TWIN_PAIRS` in the MCP server declares the relation as data, surfaced in every
+     `search_typologies` line, attached to the `get_typology` record, and **enforced by a refusal**:
+     `propose_link` rejects a twinned link whose rationale does not name the twin. Measured over
+     three runs of ADV-2026-0017 against the prior ten:
+
+     | | old | after the fix |
+     |---|---|---|
+     | SAN006 asserted | 0 of 10 | **0 of 3** |
+     | TBML010 asserted | **8 of 10** | **0 of 3** |
+     | recall | 0.25–0.38 (mean 0.325) | **0.38 / 0.38 / 0.38** |
+
+     So it removed the false positive and collapsed the variance — the old runs alternated because
+     TBML010 sometimes displaced a correct answer — and **did not produce the right twin.** Faced
+     with a choice it could not justify, the agent DROPS the claim rather than reconsidering which
+     twin fits. **A refusal suppresses; it does not redirect.** That is the same shape as "prefer
+     fewer, well-cited items": making the agent assert less is easy, making it assert correctly
+     more is the work, and every governance mechanism built so far is subtractive.
+
+     Which suggests the SAN006 miss was never primarily a twin problem — the substitution was a
+     symptom, and removing the wrong option exposed the real gap. Where the agent DID have the
+     reasoning it complied, and the reasoning is now on the record in the review queue: SAN002's
+     rationale reads *"TWIN of PAT008 (network family); this advisory is issued by NCA/OFSI/FCDO
+     explicitly to address sanctions evasion … so the sanctions-family twin SAN002 is the correct
+     fit per the stated convention."* That is worth more than the 0.05 recall it moved, because
+     week 5's reviewer can audit it.
+
+     **A FOURTH PAIR exists that `evals/golden/README.md` does not declare** — `BA008` Layering and
+     `CM004` Layering, identical labels, different families, found by label-overlap measurement on
+     2026-09-13. It carries `prefer=None`: no owner decision exists and none is invented. **It needs
+     an owner ruling.** Guarded by `evals/check_twin_pairs.py` (10 checks, mutation-verified, and it
+     redirects `NEXUS_PROPOSALS_PATH` so it never writes into the real review queue). What the tool
+     CANNOT do: adjudicate framing. It never sees the document, so it guarantees only that the agent
+     knew the twin existed and recorded a reason.
   2. **Hybrid document shape.** ADV-2026-0009 is a narrative body (pp.1-7) plus a ten-bullet
      red-flag appendix (pp.8-9); every run folds the appendix into the body's single theme and four
      of six misses cite only the appendix. **The document-shape rule adopted in `a5abcc9` asks a
@@ -137,6 +173,19 @@ claude mcp add knowledge-centre -- "$PWD/.venv/bin/python" "$PWD/mcp_server/know
 
   **Cross-document:** TBML001 Over Invoicing is defective at both ends — unreachable by vocabulary
   on ADV-2026-0016, wrongly applied by the labeller on ADV-2026-0004.
+
+- **RANKED FIXES from the three mechanisms, state as of 2026-09-13.**
+  1. ~~Twin pairs into the tool.~~ **DONE, `df8d4aa`** — removed the false positive, did not
+     recover the false negative. See mechanism 1 above. Open: an owner ruling on BA008/CM004.
+  2. **Emergent threshold 0.60 → 0.50.** Measured, free, +47% on that field, zero entity merges
+     verified pair by pair. Fixes PRECISION only; say so wherever the number is published.
+  3. **Document-shape rule per section, not per document — BUT MEASURE FIRST.** Two findings point
+     different ways: hybrid shape explains ADV-2026-0009, and explicitly does NOT explain
+     ADV-2026-0017, where three of five misses cite narrative pages. Shipping a per-section rule on
+     one trace would repeat the mistake `a5abcc9` already made. Count how many of the twenty are
+     hybrid at all before touching the prompt again.
+  4. **Owner label pass.** Gates every published figure. `evals/traces/TRIAGE_ADV-2026-0004_LABEL.md`
+     is a four-decision list: TBML001 and SAN008 to strike or keep, TBML004 and SAN001 to judge thin.
 
 - [ ] Week 4: fetcher / extractor / classifier / reviewer subagents. **DO NOT plan this against better retrieval.** Measured three ways on 2026-09-12: the search fix lifted top-5 recall 41% relative and moved extraction recall by nothing; typologies were retrieved, confirmed with `get_typology`, and then not asserted; and the agent asserts the same handful whether the document holds 5 golden typologies or 20. Build against the three mechanisms below, in that order. And note precision 0.889 is this pipeline's best property -- an assertion budget IS a precision strategy, so a reviewer that justifies each extra assertion beats simply asserting more
 - [ ] Week 5: hooks, telemetry, `review.py` gate, desk digests
