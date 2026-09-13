@@ -104,3 +104,91 @@ says the mechanism works where it was aimed — not that it lifts the pipeline.
 - **"Returning zero additions is a valid and useful answer"** is in the prompt
   because restraint has to be available to a mechanism whose failure mode is
   over-assertion.
+
+
+---
+
+# Full set: all twenty, and the prediction that was wrong
+
+The remaining sixteen ran one repeat each — the bands already settled
+repeatability on the four. This measured REACH.
+
+| all 20 | precision | recall | F1 |
+|---|---|---|---|
+| extraction alone | 0.889 | 0.357 | **0.510** |
+| + reviewer | 0.853 | **0.545** | **0.665** |
+
+**Recall +0.19, F1 +0.155, precision −0.036.** A trade, and a good one, but a
+trade. 53 additions, 42 correct, 11 spurious by the scorer's reckoning.
+
+## Where the cost falls — not where I predicted
+
+| group | additions | precision OF ADDITIONS | F1 effect |
+|---|---|---|---|
+| the 7 others | 19 | **0.947** | 0.485 → 0.712 |
+| the 4 concentrated | 10 | **0.900** | 0.349 → 0.548 |
+| the 9 with ZERO indicator misses | 24 | **0.625** | 0.592 → 0.682 |
+
+I predicted the nine zero-concentration documents would yield little, and said
+silence there would be the mechanism behaving correctly. **They produced the most
+additions at the worst precision** — and still improved F1, because the recall
+gain outweighed the cost.
+
+**The shape count predicted where the EXTRACTION's misses were. It did not
+predict where the REVIEWER would succeed.** Those are different questions and I
+conflated them when proposing to aim it. The seven documents the shape count did
+not flag were the reviewer's strongest ground, at 0.947.
+
+**Consequence: run it everywhere.** The targeting theory does not survive its own
+measurement; the mechanism does.
+
+## The spurious additions are mostly not spurious
+
+ADV-2026-0002 added five, four scored wrong — the worst document in the set — so
+they were read individually rather than accepted from the scorer.
+
+**9 of its 10 citations verify on the exact page named.** The single failure is a
+pypdf artefact (`"significant m ismatches"`), the same class of false negative
+`check_citations.py` already carries a spacing-tolerant tier for.
+
+| addition | cited evidence | read |
+|---|---|---|
+| PAT005 Shared/Mass Registration Address | *"registered at an address that is likely to be a mass registration address"* | defensible; doctrine is "entities connected through a shared address" |
+| BA008 Layering | *"Incoming wire transfers… split and forwarded to non-related multiple accounts"* | defensible; doctrine is a chain of transfers severing the audit trail |
+| BA006 Dormant Reactivation | *"A trade entity has unexplained periods of dormancy"* | defensible; mechanism matches, object is an entity not an account |
+| TBML004 Phantom Shipping | *"Trade or customs documents… missing, appear to be counterfeits"* | defensible; doctrine names a missing or forged shipping record |
+
+**So the likelier reading is that the LABEL is incomplete.** ADV-2026-0002 is a
+ten-page FATF risk-indicator paper listing dozens of indicators across four
+sections, and its label carries nine typologies.
+
+**This inverts the label question.** The ADV-2026-0004 triage asked *are these 20
+too many* and found 16 supported. This asks *are these 9 too few* — and on the
+evidence quoted, they are.
+
+**Which means the full-set number understates the reviewer in both directions.**
+If a share of the 11 spurious additions are correct-but-unlabelled, its precision
+is better than 0.792 AND the recall denominator is too small, so the recall gain
+is understated too.
+
+**The standing caveat applies and is not a formality.** This is Claude judging
+Claude's additions against Claude's labels — the correlation every label records
+in `label_status` and the owner pass exists to break. These are not ruled
+correct. They are well-cited, doctrine-matched, and they belong on the owner's
+adjudication list rather than in a spurious column.
+
+## What is now known about the labels, from two directions
+
+| document | question | finding |
+|---|---|---|
+| ADV-2026-0004 | 20 typologies — too many? | 16 SUPPORTED, 2 THIN, 2 UNSUPPORTED |
+| ADV-2026-0002 | 9 typologies — too few? | 4 defensible additions the label lacks |
+
+Both found by measurement rather than by re-reading twenty labels, which is what
+makes the owner pass cheap: it is now a short list of specific disputes.
+
+## Caveat on the numbers
+
+Sixteen of the twenty are SINGLE runs. Only the four concentrated documents have
+bands. The full-set figure is therefore a point estimate with known variance only
+on a fifth of the set.

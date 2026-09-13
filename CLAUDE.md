@@ -231,8 +231,24 @@ claude mcp add knowledge-centre -- "$PWD/.venv/bin/python" "$PWD/mcp_server/know
   BOUNDARY: measured only where misses concentrate. Eight documents have ZERO misses in indicator sections and
   the reviewer's value there is untested. `evals/traces/REVIEWER_BANDS_2026-09-13.md`.
 
-- [ ] Week 4 remaining: the full-set run, `data/emergent_candidates.json`, and the honest single-vs-multi
-  comparison. **DO NOT plan the rest against better retrieval.** Measured three ways on 2026-09-12: the search fix lifted top-5 recall 41% relative and moved extraction recall by nothing; typologies were retrieved, confirmed with `get_typology`, and then not asserted; and the agent asserts the same handful whether the document holds 5 golden typologies or 20. Build against the three mechanisms below, in that order. And note precision 0.889 is this pipeline's best property -- an assertion budget IS a precision strategy, so a reviewer that justifies each extra assertion beats simply asserting more
+  **FULL SET, all 20, 2026-09-13: extraction P 0.889 R 0.357 F1 0.510 -> + reviewer P 0.853 R 0.545
+  F1 0.665.** Recall +0.19, F1 +0.155, precision -0.036. 53 additions, 42 correct. **RUN IT EVERYWHERE:
+  my targeting theory did not survive its own measurement.** The nine documents the shape count said had
+  ZERO indicator misses produced the MOST additions (24) at the WORST precision (0.625) and still improved
+  F1; the seven it did not flag were the strongest ground (19 additions at 0.947). The shape count predicted
+  where the EXTRACTION missed, not where the REVIEWER succeeds — different questions, conflated when I
+  proposed aiming it.
+
+  **AND THE SPURIOUS ADDITIONS ARE MOSTLY NOT SPURIOUS.** ADV-2026-0002's four scored-wrong additions were
+  read individually: 9 of 10 citations verify on the page named, and PAT005, BA008, BA006 and TBML004 are
+  each doctrine-matched to a quoted indicator. Its label carries 9 typologies for a ten-page FATF
+  risk-indicator paper. **The label is likely INCOMPLETE**, which inverts the ADV-2026-0004 triage question
+  and means the full-set number understates the reviewer in BOTH directions. Claude judging Claude's
+  additions against Claude's labels — for the owner's list, not ruled correct.
+
+- [ ] Week 4 remaining: `data/emergent_candidates.json`, a schema field + version bump if the additions are
+  to merge into records, and the honest single-vs-multi comparison. Sixteen of the twenty are SINGLE runs;
+  only the four concentrated documents have bands. **DO NOT plan the rest against better retrieval.** Measured three ways on 2026-09-12: the search fix lifted top-5 recall 41% relative and moved extraction recall by nothing; typologies were retrieved, confirmed with `get_typology`, and then not asserted; and the agent asserts the same handful whether the document holds 5 golden typologies or 20. Build against the three mechanisms below, in that order. And note precision 0.889 is this pipeline's best property -- an assertion budget IS a precision strategy, so a reviewer that justifies each extra assertion beats simply asserting more
 - [ ] Week 5: hooks, telemetry, `review.py` gate, desk digests
 - [ ] Week 6: publish slice 1 on `future-capabilities.html`, tag `fc08-threatintel-slice1-v1.0.0`
 
