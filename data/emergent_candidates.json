@@ -1,0 +1,1406 @@
+{
+  "generated": "2026-09-13",
+  "generated_by": "tools/build_emergent_candidates.py",
+  "schema_version_of_records": "1.3.0",
+  "counts": {
+    "candidates": 50,
+    "distinct_labels": 50,
+    "advisories": 15,
+    "from_extraction": 34,
+    "from_reviewer": 16,
+    "with_near_neighbours": 23
+  },
+  "method": "Every typology entry carrying no typology_id, from the 20 records and from the additive reviewer's additions. near_neighbours are labels scoring >= 0.50 on token containment after generic domain words are dropped.",
+  "caveat": "NEIGHBOURS ARE A SUGGESTION, NOT A MERGE. Automatic clustering was built and rejected: at the scorer's 0.50 threshold it merged four distinct techniques on the words 'money laundering', and at the best threshold tested only one of six multi-member clusters was unambiguously right. The scorer's threshold was validated for matching one predicted label against one golden label, which is a different task. A wrong suggestion costs a moment's reading; a wrong merge destroys the evidence that two advisories described different things. The curator decides.",
+  "candidates": [
+    {
+      "advisory_id": "ADV-2026-0003",
+      "source": "extraction",
+      "label": "Underground Banking and Alternative Banking Platforms",
+      "family": "other",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 34,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "Underground banking is one tool often used by PMLs. This mechanism is used, with the goal of bypassing the regulated financial sector and creating a parallel system of moving and keeping records of transactions and accountancy."
+        },
+        {
+          "page": 35,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "The ABP was used for a year with over EUR 400 million moved through it."
+        }
+      ],
+      "near_neighbours": [
+        {
+          "label": "Chinese Underground Banking Mirror Transactions (IVTS)",
+          "advisory_id": "ADV-2026-0011",
+          "source": "extraction",
+          "score": 0.5
+        },
+        {
+          "label": "Digital Hawala / Virtual-Asset-Based Settlement Between Underground Banking Operators",
+          "advisory_id": "ADV-2026-0008",
+          "source": "extraction",
+          "score": 0.5
+        },
+        {
+          "label": "Underground Banking / HOSSP Nexus with Terrorist Financing",
+          "advisory_id": "ADV-2026-0008",
+          "source": "extraction",
+          "score": 0.5
+        },
+        {
+          "label": "Underground Banking / Hawala Remittance for CEF Proceeds",
+          "advisory_id": "ADV-2026-0007",
+          "source": "reviewer",
+          "score": 0.5
+        },
+        {
+          "label": "Underground Banking and HOSSP-Based Professional Money Laundering",
+          "advisory_id": "ADV-2026-0008",
+          "source": "extraction",
+          "score": 0.5
+        }
+      ]
+    },
+    {
+      "advisory_id": "ADV-2026-0008",
+      "source": "extraction",
+      "label": "Underground Banking and HOSSP-Based Professional Money Laundering",
+      "family": "other",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 5,
+          "printed_folio": "3",
+          "paragraph": null,
+          "quote": "Their defining feature is the transfer of value without the physical cross-border movement of funds, with obligations settled through compensation mechanisms including trade transactions, cash pooling, formal financial channels, or alternative asset movements."
+        },
+        {
+          "page": 15,
+          "printed_folio": "13",
+          "paragraph": null,
+          "quote": "Underground banking and HOSSPs usually operate as informal and decentralised, value-transfer networks, that are distinct from, but may intersect with, the formal financial sector."
+        }
+      ],
+      "near_neighbours": [
+        {
+          "label": "Underground Banking / HOSSP Nexus with Terrorist Financing",
+          "advisory_id": "ADV-2026-0008",
+          "source": "extraction",
+          "score": 0.75
+        },
+        {
+          "label": "Chinese Underground Banking Mirror Transactions (IVTS)",
+          "advisory_id": "ADV-2026-0011",
+          "source": "extraction",
+          "score": 0.5
+        },
+        {
+          "label": "Digital Hawala / Virtual-Asset-Based Settlement Between Underground Banking Operators",
+          "advisory_id": "ADV-2026-0008",
+          "source": "extraction",
+          "score": 0.5
+        },
+        {
+          "label": "Underground Banking / Hawala Remittance for CEF Proceeds",
+          "advisory_id": "ADV-2026-0007",
+          "source": "reviewer",
+          "score": 0.5
+        },
+        {
+          "label": "Underground Banking and Alternative Banking Platforms",
+          "advisory_id": "ADV-2026-0003",
+          "source": "extraction",
+          "score": 0.5
+        }
+      ]
+    },
+    {
+      "advisory_id": "ADV-2026-0001",
+      "source": "extraction",
+      "label": "Trade-Based Terrorist Financing",
+      "family": "terrorist_financing",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 14,
+          "printed_folio": "12",
+          "paragraph": null,
+          "quote": "the report defines TBTF as \u201cdisguising the movement of value through the use of trade transactions in an attempt to finance terrorism , whether from legitimate or illegitimate sources\u201d."
+        }
+      ],
+      "near_neighbours": [
+        {
+          "label": "Trade Value Offsetting for Terrorist Proxy Financing",
+          "advisory_id": "ADV-2026-0012",
+          "source": "reviewer",
+          "score": 1.0
+        },
+        {
+          "label": "Black Market Peso Exchange (BMPE) Trade-Based Settlement",
+          "advisory_id": "ADV-2026-0008",
+          "source": "extraction",
+          "score": 0.5
+        },
+        {
+          "label": "CMLN Goods-Based Trade Value Transfer (Purchase and Export)",
+          "advisory_id": "ADV-2026-0011",
+          "source": "extraction",
+          "score": 0.5
+        },
+        {
+          "label": "Underground Banking / HOSSP Nexus with Terrorist Financing",
+          "advisory_id": "ADV-2026-0008",
+          "source": "extraction",
+          "score": 0.5
+        }
+      ]
+    },
+    {
+      "advisory_id": "ADV-2026-0008",
+      "source": "extraction",
+      "label": "Digital Hawala / Virtual-Asset-Based Settlement Between Underground Banking Operators",
+      "family": "crypto",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 28,
+          "printed_folio": "26",
+          "paragraph": null,
+          "quote": "\u201cDigital hawala\u201d broadly refers to the use of digital technologies to facilitate the co-ordination, execution, settlement, or concealment of informal value transfer."
+        },
+        {
+          "page": 27,
+          "printed_folio": "25",
+          "paragraph": null,
+          "quote": "The model relies on fiat collection, conversion into VAs, wallet-to-wallet transfers, and conversion back into fiat or other stores of value."
+        }
+      ],
+      "near_neighbours": [
+        {
+          "label": "Underground Banking / Hawala Remittance for CEF Proceeds",
+          "advisory_id": "ADV-2026-0007",
+          "source": "reviewer",
+          "score": 0.5
+        },
+        {
+          "label": "Underground Banking and Alternative Banking Platforms",
+          "advisory_id": "ADV-2026-0003",
+          "source": "extraction",
+          "score": 0.5
+        },
+        {
+          "label": "Underground Banking and HOSSP-Based Professional Money Laundering",
+          "advisory_id": "ADV-2026-0008",
+          "source": "extraction",
+          "score": 0.5
+        },
+        {
+          "label": "Virtual Currency / Digital Money Laundering Networks",
+          "advisory_id": "ADV-2026-0003",
+          "source": "extraction",
+          "score": 0.5
+        }
+      ]
+    },
+    {
+      "advisory_id": "ADV-2026-0007",
+      "source": "reviewer",
+      "label": "Underground Banking / Hawala Remittance for CEF Proceeds",
+      "family": "other",
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 25,
+          "printed_folio": "23",
+          "paragraph": null,
+          "quote": "Unlicensed or unregistered remitters and VASPs: Criminal proceeds may be transferred out of jurisdiction using underground money remitters or hawala services with little or no AML/CFT controls."
+        },
+        {
+          "page": 26,
+          "printed_folio": "24",
+          "paragraph": null,
+          "quote": "Funds were also transferred to Ghana through an underground bank linked to the Ghanaian community in Japan."
+        }
+      ],
+      "doctrine_justification": "No Knowledge Centre typology cleared the search floor for hawala/informal value transfer. The document nonetheless develops this as a distinct laundering channel separate from the mule, shell-company and TBML techniques already claimed: para 30 names underground remitters/hawala as a discrete ML technique for moving CEF proceeds cross-border outside AML/CFT controls, and the Japan case study (Box 14) shows this operating in practice as one of three parallel channels (alongside a fictitious-invoice wire transfer and VA conversion) used by the same mule herder to move funds to the syndicate leader in Ghana.",
+      "where_found": "Para 30 'Unlicensed or unregistered remitters and VASPs' bullet (p.25); Box 14 Japan case, third laundering channel (p.26)",
+      "near_neighbours": [
+        {
+          "label": "Digital Hawala / Virtual-Asset-Based Settlement Between Underground Banking Operators",
+          "advisory_id": "ADV-2026-0008",
+          "source": "extraction",
+          "score": 0.5
+        },
+        {
+          "label": "Underground Banking and Alternative Banking Platforms",
+          "advisory_id": "ADV-2026-0003",
+          "source": "extraction",
+          "score": 0.5
+        },
+        {
+          "label": "Underground Banking and HOSSP-Based Professional Money Laundering",
+          "advisory_id": "ADV-2026-0008",
+          "source": "extraction",
+          "score": 0.5
+        }
+      ]
+    },
+    {
+      "advisory_id": "ADV-2026-0008",
+      "source": "extraction",
+      "label": "Underground Banking / HOSSP Nexus with Terrorist Financing",
+      "family": "terrorist_financing",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 33,
+          "printed_folio": "31",
+          "paragraph": null,
+          "quote": "HOSSPs continue to be widely used for TF, notably in conflict and post-conflict zones, remote or underserved areas with limited access to formal financial services"
+        },
+        {
+          "page": 35,
+          "printed_folio": "33",
+          "paragraph": null,
+          "quote": "T\u00fcrkiye identified a \u2018digital hawala\u2019 network used to finance members of the terrorist organisation Islamic State in Iraq and the Levant (ISIL)."
+        }
+      ],
+      "near_neighbours": [
+        {
+          "label": "Underground Banking and HOSSP-Based Professional Money Laundering",
+          "advisory_id": "ADV-2026-0008",
+          "source": "extraction",
+          "score": 0.75
+        },
+        {
+          "label": "Trade-Based Terrorist Financing",
+          "advisory_id": "ADV-2026-0001",
+          "source": "extraction",
+          "score": 0.5
+        },
+        {
+          "label": "Underground Banking and Alternative Banking Platforms",
+          "advisory_id": "ADV-2026-0003",
+          "source": "extraction",
+          "score": 0.5
+        }
+      ]
+    },
+    {
+      "advisory_id": "ADV-2026-0006",
+      "source": "reviewer",
+      "label": "Informal Value Transfer (Hawala) Networks for Environmental Crime Proceeds",
+      "family": "other",
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 22,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "Where there is onwared smuggling to Asia, criminals often rely on informal remittance networks such as hawalas, in an effort to avoid the scrutiny of the formal financial sector."
+        },
+        {
+          "page": 31,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "cases show the important role of underground money value transfer services (MVTS) to facilitate laundering from environmental crimes, and particularly illegal mining. These trends are often regionally specific and reflect local informal transfer systems (e.g., \"hawala\")."
+        }
+      ],
+      "doctrine_justification": "No existing Knowledge Centre typology matches this mechanism (best search score 0.36, against Under Invoicing, on vocabulary overlap only). The advisory develops a distinct, recurring technique: illicit gold proceeds moved onward through unlicensed hawala-style networks specifically 'to avoid the scrutiny of the formal financial sector,' confirmed as a cross-cutting finding for illegal mining laundering generally. This is a movement channel outside formal banking rails, mechanically distinct from the already-claimed cash-intensive-business front (BA007), and merits a standalone emergent entry for Knowledge Centre review.",
+      "where_found": "DRC gold smuggling route narrative (p.22) and Section 3.5 chapter finding on MVTS (p.31)",
+      "near_neighbours": [
+        {
+          "label": "Money Laundering from Environmental Crime",
+          "advisory_id": "ADV-2026-0006",
+          "source": "extraction",
+          "score": 1.0
+        },
+        {
+          "label": "Hawala and Informal Value Transfer Systems (IVTS) for Illicit Proceeds",
+          "advisory_id": "ADV-2026-0019",
+          "source": "reviewer",
+          "score": 0.62
+        }
+      ]
+    },
+    {
+      "advisory_id": "ADV-2026-0008",
+      "source": "extraction",
+      "label": "Black Market Peso Exchange (BMPE) Trade-Based Settlement",
+      "family": "tbml",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 39,
+          "printed_folio": "37",
+          "paragraph": null,
+          "quote": "The Black Market Peso Exchange (BMPE) remains a well-established regional ML mechanism in Latin America."
+        },
+        {
+          "page": 41,
+          "printed_folio": "39",
+          "paragraph": null,
+          "quote": "Operation Cymbal identified a PML scheme that exploited Venezuela\u2019s controlled exchange-rate system through mechanisms comparable to underground banking."
+        }
+      ],
+      "near_neighbours": [
+        {
+          "label": "Black Market Peso Exchange",
+          "advisory_id": "ADV-2026-0001",
+          "source": "extraction",
+          "score": 1.0
+        },
+        {
+          "label": "Trade-Based Terrorist Financing",
+          "advisory_id": "ADV-2026-0001",
+          "source": "extraction",
+          "score": 0.5
+        }
+      ]
+    },
+    {
+      "advisory_id": "ADV-2026-0011",
+      "source": "extraction",
+      "label": "Chinese Underground Banking Mirror Transactions (IVTS)",
+      "family": "other",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 5,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "it coordinates with Mexico-based CMLN counterparts who conduct a reciprocal or \u201cmirror transaction,\u201d 28 in which an equivalent amount of pesos is transferred to the Cartels\u2019 Mexico-based accounts, minus a nominal fee"
+        },
+        {
+          "page": 5,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "CMLNs may also use convertible virtual currency (CVC) as an alternative means to conduct mirror transactions with the Cartels."
+        }
+      ],
+      "near_neighbours": [
+        {
+          "label": "Underground Banking and Alternative Banking Platforms",
+          "advisory_id": "ADV-2026-0003",
+          "source": "extraction",
+          "score": 0.5
+        },
+        {
+          "label": "Underground Banking and HOSSP-Based Professional Money Laundering",
+          "advisory_id": "ADV-2026-0008",
+          "source": "extraction",
+          "score": 0.5
+        }
+      ]
+    },
+    {
+      "advisory_id": "ADV-2026-0001",
+      "source": "extraction",
+      "label": "Black Market Peso Exchange",
+      "family": "tbml",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 27,
+          "printed_folio": "25",
+          "paragraph": null,
+          "quote": "Another traditional type of TBML is Black Market Peso Exchange, which Central and South American drug cartels have used to launder drug proceeds generated in the United States."
+        }
+      ],
+      "near_neighbours": [
+        {
+          "label": "Black Market Peso Exchange (BMPE) Trade-Based Settlement",
+          "advisory_id": "ADV-2026-0008",
+          "source": "extraction",
+          "score": 1.0
+        }
+      ]
+    },
+    {
+      "advisory_id": "ADV-2026-0001",
+      "source": "extraction",
+      "label": "Services-Based Money Laundering",
+      "family": "other",
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 35,
+          "printed_folio": "33",
+          "paragraph": null,
+          "quote": "Services-based money laundering (SBML) is not TBML, and is included here for reference as it is recognised as an increasing risk, including through open source reporting. However, the fundamental difference between the two is that SBML schemes rely on exploiting the trade in services or other intangibles to disguise and justify the movement of illicit proceeds."
+        }
+      ],
+      "near_neighbours": [
+        {
+          "label": "Cryptocurrency Layering via Mixing Services, Chain-Hopping and DeFi",
+          "advisory_id": "ADV-2026-0019",
+          "source": "extraction",
+          "score": 1.0
+        }
+      ]
+    },
+    {
+      "advisory_id": "ADV-2026-0003",
+      "source": "extraction",
+      "label": "Money Transport and Cash Controller Networks",
+      "family": "network",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 19,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "Criminals and OCGs that generate significant amounts of cash often use the services of cash controller networks that are capable of transferring vast sums of cash on their behalf."
+        },
+        {
+          "page": 21,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "The network was responsible for collecting the proceeds of heroin sales throughout Europe (Spain, the Netherlands, Italy and the UK) and transporting this cash to Germany, where it was placed into the financial system through the purchase of second-hand cars, spare parts and equipment."
+        }
+      ],
+      "near_neighbours": [
+        {
+          "label": "High-Capacity Transnational PML Networks / International Controller Networks (ICN)",
+          "advisory_id": "ADV-2026-0008",
+          "source": "extraction",
+          "score": 0.5
+        }
+      ]
+    },
+    {
+      "advisory_id": "ADV-2026-0003",
+      "source": "extraction",
+      "label": "Virtual Currency / Digital Money Laundering Networks",
+      "family": "crypto",
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 25,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "Afterwards, virtual currency is transferred through a complex chain of e-wallets, which may include the use of mixers and tumblers to further enhance the anonymity of the virtual currency transactions."
+        }
+      ],
+      "near_neighbours": [
+        {
+          "label": "Digital Hawala / Virtual-Asset-Based Settlement Between Underground Banking Operators",
+          "advisory_id": "ADV-2026-0008",
+          "source": "extraction",
+          "score": 0.5
+        }
+      ]
+    },
+    {
+      "advisory_id": "ADV-2026-0004",
+      "source": "reviewer",
+      "label": "Bearer Share / Bearer Instrument Anonymised Transfer",
+      "family": "other",
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 38,
+          "printed_folio": "36",
+          "paragraph": 81,
+          "quote": "Ownership and control of bearer shares can be exchanged anonymously between parties by way of physical exchange alone, as no record of the exchange needs to be documented or reported."
+        },
+        {
+          "page": 38,
+          "printed_folio": "36",
+          "paragraph": 82,
+          "quote": "Due to the inability to accurately ascertain and monitor the owner of a bearer share at any given time, determining beneficial ownership of legal persons controlled by bearer shares is nearly impossible."
+        }
+      ],
+      "doctrine_justification": "No typology in the network, sanctions, tbml, correspondent_banking or fraud families addresses instrument-based (physical-possession) anonymised transfer of ownership; searches for 'bearer share', 'bearer instrument' and 'negotiable ownership transfer' returned no results above the match floor. The report treats this as a discrete concealment mechanism worthy of its own subsection and an explicit FATF Recommendation 24 obligation: control passes anonymously by mere physical exchange of a certificate, with no documentation trail at all - a fundamentally different concealment mechanism from nominee arrangements or corporate layering (which still leave a paper/registry trail to obscure). Case Study 12 (Canada) evidences bearer shares being used to anonymise share transfers in a securities-fraud laundering scheme.",
+      "where_found": "Section 2, 'Bearer shares and bearer share warrants', paras 81-83 (p.38); Case Study 12 - Canada",
+      "near_neighbours": [
+        {
+          "label": "Bearer Share Anonymous Ownership Transfer",
+          "advisory_id": "ADV-2026-0004",
+          "source": "reviewer",
+          "score": 0.6
+        }
+      ]
+    },
+    {
+      "advisory_id": "ADV-2026-0004",
+      "source": "reviewer",
+      "label": "Bearer Share Anonymous Ownership Transfer",
+      "family": "network",
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 38,
+          "printed_folio": "36",
+          "paragraph": null,
+          "quote": "Bearer shares are company shares that exist in certificate form and are legally owned by the person that has physical possession of the bearer share certificate at any given time. Ownership and control of bearer shares can be exchanged anonymously between parties by way of physical exchange alone, as no record of the exchange needs to be documented or reported."
+        },
+        {
+          "page": 164,
+          "printed_folio": "162",
+          "paragraph": null,
+          "quote": "The bearer shares had been sold and registered shares of the same company had been bought with the proceeds and transferred to other accounts in different jurisdictions."
+        }
+      ],
+      "doctrine_justification": "No existing typology matches this mechanism (search floor not cleared; closest candidates -- SAN001 Ownership Evasion, PAT002 Shared Beneficial Owner -- describe traceable-but-layered ownership chains, not instrument-based anonymity). The document's own description is distinct: transfer of control requires no registry entry, contract, or documented chain at all -- 'no record of the exchange needs to be documented or reported' -- unlike layered/circular ownership structures, which remain discoverable (if difficult) through registries and filings. Case Study 12 (fraudulent stock scheme using bearer-form shares signed over by seed shareholders to anonymise control of intermediary business companies) and Case Study 92 (stolen bearer shares hidden in offshore accounts, then converted to registered shares to launder proceeds) both evidence this instrument-specific anonymity mechanism, and FATF Recommendation 24 treats it as a standalone vulnerability requiring dedicated countermeasures.",
+      "where_found": "Section 2, 'Bearer shares and bearer share warrants', paras 81-83, page 38; Case Study 12 (Canada) and Case Study 92 (Switzerland), Annex C pages 118, 164",
+      "near_neighbours": [
+        {
+          "label": "Bearer Share / Bearer Instrument Anonymised Transfer",
+          "advisory_id": "ADV-2026-0004",
+          "source": "reviewer",
+          "score": 0.6
+        }
+      ]
+    },
+    {
+      "advisory_id": "ADV-2026-0006",
+      "source": "extraction",
+      "label": "Money Laundering from Environmental Crime",
+      "family": "other",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 5,
+          "printed_folio": "3",
+          "paragraph": null,
+          "quote": "This FATF report shows the significant role of trade-based fraud and misuse of shell and front companies to launder gains from illegal logging, illegal mining, and waste trafficking."
+        },
+        {
+          "page": 13,
+          "printed_folio": "11",
+          "paragraph": null,
+          "quote": "Some criminals specialise in one or more environmental crimes, and rely on specialized networks to move the products and facilitate the financial flows."
+        }
+      ],
+      "near_neighbours": [
+        {
+          "label": "Informal Value Transfer (Hawala) Networks for Environmental Crime Proceeds",
+          "advisory_id": "ADV-2026-0006",
+          "source": "reviewer",
+          "score": 1.0
+        }
+      ]
+    },
+    {
+      "advisory_id": "ADV-2026-0007",
+      "source": "extraction",
+      "label": "Cyber-Enabled Fraud (CEF) Money Laundering",
+      "family": "fraud",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 5,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "Cyber-enabled fraud (CEF) is a growing transnational organised crime."
+        },
+        {
+          "page": 63,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "CEF is perpetrated by transnational, organised crime syndicates."
+        }
+      ],
+      "near_neighbours": [
+        {
+          "label": "DPRK Proliferation Financing via Cyber-Enabled Fraud Tools",
+          "advisory_id": "ADV-2026-0007",
+          "source": "extraction",
+          "score": 0.75
+        }
+      ]
+    },
+    {
+      "advisory_id": "ADV-2026-0007",
+      "source": "extraction",
+      "label": "DPRK Proliferation Financing via Cyber-Enabled Fraud Tools",
+      "family": "other",
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 16,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "There are also links to proliferation financing, with cybercrime reported as a major source of illicit income generation for the Democratic People\u2019s Republic of Korea (DPRK)."
+        },
+        {
+          "page": 17,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "information technology (IT) workers of the Democratic People\u2019s Republic of Korea linked to the Munitions Industry Department have been earning foreign currency by selling voice phishing hacking applications"
+        }
+      ],
+      "near_neighbours": [
+        {
+          "label": "Cyber-Enabled Fraud (CEF) Money Laundering",
+          "advisory_id": "ADV-2026-0007",
+          "source": "extraction",
+          "score": 0.75
+        }
+      ]
+    },
+    {
+      "advisory_id": "ADV-2026-0008",
+      "source": "extraction",
+      "label": "High-Capacity Transnational PML Networks / International Controller Networks (ICN)",
+      "family": "network",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 21,
+          "printed_folio": "19",
+          "paragraph": null,
+          "quote": "controllers\u2014also referred to in some jurisdictions as \u2018money brokers\u2019 or \u2018superfacilitators\u2019\u2014are trusted individuals who arrange the collection of criminal proceeds and the delivery of equivalent value to the intended destination."
+        },
+        {
+          "page": 41,
+          "printed_folio": "39",
+          "paragraph": null,
+          "quote": "Operation Karasu identified a structured underground banking network with a clear division of roles between two branches."
+        }
+      ],
+      "near_neighbours": [
+        {
+          "label": "Money Transport and Cash Controller Networks",
+          "advisory_id": "ADV-2026-0003",
+          "source": "extraction",
+          "score": 0.5
+        }
+      ]
+    },
+    {
+      "advisory_id": "ADV-2026-0011",
+      "source": "extraction",
+      "label": "CMLN Goods-Based Trade Value Transfer (Purchase and Export)",
+      "family": "tbml",
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 6,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "CMLNs may also use complex TBML schemes to launder the Cartels\u2019 illicit funds. According to law enforcement, CMLNs may use money mules and other recruits to purchase U.S. electronics and other luxury goods"
+        },
+        {
+          "page": 7,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "CMLNs may export the goods they purchase to counterparties in Mexico, China, Hong Kong, and the United Arab Emirates, who resell these goods in their respective countries."
+        }
+      ],
+      "near_neighbours": [
+        {
+          "label": "Trade-Based Terrorist Financing",
+          "advisory_id": "ADV-2026-0001",
+          "source": "extraction",
+          "score": 0.5
+        }
+      ]
+    },
+    {
+      "advisory_id": "ADV-2026-0012",
+      "source": "reviewer",
+      "label": "Trade Value Offsetting for Terrorist Proxy Financing",
+      "family": "terrorist_financing",
+      "confidence": "low",
+      "citations": [
+        {
+          "page": 35,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "This scheme used a payment offsetting arrangement in which the sale and shipment of Iranian oil to Syria provided hundreds of millions of dollars to Iran's terror proxy groups, including Hizballah, HAMAS, and the IRGC-QF."
+        }
+      ],
+      "doctrine_justification": "No KC typology names this mechanism; search for 'trade proceeds used to finance terrorism proxy militant groups' returned no match above floor. SAN006 Trade Based Sanctions Evasion requires 'mispricing an invoice, or misdescribing the goods' -- absent here; this is a settlement mechanism (offsetting, not cash) routing value to a terrorist beneficiary. SAN002/SAN003 concern vessel-identity/routing concealment, not financing routing. TBML006 Circular Trade requires 'value leaves an entity and returns to it' (closed loop) -- here value moves forward Iran->Syria->Hizballah/HAMAS/IRGC-QF with no round-trip. This is a distinct trade-settlement-as-terrorist-financing-conduit mechanism the library does not capture.",
+      "where_found": "Syria section, deceptive shipping practices case study, page 35",
+      "near_neighbours": [
+        {
+          "label": "Trade-Based Terrorist Financing",
+          "advisory_id": "ADV-2026-0001",
+          "source": "extraction",
+          "score": 1.0
+        }
+      ]
+    },
+    {
+      "advisory_id": "ADV-2026-0019",
+      "source": "extraction",
+      "label": "Cryptocurrency Layering via Mixing Services, Chain-Hopping and DeFi",
+      "family": "crypto",
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 25,
+          "printed_folio": "25",
+          "paragraph": null,
+          "quote": "Deposited funds would be turned into \u201cchips\u201d (small tokens with equivalent value), which were then mixed together - thereby anonymising all trails to where the initial funds originated."
+        },
+        {
+          "page": 25,
+          "printed_folio": "25",
+          "paragraph": null,
+          "quote": "Chain hopping, for example, involves the switching between different cryptocurrencies to obscure the origin of funds."
+        }
+      ],
+      "near_neighbours": [
+        {
+          "label": "Services-Based Money Laundering",
+          "advisory_id": "ADV-2026-0001",
+          "source": "extraction",
+          "score": 1.0
+        }
+      ]
+    },
+    {
+      "advisory_id": "ADV-2026-0019",
+      "source": "reviewer",
+      "label": "Hawala and Informal Value Transfer Systems (IVTS) for Illicit Proceeds",
+      "family": "other",
+      "confidence": "low",
+      "citations": [
+        {
+          "page": 24,
+          "printed_folio": "24",
+          "paragraph": null,
+          "quote": "from informal value transfer systems to the exploitation of cryptocurrencies, all these techniques serve as crucial components of a parallel financial criminal underworld."
+        },
+        {
+          "page": 52,
+          "printed_folio": "52",
+          "paragraph": null,
+          "quote": "Irregular migrants paid between EUR 3 000 and EUR 5 000 per person, depending on the provided services, directly to hawala offices, also in cryptocurrencies."
+        }
+      ],
+      "doctrine_justification": "Search of the Knowledge Centre returned no typology above the score floor for hawala/IVTS, so this is proposed as an emergent entry rather than linked to an existing one. The advisory names informal value transfer systems as a distinct component of the criminal parallel financial system (page 24) and evidences it concretely with a case in which smuggling proceeds were paid directly to hawala offices outside the banked/correspondent system (page 52) -- a value-movement mechanism separate from the trade-invoice, shell-company and crypto mechanisms already captured elsewhere in this record. Confidence is kept low because the evidence is two brief mentions rather than a developed technique description.",
+      "where_found": "Money laundering section, page 24 (listed among parallel-financial-system techniques); migrant smuggling case example, page 52",
+      "near_neighbours": [
+        {
+          "label": "Informal Value Transfer (Hawala) Networks for Environmental Crime Proceeds",
+          "advisory_id": "ADV-2026-0006",
+          "source": "reviewer",
+          "score": 0.62
+        }
+      ]
+    },
+    {
+      "advisory_id": "ADV-2026-0001",
+      "source": "reviewer",
+      "label": "Gold/Precious Metals as Cash Proxy (Commodity-for-Cash Value Transfer)",
+      "family": "tbml",
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 21,
+          "printed_folio": "19",
+          "paragraph": null,
+          "quote": "The exploitation of gold and other precious metals and minerals is often a factor in TBML schemes, including the use of gold as an alternative form of value within the ML process \u2013 i.e. not just a commodity to exploit in moving value, but also a proxy for cash."
+        },
+        {
+          "page": 23,
+          "printed_folio": "21",
+          "paragraph": null,
+          "quote": "The gold was subsequently sold to complicit U.S. refineries, who completed the ML cycle by paying for the gold, via wire transfers that outwardly appeared to be legitimate payments for wholesale gold purchases."
+        }
+      ],
+      "doctrine_justification": "No existing Knowledge Centre typology matched this mechanism on search (floor not cleared). The document's own language frames gold's ML role as functioning directly as a cash-equivalent store of value ('a proxy for cash') rather than as a vehicle for document/price misrepresentation. Box 2.5 develops this: criminally-derived gold itself constitutes the proceeds of crime (illegal mining, bribery, smuggling), and is laundered simply by selling it through an ordinary-looking wholesale transaction to a complicit refinery, which 'completes the ML cycle' via a normal-appearing wire payment -- no invoice mispricing, phantom shipment, or false description is used. This is mechanistically distinct from TBML001-005 (misrepresentation techniques), from Black Market Peso Exchange (broker-mediated currency exchange chain), and from Infiltration of Legitimate Supply Chains (equity stake in an existing business), warranting recognition as a separate emergent pattern: commodity-as-currency value transfer through a complicit counterparty.",
+      "where_found": "Gold, precious metals and minerals sub-section (page 21) and case study Box 2.5 (page 23)",
+      "near_neighbours": []
+    },
+    {
+      "advisory_id": "ADV-2026-0001",
+      "source": "extraction",
+      "label": "Infiltration of Legitimate Supply Chains",
+      "family": "tbml",
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 31,
+          "printed_folio": "29",
+          "paragraph": null,
+          "quote": "In this case, an OCG or PML purchases a stake in a legitimate business, which may or may not be struggling financially, and continues using its supply chain as a method of integrating illicit cash into the financial system."
+        }
+      ],
+      "near_neighbours": []
+    },
+    {
+      "advisory_id": "ADV-2026-0001",
+      "source": "extraction",
+      "label": "Surrogate Shopping Networks",
+      "family": "tbml",
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 31,
+          "printed_folio": "29",
+          "paragraph": null,
+          "quote": "Surrogate shopping networks involve individuals or networks of shoppers purchasing desired goods on behalf of wealthier individuals, ostensibly to circumvent customs controls or other forms of tariff restrictions."
+        }
+      ],
+      "near_neighbours": []
+    },
+    {
+      "advisory_id": "ADV-2026-0003",
+      "source": "extraction",
+      "label": "Account Settlement Mechanism (Cross-Border Netting via OCG Accounts)",
+      "family": "correspondent_banking",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 33,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "PMLNs can facilitate the settlement of accounts between multiple OCGs. They may do this for OCGs operating in different countries that generate proceeds from cash and hold funds within bank accounts."
+        },
+        {
+          "page": 33,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "authorities have concluded that the Belgian construction and industrial cleaning companies involved in this case were part of an account settlement scheme"
+        }
+      ],
+      "near_neighbours": []
+    },
+    {
+      "advisory_id": "ADV-2026-0003",
+      "source": "extraction",
+      "label": "Complicit Financial Service Providers and Professional Gatekeepers",
+      "family": "other",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 35,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "PMLs may occupy positions within the financial services industry (e.g. bankers and MVTS agents) and DNFBP sectors (e.g. lawyers, accountants and real estate professionals), and use their occupation, business infrastructure and knowledge to facilitate ML for criminal clients."
+        },
+        {
+          "page": 45,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "PacNet, an international payment processor and MVTS provider based in Vancouver, Canada, helped dozens of fraudsters gain access to U S banks."
+        }
+      ],
+      "near_neighbours": []
+    },
+    {
+      "advisory_id": "ADV-2026-0003",
+      "source": "extraction",
+      "label": "Professional Money Laundering (Third-Party PML Organisations/Networks)",
+      "family": "other",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 8,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "PMLs provide services to criminals and organised crime groups by laundering the proceeds of their illegal activities."
+        },
+        {
+          "page": 12,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "PML is a subset of third-party ML. The FATF defines third-party ML as the laundering of proceeds by a person who was not involved in the commission of the predicate offence."
+        }
+      ],
+      "near_neighbours": []
+    },
+    {
+      "advisory_id": "ADV-2026-0004",
+      "source": "reviewer",
+      "label": "Beneficiary Flooding to Obscure Transaction Attribution",
+      "family": "correspondent_banking",
+      "confidence": "low",
+      "citations": [
+        {
+          "page": 43,
+          "printed_folio": "41",
+          "paragraph": null,
+          "quote": "FIUs and financial institutions have reported cases where large numbers of customers have been declared as beneficiaries on a single bank account in such a way that the bank has difficulty establishing which transaction was made on behalf of which beneficiary."
+        },
+        {
+          "page": 44,
+          "printed_folio": "42",
+          "paragraph": null,
+          "quote": "More than 60 beneficiaries were declared to the bank as beneficiaries, in such a way that the bank had difficulty in establishing which transaction was made on behalf of which beneficiary."
+        }
+      ],
+      "doctrine_justification": "No existing typology cleared the search floor for this mechanism; the closest correspondent-banking candidates (BA002 Funnel Accounts, BA003 Mule Accounts) describe many depositors feeding INTO one account for onward rapid transfer, whereas this technique is the declaration of many named beneficiaries AGAINST a single account's outbound transactions so that no single transfer can be tied to a specific beneficiary -- an attribution-obscuring mechanism, not a deposit-aggregation one. The document names this as its own distinct technique ('Declaring Numerous Beneficiaries') separate from nominee/layering techniques, and Case Study 38 evidences it directly with over 60 declared beneficiaries deliberately confusing the receiving bank's ability to match transactions to beneficiaries. Given the single-paragraph/single-case-study evidentiary base, this supports only low confidence.",
+      "where_found": "Section 2, 'Declaring Numerous Beneficiaries', para 93, page 43; Case Study 38 (Israel), page 44 and Annex C page 130",
+      "near_neighbours": []
+    },
+    {
+      "advisory_id": "ADV-2026-0004",
+      "source": "extraction",
+      "label": "Professional Intermediary (TCSP/Legal/Accounting) Gatekeeper Complicity in Beneficial Ownership Concealment",
+      "family": "other",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 48,
+          "printed_folio": "46",
+          "paragraph": null,
+          "quote": "The use of specialists and professional intermediaries, including lawyers, accountants, and TCSPs, is a key feature of the money laundering and broader organised crime environment."
+        },
+        {
+          "page": 50,
+          "printed_folio": "48",
+          "paragraph": null,
+          "quote": "This \u201ccontinuum of complicity\u201d can be equally applied to all professional intermediary sectors, and is not unique to the legal profession."
+        }
+      ],
+      "near_neighbours": []
+    },
+    {
+      "advisory_id": "ADV-2026-0007",
+      "source": "extraction",
+      "label": "Human Trafficking-Fuelled Scam Centres",
+      "family": "other",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 15,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "There is also a rising link between CEF and human trafficking, where victims are lured through fake job ads to online call centres and forced to commit CEF on an industrial scale."
+        },
+        {
+          "page": 16,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "15 men and one woman lured to Cambodia on the promise of a lucrative salary to work in a call centre. On arrival, however, they were locked up and forced to work 14-hour days as scammers."
+        }
+      ],
+      "near_neighbours": []
+    },
+    {
+      "advisory_id": "ADV-2026-0007",
+      "source": "reviewer",
+      "label": "Synthetic/Stolen Identity Accounts for Direct Criminal Control",
+      "family": "other",
+      "confidence": "low",
+      "citations": [
+        {
+          "page": 27,
+          "printed_folio": "25",
+          "paragraph": null,
+          "quote": "Criminals then directly set up and control accounts using these stolen or falsified identities. This makes it more difficult to trace ML activities as the account holders may not even be aware of their involvement."
+        },
+        {
+          "page": 28,
+          "printed_folio": "26",
+          "paragraph": null,
+          "quote": "In many of the cases, accounts were created with VASPs in the victim\u2019s name, without their knowledge. The criminals did this by using data stolen through the remote access tools."
+        }
+      ],
+      "doctrine_justification": "No KC typology matched (only BA003 Mule Accounts scored below floor). BA003's own doctrine defines a mule account as a real 'account holder's' personal account moved 'at a controller's instruction' -- i.e. a genuine (even if unwitting) person exists and nominally controls the account. The mechanism here is different in kind: criminals fabricate accounts using stolen/synthetic identity data such that 'the account holders may not even be aware of their involvement' -- there is no recruited, deceived, or even nominal account holder, only a fabricated identity the criminals control from account opening (confirmed by the Austria case, where VASP accounts were opened in victims' names entirely without their knowledge for direct criminal use). Low confidence given only one paragraph plus one case example develop the technique.",
+      "where_found": "Para 35, digitalisation/identity theft discussion (p.27); Box 16 Austria case (p.28)",
+      "near_neighbours": []
+    },
+    {
+      "advisory_id": "ADV-2026-0007",
+      "source": "extraction",
+      "label": "Virtual IBAN (vIBAN) Abuse",
+      "family": "correspondent_banking",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 31,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "Since IBANs and vIBANs are optically identical, criminals use them to trick victims into thinking that they are transferring funds into a bank account, when instead for example, it could be a vIBAN used for the purpose of crediting an e-wallet."
+        },
+        {
+          "page": 33,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "the IBANs provided by the fraudsters were vIBANs. These vIBANs were issued by a Luxembourg banking institution to a Luxembourg based payment service provider who offers prepaid credit cards to European customers."
+        }
+      ],
+      "near_neighbours": []
+    },
+    {
+      "advisory_id": "ADV-2026-0009",
+      "source": "extraction",
+      "label": "Bribery of Foreign Public Officials",
+      "family": "corruption",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 4,
+          "printed_folio": "4",
+          "paragraph": null,
+          "quote": "Bribery schemes often involve payments to foreign government officials by persons and entities to obtain or retain business, or for other benefits."
+        },
+        {
+          "page": 4,
+          "printed_folio": "4",
+          "paragraph": null,
+          "quote": "the defendant, Mark Lambert, participated in a scheme to bribe Vadim Mikerin, a Russian official at JSC Techsnabexport (TENEX), a subsidiary of Russia\u2019s State Atomic Energy Corporation"
+        }
+      ],
+      "near_neighbours": []
+    },
+    {
+      "advisory_id": "ADV-2026-0009",
+      "source": "extraction",
+      "label": "Misappropriation or Embezzlement of Public Assets",
+      "family": "corruption",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 5,
+          "printed_folio": "5",
+          "paragraph": null,
+          "quote": "Misappropriation or embezzlement of public assets broadly encompass the theft, diversion, or misuse of public funds or resources for personal benefit or enrichment."
+        },
+        {
+          "page": 6,
+          "printed_folio": "6",
+          "paragraph": null,
+          "quote": "Lukashenka, who was originally sanctioned in 2006, has rewarded businessmen close to him with benefits and privileges in exchange for kickbacks to himself and his regime."
+        }
+      ],
+      "near_neighbours": []
+    },
+    {
+      "advisory_id": "ADV-2026-0009",
+      "source": "extraction",
+      "label": "Purchase of Real Estate, Luxury Goods and High-Value Assets to Launder Corruption Proceeds",
+      "family": "corruption",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 7,
+          "printed_folio": "7",
+          "paragraph": null,
+          "quote": "Corrupt officials and others involved in bribery and other forms of corruption often purchase various U.S. assets, such as luxury real estate and hotels, private jets, artwork, and motion picture companies, to launder the proceeds of their corruption."
+        },
+        {
+          "page": 8,
+          "printed_folio": "8",
+          "paragraph": null,
+          "quote": "Peskov\u2019s family is reported to own real estate in Russia and elsewhere valued at more than $10 million, and to have access to a number of luxury vehicles, including private aircrafts and yachts"
+        }
+      ],
+      "near_neighbours": []
+    },
+    {
+      "advisory_id": "ADV-2026-0013",
+      "source": "reviewer",
+      "label": "Shipment Splitting to Evade Export Control Detection",
+      "family": "sanctions",
+      "confidence": "low",
+      "citations": [
+        {
+          "page": 5,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "Dividing shipments of controlled items into multiple, smaller shipments to try to avoid law enforcement detection20;"
+        }
+      ],
+      "doctrine_justification": "No library typology covers this mechanism: BA001 Structuring addresses cash deposits kept under a CTR reporting threshold (a financial-transaction pattern), and TBML003 Multiple Invoicing addresses raising several invoices against one shipment (a documentary pattern), neither of which is dividing the physical goods movement itself into smaller consignments to stay below detection thresholds. The advisory describes a distinct physical-shipment fragmentation technique for export-control evasion that the current library does not name.",
+      "where_found": "Criminal enforcement section, tactics bullet list, page 5",
+      "near_neighbours": []
+    },
+    {
+      "advisory_id": "ADV-2026-0014",
+      "source": "reviewer",
+      "label": "Alternative Financial Messaging System Exposure (SPFS)",
+      "family": "correspondent_banking",
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 11,
+          "printed_folio": "10",
+          "paragraph": null,
+          "quote": "OFSI encourages UK financial services firms to consider exposure to institutions who have joined the System for Transfer of Financial Messages (SPFS). Designed by the Central Bank of Russia as an alternative to SWIFT, SPFS could be used to breach UK financial sanctions prohibitions."
+        }
+      ],
+      "doctrine_justification": "No existing correspondent-banking typology (BA001-BA010) covers evasion via a parallel, state-built payment messaging network that substitutes for SWIFT to route sanctioned-bank traffic outside standard correspondent oversight; a knowledge-centre search for this mechanism returned no match. The advisory develops the point specifically: it names SPFS as a Central Bank of Russia alternative to SWIFT, ties it to Regulation 17A correspondent-banking obligations, and directs UK banks to assess counterparty exposure to SPFS-joined institutions as a distinct sanctions-breach vector -- a messaging-network evasion mechanism not reducible to the front-company, ownership, jurisdiction or crypto typologies already claimed.",
+      "where_found": "Strengthening Compliance / correspondent banking note, page 11",
+      "near_neighbours": []
+    },
+    {
+      "advisory_id": "ADV-2026-0015",
+      "source": "reviewer",
+      "label": "Citizenship-by-Investment Nationality Laundering",
+      "family": "sanctions",
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 10,
+          "printed_folio": "10",
+          "paragraph": null,
+          "quote": "Change of UBOs from Russian nationals to persons of other nationalities, potentially with names of Russian origin but from third-country jurisdictions (including, but not limited to, countries that offer citizenship-by-investment schemes)."
+        },
+        {
+          "page": 11,
+          "printed_folio": "11",
+          "paragraph": null,
+          "quote": "Investor visa or golden passport holders changing ownership information or divesting investments."
+        }
+      ],
+      "doctrine_justification": "No existing typology covers nationality substitution via citizenship-by-investment/golden-passport programmes as the evasion mechanism itself (searched 'citizenship by investment / golden passport' and 'name screening evasion' -- best score 0.44 on an unrelated network-workflow typology). SAN001 Ownership Evasion's mechanism is layered holding structures and nominee arrangements; SAN005 Name Screening Evasion's mechanism is engineering the *form* of a name (aliases, transliterations) to defeat exact-match filters. Here the DP's associate instead acquires a genuinely new, different nationality and passport through an investment scheme, so the underlying identity itself changes rather than the ownership chain or the name's spelling -- a distinct technique the two related bullets develop together.",
+      "where_found": "Indicators 12-13, 'For detection of frozen asset transfers' sub-section, pages 10-11",
+      "near_neighbours": []
+    },
+    {
+      "advisory_id": "ADV-2026-0015",
+      "source": "reviewer",
+      "label": "Enabler Pooled Account Screening Concealment",
+      "family": "sanctions",
+      "confidence": "low",
+      "citations": [
+        {
+          "page": 11,
+          "printed_folio": "11",
+          "paragraph": null,
+          "quote": "Pooled accounts, in which banks see only the name of the enabler and not the client , transferring funds to entities associated in open source with DPs."
+        }
+      ],
+      "doctrine_justification": "No matching doctrine was found (search for 'pooled/omnibus account concealing underlying client identity' returned nothing above noise). BA002 Funnel Accounts' mechanism is many dispersed depositors clearing to one beneficiary fast -- a volume/dispersion tell; BA009 Transaction Laundering's mechanism runs through card-processing rails. Neither matches this indicator's mechanism, which is that the bank's own name-screening never sees the true client at all because the enabler's name sits on the account -- a screening-blind-spot technique distinct from both. Single-bullet evidence, hence low confidence.",
+      "where_found": "Indicator 18, 'For detection of enablers' sub-section, page 11",
+      "near_neighbours": []
+    },
+    {
+      "advisory_id": "ADV-2026-0018",
+      "source": "extraction",
+      "label": "Capital Markets Account Funding Layering",
+      "family": "capital_markets",
+      "confidence": "low",
+      "citations": [
+        {
+          "page": 29,
+          "printed_folio": "29",
+          "paragraph": 33,
+          "quote": "The excess collateral is returned to the customer, but no questions are asked."
+        },
+        {
+          "page": 29,
+          "printed_folio": "29",
+          "paragraph": 36,
+          "quote": "it seems plausible that the cash was simply entered and withdrawn to make it appear cleaner."
+        }
+      ],
+      "near_neighbours": []
+    },
+    {
+      "advisory_id": "ADV-2026-0018",
+      "source": "reviewer",
+      "label": "Discounted Convertible Equity Issuance Wash",
+      "family": "other",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 25,
+          "printed_folio": null,
+          "paragraph": 19,
+          "quote": "It issues the bond to an investor based in the UK. This individual has connections with a senior director of the company, though this was not disclosed publicly."
+        },
+        {
+          "page": 26,
+          "printed_folio": null,
+          "paragraph": 20,
+          "quote": "the notional value of the shares issued to the investor is significantly lower than the market value of the shares at the time of the conversion, ie the investor who lends \u00a3100,000 now receives the market value equivalent of \u00a31 million shares in the company."
+        },
+        {
+          "page": 26,
+          "printed_folio": null,
+          "paragraph": 22,
+          "quote": "It appears the activity was undertaken to wash illicit funds through the markets (and cross-jurisdiction) by lending money to the company, which was exchanged for shares that can be sold for more than the value of the loan."
+        },
+        {
+          "page": 26,
+          "printed_folio": null,
+          "paragraph": 23,
+          "quote": "debt is not required to be issued for the typology to be successful. The issuer simply needs to transfer new shares to connected parties, and then sell those shares in the market."
+        }
+      ],
+      "doctrine_justification": "No existing typology captures this mechanism (nothing cleared the search floor; closest was CM007 Pump and Dump at 0.49, which requires 'coordinated promotion of a thinly-traded... instrument' and 'distribution... into the retail buying the promotion creates' -- absent here since there is no promotion or retail distribution, only a private mispriced issuance to one connected party). The document's own mechanism (para 22-23): an issuer transfers securities to a connected/undisclosed party at a price far below market value (a 10x discount via convertible-to-equity conversion), who monetises the gap by selling into the open market; the report states 'debt is not required... the issuer simply needs to transfer new shares to connected parties, and then sell those shares.' This is a fully-worked case study distinct from the claimed MTN/debt-issuance layering (coupon remittance via offshore agent) and from generic Related Party Trading (flags only the ownership/control link, not the mispriced-issuance-and-dump value transfer).",
+      "where_found": "Annex Example 4: equity placement, paragraphs 17-23, pages 25-26",
+      "near_neighbours": []
+    },
+    {
+      "advisory_id": "ADV-2026-0018",
+      "source": "extraction",
+      "label": "Free of Payment Securities Transfer Laundering",
+      "family": "capital_markets",
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 20,
+          "printed_folio": "20",
+          "paragraph": null,
+          "quote": "Company A then requests that the government bonds are transferred into the newly formed account at Broker 2. Broker 2 accepts the government bonds into the customer\u2019s portfolio, without speaking to Broker 1 about their origin or ownership."
+        },
+        {
+          "page": 20,
+          "printed_folio": "20",
+          "paragraph": 6,
+          "quote": "Company A has realised clean cash in Country 2."
+        }
+      ],
+      "near_neighbours": []
+    },
+    {
+      "advisory_id": "ADV-2026-0018",
+      "source": "extraction",
+      "label": "Medium-Term Note / Debt Issuance Layering",
+      "family": "capital_markets",
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 24,
+          "printed_folio": "24",
+          "paragraph": null,
+          "quote": "IB1 does not have sight of, or conduct due diligence on, the end investor but receives assurances from Company A that due diligence has been done."
+        },
+        {
+          "page": 24,
+          "printed_folio": "24",
+          "paragraph": 16,
+          "quote": "The arrangement suggests a strong link between the borrower and underlying \u201clender\u201d which could indicate potential embezzlement, money laundering or both."
+        }
+      ],
+      "near_neighbours": []
+    },
+    {
+      "advisory_id": "ADV-2026-0018",
+      "source": "extraction",
+      "label": "Omnibus/Reliance Intermediation Opacity",
+      "family": "capital_markets",
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 27,
+          "printed_folio": "27",
+          "paragraph": 25,
+          "quote": "The UK-based bank does not treat the offshore broker as high-risk and therefore does not conduct EDD. The UK-based bank also relies on the offshore broker, as a regulated firm, to do CDD on its customers."
+        },
+        {
+          "page": 27,
+          "printed_folio": "27",
+          "paragraph": 28,
+          "quote": "As such, the bank has potentially been facilitating the transfer of economic value from one account to another, cross-jurisdiction, without realising that this might have been linked to financial crime."
+        }
+      ],
+      "near_neighbours": []
+    },
+    {
+      "advisory_id": "ADV-2026-0019",
+      "source": "extraction",
+      "label": "Corruption Brokers and Digitalised Corruption-as-a-Service",
+      "family": "corruption",
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 23,
+          "printed_folio": "23",
+          "paragraph": null,
+          "quote": "the elevated role of corruption brokers."
+        },
+        {
+          "page": 29,
+          "printed_folio": "29",
+          "paragraph": null,
+          "quote": "Bribes are transferred by criminally exploiting cryptocurrencies or fintech."
+        }
+      ],
+      "near_neighbours": []
+    },
+    {
+      "advisory_id": "ADV-2026-0019",
+      "source": "extraction",
+      "label": "Hybrid Threat Actor Use of Criminal Networks as Proxies (Woodpecker Modus Operandi)",
+      "family": "other",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 11,
+          "printed_folio": "11",
+          "paragraph": null,
+          "quote": "It is also progressively driven by hybrid threats, directed externally, that encompass a broad range of criminal activities and tactics operated via criminal proxies."
+        },
+        {
+          "page": 15,
+          "printed_folio": "15",
+          "paragraph": null,
+          "quote": "Much like a woodpecker weakens a tree over time through repeated strikes, hybrid threat actors engage in ongoing, seemingly minor actions that collectively erode stability, security, and trust in institutions."
+        }
+      ],
+      "near_neighbours": []
+    },
+    {
+      "advisory_id": "ADV-2026-0019",
+      "source": "reviewer",
+      "label": "VAT Missing Trader / Carousel and Contra-Trading Fraud (MTIC)",
+      "family": "fraud",
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 75,
+          "printed_folio": "75",
+          "paragraph": null,
+          "quote": "MTIC fraud is the most common modus operandi in VAT fraud. It refers to schemes where a trader imports goods VAT-free from another EU country and sells them domestically, charging VAT to the buyer but failing to remit this tax to the authorities. The trader then disappears, hence the term \"missing trader\"."
+        },
+        {
+          "page": 75,
+          "printed_folio": "75",
+          "paragraph": null,
+          "quote": "Carousel fraud is the most common form of MTIC fraud and involves a circular trading scheme where the same goods are repeatedly imported and exported across multiple Member States, with VAT refunds being claimed for taxes that were never paid."
+        },
+        {
+          "page": 75,
+          "printed_folio": "75",
+          "paragraph": null,
+          "quote": "The contra-trading scheme is the most complex and emerging scheme of MTIC carousel fraud, in which criminal networks add an extra layer of companies to create a second trading circuit or carousel."
+        }
+      ],
+      "doctrine_justification": "No Knowledge Centre typology matched this mechanism above the search floor. The advisory develops, over multiple paragraphs and a EUR 297 million/400-company case example, a specific and internally consistent technique: a 'missing trader' imports goods VAT-free, charges but never remits VAT, then disappears; 'carousel fraud' repeats the same goods' import/export across Member States to claim false refunds; 'contra-trading' layers a second company circuit to obscure the fraud further. This is a distinct value-extraction mechanism (exploiting cross-border VAT refund mechanics via disappearing traders) rather than a trade-invoice manipulation or sanctions-evasion technique, so it is proposed as an emergent typology.",
+      "where_found": "VAT and MTIC fraud section, page 75, including case example '400 companies involved in a EUR 297 million VAT fraud network'",
+      "near_neighbours": []
+    },
+    {
+      "advisory_id": "ADV-2026-0020",
+      "source": "reviewer",
+      "label": "Fraudulent Claims Under Standby/Guarantee Instruments",
+      "family": "fraud",
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 60,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "in the context of SBLCs and Guarantees, payments would generally be the exception. Risk controls specific to situations where Guarantees and SBLCs are drawn upon or paid should also address sanctions, expected activity and identify potential suspicious activity."
+        },
+        {
+          "page": 67,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "Claims made within a short time after issuance"
+        },
+        {
+          "page": 67,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "Continuous claims under various guarantee instruments."
+        },
+        {
+          "page": 67,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "Claim pressure tactics"
+        }
+      ],
+      "doctrine_justification": "No existing library typology addresses this mechanism (search returned no result above the score floor). The advisory develops a distinct technique specific to demand instruments: because SBLCs/Guarantees are non-performance undertakings where 'payments would generally be the exception,' any claim event is itself unusual, and the advisory groups three related indicators around abuse of that claim mechanism \u2014 claims made shortly after issuance (suggesting the instrument was never intended to support genuine performance), continuous claims across multiple guarantee instruments (a pattern of repeat extraction), and claim pressure tactics (coercive demand behaviour). This is a self-contained fraud mechanism \u2014 using the demand/default feature of a standby instrument to extract payment absent genuine non-performance \u2014 not covered by the TBML misrepresentation typologies already linked, which concern goods/invoice misstatement rather than the instrument's claim mechanism itself.",
+      "where_found": "Appendix III, section 1.7 (p.60) and Risk Indicators table (p.67)",
+      "near_neighbours": []
+    }
+  ]
+}

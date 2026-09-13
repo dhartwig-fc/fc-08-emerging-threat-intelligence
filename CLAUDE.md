@@ -43,6 +43,8 @@ evals/search_recall.py              search measured against the golden set's rea
 evals/probe_prompt_variant.py       A/B a prompt change without editing the agent; INVERTED 2026-09-12, now builds the pre-adoption prompt
 evals/traces/                       where recall goes: the full baseline, three traced mechanisms, the label triage, the document-shape count and the reviewer's acceptance bands
 tools/batch_remaining.sh           extracts every advisory with no record; resumable and idempotent, shortest first
+tools/build_emergent_candidates.py  the week-4 deliverable: every emergent entry with its evidence and near neighbours
+agents/review_advisory.py          the additive reviewer: what did the extraction miss, justified against doctrine
 evals/review_ADV-2026-0001.md      week-1 review: what the first real run got wrong and why
 setup.sh                           bootstrap + smoke tests
 ```
@@ -246,8 +248,18 @@ claude mcp add knowledge-centre -- "$PWD/.venv/bin/python" "$PWD/mcp_server/know
   and means the full-set number understates the reviewer in BOTH directions. Claude judging Claude's
   additions against Claude's labels — for the owner's list, not ruled correct.
 
-- [ ] Week 4 remaining: `data/emergent_candidates.json`, a schema field + version bump if the additions are
-  to merge into records, and the honest single-vs-multi comparison. Sixteen of the twenty are SINGLE runs;
+  **`data/emergent_candidates.json` DONE 2026-09-13** — 50 candidates, 50 DISTINCT label strings, across 15
+  advisories (34 from extraction, 16 from the reviewer), 23 carrying near neighbours. It SUGGESTS adjacency
+  and does not assert identity, because automatic clustering was built and REJECTED: at the scorer's 0.50
+  threshold it merged four distinct techniques on the words "money laundering", and at the best threshold
+  tested only one of six multi-member clusters was unambiguously right. **The scorer's threshold was
+  validated for matching one predicted label against one golden label — a different task from clustering
+  arbitrary labels**, and in a corpus where every label names a laundering technique the domain vocabulary
+  discriminates nothing. The signal survives anyway: "Underground Banking" appears across FOUR advisories
+  under four different names, which is exactly what a curator needs.
+
+- [ ] Week 4 remaining: a schema field + version bump if the reviewer's additions are to merge into records,
+  and the honest single-vs-multi comparison. Sixteen of the twenty are SINGLE runs;
   only the four concentrated documents have bands. **DO NOT plan the rest against better retrieval.** Measured three ways on 2026-09-12: the search fix lifted top-5 recall 41% relative and moved extraction recall by nothing; typologies were retrieved, confirmed with `get_typology`, and then not asserted; and the agent asserts the same handful whether the document holds 5 golden typologies or 20. Build against the three mechanisms below, in that order. And note precision 0.889 is this pipeline's best property -- an assertion budget IS a precision strategy, so a reviewer that justifies each extra assertion beats simply asserting more
 - [ ] Week 5: hooks, telemetry, `review.py` gate, desk digests
 - [ ] Week 6: publish slice 1 on `future-capabilities.html`, tag `fc08-threatintel-slice1-v1.0.0`
