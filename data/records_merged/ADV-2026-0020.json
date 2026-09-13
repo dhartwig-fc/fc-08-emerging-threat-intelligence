@@ -1,0 +1,430 @@
+{
+  "schema_version": "1.4.0",
+  "advisory_id": "ADV-2026-0020",
+  "source": {
+    "source_type": "wolfsberg",
+    "publisher": "Wolfsberg Group, ICC and BAFT",
+    "title": "Trade Finance Principles (2019 amendment)",
+    "published_on": "2019-01-01",
+    "published_on_precision": "year",
+    "url": null,
+    "document_sha256": "6a4a9e7a9f2d160e741c887859e75e182e746fe71c0bf476b5200a6ac46c5e68",
+    "page_count": 83
+  },
+  "summary": "Joint Wolfsberg Group, ICC and BAFT guidance (2019 amendment) setting out Trade Finance Principles for managing financial crime risk in Documentary Credits, Bills for Collection, Guarantees/SBLCs, Open Account/Supply Chain Finance and FI Trade Loans. It defines core Trade-Based Money Laundering value-transfer techniques -- over-invoicing, under-invoicing, multiple invoicing, short/over shipping, obfuscation of goods type and phantom shipping -- describes sanctions, NPWMD and dual-use goods risks and the practical limitations FIs face in detecting them, and appends product-specific risk-indicator tables, including a glossary reference to funnel accounts used to layer trade-related payments.",
+  "jurisdictions": [],
+  "typologies": [
+    {
+      "family": "tbml",
+      "typology_id": "TBML001",
+      "label": "Over Invoicing",
+      "emergent": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 12,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "By misrepresenting the price of the goods in the invoice and other documentation (stating it at above the true value) the seller gains excess value as a result of the payment."
+        }
+      ]
+    },
+    {
+      "family": "tbml",
+      "typology_id": "TBML002U",
+      "label": "Under Invoicing",
+      "emergent": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 12,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "By misrepresenting the price of the goods in the invoice and other documentation (stating it as below the true value) the buyer gains excess value when the payment is made."
+        }
+      ]
+    },
+    {
+      "family": "tbml",
+      "typology_id": "TBML003",
+      "label": "Multiple Invoicing",
+      "emergent": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 12,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "By issuing more than one invoice for the same goods a seller can justify the receipt of multiple payments."
+        }
+      ]
+    },
+    {
+      "family": "tbml",
+      "typology_id": "TBML004",
+      "label": "Phantom Shipping",
+      "emergent": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 12,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "No goods are shipped and all documentation is completely falsified."
+        }
+      ]
+    },
+    {
+      "family": "tbml",
+      "typology_id": "TBML005",
+      "label": "False Description Of Goods",
+      "emergent": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 12,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "The seller ships less than the invoiced quantity or quality of goods thereby misrepresenting the true value of goods in the documents."
+        },
+        {
+          "page": 12,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "Parties may structure a transaction in a way to avoid alerting any suspicion to FIs or to other third parties which become involved."
+        }
+      ]
+    },
+    {
+      "family": "tbml",
+      "typology_id": "TBML007",
+      "label": "Dual Use Goods",
+      "emergent": false,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 16,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "Dual use items are goods, software, technology, documents and diagrams, which may have both civil and military applications."
+        },
+        {
+          "page": 21,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "Interpretation of \u201cdual use\u201d requires a degree of technical knowledge that DC, SBLC, and Guarantee FI staff cannot be expected to possess."
+        }
+      ]
+    },
+    {
+      "family": "tbml",
+      "typology_id": "TBML010",
+      "label": "Sanctions Evasion Through Trade",
+      "emergent": false,
+      "confidence": "low",
+      "citations": [
+        {
+          "page": 14,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "Trade based sanctions : Embargoes on the provision of certain g oods, services, or expertise to certain countries."
+        }
+      ]
+    },
+    {
+      "family": "correspondent_banking",
+      "typology_id": "BA002",
+      "label": "Funnel Accounts",
+      "emergent": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 30,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "Typologies given by regulators in respect of TBML often describe in detail the use of \u201dFunnel Accounts\u201d as a part of a TBML typology."
+        },
+        {
+          "page": 31,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "Often the trading company will have been taken over by the money launderers to facilitate the layering process."
+        }
+      ]
+    },
+    {
+      "family": "tbml",
+      "typology_id": "TBML008",
+      "label": "Third Party Payment Abuse",
+      "emergent": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 31,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "Unexplained Third Party: Person or entity that appears in a transaction or payment instruction where there has been no previous identification of that person or entity in the structure or documentation relating to the transaction."
+        },
+        {
+          "page": 45,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "Third parties are funding or part funding the DC value (just in time account credits to the settlement account)"
+        },
+        {
+          "page": 45,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "Unexplained third parties"
+        },
+        {
+          "page": 40,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "in the event that Party Y requests transfer of funds to an account with a bank not involved in the DC, that bank\u2019s name should be subjected to screening by Bank A"
+        }
+      ],
+      "added_by": "reviewer",
+      "review_justification": "Found in Glossary 'Unexplained Third Party' (p.31); DC risk-indicator table (p.45); BC risk-indicator table (p.57); DC Stage 3 payment review (p.40). TBML008 describes settlement 'through a payer who is not the trade counterparty \u2014 an unrelated third party, split settlement, or a payment that does not match the trade... The payment breaks the link between the trade and the funds.' The advisory operationalises exactly this mechanism as bank controls: it defines an 'Unexplained Third Party' as one appearing in a transaction/payment instruction with no prior identification in the trade documentation, flags 'third parties funding or part funding the DC value' via just-in-time credits to the settlement account as a post-event red flag, and separately requires screening where a beneficiary directs payment to a bank not party to the original DC. Each of these is the same fact pattern TBML008 names: a payer/recipient disconnected from the documented trade counterparties, obscuring the true source or destination of funds."
+    },
+    {
+      "family": "network",
+      "typology_id": "PAT009",
+      "label": "Related Party Trading",
+      "emergent": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 12,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "Generally, these techniques rely upon collusion between the seller and buyer... The collusion may arise because both parties are controlled by the same persons."
+        },
+        {
+          "page": 45,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "Connected applicant and beneficiary"
+        },
+        {
+          "page": 57,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "Connected Drawer or Drawee"
+        }
+      ],
+      "added_by": "reviewer",
+      "review_justification": "Found in Core Principles 3.1.iii (p.12); DC risk-indicator table (p.45); BC risk-indicator table (p.57). PAT009 identifies 'trading activity occurring between entities that are connected through ownership, control, directors, addresses, contacts or other network relationships.' The advisory's Core paper states plainly that value-transfer techniques such as over/under-invoicing rely on collusion that 'may arise because both parties are controlled by the same persons' \u2014 the same ownership/control nexus PAT009 targets \u2014 and then instantiates it as a standing red flag in both the DC table ('Connected applicant and beneficiary') and the BC table ('Connected Drawer or Drawee'), i.e. counterparties on opposite sides of the trade sharing common control, which is the network relationship PAT009 is built to surface."
+    },
+    {
+      "family": "fraud",
+      "typology_id": null,
+      "label": "Fraudulent Claims Under Standby/Guarantee Instruments",
+      "emergent": true,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 60,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "in the context of SBLCs and Guarantees, payments would generally be the exception. Risk controls specific to situations where Guarantees and SBLCs are drawn upon or paid should also address sanctions, expected activity and identify potential suspicious activity."
+        },
+        {
+          "page": 67,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "Claims made within a short time after issuance"
+        },
+        {
+          "page": 67,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "Continuous claims under various guarantee instruments."
+        },
+        {
+          "page": 67,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "Claim pressure tactics"
+        }
+      ],
+      "added_by": "reviewer",
+      "review_justification": "Found in Appendix III, section 1.7 (p.60) and Risk Indicators table (p.67). No existing library typology addresses this mechanism (search returned no result above the score floor). The advisory develops a distinct technique specific to demand instruments: because SBLCs/Guarantees are non-performance undertakings where 'payments would generally be the exception,' any claim event is itself unusual, and the advisory groups three related indicators around abuse of that claim mechanism \u2014 claims made shortly after issuance (suggesting the instrument was never intended to support genuine performance), continuous claims across multiple guarantee instruments (a pattern of repeat extraction), and claim pressure tactics (coercive demand behaviour). This is a self-contained fraud mechanism \u2014 using the demand/default feature of a standby instrument to extract payment absent genuine non-performance \u2014 not covered by the TBML misrepresentation typologies already linked, which concern goods/invoice misstatement rather than the instrument's claim mechanism itself."
+    }
+  ],
+  "actors": [
+    {
+      "name": "Colluding Buyer and Seller",
+      "actor_type": "category",
+      "aliases": [],
+      "jurisdiction": null,
+      "role": "Trade counterparties who collude to misrepresent the price, quantity or type of goods in trade documentation to move value outside an arm's-length transaction",
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 12,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "Generally, these techniques rely upon collusion between the seller and buyer, since the intended outcome from such arrangements is obtaining a benefit in excess of what would be expected from an arm\u2019s length transaction."
+        }
+      ]
+    },
+    {
+      "name": "Money Launderers Controlling a Trading Company",
+      "actor_type": "category",
+      "aliases": [],
+      "jurisdiction": null,
+      "role": "Actors who take over a legitimate trading company to operate funnel-account based layering of trade-related payments",
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 31,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "Often the trading company will have been taken over by the money launderers to facilitate the layering process."
+        }
+      ]
+    }
+  ],
+  "indicators": [
+    {
+      "indicator_type": "documentary",
+      "description": "Price, quantity or quality of goods is misrepresented in invoices and shipping documents (over/under invoicing, short/over shipping) to transfer excess value between trade counterparties.",
+      "detectable_in_transaction_data": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 12,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "The transfer of value in this way may be accomplished in a variety of ways which are described briefly below"
+        }
+      ]
+    },
+    {
+      "indicator_type": "documentary",
+      "description": "More than one invoice is issued for the same underlying shipment of goods to justify receipt of multiple payments, harder to detect where more than one FI facilitates the payments.",
+      "detectable_in_transaction_data": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 12,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "This will be harder to detect if the colluding parties use more than on e FI to facilitate the payments and or transactions."
+        }
+      ]
+    },
+    {
+      "indicator_type": "documentary",
+      "description": "No genuine shipment of goods occurs and the trade documentation supporting the payment is entirely falsified.",
+      "detectable_in_transaction_data": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 12,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "No goods are shipped and all documentation is completely falsified."
+        }
+      ]
+    },
+    {
+      "indicator_type": "transactional",
+      "description": "Third parties fund or part-fund a documentary credit or bill for collection through last-minute, just-in-time credits to the settlement account.",
+      "detectable_in_transaction_data": true,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 45,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "Third parties are funding or part funding the DC value (just in time account credits to \nthe settlement account)"
+        }
+      ]
+    },
+    {
+      "indicator_type": "behavioural",
+      "description": "A documentary credit is constantly amended or extended, or is routinely cancelled or left unutilised.",
+      "detectable_in_transaction_data": true,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 45,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "Constantly amended or extended \n Routinely cancelled or unutilised"
+        }
+      ]
+    },
+    {
+      "indicator_type": "network",
+      "description": "The applicant and beneficiary of a documentary credit are connected parties, or the applicant's documentation effectively controls the payment.",
+      "detectable_in_transaction_data": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 45,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "Connected applicant and beneficiary"
+        }
+      ]
+    },
+    {
+      "indicator_type": "network",
+      "description": "Funnel accounts, often held outside the trade financing bank, receive funds against false invoices and channel them into the trade relationship account to fund legitimate-looking trade transactions.",
+      "detectable_in_transaction_data": true,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 30,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "Often the funnel accounts are not in the \ntrade financing bank, with transfers of money from funnel accounts being made against false invoice s or \nprocesses to bring the money into the account of the trade relationship in order to fund the legitimate trade"
+        }
+      ]
+    },
+    {
+      "indicator_type": "documentary",
+      "description": "Dual-use goods (having both civil and military application) are difficult for FI trade staff to identify from transaction documentation because goods descriptions rarely disclose technical classification or licensing status.",
+      "detectable_in_transaction_data": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 21,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "In addition, goods descriptions may appear in the documents using a wording \nwhich does not allow the identification of such goods as \u201cdual use.\u201d"
+        }
+      ]
+    },
+    {
+      "indicator_type": "geographic",
+      "description": "Attempts to disguise or circumvent the true countries involved in a trade, including diversion or transhipment through countries not appearing on any sanctions or warning list.",
+      "detectable_in_transaction_data": true,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 21,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "countries which are technology producers or are \u201cdiversion risk\u201d countries used for the transit or re-export of goods may well not appear on any warning lists."
+        },
+        {
+          "page": 45,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "Any attempt to disguise or circumvent countries involved in the actual trade"
+        }
+      ]
+    }
+  ],
+  "suggested_desks": [
+    "trade_desk",
+    "sanctions_desk",
+    "correspondent_desk"
+  ],
+  "overall_confidence": "medium",
+  "extraction_notes": "This is an industry controls/guidance paper (Wolfsberg/ICC/BAFT), not a case-specific advisory: it names no real actors, jurisdictions or transactions. The core TBML value-transfer methods (over/under invoicing, multiple invoicing, short/over shipping, obfuscation, phantom shipping) appear together in a single summary table (page 12) rather than being individually developed with worked examples, so those links are rated medium confidence; dual-use goods is discussed more extensively across the Core, Control Mechanisms and Challenges sections and is rated high. The document only states the publication year (2019), not a specific month or day, so published_on_precision is 'year'. No ISO country codes are stated anywhere in the text, so the jurisdictions list is left empty. Merged 3 reviewer addition(s) under schema 1.4.0; each carries its review_justification. Extraction-only record retained at data/records/."
+}

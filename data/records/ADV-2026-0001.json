@@ -1,0 +1,366 @@
+{
+  "schema_version": "1.2.0",
+  "advisory_id": "ADV-2026-0001",
+  "source": {
+    "source_type": "fatf",
+    "publisher": "FATF and Egmont Group of Financial Intelligence Units",
+    "title": "Trade-Based Money Laundering: Trends and Developments",
+    "published_on": "2020-12-01",
+    "published_on_precision": "month",
+    "url": "https://www.fatf-gafi.org/publications/methodandtrends/documents/trade-based-money-laundering-trends-and-developments.html",
+    "document_sha256": "0969e49877a1937a7bc49ac02ab10a444adca2c2ff2c7803ee6a35adea9f6828",
+    "page_count": 66
+  },
+  "summary": "Joint FATF-Egmont Group report (December 2020) on trade-based money laundering (TBML) trends. It reaffirms four foundational TBML techniques from the 2006 FATF study — over-invoicing, under-invoicing, multiple invoicing and false description of goods — plus phantom shipping, and highlights the continued use of shell/front companies and third-party invoice settlement. It documents newer illicit-cash-integration methods: Black Market Peso Exchange (and an offsetting/compensation variant), surrogate shopping networks, and infiltration of legitimate supply chains without misrepresentation. It also covers trade-based terrorist financing (TBTF) and distinguishes services-based money laundering (SBML) as a related but separate risk. The report draws on national risk assessments, FIU case studies and customs data to describe risk sectors, investigative challenges, and best practices including public-private partnerships.",
+  "jurisdictions": [
+    "US",
+    "PE",
+    "DE",
+    "ES",
+    "IT",
+    "FR",
+    "BE",
+    "NL",
+    "AU",
+    "NZ",
+    "IL",
+    "CA",
+    "SG",
+    "CO"
+  ],
+  "typologies": [
+    {
+      "family": "tbml",
+      "typology_id": "TBML001",
+      "label": "Over Invoicing",
+      "emergent": false,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 26,
+          "printed_folio": "24",
+          "paragraph": null,
+          "quote": "Over- and under- invoicing of goods and services: The key element of this technique is the misrepresentation of the price of the good or service, in order to transfer value. In this type of arrangement, the critical enabling aspect is that the importer and exporter are complicit in the misrepresentation."
+        }
+      ]
+    },
+    {
+      "family": "tbml",
+      "typology_id": "TBML002U",
+      "label": "Under Invoicing",
+      "emergent": false,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 26,
+          "printed_folio": "24",
+          "paragraph": null,
+          "quote": "Over- and under- invoicing of goods and services: The key element of this technique is the misrepresentation of the price of the good or service, in order to transfer value."
+        }
+      ]
+    },
+    {
+      "family": "tbml",
+      "typology_id": "TBML003",
+      "label": "Multiple Invoicing",
+      "emergent": false,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 27,
+          "printed_folio": "25",
+          "paragraph": null,
+          "quote": "Multiple invoicing of goods and services: This doesn’t require the misrepresentation of the price; rather it centres on the reuse of existing documentation to justify multiple payments for the same shipment of goods or delivery of services."
+        }
+      ]
+    },
+    {
+      "family": "tbml",
+      "typology_id": "TBML004",
+      "label": "Phantom Shipping",
+      "emergent": false,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 27,
+          "printed_folio": "25",
+          "paragraph": null,
+          "quote": "Over- and under- shipment of goods and services: As above, this involves the misrepresentation of the quantity of goods or services, including ‘phantom shipments’ where no product is moved at all. Again, it relies on collusion between the importer and exporter."
+        }
+      ]
+    },
+    {
+      "family": "tbml",
+      "typology_id": "TBML005",
+      "label": "False Description Of Goods",
+      "emergent": false,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 27,
+          "printed_folio": "25",
+          "paragraph": null,
+          "quote": "Falsely described goods and services: This involves the misrepresentation of the quality or type of a good or service, such as the shipment of a relatively inexpensive good, which is described as a more expensive item, or an entirely different item, to justify value movement."
+        }
+      ]
+    },
+    {
+      "family": "tbml",
+      "typology_id": "TBML008",
+      "label": "Third Party Payment Abuse",
+      "emergent": false,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 29,
+          "printed_folio": "27",
+          "paragraph": null,
+          "quote": "Third-party intermediaries facilitating invoice settlement – this was first identified in the 2006 report and has remained a constant feature of TBML schemes, including those schemes not involving complicit relationships between the importer and exporter."
+        }
+      ]
+    },
+    {
+      "family": "tbml",
+      "typology_id": "TBML009",
+      "label": "Shell Company Trading",
+      "emergent": false,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 25,
+          "printed_folio": "23",
+          "paragraph": null,
+          "quote": "The exploitation of shell and front companies has become a key feature of many different types of ML activity, as well as facilitating a significant number of predicate offences."
+        }
+      ]
+    },
+    {
+      "family": "tbml",
+      "typology_id": null,
+      "label": "Black Market Peso Exchange",
+      "emergent": true,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 27,
+          "printed_folio": "25",
+          "paragraph": null,
+          "quote": "Another traditional type of TBML is Black Market Peso Exchange, which Central and South American drug cartels have used to launder drug proceeds generated in the United States."
+        }
+      ]
+    },
+    {
+      "family": "terrorist_financing",
+      "typology_id": null,
+      "label": "Trade-Based Terrorist Financing",
+      "emergent": true,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 14,
+          "printed_folio": "12",
+          "paragraph": null,
+          "quote": "the report defines TBTF as “disguising the movement of value through the use of trade transactions in an attempt to finance terrorism , whether from legitimate or illegitimate sources”."
+        }
+      ]
+    },
+    {
+      "family": "tbml",
+      "typology_id": null,
+      "label": "Surrogate Shopping Networks",
+      "emergent": true,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 31,
+          "printed_folio": "29",
+          "paragraph": null,
+          "quote": "Surrogate shopping networks involve individuals or networks of shoppers purchasing desired goods on behalf of wealthier individuals, ostensibly to circumvent customs controls or other forms of tariff restrictions."
+        }
+      ]
+    },
+    {
+      "family": "tbml",
+      "typology_id": null,
+      "label": "Infiltration of Legitimate Supply Chains",
+      "emergent": true,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 31,
+          "printed_folio": "29",
+          "paragraph": null,
+          "quote": "In this case, an OCG or PML purchases a stake in a legitimate business, which may or may not be struggling financially, and continues using its supply chain as a method of integrating illicit cash into the financial system."
+        }
+      ]
+    },
+    {
+      "family": "other",
+      "typology_id": null,
+      "label": "Services-Based Money Laundering",
+      "emergent": true,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 35,
+          "printed_folio": "33",
+          "paragraph": null,
+          "quote": "Services-based money laundering (SBML) is not TBML, and is included here for reference as it is recognised as an increasing risk, including through open source reporting. However, the fundamental difference between the two is that SBML schemes rely on exploiting the trade in services or other intangibles to disguise and justify the movement of illicit proceeds."
+        }
+      ]
+    }
+  ],
+  "actors": [
+    {
+      "name": "Organised Criminal Groups (OCGs)",
+      "actor_type": "category",
+      "aliases": [
+        "OCG",
+        "OCGs"
+      ],
+      "jurisdiction": null,
+      "role": "Exploit trade transactions and supply chains to launder proceeds of crime and move illicit funds",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 5,
+          "printed_folio": "3",
+          "paragraph": null,
+          "quote": "These are exploited by Organised Criminal Groups (OCGs), Professional Money Launderers (PMLs), and Terrorist Financing (TF) networks, to facilitate myriad types of financial flows, including the laundering of proceeds of crime, such as from drug trafficking"
+        }
+      ]
+    },
+    {
+      "name": "Professional Money Launderers (PMLs)",
+      "actor_type": "category",
+      "aliases": [
+        "PML",
+        "PMLs"
+      ],
+      "jurisdiction": null,
+      "role": "Offer specialist ML expertise (including TBML) on behalf of OCGs, taking receipt of and converting criminal proceeds for a fee before returning them",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 14,
+          "printed_folio": "12",
+          "paragraph": null,
+          "quote": "PMLs offer specialist expertise using a range of ML techniques (e.g. TBML) to diversify their risk exposure. These PMLs take receipt of the criminal proceeds on behalf of the OCG and transfer or convert those proceeds, including via TBML schemes, before passing them back to the OCG, minus the payment of their fee or commission."
+        }
+      ]
+    },
+    {
+      "name": "Terrorist Financing (TF) networks",
+      "actor_type": "category",
+      "aliases": [
+        "terrorist financiers",
+        "TF networks"
+      ],
+      "jurisdiction": null,
+      "role": "Exploit trade processes and transactions to disguise the movement of value used to finance terrorism",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 5,
+          "printed_folio": "3",
+          "paragraph": null,
+          "quote": "These are exploited by Organised Criminal Groups (OCGs), Professional Money Launderers (PMLs), and Terrorist Financing (TF) networks, to facilitate myriad types of financial flows"
+        }
+      ]
+    }
+  ],
+  "indicators": [
+    {
+      "indicator_type": "documentary",
+      "description": "Exporter uses a personal email address instead of a legitimate business email address on trade correspondence or documentation.",
+      "detectable_in_transaction_data": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 14,
+          "printed_folio": "12",
+          "paragraph": null,
+          "quote": "Use of a personal email address in lieu of a legitimate business email."
+        }
+      ]
+    },
+    {
+      "indicator_type": "documentary",
+      "description": "Trade documentation is obviously recycled from previous transactions with few or no edits, sometimes not even updating the date.",
+      "detectable_in_transaction_data": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 14,
+          "printed_folio": "12",
+          "paragraph": null,
+          "quote": "the obvious recycling of previous documentation with few or no edits, including something as basic as the date."
+        }
+      ]
+    },
+    {
+      "indicator_type": "documentary",
+      "description": "Exporter has no discoverable trading presence, including use of residential rather than business premises despite claiming to supply significant quantities of goods.",
+      "detectable_in_transaction_data": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 14,
+          "printed_folio": "12",
+          "paragraph": null,
+          "quote": "The complete lack of any trading presence of the exporter, following research by the FI. This included the use of residential rather than business premises for exporters providing significant quantities of goods."
+        }
+      ]
+    },
+    {
+      "indicator_type": "behavioural",
+      "description": "Newly formed companies show rapid growth into existing, established markets.",
+      "detectable_in_transaction_data": true,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 25,
+          "printed_folio": "23",
+          "paragraph": null,
+          "quote": "Rapid growth of newly formed companies into existing markets;"
+        }
+      ]
+    },
+    {
+      "indicator_type": "transactional",
+      "description": "Business shows consistent, significant cash payments, including payments directed to or received from previously unknown third parties.",
+      "detectable_in_transaction_data": true,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 25,
+          "printed_folio": "23",
+          "paragraph": null,
+          "quote": "Evidence of consistent and significant cash payments, including those directed towards previously unknown third-parties. These businesses may also receive unexplained third-party payments;"
+        }
+      ]
+    },
+    {
+      "indicator_type": "transactional",
+      "description": "Mismatch between export declarations recorded in the origin country and the corresponding import declarations recorded in the destination country for the same consignment (mirror-statistics discrepancy).",
+      "detectable_in_transaction_data": true,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 26,
+          "printed_folio": "24",
+          "paragraph": null,
+          "quote": "Declarations of goods on export from country A should match the corresponding import to country B (because the consignment, in theory, is the same thing). When they did not match in this case, ABF officers had reason to believe that the discrepancies were an indicator of trade mis-invoicing, and therefore, potential TBML."
+        }
+      ]
+    }
+  ],
+  "suggested_desks": [
+    "trade_desk",
+    "fiu_liaison",
+    "correspondent_desk",
+    "general_intel"
+  ],
+  "overall_confidence": "high",
+  "extraction_notes": "Thematic study, not a single-entity alert; confidence reflects documentary strength, not operational sightings. TBML002 is a duplicate entry (authored as TBML001); TBML002U used instead for Under-Invoicing since it holds distinct doctrine despite its own \"authored as TBML002\" note. Five techniques (BMPE, TBTF, Surrogate Shopping, Infiltration of Supply Chains, SBML) had no Knowledge Centre match above the search floor and are flagged emergent. Offsetting/compensation (Box 2.10) folded into BMPE as a variant. Jurisdictions reflect case-study source/route countries, not a risk ranking."
+}

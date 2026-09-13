@@ -1,0 +1,455 @@
+{
+  "schema_version": "1.3.0",
+  "advisory_id": "ADV-2026-0011",
+  "source": {
+    "source_type": "fincen",
+    "publisher": "FinCEN",
+    "title": "FinCEN Advisory on the Use of Chinese Money Laundering Networks by Mexico-Based Transnational Criminal Organizations to Launder Illicit Proceeds",
+    "published_on": "2025-08-28",
+    "published_on_precision": "day",
+    "url": null,
+    "document_sha256": "5a2654b103437fdb3cfd83db51d77a3dd5f0f756dc467ba2cf365eff1ba766ee",
+    "page_count": 15
+  },
+  "summary": "FinCEN Advisory FIN-2025-A003 (Aug 28, 2025) alerts U.S. financial institutions to Chinese money laundering networks (CMLNs), professional money launderers who launder drug proceeds for the Sinaloa, Jalisco New Generation (CJNG) and Gulf Cartels and other Mexico-based TCOs. CMLNs meet Chinese citizens' demand for USD to evade PRC currency controls by 'purchasing' Cartel USD via near-instant 'mirror transactions' (peso or RMB settled through Chinese underground banking, sometimes using virtual currency) rather than moving cash across borders. CMLNs also recruit money mules -- including Chinese international students, using counterfeit passports and sometimes complicit bank insiders -- to deposit and layer illicit cash via structuring/smurfing, cashier's checks and shell-company/real-estate purchases. A parallel trade-based scheme sees mules and 'daigou' buyers purchase U.S. electronics and luxury goods with drug cash, which shell or front companies then export to Mexico, China, Hong Kong and the UAE for resale as an alternative value-transfer leg. A DOJ case study ('Operation Fortune Runner') illustrates the model with over $50 million laundered for the Sinaloa Cartel. The Advisory lists red flag indicators for mule accounts and TBML activity and reminds institutions of SAR filing (key term CMLN-2025-A003), CTR/Form 8300, Section 312 and 314(b) obligations.",
+  "jurisdictions": [
+    "US",
+    "MX",
+    "CN",
+    "HK",
+    "AE",
+    "CO"
+  ],
+  "typologies": [
+    {
+      "family": "correspondent_banking",
+      "typology_id": "BA003",
+      "label": "Mule Accounts",
+      "emergent": false,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 5,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "As part of the laundering process, CMLNs may use money mules to deposit the illicit USD into accounts they are directed to open at U.S. depository institutions, or at accounts held by U.S.-based Chinese nationals or businesses."
+        },
+        {
+          "page": 9,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "A customer, especially a customer who presented a Chinese passport as identification during the onboarding process, regularly receives funds that are not commensurate with the reported occupation or income"
+        }
+      ]
+    },
+    {
+      "family": "correspondent_banking",
+      "typology_id": "BA001",
+      "label": "Structuring",
+      "emergent": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 6,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "CMLN money mules may also engage in “smurfing” operations 35 across multiple depository institution branches to deposit illicit funds into money mule accounts"
+        },
+        {
+          "page": 6,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "CMLN money mules have also been observed depositing large sums of cash during a visit, irrespective of Currency Transaction Reporting requirements."
+        }
+      ]
+    },
+    {
+      "family": "other",
+      "typology_id": null,
+      "label": "Chinese Underground Banking Mirror Transactions (IVTS)",
+      "emergent": true,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 5,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "it coordinates with Mexico-based CMLN counterparts who conduct a reciprocal or “mirror transaction,” 28 in which an equivalent amount of pesos is transferred to the Cartels’ Mexico-based accounts, minus a nominal fee"
+        },
+        {
+          "page": 5,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "CMLNs may also use convertible virtual currency (CVC) as an alternative means to conduct mirror transactions with the Cartels."
+        }
+      ]
+    },
+    {
+      "family": "tbml",
+      "typology_id": null,
+      "label": "CMLN Goods-Based Trade Value Transfer (Purchase and Export)",
+      "emergent": true,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 6,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "CMLNs may also use complex TBML schemes to launder the Cartels’ illicit funds. According to law enforcement, CMLNs may use money mules and other recruits to purchase U.S. electronics and other luxury goods"
+        },
+        {
+          "page": 7,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "CMLNs may export the goods they purchase to counterparties in Mexico, China, Hong Kong, and the United Arab Emirates, who resell these goods in their respective countries."
+        }
+      ]
+    }
+  ],
+  "actors": [
+    {
+      "name": "Chinese money laundering networks (CMLNs)",
+      "actor_type": "category",
+      "aliases": [
+        "Chinese money laundering organizations (CMLOs)"
+      ],
+      "jurisdiction": null,
+      "role": "Professional money launderers laundering Cartel drug proceeds via mirror transactions, money mules and TBML",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 1,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "the Jalisco New Generation Cartel (CJNG), the Sinaloa Cartel, the Gulf Cartel, and other Mexico-based transnational criminal organizations (TCOs)—frequently known collectively as the “Cartels”—to launder illicit proceeds. CMLNs are considered professional money launderers (PMLs)"
+        }
+      ]
+    },
+    {
+      "name": "Mexico-based transnational criminal organizations (TCOs) / the Cartels",
+      "actor_type": "category",
+      "aliases": [
+        "TCOs",
+        "the Cartels"
+      ],
+      "jurisdiction": "MX",
+      "role": "Drug trafficking organizations whose USD proceeds are laundered by CMLNs",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 1,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "the Jalisco New Generation Cartel (CJNG), the Sinaloa Cartel, the Gulf Cartel, and other Mexico-based transnational criminal organizations (TCOs)—frequently known collectively as the “Cartels”"
+        }
+      ]
+    },
+    {
+      "name": "Sinaloa Cartel",
+      "actor_type": "organisation",
+      "aliases": [],
+      "jurisdiction": "MX",
+      "role": "TCO whose drug proceeds were laundered via Chinese underground money exchanges per DOJ case study",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 7,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "Federal Indictment Alleges Alliance Between Sinaloa Cartel and Money Launderers Linked to Chinese Underground Banking"
+        }
+      ]
+    },
+    {
+      "name": "Jalisco New Generation Cartel (CJNG)",
+      "actor_type": "organisation",
+      "aliases": [
+        "CJNG"
+      ],
+      "jurisdiction": "MX",
+      "role": "Named TCO using CMLNs to launder illicit proceeds",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 1,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "the Jalisco New Generation Cartel (CJNG), the Sinaloa Cartel, the Gulf Cartel"
+        }
+      ]
+    },
+    {
+      "name": "Gulf Cartel",
+      "actor_type": "organisation",
+      "aliases": [],
+      "jurisdiction": "MX",
+      "role": "Named TCO using CMLNs to launder illicit proceeds",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 1,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "the Jalisco New Generation Cartel (CJNG), the Sinaloa Cartel, the Gulf Cartel, and other Mexico-based transnational criminal organizations"
+        }
+      ]
+    },
+    {
+      "name": "Edgar Joel Martinez-Reyes",
+      "actor_type": "person",
+      "aliases": [],
+      "jurisdiction": "US",
+      "role": "Lead defendant, Los Angeles-based associate coordinating with Sinaloa Cartel and Chinese underground banking money remitters (Operation Fortune Runner)",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 8,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "Lead defendant Edgar Joel Martinez-Reyes and others allegedly used a variety of methods to hide the money’s source, including trade-based money laundering"
+        }
+      ]
+    },
+    {
+      "name": "Colombian peso brokers",
+      "actor_type": "category",
+      "aliases": [],
+      "jurisdiction": "CO",
+      "role": "Other international professional money launderers CMLNs may coordinate with",
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 1,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "CMLNs operate around the world and may coordinate with other international PMLs, such as shadow banking networks and Colombian peso brokers."
+        }
+      ]
+    },
+    {
+      "name": "Daigou buyers and operators",
+      "actor_type": "category",
+      "aliases": [
+        "daigou"
+      ],
+      "jurisdiction": null,
+      "role": "Straw buyers (witting or unwitting) instructed by CMLNs to purchase U.S. goods for export to China",
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 7,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "CMLNs may also use or work with “daigou” buyers (meaning “buying on behalf of,” i.e., straw buyers) to obtain U.S. goods for Chinese citizens or businesses."
+        }
+      ]
+    }
+  ],
+  "indicators": [
+    {
+      "indicator_type": "documentary",
+      "description": "Customer presents a Chinese passport during onboarding and regularly receives funds not commensurate with reported occupation/income, with no attributable legitimate source (unexplained wealth).",
+      "detectable_in_transaction_data": true,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 9,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "A customer, especially a customer who presented a Chinese passport as identification during the onboarding process, regularly receives funds that are not commensurate with the reported occupation or income"
+        }
+      ]
+    },
+    {
+      "indicator_type": "documentary",
+      "description": "Chinese passport and visa presented at onboarding contain the same photograph despite being allegedly issued years apart, suggesting counterfeit identity documents.",
+      "detectable_in_transaction_data": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 9,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "During the onboarding process, a customer presents a Chinese passport and a visa that contain the same photograph despite being allegedly issued years apart."
+        }
+      ]
+    },
+    {
+      "indicator_type": "behavioural",
+      "description": "Customer (especially Chinese national) opens account as a student, receives cash deposits or wires labelled 'tuition'/'living expenses' inconsistent with stated status, then sends wires/P2P transfers to unrelated individuals.",
+      "detectable_in_transaction_data": true,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 9,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "This customer then regularly deposits cash into their account or receives wire transfers notated as “tuition” or “living expenses” that are not commensurate with the reported information."
+        }
+      ]
+    },
+    {
+      "indicator_type": "transactional",
+      "description": "Customer with a low-income declared occupation (student, retiree, housewife) purchases cashier's checks payable to a real estate company or initiates real estate wires, sometimes accompanied by a real estate agent.",
+      "detectable_in_transaction_data": true,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 9,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "A customer, especially a Chinese national with unexplained wealth, initiates a wire transfer related to a real estate purchase or purchases cashier’s checks made payable to a real estate company."
+        }
+      ]
+    },
+    {
+      "indicator_type": "transactional",
+      "description": "Customer regularly deposits large cash/cashier's checks or receives multiple wire/ACH/P2P transfers with no business or lawful purpose, then disperses funds to other individuals, often in high-risk jurisdictions.",
+      "detectable_in_transaction_data": true,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 9,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "A customer, especially a Chinese national, regularly deposits large volumes of cash or cashier’s checks, or receives multiple wire, ACH, or P2P transfers for no business or apparent lawful purpose."
+        }
+      ]
+    },
+    {
+      "indicator_type": "behavioural",
+      "description": "Customer is reluctant or refuses to explain the source of funds or acts evasive when questioned, sometimes falsely characterising deposits as loan repayments.",
+      "detectable_in_transaction_data": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 9,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "A customer, especially a Chinese national, is reluctant or refuses to provide information regarding the source of funds deposited or transferred into their account"
+        }
+      ]
+    },
+    {
+      "indicator_type": "network",
+      "description": "A U.S.-based escrow company receives funds from an unaffiliated foreign-based shell company in an unrelated line of business, used to purchase U.S. real estate.",
+      "detectable_in_transaction_data": true,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 10,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "A customer that is a U.S.-based escrow company receives funds from an unaffiliated, foreign-based shell company or entity in a disparate line of business that are used to purchase real estate in the United States."
+        }
+      ]
+    },
+    {
+      "indicator_type": "transactional",
+      "description": "Business owned by a Chinese national receives deposits from online marketplaces or export-related wires to Mexico, China, Hong Kong or the UAE, but rarely transacts to purchase inventory.",
+      "detectable_in_transaction_data": true,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 10,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "A business owned by a Chinese national regularly receives deposits from online marketplaces, but rarely, or never, engages in transactions that indicate the purchase of goods to maintain inventory."
+        }
+      ]
+    },
+    {
+      "indicator_type": "geographic",
+      "description": "Small U.S. electronics or real estate business receives wires from Mexico, China, Hong Kong or the UAE with no known nexus to those countries.",
+      "detectable_in_transaction_data": true,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 10,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "A small U.S.-based business in the electronics or real estate industry receives wires from Mexico, China, Hong Kong, and the United Arab Emirates and has no known nexus to these countries."
+        }
+      ]
+    },
+    {
+      "indicator_type": "network",
+      "description": "Business selling electronics or luxury goods pays off multiple credit cards belonging to individuals who appear unrelated to the business.",
+      "detectable_in_transaction_data": true,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 10,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "A business that sells electronics or other luxury goods makes payments for multiple credit cards associated with various individuals, who are seemingly unrelated to the business."
+        }
+      ]
+    },
+    {
+      "indicator_type": "network",
+      "description": "Hong Kong-registered trading companies with shell-like characteristics send funds to Chinese nationals residing in the U.S., real estate escrow/title companies, or other international destinations with no apparent business purpose.",
+      "detectable_in_transaction_data": true,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 10,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "Hong Kong registered trading companies with shell-like characteristics send funds to Chinese nationals residing in the United States, real estate escrow or title insurance companies, and other international destinations with no apparent business or economic purpose."
+        }
+      ]
+    },
+    {
+      "indicator_type": "transactional",
+      "description": "Money mules deposit illicit cash across multiple depository institution branches (smurfing) and deposit large cash sums irrespective of Currency Transaction Reporting requirements.",
+      "detectable_in_transaction_data": true,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 6,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "CMLN money mules may also engage in “smurfing” operations 35 across multiple depository institution branches to deposit illicit funds into money mule accounts"
+        }
+      ]
+    },
+    {
+      "indicator_type": "documentary",
+      "description": "CMLNs provide money mules with counterfeit Chinese passports to facilitate account opening and other illicit financial behaviour.",
+      "detectable_in_transaction_data": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 6,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "CMLNs may also provide money mules with counterfeit Chinese passports to facilitate account opening and engage in other illicit financial behavior."
+        }
+      ]
+    },
+    {
+      "indicator_type": "network",
+      "description": "CMLNs recruit financial institution employees as complicit insiders or place their own members inside institutions to assist operations.",
+      "detectable_in_transaction_data": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 6,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "CMLNs may also recruit financial institution employees to act as complicit insiders or infiltrate and place CMLN members within a financial institution to assist in CMLN operations."
+        }
+      ]
+    }
+  ],
+  "suggested_desks": [
+    "fraud_desk",
+    "trade_desk",
+    "correspondent_desk",
+    "sanctions_desk",
+    "fiu_liaison"
+  ],
+  "overall_confidence": "high",
+  "extraction_notes": "Two typologies (mirror transactions/Chinese underground banking IVTS, and goods-based TBML purchase-and-export) had no substantive match in the Knowledge Centre library despite multiple search phrasings; both proposed as emergent per tool guidance. BA003 (Mule Accounts) and BA001 (Structuring) are library matches supported by dedicated advisory subsections and red-flag lists. Cartels are designated FTOs/SDGTs under E.O. 14157 (p.2) which may independently trigger sanctions-desk relevance beyond the money-laundering typologies captured here. Hong Kong (HK) and UAE (AE) included as named export/counterparty jurisdictions for the TBML scheme; Colombia (CO) included only because Colombian peso brokers are named as a coordinating PML network, not as a laundering venue described in detail."
+}

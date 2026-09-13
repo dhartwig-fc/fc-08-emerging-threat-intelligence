@@ -1,0 +1,603 @@
+{
+  "schema_version": "1.3.0",
+  "advisory_id": "ADV-2026-0003",
+  "source": {
+    "source_type": "fatf",
+    "publisher": "FATF",
+    "title": "Professional Money Laundering",
+    "published_on": "2018-07-01",
+    "published_on_precision": "month",
+    "url": "www.fatf-gafi.org/publications/methodandtrends/documents/professional-money-laundering.html",
+    "document_sha256": "d1bf46ef8da859c0a52b761938e23e0bb1b45ffad647a079404fc11843dfd211",
+    "page_count": 53
+  },
+  "summary": "FATF's July 2018 thematic report on Professional Money Launderers (PMLs) - individuals, organisations (PMLOs) and networks (PMLNs) that launder for criminal clients in exchange for a fee or commission. It sets out PML characteristics (shadow accountancy, advertising, commission structures), roles/functions, and a three-stage business model. It profiles four dedicated network types (cash controller/courier, money mule, digital money/virtual currency, and proxy/shell-company networks) and three supporting mechanisms (TBML, account settlement, underground banking/alternative banking platforms), each illustrated with multi-country case studies. It also catalogues complicit/criminal financial-service providers and professionals - MVTS agents, bank insiders, lawyers, accountants, TCSPs, payment processors and virtual currency exchangers - who knowingly facilitate PML. Case studies span Argentina, Australia, Belgium, Canada, Germany, Israel, Italy, Luxembourg, the Netherlands, Pakistan/UAE, Russia, Singapore, Spain, Ukraine, the UK and the US, including the Altaf Khanani MLO, EUROPOL's Operation Kandil, the Avalanche cybercrime infrastructure, PacNet and BTC-e.",
+  "jurisdictions": [
+    "PK",
+    "AE",
+    "US",
+    "GB",
+    "CA",
+    "AU",
+    "DE",
+    "ES",
+    "NL",
+    "IT",
+    "SG",
+    "RU",
+    "IL",
+    "LU",
+    "BG",
+    "BE",
+    "UA",
+    "AR",
+    "CO",
+    "MX",
+    "CN"
+  ],
+  "typologies": [
+    {
+      "family": "other",
+      "typology_id": null,
+      "label": "Professional Money Laundering (Third-Party PML Organisations/Networks)",
+      "emergent": true,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 8,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "PMLs provide services to criminals and organised crime groups by laundering the proceeds of their illegal activities."
+        },
+        {
+          "page": 12,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "PML is a subset of third-party ML. The FATF defines third-party ML as the laundering of proceeds by a person who was not involved in the commission of the predicate offence."
+        }
+      ]
+    },
+    {
+      "family": "network",
+      "typology_id": null,
+      "label": "Money Transport and Cash Controller Networks",
+      "emergent": true,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 19,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "Criminals and OCGs that generate significant amounts of cash often use the services of cash controller networks that are capable of transferring vast sums of cash on their behalf."
+        },
+        {
+          "page": 21,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "The network was responsible for collecting the proceeds of heroin sales throughout Europe (Spain, the Netherlands, Italy and the UK) and transporting this cash to Germany, where it was placed into the financial system through the purchase of second-hand cars, spare parts and equipment."
+        }
+      ]
+    },
+    {
+      "family": "correspondent_banking",
+      "typology_id": "BA003",
+      "label": "Money Mule Networks (Mule Accounts)",
+      "emergent": false,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 22,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "Money mule recruiters are also known as mule 'herders.'"
+        },
+        {
+          "page": 23,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "Most of the funds were transferred out or withdrawn within a few days of receipt, upon instructions of the Nigerian-based OCG."
+        }
+      ]
+    },
+    {
+      "family": "crypto",
+      "typology_id": null,
+      "label": "Virtual Currency / Digital Money Laundering Networks",
+      "emergent": true,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 25,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "Afterwards, virtual currency is transferred through a complex chain of e-wallets, which may include the use of mixers and tumblers to further enhance the anonymity of the virtual currency transactions."
+        }
+      ]
+    },
+    {
+      "family": "network",
+      "typology_id": "PAT007",
+      "label": "Proxy Networks (Shell Company Layering)",
+      "emergent": false,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 26,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "PML schemes that are arranged with the use of bank accounts consist of multiple layers of shell companies in different jurisdictions, which have been established purely to redistribute and mix funds from various sources."
+        },
+        {
+          "page": 26,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "Step 2: Funds are moved through a complex chain of accounts established by domestic shell companies under fictitious contracts. The funds from different clients are mixed within the same accounts, which makes it difficult for investigators to trace the funds coming from a particular client."
+        }
+      ]
+    },
+    {
+      "family": "tbml",
+      "typology_id": "TBML001",
+      "label": "Trade-Based Money Laundering - Over/Under-Invoicing",
+      "emergent": false,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 30,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "Falsifying the number and/or value of goods being shipped to be higher or lower than the corresponding payment, allowing for the transfer or receipt of the value of proceeds of crime (also known as over or under-invoicing)"
+        }
+      ]
+    },
+    {
+      "family": "tbml",
+      "typology_id": "TBML004",
+      "label": "Trade-Based Money Laundering - Phantom Shipments",
+      "emergent": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 30,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "The transfer of funds which purport to be related to trade, or to the purchase of goods that are ultimately never shipped or received (also known as \"phantom shipments\")"
+        }
+      ]
+    },
+    {
+      "family": "correspondent_banking",
+      "typology_id": null,
+      "label": "Account Settlement Mechanism (Cross-Border Netting via OCG Accounts)",
+      "emergent": true,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 33,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "PMLNs can facilitate the settlement of accounts between multiple OCGs. They may do this for OCGs operating in different countries that generate proceeds from cash and hold funds within bank accounts."
+        },
+        {
+          "page": 33,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "authorities have concluded that the Belgian construction and industrial cleaning companies involved in this case were part of an account settlement scheme"
+        }
+      ]
+    },
+    {
+      "family": "other",
+      "typology_id": null,
+      "label": "Underground Banking and Alternative Banking Platforms",
+      "emergent": true,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 34,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "Underground banking is one tool often used by PMLs. This mechanism is used, with the goal of bypassing the regulated financial sector and creating a parallel system of moving and keeping records of transactions and accountancy."
+        },
+        {
+          "page": 35,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "The ABP was used for a year with over EUR 400 million moved through it."
+        }
+      ]
+    },
+    {
+      "family": "other",
+      "typology_id": null,
+      "label": "Complicit Financial Service Providers and Professional Gatekeepers",
+      "emergent": true,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 35,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "PMLs may occupy positions within the financial services industry (e.g. bankers and MVTS agents) and DNFBP sectors (e.g. lawyers, accountants and real estate professionals), and use their occupation, business infrastructure and knowledge to facilitate ML for criminal clients."
+        },
+        {
+          "page": 45,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "PacNet, an international payment processor and MVTS provider based in Vancouver, Canada, helped dozens of fraudsters gain access to U S banks."
+        }
+      ]
+    }
+  ],
+  "actors": [
+    {
+      "name": "Altaf Khanani",
+      "actor_type": "person",
+      "aliases": [],
+      "jurisdiction": "PK",
+      "role": "Pakistani national who headed the Khanani MLO; laundered funds for OCGs and designated terrorist groups",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 13,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "The Khanani MLO was an OCG composed of individuals and entities operating under the supervision of Pakistani national, Altaf Khanani, whom the US Drug Enforcement Administration (DEA) arrested in 2015."
+        }
+      ]
+    },
+    {
+      "name": "Khanani Money Laundering Organisation",
+      "actor_type": "organisation",
+      "aliases": [
+        "Khanani MLO"
+      ],
+      "jurisdiction": "PK",
+      "role": "Professional money laundering organisation providing services to OCGs, drug traffickers and terrorist groups",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 13,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "The Altaf Khanani Money Laundering Organisation (MLO) laundered illicit proceeds for other OCGs, drug trafficking organisations and designated terrorist groups throughout the world."
+        }
+      ]
+    },
+    {
+      "name": "Al Zarooni Exchange",
+      "actor_type": "organisation",
+      "aliases": [],
+      "jurisdiction": "AE",
+      "role": "Exchange house utilised by the Khanani MLO, OFAC-designated alongside it",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 14,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "On the same day, OFAC designated the exchange house utilised by the Khanani MLO, Al Zarooni Exchange."
+        }
+      ]
+    },
+    {
+      "name": "Organised crime groups",
+      "actor_type": "category",
+      "aliases": [
+        "OCGs"
+      ],
+      "jurisdiction": null,
+      "role": "Primary criminal clients of professional money launderers",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 8,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "PMLs provide services to criminals and organised crime groups by laundering the proceeds of their illegal activities."
+        }
+      ]
+    },
+    {
+      "name": "Professional money launderers",
+      "actor_type": "category",
+      "aliases": [
+        "PMLs",
+        "PMLOs",
+        "PMLNs"
+      ],
+      "jurisdiction": null,
+      "role": "Third-party launderers who provide ML services for a fee or commission",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 12,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "The main characteristic that makes PML unique is the provision of ML services in exchange for a commission, fee or other type of profit."
+        }
+      ]
+    },
+    {
+      "name": "Money mule herders",
+      "actor_type": "category",
+      "aliases": [
+        "mule herders",
+        "money mule recruiters"
+      ],
+      "jurisdiction": null,
+      "role": "Recruit and manage networks of money mules, including paying salaries",
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 22,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "Money mule recruiters are also known as mule 'herders.'"
+        }
+      ]
+    },
+    {
+      "name": "Subject X",
+      "actor_type": "person",
+      "aliases": [],
+      "jurisdiction": "CA",
+      "role": "Operated a PMLO/underground banking network in British Columbia serving Mexican, Asian and Middle Eastern OCGs",
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 34,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "Subject X and his network of associates in British Columbia, Canada, are believed to have operated a PMLO that offered a number of crucial services to Transnational Criminal Organisations including Mexican Cartels, Asian OCGs, and Middle Eastern OCGs."
+        }
+      ]
+    },
+    {
+      "name": "Company X",
+      "actor_type": "organisation",
+      "aliases": [],
+      "jurisdiction": "CA",
+      "role": "Unlicensed MVTS provider owned by Subject X, used to move gambling and drug proceeds",
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 34,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "The cash given to the high-roller gamblers came from Company X, an unlicensed MVTS provider owned by Subject X."
+        }
+      ]
+    },
+    {
+      "name": "La Cosa Nostra",
+      "actor_type": "organisation",
+      "aliases": [
+        "LCN"
+      ],
+      "jurisdiction": "IT",
+      "role": "Organised crime group served by a complicit lawyer performing a 'money box' function (Operation CICERO)",
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 42,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "a judicially authorised search conducted on the boss of a major organised crime group (La Cosa Nostra or LCN) in Palermo, Italy"
+        }
+      ]
+    },
+    {
+      "name": "PacNet",
+      "actor_type": "organisation",
+      "aliases": [],
+      "jurisdiction": "CA",
+      "role": "International payment processor/MVTS provider that knowingly processed mail-fraud proceeds for scammers",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 45,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "PacNet, an international payment processor and MVTS provider based in Vancouver, Canada, helped dozens of fraudsters gain access to U S banks."
+        }
+      ]
+    },
+    {
+      "name": "BTC-e",
+      "actor_type": "organisation",
+      "aliases": [],
+      "jurisdiction": null,
+      "role": "Virtual currency exchanger intentionally created and promoted as a criminal ML business venture",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 47,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "BTC-e was an international ML scheme that allegedly catered to criminals, particularly cyber criminals, and evolved into one of the principal means by which criminals around the world laundered the proceeds of their illicit activity."
+        }
+      ]
+    }
+  ],
+  "indicators": [
+    {
+      "indicator_type": "documentary",
+      "description": "PML keeps a parallel 'shadow accounting' system (spreadsheets or paper records) tracking clients by code name, funds laundered, origin/destination and commissions.",
+      "detectable_in_transaction_data": false,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 12,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "Law enforcement has reported that PMLs often keep a shadow accounting system that contains detailed records with code names."
+        }
+      ]
+    },
+    {
+      "indicator_type": "transactional",
+      "description": "Cash deposits structured in amounts kept deliberately under the regulatory reporting threshold.",
+      "detectable_in_transaction_data": true,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 19,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "The launderer deposits the money in amounts under the reporting threshold to avoid detection."
+        }
+      ]
+    },
+    {
+      "indicator_type": "transactional",
+      "description": "Funds received into a personal (mule) account are transferred out or withdrawn within days, on the instruction of a third party.",
+      "detectable_in_transaction_data": true,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 23,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "Most of the funds were transferred out or withdrawn within a few days of receipt, upon instructions of the Nigerian-based OCG."
+        }
+      ]
+    },
+    {
+      "indicator_type": "network",
+      "description": "Client funds are moved through a complex chain of domestic and foreign shell-company accounts under fictitious contracts, with funds from different clients mixed in the same accounts.",
+      "detectable_in_transaction_data": false,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 26,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "Step 2: Funds are moved through a complex chain of accounts established by domestic shell companies under fictitious contracts. The funds from different clients are mixed within the same accounts, which makes it difficult for investigators to trace the funds coming from a particular client."
+        }
+      ]
+    },
+    {
+      "indicator_type": "transactional",
+      "description": "Trade transactions where the invoiced quantity or value of goods is deliberately inflated or understated relative to the payment made.",
+      "detectable_in_transaction_data": true,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 30,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "Falsifying the number and/or value of goods being shipped to be higher or lower than the corresponding payment, allowing for the transfer or receipt of the value of proceeds of crime (also known as over or under-invoicing)"
+        }
+      ]
+    },
+    {
+      "indicator_type": "documentary",
+      "description": "Payments made under trade contracts for goods that are ultimately never shipped or received ('phantom shipments').",
+      "detectable_in_transaction_data": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 30,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "The transfer of funds which purport to be related to trade, or to the purchase of goods that are ultimately never shipped or received (also known as \"phantom shipments\")"
+        }
+      ]
+    },
+    {
+      "indicator_type": "transactional",
+      "description": "Multiple large cash deposits made per day using bank 'quick-drop' facilities, avoiding face-to-face contact with branch staff.",
+      "detectable_in_transaction_data": true,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 37,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "Multiple deposits of GBP 25 000 were paid into the bank accounts per day using bank 'quick-drop' facilities."
+        }
+      ]
+    },
+    {
+      "indicator_type": "geographic",
+      "description": "Sharp, sustained decline in formal remittance flows on a given corridor coinciding with migration of MVTS agents to unregulated foreign providers.",
+      "detectable_in_transaction_data": true,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 37,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "The Italian FIU identified a significant reduction in remittances sent to Country \"A\" within a three year period (from EUR 2.7 billion in 2012 to EUR 560 million in 2015)."
+        }
+      ]
+    },
+    {
+      "indicator_type": "product",
+      "description": "Bank cards or e-wallets are issued in the names of nominees (e.g. students) who are unaware of their subsequent use in a laundering scheme.",
+      "detectable_in_transaction_data": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 25,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "Financial instruments are issued under the names of money mules (usually students who obtain a bank card and then sell the bank card to criminals for a fee, knowing nothing about its subsequent usage and associated criminal activities)."
+        }
+      ]
+    },
+    {
+      "indicator_type": "geographic",
+      "description": "Cash proceeds of crime collected across multiple countries are physically transported cross-border to a separate jurisdiction for placement into the financial system.",
+      "detectable_in_transaction_data": false,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 21,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "The network was responsible for collecting the proceeds of heroin sales throughout Europe (Spain, the Netherlands, Italy and the UK) and transporting this cash to Germany, where it was placed into the financial system through the purchase of second-hand cars, spare parts and equipment."
+        }
+      ]
+    },
+    {
+      "indicator_type": "behavioural",
+      "description": "Transactions are conducted through an informal/underground banking system that deliberately avoids the transaction tracking typical of conventional banking.",
+      "detectable_in_transaction_data": false,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 34,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "Most transactions were held in cash and avoided the tracking that is typical for conventional banking."
+        }
+      ]
+    },
+    {
+      "indicator_type": "behavioural",
+      "description": "A licensed professional (banker, lawyer, accountant, MVTS agent) uses their occupation and business infrastructure to knowingly facilitate account opening, company formation or fund transfers for criminal clients.",
+      "detectable_in_transaction_data": false,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 35,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "PMLs may occupy positions within the financial services industry (e.g. bankers and MVTS agents) and DNFBP sectors (e.g. lawyers, accountants and real estate professionals), and use their occupation, business infrastructure and knowledge to facilitate ML for criminal clients."
+        }
+      ]
+    }
+  ],
+  "suggested_desks": [
+    "trade_desk",
+    "sanctions_desk",
+    "correspondent_desk",
+    "fraud_desk",
+    "fiu_liaison",
+    "general_intel"
+  ],
+  "overall_confidence": "high",
+  "extraction_notes": "This is a broad, multi-country FATF thematic report; 10 typology candidates were identified reflecting the report's own section structure. Six are proposed as emergent because Knowledge Centre searches returned no doctrine specifically matching FATF's PML sub-typologies (overarching PML business model, cash controller/courier networks, virtual currency laundering networks, account settlement mechanism, underground banking/ABPs, and complicit financial-service-provider facilitation) -- in each case the closest KC hits (e.g. BA007 Cash Intensive Activity, PAT010 Hidden Controller, CMI010 Cryptocurrency Evasion) were judged too narrow or family-mismatched (CMI010 is sanctions-specific) to link with confidence. Four typologies matched existing doctrine: BA003 (Mule Accounts), PAT007 (Shell Company Network) for Proxy Networks, and TBML001/TBML004 for the trade-based techniques described. Jurisdiction list reflects the main country sources/case examples cited; the non-public annex referenced in the report (investigative techniques and recommendations) was not available for extraction. Human reviewer should confirm whether the six emergent proposals should be split further or consolidated given their differing analytic maturity."
+}

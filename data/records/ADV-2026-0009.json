@@ -1,0 +1,438 @@
+{
+  "schema_version": "1.3.0",
+  "advisory_id": "ADV-2026-0009",
+  "source": {
+    "source_type": "fincen",
+    "publisher": "FinCEN",
+    "title": "Advisory on Kleptocracy and Foreign Public Corruption (FIN-2022-A001)",
+    "published_on": "2022-04-14",
+    "published_on_precision": "day",
+    "url": null,
+    "document_sha256": "3e93619028f029dac2bc650049eac49a2b3550b6890be74ece90f52f9ddbd464",
+    "page_count": 13
+  },
+  "summary": "FinCEN advisory urging financial institutions to detect proceeds of foreign public corruption and kleptocracy, with particular focus on Russia given the nexus of corruption, sanctions evasion and the invasion of Ukraine. It describes bribery/extortion of foreign officials, misappropriation/embezzlement of public assets, and laundering of illicit proceeds through shell companies, offshore accounts, and purchases of U.S. real estate, luxury goods and other high-value assets. It gives case examples (TENEX/TLI, Odebrecht/Braskem, Belarus, El Salvador, Peskov family) and lists financial red flag indicators, plus SAR/BSA filing guidance including the key term 'CORRUPTION FIN-2022-A001'.",
+  "jurisdictions": [
+    "US",
+    "RU",
+    "BY",
+    "SV",
+    "BR",
+    "AO",
+    "AR",
+    "CO",
+    "DO",
+    "EC",
+    "GT",
+    "MX",
+    "MZ",
+    "PA",
+    "PE",
+    "VE",
+    "LV",
+    "CY",
+    "CH"
+  ],
+  "typologies": [
+    {
+      "family": "corruption",
+      "typology_id": null,
+      "label": "Bribery of Foreign Public Officials",
+      "emergent": true,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 4,
+          "printed_folio": "4",
+          "paragraph": null,
+          "quote": "Bribery schemes often involve payments to foreign government officials by persons and entities to obtain or retain business, or for other benefits."
+        },
+        {
+          "page": 4,
+          "printed_folio": "4",
+          "paragraph": null,
+          "quote": "the defendant, Mark Lambert, participated in a scheme to bribe Vadim Mikerin, a Russian official at JSC Techsnabexport (TENEX), a subsidiary of Russia’s State Atomic Energy Corporation"
+        }
+      ]
+    },
+    {
+      "family": "corruption",
+      "typology_id": null,
+      "label": "Misappropriation or Embezzlement of Public Assets",
+      "emergent": true,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 5,
+          "printed_folio": "5",
+          "paragraph": null,
+          "quote": "Misappropriation or embezzlement of public assets broadly encompass the theft, diversion, or misuse of public funds or resources for personal benefit or enrichment."
+        },
+        {
+          "page": 6,
+          "printed_folio": "6",
+          "paragraph": null,
+          "quote": "Lukashenka, who was originally sanctioned in 2006, has rewarded businessmen close to him with benefits and privileges in exchange for kickbacks to himself and his regime."
+        }
+      ]
+    },
+    {
+      "family": "network",
+      "typology_id": "PAT007",
+      "label": "Shell Company Network",
+      "emergent": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 6,
+          "printed_folio": "6",
+          "paragraph": null,
+          "quote": "Corrupt actors often use shell companies to obscure the ownership and origin of illicit funds."
+        },
+        {
+          "page": 7,
+          "printed_folio": "7",
+          "paragraph": null,
+          "quote": "these shell companies and offshore accounts are frequently established in foreign jurisdictions whose corporate formation regimes and financial sector offer limited transparency to law enforcement, regulators, or financial institutions."
+        }
+      ]
+    },
+    {
+      "family": "corruption",
+      "typology_id": null,
+      "label": "Purchase of Real Estate, Luxury Goods and High-Value Assets to Launder Corruption Proceeds",
+      "emergent": true,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 7,
+          "printed_folio": "7",
+          "paragraph": null,
+          "quote": "Corrupt officials and others involved in bribery and other forms of corruption often purchase various U.S. assets, such as luxury real estate and hotels, private jets, artwork, and motion picture companies, to launder the proceeds of their corruption."
+        },
+        {
+          "page": 8,
+          "printed_folio": "8",
+          "paragraph": null,
+          "quote": "Peskov’s family is reported to own real estate in Russia and elsewhere valued at more than $10 million, and to have access to a number of luxury vehicles, including private aircrafts and yachts"
+        }
+      ]
+    }
+  ],
+  "actors": [
+    {
+      "name": "Vladimir Putin",
+      "actor_type": "person",
+      "aliases": [
+        "President Putin",
+        "Russian President Vladimir Putin"
+      ],
+      "jurisdiction": "RU",
+      "role": "President of Russia; kleptocratic regime leader enabling oligarch enrichment",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 2,
+          "printed_folio": "2",
+          "paragraph": null,
+          "quote": "Russia’s further invasion of Ukraine, for example, highlights foreign public corruption perpetrated by kleptocratic regimes like that of Russian President Vladimir Putin."
+        }
+      ]
+    },
+    {
+      "name": "Russian oligarchs and elites",
+      "actor_type": "category",
+      "aliases": [
+        "Russia's elites and oligarchs"
+      ],
+      "jurisdiction": "RU",
+      "role": "Control majority of Russia's economic interests; finance off-budget malign influence and armed intervention projects",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 2,
+          "printed_folio": "2",
+          "paragraph": null,
+          "quote": "Russia’s actions in Ukraine are supported and enabled by Russia’s elites and oligarchs who control a majority of Russia’s economic interests."
+        },
+        {
+          "page": 2,
+          "printed_folio": "2",
+          "paragraph": null,
+          "quote": "Oligarchs are believed to be directly financing off-budget projects that include political malign influence operations and armed interventions abroad."
+        }
+      ]
+    },
+    {
+      "name": "Mark Lambert",
+      "actor_type": "person",
+      "aliases": [],
+      "jurisdiction": null,
+      "role": "Former president of Transportation Logistics Inc (TLI); convicted of bribing a Russian TENEX official",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 4,
+          "printed_folio": "4",
+          "paragraph": null,
+          "quote": "the defendant, Mark Lambert, participated in a scheme to bribe Vadim Mikerin, a Russian official at JSC Techsnabexport (TENEX)"
+        }
+      ]
+    },
+    {
+      "name": "Vadim Mikerin",
+      "actor_type": "person",
+      "aliases": [],
+      "jurisdiction": "RU",
+      "role": "Russian official at TENEX who solicited and received bribes from TLI",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 5,
+          "printed_folio": "5",
+          "paragraph": null,
+          "quote": "Lambert conspired with others at TLI to pay bribes to Mikerin through offshore bank accounts associated with shell companies, at Mikerin’s direction."
+        }
+      ]
+    },
+    {
+      "name": "JSC Techsnabexport (TENEX)",
+      "actor_type": "organisation",
+      "aliases": [
+        "TENEX"
+      ],
+      "jurisdiction": "RU",
+      "role": "Subsidiary of Russia's State Atomic Energy Corporation; sole supplier/exporter of Russian uranium, used as bribery vehicle",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 4,
+          "printed_folio": "4",
+          "paragraph": null,
+          "quote": "a subsidiary of Russia’s State Atomic Energy Corporation and the sole supplier and exporter of Russian Federation uranium and uranium enrichment services to nuclear power companies worldwide, in order to secure contracts with TENEX"
+        }
+      ]
+    },
+    {
+      "name": "Odebrecht S.A.",
+      "actor_type": "organisation",
+      "aliases": [],
+      "jurisdiction": "BR",
+      "role": "Brazilian construction conglomerate that paid $788 million in bribes across 12 countries",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 5,
+          "printed_folio": "5",
+          "paragraph": null,
+          "quote": "Odebrecht S.A., a global construction conglomerate based in Brazil, admitted in its guilty plea agreement with DOJ that it paid $788 million in bribes to or for the benefit of government officials in 12 countries"
+        }
+      ]
+    },
+    {
+      "name": "Braskem S.A.",
+      "actor_type": "organisation",
+      "aliases": [],
+      "jurisdiction": "BR",
+      "role": "Brazilian petrochemical company that funded bribes to politicians and a Petrobras official via Odebrecht",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 5,
+          "printed_folio": "5",
+          "paragraph": null,
+          "quote": "Braskem S.A., a Brazilian petrochemical company, also admitted to paying approximately $250 million to Odebrecht to use to pay bribes to politicians and political parties in Brazil"
+        }
+      ]
+    },
+    {
+      "name": "Alyaksandr Ryhorovich Lukashenka",
+      "actor_type": "person",
+      "aliases": [
+        "Lukashenka"
+      ],
+      "jurisdiction": "BY",
+      "role": "Head of the corrupt government of Belarus; sanctioned by OFAC",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 6,
+          "printed_folio": "6",
+          "paragraph": null,
+          "quote": "The U.S. Department of the Treasury’s Office of Foreign Assets Control (OFAC) recently sanctioned Alyaksandr Ryhorovich Lukashenka, the head of the corrupt government in Belarus whose patronage network benefits his inner circle and regime."
+        }
+      ]
+    },
+    {
+      "name": "Aliaksei Aleksin",
+      "actor_type": "person",
+      "aliases": [],
+      "jurisdiction": "BY",
+      "role": "U.S.-designated businessman granted a tobacco-smuggling monopoly by Lukashenka in exchange for kickbacks",
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 6,
+          "printed_folio": "6",
+          "paragraph": null,
+          "quote": "Lukashenka enacted strategic policies that facilitated tobacco smuggling by U.S. designated Aliaksei Aleksin, granting Aleksin a virtual monopoly over the Belarusian tobacco industry."
+        }
+      ]
+    },
+    {
+      "name": "Martha Carolina Recinos De Bernal",
+      "actor_type": "person",
+      "aliases": [
+        "Recinos"
+      ],
+      "jurisdiction": "SV",
+      "role": "Head of a multi-ministry corruption scheme in El Salvador; designated by OFAC",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 6,
+          "printed_folio": "6",
+          "paragraph": null,
+          "quote": "On December 9, 2021, OFAC designated Martha Carolina Recinos De Bernal. Recinos was the head of a multiple-ministry, multi-million-dollar corruption scheme in El Salvador"
+        }
+      ]
+    },
+    {
+      "name": "Dmitriy Sergeevich Peskov",
+      "actor_type": "person",
+      "aliases": [],
+      "jurisdiction": "RU",
+      "role": "Close ally and spokesperson of President Putin; family sanctioned by OFAC for holding high-value assets",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 8,
+          "printed_folio": "8",
+          "paragraph": null,
+          "quote": "OFAC recently sanctioned the family of Dmitriy Sergeevich Peskov, a close ally of President Putin and lead propagandist and spokesperson for the Russian Federation."
+        }
+      ]
+    }
+  ],
+  "indicators": [
+    {
+      "indicator_type": "network",
+      "description": "Long-term government contracts consistently awarded through an opaque selection process to the same legal entity or entities sharing similar beneficial ownership structures.",
+      "detectable_in_transaction_data": true,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 8,
+          "printed_folio": "8",
+          "paragraph": null,
+          "quote": "Transactions involving long-term gov ernment contracts consistently awarded, through an opaque selection process, to the same legal entity or entities that share similar beneficial ownership structures."
+        }
+      ]
+    },
+    {
+      "indicator_type": "geographic",
+      "description": "Services provided to state-owned companies or public institutions by companies registered in high-risk jurisdictions.",
+      "detectable_in_transaction_data": true,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 8,
+          "printed_folio": "8",
+          "paragraph": null,
+          "quote": "Transactions involving services provided to state-owned compani es or public institutions by companies registered in high-risk jurisdictions."
+        }
+      ]
+    },
+    {
+      "indicator_type": "behavioural",
+      "description": "Official embassy or foreign government business conducted through personal accounts rather than official accounts.",
+      "detectable_in_transaction_data": true,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 8,
+          "printed_folio": "8",
+          "paragraph": null,
+          "quote": "Transactions involving official embassy or foreign gov ernment business conducted through personal accounts."
+        }
+      ]
+    },
+    {
+      "indicator_type": "behavioural",
+      "description": "Public officials' transactions in high-value assets such as real estate or luxury goods that are not commensurate with their reported source of wealth or normal pattern of activity.",
+      "detectable_in_transaction_data": true,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 8,
+          "printed_folio": "8",
+          "paragraph": null,
+          "quote": "Transactions involving public officials related to high-v alue assets, such as real estate or other luxury goods, that are not commensurate with the reported source of wealth for the public official or that fall outside that individual’s normal pattern of activity or lifestyle."
+        }
+      ]
+    },
+    {
+      "indicator_type": "geographic",
+      "description": "Public officials' funds moving to and from countries with which the officials do not appear to have any ties.",
+      "detectable_in_transaction_data": true,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 8,
+          "printed_folio": "8",
+          "paragraph": null,
+          "quote": "Transactions involving public officials and funds moving to and f rom countries with which the public officials do not appear to have ties."
+        }
+      ]
+    },
+    {
+      "indicator_type": "network",
+      "description": "Use of third parties to shield the identity of foreign public officials seeking to hide the origin or ownership of funds, for example in real estate purchases.",
+      "detectable_in_transaction_data": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 9,
+          "printed_folio": "9",
+          "paragraph": null,
+          "quote": "Use of third parties to shield the identity of foreign public o fficials seeking to hide the origin or ownership of funds, for example, to hide the purchase or sale of real estate."
+        }
+      ]
+    },
+    {
+      "indicator_type": "documentary",
+      "description": "Invoices or other documents corroborating government contract transactions that show charges substantially above market rates, or overly simple documentation lacking standard details.",
+      "detectable_in_transaction_data": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 9,
+          "printed_folio": "9",
+          "paragraph": null,
+          "quote": "Documents corroborating transactions involving gov ernment contracts (e.g., invoices) that include charges at substantially higher prices than market rates or that include overly simple documentation or lack traditional details"
+        }
+      ]
+    },
+    {
+      "indicator_type": "documentary",
+      "description": "Use of fictitious email addresses and false invoices to justify payments, particularly for international transactions.",
+      "detectable_in_transaction_data": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 9,
+          "printed_folio": "9",
+          "paragraph": null,
+          "quote": "Transactions involving fictitious email addresses and false invo ices to justify payments, particularly for international transactions."
+        }
+      ]
+    }
+  ],
+  "suggested_desks": [
+    "sanctions_desk",
+    "fraud_desk",
+    "fiu_liaison"
+  ],
+  "overall_confidence": "high",
+  "extraction_notes": "The Knowledge Centre library has no 'corruption' family typologies at all (list_typologies(family='corruption') returns empty, and searches for 'bribery', 'corruption', 'embezzlement', 'kleptocracy', 'misappropriation of public funds', and 'PEP'-related phrases all returned no match above the 0.25 floor). Three of the four typologies here are therefore emergent by necessity, not by weak evidence -- the document's own case support for them is strong. Only the shell-company/offshore-account laundering method matched an existing typology (PAT007 Shell Company Network, network family), and that match is a partial fit: PAT007's doctrine is about detecting shell-company network structural signatures, whereas the advisory's framing is corruption-proceeds laundering via such structures -- confidence set to medium for that link. Jurisdictions list includes all countries named as bribe destinations/shell-company domiciles in the Odebrecht (p.5) and TLI/TENEX (p.5) case studies even though the advisory's main narrative focus is Russia, Belarus and El Salvador; a reviewer may want to split 'named case jurisdictions' from 'primary threat jurisdictions' in a future schema revision. Indicator detectable_in_transaction_data judgments assume a monitoring stack without beneficial-ownership or document-image enrichment; systems with UBO/OCR enrichment could detect more of the documentary/network indicators than marked here."
+}

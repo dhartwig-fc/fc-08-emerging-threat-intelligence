@@ -1,0 +1,386 @@
+{
+  "schema_version": "1.3.0",
+  "advisory_id": "ADV-2026-0015",
+  "source": {
+    "source_type": "nca",
+    "publisher": "National Crime Agency (NECC) / HM Treasury OFSI / JMLIT",
+    "title": "Financial Sanctions Evasion Typologies: Russian Elites and Enablers (Red Alert 0697-NECC)",
+    "published_on": "2022-07-01",
+    "published_on_precision": "month",
+    "url": null,
+    "document_sha256": "bf6b4afaa6dcb2327d8547f01ff0ff78d4e59e24a782d7f1a25dfdd963585ad6",
+    "page_count": 15
+  },
+  "summary": "A UK NECC/OFSI/JMLIT Red Alert (July 2022, ref 0697-NECC) warns that Russian designated persons (DPs) and their London-based professional enablers are evading UK financial sanctions by transferring shareholdings to trusted proxies, divesting stakes below the 50% control threshold, and using nominee directors, trust structures and complex offshore corporate arrangements to disguise continued control of frozen assets. It notes exploitation of differing designation timescales across the UK, US and EU, use of secrecy jurisdictions, alternative payment channels including crypto-assets to bypass SWIFT restrictions, and pooled accounts and off-the-shelf shell corporations used by TCSPs and other enablers as throughputs. It lists 34 detection indicators across frozen-asset transfers, enabler activity and suspicious payments, and sets out reporting routes to OFSI and NCA SARs, plus responses from the NCA's Combating Kleptocracy Cell and professional body supervisors.",
+  "jurisdictions": [
+    "GB",
+    "RU",
+    "AE",
+    "TR",
+    "CN",
+    "BR",
+    "IN",
+    "CH",
+    "CY",
+    "VG"
+  ],
+  "typologies": [
+    {
+      "family": "sanctions",
+      "typology_id": "SAN001",
+      "label": "Ownership Evasion",
+      "emergent": false,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 3,
+          "printed_folio": "3",
+          "paragraph": null,
+          "quote": "Transfer assets such as shareholdings in holding companies to trusted proxies such as relatives or employees;"
+        },
+        {
+          "page": 10,
+          "printed_folio": "10",
+          "paragraph": null,
+          "quote": "Changes to ownership of a corporate holding to reduce ownership stakes to below the 50% threshold, shortly before or after sanctions designations."
+        }
+      ]
+    },
+    {
+      "family": "sanctions",
+      "typology_id": "SAN009",
+      "label": "Complex Ownership Structures",
+      "emergent": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 10,
+          "printed_folio": "10",
+          "paragraph": null,
+          "quote": "Use of trust arrangements or complex corporate structures involving offshore companies, with circumstances of transfers calling into question whether the original owner retains indirect control or otherwise could retain a benefit from the assets transferred."
+        }
+      ]
+    },
+    {
+      "family": "sanctions",
+      "typology_id": "CMI010",
+      "label": "Cryptocurrency Evasion",
+      "emergent": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 4,
+          "printed_folio": "4",
+          "paragraph": null,
+          "quote": "Russian money launderers have increasingly been observed in UK intelligence and operational activity providing cash to crypto-asset services, with the ability to move significant volumes of funds."
+        }
+      ]
+    },
+    {
+      "family": "tbml",
+      "typology_id": "TBML010",
+      "label": "Sanctions Evasion Through Trade",
+      "emergent": false,
+      "confidence": "low",
+      "citations": [
+        {
+          "page": 12,
+          "printed_folio": "12",
+          "paragraph": null,
+          "quote": "Circumvention attempts through Open Account Trade-Based Money Laundering (TBML) typology, such as increases in third party open account payments."
+        }
+      ]
+    },
+    {
+      "family": "network",
+      "typology_id": "PAT007",
+      "label": "Shell Company Network",
+      "emergent": false,
+      "confidence": "low",
+      "citations": [
+        {
+          "page": 11,
+          "printed_folio": "11",
+          "paragraph": null,
+          "quote": "A large number of off-the-shelf corporations with no trading record with nominee ownership used as throughputs."
+        },
+        {
+          "page": 11,
+          "printed_folio": "11",
+          "paragraph": null,
+          "quote": "Numerous transfers of shares from sanctioned entities to non-sanctioned entities involving corporations incorporated by the same people and company (often with a registered office at the same physical address)."
+        }
+      ]
+    }
+  ],
+  "actors": [
+    {
+      "name": "National Economic Crime Centre (NECC)",
+      "actor_type": "organisation",
+      "aliases": [
+        "NECC"
+      ],
+      "jurisdiction": "GB",
+      "role": "Issuing multi-agency unit within the NCA",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 1,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "This Red Alert is issued by the National Economic Crime Centre  (NECC), a multi -agency unit in the  \nNational Crime Agency (NCA )"
+        }
+      ]
+    },
+    {
+      "name": "HM Treasury Office of Financial Sanctions Implementation (OFSI)",
+      "actor_type": "organisation",
+      "aliases": [
+        "OFSI",
+        "HMT OFSI"
+      ],
+      "jurisdiction": "GB",
+      "role": "Competent authority for financial sanctions implementation; joint issuer",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 1,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "HM Treasury’s Office of Financial Sanctions Implementation (OFSI) working in conjunction with law enforcement and financial sector partners as part of the \nJoint Money Laundering Intelligence Taskforce (JMLIT)."
+        }
+      ]
+    },
+    {
+      "name": "Joint Money Laundering Intelligence Taskforce (JMLIT)",
+      "actor_type": "organisation",
+      "aliases": [
+        "JMLIT",
+        "JMLIT+"
+      ],
+      "jurisdiction": "GB",
+      "role": "Public-private taskforce managed in the NECC that issued the alert",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 2,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "This alert is issued by the JMLIT+ Sanctions Facilitators Cell, with representation from law \nenforcement, private industry, financial crime regulators and OFSI."
+        }
+      ]
+    },
+    {
+      "name": "Combating Kleptocracy Cell (CKC)",
+      "actor_type": "organisation",
+      "aliases": [
+        "CKC"
+      ],
+      "jurisdiction": "GB",
+      "role": "NCA unit targeting corrupt elites and their enablers",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 6,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "The NCA has surged officers into the Combating Kleptocracy Cell (CKC) announced by the Prime \nMinister in February."
+        }
+      ]
+    },
+    {
+      "name": "Designated Persons (Russian elites/oligarchs)",
+      "actor_type": "category",
+      "aliases": [
+        "DPs",
+        "Russian elites",
+        "Russian UHNWI/PEP"
+      ],
+      "jurisdiction": "RU",
+      "role": "Subjects of UK/US/EU financial sanctions attempting to evade asset freezes",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 3,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "some Designated \nPersons (DPs) are using a range of techniques in order to evade sanctions impacting on their \npersonal and commercial holdings."
+        }
+      ]
+    },
+    {
+      "name": "Enablers (legal, financial and TCSP professionals)",
+      "actor_type": "category",
+      "aliases": [
+        "Enablers",
+        "professional enablers"
+      ],
+      "jurisdiction": "GB",
+      "role": "UK-based professionals facilitating sanctions evasion and associated money laundering on behalf of DPs",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 3,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "Enablers are individuals or businesses facilitating \nsanctions evasion and associated money laundering."
+        }
+      ]
+    }
+  ],
+  "indicators": [
+    {
+      "indicator_type": "documentary",
+      "description": "DPs communicate changes to beneficial ownership of corporate structures (PICs/JSCs) to non-Russian or dual-national family members, associates, or nominee directors/shareholders shortly before or after sanctions take effect, with the DP likely retaining indirect control.",
+      "detectable_in_transaction_data": false,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 10,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "DPs communicating changes to the beneficial ownership of their corporate structures such as \nPrivate Investment Companies (PICs) and Joint Stock Companies (JSC) to non-Russian or \ndual national family members or associates, or nominee directors/shareholders, prior to, or \nshortly after sanctions taking effect."
+        }
+      ]
+    },
+    {
+      "indicator_type": "documentary",
+      "description": "Ownership of a corporate holding is reduced to just below the 50% control threshold shortly before or after a sanctions designation, potentially while undue influence is retained through associates or joint arrangements.",
+      "detectable_in_transaction_data": false,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 10,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "Changes to ownership of a corporate holding to reduce ownership stakes to below the 50% \nthreshold, shortly before or after sanctions designations."
+        }
+      ]
+    },
+    {
+      "indicator_type": "documentary",
+      "description": "Use of trust arrangements or complex offshore corporate structures, including circular ownership, shell companies and trust structures involving relatives or associates as PSC, trustee, beneficiary, settlor or protector, that call into question whether the DP retains indirect control.",
+      "detectable_in_transaction_data": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 10,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "Complex ownership structures could include circular ownership structures, shell companies and trust \nstructures, with varying combinations of relatives or other close business associates of DPs \noperating as PSC, trustee, beneficiary, settlor, protector or other connected person."
+        }
+      ]
+    },
+    {
+      "indicator_type": "behavioural",
+      "description": "Multiple beneficial ownership changes occur in a pattern synchronised with new sanctions designations, suggesting pre-emptive or reactive restructuring.",
+      "detectable_in_transaction_data": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 10,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "Multiple beneficial ownership changes synchronised with new sanctions designations."
+        }
+      ]
+    },
+    {
+      "indicator_type": "network",
+      "description": "Trust and Company Service Providers (TCSPs) offer nominee and trustee services to DPs and their close family members or business associates.",
+      "detectable_in_transaction_data": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 11,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "Trust and Company Service Providers (TCSPs) offering nominees and trustee services to DPs and \nclose family members or business associates."
+        }
+      ]
+    },
+    {
+      "indicator_type": "transactional",
+      "description": "Pooled accounts, where a bank sees only the name of the enabler and not the underlying client, are used to transfer funds to entities associated in open source with DPs.",
+      "detectable_in_transaction_data": true,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 11,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "Pooled accounts, in which banks see only the name of the enabler and not the client , \ntransferring funds to entities associated in open source with DPs."
+        }
+      ]
+    },
+    {
+      "indicator_type": "network",
+      "description": "Large numbers of off-the-shelf corporations with no trading record and nominee ownership are used as throughputs, and numerous share transfers occur between corporations incorporated by the same people, often sharing a registered address.",
+      "detectable_in_transaction_data": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 11,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "A large number of off-the-shelf corporations with no trading record with nominee ownership \nused as throughputs."
+        },
+        {
+          "page": 11,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "Numerous transfers of shares from sanctioned entities to non-sanctioned entities involving \ncorporations incorporated by the same people and company (often with a registered office at \nthe same physical address)."
+        }
+      ]
+    },
+    {
+      "indicator_type": "transactional",
+      "description": "DPs and Russian money launderers use crypto-asset services, including converting cash to crypto at scale, to move funds and circumvent reduced access to the SWIFT payment system.",
+      "detectable_in_transaction_data": true,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 4,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "Russian money launderers have increasingly been observed in UK intelligence and \noperational activity providing cash to crypto-asset services, with the ability to move significant \nvolumes of funds."
+        }
+      ]
+    },
+    {
+      "indicator_type": "transactional",
+      "description": "Payments via fintechs with a Russian investor nexus show customer transactions initiated from or sent to non-trusted or high-risk IP addresses, including Russia, Belarus, FATF-deficient or comprehensively sanctioned jurisdictions.",
+      "detectable_in_transaction_data": true,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 12,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "Payments via a Fintech with Russian investor nexus including customer’s transactions that \nare initiated from or sent to IP addresses that have non-trusted sources, or are located in \nRussia, Belarus, jurisdictions with FATF-identified AML deficiencies or comprehensively \nsanctioned jurisdictions."
+        }
+      ]
+    },
+    {
+      "indicator_type": "transactional",
+      "description": "Circumvention attempts via open-account trade-based money laundering, evidenced by increases in third-party open-account payments.",
+      "detectable_in_transaction_data": true,
+      "confidence": "low",
+      "citations": [
+        {
+          "page": 12,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "Circumvention attempts through Open Account Trade-Based Money Laundering (TBML) \ntypology, such as increases in third party open account payments."
+        }
+      ]
+    }
+  ],
+  "suggested_desks": [
+    "sanctions_desk",
+    "correspondent_desk",
+    "fiu_liaison"
+  ],
+  "overall_confidence": "high",
+  "extraction_notes": "Document is a UK NCA/OFSI Red Alert combining narrative context (pp.3-9) with a numbered indicator list (34 items, pp.10-12); typology confidence reflects how developed each theme is, not just presence. SAN001 (Ownership Evasion) is the dominant, well-developed theme (high confidence). SAN009, CMI010, TBML010 and PAT007 rest on fewer, more narrowly stated passages and are scored medium/low accordingly. The document also references transfers to \"the former Soviet Union (excluding the Baltic States and Ukraine)\" as a destination for evasion, which could not be mapped to specific ISO codes and is omitted from the jurisdictions list. Enablers and DPs are recorded as category-type actors per instruction, since the document describes classes of actors rather than named individuals/organisations. No named individual or corporate actor is identified in the text supplied."
+}

@@ -1,8 +1,14 @@
+# data/records/ and data/records_merged/ are DELIBERATELY TRACKED since 2026-09-13.
+# They are the evidence for every published figure -- F1 0.510 and 0.665, the
+# per-document table, the reviewer's acceptance bands, score_report.json -- and
+# extraction is NOT deterministic, so re-running does not recover them. Untracked,
+# those numbers were reproducible on one machine and nowhere else.
+# THE TRADE: a new extraction run now dirties the tree. That is deliberate. These
+# are tracked evidence, not disposable build output, and a dirty status after a run
+# is the correct signal that the evidence has moved.
 data/advisories/
-data/records/
 data/repeats/
 data/reviewed/
-data/records_merged/
 data/records_extraction_only/
 data/proposals.jsonl
 .venv/

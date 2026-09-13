@@ -1,0 +1,547 @@
+{
+  "schema_version": "1.4.0",
+  "advisory_id": "ADV-2026-0006",
+  "source": {
+    "source_type": "fatf",
+    "publisher": "FATF/OECD",
+    "title": "Money Laundering from Environmental Crime",
+    "published_on": "2021-07-01",
+    "published_on_precision": "month",
+    "url": "https://www.fatf-gafi.org/publications/methodsandtrends/documents/money-laundering-environmental-crime.html",
+    "document_sha256": "7524aafac9293588ba9b60e46e9fd2bcdc8a5d5a9aed1e3bfdbf1219ca52ed39",
+    "page_count": 70
+  },
+  "summary": "This FATF report examines how criminals launder proceeds of environmental crime -- illegal logging/land clearing, illegal mining, and waste trafficking -- estimated at USD 110-281 billion annually. It finds heavy reliance on front and shell companies to co-mingle illicit and legitimate proceeds early in supply chains, trade-based fraud (false invoicing, false descriptions of goods, over/under valuation) to move money across borders, cash-intensive sectors and MVTS/hawala to pay rural labour, and offshore corporate structures with nominee/opaque beneficial owners, often enabled by corruption of officials issuing concessions and licences. It also notes convergence with tax crime, smuggling, human trafficking and, in some cases, terrorist/insurgent financing, and sets out case studies, risk indicators and priority actions for AML authorities and the private sector.",
+  "jurisdictions": [
+    "US",
+    "CL",
+    "CD",
+    "CH",
+    "GN",
+    "MG",
+    "IT",
+    "BR",
+    "ZA",
+    "PE",
+    "PG",
+    "NL",
+    "SG",
+    "CN",
+    "NO"
+  ],
+  "typologies": [
+    {
+      "family": "other",
+      "typology_id": null,
+      "label": "Money Laundering from Environmental Crime",
+      "emergent": true,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 5,
+          "printed_folio": "3",
+          "paragraph": null,
+          "quote": "This FATF report shows the significant role of trade-based fraud and misuse of shell and front companies to launder gains from illegal logging, illegal mining, and waste trafficking."
+        },
+        {
+          "page": 13,
+          "printed_folio": "11",
+          "paragraph": null,
+          "quote": "Some criminals specialise in one or more environmental crimes, and rely on specialized networks to move the products and facilitate the financial flows."
+        }
+      ]
+    },
+    {
+      "family": "tbml",
+      "typology_id": "TBML009",
+      "label": "Shell Company Trading",
+      "emergent": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 29,
+          "printed_folio": "27",
+          "paragraph": null,
+          "quote": "criminals used front companies to co-mingle gains from illegal mining, logging and waste trafficking into their legitimate business accounts"
+        },
+        {
+          "page": 30,
+          "printed_folio": "28",
+          "paragraph": null,
+          "quote": "criminals manipulated the prices of the domestic vanilla trade to help integrate the illicit proceeds from rosewood trafficking"
+        }
+      ]
+    },
+    {
+      "family": "network",
+      "typology_id": "PAT007",
+      "label": "Shell Company Network",
+      "emergent": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 30,
+          "printed_folio": "28",
+          "paragraph": null,
+          "quote": "They relied on shell companies located overseas to move funds back and forth under the guise of invoices for processing their waste."
+        },
+        {
+          "page": 24,
+          "printed_folio": "22",
+          "paragraph": null,
+          "quote": "the funds were obscured through a web of domestic shell companies that had been established by Designated Non-Financial Business and Professions (DNFBPs)... the named individual on the registry would be a nominee with only a loose connection to the ultimate underlying owner"
+        }
+      ]
+    },
+    {
+      "family": "tbml",
+      "typology_id": "TBML005",
+      "label": "False Description Of Goods",
+      "emergent": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 31,
+          "printed_folio": "29",
+          "paragraph": null,
+          "quote": "For environmental crimes specifically, this could include mislabelling of hazardous waste or protected wood to conceal their real value."
+        },
+        {
+          "page": 32,
+          "printed_folio": "30",
+          "paragraph": null,
+          "quote": "Shipping documents were falsified to state that the cargo consisted of goods and raw materials, as opposed to waste."
+        }
+      ]
+    },
+    {
+      "family": "tbml",
+      "typology_id": "TBML002U",
+      "label": "Under Invoicing",
+      "emergent": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 60,
+          "printed_folio": "58",
+          "paragraph": null,
+          "quote": "it is common for timber, processed lumber, or gold, to be exported at below market prices, change ownership and Bill of Lading en route, often in a customs free trade zone, and is imported at recipient countries at higher declared values"
+        }
+      ]
+    },
+    {
+      "family": "correspondent_banking",
+      "typology_id": "BA007",
+      "label": "Cash Intensive Activity",
+      "emergent": false,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 16,
+          "printed_folio": "14",
+          "paragraph": null,
+          "quote": "criminals use the mining sector to both generate criminal proceeds through illegal mining, and to launder proceeds from other crimes using the cash-intensive nature of the industry"
+        },
+        {
+          "page": 30,
+          "printed_folio": "28",
+          "paragraph": null,
+          "quote": "In 2014, individuals would bulk buy vanilla to drive the prices up to conceal co-mingling and integration of criminal gains, presented as legitimate earnings from vanilla."
+        },
+        {
+          "page": 57,
+          "printed_folio": "55",
+          "paragraph": null,
+          "quote": "Large cash withdrawals from financial institutions operating in rural areas that may be in proximity to illegal mining or logging areas."
+        }
+      ]
+    },
+    {
+      "family": "tbml",
+      "typology_id": "TBML008",
+      "label": "Third Party Payment Abuse",
+      "emergent": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 32,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "This discrepancy initiated a closer inspection of the miners and linked the group to a previous investigation had uncovered that some of the miners involved were paid by importers from South-East Asia through a scheme controlled by a network of underground exchange market dealers."
+        },
+        {
+          "page": 22,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "The payment would then be made either by the intermediary to the smuggler, or would come later once the intermediary got the gold to a refiner in the Middle East."
+        },
+        {
+          "page": 33,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "This includes integrating proceeds through third party wire transfers under the guise of payments for goods and services, but also investments and sponsorship."
+        }
+      ],
+      "added_by": "reviewer",
+      "review_justification": "Found in Box 3.3 Brazil emeralds/hairdressers case (p.32); DRC/Rwanda gold supply chain narrative (p.22); chapter highlight (p.33). TBML008 doctrine: 'Third Party Payment Abuse settles a trade through a payer who is not the trade counterparty \u2014 an unrelated third party, split settlement, or a payment that does not match the trade. The payment breaks the link between the trade and the funds.' In the Brazil case, hairdressers were invoiced by the illegal miners 'for importing on their behalf' while the actual miners were compensated separately through an underground exchange-market network rather than directly by the Southeast Asian buyers of the emeralds -- the settlement chain deliberately does not match the underlying trade counterparties. The DRC gold example shows the same break: the intermediary, not the original smuggler/exporter, is the one who ultimately pays or is paid, consistent with the doctrine's 'payer who is not the trade counterparty' mechanism."
+    },
+    {
+      "family": "tbml",
+      "typology_id": "TBML001",
+      "label": "Over Invoicing",
+      "emergent": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 31,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "the trend to over or under declare goods being shipped and the use of false descriptions are common threads of both trade fraud and TBML activity"
+        },
+        {
+          "page": 58,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "It is common for timber, processed lumber, or gold, to be exported at below market prices, change ownership and Bill of Lading en route, often in a customs free trade zone, and is imported at recipient countries at higher declared values."
+        }
+      ],
+      "added_by": "reviewer",
+      "review_justification": "Found in Section 3.4 narrative (p.31) and Annex A 'Export & transfer pricing' indicators (p.58). TBML001 doctrine: 'the price of goods is intentionally inflated beyond their true market value.' The advisory names over-declaration explicitly as a technique distinct from the under-invoicing already claimed (TBML002U), and Annex A describes the specific mechanism of the same goods being re-declared at a higher value on the import leg after an under-valued export -- an intentional inflation of declared price beyond true market value on that leg of the transaction chain, matching TBML001's mechanism rather than the export-side under-declaration already captured."
+    },
+    {
+      "family": "network",
+      "typology_id": "PAT010",
+      "label": "Hidden Controller via Nominee Directors/Shareholders",
+      "emergent": false,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 19,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "These PEPs will often act as the local representatives for multinational mining ventures or as nominee directors of corporations."
+        },
+        {
+          "page": 22,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "These DNFBPs would identify a beneficial owner for the register, but the named individual on the registry would be a nominee with only a loose connection to the ultimate underlying owner."
+        },
+        {
+          "page": 47,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "The financial analysis facilitated the identification of the network and the nominees used to disguise the beneficial ownership of bank accounts and front companies as well as at least three more suspects based in Country B."
+        }
+      ],
+      "added_by": "reviewer",
+      "review_justification": "Found in General findings on PEPs and complex structures (p.19), South American shell-company example (p.22), and Box 4.10 forestry case (p.47). PAT010 doctrine: 'identifies individuals or entities exercising effective control over an organisation despite not appearing as the declared owner, director or controller,' with indicators including 'Nominee director structure' and 'Concealed ownership arrangement.' The advisory develops this mechanism across three independent findings -- PEPs sitting as nominee directors, DNFBP-appointed nominees with only a loose connection to the true owner on beneficial ownership registries, and a case where financial analysis specifically uncovered nominees used to disguise beneficial ownership of accounts and front companies. This is control exercised behind a declared nominee, the exact PAT010 mechanism, and is distinct from the already-claimed PAT007 (network of shell companies as a structure) since the emphasis here is on the concealed controller behind each nominee, not the company network itself."
+    },
+    {
+      "family": "correspondent_banking",
+      "typology_id": "BA008",
+      "label": "Layering via Nested Correspondent Activity",
+      "emergent": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 23,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "Nesting the activity within a correspondent banking relationship obscures the ultimate beneficial owner and decreases the risk of transactions associated with environmental crime being identified."
+        },
+        {
+          "page": 23,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "the exit of larger financial institutions and entry of smaller and/or regional institutions have the added benefit for illicit actors, of creating additional layers between the originator and the beneficiary."
+        }
+      ],
+      "added_by": "reviewer",
+      "review_justification": "Found in Section 2.4 discussion of regional financial institutions and de-risking (p.23). BA008 doctrine: layering 'pushed through a chain of transfers designed to sever the audit trail from their source... its only job is to put distance, opacity and jurisdictional friction between the seed account and wherever the funds end up,' evidenced by 'multiple transfer hops' and a 'trail that goes cold well before it reaches an identifiable beneficial owner.' The advisory describes exactly this mechanism in the correspondent-banking context: as large banks de-risk natural-resource clients, smaller/regional institutions step in and nesting within the correspondent relationship 'creates additional layers between originator and beneficiary' and 'obscures the ultimate beneficial owner' -- the same audit-trail-severing, opacity-adding function BA008 names."
+    },
+    {
+      "family": "other",
+      "typology_id": null,
+      "label": "Informal Value Transfer (Hawala) Networks for Environmental Crime Proceeds",
+      "emergent": true,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 22,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "Where there is onwared smuggling to Asia, criminals often rely on informal remittance networks such as hawalas, in an effort to avoid the scrutiny of the formal financial sector."
+        },
+        {
+          "page": 31,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "cases show the important role of underground money value transfer services (MVTS) to facilitate laundering from environmental crimes, and particularly illegal mining. These trends are often regionally specific and reflect local informal transfer systems (e.g., \"hawala\")."
+        }
+      ],
+      "added_by": "reviewer",
+      "review_justification": "Found in DRC gold smuggling route narrative (p.22) and Section 3.5 chapter finding on MVTS (p.31). No existing Knowledge Centre typology matches this mechanism (best search score 0.36, against Under Invoicing, on vocabulary overlap only). The advisory develops a distinct, recurring technique: illicit gold proceeds moved onward through unlicensed hawala-style networks specifically 'to avoid the scrutiny of the formal financial sector,' confirmed as a cross-cutting finding for illegal mining laundering generally. This is a movement channel outside formal banking rails, mechanically distinct from the already-claimed cash-intensive-business front (BA007), and merits a standalone emergent entry for Knowledge Centre review."
+    }
+  ],
+  "actors": [
+    {
+      "name": "FATF",
+      "actor_type": "organisation",
+      "aliases": [
+        "Financial Action Task Force",
+        "FATF/OECD"
+      ],
+      "jurisdiction": "FR",
+      "role": "Author of the report; inter-governmental AML/CFT standard-setting body",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 1,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "FATF REPORT Money Laundering from Environmental Crime July 2021"
+        }
+      ]
+    },
+    {
+      "name": "Organized crime groups involved in environmental crime",
+      "actor_type": "category",
+      "aliases": [
+        "organized criminal groups"
+      ],
+      "jurisdiction": null,
+      "role": "Perpetrators of illegal logging, illegal mining and waste trafficking, and launderers of the resulting proceeds",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 5,
+          "printed_folio": "3",
+          "paragraph": null,
+          "quote": "Actors involved in these crimes vary from large organized crime groups to multinational companies and individuals."
+        }
+      ]
+    },
+    {
+      "name": "Dan Gertler",
+      "actor_type": "person",
+      "aliases": [],
+      "jurisdiction": null,
+      "role": "Middleman for DRC mining asset sales; used offshore companies to hide proceeds; US-sanctioned",
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 63,
+          "printed_folio": "61",
+          "paragraph": null,
+          "quote": "In 2018, US imposed sanctions on Dan Gertler, and 14 affiliated entities. Gertler has used his close friendship with DRC President Joseph Kabila to act as a middleman for mining asset sales in the DRC"
+        }
+      ]
+    },
+    {
+      "name": "Joseph Kabila",
+      "actor_type": "person",
+      "aliases": [],
+      "jurisdiction": "CD",
+      "role": "DRC President; PEP relationship exploited by Gertler to facilitate underpriced mining asset sales",
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 63,
+          "printed_folio": "61",
+          "paragraph": null,
+          "quote": "Gertler has used his close friendship with DRC President Joseph Kabila to act as a middleman for mining asset sales in the DRC"
+        }
+      ]
+    },
+    {
+      "name": "Fleurette Properties",
+      "actor_type": "organisation",
+      "aliases": [],
+      "jurisdiction": null,
+      "role": "Gertler-linked company accused of buying DRC mining assets below market value and reselling for profit via offshore structures",
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 63,
+          "printed_folio": "61",
+          "paragraph": null,
+          "quote": "Fleurette Properties, one of Gertler's companies, has been accused of buying mining assets below market value from Gecamines, and then selling them for a profit"
+        }
+      ]
+    },
+    {
+      "name": "Beny Steinmetz",
+      "actor_type": "person",
+      "aliases": [],
+      "jurisdiction": "IL",
+      "role": "Convicted of corruption relating to Guinea mining rights; moved proceeds through offshore companies and banking sector",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 64,
+          "printed_folio": "62",
+          "paragraph": null,
+          "quote": "Switzerland convicted Israeli billionaire Beny Steinmetz to five-year imprisonment... over corruption charges related to mining sector in Guinea."
+        }
+      ]
+    },
+    {
+      "name": "NTR Metals Miami",
+      "actor_type": "organisation",
+      "aliases": [
+        "NTR"
+      ],
+      "jurisdiction": "US",
+      "role": "US refinery that purchased gold sourced by a Chilean TCO and paid via wire transfer back to Chile; applied a commission model incentivising high-volume gold imports",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 34,
+          "printed_folio": "32",
+          "paragraph": null,
+          "quote": "delivered it to a U.S. refinery, NTR Metals Miami (NTR), which paid for the gold via wire transfer back to Chile. NTR Metals applied a commission model, creating an incentive for employees to import as much gold as possible as quickly as possible."
+        }
+      ]
+    },
+    {
+      "name": "Chilean gold-smuggling TCO (Operation Diez Condores)",
+      "actor_type": "organisation",
+      "aliases": [],
+      "jurisdiction": "CL",
+      "role": "Transnational criminal organisation that procured illicit gold and smuggled it via couriers to a US refinery, disrupted by joint FBI/Chilean police operation",
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 34,
+          "printed_folio": "32",
+          "paragraph": null,
+          "quote": "Operation Diez Condores... disrupted a Chilean TCO involved in smuggling illicit gold. The Chilean-based operation procured gold from various illicit sources and conspired with disreputable businesses to generate fraudulent paperwork about the gold's true origin and composition."
+        }
+      ]
+    }
+  ],
+  "indicators": [
+    {
+      "indicator_type": "network",
+      "description": "Use of front or shell companies (often related-party or nominee-controlled) to co-mingle proceeds of illegal logging, mining or waste trafficking with legitimate business accounts.",
+      "detectable_in_transaction_data": true,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 29,
+          "printed_folio": "27",
+          "paragraph": null,
+          "quote": "criminals used front companies to co-mingle gains from illegal mining, logging and waste trafficking into their legitimate business accounts"
+        }
+      ]
+    },
+    {
+      "indicator_type": "transactional",
+      "description": "Logging-sector companies with frequent transactions to offshore financial centres.",
+      "detectable_in_transaction_data": true,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 55,
+          "printed_folio": "53",
+          "paragraph": null,
+          "quote": "Companies operating in the logging sector with frequent transactions to offshore financial centres."
+        }
+      ]
+    },
+    {
+      "indicator_type": "transactional",
+      "description": "Large cash withdrawals from financial institutions operating in rural areas near known illegal mining or logging zones.",
+      "detectable_in_transaction_data": true,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 55,
+          "printed_folio": "53",
+          "paragraph": null,
+          "quote": "Large cash withdrawals from financial institutions operating in rural areas that may be in proximity to illegal mining or logging areas."
+        }
+      ]
+    },
+    {
+      "indicator_type": "transactional",
+      "description": "Timber or gold exported at below-market declared prices, with ownership/Bill of Lading changed en route (often via a free-trade zone) and re-imported at higher declared values -- an under-invoicing/transfer-pricing pattern.",
+      "detectable_in_transaction_data": true,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 60,
+          "printed_folio": "58",
+          "paragraph": null,
+          "quote": "it is common for timber, processed lumber, or gold, to be exported at below market prices, change ownership and Bill of Lading en route, often in a customs free trade zone, and is imported at recipient countries at higher declared values"
+        }
+      ]
+    },
+    {
+      "indicator_type": "documentary",
+      "description": "Falsified shipping, customs or loan/letter-of-credit documentation mislabelling hazardous waste or protected timber as ordinary goods or raw materials.",
+      "detectable_in_transaction_data": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 32,
+          "printed_folio": "30",
+          "paragraph": null,
+          "quote": "Shipping documents were falsified to state that the cargo consisted of goods and raw materials, as opposed to waste."
+        }
+      ]
+    },
+    {
+      "indicator_type": "documentary",
+      "description": "Recently created companies that register gold exports for significant amounts over a noticeably brief period of operation.",
+      "detectable_in_transaction_data": true,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 56,
+          "printed_folio": "54",
+          "paragraph": null,
+          "quote": "Recently created companies that register gold exports for significant amounts and noticeably brief period of operations."
+        }
+      ]
+    },
+    {
+      "indicator_type": "network",
+      "description": "A single individual identified as manager or director of multiple companies linked to environmental resource extraction.",
+      "detectable_in_transaction_data": true,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 56,
+          "printed_folio": "54",
+          "paragraph": null,
+          "quote": "Individual identified as a manager or director of several companies linked to environmental extraction."
+        }
+      ]
+    },
+    {
+      "indicator_type": "behavioural",
+      "description": "A company in the metals/waste sector lacking an adequate organisational structure, holding an address unlinked to any economic activity, with shares sold below book value and high cash withdrawals.",
+      "detectable_in_transaction_data": true,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 58,
+          "printed_folio": "56",
+          "paragraph": null,
+          "quote": "Company operating in the metals and waste disposal sector shows one of the following characteristics or behaviours: Lacks an adequate organizational structure, Holds an address that is not linked to any economic activity, Has shares sold at lower than book value, and Has high withdrawals of cash recorded on bank accounts"
+        }
+      ]
+    }
+  ],
+  "suggested_desks": [
+    "trade_desk",
+    "correspondent_desk",
+    "sanctions_desk",
+    "fraud_desk",
+    "fiu_liaison"
+  ],
+  "overall_confidence": "medium",
+  "extraction_notes": "This is a broad FATF thematic report covering three distinct predicate crime types (illegal logging/land clearing, illegal mining, waste trafficking); typologies extracted are those the report develops in depth with dedicated sections/case studies rather than every risk indicator in Annex A. The 'Money Laundering from Environmental Crime' label is proposed as emergent because no existing Knowledge Centre typology captures environmental crime as the underlying predicate driver -- reviewers may wish to consider whether this should instead be modelled as a new family. The Gertler/Steinmetz/Kabila corruption cases (Annex C) are illustrative examples cited by the report rather than the report's central case studies; sanctions_desk routing reflects Gertler's Global Magnitsky designation mentioned in the text. Country list under jurisdictions covers only those tied to named cases/examples, not the full list of ~45 countries that responded to FATF's survey. Merged 5 reviewer addition(s) under schema 1.4.0; each carries its review_justification. Extraction-only record retained at data/records/."
+}

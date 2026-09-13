@@ -1,0 +1,717 @@
+{
+  "schema_version": "1.3.0",
+  "advisory_id": "ADV-2026-0010",
+  "source": {
+    "source_type": "fincen",
+    "publisher": "FinCEN (U.S. Department of the Treasury)",
+    "title": "FinCEN Advisory on the Iranian Regime's Illicit Oil Smuggling Activities, Shadow Banking Networks, and Weapons Procurement Efforts (FIN-2025-A002)",
+    "published_on": "2025-06-06",
+    "published_on_precision": "day",
+    "url": null,
+    "document_sha256": "5ae3f6928535b91fc38af7d71983e71a97d63fda292e94eb5234d2357ec6678b",
+    "page_count": 18
+  },
+  "summary": "FinCEN advisory FIN-2025-A002 (June 6, 2025) supports the U.S. maximum pressure campaign against Iran, updating the 2018 Iran advisory. It covers three linked typologies: (1) oil smuggling via a \"shadow fleet\" of opaque vessels using false flags, frequent renaming/reflagging, AIS manipulation, ship-to-ship transfers and \"Malaysian blend\" relabeling to disguise origin; (2) multi-jurisdictional \"shadow banking\" networks of exchange houses, trading companies and front companies (concentrated in UAE/Hong Kong) that launder oil proceeds, access U.S. dollars via correspondent banking, and settle funds for sanctioned entities like MODAFL and the IRGC without repatriating funds; and (3) weapons procurement networks using front companies, layering, falsified documentation and transshipment through China, Hong Kong, Turkiye and Southeast Asia to obtain dual-use goods for Iran's missile/UAV programs. Two case studies are given: OFAC's designation of the Zarringhalam brothers' exchange-house network (GCM Exchange, Berelian Exchange) laundering billions via UAE/Hong Kong front companies, and Sahara Thunder, MODAFL's UAV front company. The advisory closes with red flags for oil-shipping, shadow-banking and procurement activity and SAR/CDD/314(b) reminders (key term IRAN-2025-A002).",
+  "jurisdictions": [
+    "IR",
+    "CN",
+    "HK",
+    "AE",
+    "RU",
+    "VE",
+    "TR",
+    "SG",
+    "US"
+  ],
+  "typologies": [
+    {
+      "family": "sanctions",
+      "typology_id": "SAN002",
+      "label": "Shadow Fleet",
+      "emergent": false,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 4,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "To transport its oil, Iran typically uses a fleet of old and poorly maintained vessels sometimes referred to as the \"shadow fleet,\" \"ghost fleet,\" or \"dark fleet,\" given their opaque ownership and obfuscation tactics"
+        },
+        {
+          "page": 4,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "vessels may undergo frequent name changes, changes in nominal ownership, or frequent reflagging in different third-country jurisdictions to disguise their illicit activity"
+        },
+        {
+          "page": 4,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "vessels often engage in deceptive shipping practices, like falsifying cargo and vessel documents, disabling or manipulating automatic identification systems (AIS) on vessels, voyage irregularities, and ship-to-ship transfers"
+        }
+      ]
+    },
+    {
+      "family": "sanctions",
+      "typology_id": "SAN004",
+      "label": "Front Companies",
+      "emergent": false,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 3,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "These networks establish and use front companies in third-country jurisdictions to obscure Iranian involvement and layer transactions"
+        },
+        {
+          "page": 5,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "Exchange houses in Iran are often used to manage numerous front companies and trading companies registered in key third-country jurisdictions such as Hong Kong or the UAE"
+        },
+        {
+          "page": 6,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "they oversee a sprawling network of front companies, largely operating out of the UAE and Hong Kong"
+        }
+      ]
+    },
+    {
+      "family": "sanctions",
+      "typology_id": "SAN007",
+      "label": "Dual Use Goods",
+      "emergent": false,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 6,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "The Iranian regime uses revenue generated through Iranian oil sales to procure weapons components, dual-use goods, and chemicals from the international market, primarily for its ballistic missile and UAV programs."
+        },
+        {
+          "page": 6,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "the United States imposes substantial controls on exports to Iran, which Iran seeks to evade via elaborate, long-standing networks of procurement agents, front companies, intermediaries, and suppliers operating in third countries"
+        },
+        {
+          "page": 7,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "These procurement networks use a variety of techniques to further obscure Iran as the end user, including transaction layering, falsifying documentation, and transshipping through third countries."
+        }
+      ]
+    },
+    {
+      "family": "sanctions",
+      "typology_id": "SAN006",
+      "label": "Trade Based Sanctions Evasion",
+      "emergent": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 3,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "To entice foreign buyers, Iran often sells its oil below prevailing market prices, offering a significant discount compared to other Gulf states."
+        },
+        {
+          "page": 4,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "Iranian oil is blended with oil from third countries to further disguise its origins, or forged documents will relabel the oil as the product of another jurisdiction, most commonly as \"Malaysian blend.\""
+        }
+      ]
+    }
+  ],
+  "actors": [
+    {
+      "name": "Islamic Republic of Iran",
+      "actor_type": "jurisdiction",
+      "aliases": [
+        "Iran"
+      ],
+      "jurisdiction": "IR",
+      "role": "State sponsoring destabilizing activity, terrorism and proliferation financed via oil revenue",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 1,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "identifying and reporting potential sanctions evasion and other suspicious activity related to the Islamic Republic of Iran (Iran)"
+        }
+      ]
+    },
+    {
+      "name": "Islamic Revolutionary Guard Corps",
+      "actor_type": "organisation",
+      "aliases": [
+        "IRGC"
+      ],
+      "jurisdiction": "IR",
+      "role": "Parallel military institution and SDGT; recipient of oil-revenue allocations and shadow banking proceeds",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 1,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "including the Islamic Revolutionary Guard Corps (IRGC), 1 and its terrorist proxies, access to the resources that sustain their destabilizing activities"
+        }
+      ]
+    },
+    {
+      "name": "IRGC-Qods Force",
+      "actor_type": "organisation",
+      "aliases": [
+        "IRGC-QF"
+      ],
+      "jurisdiction": "IR",
+      "role": "Recipient of oil budget allocations for sale on international markets to fund proxy groups",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 3,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "the IRGC-Qods Force (IRGC-QF) 27 for sale on the international market in order to supplement their budgets"
+        }
+      ]
+    },
+    {
+      "name": "Ministry of Defense and Armed Forces Logistics",
+      "actor_type": "organisation",
+      "aliases": [
+        "MODAFL"
+      ],
+      "jurisdiction": "IR",
+      "role": "Directs weapons procurement via front companies and shadow banking proceeds",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 3,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "Iran’s Ministry of Defense and Armed Forces Logistics (MODAFL), 26"
+        }
+      ]
+    },
+    {
+      "name": "Iranian Armed Forces General Staff",
+      "actor_type": "organisation",
+      "aliases": [
+        "AFGS"
+      ],
+      "jurisdiction": "IR",
+      "role": "Military entity receiving oil-revenue budget allocations",
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 3,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "the Iranian Armed Forces General Staff (AFGS), and the IRGC-Qods Force (IRGC-QF) 27 for sale on the international market"
+        }
+      ]
+    },
+    {
+      "name": "National Iranian Oil Company",
+      "actor_type": "organisation",
+      "aliases": [
+        "NIOC"
+      ],
+      "jurisdiction": "IR",
+      "role": "Primary seller of Iranian oil and petroleum products",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 3,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "Most of Iran’s oil is sold by the National Iranian Oil Company (NIOC), 25 which is responsible for the exploration, production, refining, and export of oil"
+        }
+      ]
+    },
+    {
+      "name": "Hamas",
+      "actor_type": "organisation",
+      "aliases": [],
+      "jurisdiction": null,
+      "role": "Iran-backed terrorist proxy receiving financial and material support",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 2,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "These terrorist organizations include Hamas, 11 Lebanese Hizballah (Hizballah), 12 Ansarallah (more commonly known as the Houthis), Palestinian Islamic Jihad (PIJ)"
+        }
+      ]
+    },
+    {
+      "name": "Lebanese Hizballah",
+      "actor_type": "organisation",
+      "aliases": [
+        "Hizballah"
+      ],
+      "jurisdiction": "LB",
+      "role": "Iran-backed terrorist proxy",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 2,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "These terrorist organizations include Hamas, 11 Lebanese Hizballah (Hizballah), 12 Ansarallah (more commonly known as the Houthis)"
+        }
+      ]
+    },
+    {
+      "name": "Ansarallah",
+      "actor_type": "organisation",
+      "aliases": [
+        "Houthis"
+      ],
+      "jurisdiction": "YE",
+      "role": "Iran-backed terrorist proxy receiving ballistic missiles/UAVs and attacking shipping",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 5,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "transactions involving these networks have supported Iran’s assistance to the Houthis in Yemen, who engaged in a campaign of reckless attacks on global shipping"
+        }
+      ]
+    },
+    {
+      "name": "Palestinian Islamic Jihad",
+      "actor_type": "organisation",
+      "aliases": [
+        "PIJ"
+      ],
+      "jurisdiction": null,
+      "role": "Iran-backed terrorist proxy",
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 2,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "Ansarallah (more commonly known as the Houthis), Palestinian Islamic Jihad (PIJ), and multiple Iran-aligned militia groups in Iraq and Syria"
+        }
+      ]
+    },
+    {
+      "name": "Mansour Zarringhalam",
+      "actor_type": "person",
+      "aliases": [
+        "Mansour"
+      ],
+      "jurisdiction": "IR",
+      "role": "Operates Iran-based exchange house GCM Exchange; oversees front-company network in UAE/Hong Kong",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 6,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "Mansour Zarringhalam (Mansour) and Nasser Zarringhalam (Nasser) operate Iran-based exchange houses Mansour Zarrin Ghalam and Partners Company (also known as GCM Exchange)"
+        }
+      ]
+    },
+    {
+      "name": "Nasser Zarringhalam",
+      "actor_type": "person",
+      "aliases": [
+        "Nasser"
+      ],
+      "jurisdiction": "IR",
+      "role": "Operates Iran-based exchange house Berelian Exchange; oversees front-company network in UAE/Hong Kong",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 6,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "Nasser Zarrin Ghalam and Partners Company (also known as Berelian Exchange), respectively, through which they oversee a sprawling network of front companies"
+        }
+      ]
+    },
+    {
+      "name": "Fazlolah Zarringhalam",
+      "actor_type": "person",
+      "aliases": [],
+      "jurisdiction": "IR",
+      "role": "OFAC-designated individual tied to the Iranian shadow banking network",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 6,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "OFAC designated over 40 individuals and entities tied to Iranian brothers Mansour, Nasser, and Fazlolah Zarringhalam"
+        }
+      ]
+    },
+    {
+      "name": "GCM Exchange",
+      "actor_type": "organisation",
+      "aliases": [
+        "Mansour Zarrin Ghalam and Partners Company"
+      ],
+      "jurisdiction": "IR",
+      "role": "Iran-based exchange house used to launder oil/petrochemical proceeds via front companies",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 6,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "Mansour Zarrin Ghalam and Partners Company (also known as GCM Exchange)"
+        }
+      ]
+    },
+    {
+      "name": "Berelian Exchange",
+      "actor_type": "organisation",
+      "aliases": [
+        "Nasser Zarrin Ghalam and Partners Company"
+      ],
+      "jurisdiction": "IR",
+      "role": "Iran-based exchange house used to launder oil/petrochemical proceeds via front companies",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 6,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "Nasser Zarrin Ghalam and Partners Company (also known as Berelian Exchange)"
+        }
+      ]
+    },
+    {
+      "name": "Sahara Thunder",
+      "actor_type": "organisation",
+      "aliases": [],
+      "jurisdiction": "IR",
+      "role": "MODAFL front company overseeing clandestine sale/shipment of Iranian UAVs, including to Russia",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 7,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "OFAC designated Sahara Thunder, the main front company that oversaw MODAFL’s commercial activities in support of the clandestine sale of Iranian UAVs"
+        }
+      ]
+    },
+    {
+      "name": "Joint Stock Company Special Economic Zone of Industrial Production Alabuga",
+      "actor_type": "organisation",
+      "aliases": [
+        "Alabuga"
+      ],
+      "jurisdiction": "RU",
+      "role": "U.S.-sanctioned Russian facility producing Iranian-designed UAVs under contract with MODAFL",
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 7,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "MODAFL has cooperated with Russia to finance and produce Iranian-designed one-way attack UAVs at the U.S.-sanctioned Joint Stock Company Special Economic Zone of Industrial Production Alabuga facility in Russia"
+        }
+      ]
+    },
+    {
+      "name": "Front companies (class)",
+      "actor_type": "category",
+      "aliases": [],
+      "jurisdiction": null,
+      "role": "Recently incorporated, low-substance entities used to obscure Iranian ownership and layer oil-sale and procurement transactions",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 5,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "These front companies—which are often recently incorporated, have minimal to no web presence, and transact in large amounts with no clear business purpose or using falsified invoices"
+        }
+      ]
+    },
+    {
+      "name": "Exchange houses and trading companies (class)",
+      "actor_type": "category",
+      "aliases": [],
+      "jurisdiction": null,
+      "role": "Financial intermediaries used to convert and move sanctioned Iranian proceeds and access correspondent banking",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 3,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "a multijurisdictional \"shadow banking\" network of financial intermediaries including exchange houses, trading companies, and front companies to move and settle funds"
+        }
+      ]
+    },
+    {
+      "name": "Money services businesses, legal entities and TCSPs (class)",
+      "actor_type": "category",
+      "aliases": [
+        "MSBs",
+        "TCSPs"
+      ],
+      "jurisdiction": null,
+      "role": "Facilitators orchestrating complex money laundering and sanctions evasion schemes for the shadow banking network",
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 5,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "a network of facilitators, including money services businesses (MSBs), legal entities, and trust and company service providers (TCSPs), that have played pivotal roles in orchestrating complex money laundering and sanctions evasion schemes"
+        }
+      ]
+    }
+  ],
+  "indicators": [
+    {
+      "indicator_type": "documentary",
+      "description": "Shipping documentation for oil transactions is inconsistent with maritime database entries, e.g. a database shows a vessel called at an Iranian port not disclosed in documents submitted for payment processing.",
+      "detectable_in_transaction_data": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 8,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "a maritime database may indicate that a vessel called in an Iranian port, even though this information is not included in the shipping documents submitted to financial institutions for payment processing"
+        }
+      ]
+    },
+    {
+      "indicator_type": "documentary",
+      "description": "Oil transaction documents reference vessels that have recently undergone multiple name or flag changes, or an ownership/operator transfer following OFAC designation, while the designated owner appears to retain an interest.",
+      "detectable_in_transaction_data": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 8,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "vessels that, according to maritime databases, have undergone recent or multiple name or flag changes, or transfer of ownership or operation to another person following OFAC's designation of its owner or operator, but the designated owner or operator appears to maintain an interest in the vessel"
+        }
+      ]
+    },
+    {
+      "indicator_type": "documentary",
+      "description": "Oil transaction documents reference an IMO number that maritime databases show belongs to a different vessel or to a vessel that has been scrapped.",
+      "detectable_in_transaction_data": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 8,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "vessels that claim an International Maritime Organization (IMO) number that, on examination of maritime databases, belong to a different vessel or to vessels that have previously been scrapped"
+        }
+      ]
+    },
+    {
+      "indicator_type": "geographic",
+      "description": "Documentation references 'Malaysian blend' oil bound for China via Southeast Asia, combined with AIS irregularities or evidence of a ship-to-ship transfer near Southeast Asia.",
+      "detectable_in_transaction_data": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 8,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "makes reference to \"Malaysian blend\" oil, particularly if the vessel is bound for China by way of Southeast Asia and if maritime databases indicate that the vessel displayed AIS irregularities during its voyage or reveal evidence of a ship-to-ship transfer"
+        }
+      ]
+    },
+    {
+      "indicator_type": "network",
+      "description": "A petroleum or shipping company's counterparties or vessels have ties to Iran, or maritime databases show the vessel has made stops at Iranian ports.",
+      "detectable_in_transaction_data": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 8,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "it does business with counterparties that have ties to Iran or transports goods using vessels that have ties to Iran or that maritime databases indicate have made stops at Iranian ports"
+        }
+      ]
+    },
+    {
+      "indicator_type": "documentary",
+      "description": "Oil-related wire transfers involve vessels previously linked to suspicious financial activity, or shipping documents (bills of lading, invoices) that appear falsified or omit consignee/key information to hide an Iranian nexus.",
+      "detectable_in_transaction_data": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 8,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "documentation, such as bills of lading or shipping invoices, with no consignees, that appear to be falsified, or that omit key information, in an attempt to hide the Iranian nexus"
+        }
+      ]
+    },
+    {
+      "indicator_type": "transactional",
+      "description": "Funds move through multiple exchange houses and/or trading companies, with fees and costs added at each stage, in a pattern and volume inconsistent with standard commercial practice.",
+      "detectable_in_transaction_data": true,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 8,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "transactions that move through multiple exchange houses and/or trading companies, adding additional fees and costs as the transactions progress, where the fees, number of transactions, and pattern of transactions do not reflect standard and customary commercial practices"
+        }
+      ]
+    },
+    {
+      "indicator_type": "documentary",
+      "description": "An exchange house or trading company near Iran uses forged or falsified documents to conceal transaction parties while relying on regional banks' correspondent relationships with U.S. institutions to access U.S. dollars.",
+      "detectable_in_transaction_data": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 8,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "uses forged or falsified documents to conceal the identity of parties involved in transactions that will utilize regional banks' correspondent banking relationships with U.S. financial institutions to access U.S. dollars"
+        }
+      ]
+    },
+    {
+      "indicator_type": "transactional",
+      "description": "Wire transfers or deposits lack, or contain incomplete, source-of-funds information, or do not match the customer's line of business, especially when involving entities in a jurisdiction high-risk for Iranian illicit finance.",
+      "detectable_in_transaction_data": true,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 9,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "receives wire transfers or deposits that do not contain any information about the source of funds, contain incomplete information about the source of funds, or do not match the customer's line of business"
+        }
+      ]
+    },
+    {
+      "indicator_type": "network",
+      "description": "A UAE general trading company registered in a free trade zone has opaque ownership, trades mainly with counterparties in Singapore and Hong Kong, and holds accounts at multiple UAE financial institutions.",
+      "detectable_in_transaction_data": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 9,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "A general trading company registered in a commercial free trade zone in the UAE with opaque ownership and whose trading counterparties are companies mostly located in Singapore and Hong Kong has bank accounts at multiple UAE financial institutions"
+        }
+      ]
+    },
+    {
+      "indicator_type": "behavioural",
+      "description": "A Hong Kong company using a Chinese non-resident bank account, with little web presence, co-located with similar firms or recently incorporated, transmits large unexplained payments to UAE general trading companies.",
+      "detectable_in_transaction_data": true,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 9,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "is recently incorporated yet transmitting large payments with no adequate explanation for the source of funds, makes numerous payments in large figures to UAE general trading companies with no clear business purpose"
+        }
+      ]
+    },
+    {
+      "indicator_type": "network",
+      "description": "Transactions involve companies originating with or directed to general trading companies, suspected front companies, or entities with an Iran nexus, showing opaque ownership, obscure controlling individuals, or residential/co-located business addresses.",
+      "detectable_in_transaction_data": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 9,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "Other indicators of possible front companies include opaque ownership structures, individuals/entities with obscure names that direct the company, or business addresses that are residential or co-located with other companies"
+        }
+      ]
+    },
+    {
+      "indicator_type": "documentary",
+      "description": "A customer's declared business is inconsistent with prior transaction history, particularly where trade data shows a history of facilitating shipments to/from Iran and the customer transacts predominantly with technology companies or chemical suppliers.",
+      "detectable_in_transaction_data": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 9,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "particularly if trade data indicates that they have a history of facilitating shipments to and from Iran and if they transact predominantly with technology companies or chemical suppliers"
+        }
+      ]
+    },
+    {
+      "indicator_type": "transactional",
+      "description": "Funds flow to companies in unrelated business lines that do not align with CDD information, e.g. a customer receiving funds primarily from commodities trading companies but sending funds primarily to electronics suppliers.",
+      "detectable_in_transaction_data": true,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 9,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "customers that primarily receive funds from commodities trading companies, but send funds primarily to electronics suppliers"
+        }
+      ]
+    },
+    {
+      "indicator_type": "network",
+      "description": "Multiple companies incorporated at roughly the same time share counterparties, addresses, owners, or name similarities and show similar transaction profiles, with little web presence and large recurring transactions.",
+      "detectable_in_transaction_data": true,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 9,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "Multiple companies incorporated at roughly the same time share counterparties, addresses, owners, or name similarities and demonstrate similar transaction profiles"
+        }
+      ]
+    },
+    {
+      "indicator_type": "transactional",
+      "description": "A Middle East company with Iran links or front-company indicators receives payments primarily from petroleum companies and then pays primarily electronics companies based in Hong Kong and China.",
+      "detectable_in_transaction_data": true,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 9,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "receives payments primarily from petroleum companies and then makes payments primarily to electronics companies based in Hong Kong and China"
+        }
+      ]
+    }
+  ],
+  "suggested_desks": [
+    "sanctions_desk",
+    "trade_desk",
+    "correspondent_desk",
+    "fiu_liaison"
+  ],
+  "overall_confidence": "high",
+  "extraction_notes": "Document is a FinCEN advisory combining narrative typology description (pp.1-9) with a discrete red-flag section (pp.8-9); indicators were drawn from the red-flag section and mapped to the typology each cluster supports. Knowledge Centre search also returned PAT008 (network family, doctrine authored as NI008) as an equally-scored match for 'Shadow Fleet'; SAN002 (sanctions family) was selected as the closer fit given the advisory's sanctions-evasion framing, but a human reviewer may wish to also link PAT008 if network-family coverage is desired. TBML010 (Sanctions Evasion Through Trade) also scored highly on shadow-banking searches but was not proposed separately to avoid double-counting with SAN004/SAN006, which more precisely match the document's specific mechanics (front companies; price deviation and goods misdescription). Many red-flag indicators are document/KYC-based (maritime database cross-checks, ownership opacity) rather than directly visible in raw transaction data; these are marked detectable_in_transaction_data=false. ISO codes for 'Southeast Asia' and 'Middle East' as used generically in the text could not be resolved to specific countries and are omitted from the jurisdictions list. Named individuals (Zarringhalam brothers) and Sahara Thunder are drawn from the June 6, 2025 and April 2024 OFAC designations referenced in the case studies, not from independent verification by this agent."
+}

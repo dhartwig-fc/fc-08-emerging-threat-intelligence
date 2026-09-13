@@ -1,0 +1,456 @@
+{
+  "schema_version": "1.4.0",
+  "advisory_id": "ADV-2026-0018",
+  "source": {
+    "source_type": "fca",
+    "publisher": "Financial Conduct Authority",
+    "title": "Understanding the Money Laundering Risks in the Capital Markets - Thematic Review TR19/4",
+    "published_on": "2019-06-01",
+    "published_on_precision": "month",
+    "url": null,
+    "document_sha256": "45645a37a4f9a3a44b130d689db7463bcf701ba0bb8e4e4bc84e576b366a4111",
+    "page_count": 30
+  },
+  "summary": "FCA thematic review of money-laundering risk across UK secondary (and, to a lesser extent, primary) capital markets, based on visits to 19 participants. It finds CDD, transaction-chain visibility and SAR reporting weaknesses, and sets out a non-exhaustive Annex of seven illustrative, fictionalised typologies - free-of-payment securities movement, mirror trading, MTN debt issuance, discounted equity placement to a connected investor, omnibus/reliance intermediation, FX option premium layering, and account over-collateralisation/dormant cash withdrawal - plus a list of trade-level red flags for transaction monitoring and training.",
+  "jurisdictions": [
+    "GB",
+    "HK"
+  ],
+  "typologies": [
+    {
+      "family": "capital_markets",
+      "typology_id": "CM005",
+      "label": "Wash Trading",
+      "emergent": false,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 10,
+          "printed_folio": "10",
+          "paragraph": 24,
+          "quote": "Some market -abuse practices (eg wash trading) may also be indicative of money laundering."
+        },
+        {
+          "page": 21,
+          "printed_folio": "21",
+          "paragraph": 10,
+          "quote": "The result is that both customers are flat in the security, ie neither had net bought or sold. However, money has moved from the customer in Country A to the customer in Country B."
+        },
+        {
+          "page": 23,
+          "printed_folio": "23",
+          "paragraph": null,
+          "quote": "The FCA\u2019s Final Notice to Deutsche Bank in January 2017 is another example of mirror trading off-market."
+        }
+      ]
+    },
+    {
+      "family": "capital_markets",
+      "typology_id": null,
+      "label": "Free of Payment Securities Transfer Laundering",
+      "emergent": true,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 20,
+          "printed_folio": "20",
+          "paragraph": null,
+          "quote": "Company A then requests that the government bonds are transferred into the newly formed account at Broker 2. Broker 2 accepts the government bonds into the customer\u2019s portfolio, without speaking to Broker 1 about their origin or ownership."
+        },
+        {
+          "page": 20,
+          "printed_folio": "20",
+          "paragraph": 6,
+          "quote": "Company A has realised clean cash in Country 2."
+        }
+      ]
+    },
+    {
+      "family": "capital_markets",
+      "typology_id": null,
+      "label": "Medium-Term Note / Debt Issuance Layering",
+      "emergent": true,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 24,
+          "printed_folio": "24",
+          "paragraph": null,
+          "quote": "IB1 does not have sight of, or conduct due diligence on, the end investor but receives assurances from Company A that due diligence has been done."
+        },
+        {
+          "page": 24,
+          "printed_folio": "24",
+          "paragraph": 16,
+          "quote": "The arrangement suggests a strong link between the borrower and underlying \u201clender\u201d which could indicate potential embezzlement, money laundering or both."
+        }
+      ]
+    },
+    {
+      "family": "network",
+      "typology_id": "PAT009",
+      "label": "Related Party Trading",
+      "emergent": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 25,
+          "printed_folio": "25",
+          "paragraph": 19,
+          "quote": "This individual has connections with a senior director of the company, though this was not disclosed publicly."
+        },
+        {
+          "page": 26,
+          "printed_folio": "26",
+          "paragraph": 22,
+          "quote": "It appears the activity was undertaken to wash illicit funds through the markets (and cross-jurisdiction) by lending money to the company, which was exchanged for shares that can be sold for more than the value of the loan."
+        }
+      ]
+    },
+    {
+      "family": "capital_markets",
+      "typology_id": null,
+      "label": "Omnibus/Reliance Intermediation Opacity",
+      "emergent": true,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 27,
+          "printed_folio": "27",
+          "paragraph": 25,
+          "quote": "The UK-based bank does not treat the offshore broker as high-risk and therefore does not conduct EDD. The UK-based bank also relies on the offshore broker, as a regulated firm, to do CDD on its customers."
+        },
+        {
+          "page": 27,
+          "printed_folio": "27",
+          "paragraph": 28,
+          "quote": "As such, the bank has potentially been facilitating the transfer of economic value from one account to another, cross-jurisdiction, without realising that this might have been linked to financial crime."
+        }
+      ]
+    },
+    {
+      "family": "correspondent_banking",
+      "typology_id": "BA008",
+      "label": "Layering",
+      "emergent": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 28,
+          "printed_folio": "28",
+          "paragraph": 30,
+          "quote": "The effect of the activity is that the customer receives an initial premium payment into their prime brokerage account at a separate bank, only for this to be paid back upon the almost immediate expiry of the FX options."
+        },
+        {
+          "page": 28,
+          "printed_folio": "28",
+          "paragraph": 32,
+          "quote": "The neutralising effect of the trading raises concerns that the intended purpose is to facilitate the layering stage of a money-laundering scheme."
+        }
+      ]
+    },
+    {
+      "family": "capital_markets",
+      "typology_id": null,
+      "label": "Capital Markets Account Funding Layering",
+      "emergent": true,
+      "confidence": "low",
+      "citations": [
+        {
+          "page": 29,
+          "printed_folio": "29",
+          "paragraph": 33,
+          "quote": "The excess collateral is returned to the customer, but no questions are asked."
+        },
+        {
+          "page": 29,
+          "printed_folio": "29",
+          "paragraph": 36,
+          "quote": "it seems plausible that the cash was simply entered and withdrawn to make it appear cleaner."
+        }
+      ]
+    },
+    {
+      "family": "tbml",
+      "typology_id": "TBML008",
+      "label": "Third Party Payment Abuse",
+      "emergent": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 8,
+          "printed_folio": null,
+          "paragraph": 12,
+          "quote": "Our review identified instances of potential suspicious activity involving orders from unconnected third parties."
+        },
+        {
+          "page": 12,
+          "printed_folio": null,
+          "paragraph": 38,
+          "quote": "Participants mitigated similar activity by being aware of the risks around third-party payments and third-party transfers of assets, and by implementing strong transaction-monitoring controls in relation to these."
+        },
+        {
+          "page": 12,
+          "printed_folio": null,
+          "paragraph": 35,
+          "quote": "For example, if a customer informs their broker that the security should be delivered into an account held with a third-party broker, but this is not a usual instruction for that customer's account."
+        },
+        {
+          "page": 19,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "instructions or involvement from third parties"
+        },
+        {
+          "page": 29,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "it withdraws the cash to a third-party account."
+        }
+      ],
+      "added_by": "reviewer",
+      "review_justification": "Found in Findings 2.12 and 2.35-2.38 (p.8, p.12), Annex red-flag list item 'instructions or involvement from third parties' (p.19), Example 7b (p.29). TBML008 states: 'Third Party Payment Abuse settles a trade through a payer who is not the trade counterparty \u2014 an unrelated third party, split settlement, or a payment that does not match the trade. The payment breaks the link between the trade and the funds.' The advisory evidences exactly this mechanism repeatedly and independently of the already-claimed FOP/MTN/omnibus/wash-trading/account-funding items: unconnected third parties instructing trades (2.12), non-standard settlement into a third-party broker's account (2.35), explicit recognition of 'third-party payments and third-party transfers of assets' as a laundering risk mitigated by monitoring controls (2.38), a standalone Annex red-flag bullet for third-party involvement, and a cash withdrawal to a third-party account in Example 7b -- each instance breaking the link between the trading customer and the ultimate recipient of funds/assets, matching TBML008's core tell."
+    },
+    {
+      "family": "other",
+      "typology_id": null,
+      "label": "Discounted Convertible Equity Issuance Wash",
+      "emergent": true,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 25,
+          "printed_folio": null,
+          "paragraph": 19,
+          "quote": "It issues the bond to an investor based in the UK. This individual has connections with a senior director of the company, though this was not disclosed publicly."
+        },
+        {
+          "page": 26,
+          "printed_folio": null,
+          "paragraph": 20,
+          "quote": "the notional value of the shares issued to the investor is significantly lower than the market value of the shares at the time of the conversion, ie the investor who lends \u00a3100,000 now receives the market value equivalent of \u00a31 million shares in the company."
+        },
+        {
+          "page": 26,
+          "printed_folio": null,
+          "paragraph": 22,
+          "quote": "It appears the activity was undertaken to wash illicit funds through the markets (and cross-jurisdiction) by lending money to the company, which was exchanged for shares that can be sold for more than the value of the loan."
+        },
+        {
+          "page": 26,
+          "printed_folio": null,
+          "paragraph": 23,
+          "quote": "debt is not required to be issued for the typology to be successful. The issuer simply needs to transfer new shares to connected parties, and then sell those shares in the market."
+        }
+      ],
+      "added_by": "reviewer",
+      "review_justification": "Found in Annex Example 4: equity placement, paragraphs 17-23, pages 25-26. No existing typology captures this mechanism (nothing cleared the search floor; closest was CM007 Pump and Dump at 0.49, which requires 'coordinated promotion of a thinly-traded... instrument' and 'distribution... into the retail buying the promotion creates' -- absent here since there is no promotion or retail distribution, only a private mispriced issuance to one connected party). The document's own mechanism (para 22-23): an issuer transfers securities to a connected/undisclosed party at a price far below market value (a 10x discount via convertible-to-equity conversion), who monetises the gap by selling into the open market; the report states 'debt is not required... the issuer simply needs to transfer new shares to connected parties, and then sell those shares.' This is a fully-worked case study distinct from the claimed MTN/debt-issuance layering (coupon remittance via offshore agent) and from generic Related Party Trading (flags only the ownership/control link, not the mispriced-issuance-and-dump value transfer)."
+    }
+  ],
+  "actors": [
+    {
+      "name": "Deutsche Bank",
+      "actor_type": "organisation",
+      "aliases": [],
+      "jurisdiction": null,
+      "role": "Subject of FCA's 2017 Final Notice for AML failings ('mirror trading'); central real-world case study for the mirror-trading typology",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 4,
+          "printed_folio": "4",
+          "paragraph": 12,
+          "quote": "This followed Deutsche Bank\u2019s Final Notice in 2017 for AML failings relating to \u2018mirror trading\u2019."
+        },
+        {
+          "page": 23,
+          "printed_folio": "23",
+          "paragraph": 14,
+          "quote": "The FCA\u2019s Final Notice to Deutsche Bank in January 2017 is another example of mirror trading off-market."
+        }
+      ]
+    }
+  ],
+  "indicators": [
+    {
+      "indicator_type": "transactional",
+      "description": "'Free of payment' asset transfers between accounts/brokers, particularly before onward sale of the asset.",
+      "detectable_in_transaction_data": true,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 19,
+          "printed_folio": "19",
+          "paragraph": 4,
+          "quote": "\u2018free of payment\u2019 asset transfers"
+        }
+      ]
+    },
+    {
+      "indicator_type": "product",
+      "description": "Remote booking of trades between group entities, executed in one jurisdiction and booked via an overseas branch into another.",
+      "detectable_in_transaction_data": true,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 19,
+          "printed_folio": "19",
+          "paragraph": 4,
+          "quote": "remote booking of trades between group entities"
+        }
+      ]
+    },
+    {
+      "indicator_type": "behavioural",
+      "description": "Pre-arranged trading where buy and sell counterparties are specified and already agreed before execution.",
+      "detectable_in_transaction_data": true,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 19,
+          "printed_folio": "19",
+          "paragraph": 4,
+          "quote": "pre-arranged trading"
+        }
+      ]
+    },
+    {
+      "indicator_type": "behavioural",
+      "description": "Instructions to trade coming from, or involvement of, unconnected third parties rather than the account holder.",
+      "detectable_in_transaction_data": true,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 19,
+          "printed_folio": "19",
+          "paragraph": 4,
+          "quote": "instructions or involvement from third parties"
+        }
+      ]
+    },
+    {
+      "indicator_type": "transactional",
+      "description": "Non-standard settlement arrangements that deviate from a customer's usual instructions, e.g. delivery into a third-party broker account.",
+      "detectable_in_transaction_data": true,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 12,
+          "printed_folio": "12",
+          "paragraph": 35,
+          "quote": "We refer to settlement arrangements as being \u2018non-standard\u2019 in the context of a particular customer\u2019s usual trading and settlement."
+        }
+      ]
+    },
+    {
+      "indicator_type": "behavioural",
+      "description": "Uneconomic or irrational trading strategies with no apparent business or economic rationale.",
+      "detectable_in_transaction_data": true,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 19,
+          "printed_folio": "19",
+          "paragraph": 4,
+          "quote": "uneconomic or irrational trading strategies of a customer"
+        }
+      ]
+    },
+    {
+      "indicator_type": "transactional",
+      "description": "Counterparty concentration, where a customer trades repeatedly and almost exclusively against the same counterparty.",
+      "detectable_in_transaction_data": true,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 20,
+          "printed_folio": "20",
+          "paragraph": 4,
+          "quote": "counterparty concentration"
+        }
+      ]
+    },
+    {
+      "indicator_type": "transactional",
+      "description": "Unusually high or consistent win/loss rates, or flat/neutralising trading activity that ends a position at no net gain or loss.",
+      "detectable_in_transaction_data": true,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 20,
+          "printed_folio": "20",
+          "paragraph": 4,
+          "quote": "unusual win/loss rates or flat/neutralising activity"
+        }
+      ]
+    },
+    {
+      "indicator_type": "transactional",
+      "description": "Dormant accounts with no trading activity, sometimes followed by a significant cash withdrawal to a third party.",
+      "detectable_in_transaction_data": true,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 20,
+          "printed_folio": "20",
+          "paragraph": 4,
+          "quote": "no trading on an account"
+        },
+        {
+          "page": 29,
+          "printed_folio": "29",
+          "paragraph": 35,
+          "quote": "The customer does not then trade on the account. Instead, two months later, it withdraws the cash to a third-party account."
+        }
+      ]
+    },
+    {
+      "indicator_type": "geographic",
+      "description": "Settlement instructions or involvement of accounts located in jurisdictions classified as posing high money-laundering risk.",
+      "detectable_in_transaction_data": true,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 12,
+          "printed_folio": "12",
+          "paragraph": 37,
+          "quote": "Settlement into high-risk jurisdictions is a risk factor that we observed some participants starting to include within their automated monitoring processes."
+        }
+      ]
+    },
+    {
+      "indicator_type": "documentary",
+      "description": "Ultimate beneficial ownership of a deposited or transferred financial instrument is not verified before it is accepted into a customer's account.",
+      "detectable_in_transaction_data": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 20,
+          "printed_folio": "20",
+          "paragraph": 2,
+          "quote": "no checks take place to determine the ultimate beneficial owner of the bonds"
+        }
+      ]
+    },
+    {
+      "indicator_type": "network",
+      "description": "Firm has no visibility of its customer's own underlying customers or the ultimate beneficial owner of assets traded, common in chains involving omnibus accounts or reliance.",
+      "detectable_in_transaction_data": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 8,
+          "printed_folio": "8",
+          "paragraph": 7,
+          "quote": "We found that most participants had no visibility of their customer\u2019s customer or, for example, the ultimate beneficial owner of the asset being traded."
+        }
+      ]
+    }
+  ],
+  "suggested_desks": [
+    "markets_desk",
+    "fraud_desk"
+  ],
+  "overall_confidence": "medium",
+  "extraction_notes": "Document is a broad FCA thematic review rather than a single-scheme alert; its Annex (pp.19-29) explicitly states the seven worked typology examples are illustrative composites 'modified and developed with fictitious information' from a variety of intelligence sources (page 19, para 2), not confirmed live cases (except the Deutsche Bank mirror-trading references, which are real). Four of the seven typologies (Free of Payment Securities Transfer, MTN/Debt Issuance Layering, Omnibus/Reliance Intermediation, Account Funding Layering) had no above-floor Knowledge Centre match and are proposed as emergent; reviewers should sanity-check these against any newer capital-markets doctrine. CM005 (Wash Trading) and BA008 (Layering) are cross-purpose links (market-abuse and correspondent-banking doctrine respectively) selected as the closest functional fit for the mirror-trading and option-premium examples - the document itself draws the wash-trading/ML parallel at para 2.24. PAT009 sits in the network family; confirm desk routing accordingly. Only one real (named) actor - Deutsche Bank - appears; all other entities in the Annex (Company A, Broker 1/2/3 etc.) are explicitly fictitious illustrations and were not extracted as actors. Merged 2 reviewer addition(s) under schema 1.4.0; each carries its review_justification. Extraction-only record retained at data/records/."
+}

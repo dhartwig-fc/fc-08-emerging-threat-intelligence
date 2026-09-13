@@ -1,0 +1,621 @@
+{
+  "schema_version": "1.4.0",
+  "advisory_id": "ADV-2026-0007",
+  "source": {
+    "source_type": "fatf",
+    "publisher": "FATF, INTERPOL and Egmont Group of Financial Intelligence Units",
+    "title": "Illicit Financial Flows from Cyber-Enabled Fraud",
+    "published_on": "2023-11-01",
+    "published_on_precision": "month",
+    "url": "www.fatf-gafi.org/content/fatf-gafi/en/publications/Methodsandtrends/illicit-financial-flows-cyber-enabled-fraud.html",
+    "document_sha256": "6888bb2e4d14d6935d2cb17bbd145b818bb10e6116f70675a8aeeb7e765356e6",
+    "page_count": 72
+  },
+  "summary": "This joint FATF-INTERPOL-Egmont Group report analyses illicit financial flows from cyber-enabled fraud (CEF) - including BEC, phishing, impersonation, online trading, romance ('pig butchering') and employment scams. It describes transnational, often hierarchical criminal syndicates that launder proceeds at speed through networks of individual money mules and shell companies across multiple jurisdictions and financial sectors, using cash withdrawal, TBML, unlicensed remitters, virtual assets, virtual IBANs and non-traditional digital platforms. It notes links to human trafficking (forced labour in scam call centres) and DPRK proliferation financing, and sets out national and international detection, prevention and asset-recovery good practices plus an annex of risk indicators.",
+  "jurisdictions": [
+    "NG",
+    "GB",
+    "US",
+    "TH",
+    "LV",
+    "BG",
+    "ES",
+    "IT",
+    "PT",
+    "IE",
+    "TR",
+    "IN",
+    "LU",
+    "KP",
+    "KR",
+    "MY",
+    "KH",
+    "PH"
+  ],
+  "typologies": [
+    {
+      "family": "fraud",
+      "typology_id": null,
+      "label": "Cyber-Enabled Fraud (CEF) Money Laundering",
+      "emergent": true,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 5,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "Cyber-enabled fraud (CEF) is a growing transnational organised crime."
+        },
+        {
+          "page": 63,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "CEF is perpetrated by transnational, organised crime syndicates."
+        }
+      ]
+    },
+    {
+      "family": "correspondent_banking",
+      "typology_id": "BA003",
+      "label": "Mule Accounts",
+      "emergent": false,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 18,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "Individual money mules are often recruited by criminals via various means, including through job offers and advertisements, as well as online social media interactions. Money mule recruiters are also known as mule \u2018herders.\u2019"
+        },
+        {
+          "page": 62,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "8,755 money mules were identified alongside 222 money mule recruiters. In all, EUR 17.5 million of funds were intercepted, with 2,469 money mules arrested."
+        }
+      ]
+    },
+    {
+      "family": "network",
+      "typology_id": "PAT007",
+      "label": "Shell Company Network",
+      "emergent": false,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 20,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "a network of 209 companies, that had laundered proceeds amongst each other. The companies had mutual accountants and were mostly established on the same date and were liquidated after a short period."
+        },
+        {
+          "page": 23,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "Another 34 entities were identified to be linked to these two entities. Out of the 36 entities, 28 entities had foreign nationals as directors."
+        }
+      ]
+    },
+    {
+      "family": "tbml",
+      "typology_id": "TBML001",
+      "label": "Over Invoicing",
+      "emergent": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 24,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "criminals use trade-based money laundering (TBML) technique s such as fictitious or false invoicing, as well as using illicit proceeds to purchase high value or readily marketable goods"
+        },
+        {
+          "page": 25,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "A Nigerian company (controlled by a Nigerian believed to be based in the United States) orders goods from legitimate European or Chinese companies."
+        }
+      ]
+    },
+    {
+      "family": "sanctions",
+      "typology_id": "CMI010",
+      "label": "Cryptocurrency Evasion",
+      "emergent": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 25,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "The use of unhosted wallets, peer-to-peer transactions, peel chains, and high -risk exchanges are the preferred methods to quickly launder VA-related CEF-proceeds out of a jurisdiction"
+        },
+        {
+          "page": 25,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "using mixers or tumbler services as well as anonymity -enhanced VAs (also called privacy coins, e.g., Monero) and decentralised finance (DeFi) services."
+        }
+      ]
+    },
+    {
+      "family": "correspondent_banking",
+      "typology_id": null,
+      "label": "Virtual IBAN (vIBAN) Abuse",
+      "emergent": true,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 31,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "Since IBANs and vIBANs are optically identical, criminals use them to trick victims into thinking that they are transferring funds into a bank account, when instead for example, it could be a vIBAN used for the purpose of crediting an e-wallet."
+        },
+        {
+          "page": 33,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "the IBANs provided by the fraudsters were vIBANs. These vIBANs were issued by a Luxembourg banking institution to a Luxembourg based payment service provider who offers prepaid credit cards to European customers."
+        }
+      ]
+    },
+    {
+      "family": "other",
+      "typology_id": null,
+      "label": "Human Trafficking-Fuelled Scam Centres",
+      "emergent": true,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 15,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "There is also a rising link between CEF and human trafficking, where victims are lured through fake job ads to online call centres and forced to commit CEF on an industrial scale."
+        },
+        {
+          "page": 16,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "15 men and one woman lured to Cambodia on the promise of a lucrative salary to work in a call centre. On arrival, however, they were locked up and forced to work 14-hour days as scammers."
+        }
+      ]
+    },
+    {
+      "family": "other",
+      "typology_id": null,
+      "label": "DPRK Proliferation Financing via Cyber-Enabled Fraud Tools",
+      "emergent": true,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 16,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "There are also links to proliferation financing, with cybercrime reported as a major source of illicit income generation for the Democratic People\u2019s Republic of Korea (DPRK)."
+        },
+        {
+          "page": 17,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "information technology (IT) workers of the Democratic People\u2019s Republic of Korea linked to the Munitions Industry Department have been earning foreign currency by selling voice phishing hacking applications"
+        }
+      ]
+    },
+    {
+      "family": "correspondent_banking",
+      "typology_id": "BA005",
+      "label": "Rapid Movement",
+      "emergent": false,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 22,
+          "printed_folio": "20",
+          "paragraph": 3,
+          "quote": "Funds are thereafter rapidly layered through a series of \"pass -through\" transactions via domestic or foreign accounts that are controlled by the mule/strawmen themselves or by the CEF syndicate."
+        },
+        {
+          "page": 44,
+          "printed_folio": "42",
+          "paragraph": null,
+          "quote": "Pass-through transactions and account hopping across multiple FIs increases law enforcement tracing efforts as time is required to gather information from the respective FIs; to peel through layers of transactions and to identify the origin and ultimate destination of funds."
+        }
+      ],
+      "added_by": "reviewer",
+      "review_justification": "Found in Section 2.3 ML techniques, paras 26-29 (p.22); Box 31/enforcement strategies (p.44); Section 5.1 asset recovery 24-72hr windows (p.49-50). BA005 doctrine: 'funds land on an account and clear back out again almost immediately... it is defined by HOW FAST the funds move and HOW MUCH volume passes through an account relative to what it normally holds.' The document develops exactly this velocity mechanism at length: CEF proceeds are 'rapidly layered through a series of pass-through transactions' the instant an account is established, then hopped across multiple FIs/PSPs/remitters (p.22, p.44), and the entire international asset-recovery chapter is built around intervening within 24-72 hours precisely because the funds clear out almost immediately. This is a well-developed, recurring theme (not a single bullet), warranting high confidence."
+    },
+    {
+      "family": "correspondent_banking",
+      "typology_id": "BA001",
+      "label": "Structuring",
+      "emergent": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 22,
+          "printed_folio": "20",
+          "paragraph": 3,
+          "quote": "criminals employ various techniques and mechanisms: e.g., smurfing; hopping through accounts across different financial, remittance or payment service providers; and conversion to other types of financial assets"
+        },
+        {
+          "page": 30,
+          "printed_folio": "28",
+          "paragraph": null,
+          "quote": "Splitting the amounts between several accounts enables criminals to circumvent restrictions imposed by the PSP regarding their services such as cash withdrawal limits or remaining under operations monitoring threshold defined internally by the PSP."
+        }
+      ],
+      "added_by": "reviewer",
+      "review_justification": "Found in Para 29 ML typologies list (p.22); Box 17 France PSP sector abuse case (p.30). BA001 doctrine: structuring is 'the deliberate breaking-up of ... amounts just under a ... reporting threshold ... to keep individual deposits below the reporting trigger.' Para 29 explicitly names 'smurfing' as a CEF laundering technique, and Box 17's France case shows the same break-into-pieces-to-stay-under-a-threshold logic applied to a PSP's internal monitoring and cash-withdrawal-limit thresholds rather than a CTR line -- the same mechanism, different threshold type, hence medium rather than high confidence."
+    },
+    {
+      "family": "correspondent_banking",
+      "typology_id": "BA009",
+      "label": "Transaction Laundering",
+      "emergent": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 19,
+          "printed_folio": "17",
+          "paragraph": 4,
+          "quote": "In cases of online trading fraud, criminals may also use these shell companies to open virtual point -of-sale accounts with merchant services companies to process payments and transfers from victims."
+        },
+        {
+          "page": 20,
+          "printed_folio": "18",
+          "paragraph": null,
+          "quote": "One hundred thirty -five companies received TRY 9.6 billion (about EUR 323.2 million) of fraud proceeds through payment companies. To facilitate receipt of transactions from victims, these companies established virtual point-of-sale accounts."
+        }
+      ],
+      "added_by": "reviewer",
+      "review_justification": "Found in Para 24 shell company bullet (p.19); Box 9 Turkiye virtual POS case (p.20). BA009 doctrine: transaction laundering is 'a legitimate-looking merchant account used as a payment processing front for hidden third parties: a card-processing relationship underwritten against one declared business is quietly used to clear volume ... the acquirer never screened.' The Turkiye case shows exactly this -- 135 shell companies boarded virtual point-of-sale/merchant accounts with payment companies, which then cleared TRY 9.6 billion of fraud-victim payments the acquirer had not screened as CEF proceeds. This is a card-rails-specific technique distinct from the generic shell-company-network typology already claimed."
+    },
+    {
+      "family": "other",
+      "typology_id": null,
+      "label": "Underground Banking / Hawala Remittance for CEF Proceeds",
+      "emergent": true,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 25,
+          "printed_folio": "23",
+          "paragraph": null,
+          "quote": "Unlicensed or unregistered remitters and VASPs: Criminal proceeds may be transferred out of jurisdiction using underground money remitters or hawala services with little or no AML/CFT controls."
+        },
+        {
+          "page": 26,
+          "printed_folio": "24",
+          "paragraph": null,
+          "quote": "Funds were also transferred to Ghana through an underground bank linked to the Ghanaian community in Japan."
+        }
+      ],
+      "added_by": "reviewer",
+      "review_justification": "Found in Para 30 'Unlicensed or unregistered remitters and VASPs' bullet (p.25); Box 14 Japan case, third laundering channel (p.26). No Knowledge Centre typology cleared the search floor for hawala/informal value transfer. The document nonetheless develops this as a distinct laundering channel separate from the mule, shell-company and TBML techniques already claimed: para 30 names underground remitters/hawala as a discrete ML technique for moving CEF proceeds cross-border outside AML/CFT controls, and the Japan case study (Box 14) shows this operating in practice as one of three parallel channels (alongside a fictitious-invoice wire transfer and VA conversion) used by the same mule herder to move funds to the syndicate leader in Ghana."
+    },
+    {
+      "family": "other",
+      "typology_id": null,
+      "label": "Synthetic/Stolen Identity Accounts for Direct Criminal Control",
+      "emergent": true,
+      "confidence": "low",
+      "citations": [
+        {
+          "page": 27,
+          "printed_folio": "25",
+          "paragraph": null,
+          "quote": "Criminals then directly set up and control accounts using these stolen or falsified identities. This makes it more difficult to trace ML activities as the account holders may not even be aware of their involvement."
+        },
+        {
+          "page": 28,
+          "printed_folio": "26",
+          "paragraph": null,
+          "quote": "In many of the cases, accounts were created with VASPs in the victim\u2019s name, without their knowledge. The criminals did this by using data stolen through the remote access tools."
+        }
+      ],
+      "added_by": "reviewer",
+      "review_justification": "Found in Para 35, digitalisation/identity theft discussion (p.27); Box 16 Austria case (p.28). No KC typology matched (only BA003 Mule Accounts scored below floor). BA003's own doctrine defines a mule account as a real 'account holder's' personal account moved 'at a controller's instruction' -- i.e. a genuine (even if unwitting) person exists and nominally controls the account. The mechanism here is different in kind: criminals fabricate accounts using stolen/synthetic identity data such that 'the account holders may not even be aware of their involvement' -- there is no recruited, deceived, or even nominal account holder, only a fabricated identity the criminals control from account opening (confirmed by the Austria case, where VASP accounts were opened in victims' names entirely without their knowledge for direct criminal use). Low confidence given only one paragraph plus one case example develop the technique."
+    }
+  ],
+  "actors": [
+    {
+      "name": "CEF criminal syndicates / organised crime groups",
+      "actor_type": "category",
+      "aliases": [
+        "CEF syndicates"
+      ],
+      "jurisdiction": null,
+      "role": "Transnational, often hierarchical groups that perpetrate cyber-enabled fraud and launder its proceeds",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 5,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "CEF criminal syndicates are often well structured into distinct sub-groups with specialised areas of criminal expertise, including money laundering."
+        }
+      ]
+    },
+    {
+      "name": "Money mules and mule herders",
+      "actor_type": "category",
+      "aliases": [],
+      "jurisdiction": null,
+      "role": "Individuals who receive and forward fraud proceeds through personal or corporate accounts, recruited and directed by 'herders'",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 18,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "Individual money mules are often recruited by criminals via various means, including through job offers and advertisements, as well as online social media interactions. Money mule recruiters are also known as mule \u2018herders.\u2019"
+        }
+      ]
+    },
+    {
+      "name": "Professional money laundering groups and third-party professional enablers",
+      "actor_type": "category",
+      "aliases": [],
+      "jurisdiction": null,
+      "role": "Lawyers, accountants, tax advisors, company secretaries and bankers who facilitate CEF-related ML, sometimes under a crime-as-a-service model",
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 15,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "Jurisdictions have observed the involvement of professional ML groups as well as third- party professional enablers including lawyers, accountants, tax adviso rs, company secretaries and bankers."
+        }
+      ]
+    },
+    {
+      "name": "QQAAZZ",
+      "actor_type": "network",
+      "aliases": [],
+      "jurisdiction": null,
+      "role": "Professional money laundering network offering a 'global, complicit bank drops service' to cybercriminals",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 18,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "The QQAAZZ advertised its services as a \u201cglobal, complicit bank drops service\u201d on Russian -speaking online cybercriminal forums"
+        },
+        {
+          "page": 18,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "an international law enforcement operation involving 16 countries resulted in the arrest of 20 individuals suspected of belonging to the QQAAZZ criminal network"
+        }
+      ]
+    },
+    {
+      "name": "Person MS",
+      "actor_type": "person",
+      "aliases": [],
+      "jurisdiction": "IE",
+      "role": "Key individual arrested for laundering romance and BEC fraud proceeds from Ireland to Nigeria via TBML",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 25,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "Irish authorities arrested a key individual, Person MS, in a scheme to launder romance and BEC proceeds from Ireland to Nigeria through TBML."
+        }
+      ]
+    },
+    {
+      "name": "Mr. O",
+      "actor_type": "person",
+      "aliases": [],
+      "jurisdiction": "NG",
+      "role": "Nigerian national who ran a multimillion online romance scam and recruited a money mule",
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 19,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "Mr. O is a Nigerian national who was arrested in 2019 for allegedly operating a multimillion online romance scam"
+        }
+      ]
+    },
+    {
+      "name": "DPRK IT workers linked to the Munitions Industry Department",
+      "actor_type": "category",
+      "aliases": [],
+      "jurisdiction": "KP",
+      "role": "Sell voice-phishing hacking applications and hacking/phishing tools to generate foreign currency for weapons programmes",
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 17,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "information technology (IT) workers of the Democratic People\u2019s Republic of Korea linked to the Munitions Industry Department have been earning foreign currency by selling voice phishing hacking applications"
+        }
+      ]
+    }
+  ],
+  "indicators": [
+    {
+      "indicator_type": "transactional",
+      "description": "Rapid or immediate, high or low value transactions after opening of an account, inconsistent with the purpose of the account",
+      "detectable_in_transaction_data": true,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 65,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "Rapid or immediate, high or low value transactions after opening of an account, inconsistent with the purpose of the account"
+        }
+      ]
+    },
+    {
+      "indicator_type": "transactional",
+      "description": "Rapid or immediate cash withdrawals or transfers of large amounts following the receipt of a funds transfer in order to empty the account",
+      "detectable_in_transaction_data": true,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 65,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "Rapid or immediate cash withdrawals or transfers of large amounts following the receipt of a funds transfer in order to empty the account"
+        }
+      ]
+    },
+    {
+      "indicator_type": "transactional",
+      "description": "A small test payment to a beneficiary is rapidly followed by larger value payments to the same beneficiary once the test succeeds",
+      "detectable_in_transaction_data": true,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 65,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "Small payment to a beneficiary, which once successfully completed, is rapidly followed by larger value payments to the same beneficiary"
+        }
+      ]
+    },
+    {
+      "indicator_type": "geographic",
+      "description": "Transfers of funds to and from jurisdictions assessed as high money-laundering risk",
+      "detectable_in_transaction_data": true,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 65,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "Transfers of funds to and from high-risk money laundering jurisdictions"
+        }
+      ]
+    },
+    {
+      "indicator_type": "network",
+      "description": "Shell companies incorporated on the same date, sharing accountants, and liquidated after a short period, laundering proceeds amongst each other",
+      "detectable_in_transaction_data": false,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 20,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "The companies had mutual accountants and were mostly established on the same date and were liquidated after a shor t period."
+        }
+      ]
+    },
+    {
+      "indicator_type": "behavioural",
+      "description": "Frequent changes of contact details, phone numbers or email addresses shortly after an account is opened",
+      "detectable_in_transaction_data": true,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 66,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "Frequent changes of contact details, phone numbers, email addresses after opening of the account"
+        }
+      ]
+    },
+    {
+      "indicator_type": "network",
+      "description": "A single static IP address or device is associated with multiple accounts belonging to different account holders",
+      "detectable_in_transaction_data": true,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 67,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "Single static IP address or electronic device associated with multiple accounts of various account holders"
+        }
+      ]
+    },
+    {
+      "indicator_type": "behavioural",
+      "description": "Use of VPNs, compromised devices or hosting companies that may mask a user's true IP address",
+      "detectable_in_transaction_data": true,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 67,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "Use of virtual private networks (VPNs), compromised devices (such as IOT devices), and hosting companies that may mask a user\u2019s IP address"
+        }
+      ]
+    },
+    {
+      "indicator_type": "product",
+      "description": "Sending or receiving large volumes, or high-frequency low amounts, of virtual assets to unhosted wallets or addresses associated with mixing/tumbling services or high-risk jurisdictions",
+      "detectable_in_transaction_data": true,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 67,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "Sending/receiving large volumes or high frequency low amounts worth of VAs to unhosted wallet addresses; or addresses associated with darknet marketplaces, child sexual abuse material platforms, cyber exploit marketplaces, ransomware groups, mixing/tumbling services, high -risk jurisdictions"
+        }
+      ]
+    },
+    {
+      "indicator_type": "documentary",
+      "description": "Counterparty business name is incommensurate with the account holder's declared business (e.g. a furniture company transferring large sums to a 'petroleum trading company')",
+      "detectable_in_transaction_data": true,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 66,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "Counterparties incommensurate with the business/ company name of the account might suggest which may provide cover for the movement of large amounts of funds internationally"
+        }
+      ]
+    },
+    {
+      "indicator_type": "behavioural",
+      "description": "Account holder shows inadequate knowledge of the nature, purpose or amount of a transaction, or gives non-realistic or inconsistent explanations, suggesting they are acting as a mule",
+      "detectable_in_transaction_data": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 66,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "The customer shows to have inadequate knowledge on the nature, object, amount or purpose of the transaction/s or relations hip or provides non -realistic, confusing or inconsistent explanations, which drive to the suspicion that the customer is acting as a mule."
+        }
+      ]
+    },
+    {
+      "indicator_type": "network",
+      "description": "Bank accounts opened by a single individual at three or more financial institutions within a short period (e.g. 20 days), a discovered money mule profile",
+      "detectable_in_transaction_data": true,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 37,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "bank accounts opened by a single individual at three or more financial institutions within 20 days"
+        }
+      ]
+    }
+  ],
+  "suggested_desks": [
+    "fraud_desk",
+    "correspondent_desk",
+    "sanctions_desk",
+    "trade_desk",
+    "fiu_liaison"
+  ],
+  "overall_confidence": "high",
+  "extraction_notes": "This is a broad narrative typologies/good-practice report (72 pages, FATF-INTERPOL-Egmont), not a single-technique red alert, so an emergent umbrella typology ('Cyber-Enabled Fraud Money Laundering') was proposed alongside more specific component typologies. TBML001 (Over Invoicing) and CMI010 (Cryptocurrency Evasion, authored in a sanctions-evasion context) are the closest available Knowledge Centre matches for the report's general TBML and VA-anonymisation techniques respectively, but the fit is imperfect - reviewer should confirm before treating as confirmed links. Four typologies (CEF-ML umbrella, vIBAN abuse, human-trafficking-fuelled scam centres, DPRK proliferation financing) returned no Knowledge Centre match and are proposed as emergent. Jurisdiction list and actors are limited to those directly tied to the cited case studies/typologies rather than every jurisdiction mentioned in the 72-page document; many more national case studies (e.g., Chile, Japan/Ghana, Austria, Germany, Malta, Brazil, China, Slovakia, Saudi Arabia, Australia) appear in the source but were not individually extracted as actors/typologies to keep the record proportionate. Merged 5 reviewer addition(s) under schema 1.4.0; each carries its review_justification. Extraction-only record retained at data/records/."
+}

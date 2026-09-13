@@ -1,0 +1,487 @@
+{
+  "schema_version": "1.4.0",
+  "advisory_id": "ADV-2026-0019",
+  "source": {
+    "source_type": "europol",
+    "publisher": "Europol",
+    "title": "European Union Serious and Organised Crime Threat Assessment \u2013 The changing DNA of serious and organised crime (EU-SOCTA 2025)",
+    "published_on": "2025-01-01",
+    "published_on_precision": "year",
+    "url": null,
+    "document_sha256": "904f1bd6e2a4bdaaa03da01bae9d5dd9cdbf1271cae6aed9d90d04f6b10e84dd",
+    "page_count": 100
+  },
+  "summary": "Europol's EU-SOCTA 2025 assesses the EU organised-crime landscape as destabilising, nurtured online, and accelerated by AI. Financial-crime relevant strands: money laundering evolving via crypto mixing services, chain-hopping and DeFi as a 'digital cloak'; pervasive abuse of shell/buffer companies to launder proceeds and commit VAT/customs fraud; digitalising corruption with corruption brokers and crypto/fintech-paid bribes; and a dedicated sanctions-evasion section on trade-based evasion of EU sanctions on Russia via front companies, falsified documentation and transhipment through the Eurasian Economic Union/Caucasus, increasingly aided by crypto. A central theme is criminal networks acting as proxies for state-aligned hybrid threat actors (sabotage, cyber-attacks, disinformation, laundering) via a persistent, cumulative 'woodpecker' pattern. The report also covers many physical crime areas (drugs, firearms, migrant smuggling, THB, cyber-attacks, fraud, CSAM, property/environmental crime) summarised but not separately typology-tagged, as outside the Knowledge Centre's financial-crime-analytics scope.",
+  "jurisdictions": [
+    "NL",
+    "DE",
+    "LV",
+    "LT",
+    "RU",
+    "CN",
+    "IR",
+    "KP",
+    "UA"
+  ],
+  "typologies": [
+    {
+      "family": "sanctions",
+      "typology_id": "SAN006",
+      "label": "Trade Based Sanctions Evasion",
+      "emergent": false,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 77,
+          "printed_folio": "77",
+          "paragraph": null,
+          "quote": "In early 2024, Dutch authorities arrested three individuals for allegedly exporting military-grade goods to Russia, in violation of European Union sanctions."
+        },
+        {
+          "page": 78,
+          "printed_folio": "78",
+          "paragraph": null,
+          "quote": "Trade-based sanctions evasion relies heavily on a crime-as-a-service model combined with infiltration into legitimate businesses to handle the supply chain."
+        }
+      ]
+    },
+    {
+      "family": "sanctions",
+      "typology_id": "SAN004",
+      "label": "Front Companies",
+      "emergent": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 77,
+          "printed_folio": "77",
+          "paragraph": null,
+          "quote": "These illicit exports were allegedly facilitated through front companies and falsified documentation to circumvent trade restrictions."
+        },
+        {
+          "page": 78,
+          "printed_folio": "78",
+          "paragraph": null,
+          "quote": "Legal businesses are infiltrated, and front companies are set up in retail, import-export, transport, or the financial sector for the procurement and shipment of goods or assets."
+        }
+      ]
+    },
+    {
+      "family": "sanctions",
+      "typology_id": "CMI010",
+      "label": "Cryptocurrency Evasion",
+      "emergent": false,
+      "confidence": "low",
+      "citations": [
+        {
+          "page": 77,
+          "printed_folio": "77",
+          "paragraph": null,
+          "quote": "It is likely that criminal networks increasingly leverage tools such as encrypted communications, anonymised financial transactions, cryptocurrencies and blockchain technologies, and cyber-enabled trade-based money laundering."
+        }
+      ]
+    },
+    {
+      "family": "tbml",
+      "typology_id": "TBML009",
+      "label": "Shell Company Trading",
+      "emergent": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 27,
+          "printed_folio": "27",
+          "paragraph": null,
+          "quote": "For example, front or shell companies may be used to facilitate the movement of illicit or stolen goods or to enable money laundering activities."
+        },
+        {
+          "page": 75,
+          "printed_folio": "75",
+          "paragraph": null,
+          "quote": "Criminals make use of limited liability companies, individual entrepreneurs, and shell companies, which they quickly establish and dissolve."
+        },
+        {
+          "page": 75,
+          "printed_folio": "75",
+          "paragraph": null,
+          "quote": "Shell or buffer companies, whether infiltrated or set-up, facilitate the exploitation of cross-border VAT systems and VAT refund processes."
+        }
+      ]
+    },
+    {
+      "family": "crypto",
+      "typology_id": null,
+      "label": "Cryptocurrency Layering via Mixing Services, Chain-Hopping and DeFi",
+      "emergent": true,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 25,
+          "printed_folio": "25",
+          "paragraph": null,
+          "quote": "Deposited funds would be turned into \u201cchips\u201d (small tokens with equivalent value), which were then mixed together - thereby anonymising all trails to where the initial funds originated."
+        },
+        {
+          "page": 25,
+          "printed_folio": "25",
+          "paragraph": null,
+          "quote": "Chain hopping, for example, involves the switching between different cryptocurrencies to obscure the origin of funds."
+        }
+      ]
+    },
+    {
+      "family": "corruption",
+      "typology_id": null,
+      "label": "Corruption Brokers and Digitalised Corruption-as-a-Service",
+      "emergent": true,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 23,
+          "printed_folio": "23",
+          "paragraph": null,
+          "quote": "the elevated role of corruption brokers."
+        },
+        {
+          "page": 29,
+          "printed_folio": "29",
+          "paragraph": null,
+          "quote": "Bribes are transferred by criminally exploiting cryptocurrencies or fintech."
+        }
+      ]
+    },
+    {
+      "family": "other",
+      "typology_id": null,
+      "label": "Hybrid Threat Actor Use of Criminal Networks as Proxies (Woodpecker Modus Operandi)",
+      "emergent": true,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 11,
+          "printed_folio": "11",
+          "paragraph": null,
+          "quote": "It is also progressively driven by hybrid threats, directed externally, that encompass a broad range of criminal activities and tactics operated via criminal proxies."
+        },
+        {
+          "page": 15,
+          "printed_folio": "15",
+          "paragraph": null,
+          "quote": "Much like a woodpecker weakens a tree over time through repeated strikes, hybrid threat actors engage in ongoing, seemingly minor actions that collectively erode stability, security, and trust in institutions."
+        }
+      ]
+    },
+    {
+      "family": "correspondent_banking",
+      "typology_id": "BA007",
+      "label": "Cash Intensive Activity",
+      "emergent": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 25,
+          "printed_folio": "25",
+          "paragraph": null,
+          "quote": "Criminals often use cash-intensive businesses\u2014such as restaurants, hotels, car washes\u2014to mix illicit funds with the businesses' legitimate income."
+        }
+      ],
+      "added_by": "reviewer",
+      "review_justification": "Found in Money laundering section, page 25 ('Emerging technologies as a digital cloak' subsection). BA007 doctrine: 'A cash-intensive business is a legitimate cover for laundering physical cash: cash & carry wholesalers, currency exchange houses, laundromats, and similar operators that plausibly handle real cash every day.' The advisory names the identical mechanism -- restaurants, hotels and car washes used to blend illicit cash with declared legitimate turnover -- as a placement method in criminal networks' parallel financial system, matching BA007's core tell of cash disproportionate to the business's own declared profile."
+    },
+    {
+      "family": "correspondent_banking",
+      "typology_id": "BA003",
+      "label": "Mule Accounts",
+      "emergent": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 25,
+          "printed_folio": "25",
+          "paragraph": null,
+          "quote": "Increasingly, young and vulnerable people are recruited, often via social media and gaming platforms, to act as money mules."
+        },
+        {
+          "page": 33,
+          "printed_folio": "33",
+          "paragraph": null,
+          "quote": "Young people are used as money mules, receiving and transferring illicit funds through their bank accounts, often in exchange for a small share of the money."
+        }
+      ],
+      "added_by": "reviewer",
+      "review_justification": "Found in Money laundering section (page 25) and Criminal exploitation of young perpetrators section (page 33). BA003 doctrine: 'A mule account is a personal account used purely as a pass-through point: it receives illicit funds from one or more originators and forwards them onward almost immediately, retaining little or nothing for itself... moving money at a controller's instruction rather than the account holder's own initiative.' The advisory describes exactly this: recruited individuals whose personal bank accounts receive and forward illicit funds, keeping only 'a small share' as payment -- the pass-through, controller-directed mechanism BA003 defines, not merely shared vocabulary about 'money mules.'"
+    },
+    {
+      "family": "fraud",
+      "typology_id": null,
+      "label": "VAT Missing Trader / Carousel and Contra-Trading Fraud (MTIC)",
+      "emergent": true,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 75,
+          "printed_folio": "75",
+          "paragraph": null,
+          "quote": "MTIC fraud is the most common modus operandi in VAT fraud. It refers to schemes where a trader imports goods VAT-free from another EU country and sells them domestically, charging VAT to the buyer but failing to remit this tax to the authorities. The trader then disappears, hence the term \"missing trader\"."
+        },
+        {
+          "page": 75,
+          "printed_folio": "75",
+          "paragraph": null,
+          "quote": "Carousel fraud is the most common form of MTIC fraud and involves a circular trading scheme where the same goods are repeatedly imported and exported across multiple Member States, with VAT refunds being claimed for taxes that were never paid."
+        },
+        {
+          "page": 75,
+          "printed_folio": "75",
+          "paragraph": null,
+          "quote": "The contra-trading scheme is the most complex and emerging scheme of MTIC carousel fraud, in which criminal networks add an extra layer of companies to create a second trading circuit or carousel."
+        }
+      ],
+      "added_by": "reviewer",
+      "review_justification": "Found in VAT and MTIC fraud section, page 75, including case example '400 companies involved in a EUR 297 million VAT fraud network'. No Knowledge Centre typology matched this mechanism above the search floor. The advisory develops, over multiple paragraphs and a EUR 297 million/400-company case example, a specific and internally consistent technique: a 'missing trader' imports goods VAT-free, charges but never remits VAT, then disappears; 'carousel fraud' repeats the same goods' import/export across Member States to claim false refunds; 'contra-trading' layers a second company circuit to obscure the fraud further. This is a distinct value-extraction mechanism (exploiting cross-border VAT refund mechanics via disappearing traders) rather than a trade-invoice manipulation or sanctions-evasion technique, so it is proposed as an emergent typology."
+    },
+    {
+      "family": "other",
+      "typology_id": null,
+      "label": "Hawala and Informal Value Transfer Systems (IVTS) for Illicit Proceeds",
+      "emergent": true,
+      "confidence": "low",
+      "citations": [
+        {
+          "page": 24,
+          "printed_folio": "24",
+          "paragraph": null,
+          "quote": "from informal value transfer systems to the exploitation of cryptocurrencies, all these techniques serve as crucial components of a parallel financial criminal underworld."
+        },
+        {
+          "page": 52,
+          "printed_folio": "52",
+          "paragraph": null,
+          "quote": "Irregular migrants paid between EUR 3 000 and EUR 5 000 per person, depending on the provided services, directly to hawala offices, also in cryptocurrencies."
+        }
+      ],
+      "added_by": "reviewer",
+      "review_justification": "Found in Money laundering section, page 24 (listed among parallel-financial-system techniques); migrant smuggling case example, page 52. Search of the Knowledge Centre returned no typology above the score floor for hawala/IVTS, so this is proposed as an emergent entry rather than linked to an existing one. The advisory names informal value transfer systems as a distinct component of the criminal parallel financial system (page 24) and evidences it concretely with a case in which smuggling proceeds were paid directly to hawala offices outside the banked/correspondent system (page 52) -- a value-movement mechanism separate from the trade-invoice, shell-company and crypto mechanisms already captured elsewhere in this record. Confidence is kept low because the evidence is two brief mentions rather than a developed technique description."
+    }
+  ],
+  "actors": [
+    {
+      "name": "Criminal networks",
+      "actor_type": "category",
+      "aliases": [],
+      "jurisdiction": null,
+      "role": "Primary perpetrators across all crime areas described in the report; increasingly act as proxies for hybrid threat actors while retaining financial motivation",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 11,
+          "printed_folio": "11",
+          "paragraph": null,
+          "quote": "While criminal networks are in it for the financial profits, their activities contribute to the political goals of the hybrid threat actor they support."
+        }
+      ]
+    },
+    {
+      "name": "Hybrid threat actors",
+      "actor_type": "category",
+      "aliases": [],
+      "jurisdiction": null,
+      "role": "State or state-aligned actors who cooperate with and outsource criminal activity (sabotage, disinformation, cyber-attacks, money laundering) to criminal networks for deniability and geopolitical gain",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 14,
+          "printed_folio": "14",
+          "paragraph": null,
+          "quote": "Some states provide safe havens for criminals in exchange for their services, allowing them to operate freely without fear of prosecution."
+        }
+      ]
+    },
+    {
+      "name": "Professional money launderers / money brokers",
+      "actor_type": "category",
+      "aliases": [],
+      "jurisdiction": null,
+      "role": "Specialised launderers who operate parallel, underground financial systems outside regulated frameworks, offering large-scale unregulated financial services to multiple criminal networks",
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 26,
+          "printed_folio": "26",
+          "paragraph": null,
+          "quote": "Some high-level money brokers occupy pivotal positions within criminal networks, offering extensive, unregulated financial services to multiple criminal networks."
+        }
+      ]
+    },
+    {
+      "name": "Corruption brokers",
+      "actor_type": "category",
+      "aliases": [],
+      "jurisdiction": null,
+      "role": "Intermediaries emerging under the crime-as-a-service model to facilitate corrupt access to public and private sector systems",
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 23,
+          "printed_folio": "23",
+          "paragraph": null,
+          "quote": "corruption has adapted to the broader trends toward digitalisation and a crime-as-a-service model, with several threats becoming increasingly visible: ... the elevated role of corruption brokers."
+        }
+      ]
+    },
+    {
+      "name": "ChipMixer",
+      "actor_type": "organisation",
+      "aliases": [],
+      "jurisdiction": null,
+      "role": "Unlicensed cryptocurrency mixing service used to launder illicit crypto assets by tokenising and mixing deposits",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 25,
+          "printed_folio": "25",
+          "paragraph": null,
+          "quote": "ChipMixer, an unlicensed cryptocurrency mixer, was taken down in March 2023, for its alleged involvement in money laundering activities."
+        }
+      ]
+    },
+    {
+      "name": "Front companies (sanctions-evasion supply chains)",
+      "actor_type": "category",
+      "aliases": [],
+      "jurisdiction": null,
+      "role": "Entities set up or infiltrated in retail, import-export, transport and financial sectors to procure and ship sanctioned goods while concealing the real party in interest",
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 78,
+          "printed_folio": "78",
+          "paragraph": null,
+          "quote": "Legal businesses are infiltrated, and front companies are set up in retail, import-export, transport, or the financial sector for the procurement and shipment of goods or assets."
+        }
+      ]
+    }
+  ],
+  "indicators": [
+    {
+      "indicator_type": "documentary",
+      "description": "Use of front companies and falsified export documentation to disguise military-grade or sanctioned goods shipped to sanctioned destinations",
+      "detectable_in_transaction_data": false,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 77,
+          "printed_folio": "77",
+          "paragraph": null,
+          "quote": "These illicit exports were allegedly facilitated through front companies and falsified documentation to circumvent trade restrictions."
+        }
+      ]
+    },
+    {
+      "indicator_type": "network",
+      "description": "Infiltration of legitimate businesses and establishment of front companies across retail, import-export, transport and financial sectors to run sanctions-evasion supply chains",
+      "detectable_in_transaction_data": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 78,
+          "printed_folio": "78",
+          "paragraph": null,
+          "quote": "Legal businesses are infiltrated, and front companies are set up in retail, import-export, transport, or the financial sector for the procurement and shipment of goods or assets."
+        }
+      ]
+    },
+    {
+      "indicator_type": "transactional",
+      "description": "Chain-hopping between cryptocurrencies, including conversion into lesser-known coins or privacy coins such as Monero, to obscure the origin of funds",
+      "detectable_in_transaction_data": true,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 25,
+          "printed_folio": "25",
+          "paragraph": null,
+          "quote": "These transactions are difficult to trace when well-known coins are exchanged into less known ones or privacy coins like Monero, enhancing anonymity."
+        }
+      ]
+    },
+    {
+      "indicator_type": "transactional",
+      "description": "Deposits processed through an unlicensed cryptocurrency mixing service that converts funds into interchangeable tokens before redistribution, severing the audit trail back to source",
+      "detectable_in_transaction_data": true,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 25,
+          "printed_folio": "25",
+          "paragraph": null,
+          "quote": "Deposited funds would be turned into \u201cchips\u201d (small tokens with equivalent value), which were then mixed together - thereby anonymising all trails to where the initial funds originated."
+        }
+      ]
+    },
+    {
+      "indicator_type": "documentary",
+      "description": "Use of shell or buffer companies with no genuine commercial substance, quickly established and dissolved, to exploit cross-border VAT refund and customs processes",
+      "detectable_in_transaction_data": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 75,
+          "printed_folio": "75",
+          "paragraph": null,
+          "quote": "Shell or buffer companies, whether infiltrated or set-up, facilitate the exploitation of cross-border VAT systems and VAT refund processes."
+        }
+      ]
+    },
+    {
+      "indicator_type": "behavioural",
+      "description": "Recruitment and communication with corrupt insiders conducted online, with bribes settled via cryptocurrency or fintech channels",
+      "detectable_in_transaction_data": false,
+      "confidence": "low",
+      "citations": [
+        {
+          "page": 29,
+          "printed_folio": "29",
+          "paragraph": null,
+          "quote": "Recruitment of, and communication with corruptees takes place online. Bribes are transferred by criminally exploiting cryptocurrencies or fintech."
+        }
+      ]
+    },
+    {
+      "indicator_type": "network",
+      "description": "Criminal networks executing persistent, cumulative, seemingly minor disruptive incidents (sabotage, arson, intimidation) on behalf of external hybrid threat actors rather than a single major attack",
+      "detectable_in_transaction_data": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 15,
+          "printed_folio": "15",
+          "paragraph": null,
+          "quote": "Such incidents may be part of a larger strategic objective of destabilisation, involving persistent, targeted, and cumulative disruptions rather than a single, overwhelming attack."
+        }
+      ]
+    },
+    {
+      "indicator_type": "geographic",
+      "description": "Transhipment of sanctioned strategic goods routed via Eurasian Economic Union and Caucasus countries en route to Russia and Belarus",
+      "detectable_in_transaction_data": true,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 78,
+          "printed_folio": "78",
+          "paragraph": null,
+          "quote": "Countries from the Eurasian Economic Union and the Caucasus play a central role in transhipment."
+        }
+      ]
+    }
+  ],
+  "suggested_desks": [
+    "sanctions_desk",
+    "trade_desk",
+    "fraud_desk",
+    "general_intel"
+  ],
+  "overall_confidence": "medium",
+  "extraction_notes": "This is a 100-page, EU-wide strategic threat assessment covering nearly the entire organised-crime landscape (cyber-attacks, online fraud, CSAM, human trafficking, migrant smuggling, drug and firearms trafficking, environmental crime, property crime, IP crime, currency counterfeiting, EU-financial-interest fraud). Only the strands with direct financial-crime/Knowledge Centre relevance (sanctions evasion, shell-company/TBML abuse, crypto layering, corruption, and the hybrid-threat/criminal-proxy nexus) were extracted as typologies; the remaining crime areas are reflected only in the summary. Confidence on CMI010 and the corruption-broker emergent typology is comparatively low/medium because each rests on a small number of narrative sentences rather than a developed case study. The 'Hybrid Threat Actor Use of Criminal Networks as Proxies' item is proposed as emergent because no existing KC family/typology captures state-criminal proxy relationships, even though it is arguably the report's central thesis. Jurisdictions listed reflect countries named in the specific passages cited (sanctions case: NL/DE/LV/LT/RU; hybrid threat state-actor context: RU/CN/IR/KP/UA) rather than the full geographic scope of the report. Merged 4 reviewer addition(s) under schema 1.4.0; each carries its review_justification. Extraction-only record retained at data/records/."
+}

@@ -1,0 +1,534 @@
+{
+  "schema_version": "1.4.0",
+  "advisory_id": "ADV-2026-0012",
+  "source": {
+    "source_type": "ofac",
+    "publisher": "U.S. Dept. of State, OFAC (U.S. Dept. of the Treasury), U.S. Coast Guard",
+    "title": "Guidance to Address Illicit Shipping and Sanctions Evasion Practices (Sanctions Advisory for the Maritime Industry, Energy and Metals Sectors)",
+    "published_on": "2020-05-14",
+    "published_on_precision": "day",
+    "url": null,
+    "document_sha256": "84c17da514a83199c0cfdda47cc97d0907d4365c21266f582313ba654699e4e8",
+    "page_count": 35
+  },
+  "summary": "This joint advisory from the U.S. Department of State, OFAC, and the U.S. Coast Guard (May 14, 2020) updates prior sanctions-related shipping advisories concerning Iran, North Korea, and Syria. It describes deceptive shipping practices used to evade sanctions: AIS disabling/manipulation ('spoofing'), physically altering vessel identification, falsifying cargo and vessel documents, ship-to-ship (STS) transfers, voyage irregularities including indirect routing and transshipment through third countries, false flags and flag hopping, and complex ownership or management structures using shell companies to disguise beneficial ownership. Annex A gives sector-specific due diligence guidance for insurers, flag registries, port authorities, industry associations, commodity traders, financial institutions, ship owners/operators/charterers, classification societies, vessel captains, and crewing companies. Annex B details North Korea-, Iran-, and Syria-specific sanctions authorities and documented deceptive practices, including North Korean coal and sand exports via STS transfers to Chinese barges, illicit refined-petroleum imports via STS transfers, non-AIS-transmitting barges, and Iranian oil-for-Syria schemes that benefited the IRGC-Qods Force, Hizballah, and Hamas.",
+  "jurisdictions": [
+    "US",
+    "IR",
+    "KP",
+    "SY",
+    "CN",
+    "RU"
+  ],
+  "typologies": [
+    {
+      "family": "sanctions",
+      "typology_id": "SAN002",
+      "label": "Shadow Fleet",
+      "emergent": false,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 2,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "vessels engaged in illicit activities may also intentionally disable their AIS transponders or manipulate the data transmitted in order to mask their movement."
+        },
+        {
+          "page": 3,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "Bad actors may falsify the flag of their vessels to mask illicit trade.  They may also repeatedly register with new flag states (\u201cflag hopping\u201d) to avoid detection."
+        },
+        {
+          "page": 3,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "STS transfers\u2014especially at night or in areas determined to be high-risk for sanctions evasion or other illicit activity\u2014are frequently used to evade sanctions"
+        },
+        {
+          "page": 30,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "North Korea sometimes utilizes non-ocean-going barges that do not transmit an AIS signal to illicitly transport North Korea-origin goods to China."
+        }
+      ]
+    },
+    {
+      "family": "sanctions",
+      "typology_id": "SAN009",
+      "label": "Complex Ownership Structures",
+      "emergent": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 3,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "Bad actors attempt to take advantage of this complexity through the use of complex business structures, including those involving shell companies and/or multiple levels of ownership and management, to disguise the ultimate beneficial owner of cargo or commodities"
+        }
+      ]
+    },
+    {
+      "family": "sanctions",
+      "typology_id": "SAN003",
+      "label": "Transshipment",
+      "emergent": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 3,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "Malign actors may attempt to disguise the ultimate destination or origin of cargo or recipients by using indirect routing, unscheduled detours, or transit or transshipment of cargo through third countries."
+        },
+        {
+          "page": 28,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "The majority of these exports have occurred via STS transfers from North Korea-flagged vessels to local barges in Chinese territorial sea."
+        }
+      ]
+    },
+    {
+      "family": "sanctions",
+      "typology_id": "SAN006",
+      "label": "Trade Based Sanctions Evasion",
+      "emergent": false,
+      "confidence": "low",
+      "citations": [
+        {
+          "page": 2,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "Authorities have found that sanctions evaders have falsified shipping documentation pertaining to petrochemicals, petroleum, petroleum products, or metals (steel, iron) or sand in order to disguise their origin."
+        },
+        {
+          "page": 15,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "Recognizing that purchases of crude and refined petroleum, petrochemicals, and metals at rates significantly below market prices may be red flags indicating illicit behavior."
+        }
+      ]
+    },
+    {
+      "family": "terrorist_financing",
+      "typology_id": null,
+      "label": "Trade Value Offsetting for Terrorist Proxy Financing",
+      "emergent": true,
+      "confidence": "low",
+      "citations": [
+        {
+          "page": 35,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "This scheme used a payment offsetting arrangement in which the sale and shipment of Iranian oil to Syria provided hundreds of millions of dollars to Iran's terror proxy groups, including Hizballah, HAMAS, and the IRGC-QF."
+        }
+      ],
+      "added_by": "reviewer",
+      "review_justification": "Found in Syria section, deceptive shipping practices case study, page 35. No KC typology names this mechanism; search for 'trade proceeds used to finance terrorism proxy militant groups' returned no match above floor. SAN006 Trade Based Sanctions Evasion requires 'mispricing an invoice, or misdescribing the goods' -- absent here; this is a settlement mechanism (offsetting, not cash) routing value to a terrorist beneficiary. SAN002/SAN003 concern vessel-identity/routing concealment, not financing routing. TBML006 Circular Trade requires 'value leaves an entity and returns to it' (closed loop) -- here value moves forward Iran->Syria->Hizballah/HAMAS/IRGC-QF with no round-trip. This is a distinct trade-settlement-as-terrorist-financing-conduit mechanism the library does not capture."
+    }
+  ],
+  "actors": [
+    {
+      "name": "North Korea",
+      "actor_type": "jurisdiction",
+      "aliases": [],
+      "jurisdiction": "KP",
+      "role": "Sanctioned jurisdiction engaging in illicit shipping to evade sanctions",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 1,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "with a focus on Iran, North Korea, and Syria"
+        }
+      ]
+    },
+    {
+      "name": "Iran",
+      "actor_type": "jurisdiction",
+      "aliases": [],
+      "jurisdiction": "IR",
+      "role": "Sanctioned jurisdiction subject to comprehensive OFAC sanctions",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 1,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "with a focus on Iran, North Korea, and Syria"
+        }
+      ]
+    },
+    {
+      "name": "Syria",
+      "actor_type": "jurisdiction",
+      "aliases": [],
+      "jurisdiction": "SY",
+      "role": "Sanctioned jurisdiction, Government of Syria subject to Syrian Sanctions Regulations",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 1,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "with a focus on Iran, North Korea, and Syria"
+        }
+      ]
+    },
+    {
+      "name": "Islamic Revolutionary Guard Corps (IRGC)",
+      "actor_type": "organisation",
+      "aliases": [
+        "IRGC"
+      ],
+      "jurisdiction": "IR",
+      "role": "Specially Designated Global Terrorist and Foreign Terrorist Organization financing terrorist activity",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 6,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "The IRGC, which is a Specially Designated Global Terrorist and was designated as a Foreign Terrorist Organization by the U.S. government in April 2019, has financed numerous terrorist attacks and activities globally."
+        }
+      ]
+    },
+    {
+      "name": "IRGC-Qods Force (IRGC-QF)",
+      "actor_type": "organisation",
+      "aliases": [
+        "IRGC-QF",
+        "Qods Force"
+      ],
+      "jurisdiction": "IR",
+      "role": "Supports terrorist operations outside Iran via militant proxy groups",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 7,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "The IRGC-QF supports terrorist operations outside Iran via militant groups, such as Hizballah and Hamas."
+        }
+      ]
+    },
+    {
+      "name": "Hizballah",
+      "actor_type": "organisation",
+      "aliases": [],
+      "jurisdiction": null,
+      "role": "Terror proxy group receiving funds from Iranian oil-for-Syria payment offsetting scheme",
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 35,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "the sale and shipment of Iranian oil to Syria provided hundreds of millions of dollars to Iran\u2019s terror proxy groups, including Hizballah, HAMAS, and the IRGC-QF."
+        }
+      ]
+    },
+    {
+      "name": "Hamas",
+      "actor_type": "organisation",
+      "aliases": [],
+      "jurisdiction": null,
+      "role": "Terror proxy group receiving funds from Iranian oil-for-Syria payment offsetting scheme",
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 35,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "the sale and shipment of Iranian oil to Syria provided hundreds of millions of dollars to Iran\u2019s terror proxy groups, including Hizballah, HAMAS, and the IRGC-QF."
+        }
+      ]
+    },
+    {
+      "name": "National Iranian Oil Company",
+      "actor_type": "organisation",
+      "aliases": [
+        "NIOC"
+      ],
+      "jurisdiction": "IR",
+      "role": "SDN-listed Iranian entity for which material support is sanctionable",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 31,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "such as the National Iranian Oil Company (NIOC), the National Iranian Tanker Company (NITC), and the Islamic Republic of Iran Shipping Lines (IRISL)"
+        }
+      ]
+    },
+    {
+      "name": "National Iranian Tanker Company",
+      "actor_type": "organisation",
+      "aliases": [
+        "NITC"
+      ],
+      "jurisdiction": "IR",
+      "role": "SDN-listed Iranian entity for which material support is sanctionable",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 31,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "such as the National Iranian Oil Company (NIOC), the National Iranian Tanker Company (NITC), and the Islamic Republic of Iran Shipping Lines (IRISL)"
+        }
+      ]
+    },
+    {
+      "name": "Islamic Republic of Iran Shipping Lines",
+      "actor_type": "organisation",
+      "aliases": [
+        "IRISL"
+      ],
+      "jurisdiction": "IR",
+      "role": "SDN-listed Iranian entity for which material support is sanctionable",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 31,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "such as the National Iranian Oil Company (NIOC), the National Iranian Tanker Company (NITC), and the Islamic Republic of Iran Shipping Lines (IRISL)"
+        }
+      ]
+    },
+    {
+      "name": "Maritime Assistance LLC",
+      "actor_type": "organisation",
+      "aliases": [],
+      "jurisdiction": null,
+      "role": "Sanctioned entity for facilitating jet fuel sale/delivery to Russian military in Banias, Syria",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 35,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "in September 2019, OFAC sanctioned Maritime Assistance LLC and three individuals for facilitating the sale and delivery of jet fuel to Russian military forces operating in Banias, Syria."
+        }
+      ]
+    },
+    {
+      "name": "Government of Syria / Bashar al-Assad regime",
+      "actor_type": "organisation",
+      "aliases": [],
+      "jurisdiction": "SY",
+      "role": "Sanctioned government entity subject to Syrian Sanctions Regulations",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 35,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "The United States is committed to holding the Government of Syria, the Bashar al-Assad regime, and those who continue to support them accountable for their brutality and killing of Syrian civilians."
+        }
+      ]
+    },
+    {
+      "name": "Syrian Company for Oil Transport",
+      "actor_type": "organisation",
+      "aliases": [],
+      "jurisdiction": "SY",
+      "role": "U.S.-designated government-owned entity receiving petroleum shipments",
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 35,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "such as the U.S.-designated Syrian Company for Oil Transport or Banias Refinery Company"
+        }
+      ]
+    },
+    {
+      "name": "Banias Refinery Company",
+      "actor_type": "organisation",
+      "aliases": [],
+      "jurisdiction": "SY",
+      "role": "U.S.-designated government-owned entity receiving petroleum shipments",
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 35,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "such as the U.S.-designated Syrian Company for Oil Transport or Banias Refinery Company"
+        }
+      ]
+    },
+    {
+      "name": "Malign/bad actors engaged in illicit shipping",
+      "actor_type": "category",
+      "aliases": [],
+      "jurisdiction": null,
+      "role": "Operators of vessels employing deceptive shipping practices to evade sanctions",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 2,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "Malign actors constantly seek novel ways to exploit global supply chains for their benefit."
+        }
+      ]
+    }
+  ],
+  "indicators": [
+    {
+      "indicator_type": "behavioural",
+      "description": "Vessels intentionally disable AIS transponders or manipulate transmitted data ('spoofing') to broadcast a different name, IMO number, MMSI or other identifying information, masking movement.",
+      "detectable_in_transaction_data": false,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 2,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "The practice of manipulating AIS data, referred to as \u201cspoofing,\u201d allows ships to broadcast a different name, International Maritime Organization (IMO) number (a unique, seven-digit vessel identification code), Maritime Mobile Service Identity (MMSI), or other identifying information."
+        }
+      ]
+    },
+    {
+      "indicator_type": "behavioural",
+      "description": "Vessels painted over names and IMO numbers on hull/superstructure to obscure identity and pass as different vessels.",
+      "detectable_in_transaction_data": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 2,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "Vessels involved in illicit activities have often painted over vessel names and IMO numbers to obscure their identities and pass themselves off as different vessels."
+        }
+      ]
+    },
+    {
+      "indicator_type": "documentary",
+      "description": "Falsified shipping documentation (bills of lading, certificates of origin, invoices) for petrochemicals, petroleum, metals or sand used to disguise true cargo origin.",
+      "detectable_in_transaction_data": true,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 2,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "Authorities have found that sanctions evaders have falsified shipping documentation pertaining to petrochemicals, petroleum, petroleum products, or metals (steel, iron) or sand in order to disguise their origin."
+        }
+      ]
+    },
+    {
+      "indicator_type": "behavioural",
+      "description": "Ship-to-ship cargo transfers at sea, especially at night or in high-risk areas, used to conceal the origin or destination of petroleum, coal and other material.",
+      "detectable_in_transaction_data": false,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 3,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "STS transfers\u2014especially at night or in areas determined to be high-risk for sanctions evasion or other illicit activity\u2014are frequently used to evade sanctions by concealing the origin or destination of surreptitiously transferred petroleum, coal, and other material."
+        }
+      ]
+    },
+    {
+      "indicator_type": "geographic",
+      "description": "Indirect routing, unscheduled detours, or transit/transshipment of cargo through third countries used to disguise ultimate cargo origin or destination.",
+      "detectable_in_transaction_data": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 3,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "Malign actors may attempt to disguise the ultimate destination or origin of cargo or recipients by using indirect routing, unscheduled detours, or transit or transshipment of cargo through third countries."
+        }
+      ]
+    },
+    {
+      "indicator_type": "documentary",
+      "description": "Falsification of a vessel's flag and repeated re-registration with new flag states ('flag hopping') to avoid detection, including continued use of a flag after deregistration.",
+      "detectable_in_transaction_data": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 3,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "Bad actors may falsify the flag of their vessels to mask illicit trade.  They may also repeatedly register with new flag states (\u201cflag hopping\u201d) to avoid detection."
+        }
+      ]
+    },
+    {
+      "indicator_type": "network",
+      "description": "Use of complex business structures, shell companies and multiple layers of ownership/management to disguise the ultimate beneficial owner of cargo or commodities.",
+      "detectable_in_transaction_data": true,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 3,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "Bad actors attempt to take advantage of this complexity through the use of complex business structures, including those involving shell companies and/or multiple levels of ownership and management, to disguise the ultimate beneficial owner of cargo or commodities"
+        }
+      ]
+    },
+    {
+      "indicator_type": "transactional",
+      "description": "Purchases of crude/refined petroleum, petrochemicals and metals at rates significantly below market price.",
+      "detectable_in_transaction_data": true,
+      "confidence": "low",
+      "citations": [
+        {
+          "page": 15,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "Recognizing that purchases of crude and refined petroleum, petrochemicals, and metals at rates significantly below market prices may be red flags indicating illicit behavior."
+        }
+      ]
+    },
+    {
+      "indicator_type": "behavioural",
+      "description": "Use of non-ocean-going barges that do not transmit an AIS signal to illicitly transport North Korea-origin coal and sand to China.",
+      "detectable_in_transaction_data": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 30,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "North Korea sometimes utilizes non-ocean-going barges that do not transmit an AIS signal to illicitly transport North Korea-origin goods to China."
+        }
+      ]
+    },
+    {
+      "indicator_type": "behavioural",
+      "description": "Ownership of a vessel transferred between companies controlled by the same beneficial owner with no discernable legitimate purpose for the transfer.",
+      "detectable_in_transaction_data": true,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 5,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "industry actors may also consider looking for situations where ownership of a vessel is transferred between companies controlled by the same beneficial owner and where there is no discernable legitimate purpose for the transfer"
+        }
+      ]
+    }
+  ],
+  "suggested_desks": [
+    "sanctions_desk",
+    "trade_desk",
+    "correspondent_desk"
+  ],
+  "overall_confidence": "high",
+  "extraction_notes": "PAT008 (network family, doctrine authored as NI008) shares the label 'Shadow Fleet' with SAN002 (sanctions family); SAN002 was selected as the closer fit given this document's framing as a sanctions advisory rather than a network-analytics product. TBML004/TBML005/TBML010 were reviewed but not proposed: the document's falsified-documents and underpricing content is narrower and mechanism-specific, so SAN006 (Trade Based Sanctions Evasion) was used at low confidence instead. Russia (RU) and China (CN) are named only as counterparties/destinations in specific case examples (Annex B North Korea coal/sand routes; Syria section jet-fuel sanctions action), not as primary subjects of the advisory. The three unnamed individuals sanctioned alongside Maritime Assistance LLC could not be extracted as the source text does not name them. Merged 1 reviewer addition(s) under schema 1.4.0; each carries its review_justification. Extraction-only record retained at data/records/."
+}
