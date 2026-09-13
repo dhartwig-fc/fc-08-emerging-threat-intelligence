@@ -1,5 +1,5 @@
 {
-  "schema_version": "1.3.0",
+  "schema_version": "1.4.0",
   "advisory_id": "ADV-2026-0001",
   "source": {
     "source_type": "fatf",
@@ -45,7 +45,9 @@
           "paragraph": 1,
           "quote": "Several jurisdictions reported the misuse of carbon credit trading to legitimise proceeds."
         }
-      ]
+      ],
+      "added_by": "reviewer",
+      "review_justification": "The Knowledge Centre search returned no match above the floor for carbon-credit invoice laundering, and the closest candidate, TBML001 Over Invoicing, describes inflating the price of goods rather than fabricating the underlying carbon credit. The advisory describes credits that were never issued being invoiced and settled, which is a different mechanism, so this is emergent rather than a library match."
     }
   ],
   "actors": [

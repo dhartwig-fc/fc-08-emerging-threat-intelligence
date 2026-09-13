@@ -15,7 +15,20 @@ from typing import List, Optional
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
-SCHEMA_VERSION = "1.3.0"
+SCHEMA_VERSION = "1.4.0"
+# 1.4.0 (2026-09-13, week 4 additive reviewer): TypologyReference gains `added_by`
+#   and `review_justification`. The reviewer (agents/review_advisory.py) finds
+#   typologies the extraction missed -- measured full-set F1 0.510 -> 0.665 -- and
+#   its additions were held in separate files because merging them into a record
+#   would have lost WHICH mechanism produced each claim, and why.
+#   `added_by` defaults to "extractor", so every existing record validates
+#   unchanged and a record written before this version means what it always meant.
+#   The validator pair is the point: a reviewer addition MUST carry its
+#   justification, and an extractor entry may NOT carry one. The reviewer earns
+#   each addition by quoting the doctrine's own words; letting that reason be
+#   dropped on the way into the record would leave the same unexplainable
+#   assertion the ADV-2026-0016 trace found -- a typology retrieved, confirmed
+#   and committed with no record anywhere of why.
 # 1.3.0 (2026-09-11, week 3 golden set): extraction_notes cap 1000 -> 4000. Six golden
 #   labels on 50-190 page reports failed validation on reviewer notes alone; truncating
 #   them would discard the judgement calls the owner review exists to read.
@@ -119,6 +132,20 @@ class Citation(BaseModel):
     quote: str = Field(..., min_length=10, max_length=600, description="Verbatim supporting text")
 
 
+class AddedBy(str, Enum):
+    """Which mechanism put this typology in the record.
+
+    Two mechanisms with different failure modes: the extractor reads the document
+    once and under-asserts (measured recall 0.357 against precision 0.889); the
+    reviewer reads it again looking for what was missed and can over-assert
+    (additions run at precision 0.792). A curator, and any future scorer, should
+    be able to weigh them separately -- so the record says which.
+    """
+
+    EXTRACTOR = "extractor"
+    REVIEWER = "reviewer"
+
+
 class TypologyReference(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
@@ -132,6 +159,37 @@ class TypologyReference(BaseModel):
     emergent: bool = Field(False, description="True when no existing typology matches")
     confidence: Confidence
     citations: List[Citation] = Field(..., min_length=1)
+    added_by: AddedBy = Field(
+        AddedBy.EXTRACTOR,
+        description="Which mechanism produced this entry. Defaults to extractor so every "
+                    "record written before schema 1.4.0 means what it always meant.",
+    )
+    review_justification: Optional[str] = Field(
+        None,
+        min_length=40,
+        max_length=1200,
+        description="Required when added_by is reviewer, forbidden otherwise. For a library "
+                    "match, quote the doctrine's own words for the mechanism and say how this "
+                    "document's evidence matches THAT mechanism. For an emergent entry there "
+                    "is no doctrine to quote, so say what the search returned, why the closest "
+                    "candidate is a different mechanism, and what this one is.",
+    )
+
+    @model_validator(mode="after")
+    def _reviewer_additions_carry_their_reason(self) -> "TypologyReference":
+        """The reviewer earns each addition. The reason travels with it or it does not enter.
+
+        Not a style rule. The 2026-09-13 trace of ADV-2026-0016 found SAN006
+        retrieved, confirmed with get_typology and then dropped, with no record
+        anywhere of why -- rule 3 governs what enters a record and nothing
+        governed the reasoning behind it. An addition that arrives without its
+        justification is the same defect pointing the other way.
+        """
+        if self.added_by is AddedBy.REVIEWER and not self.review_justification:
+            raise ValueError("a reviewer addition must carry review_justification")
+        if self.added_by is not AddedBy.REVIEWER and self.review_justification is not None:
+            raise ValueError("review_justification belongs only to a reviewer addition")
+        return self
 
     @model_validator(mode="after")
     def _emergent_has_no_id(self) -> "TypologyReference":

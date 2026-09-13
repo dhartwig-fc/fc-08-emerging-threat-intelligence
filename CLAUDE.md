@@ -20,7 +20,7 @@ The pre-existing folders (`analytics-opportunities/`, `intelligence/`, `roadmap/
 
 ```
 PLAN.md                            six-week plan and definition of done
-schemas/advisory.py                AdvisoryRecord contract (schema 1.2.0; read SCHEMA_VERSION, not this line) — the treaty
+schemas/advisory.py                AdvisoryRecord contract (read SCHEMA_VERSION, not this line) — the treaty
 mcp_server/knowledge_centre_server.py   Knowledge Centre as MCP tools (read-only + propose)
 agents/extract_advisory.py         single-advisory extraction agent, grounded on the MCP server since week 2
 evals/golden/                      week-3 golden set: advisory_list.json (20, hashed) + hand labels as they are written
@@ -38,6 +38,7 @@ evals/score.py                     scores predicted records against the golden s
 evals/check_tool_surface.py        proves the agent cannot reach Bash/Write/Read; run with --live --mutate
 evals/search_aliases_probe.py       guards SEARCH_ALIASES: direction pair fixed, emergent guard intact; --mutate
 evals/check_twin_pairs.py           guards the cross-family twin relation and the propose_link refusal; --mutate
+evals/check_added_by.py             pins schema 1.4.0's added_by / review_justification pair; --mutate
 evals/check_emergent_threshold.py   pins emergent at 0.50 and proves 0.40 is a real floor; --mutate
 evals/search_recall.py              search measured against the golden set's real advisory sentences, not hand-written probes
 evals/probe_prompt_variant.py       A/B a prompt change without editing the agent; INVERTED 2026-09-12, now builds the pre-adoption prompt
@@ -258,8 +259,17 @@ claude mcp add knowledge-centre -- "$PWD/.venv/bin/python" "$PWD/mcp_server/know
   discriminates nothing. The signal survives anyway: "Underground Banking" appears across FOUR advisories
   under four different names, which is exactly what a curator needs.
 
-- [ ] Week 4 remaining: a schema field + version bump if the reviewer's additions are to merge into records,
-  and the honest single-vs-multi comparison. Sixteen of the twenty are SINGLE runs;
+  **SCHEMA 1.4.0, 2026-09-13: `added_by` + `review_justification` on TypologyReference.** `added_by`
+  defaults to `extractor`, so all 20 existing records validate unchanged and a pre-1.4.0 record means what it
+  always meant. The VALIDATOR PAIR is the point: a reviewer addition MUST carry its justification, and an
+  extractor entry may NOT carry one. The 0016 trace found SAN006 retrieved, confirmed and dropped with no
+  record of why — rule 3 governs what ENTERS a record and nothing governed the reasoning; an addition
+  arriving without its reason is that defect pointing the other way. Writing the example record caught a
+  flaw in the field's own description: an EMERGENT entry has no doctrine to quote, so the description now
+  covers both cases. Pinned by `evals/check_added_by.py`, mutation-verified.
+
+- [ ] Week 4 remaining: a merge step that writes reviewer additions into records under the new fields, and
+  the honest single-vs-multi comparison. Sixteen of the twenty are SINGLE runs;
   only the four concentrated documents have bands. **DO NOT plan the rest against better retrieval.** Measured three ways on 2026-09-12: the search fix lifted top-5 recall 41% relative and moved extraction recall by nothing; typologies were retrieved, confirmed with `get_typology`, and then not asserted; and the agent asserts the same handful whether the document holds 5 golden typologies or 20. Build against the three mechanisms below, in that order. And note precision 0.889 is this pipeline's best property -- an assertion budget IS a precision strategy, so a reviewer that justifies each extra assertion beats simply asserting more
 - [ ] Week 5: hooks, telemetry, `review.py` gate, desk digests
 - [ ] Week 6: publish slice 1 on `future-capabilities.html`, tag `fc08-threatintel-slice1-v1.0.0`
