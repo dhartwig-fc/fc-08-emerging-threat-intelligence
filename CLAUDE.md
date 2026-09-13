@@ -145,10 +145,18 @@ claude mcp add knowledge-centre -- "$PWD/.venv/bin/python" "$PWD/mcp_server/know
      fit per the stated convention."* That is worth more than the 0.05 recall it moved, because
      week 5's reviewer can audit it.
 
-     **A FOURTH PAIR exists that `evals/golden/README.md` does not declare** — `BA008` Layering and
-     `CM004` Layering, identical labels, different families, found by label-overlap measurement on
-     2026-09-13. It carries `prefer=None`: no owner decision exists and none is invented. **It needs
-     an owner ruling.** Guarded by `evals/check_twin_pairs.py` (10 checks, mutation-verified, and it
+     **THE FOURTH PAIR WAS NOT A PAIR — ruled 2026-09-13, and it was my error.** `BA008` and
+     `CM004` are both labelled "Layering" and I added them to the map on that overlap without
+     reading the doctrine. BA008 (correspondent banking) is *"the classic middle stage of money
+     laundering: funds pushed through a chain of transfers to sever the audit trail"*; CM004
+     (capital markets) is *"ORDER-BOOK layering — staggering non-bona-fide orders to fake depth,
+     then cancelling"*. **A homonym, not a twin**: the three real pairs are one technique under two
+     codes, this is two techniques under one word. Declaring it was actively harmful, not merely
+     wrong — **BA008 appears in 13 of the 20 golden labels, more than any other typology**, so every
+     BA008 link would have demanded a meaningless CM004 justification, and a refusal that cannot be
+     satisfied honestly gets answered by dropping the claim. Removed, and recorded in
+     `_REJECTED_TWIN_CANDIDATES` so the same shortcut cannot re-add it. **LABEL OVERLAP PROPOSES;
+     DOCTRINE DECIDES.** Guarded by `evals/check_twin_pairs.py` (10 checks, mutation-verified, and it
      redirects `NEXUS_PROPOSALS_PATH` so it never writes into the real review queue). What the tool
      CANNOT do: adjudicate framing. It never sees the document, so it guarantees only that the agent
      knew the twin existed and recorded a reason.

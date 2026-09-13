@@ -138,6 +138,23 @@ def checks() -> list:
                       rationale="Front companies named on page 3.", confidence="low")
     out.append((untwinned.startswith("Accepted"), "an UNTWINNED code is unaffected",
                 "SAN004 has no twin and must not be caught by the refusal"))
+
+    # A rejected candidate must STAY rejected. BA008 is in 13 of the 20 golden
+    # labels -- more than any other typology -- so twinning it by mistake would
+    # demand a meaningless CM004 justification on the most common link in the
+    # set, and a refusal that cannot be satisfied honestly gets answered by
+    # dropping the claim (measured, df8d4aa). This check exists because that
+    # mistake WAS made, on label overlap, before anyone read the doctrine.
+    for (a, b), why in kc._REJECTED_TWIN_CANDIDATES.items():
+        out.append((a not in kc.TYPOLOGY_TWINS and b not in kc.TYPOLOGY_TWINS,
+                    "%s/%s stays OUT of the twin map" % (a, b), why))
+
+    ok = _call(kc.propose_link, kc.ProposeLinkInput, advisory_id=ADVISORY, typology_id="BA008",
+               rationale="Chain of transfers through intermediaries severing the audit trail, p.4.",
+               confidence="medium")
+    out.append((ok.startswith("Accepted"),
+                "propose_link ACCEPTS BA008 with no twin named",
+                "the most-used typology in the golden set must not carry a spurious requirement"))
     return out
 
 

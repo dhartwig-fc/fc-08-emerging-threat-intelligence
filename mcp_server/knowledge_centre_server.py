@@ -329,10 +329,33 @@ _TWIN_PAIRS = (
      "An advisory framed as sanctions or export-control evasion takes the sanctions twin."),
     ("SAN002", "PAT008", "SAN002",
      "An advisory framed as sanctions or export-control evasion takes the sanctions twin."),
-    ("BA008", "CM004", None,
-     "No owner decision. Found by label-overlap measurement 2026-09-13. Choose on the "
-     "document's own framing and say which and why."),
 )
+
+# REJECTED CANDIDATES, and why the rejection is recorded rather than silent.
+#
+# The pairs above were found by reading doctrine. A cheaper detector -- identical
+# or near-identical labels across families -- also proposes BA008/CM004, and on
+# 2026-09-13 that one was briefly ADDED to the map on label overlap alone, before
+# anyone read what the two codes say:
+#
+#   BA008 (correspondent_banking) "Layering" -- the classic middle stage of
+#     laundering: funds already placed are pushed through a chain of transfers to
+#     sever the audit trail.
+#   CM004 (capital_markets) "Layering" -- ORDER-BOOK layering: staggering
+#     non-bona-fide orders across price levels to fake depth, then cancelling.
+#
+# A homonym, not a twin. The three real pairs are one technique under two codes;
+# these are two techniques under one word. Declaring it would have been actively
+# harmful: BA008 appears in 13 of the 20 golden labels, more than any other
+# typology, so every BA008 link would have demanded a meaningless justification
+# naming CM004 -- and a refusal the agent cannot satisfy honestly is a refusal it
+# answers by dropping the claim, which is measured behaviour (see df8d4aa).
+#
+# Kept here so the candidate is not rediscovered and re-added by the same
+# shortcut. LABEL OVERLAP PROPOSES; DOCTRINE DECIDES.
+_REJECTED_TWIN_CANDIDATES = {
+    ("BA008", "CM004"): "homonym: AML layering vs order-book layering, different techniques",
+}
 
 
 def _twins() -> dict:
