@@ -129,6 +129,13 @@ async def get_typology(params: GetTypologyInput) -> str:
     """
     for r in _typologies():
         if r["typology_id"] == params.typology_id:
+            t = TYPOLOGY_TWINS.get(params.typology_id)
+            if t:
+                # Attached to the doctrine the agent is reading, at the moment it
+                # decides. The governed export itself is never modified.
+                twin_label = next((x["label"] for x in _typologies() if x["typology_id"] == t["twin"]), "?")
+                r = dict(r, twin={"typology_id": t["twin"], "label": twin_label,
+                                  "prefer": t["prefer"], "convention": t["note"]})
             return json.dumps(r, indent=2)
     return "Typology %s not found. Use knowledge_centre_list_typologies to see valid IDs." % params.typology_id
 
@@ -290,6 +297,66 @@ def rank_typologies(query: str) -> List[tuple]:
     return ranked
 
 
+# ---------------------------------------------------------------------------
+# Cross-family twins: the same technique carried by two typology codes.
+#
+# WHY THIS IS DATA AND NOT A PROMPT LINE. The system prompt said "Two typologies
+# can share a label; choose by family". Measured 2026-09-13 across ten runs of
+# ADV-2026-0017: SAN002 and PAT008 are both labelled "Shadow Fleet", so the rule
+# fires and the agent chooses correctly 10 of 10. SAN006 "Trade Based Sanctions
+# Evasion" and TBML010 "Sanctions Evasion Through Trade" are the same concept
+# with the words reordered, so the rule NEVER FIRES -- SAN006 was asserted in 0
+# of 10 runs and TBML010 in 8 of 10. One wrong choice scores as a false negative
+# AND a false positive, so it inflates the measured recall gap twice over.
+#
+# A rule whose predicate is string equality is correct English and the wrong
+# test: it is satisfied by the pair that does not need it and silent on the pair
+# that does. So the relation is declared here, surfaced in every search and
+# get_typology result, and propose_link refuses a twinned link whose rationale
+# does not say why that family. The agent can no longer choose a twin without
+# knowing the other exists, and cannot commit without recording the reason.
+#
+# PREFERENCE. For the three sanctions/trade pairs the owner decision of
+# 2026-09-10 (evals/golden/README.md) is that an advisory framed as sanctions or
+# export-control evasion takes the SANCTIONS twin. BA008/CM004 was found by
+# measurement on 2026-09-13, is NOT an owner decision, and has no stated
+# preference -- it is declared so the ambiguity is visible, with `prefer` None so
+# nothing is asserted that nobody decided.
+_TWIN_PAIRS = (
+    ("SAN006", "TBML010", "SAN006",
+     "An advisory framed as sanctions or export-control evasion takes the sanctions twin."),
+    ("SAN007", "TBML007", "SAN007",
+     "An advisory framed as sanctions or export-control evasion takes the sanctions twin."),
+    ("SAN002", "PAT008", "SAN002",
+     "An advisory framed as sanctions or export-control evasion takes the sanctions twin."),
+    ("BA008", "CM004", None,
+     "No owner decision. Found by label-overlap measurement 2026-09-13. Choose on the "
+     "document's own framing and say which and why."),
+)
+
+
+def _twins() -> dict:
+    """typology_id -> {twin, prefer, note}. Bidirectional, built from _TWIN_PAIRS."""
+    out = {}
+    for a, b, prefer, note in _TWIN_PAIRS:
+        out[a] = {"twin": b, "prefer": prefer, "note": note}
+        out[b] = {"twin": a, "prefer": prefer, "note": note}
+    return out
+
+
+TYPOLOGY_TWINS = _twins()
+
+
+def _twin_line(typology_id: str) -> str:
+    """One-line twin declaration for a search result, or empty."""
+    t = TYPOLOGY_TWINS.get(typology_id)
+    if not t:
+        return ""
+    if t["prefer"]:
+        return " (TWIN of %s; prefer %s when the advisory is framed that way)" % (t["twin"], t["prefer"])
+    return " (TWIN of %s; no preference set, choose on framing)" % t["twin"]
+
+
 @mcp.tool(
     name="knowledge_centre_search_typologies",
     annotations={"title": "Search typologies", "readOnlyHint": True, "destructiveHint": False, "idempotentHint": True, "openWorldHint": False},
@@ -302,8 +369,13 @@ async def search_typologies(params: SearchTypologiesInput) -> str:
     A result is only returned when it clears the score floor. "No match" means
     the library has nothing close: treat the phrase as a possible emergent
     typology and propose it with emergent_label. Never link a typology this
-    tool did not return. Two typologies can share a label (SAN002 and PAT008
-    are both Shadow Fleet); pick by family.
+    tool did not return.
+
+    A result marked TWIN carries the same technique as another code in a different
+    family. The declaration names the twin and the preference where one exists;
+    propose_link will refuse the link unless the rationale says why that family.
+    Do not rely on the two labels looking alike -- SAN006 and TBML010 are the same
+    technique with the words reordered.
     """
     ranked = rank_typologies(params.query)
     above = [(s, r) for s, r in ranked if s >= SEARCH_SCORE_FLOOR]
@@ -320,6 +392,8 @@ async def search_typologies(params: SearchTypologiesInput) -> str:
         # agent can prefer the code the doctrine was actually written for.
         if r.get("doctrine_authored_as"):
             line += " (doctrine authored as %s)" % r["doctrine_authored_as"]
+        # Declared here rather than left to the prompt: see _TWIN_PAIRS.
+        line += _twin_line(r["typology_id"])
         out.append(line)
     return "\n".join(out)
 
@@ -339,6 +413,17 @@ async def propose_link(params: ProposeLinkInput) -> str:
         return "Rejected: provide exactly one of typology_id or emergent_label."
     if params.typology_id and not any(r["typology_id"] == params.typology_id for r in _typologies()):
         return "Rejected: %s is not in the library. Use emergent_label if this is new." % params.typology_id
+
+    # GOVERNANCE, not advice. A twinned code may not be pinned without the
+    # rationale naming the twin it was chosen over. The refusal is what makes the
+    # reason exist: trace one on ADV-2026-0016 found a typology retrieved,
+    # confirmed and then dropped with no record anywhere of why.
+    twin = TYPOLOGY_TWINS.get(params.typology_id or "")
+    if twin and twin["twin"] not in (params.rationale or ""):
+        return ("Rejected: %s has a cross-family twin, %s. These carry the same technique under "
+                "two codes, so the choice has to be recorded. %s Name %s in the rationale and say "
+                "why this family fits the advisory's framing, then propose again."
+                % (params.typology_id, twin["twin"], twin["note"], twin["twin"]))
 
     record = {
         "proposed_at": datetime.now(timezone.utc).isoformat(),

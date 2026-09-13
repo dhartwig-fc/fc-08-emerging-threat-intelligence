@@ -80,7 +80,8 @@ The Knowledge Centre:
 - You do not know the typology library. Look it up with the knowledge_centre_* tools.
 - For each technique the document describes, call knowledge_centre_search_typologies with a phrase from the document. Confirm a candidate with knowledge_centre_get_typology before using it.
 - A typology_id may only be one a tool returned. If the search reports no match, the typology is emergent: typology_id null, emergent true.
-- Two typologies can share a label; choose by family. When a result says its doctrine is authored as another id, prefer that id.
+- A search result marked TWIN carries the same technique as another code in a different family. The declaration names the twin and the preferred family where one exists. knowledge_centre_propose_link REFUSES the link unless your rationale names that twin and says why this family fits the advisory. Do not judge by whether the two labels look alike: SAN006 and TBML010 are the same technique with the words reordered.
+- When a result says its doctrine is authored as another id, prefer that id.
 - Before you finish, call knowledge_centre_propose_link once per typology in your record: with typology_id for a library match, with emergent_label for an emergent one. Cite page numbers in the rationale.
 """
 
