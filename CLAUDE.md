@@ -45,6 +45,7 @@ evals/probe_prompt_variant.py       A/B a prompt change without editing the agen
 evals/traces/                       where recall goes: the full baseline, three traced mechanisms, the label triage, the document-shape count and the reviewer's acceptance bands
 tools/batch_remaining.sh           extracts every advisory with no record; resumable and idempotent, shortest first
 tools/build_emergent_candidates.py  the week-4 deliverable: every emergent entry with its evidence and near neighbours
+tools/merge_reviewer_additions.py   merges reviewer additions into records under schema 1.4.0; non-destructive by default
 agents/review_advisory.py          the additive reviewer: what did the extraction miss, justified against doctrine
 evals/review_ADV-2026-0001.md      week-1 review: what the first real run got wrong and why
 setup.sh                           bootstrap + smoke tests
@@ -268,8 +269,17 @@ claude mcp add knowledge-centre -- "$PWD/.venv/bin/python" "$PWD/mcp_server/know
   flaw in the field's own description: an EMERGENT entry has no doctrine to quote, so the description now
   covers both cases. Pinned by `evals/check_added_by.py`, mutation-verified.
 
-- [ ] Week 4 remaining: a merge step that writes reviewer additions into records under the new fields, and
-  the honest single-vs-multi comparison. Sixteen of the twenty are SINGLE runs;
+  **MERGE STEP DONE 2026-09-13.** `tools/merge_reviewer_additions.py` writes additions into records under
+  1.4.0: all 20 merged, 68 additions, zero validation failures, zero duplicates. **This is the pipeline's
+  real output number** — typologies P 0.853 R 0.545 **F1 0.665** against extraction-only 0.889/0.357/0.510,
+  and emergent 0.306 -> **0.352**, which the band runs had not isolated. Provenance intact: 192 typologies,
+  68 `added_by=reviewer`, ZERO missing a justification — the schema refusing it, not the script remembering.
+  `where_found` has no field in the contract and is prepended to the justification rather than dropped.
+  **NON-DESTRUCTIVE BY DEFAULT**: `data/records/` is the evidence for every published baseline figure, so
+  merged records go to `data/records_merged/` and `--in-place` waits on a decision that the merged record IS
+  the pipeline's output.
+
+- [ ] Week 4 remaining: the honest single-vs-multi comparison, and the `--in-place` decision. Sixteen of the twenty are SINGLE runs;
   only the four concentrated documents have bands. **DO NOT plan the rest against better retrieval.** Measured three ways on 2026-09-12: the search fix lifted top-5 recall 41% relative and moved extraction recall by nothing; typologies were retrieved, confirmed with `get_typology`, and then not asserted; and the agent asserts the same handful whether the document holds 5 golden typologies or 20. Build against the three mechanisms below, in that order. And note precision 0.889 is this pipeline's best property -- an assertion budget IS a precision strategy, so a reviewer that justifies each extra assertion beats simply asserting more
 - [ ] Week 5: hooks, telemetry, `review.py` gate, desk digests
 - [ ] Week 6: publish slice 1 on `future-capabilities.html`, tag `fc08-threatintel-slice1-v1.0.0`

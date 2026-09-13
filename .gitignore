@@ -2,6 +2,7 @@ data/advisories/
 data/records/
 data/repeats/
 data/reviewed/
+data/records_merged/
 data/proposals.jsonl
 .venv/
 __pycache__/
