@@ -41,7 +41,7 @@ evals/check_twin_pairs.py           guards the cross-family twin relation and th
 evals/check_emergent_threshold.py   pins emergent at 0.50 and proves 0.40 is a real floor; --mutate
 evals/search_recall.py              search measured against the golden set's real advisory sentences, not hand-written probes
 evals/probe_prompt_variant.py       A/B a prompt change without editing the agent; INVERTED 2026-09-12, now builds the pre-adoption prompt
-evals/traces/                       where recall goes: the full baseline, three traced mechanisms, and the ADV-2026-0004 label triage
+evals/traces/                       where recall goes: the full baseline, three traced mechanisms, the ADV-2026-0004 label triage and the document-shape count
 tools/batch_remaining.sh           extracts every advisory with no record; resumable and idempotent, shortest first
 evals/review_ADV-2026-0001.md      week-1 review: what the first real run got wrong and why
 setup.sh                           bootstrap + smoke tests
@@ -152,11 +152,16 @@ claude mcp add knowledge-centre -- "$PWD/.venv/bin/python" "$PWD/mcp_server/know
      redirects `NEXUS_PROPOSALS_PATH` so it never writes into the real review queue). What the tool
      CANNOT do: adjudicate framing. It never sees the document, so it guarantees only that the agent
      knew the twin existed and recorded a reason.
-  2. **Hybrid document shape.** ADV-2026-0009 is a narrative body (pp.1-7) plus a ten-bullet
-     red-flag appendix (pp.8-9); every run folds the appendix into the body's single theme and four
-     of six misses cite only the appendix. **The document-shape rule adopted in `a5abcc9` asks a
-     BINARY question that a hybrid defeats** — it needs to apply per SECTION. Note this does NOT
-     generalise: on ADV-2026-0017 three of five misses cite narrative pages.
+  2. **Hybrid document shape — real, and smaller than it looked.** ADV-2026-0009 is a narrative
+     body (pp.1-7) plus a ten-bullet red-flag appendix (pp.8-9); every run folds the appendix into
+     the body's single theme and four of six misses cite only the appendix. The `a5abcc9` rule asks
+     a BINARY question that a hybrid defeats. **Counted across the set 2026-09-13: 14 of 20 are
+     hybrid, but only 0.33 of misses cite an indicator page, bimodally.** So the mechanism is real
+     and caps at a third — see item 3 below, now closed against a per-section prompt rule.
+     `SHAPE_COUNT_2026-09-13.md` also CORRECTS the shape labels in the per-document table of
+     `FULL_BASELINE_2026-09-12.md`: ADV-2026-0013 and ADV-2026-0002 are NARRATIVE (0013 has zero
+     bullet-formatted lines), and ADV-2026-0016 is HYBRID, not indicator-list. Those labels had been
+     assigned from the publisher rather than the content.
   3. **Emergent splits in two.** Precision 0.441 is ~63% artefact (threshold, see above; 2 of the
      19 false positives are the agent being RIGHT where the label is incomplete). Recall 0.136 is
      ~99% real: **10 of 20 records propose ZERO emergent labels** and 44 of 56 sampled false
@@ -183,11 +188,17 @@ claude mcp add knowledge-centre -- "$PWD/.venv/bin/python" "$PWD/mcp_server/know
      0.136 → 0.200 and the rest of that gap is real, since 10 of 20 records propose no emergent
      technique at all. The threshold is now pinned with the two facts that justify it, so a future
      change has to argue with evidence. **The actor threshold deliberately did NOT move.**
-  3. **Document-shape rule per section, not per document — BUT MEASURE FIRST.** Two findings point
-     different ways: hybrid shape explains ADV-2026-0009, and explicitly does NOT explain
-     ADV-2026-0017, where three of five misses cite narrative pages. Shipping a per-section rule on
-     one trace would repeat the mistake `a5abcc9` already made. Count how many of the twenty are
-     hybrid at all before touching the prompt again.
+  3. ~~Document-shape rule per section.~~ **CLOSED 2026-09-13 — measured, and NOT worth doing as a
+     prompt change.** The measurement this item was blocked on came back against it. 14 of 20
+     documents are HYBRID (a red-flag section inside a narrative body), so the binary question the
+     `a5abcc9` rule asks is indeed wrong for most of the set — but **only 48 of 144 misses (0.33)
+     cite a bullet-dense page at all**, and the third is bimodal, not spread: ADV-2026-0016 7 of 7,
+     0015 7 of 8, 0009 5 of 6, 0004 12 of 17, against EIGHT documents at exactly zero. Two-thirds of
+     the gap is in narrative prose no shape rule reaches. Where it does point: those four documents
+     are where a SECTION-AWARE REVIEWER PASS would pay — a step that walks an indicator list and
+     asks what each bullet evidences, which is week 4, not the prompt. The `a5abcc9` rule STAYS:
+     incomplete rather than wrong, cost nothing, tightened ADV-2026-0013's variance to zero.
+     Evidence and instrument limits: `evals/traces/SHAPE_COUNT_2026-09-13.md`.
   4. **Owner label pass.** Gates every published figure. `evals/traces/TRIAGE_ADV-2026-0004_LABEL.md`
      is a four-decision list: TBML001 and SAN008 to strike or keep, TBML004 and SAN001 to judge thin.
 
