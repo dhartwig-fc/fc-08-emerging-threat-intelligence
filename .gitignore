@@ -3,6 +3,7 @@ data/records/
 data/repeats/
 data/reviewed/
 data/records_merged/
+data/records_extraction_only/
 data/proposals.jsonl
 .venv/
 __pycache__/

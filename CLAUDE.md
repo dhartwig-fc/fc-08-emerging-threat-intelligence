@@ -279,7 +279,23 @@ claude mcp add knowledge-centre -- "$PWD/.venv/bin/python" "$PWD/mcp_server/know
   merged records go to `data/records_merged/` and `--in-place` waits on a decision that the merged record IS
   the pipeline's output.
 
-- [ ] Week 4 remaining: the honest single-vs-multi comparison, and the `--in-place` decision. Sixteen of the twenty are SINGLE runs;
+  **THE `--in-place` DECISION, TAKEN 2026-09-13: preserve first, then act.** Three measured facts settled
+  it. `data/records/` is NOT tracked in git — it exists on one machine. Extraction is NOT deterministic —
+  three identical re-runs of ADV-2026-0016 gave THREE different typology sets, so re-running does not
+  recover a record, it produces a different one. And every published figure depends on exactly those
+  records: F1 0.510, recall 0.357, the per-document table, the acceptance bands, `score_report.json`, the
+  journal, the slice-1 page. A plain overwrite destroys the only copy of the evidence behind every number
+  this project has published — fc-10's priority 1 in a new place, where deleting an 'orphaned' page would
+  have destroyed the last record of a run and the answer was preserve first.
+
+  So `--in-place` ARCHIVES to `data/records_extraction_only/` before overwriting, and REFUSES if that
+  archive already holds records — a second run would otherwise archive the MERGED records over the
+  originals, which is the loss the archive exists to prevent, one step removed. Verified on a throwaway
+  copy: first run archives 22 and merges, second exits 2. **The flag has not been run for real**; two-stage
+  is the standing arrangement — `data/records/` is extraction output, `data/records_merged/` is pipeline
+  output, and anything downstream should say which it reads.
+
+- [ ] Week 4 remaining: the honest single-vs-multi comparison. Sixteen of the twenty are SINGLE runs;
   only the four concentrated documents have bands. **DO NOT plan the rest against better retrieval.** Measured three ways on 2026-09-12: the search fix lifted top-5 recall 41% relative and moved extraction recall by nothing; typologies were retrieved, confirmed with `get_typology`, and then not asserted; and the agent asserts the same handful whether the document holds 5 golden typologies or 20. Build against the three mechanisms below, in that order. And note precision 0.889 is this pipeline's best property -- an assertion budget IS a precision strategy, so a reviewer that justifies each extra assertion beats simply asserting more
 - [ ] Week 5: hooks, telemetry, `review.py` gate, desk digests
 - [ ] Week 6: publish slice 1 on `future-capabilities.html`, tag `fc08-threatintel-slice1-v1.0.0`

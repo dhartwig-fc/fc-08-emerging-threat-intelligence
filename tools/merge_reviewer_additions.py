@@ -114,13 +114,58 @@ def merge(record: dict, additions: list) -> tuple:
     return out, kept, dup
 
 
+ARCHIVE = ROOT / "data" / "records_extraction_only"
+
+
+def archive_extraction_records() -> bool:
+    """Copy the extraction-only records aside before --in-place overwrites them.
+
+    PRESERVE FIRST, THEN ACT. Three facts make this non-negotiable rather than
+    cautious, all measured 2026-09-13:
+
+      1. data/records/ is NOT tracked in git. It exists on one machine.
+      2. Extraction is NOT deterministic. Three identical re-runs of
+         ADV-2026-0016 produced THREE different typology sets, so re-running
+         does not recover a record -- it produces a different one.
+      3. Every published figure depends on exactly these records: typologies
+         F1 0.510, recall 0.357, the per-document table, the reviewer's
+         acceptance bands, evals/score_report.json, the journal, the slice-1
+         page.
+
+    So a plain overwrite destroys the only copy of the evidence behind every
+    number this project has published. fc-10 met the same shape of decision in
+    its priority 1, where deleting an 'orphaned' product page would have
+    destroyed the last surviving record of a run; the resolution there was to
+    preserve first and then act, and it is the resolution here.
+
+    Refuses rather than overwriting an existing archive: a second --in-place run
+    would otherwise archive the ALREADY-MERGED records over the originals, which
+    is the destruction this function exists to prevent, one step removed.
+    """
+    src = ROOT / "data" / "records"
+    if ARCHIVE.exists() and any(ARCHIVE.glob("ADV-2026-*.json")):
+        print("REFUSED: %s already holds archived records.\n"
+              "  A second --in-place would archive the MERGED records over the extraction-only\n"
+              "  originals, which is the loss this archive exists to prevent. Move or delete the\n"
+              "  existing archive deliberately if you mean to re-archive." % ARCHIVE, file=sys.stderr)
+        return False
+    ARCHIVE.mkdir(parents=True, exist_ok=True)
+    n = 0
+    for f in sorted(src.glob("ADV-2026-*.json")):
+        (ARCHIVE / f.name).write_text(f.read_text(encoding="utf-8"), encoding="utf-8")
+        n += 1
+    print("archived %d extraction-only records to %s" % (n, ARCHIVE))
+    return True
+
+
 def main(argv: list) -> int:
     ap = argparse.ArgumentParser(description="Merge reviewer additions into records")
     ap.add_argument("--advisory", default=None, help="One advisory id; default is all")
     ap.add_argument("--out-dir", type=Path, default=ROOT / "data" / "records_merged")
     ap.add_argument("--in-place", action="store_true",
-                    help="Overwrite data/records/. The extraction-only record is the evidence "
-                         "for every published baseline figure; think before using this.")
+                    help="Make the merged set the pipeline output at data/records/. The "
+                         "extraction-only records are ARCHIVED first, to data/records_extraction_only/; "
+                         "it refuses rather than overwrite an archive that already exists.")
     args = ap.parse_args(argv)
 
     src = sorted((ROOT / "data" / "records").glob("ADV-2026-*.json"))
@@ -132,6 +177,8 @@ def main(argv: list) -> int:
             return 2
 
     out_dir = (ROOT / "data" / "records") if args.in_place else args.out_dir
+    if args.in_place and not archive_extraction_records():
+        return 2
     out_dir.mkdir(parents=True, exist_ok=True)
 
     total_kept = total_dup = failed = 0
