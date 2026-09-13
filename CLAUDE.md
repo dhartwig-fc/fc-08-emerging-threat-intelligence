@@ -42,7 +42,7 @@ evals/check_added_by.py             pins schema 1.4.0's added_by / review_justif
 evals/check_emergent_threshold.py   pins emergent at 0.50 and proves 0.40 is a real floor; --mutate
 evals/search_recall.py              search measured against the golden set's real advisory sentences, not hand-written probes
 evals/probe_prompt_variant.py       A/B a prompt change without editing the agent; INVERTED 2026-09-12, now builds the pre-adoption prompt
-evals/traces/                       where recall goes: the full baseline, three traced mechanisms, the label triage, the document-shape count and the reviewer's acceptance bands
+evals/traces/                       where recall goes and what was built about it: the full baseline, three traced mechanisms, the label triage, the shape count, the reviewer's bands and the single-vs-multi comparison
 tools/batch_remaining.sh           extracts every advisory with no record; resumable and idempotent, shortest first
 tools/build_emergent_candidates.py  the week-4 deliverable: every emergent entry with its evidence and near neighbours
 tools/merge_reviewer_additions.py   merges reviewer additions into records under schema 1.4.0; non-destructive by default
@@ -295,7 +295,18 @@ claude mcp add knowledge-centre -- "$PWD/.venv/bin/python" "$PWD/mcp_server/know
   is the standing arrangement — `data/records/` is extraction output, `data/records_merged/` is pipeline
   output, and anything downstream should say which it reads.
 
-- [ ] Week 4 remaining: the honest single-vs-multi comparison. Sixteen of the twenty are SINGLE runs;
+  **SINGLE VS MULTI, written 2026-09-13: `evals/traces/SINGLE_VS_MULTI_2026-09-13.md`.** One extra agent
+  instead of four. The fetcher should not be an agent (deterministic, and three supervising subagents died
+  on the quota meter producing nothing while a bash script finished the job first time); the classifier
+  targets retrieval, ruled out three ways; the specified reviewer duplicates a passing guard AND subtracts.
+  Cost measured: extraction 14 runs mean $0.73 / 33.9 turns / 270s, reviewer 27 runs mean $0.48 / 29.1
+  turns / 159s — so two stages are ~1.65x one agent for +0.155 F1. **The test is not how many agents but
+  whether each addresses a MEASURED constraint.** What would justify more: a routing decision a model must
+  make, a genuinely parallel workload, or an adversarial reviewer from a DIFFERENT model family — the last
+  is the strongest remaining case, and it is about independence rather than throughput.
+
+- [x] **Week 4 COMPLETE** (2026-09-13): additive reviewer, acceptance bands, full-set run, emergent
+  candidates, schema 1.4.0, the merge step, the --in-place decision, and the single-vs-multi write-up. Sixteen of the twenty are SINGLE runs;
   only the four concentrated documents have bands. **DO NOT plan the rest against better retrieval.** Measured three ways on 2026-09-12: the search fix lifted top-5 recall 41% relative and moved extraction recall by nothing; typologies were retrieved, confirmed with `get_typology`, and then not asserted; and the agent asserts the same handful whether the document holds 5 golden typologies or 20. Build against the three mechanisms below, in that order. And note precision 0.889 is this pipeline's best property -- an assertion budget IS a precision strategy, so a reviewer that justifies each extra assertion beats simply asserting more
 - [ ] Week 5: hooks, telemetry, `review.py` gate, desk digests
 - [ ] Week 6: publish slice 1 on `future-capabilities.html`, tag `fc08-threatintel-slice1-v1.0.0`
