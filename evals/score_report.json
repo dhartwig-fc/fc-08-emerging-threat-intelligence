@@ -6,60 +6,59 @@
   "scored": [
     "ADV-2026-0001",
     "ADV-2026-0002",
-    "ADV-2026-0009",
-    "ADV-2026-0013",
-    "ADV-2026-0016",
-    "ADV-2026-0017"
-  ],
-  "not_scored_no_prediction": [
     "ADV-2026-0003",
     "ADV-2026-0004",
     "ADV-2026-0005",
     "ADV-2026-0006",
     "ADV-2026-0007",
     "ADV-2026-0008",
+    "ADV-2026-0009",
     "ADV-2026-0010",
     "ADV-2026-0011",
     "ADV-2026-0012",
+    "ADV-2026-0013",
     "ADV-2026-0014",
     "ADV-2026-0015",
+    "ADV-2026-0016",
+    "ADV-2026-0017",
     "ADV-2026-0018",
     "ADV-2026-0019",
     "ADV-2026-0020"
   ],
+  "not_scored_no_prediction": [],
   "ignored_no_golden": [],
   "totals": {
     "typologies": {
-      "tp": 25,
-      "fp": 2,
-      "fn": 30,
-      "precision": 0.9259259259259259,
-      "recall": 0.45454545454545453,
-      "f1": 0.6097560975609756
+      "tp": 80,
+      "fp": 10,
+      "fn": 144,
+      "precision": 0.8888888888888888,
+      "recall": 0.35714285714285715,
+      "f1": 0.5095541401273885
     },
     "emergent": {
-      "tp": 9,
-      "fp": 1,
-      "fn": 11,
-      "precision": 0.9,
-      "recall": 0.45,
-      "f1": 0.6
+      "tp": 15,
+      "fp": 19,
+      "fn": 95,
+      "precision": 0.4411764705882353,
+      "recall": 0.13636363636363635,
+      "f1": 0.20833333333333331
     },
     "actors": {
-      "tp": 32,
-      "fp": 7,
-      "fn": 10,
-      "precision": 0.8205128205128205,
-      "recall": 0.7619047619047619,
-      "f1": 0.7901234567901233
+      "tp": 108,
+      "fp": 46,
+      "fn": 50,
+      "precision": 0.7012987012987013,
+      "recall": 0.6835443037974683,
+      "f1": 0.6923076923076923
     },
     "jurisdictions": {
-      "tp": 54,
-      "fp": 5,
-      "fn": 6,
-      "precision": 0.9152542372881356,
-      "recall": 0.9,
-      "f1": 0.9075630252100839
+      "tp": 188,
+      "fp": 35,
+      "fn": 104,
+      "precision": 0.8430493273542601,
+      "recall": 0.6438356164383562,
+      "f1": 0.7300970873786407
     }
   },
   "per_advisory": {
@@ -183,12 +182,11 @@
     },
     "ADV-2026-0002": {
       "typologies": {
-        "tp": 6,
-        "fn": 3,
+        "tp": 7,
+        "fn": 2,
         "fp": 1,
         "missed": [
           "PAT010",
-          "TBML005",
           "TBML006"
         ],
         "spurious": [
@@ -199,6 +197,7 @@
           "BA005",
           "TBML001",
           "TBML002U",
+          "TBML005",
           "TBML008",
           "TBML009"
         ]
@@ -216,12 +215,9 @@
       "actors": {
         "tp": 0,
         "fn": 0,
-        "fp": 2,
+        "fp": 0,
         "missed": [],
-        "spurious": [
-          "Criminals engaged in trade-based money laundering",
-          "Trade entities used as laundering vehicles"
-        ],
+        "spurious": [],
         "matched": []
       },
       "jurisdictions": {
@@ -231,6 +227,832 @@
         "missed": [],
         "spurious": [],
         "matched": []
+      }
+    },
+    "ADV-2026-0003": {
+      "typologies": {
+        "tp": 4,
+        "fn": 12,
+        "fp": 0,
+        "missed": [
+          "BA001",
+          "BA002",
+          "BA004",
+          "BA005",
+          "BA008",
+          "BA009",
+          "PAT001",
+          "PAT003",
+          "PAT005",
+          "PAT010",
+          "TBML002U",
+          "TBML009"
+        ],
+        "spurious": [],
+        "matched": [
+          "BA003",
+          "PAT007",
+          "TBML001",
+          "TBML004"
+        ]
+      },
+      "emergent": {
+        "tp": 2,
+        "fn": 6,
+        "fp": 4,
+        "missed": [
+          "Account settlement mechanism netting cash against bank balances between criminal clients",
+          "Fictitious contracts and false documentation to justify transfers",
+          "Virtual currency cash-out through straw-man e-wallets, mixers and complicit exchangers",
+          "Black Market Peso Exchange and money brokering of drug proceeds",
+          "Complicit insider and institutional compromise of financial businesses",
+          "Mirror trading through securities markets to move value abroad"
+        ],
+        "spurious": [
+          "Professional Money Laundering (Third-Party PML Organisations/Networks)",
+          "Virtual Currency / Digital Money Laundering Networks",
+          "Account Settlement Mechanism (Cross-Border Netting via OCG Accounts)",
+          "Complicit Financial Service Providers and Professional Gatekeepers"
+        ],
+        "matched": [
+          {
+            "gold": "Underground banking, hawala and alternative banking platforms",
+            "predicted": "Underground Banking and Alternative Banking Platforms",
+            "score": 1.0
+          },
+          {
+            "gold": "Bulk cash collection and courier transport by cash controller networks",
+            "predicted": "Money Transport and Cash Controller Networks",
+            "score": 0.8
+          }
+        ]
+      },
+      "actors": {
+        "tp": 7,
+        "fn": 7,
+        "fp": 4,
+        "missed": [
+          "Professional money laundering organisations",
+          "Professional money laundering networks",
+          "Cash controller and money transport networks",
+          "Proxy networks",
+          "Complicit financial service providers and professional gatekeepers",
+          "Altaf Khanani",
+          "Avalanche network"
+        ],
+        "spurious": [
+          "Khanani Money Laundering Organisation",
+          "Organised crime groups",
+          "Subject X",
+          "Company X"
+        ],
+        "matched": [
+          {
+            "gold": "Al Zarooni Exchange",
+            "predicted": "Al Zarooni Exchange",
+            "score": 1.0
+          },
+          {
+            "gold": "Altaf Khanani Money Laundering Organisation",
+            "predicted": "Altaf Khanani",
+            "score": 1.0
+          },
+          {
+            "gold": "BTC-e",
+            "predicted": "BTC-e",
+            "score": 1.0
+          },
+          {
+            "gold": "Individual professional money launderers",
+            "predicted": "Professional money launderers",
+            "score": 1.0
+          },
+          {
+            "gold": "La Cosa Nostra (Palermo)",
+            "predicted": "La Cosa Nostra",
+            "score": 1.0
+          },
+          {
+            "gold": "Money mule networks",
+            "predicted": "Money mule herders",
+            "score": 1.0
+          },
+          {
+            "gold": "PacNet",
+            "predicted": "PacNet",
+            "score": 1.0
+          }
+        ]
+      },
+      "jurisdictions": {
+        "tp": 21,
+        "fn": 15,
+        "fp": 0,
+        "missed": [
+          "BZ",
+          "CY",
+          "EE",
+          "HK",
+          "IE",
+          "IQ",
+          "LI",
+          "LV",
+          "MD",
+          "NG",
+          "NZ",
+          "PA",
+          "PE",
+          "VE",
+          "VG"
+        ],
+        "spurious": [],
+        "matched": [
+          "AE",
+          "AR",
+          "AU",
+          "BE",
+          "BG",
+          "CA",
+          "CN",
+          "CO",
+          "DE",
+          "ES",
+          "GB",
+          "IL",
+          "IT",
+          "LU",
+          "MX",
+          "NL",
+          "PK",
+          "RU",
+          "SG",
+          "UA",
+          "US"
+        ]
+      }
+    },
+    "ADV-2026-0004": {
+      "typologies": {
+        "tp": 3,
+        "fn": 17,
+        "fp": 2,
+        "missed": [
+          "BA003",
+          "BA004",
+          "BA005",
+          "BA007",
+          "BA008",
+          "CM002",
+          "PAT001",
+          "PAT002",
+          "PAT005",
+          "PAT009",
+          "SAN001",
+          "SAN004",
+          "SAN008",
+          "TBML001",
+          "TBML004",
+          "TBML008",
+          "TBML009"
+        ],
+        "spurious": [
+          "FND003",
+          "PAT004"
+        ],
+        "matched": [
+          "PAT003",
+          "PAT007",
+          "PAT010"
+        ]
+      },
+      "emergent": {
+        "tp": 0,
+        "fn": 8,
+        "fp": 1,
+        "missed": [
+          "Formal and informal nominee directors and shareholders (straw men, sold or stolen identities)",
+          "Professional intermediary facilitation by lawyers, accountants and TCSPs",
+          "False loans (loan-back) disguising the return of own funds as third-party lending",
+          "Trusts and legal arrangements interposed to separate legal from beneficial ownership",
+          "Bearer shares and bearer share warrants",
+          "Shelf companies sold with pre-established bank accounts and nominee directors",
+          "Professional trust, client and escrow accounts used to place and pass through funds",
+          "Real estate acquired through nominees, companies or trusts to hold illicit wealth"
+        ],
+        "spurious": [
+          "Professional Intermediary (TCSP/Legal/Accounting) Gatekeeper Complicity in Beneficial Ownership Concealment"
+        ],
+        "matched": []
+      },
+      "actors": {
+        "tp": 5,
+        "fn": 3,
+        "fp": 7,
+        "missed": [
+          "Sinaloa cartel",
+          "Camorra-linked organised crime group",
+          "Organised crime groups"
+        ],
+        "spurious": [
+          "Financial Action Task Force (FATF)",
+          "Egmont Group of Financial Intelligence Units",
+          "Legal professionals (lawyers and notaries)",
+          "Accounting professionals",
+          "Nominee directors and shareholders (formal and informal)",
+          "Mossack Fonseca",
+          "Appleby"
+        ],
+        "matched": [
+          {
+            "gold": "Alavi Foundation",
+            "predicted": "Alavi Foundation",
+            "score": 1.0
+          },
+          {
+            "gold": "Bank Melli",
+            "predicted": "Bank Melli",
+            "score": 1.0
+          },
+          {
+            "gold": "Politically exposed persons and corrupt public officials",
+            "predicted": "Politically exposed persons (PEPs)",
+            "score": 1.0
+          },
+          {
+            "gold": "Professional intermediaries (lawyers, accountants, TCSPs)",
+            "predicted": "Trust and Company Service Providers (TCSPs)",
+            "score": 1.0
+          },
+          {
+            "gold": "Professional money launderers (business finders)",
+            "predicted": "Professional money launderers / \"business finders\"",
+            "score": 1.0
+          }
+        ]
+      },
+      "jurisdictions": {
+        "tp": 17,
+        "fn": 45,
+        "fp": 1,
+        "missed": [
+          "AD",
+          "AR",
+          "AT",
+          "BE",
+          "BO",
+          "BR",
+          "BS",
+          "BZ",
+          "CA",
+          "CN",
+          "CR",
+          "EC",
+          "EE",
+          "EG",
+          "ES",
+          "FJ",
+          "GB",
+          "GH",
+          "GI",
+          "HK",
+          "HN",
+          "HR",
+          "IE",
+          "KH",
+          "LI",
+          "LV",
+          "MD",
+          "ME",
+          "MX",
+          "NA",
+          "NO",
+          "NU",
+          "PE",
+          "RS",
+          "SC",
+          "SI",
+          "TR",
+          "TT",
+          "UA",
+          "UY",
+          "VA",
+          "VN",
+          "VU",
+          "WS",
+          "ZA"
+        ],
+        "spurious": [
+          "DE"
+        ],
+        "matched": [
+          "AU",
+          "CH",
+          "CY",
+          "FR",
+          "GG",
+          "IL",
+          "IR",
+          "IT",
+          "JE",
+          "KY",
+          "LU",
+          "NL",
+          "NZ",
+          "PA",
+          "RU",
+          "US",
+          "VG"
+        ]
+      }
+    },
+    "ADV-2026-0005": {
+      "typologies": {
+        "tp": 5,
+        "fn": 3,
+        "fp": 0,
+        "missed": [
+          "BA002",
+          "BA005",
+          "PAT007"
+        ],
+        "spurious": [],
+        "matched": [
+          "BA001",
+          "BA003",
+          "BA008",
+          "CMI010",
+          "SAN008"
+        ]
+      },
+      "emergent": {
+        "tp": 0,
+        "fn": 11,
+        "fp": 0,
+        "missed": [
+          "Mixing and tumbling services",
+          "Chain hopping: conversion across multiple virtual assets and exchanges",
+          "Anonymity-enhanced cryptocurrency and privacy coin swaps",
+          "Unregistered peer-to-peer exchange and unlicensed money transmission",
+          "Unhosted and hardware wallets to obscure and transport value across borders",
+          "VASP relocation to jurisdictions without AML/CFT regulation",
+          "Darknet marketplace proceeds and wallet exposure",
+          "Virtual asset ATM and kiosk cash-in",
+          "Crypto-to-plastic: card and prepaid-card cash-out of virtual assets",
+          "Shell wallets controlled from a common IP or device",
+          "Forged identity documents to circumvent VASP KYC"
+        ],
+        "spurious": [],
+        "matched": []
+      },
+      "actors": {
+        "tp": 5,
+        "fn": 1,
+        "fp": 0,
+        "missed": [
+          "Unregistered VASP operators and peer-to-peer dealers"
+        ],
+        "spurious": [],
+        "matched": [
+          {
+            "gold": "AlphaBay",
+            "predicted": "AlphaBay",
+            "score": 1.0
+          },
+          {
+            "gold": "DeepDotWeb",
+            "predicted": "DeepDotWeb (DDW)",
+            "score": 1.0
+          },
+          {
+            "gold": "Helix",
+            "predicted": "Helix",
+            "score": 1.0
+          },
+          {
+            "gold": "Money mules and scam victims turned mules",
+            "predicted": "Money mules / scam victims turned mules",
+            "score": 1.0
+          },
+          {
+            "gold": "Professional money launderers",
+            "predicted": "Professional money launderers",
+            "score": 1.0
+          }
+        ]
+      },
+      "jurisdictions": {
+        "tp": 8,
+        "fn": 0,
+        "fp": 0,
+        "missed": [],
+        "spurious": [],
+        "matched": [
+          "CZ",
+          "FI",
+          "IT",
+          "KR",
+          "KY",
+          "RU",
+          "US",
+          "ZA"
+        ]
+      }
+    },
+    "ADV-2026-0006": {
+      "typologies": {
+        "tp": 5,
+        "fn": 7,
+        "fp": 0,
+        "missed": [
+          "BA008",
+          "PAT003",
+          "PAT010",
+          "SAN008",
+          "TBML001",
+          "TBML004",
+          "TBML008"
+        ],
+        "spurious": [],
+        "matched": [
+          "BA007",
+          "PAT007",
+          "TBML002U",
+          "TBML005",
+          "TBML009"
+        ]
+      },
+      "emergent": {
+        "tp": 0,
+        "fn": 4,
+        "fp": 1,
+        "missed": [
+          "Co-mingling of illegal and legal goods early in the resource supply chain",
+          "Informal value transfer via hawala and underground exchange dealers",
+          "Bulk cash and hand-carried gold moved by couriers",
+          "PEP-linked corporate structures and corrupt concession licensing"
+        ],
+        "spurious": [
+          "Money Laundering from Environmental Crime"
+        ],
+        "matched": []
+      },
+      "actors": {
+        "tp": 5,
+        "fn": 4,
+        "fp": 3,
+        "missed": [
+          "Organised crime groups operating waste-management front companies",
+          "Transnational organised crime groups in illegal mining and logging",
+          "Complicit intermediaries and gatekeepers",
+          "Corrupt public officials and PEPs in resource licensing"
+        ],
+        "spurious": [
+          "FATF",
+          "Organized crime groups involved in environmental crime",
+          "Joseph Kabila"
+        ],
+        "matched": [
+          {
+            "gold": "Beny Steinmetz",
+            "predicted": "Beny Steinmetz",
+            "score": 1.0
+          },
+          {
+            "gold": "Chilean gold-smuggling TCO (Operation Diez Condores)",
+            "predicted": "Chilean gold-smuggling TCO (Operation Diez Condores)",
+            "score": 1.0
+          },
+          {
+            "gold": "Dan Gertler",
+            "predicted": "Dan Gertler",
+            "score": 1.0
+          },
+          {
+            "gold": "Fleurette Properties",
+            "predicted": "Fleurette Properties",
+            "score": 1.0
+          },
+          {
+            "gold": "NTR Metals Miami",
+            "predicted": "NTR Metals Miami",
+            "score": 1.0
+          }
+        ]
+      },
+      "jurisdictions": {
+        "tp": 11,
+        "fn": 10,
+        "fp": 4,
+        "missed": [
+          "CO",
+          "EC",
+          "GM",
+          "ID",
+          "MM",
+          "NG",
+          "RU",
+          "RW",
+          "UG",
+          "VE"
+        ],
+        "spurious": [
+          "CH",
+          "NL",
+          "NO",
+          "SG"
+        ],
+        "matched": [
+          "BR",
+          "CD",
+          "CL",
+          "CN",
+          "GN",
+          "IT",
+          "MG",
+          "PE",
+          "PG",
+          "US",
+          "ZA"
+        ]
+      }
+    },
+    "ADV-2026-0007": {
+      "typologies": {
+        "tp": 2,
+        "fn": 7,
+        "fp": 2,
+        "missed": [
+          "BA001",
+          "BA002",
+          "BA005",
+          "BA008",
+          "BA009",
+          "PAT010",
+          "TBML008"
+        ],
+        "spurious": [
+          "CMI010",
+          "TBML001"
+        ],
+        "matched": [
+          "BA003",
+          "PAT007"
+        ]
+      },
+      "emergent": {
+        "tp": 2,
+        "fn": 8,
+        "fp": 2,
+        "missed": [
+          "Fictitious and overpriced invoicing for IT and consultancy services",
+          "Cyber-enabled fraud predicates: BEC, phishing, impersonation, online trading platform, romance and employment scams",
+          "Mule herding: online recruitment and remote control of mule account networks at scale",
+          "Virtual-asset laundering of fraud proceeds via unhosted wallets, peel chains, mixers and Bitcoin ATMs",
+          "Laundering through social media, streaming and gaming platform credits and gifts",
+          "Stolen, synthetic and relinquished digital identities used to open and directly control accounts",
+          "Small-value test transactions before moving the bulk of proceeds",
+          "Cash-out by ATM withdrawal and cross-border cash couriers after layering"
+        ],
+        "spurious": [
+          "Cyber-Enabled Fraud (CEF) Money Laundering",
+          "DPRK Proliferation Financing via Cyber-Enabled Fraud Tools"
+        ],
+        "matched": [
+          {
+            "gold": "Human trafficking into forced-labour scam call centres",
+            "predicted": "Human Trafficking-Fuelled Scam Centres",
+            "score": 0.8
+          },
+          {
+            "gold": "Virtual IBAN abuse to obscure the master account and beneficial owner",
+            "predicted": "Virtual IBAN (vIBAN) Abuse",
+            "score": 0.75
+          }
+        ]
+      },
+      "actors": {
+        "tp": 5,
+        "fn": 1,
+        "fp": 2,
+        "missed": [
+          "Third-party professional enablers"
+        ],
+        "spurious": [
+          "Person MS",
+          "Mr. O"
+        ],
+        "matched": [
+          {
+            "gold": "Cyber-enabled fraud syndicates",
+            "predicted": "CEF criminal syndicates / organised crime groups",
+            "score": 1.0
+          },
+          {
+            "gold": "DPRK IT workers linked to the Munitions Industry Department",
+            "predicted": "DPRK IT workers linked to the Munitions Industry Department",
+            "score": 1.0
+          },
+          {
+            "gold": "Mule herders",
+            "predicted": "Money mules and mule herders",
+            "score": 1.0
+          },
+          {
+            "gold": "Professional money laundering networks",
+            "predicted": "Professional money laundering groups and third-party professional enablers",
+            "score": 1.0
+          },
+          {
+            "gold": "QQAAZZ",
+            "predicted": "QQAAZZ",
+            "score": 1.0
+          }
+        ]
+      },
+      "jurisdictions": {
+        "tp": 16,
+        "fn": 11,
+        "fp": 2,
+        "missed": [
+          "AT",
+          "CL",
+          "CN",
+          "DE",
+          "FR",
+          "GH",
+          "JP",
+          "MT",
+          "RS",
+          "SG",
+          "SK"
+        ],
+        "spurious": [
+          "MY",
+          "PT"
+        ],
+        "matched": [
+          "BG",
+          "ES",
+          "GB",
+          "IE",
+          "IN",
+          "IT",
+          "KH",
+          "KP",
+          "KR",
+          "LU",
+          "LV",
+          "NG",
+          "PH",
+          "TH",
+          "TR",
+          "US"
+        ]
+      }
+    },
+    "ADV-2026-0008": {
+      "typologies": {
+        "tp": 5,
+        "fn": 11,
+        "fp": 0,
+        "missed": [
+          "BA001",
+          "BA002",
+          "BA005",
+          "BA007",
+          "BA008",
+          "BA009",
+          "PAT007",
+          "PAT010",
+          "TBML004",
+          "TBML005",
+          "TBML006"
+        ],
+        "spurious": [],
+        "matched": [
+          "BA003",
+          "TBML001",
+          "TBML002U",
+          "TBML008",
+          "TBML009"
+        ]
+      },
+      "emergent": {
+        "tp": 1,
+        "fn": 9,
+        "fp": 4,
+        "missed": [
+          "Hawala net settlement by compensation between counterpart operators",
+          "Triangular or multi-node settlement through third jurisdictions",
+          "Cash-courier and bulk-cash settlement between service providers",
+          "Commodity and gold-backed settlement, including luxury-goods repurchase",
+          "Cuckoo smurfing through unwitting legitimate remitters",
+          "Black market peso exchange and three-way exchange exploiting capital controls",
+          "Digital hawala: encrypted-messaging co-ordination, hawala apps and AI-driven routing",
+          "Mobile-money integration with hawala for cash-in and cash-out",
+          "Terrorist financing through hawala networks"
+        ],
+        "spurious": [
+          "Underground Banking and HOSSP-Based Professional Money Laundering",
+          "Underground Banking / HOSSP Nexus with Terrorist Financing",
+          "Black Market Peso Exchange (BMPE) Trade-Based Settlement",
+          "High-Capacity Transnational PML Networks / International Controller Networks (ICN)"
+        ],
+        "matched": [
+          {
+            "gold": "Virtual-asset and stablecoin settlement between underground banking operators",
+            "predicted": "Digital Hawala / Virtual-Asset-Based Settlement Between Underground Banking Operators",
+            "score": 0.875
+          }
+        ]
+      },
+      "actors": {
+        "tp": 6,
+        "fn": 3,
+        "fp": 1,
+        "missed": [
+          "Cash couriers",
+          "Money mules",
+          "Professional enablers"
+        ],
+        "spurious": [
+          "BMPE brokers"
+        ],
+        "matched": [
+          {
+            "gold": "Chinese-speaking money laundering networks",
+            "predicted": "Chinese-speaking money laundering networks",
+            "score": 1.0
+          },
+          {
+            "gold": "Controllers and international controller networks",
+            "predicted": "Controllers / International Controller Networks (ICN)",
+            "score": 1.0
+          },
+          {
+            "gold": "Hawaladars and underground bankers",
+            "predicted": "Underground bankers / Hawaladars",
+            "score": 1.0
+          },
+          {
+            "gold": "Islamic State in Iraq and the Levant",
+            "predicted": "Islamic State in Iraq and the Levant (ISIL)",
+            "score": 1.0
+          },
+          {
+            "gold": "Professional money launderers",
+            "predicted": "Professional money launderers (PML actors)",
+            "score": 1.0
+          },
+          {
+            "gold": "Transnational organised crime groups",
+            "predicted": "Transnational organised crime groups",
+            "score": 1.0
+          }
+        ]
+      },
+      "jurisdictions": {
+        "tp": 16,
+        "fn": 6,
+        "fp": 10,
+        "missed": [
+          "AF",
+          "BJ",
+          "CI",
+          "CW",
+          "GH",
+          "SY"
+        ],
+        "spurious": [
+          "BD",
+          "CH",
+          "FR",
+          "ID",
+          "KE",
+          "LU",
+          "MY",
+          "PT",
+          "SE",
+          "US"
+        ],
+        "matched": [
+          "AE",
+          "BE",
+          "CN",
+          "DE",
+          "ES",
+          "GB",
+          "IN",
+          "IT",
+          "JP",
+          "MA",
+          "NG",
+          "NL",
+          "OM",
+          "PK",
+          "TR",
+          "VE"
+        ]
       }
     },
     "ADV-2026-0009": {
@@ -263,7 +1085,7 @@
         "matched": [
           {
             "gold": "Bribery and extortion involving foreign public officials",
-            "predicted": "Bribery and Extortion of Foreign Public Officials",
+            "predicted": "Bribery of Foreign Public Officials",
             "score": 1.0
           },
           {
@@ -279,11 +1101,12 @@
         ]
       },
       "actors": {
-        "tp": 12,
-        "fn": 2,
+        "tp": 11,
+        "fn": 3,
         "fp": 0,
         "missed": [
-          "JSC Techsnabexport",
+          "Kleptocrats and corrupt foreign public officials",
+          "Transportation Logistics Inc.",
           "Professional service providers and third-party facilitators"
         ],
         "spurious": [],
@@ -309,6 +1132,11 @@
             "score": 1.0
           },
           {
+            "gold": "JSC Techsnabexport",
+            "predicted": "JSC Techsnabexport (TENEX)",
+            "score": 1.0
+          },
+          {
             "gold": "Mark Lambert",
             "predicted": "Mark Lambert",
             "score": 1.0
@@ -325,12 +1153,7 @@
           },
           {
             "gold": "Russian elites and oligarchs",
-            "predicted": "Russia's elites and oligarchs",
-            "score": 1.0
-          },
-          {
-            "gold": "Transportation Logistics Inc.",
-            "predicted": "Transportation Logistics Inc. (TLI)",
+            "predicted": "Russian oligarchs and elites",
             "score": 1.0
           },
           {
@@ -342,22 +1165,15 @@
             "gold": "Vladimir Putin",
             "predicted": "Vladimir Putin",
             "score": 1.0
-          },
-          {
-            "gold": "Kleptocrats and corrupt foreign public officials",
-            "predicted": "Kleptocratic regimes and corrupt public officials",
-            "score": 0.6
           }
         ]
       },
       "jurisdictions": {
         "tp": 19,
         "fn": 0,
-        "fp": 1,
+        "fp": 0,
         "missed": [],
-        "spurious": [
-          "UA"
-        ],
+        "spurious": [],
         "matched": [
           "AO",
           "AR",
@@ -381,12 +1197,387 @@
         ]
       }
     },
-    "ADV-2026-0013": {
+    "ADV-2026-0010": {
       "typologies": {
         "tp": 4,
-        "fn": 6,
+        "fn": 8,
+        "fp": 0,
+        "missed": [
+          "BA008",
+          "PAT005",
+          "PAT007",
+          "SAN001",
+          "SAN003",
+          "SAN005",
+          "SAN008",
+          "TBML008"
+        ],
+        "spurious": [],
+        "matched": [
+          "SAN002",
+          "SAN004",
+          "SAN006",
+          "SAN007"
+        ]
+      },
+      "emergent": {
+        "tp": 0,
+        "fn": 3,
+        "fp": 0,
+        "missed": [
+          "Third-country exchange houses accessing U.S. dollars through regional banks' correspondent relationships",
+          "Blending and relabelling of cargo to disguise sanctioned origin ('Malaysian blend')",
+          "Oil-for-arms proliferation financing: state oil allocations to military entities laundered to procure weapons components"
+        ],
+        "spurious": [],
+        "matched": []
+      },
+      "actors": {
+        "tp": 16,
+        "fn": 4,
+        "fp": 4,
+        "missed": [
+          "Zarringhalam shadow banking network",
+          "Chinese teapot refineries",
+          "Shadow fleet vessel owners and managers",
+          "Iranian weapons procurement networks"
+        ],
+        "spurious": [
+          "Islamic Republic of Iran",
+          "Hamas",
+          "Palestinian Islamic Jihad",
+          "Front companies (class)"
+        ],
+        "matched": [
+          {
+            "gold": "Berelian Exchange",
+            "predicted": "Berelian Exchange",
+            "score": 1.0
+          },
+          {
+            "gold": "Fazlolah Zarringhalam",
+            "predicted": "Fazlolah Zarringhalam",
+            "score": 1.0
+          },
+          {
+            "gold": "GCM Exchange",
+            "predicted": "GCM Exchange",
+            "score": 1.0
+          },
+          {
+            "gold": "Hizballah",
+            "predicted": "Lebanese Hizballah",
+            "score": 1.0
+          },
+          {
+            "gold": "Houthis",
+            "predicted": "Ansarallah",
+            "score": 1.0
+          },
+          {
+            "gold": "IRGC-Qods Force",
+            "predicted": "IRGC-Qods Force",
+            "score": 1.0
+          },
+          {
+            "gold": "Iranian Armed Forces General Staff",
+            "predicted": "Iranian Armed Forces General Staff",
+            "score": 1.0
+          },
+          {
+            "gold": "Islamic Revolutionary Guard Corps",
+            "predicted": "Islamic Revolutionary Guard Corps",
+            "score": 1.0
+          },
+          {
+            "gold": "Joint Stock Company Special Economic Zone of Industrial Production Alabuga",
+            "predicted": "Joint Stock Company Special Economic Zone of Industrial Production Alabuga",
+            "score": 1.0
+          },
+          {
+            "gold": "Mansour Zarringhalam",
+            "predicted": "Mansour Zarringhalam",
+            "score": 1.0
+          },
+          {
+            "gold": "Ministry of Defense and Armed Forces Logistics",
+            "predicted": "Ministry of Defense and Armed Forces Logistics",
+            "score": 1.0
+          },
+          {
+            "gold": "Nasser Zarringhalam",
+            "predicted": "Nasser Zarringhalam",
+            "score": 1.0
+          },
+          {
+            "gold": "National Iranian Oil Company",
+            "predicted": "National Iranian Oil Company",
+            "score": 1.0
+          },
+          {
+            "gold": "Sahara Thunder",
+            "predicted": "Sahara Thunder",
+            "score": 1.0
+          },
+          {
+            "gold": "Sanctions facilitators (MSBs, legal entities, TCSPs)",
+            "predicted": "Money services businesses, legal entities and TCSPs (class)",
+            "score": 1.0
+          },
+          {
+            "gold": "Iranian and third-country exchange houses and trading companies",
+            "predicted": "Exchange houses and trading companies (class)",
+            "score": 0.8
+          }
+        ]
+      },
+      "jurisdictions": {
+        "tp": 8,
+        "fn": 0,
+        "fp": 1,
+        "missed": [],
+        "spurious": [
+          "US"
+        ],
+        "matched": [
+          "AE",
+          "CN",
+          "HK",
+          "IR",
+          "RU",
+          "SG",
+          "TR",
+          "VE"
+        ]
+      }
+    },
+    "ADV-2026-0011": {
+      "typologies": {
+        "tp": 2,
+        "fn": 8,
+        "fp": 0,
+        "missed": [
+          "BA002",
+          "BA005",
+          "BA008",
+          "BA010",
+          "PAT007",
+          "PAT009",
+          "TBML008",
+          "TBML009"
+        ],
+        "spurious": [],
+        "matched": [
+          "BA001",
+          "BA003"
+        ]
+      },
+      "emergent": {
+        "tp": 1,
+        "fn": 4,
         "fp": 1,
         "missed": [
+          "Export of purchased luxury goods as value exchange in place of a mirror transfer",
+          "Surrogate shopping (daigou) straw buyers acquiring and shipping U.S. goods to China",
+          "Convertible virtual currency as an alternative settlement rail for mirror transactions",
+          "Counterfeit passports and fake identity documents supplied to mules for account opening"
+        ],
+        "spurious": [
+          "CMLN Goods-Based Trade Value Transfer (Purchase and Export)"
+        ],
+        "matched": [
+          {
+            "gold": "Mirror-transaction currency swap through Chinese underground banking (BMPE-style, no cross-border movement)",
+            "predicted": "Chinese Underground Banking Mirror Transactions (IVTS)",
+            "score": 0.667
+          }
+        ]
+      },
+      "actors": {
+        "tp": 7,
+        "fn": 3,
+        "fp": 1,
+        "missed": [
+          "CMLN money mules",
+          "Complicit U.S. businesses and financial institution insiders",
+          "San Gabriel Valley money transmitting group"
+        ],
+        "spurious": [
+          "Colombian peso brokers"
+        ],
+        "matched": [
+          {
+            "gold": "Chinese money laundering networks",
+            "predicted": "Chinese money laundering networks (CMLNs)",
+            "score": 1.0
+          },
+          {
+            "gold": "Daigou buyers",
+            "predicted": "Daigou buyers and operators",
+            "score": 1.0
+          },
+          {
+            "gold": "Edgar Joel Martinez-Reyes",
+            "predicted": "Edgar Joel Martinez-Reyes",
+            "score": 1.0
+          },
+          {
+            "gold": "Gulf Cartel",
+            "predicted": "Gulf Cartel",
+            "score": 1.0
+          },
+          {
+            "gold": "Jalisco New Generation Cartel",
+            "predicted": "Jalisco New Generation Cartel (CJNG)",
+            "score": 1.0
+          },
+          {
+            "gold": "Mexico-based transnational criminal organizations",
+            "predicted": "Mexico-based transnational criminal organizations (TCOs) / the Cartels",
+            "score": 1.0
+          },
+          {
+            "gold": "Sinaloa Cartel",
+            "predicted": "Sinaloa Cartel",
+            "score": 1.0
+          }
+        ]
+      },
+      "jurisdictions": {
+        "tp": 5,
+        "fn": 0,
+        "fp": 1,
+        "missed": [],
+        "spurious": [
+          "CO"
+        ],
+        "matched": [
+          "AE",
+          "CN",
+          "HK",
+          "MX",
+          "US"
+        ]
+      }
+    },
+    "ADV-2026-0012": {
+      "typologies": {
+        "tp": 4,
+        "fn": 4,
+        "fp": 0,
+        "missed": [
+          "SAN001",
+          "SAN004",
+          "SAN007",
+          "SAN008"
+        ],
+        "spurious": [],
+        "matched": [
+          "SAN002",
+          "SAN003",
+          "SAN006",
+          "SAN009"
+        ]
+      },
+      "emergent": {
+        "tp": 0,
+        "fn": 5,
+        "fp": 0,
+        "missed": [
+          "AIS disablement and spoofing to mask vessel identity and movement",
+          "Ship-to-ship transfers at sea to conceal cargo origin or destination",
+          "False flags and flag hopping",
+          "Physical alteration of vessel identification (painted-over names and IMO numbers)",
+          "Payment offsetting arrangement settling sanctioned oil shipments"
+        ],
+        "spurious": [],
+        "matched": []
+      },
+      "actors": {
+        "tp": 9,
+        "fn": 0,
+        "fp": 6,
+        "missed": [],
+        "spurious": [
+          "Syria",
+          "Islamic Revolutionary Guard Corps (IRGC)",
+          "Hizballah",
+          "Hamas",
+          "Government of Syria / Bashar al-Assad regime",
+          "Malign/bad actors engaged in illicit shipping"
+        ],
+        "matched": [
+          {
+            "gold": "Banias Refinery Company",
+            "predicted": "Banias Refinery Company",
+            "score": 1.0
+          },
+          {
+            "gold": "IRGC-Qods Force",
+            "predicted": "IRGC-Qods Force (IRGC-QF)",
+            "score": 1.0
+          },
+          {
+            "gold": "Iran-Syria oil procurement network",
+            "predicted": "Iran",
+            "score": 1.0
+          },
+          {
+            "gold": "Islamic Republic of Iran Shipping Lines",
+            "predicted": "Islamic Republic of Iran Shipping Lines",
+            "score": 1.0
+          },
+          {
+            "gold": "Maritime Assistance LLC",
+            "predicted": "Maritime Assistance LLC",
+            "score": 1.0
+          },
+          {
+            "gold": "National Iranian Oil Company",
+            "predicted": "National Iranian Oil Company",
+            "score": 1.0
+          },
+          {
+            "gold": "National Iranian Tanker Company",
+            "predicted": "National Iranian Tanker Company",
+            "score": 1.0
+          },
+          {
+            "gold": "North Korea-associated vessels",
+            "predicted": "North Korea",
+            "score": 1.0
+          },
+          {
+            "gold": "Syrian Company for Oil Transport",
+            "predicted": "Syrian Company for Oil Transport",
+            "score": 1.0
+          }
+        ]
+      },
+      "jurisdictions": {
+        "tp": 5,
+        "fn": 0,
+        "fp": 1,
+        "missed": [],
+        "spurious": [
+          "US"
+        ],
+        "matched": [
+          "CN",
+          "IR",
+          "KP",
+          "RU",
+          "SY"
+        ]
+      }
+    },
+    "ADV-2026-0013": {
+      "typologies": {
+        "tp": 3,
+        "fn": 7,
+        "fp": 2,
+        "missed": [
+          "BA005",
           "PAT005",
           "SAN001",
           "SAN005",
@@ -395,10 +1586,10 @@
           "TBML009"
         ],
         "spurious": [
+          "BA008",
           "TBML002U"
         ],
         "matched": [
-          "BA005",
           "SAN003",
           "SAN004",
           "SAN007"
@@ -407,24 +1598,24 @@
       "emergent": {
         "tp": 0,
         "fn": 2,
-        "fp": 1,
+        "fp": 0,
         "missed": [
           "False end-user and end-use declarations",
           "Splitting controlled shipments to avoid detection"
         ],
-        "spurious": [
-          "Shipment Structuring to Evade Detection"
-        ],
+        "spurious": [],
         "matched": []
       },
       "actors": {
-        "tp": 4,
-        "fn": 1,
-        "fp": 1,
-        "missed": [
-          "Grinin procurement network"
-        ],
+        "tp": 5,
+        "fn": 0,
+        "fp": 5,
+        "missed": [],
         "spurious": [
+          "Office of Foreign Assets Control (OFAC)",
+          "Bureau of Industry and Security (BIS)",
+          "Department of Justice (DOJ)",
+          "Task Force KleptoCapture",
           "Third-party intermediaries and transshipment points"
         ],
         "matched": [
@@ -439,13 +1630,18 @@
             "score": 1.0
           },
           {
+            "gold": "Grinin procurement network",
+            "predicted": "Grinin network (five Russian nationals including a suspected FSB officer, and two U.S. citizens)",
+            "score": 0.667
+          },
+          {
             "gold": "Iranian UAV entities",
-            "predicted": "Seven Iranian drone entities",
+            "predicted": "Iranian drone entities",
             "score": 0.667
           },
           {
             "gold": "Orekhov procurement network",
-            "predicted": "Russian and Spanish nationals indicted for shell-company export network (Orekhov)",
+            "predicted": "Orekhov network (six Russian nationals and one Spanish national)",
             "score": 0.667
           }
         ]
@@ -473,15 +1669,203 @@
         ]
       }
     },
-    "ADV-2026-0016": {
+    "ADV-2026-0014": {
       "typologies": {
         "tp": 4,
-        "fn": 6,
+        "fn": 8,
+        "fp": 0,
+        "missed": [
+          "BA008",
+          "PAT002",
+          "PAT005",
+          "PAT007",
+          "PAT009",
+          "PAT010",
+          "SAN005",
+          "SAN009"
+        ],
+        "spurious": [],
+        "matched": [
+          "CMI010",
+          "SAN001",
+          "SAN004",
+          "SAN008"
+        ]
+      },
+      "emergent": {
+        "tp": 0,
+        "fn": 7,
+        "fp": 0,
+        "missed": [
+          "Enabler payments to maintain designated persons' lifestyles and assets",
+          "Fronting by enablers to claim ownership of frozen assets",
+          "Citizenship-by-investment used to conceal links to designated persons",
+          "SPFS messaging as an alternative to SWIFT for sanctioned payments",
+          "Non-resident banking in intermediary jurisdictions",
+          "Replacement of closed companies with freshly incorporated copies elsewhere",
+          "Cash couriering and unexplained cash deposits to fund designated persons"
+        ],
+        "spurious": [],
+        "matched": []
+      },
+      "actors": {
+        "tp": 5,
+        "fn": 0,
+        "fp": 1,
+        "missed": [],
+        "spurious": [
+          "National Crime Agency (NCA)"
+        ],
+        "matched": [
+          {
+            "gold": "Garantex",
+            "predicted": "Garantex",
+            "score": 1.0
+          },
+          {
+            "gold": "Non-professional enablers",
+            "predicted": "Non-professional enablers",
+            "score": 1.0
+          },
+          {
+            "gold": "Professional enablers",
+            "predicted": "Professional enablers",
+            "score": 1.0
+          },
+          {
+            "gold": "Russian designated persons",
+            "predicted": "Russian designated persons (DPs)",
+            "score": 1.0
+          },
+          {
+            "gold": "Russian money laundering network (Operation Destabilise)",
+            "predicted": "Russian money laundering network (Operation Destabilise)",
+            "score": 1.0
+          }
+        ]
+      },
+      "jurisdictions": {
+        "tp": 12,
+        "fn": 0,
+        "fp": 4,
+        "missed": [],
+        "spurious": [
+          "BY",
+          "IR",
+          "KP",
+          "LY"
+        ],
+        "matched": [
+          "AE",
+          "AT",
+          "CH",
+          "CY",
+          "GB",
+          "GG",
+          "IM",
+          "KY",
+          "LU",
+          "RU",
+          "TR",
+          "VG"
+        ]
+      }
+    },
+    "ADV-2026-0015": {
+      "typologies": {
+        "tp": 4,
+        "fn": 8,
+        "fp": 1,
+        "missed": [
+          "BA008",
+          "PAT001",
+          "PAT005",
+          "PAT010",
+          "SAN005",
+          "SAN006",
+          "SAN008",
+          "TBML008"
+        ],
+        "spurious": [
+          "TBML010"
+        ],
+        "matched": [
+          "CMI010",
+          "PAT007",
+          "SAN001",
+          "SAN009"
+        ]
+      },
+      "emergent": {
+        "tp": 0,
+        "fn": 3,
+        "fp": 0,
+        "missed": [
+          "Enabler-facilitated sanctions evasion by professional services",
+          "Pre-designation asset transfer exploiting designation timing gaps",
+          "Ownership dilution below the 50% control threshold"
+        ],
+        "spurious": [],
+        "matched": []
+      },
+      "actors": {
+        "tp": 2,
+        "fn": 1,
+        "fp": 4,
+        "missed": [
+          "Russian money launderers"
+        ],
+        "spurious": [
+          "National Economic Crime Centre (NECC)",
+          "HM Treasury Office of Financial Sanctions Implementation (OFSI)",
+          "Joint Money Laundering Intelligence Taskforce (JMLIT)",
+          "Combating Kleptocracy Cell (CKC)"
+        ],
+        "matched": [
+          {
+            "gold": "Designated persons (Russian elites)",
+            "predicted": "Designated Persons (Russian elites/oligarchs)",
+            "score": 1.0
+          },
+          {
+            "gold": "UK enablers (professional services)",
+            "predicted": "Enablers (legal, financial and TCSP professionals)",
+            "score": 1.0
+          }
+        ]
+      },
+      "jurisdictions": {
+        "tp": 10,
+        "fn": 1,
+        "fp": 0,
+        "missed": [
+          "BY"
+        ],
+        "spurious": [],
+        "matched": [
+          "AE",
+          "BR",
+          "CH",
+          "CN",
+          "CY",
+          "GB",
+          "IN",
+          "RU",
+          "TR",
+          "VG"
+        ]
+      }
+    },
+    "ADV-2026-0016": {
+      "typologies": {
+        "tp": 3,
+        "fn": 7,
         "fp": 0,
         "missed": [
           "PAT005",
           "SAN001",
           "SAN005",
+          "SAN006",
           "SAN008",
           "TBML001",
           "TBML008"
@@ -490,7 +1874,6 @@
         "matched": [
           "SAN003",
           "SAN004",
-          "SAN006",
           "SAN007"
         ]
       },
@@ -508,14 +1891,12 @@
       "actors": {
         "tp": 6,
         "fn": 2,
-        "fp": 1,
+        "fp": 0,
         "missed": [
           "Russian military procurement",
           "Third-country businesses supplying Russia's war machine"
         ],
-        "spurious": [
-          "Russian oligarchs"
-        ],
+        "spurious": [],
         "matched": [
           {
             "gold": "AZU International",
@@ -552,11 +1933,9 @@
       "jurisdictions": {
         "tp": 8,
         "fn": 0,
-        "fp": 1,
+        "fp": 0,
         "missed": [],
-        "spurious": [
-          "UA"
-        ],
+        "spurious": [],
         "matched": [
           "AE",
           "BY",
@@ -573,7 +1952,7 @@
       "typologies": {
         "tp": 3,
         "fn": 5,
-        "fp": 0,
+        "fp": 1,
         "missed": [
           "PAT007",
           "PAT009",
@@ -581,7 +1960,9 @@
           "SAN008",
           "SAN009"
         ],
-        "spurious": [],
+        "spurious": [
+          "TBML010"
+        ],
         "matched": [
           "SAN002",
           "SAN003",
@@ -589,21 +1970,16 @@
         ]
       },
       "emergent": {
-        "tp": 1,
-        "fn": 2,
+        "tp": 0,
+        "fn": 3,
         "fp": 0,
         "missed": [
+          "Split evasion network: sanctions-facing 'blue' and Russia-facing 'red' companies",
           "Replacement of designated entities with freshly incorporated companies",
           "Blending of cargo to disguise sanctioned origin"
         ],
         "spurious": [],
-        "matched": [
-          {
-            "gold": "Split evasion network: sanctions-facing 'blue' and Russia-facing 'red' companies",
-            "predicted": "Dual-Sided (Blue/Red) Sanctions Evasion Trading Network",
-            "score": 0.625
-          }
-        ]
+        "matched": []
       },
       "actors": {
         "tp": 7,
@@ -613,9 +1989,9 @@
           "2Rivers network"
         ],
         "spurious": [
-          "'Blue' side network companies",
-          "'Red' side network companies",
-          "Shadow Fleet oil tankers"
+          "Shadow Fleet oil tankers",
+          "'Blue' side network",
+          "'Red' side network"
         ],
         "matched": [
           {
@@ -658,18 +2034,266 @@
       "jurisdictions": {
         "tp": 2,
         "fn": 2,
-        "fp": 1,
+        "fp": 3,
         "missed": [
           "AE",
           "SG"
         ],
         "spurious": [
-          "GB"
+          "CA",
+          "GB",
+          "US"
         ],
         "matched": [
           "AZ",
           "RU"
         ]
+      }
+    },
+    "ADV-2026-0018": {
+      "typologies": {
+        "tp": 2,
+        "fn": 3,
+        "fp": 1,
+        "missed": [
+          "CM002",
+          "PAT002",
+          "SAN008"
+        ],
+        "spurious": [
+          "CM005"
+        ],
+        "matched": [
+          "BA008",
+          "PAT009"
+        ]
+      },
+      "emergent": {
+        "tp": 1,
+        "fn": 6,
+        "fp": 3,
+        "missed": [
+          "Mirror trading: associates transfer value through offsetting trades, on-platform or off-market",
+          "Equity placement: convertible debt converted into shares worth far more than the loan for a connected investor",
+          "Debt issuance: loan repackaged as an MTN with coupons routed through an offshore agent to connected holders",
+          "Intermediation through an offshore broker's omnibus account with settlement in another jurisdiction and currency",
+          "Neutralising FX option positions to receive and return premium through a prime brokerage account",
+          "Account funding abuse: over-collateralisation and cash parked without trading then withdrawn to a third party"
+        ],
+        "spurious": [
+          "Medium-Term Note / Debt Issuance Layering",
+          "Omnibus/Reliance Intermediation Opacity",
+          "Capital Markets Account Funding Layering"
+        ],
+        "matched": [
+          {
+            "gold": "Free-of-payment movement of securities of unverified ownership between brokers before sale",
+            "predicted": "Free of Payment Securities Transfer Laundering",
+            "score": 0.6
+          }
+        ]
+      },
+      "actors": {
+        "tp": 0,
+        "fn": 5,
+        "fp": 1,
+        "missed": [
+          "Associated customers trading against each other across jurisdictions",
+          "Third parties instructing trades not for their own account",
+          "Offshore brokers in high-risk jurisdictions fronting undisclosed underlying customers",
+          "Politically connected high-net-worth individuals",
+          "Enabling lawyers, including struck-off practitioners"
+        ],
+        "spurious": [
+          "Deutsche Bank"
+        ],
+        "matched": []
+      },
+      "jurisdictions": {
+        "tp": 1,
+        "fn": 0,
+        "fp": 1,
+        "missed": [],
+        "spurious": [
+          "HK"
+        ],
+        "matched": [
+          "GB"
+        ]
+      }
+    },
+    "ADV-2026-0019": {
+      "typologies": {
+        "tp": 4,
+        "fn": 13,
+        "fp": 0,
+        "missed": [
+          "BA003",
+          "BA007",
+          "BA008",
+          "PAT007",
+          "PAT010",
+          "SAN001",
+          "SAN003",
+          "SAN007",
+          "SAN008",
+          "SAN009",
+          "TBML002U",
+          "TBML005",
+          "TBML006"
+        ],
+        "spurious": [],
+        "matched": [
+          "CMI010",
+          "SAN004",
+          "SAN006",
+          "TBML009"
+        ]
+      },
+      "emergent": {
+        "tp": 0,
+        "fn": 7,
+        "fp": 3,
+        "missed": [
+          "Criminal infiltration and abuse of legal business structures",
+          "Cryptocurrency laundering through mixers, chain hopping, privacy coins and DeFi",
+          "Professional money laundering as a service through parallel underground financial systems",
+          "Missing trader intra-community (MTIC) VAT fraud",
+          "Free trade zone abuse for illicit trade and financial crime",
+          "Informal value transfer systems (hawala)",
+          "Shared professional launderers linking organised-crime proceeds to terrorist financing"
+        ],
+        "spurious": [
+          "Cryptocurrency Layering via Mixing Services, Chain-Hopping and DeFi",
+          "Corruption Brokers and Digitalised Corruption-as-a-Service",
+          "Hybrid Threat Actor Use of Criminal Networks as Proxies (Woodpecker Modus Operandi)"
+        ],
+        "matched": []
+      },
+      "actors": {
+        "tp": 4,
+        "fn": 8,
+        "fp": 2,
+        "missed": [
+          "Dutch military-goods export network",
+          "EUR 297 million VAT fraud network",
+          "JuicyFields investment fraud network",
+          "Thieves in Law",
+          "Greek counterfeit-goods network owning courier companies",
+          "Morocco–Spain cannabis helicopter network",
+          "LockBit",
+          "Money mules (young and vulnerable recruits)"
+        ],
+        "spurious": [
+          "Corruption brokers",
+          "Front companies (sanctions-evasion supply chains)"
+        ],
+        "matched": [
+          {
+            "gold": "ChipMixer",
+            "predicted": "ChipMixer",
+            "score": 1.0
+          },
+          {
+            "gold": "Hybrid threat actors",
+            "predicted": "Hybrid threat actors",
+            "score": 1.0
+          },
+          {
+            "gold": "Professional money launderers and money brokers",
+            "predicted": "Professional money launderers / money brokers",
+            "score": 1.0
+          },
+          {
+            "gold": "Russian criminal networks",
+            "predicted": "Criminal networks",
+            "score": 1.0
+          }
+        ]
+      },
+      "jurisdictions": {
+        "tp": 4,
+        "fn": 10,
+        "fp": 5,
+        "missed": [
+          "BY",
+          "CY",
+          "ES",
+          "FR",
+          "GR",
+          "HR",
+          "IT",
+          "MA",
+          "PL",
+          "SI"
+        ],
+        "spurious": [
+          "CN",
+          "IR",
+          "KP",
+          "LT",
+          "LV"
+        ],
+        "matched": [
+          "DE",
+          "NL",
+          "RU",
+          "UA"
+        ]
+      }
+    },
+    "ADV-2026-0020": {
+      "typologies": {
+        "tp": 8,
+        "fn": 4,
+        "fp": 0,
+        "missed": [
+          "PAT009",
+          "SAN003",
+          "SAN008",
+          "TBML008"
+        ],
+        "spurious": [],
+        "matched": [
+          "BA002",
+          "TBML001",
+          "TBML002U",
+          "TBML003",
+          "TBML004",
+          "TBML005",
+          "TBML007",
+          "TBML010"
+        ]
+      },
+      "emergent": {
+        "tp": 0,
+        "fn": 2,
+        "fp": 0,
+        "missed": [
+          "Short shipping and over shipping (quantity or quality misrepresentation)",
+          "End-user concealment through intermediaries and ownership transfers"
+        ],
+        "spurious": [],
+        "matched": []
+      },
+      "actors": {
+        "tp": 0,
+        "fn": 0,
+        "fp": 2,
+        "missed": [],
+        "spurious": [
+          "Colluding Buyer and Seller",
+          "Money Launderers Controlling a Trading Company"
+        ],
+        "matched": []
+      },
+      "jurisdictions": {
+        "tp": 0,
+        "fn": 0,
+        "fp": 0,
+        "missed": [],
+        "spurious": [],
+        "matched": []
       }
     }
   }
