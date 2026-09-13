@@ -69,7 +69,35 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
-DEFAULT_EMERGENT_THRESHOLD = 0.60
+# EMERGENT 0.50, ACTORS 0.60, and the two are not interchangeable.
+#
+# Emergent was 0.60 until 2026-09-13. The full-set audit
+# (evals/traces/EMERGENT_AUDIT_2026-09-12.md) measured what that cost: of 19
+# false positives, 10 were genuine paraphrases the threshold refused to credit.
+# Lowering it to 0.50 credits 7 of them and merges nothing -- every gained match
+# was read pair by pair against its citations:
+#
+#   0.60 -> 0.50 gains 7, all genuine restatements. Examples:
+#     "Black Market Peso Exchange (BMPE) Trade-Based Settlement"
+#       <-> "Black market peso exchange and three-way exchange exploiting capital controls"
+#     "Cryptocurrency Layering via Mixing Services, Chain-Hopping and DeFi"
+#       <-> "Cryptocurrency laundering through mixers, chain hopping, privacy coins and DeFi"
+#
+# 0.40 IS THE FLOOR AND IT IS REAL, not hypothetical. It merges this pair on
+# ADV-2026-0004 at 0.43, and they are different mechanisms:
+#     "Professional Intermediary (TCSP/Legal/Accounting) Gatekeeper Complicity"
+#       <-> "Trusts and legal arrangements interposed to separate legal from beneficial ownership"
+#
+# THE ACTOR THRESHOLD STAYS AT 0.60, and the reason is the 2Rivers pair below.
+# "2Rivers DMCC" and "2Rivers PTE" are two different companies, both real actors
+# in ADV-2026-0017's label, and they score exactly 0.50 -- so an actor threshold
+# of 0.50 would score them as one. That example was previously quoted as the
+# justification for the EMERGENT threshold; it is a real case, but it is an
+# ACTOR case, and conflating the two constants is what kept emergent at 0.60 for
+# no measured reason. Change one without the other.
+#
+# Guarded by evals/check_emergent_threshold.py, mutation-verified.
+DEFAULT_EMERGENT_THRESHOLD = 0.50
 DEFAULT_ACTOR_THRESHOLD = 0.60
 
 # Dropped before token comparison: grammatical words only.
