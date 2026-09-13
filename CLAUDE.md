@@ -41,7 +41,7 @@ evals/check_twin_pairs.py           guards the cross-family twin relation and th
 evals/check_emergent_threshold.py   pins emergent at 0.50 and proves 0.40 is a real floor; --mutate
 evals/search_recall.py              search measured against the golden set's real advisory sentences, not hand-written probes
 evals/probe_prompt_variant.py       A/B a prompt change without editing the agent; INVERTED 2026-09-12, now builds the pre-adoption prompt
-evals/traces/                       where recall goes: the full baseline, three traced mechanisms, the ADV-2026-0004 label triage and the document-shape count
+evals/traces/                       where recall goes: the full baseline, three traced mechanisms, the label triage, the document-shape count and the reviewer's acceptance bands
 tools/batch_remaining.sh           extracts every advisory with no record; resumable and idempotent, shortest first
 evals/review_ADV-2026-0001.md      week-1 review: what the first real run got wrong and why
 setup.sh                           bootstrap + smoke tests
@@ -210,7 +210,29 @@ claude mcp add knowledge-centre -- "$PWD/.venv/bin/python" "$PWD/mcp_server/know
   4. **Owner label pass.** Gates every published figure. `evals/traces/TRIAGE_ADV-2026-0004_LABEL.md`
      is a four-decision list: TBML001 and SAN008 to strike or keep, TBML004 and SAN001 to judge thin.
 
-- [ ] Week 4: fetcher / extractor / classifier / reviewer subagents. **DO NOT plan this against better retrieval.** Measured three ways on 2026-09-12: the search fix lifted top-5 recall 41% relative and moved extraction recall by nothing; typologies were retrieved, confirmed with `get_typology`, and then not asserted; and the agent asserts the same handful whether the document holds 5 golden typologies or 20. Build against the three mechanisms below, in that order. And note precision 0.889 is this pipeline's best property -- an assertion budget IS a precision strategy, so a reviewer that justifies each extra assertion beats simply asserting more
+- [~] Week 4 (started 2026-09-13): **built the ADDITIVE reviewer only, not the four stations PLAN.md lists,
+  and it PASSES its acceptance test.** The fetcher is deterministic Python already working; the classifier is a
+  retrieval role and retrieval is not the constraint; and the reviewer PLAN.md specifies ("reject any fact whose
+  quote is not in the page text") duplicates `check_citations.py`, which all 624 citations already pass. The
+  measured defect is the other one — a quote that exists is not a quote that supports — and the measured gap is
+  recall. `agents/review_advisory.py` is a second pass that asks what the extraction MISSED, under a burden:
+  every addition must quote the doctrine's own words and say how the evidence matches THAT mechanism.
+  Twelve runs, three repeats over the four concentrated documents:
+
+  | | tp | fp | P | R | F1 |
+  |---|---|---|---|---|---|
+  | extraction alone | 11 | 3 | 0.786 | 0.224 | **0.349** |
+  | + reviewer (3 reps) | 19-21 | 4-6 | 0.760-0.833 | 0.388-0.429 | **0.514-0.553** |
+
+  Bands SEPARATE on F1 and recall; precision straddles the baseline rather than clearing it. It found SAN006 on
+  ADV-2026-0016 — missed in 13 of 13 extractions, unreached by the search fix, unrecovered by the twin fix — by
+  reading doctrine and matching mechanisms rather than retrieving on vocabulary. **Cost: additions run at
+  precision 0.794**, below the pipeline's 0.889; this is the first mechanism built that CAN spend precision.
+  BOUNDARY: measured only where misses concentrate. Eight documents have ZERO misses in indicator sections and
+  the reviewer's value there is untested. `evals/traces/REVIEWER_BANDS_2026-09-13.md`.
+
+- [ ] Week 4 remaining: the full-set run, `data/emergent_candidates.json`, and the honest single-vs-multi
+  comparison. **DO NOT plan the rest against better retrieval.** Measured three ways on 2026-09-12: the search fix lifted top-5 recall 41% relative and moved extraction recall by nothing; typologies were retrieved, confirmed with `get_typology`, and then not asserted; and the agent asserts the same handful whether the document holds 5 golden typologies or 20. Build against the three mechanisms below, in that order. And note precision 0.889 is this pipeline's best property -- an assertion budget IS a precision strategy, so a reviewer that justifies each extra assertion beats simply asserting more
 - [ ] Week 5: hooks, telemetry, `review.py` gate, desk digests
 - [ ] Week 6: publish slice 1 on `future-capabilities.html`, tag `fc08-threatintel-slice1-v1.0.0`
 
