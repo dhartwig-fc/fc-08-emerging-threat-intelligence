@@ -7,9 +7,12 @@ Usage:
     python tools/review.py --decisions FILE     # apply a pasted list (e.g. from a phone)
     python tools/review.py --check              # fail unless approvals match the log AND the log is the gate's
 
-A decisions file holds one line per link; anything not starting "ADV-" is ignored:
+A decisions file holds one line per link. Leading list markers (-, *, a bullet)
+and a lowercase "adv-" are accepted, because that is what a phone pastes. A line
+that does not mention ADV- is ignored; one that does and cannot be read refuses
+the whole list -- a decision is never silently dropped. An empty list is refused.
     ADV-2026-0002 BA008: approve -- note
-    ADV-2026-0002 EMERGENT[shadow fleet ship-to-ship transfer]: reject -- note
+    - ADV-2026-0002 EMERGENT[shadow fleet ship-to-ship transfer]: reject -- note
 
 Both deciding modes go through governance.decisions.apply, which refuses an
 unknown or quarantined link, a link twice in one list, and overturning a decided
@@ -32,6 +35,7 @@ from governance import card  # noqa: E402
 from governance import decisions as gd  # noqa: E402
 from governance import proposals as gp  # noqa: E402
 
+MARKERS = re.compile(r"^[\s\-*\u2022]+")  # leading whitespace, -, * and the bullet a phone inserts
 LINE = re.compile(r"^(ADV-\d{4}-\d{4})\s+(?:([A-Z]{2,6}\d{3}[A-Z]?)|EMERGENT\[(.+?)\]):\s*(approve|reject)"
                   r"\s*(?:--\s*(.*))?$", re.I)
 
@@ -39,14 +43,15 @@ LINE = re.compile(r"^(ADV-\d{4}-\d{4})\s+(?:([A-Z]{2,6}\d{3}[A-Z]?)|EMERGENT\[(.
 def parse_decisions(text: str) -> list:
     out = []
     for raw in text.splitlines():
-        line = raw.strip()
-        if not line.startswith("ADV-"):
+        line = MARKERS.sub("", raw).strip()
+        if "adv-" not in line.lower():
             continue
         m = LINE.match(line)
         if not m:
-            raise SystemExit("cannot read decision line: %r" % line)
+            raise SystemExit("cannot read decision line, nothing written: %r" % raw.strip())
         aid, tid, label, decision, note = m.groups()
-        out.append((gp.link_key(aid, tid.upper() if tid else None, label), decision.lower(), (note or "").strip()))
+        out.append((gp.link_key(aid.upper(), tid.upper() if tid else None, label), decision.lower(),
+                    (note or "").strip()))
     return out
 
 

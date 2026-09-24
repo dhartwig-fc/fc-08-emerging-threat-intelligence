@@ -32,7 +32,7 @@ data/advisories/                   source PDFs (gitignored)
 data/records/                      extraction-only AdvisoryRecords -- TRACKED since e0dbfb6, the evidence behind every published figure
 data/records_merged/               extraction + reviewer additions under schema 1.4.0; the pipeline's output (tracked)
 data/label_disputes/               the 15 owner label-pass disputes, built by tools/build_label_disputes.py (tracked)
-data/proposals.jsonl               review queue written by the MCP server (gitignored)
+data/proposals.jsonl               RETIRED: never written since week 5 (gitignored); frozen copy at data/proposals_legacy_2026-09-10_to_13.jsonl
 evals/example_record.json          golden record proving the schema
 evals/validate_record.py           validator for any record
 evals/check_citations.py           proves every citation quote exists on the PDF page it names
@@ -58,7 +58,8 @@ governance/                        the review gate: proposals.py (load, re-check
 tools/review.py                    THE ONLY writer of approvals: interactive, --decisions, --list, --check
 data/review_decisions.jsonl        append-only decision log (tracked); the two approvals files are rebuilt from it
 evals/check_proposal_contract.py   pins the proposal contract; --mutate citations|run
-evals/check_review_gate.py         pins the gate end to end; --mutate quarantine|overturn|evidence
+evals/check_review_gate.py         pins the gate end to end; --mutate quarantine|overturn|evidence|contract
+schemas/proposal_contract.py       THE proposal contract (schema, stages, quote bounds, proposal_id), shared by the MCP server and the gate
 evals/owner_decisions/             dated evidence of what the owner decided about the golden labels
 agents/review_advisory.py          the additive reviewer: what did the extraction miss, justified against doctrine
 evals/review_ADV-2026-0001.md      week-1 review: what the first real run got wrong and why
@@ -371,8 +372,9 @@ claude mcp add knowledge-centre -- "$PWD/.venv/bin/python" "$PWD/mcp_server/know
   every proposal names its run and carries quotes verified at proposal time and again at review; one
   tracked queue file per run; `tools/review.py` is the only writer of approvals, rebuilt from an
   append-only decision log. The 383 legacy proposals are frozen, not reviewed -- they carry no quotes and
-  no run. NEXT: sub-project B (telemetry + the write allowlist; probe first whether `can_use_tool` needs a
-  streamed prompt), then C (desk digests).
+  no run. `.venv/bin/python tools/review.py --check` proves the approvals and the log agree, and that every
+  logged decision cites real queue proposals for its own link. NEXT: sub-project B (telemetry + the write
+  allowlist; probe first whether `can_use_tool` needs a streamed prompt), then C (desk digests).
 - [ ] Week 6: publish slice 1 on `future-capabilities.html`, tag `fc08-threatintel-slice1-v1.0.0`
 
 ## Journal

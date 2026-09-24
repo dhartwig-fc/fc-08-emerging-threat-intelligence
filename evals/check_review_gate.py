@@ -10,7 +10,11 @@ Usage:
 
 Builds a throwaway queue from REAL quotes in the ADV-2026-0002 golden label, plus
 one tampered proposal and one legacy line, and drives governance/ against it.
-Nothing here touches data/proposals/, the decision log or the approvals files.
+contract_checks gives each tampered copy of a clean line its OWN queue dir;
+log_checks forges decision logs and drives --check and the deciding modes;
+parse_checks drives --decisions with what a phone pastes.
+Nothing here touches data/proposals/, the decision log or the approvals files --
+log_checks asserts the real ones are byte-identical before and after.
 
 NEEDS the ADV-2026-0002 PDF in data/advisories/ (gitignored). Without it this
 exits 2 and says so.
@@ -252,8 +256,8 @@ def decision_checks(w: dict) -> list:
     gd.write_approved(gd.load_log(log), links_path, emergent_path)
     out.append((gd.check_approved(gd.load_log(log), links_path, emergent_path) == [],
                 "check_approved passes on files rebuilt from the log", ""))
-    links_path.write_text(links_path.read_text(encoding="utf-8").replace("[]", '[{"hand": "edit"}]'),
-                          encoding="utf-8")
+    # One appended byte: the smallest hand edit, and never a no-op whatever the file holds.
+    links_path.write_text(links_path.read_text(encoding="utf-8") + " ", encoding="utf-8")
     problems = gd.check_approved(gd.load_log(log), links_path, emergent_path)
     out.append((bool(problems), "a HAND-EDITED approvals file is caught", "; ".join(problems)[:120]))
     out.append((gd.rebuild(gd.load_log(log)) == gd.rebuild(gd.load_log(log)), "rebuild is deterministic", ""))
@@ -318,16 +322,72 @@ def cli_checks(w: dict) -> list:
                 "interactive mode records a decision with its note through the same writer",
                 (r.stdout + r.stderr)[-160:]))
 
-    writers = []
-    for py in ROOT.rglob("*.py"):
-        rel = py.relative_to(ROOT).as_posix()
-        if rel.startswith((".venv/", "evals/")) or rel == "governance/decisions.py":
-            continue
-        text = py.read_text(encoding="utf-8", errors="replace")
-        if "approved_links.json" in text or "approved_emergent.json" in text:
-            writers.append(rel)
-    out.append((writers == [], "NOTHING outside governance/decisions.py names the approvals files",
+    writers = _naming_the_record(ROOT)
+    out.append((writers == [], "NOTHING outside governance/decisions.py names the log or the approvals files",
                 "found in: %s" % writers if writers else "only the gate"))
+    plant = WORK / "scan"
+    for rel, text in (("tools/x.sh", "cat data/review_decisions.jsonl\n"),
+                      ("evals/y.py", "OUT = 'data/approved_links.json'\n"),
+                      ("governance/decisions.py", "LOG = 'data/review_decisions.jsonl'\n")):
+        (plant / rel).parent.mkdir(parents=True, exist_ok=True)
+        (plant / rel).write_text(text, encoding="utf-8")
+    found = _naming_the_record(plant)
+    out.append((found == ["evals/y.py", "tools/x.sh"],
+                "the scan is not vacuous: it finds a .sh naming the log and an evals/ .py naming approvals",
+                str(found)))
+    return out
+
+
+def _naming_the_record(root: Path) -> list:
+    """Every .py/.sh under root, other than the gate and this guard, that names the decision log or an
+    approvals file. Earlier this skipped ALL of evals/, read only .py, and ignored the log's own name."""
+    names = (gd.LOG.name, gd.APPROVED_LINKS.name, gd.APPROVED_EMERGENT.name)
+    allowed = {"governance/decisions.py", Path(__file__).resolve().relative_to(ROOT).as_posix()}
+    hits = []
+    for path in sorted(root.rglob("*")):
+        rel = path.relative_to(root).as_posix()
+        if path.suffix not in (".py", ".sh") or not path.is_file() or rel.startswith(".venv/") or rel in allowed:
+            continue
+        if any(n in path.read_text(encoding="utf-8", errors="replace") for n in names):
+            hits.append(rel)
+    return hits
+
+
+def parse_checks(w: dict) -> list:
+    """--decisions reads what a phone actually pastes, and refuses what it cannot read instead of dropping it."""
+    out = []
+
+    def run(name: str, text: str):
+        d = WORK / "parse" / name
+        d.mkdir(parents=True)
+        (d / "decisions.txt").write_text(text, encoding="utf-8")
+        r = _review("--decisions", str(d / "decisions.txt"), "--queue-dir", str(QUEUE_DIR),
+                    "--log", str(d / "log.jsonl"), "--approved-links", str(d / "links.json"),
+                    "--approved-emergent", str(d / "emergent.json"))
+        return r, d
+
+    r, d = run("markers", "FC08 decisions\n  * adv-2026-0002 %s: reject -- lowercase, starred\n"
+                          "\u2022 ADV-2026-0002 EMERGENT[Guard  witness EMERGENT technique]: approve -- bulleted\n"
+                          % w["a_tid"])
+    log = [json.loads(x) for x in (d / "log.jsonl").read_text(encoding="utf-8").splitlines()] \
+        if (d / "log.jsonl").exists() else []
+    emergent = json.loads((d / "emergent.json").read_text(encoding="utf-8"))["approved"] \
+        if (d / "emergent.json").exists() else []
+    out.append((r.returncode == 0 and [x["link_key"] for x in log] == [w["a_key"], w["e_key"]]
+                and [x["link_key"] for x in emergent] == [w["e_key"]],
+                "--decisions reads list markers, a lowercase adv- and an EMERGENT[...] line into the emergent file",
+                (r.stdout + r.stderr).strip()[-120:]))
+
+    r, d = run("unreadable", "1. ADV-2026-0002 %s: approve\n" % w["a_tid"])
+    out.append((r.returncode != 0 and "1. ADV-2026-0002" in r.stderr and not (d / "log.jsonl").exists(),
+                "a line naming ADV- that does not parse is REFUSED, quoted, and nothing is written",
+                (r.stdout + r.stderr).strip()[-120:]))
+
+    r, d = run("empty", "FC08 decisions\nnothing today\n")
+    out.append((r.returncode != 0 and "no decisions in the list" in (r.stdout + r.stderr)
+                and not (d / "log.jsonl").exists(),
+                "an EMPTY decision list is refused and does not create the log",
+                (r.stdout + r.stderr).strip()[-120:]))
     return out
 
 
@@ -418,7 +478,7 @@ def log_checks(w: dict) -> list:
 
 def all_checks() -> list:
     w = build_fixture()
-    return queue_checks(w) + contract_checks(w) + decision_checks(w) + cli_checks(w) + log_checks(w)
+    return queue_checks(w) + contract_checks(w) + decision_checks(w) + cli_checks(w) + log_checks(w) + parse_checks(w)
 
 
 def main(argv: list) -> int:

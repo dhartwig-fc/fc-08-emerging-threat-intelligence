@@ -45,7 +45,7 @@ Three sub-projects, each with its own plan, in this order:
 
 ### Run identity comes from the run, not the agent
 
-`mcp_servers()` passes the server four more environment values:
+`mcp_servers()` passes the server six more environment values:
 
 | Variable | Value |
 |---|---|

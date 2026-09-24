@@ -14,6 +14,7 @@ ADV-2026-0001::TBML001 citing nothing -- rebuilt the approvals from it, and
 check_approved alone passed it, because the approvals DID match the log.
 
 Refusals (GateRefusal), with NOTHING written -- the whole list is checked first:
+  - an empty list;
   - the same link twice in one list;
   - a link that is not reviewable (unknown, or every proposal quarantined);
   - a link already decided with no new evidence: a change of mind needs its own
@@ -131,6 +132,9 @@ def apply(requests, links: Dict[str, Link], quarantined: Dict[str, str], log_pat
           now: Optional[str] = None) -> List[Decision]:
     """Check every (link_key, decision, note) request, then append them all -- or refuse and write nothing."""
     requests = list(requests)
+    if not requests:
+        # Refused, not a no-op: opening the log to append nothing would still create it.
+        raise GateRefusal("no decisions in the list")
     twice = sorted(k for k, n in Counter(k for k, _, _ in requests).items() if n > 1)
     if twice:
         raise GateRefusal("%s is decided twice in one list" % ", ".join(twice))

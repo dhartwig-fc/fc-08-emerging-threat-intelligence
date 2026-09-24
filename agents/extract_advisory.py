@@ -35,7 +35,6 @@ from __future__ import annotations
 
 import argparse
 import asyncio
-import hashlib
 import json
 import sys
 from collections import Counter
