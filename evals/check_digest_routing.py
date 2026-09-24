@@ -120,14 +120,29 @@ def digest_checks(routing: dict) -> list:
 
     batch = dg.build_batch("guard-batch", [rec], LIBRARY, routing, standing, props, advisories)
     san = batch["sanctions_desk"]
+    fiu = batch["fiu_liaison"]
+    gen = batch["general_intel"]
+    trade = batch["trade_desk"]
     out.append((("**%s " % SAN) in san and 'p3: "a sanctioned party routed goods via a hub"' in san,
                 "an approved link appears under Approved, quoted from the proposal the owner decided on", san[:160]))
-    out.append(("REJECTED QUOTE" not in san and ("**%s " % TBML) not in san,
+    # Checked on trade_desk, TBML's OWN family desk (not sanctions_desk): family scoping now hides
+    # an out-of-scope typology for a reason that has nothing to do with rejection, which would mask
+    # a rejected link showing on the one desk it actually belongs to.
+    out.append(("REJECTED QUOTE" not in trade and ("**%s " % TBML) not in trade,
                 "a rejected link never appears", ""))
-    out.append((("**%s " % NET) in san and "the network quote for the absent link" in san,
+    out.append((("**%s " % NET) in fiu and "the network quote for the absent link" in fiu,
                 "an approved link the record does NOT carry still appears (the SAN001 case)", ""))
     out.append(("### Approved emergent candidates" in san and "Guard witness technique" in san,
                 "an approved emergent candidate appears under its own heading", ""))
+
+    elsewhere = (san.split("also approved on this advisory, for other desks", 1)[1]
+                if "also approved on this advisory, for other desks" in san else "")
+    out.append((("**%s " % NET) not in san and "the network quote for the absent link" not in san
+                and NET in elsewhere,
+                "a family desk quotes only its own family's approvals; other desks' approvals are named, not quoted",
+                elsewhere[:120]))
+    out.append((("**%s " % SAN) in gen and ("**%s " % NET) in gen,
+                "a desk reached by the agent's suggestion sees the whole advisory", gen[:200]))
 
     extra = next(t for t, v in sorted(LIBRARY.items()) if v.get("family") == "sanctions" and t != SAN)
     undecided = record(aid, [SAN, TBML, NET, extra])
@@ -159,6 +174,13 @@ def real_checks() -> list:
     approved = block.split("### Approved links", 1)[1].split("###", 1)[0] if "### Approved links" in block else ""
     out.append(("SAN001" in approved and "SAN003" in approved,
                 "the owner's ADV-2026-0013 approvals appear on the sanctions desk, SAN001 included", approved[:200]))
+
+    corr = batch.get("correspondent_desk", "")
+    corr_block = (corr.split("## ADV-2026-0013", 1)[1].split("\n## ", 1)[0]
+                 if "## ADV-2026-0013" in corr else "")
+    out.append(("**BA005 " not in block and "**BA005 " in corr_block,
+                "BA005 is not quoted on the sanctions desk but is on the correspondent desk",
+                "sanctions block: %s | correspondent block: %s" % (block[:120], corr_block[:120])))
     return out
 
 
@@ -168,7 +190,7 @@ def all_checks(routing: dict) -> list:
 
 def main(argv: list) -> int:
     ap = argparse.ArgumentParser(description="Pin desk routing and digests")
-    ap.add_argument("--mutate", choices=("suggestion", "rejected"), help="break one rule; checks MUST fail")
+    ap.add_argument("--mutate", choices=("suggestion", "rejected", "scope"), help="break one rule; checks MUST fail")
     args = ap.parse_args(argv)
 
     routing = gr.load_routing()
@@ -178,6 +200,9 @@ def main(argv: list) -> int:
     elif args.mutate == "rejected":
         dg._visible = lambda d: True
         print("MUTATED: rejected links are shown as approved.\n")
+    elif args.mutate == "scope":
+        dg._in_scope = lambda *a, **k: True
+        print("MUTATED: desk scoping is off; every desk sees every family's approvals.\n")
 
     failures = 0
     for ok, label, detail in all_checks(routing):
