@@ -31,6 +31,9 @@ sys.path.insert(0, str(ROOT))
 
 from agents import telemetry  # noqa: E402
 from agents.run_identity import RunIdentity  # noqa: E402
+from agents import permissions  # noqa: E402
+from claude_agent_sdk import PermissionResultAllow, PermissionResultDeny  # noqa: E402
+from claude_agent_sdk.types import ToolPermissionContext  # noqa: E402
 
 telemetry.TELEMETRY_DIR = Path(tempfile.mkdtemp(prefix="fc08_telemetry_"))
 RUN = RunIdentity(run_id="probe-telemetry", stage="extractor", advisory_id="ADV-2026-0002",
@@ -118,19 +121,73 @@ def hook_checks() -> list:
     return out
 
 
+def permission_checks() -> list:
+    out = []
+    ask = permissions.permission_callback(RUN)
+    WRITE = "mcp__probe_writes__knowledge_centre_write_typology"
+
+    got = asyncio.run(ask(PROPOSE, {}, ToolPermissionContext(tool_use_id="toolu_prop")))
+    e = by_id("toolu_prop")
+    out.append((isinstance(got, PermissionResultAllow) and len(e) == 1
+                and e[0]["stage"] == telemetry.PERMISSION_ALLOWED and e[0]["status"] == telemetry.ALLOWED,
+                "propose_link is ALLOWED, and the decision is recorded", str(e)[:150]))
+
+    got = asyncio.run(ask(WRITE, {"typology_id": "TBML999"}, ToolPermissionContext(tool_use_id="toolu_write")))
+    e = by_id("toolu_write")
+    out.append((isinstance(got, PermissionResultDeny) and "allowlist" in got.message and len(e) == 1
+                and e[0]["stage"] == telemetry.PERMISSION_DENIED and e[0]["status"] == telemetry.DENIED
+                and e[0]["payload"]["tool"] == WRITE and e[0]["payload"]["latency_ms"] is None,
+                "a write tool NOT on the allowlist is DENIED, with one PERMISSION_DENIED event", str(e)[:150]))
+
+    got = asyncio.run(ask(GET, {}, ToolPermissionContext(tool_use_id="toolu_read")))
+    out.append((isinstance(got, PermissionResultDeny),
+                "even a read-only tool is denied if it reaches the callback -- reads are pre-approved, never decided here",
+                type(got).__name__))
+
+    blank = RunIdentity(run_id="probe-blank", stage="extractor", advisory_id="ADV-2026-0002",
+                        pdf_path=ROOT / "data" / "advisories" / "not-read.pdf", pdf_sha256="")
+    got = asyncio.run(permissions.permission_callback(blank)(PROPOSE, {}, ToolPermissionContext(tool_use_id="t")))
+    out.append((isinstance(got, PermissionResultDeny),
+                "propose_link is DENIED when the run identity is incomplete", type(got).__name__))
+
+    out.append((permissions.WRITE_ALLOWLIST == frozenset({permissions.PROPOSE_TOOL})
+                and not set(permissions.READ_ONLY_TOOLS) & permissions.WRITE_ALLOWLIST,
+                "the allowlist is exactly propose_link, and shares nothing with the read-only tools",
+                str(sorted(permissions.WRITE_ALLOWLIST))))
+
+    # The invariant, over one simulated run's worth of calls: every call has
+    # exactly one terminal event, and an ALLOWED decision is not terminal.
+    terminal = [e for e in events() if e["stage"] in (telemetry.TOOL_CALL, telemetry.PERMISSION_DENIED)]
+    counts = {}
+    for e in terminal:
+        counts[e["payload"]["tool_use_id"]] = counts.get(e["payload"]["tool_use_id"], 0) + 1
+    expected = {"toolu_ok", "toolu_ref", "toolu_ref2", "toolu_fail", "toolu_write", "toolu_read"}
+    out.append((expected <= set(counts) and all(counts[i] == 1 for i in expected) and "toolu_prop" not in counts,
+                "EXACTLY one terminal event per call: ran, refused, raised and denied alike",
+                str({i: counts.get(i, 0) for i in sorted(expected | {"toolu_prop"})})))
+    return out
+
+
 def all_checks() -> list:
-    return hook_checks()
+    return hook_checks() + permission_checks()
 
 
 def main(argv: list) -> int:
     ap = argparse.ArgumentParser(description="Pin the telemetry contract")
-    ap.add_argument("--mutate", choices=("refusal",),
+    ap.add_argument("--mutate", choices=("refusal", "allowlist", "terminal"),
                     help="remove one rule; the checks that depend on it MUST fail")
     args = ap.parse_args(argv)
 
     if args.mutate == "refusal":
         telemetry.classify_response = lambda response: (telemetry.SUCCESS, "")
         print("MUTATED: every tool reply is classified SUCCESS.\n")
+    elif args.mutate == "allowlist":
+        permissions.WRITE_ALLOWLIST = frozenset({permissions.PROPOSE_TOOL, GET,
+                                                 "mcp__probe_writes__knowledge_centre_write_typology"})
+        print("MUTATED: the allowlist admits a write tool and a read tool.\n")
+    elif args.mutate == "terminal":
+        permissions._record_denial = lambda run, tool, tool_use_id, reason: {}
+        print("MUTATED: a denial leaves no event.\n")
 
     failures = 0
     for ok, label, detail in all_checks():
