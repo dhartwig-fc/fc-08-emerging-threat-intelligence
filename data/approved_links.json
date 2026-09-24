@@ -1,0 +1,70 @@
+{
+  "approved": [
+    {
+      "advisory_id": "ADV-2026-0013",
+      "decided_at": "2026-09-24T14:46:56+00:00",
+      "link_key": "ADV-2026-0013::BA005",
+      "note": "single bullet, fast forwarding to break the audit trail (p5); medium, weakest of the five",
+      "proposal_ids": [
+        "a253b4927fc7dbe7"
+      ],
+      "run_ids": [
+        "adv-2026-0013-extractor-f617bd3b00"
+      ],
+      "typology_id": "BA005"
+    },
+    {
+      "advisory_id": "ADV-2026-0013",
+      "decided_at": "2026-09-24T14:46:56+00:00",
+      "link_key": "ADV-2026-0013::SAN001",
+      "note": "single red-flag bullet naming ownership concealment (p2); medium",
+      "proposal_ids": [
+        "ec40d88739263661"
+      ],
+      "run_ids": [
+        "adv-2026-0013-extractor-f617bd3b00"
+      ],
+      "typology_id": "SAN001"
+    },
+    {
+      "advisory_id": "ADV-2026-0013",
+      "decided_at": "2026-09-24T14:46:56+00:00",
+      "link_key": "ADV-2026-0013::SAN003",
+      "note": "mechanism developed: named transshipment hubs (p3) + Bulgarian front case (p4)",
+      "proposal_ids": [
+        "d40bb5c50b596430"
+      ],
+      "run_ids": [
+        "adv-2026-0013-extractor-f617bd3b00"
+      ],
+      "typology_id": "SAN003"
+    },
+    {
+      "advisory_id": "ADV-2026-0013",
+      "decided_at": "2026-09-24T14:46:56+00:00",
+      "link_key": "ADV-2026-0013::SAN004",
+      "note": "Milandr front-to-front transfer (p4) is the mechanism itself",
+      "proposal_ids": [
+        "9bbcb1978a29643d"
+      ],
+      "run_ids": [
+        "adv-2026-0013-extractor-f617bd3b00"
+      ],
+      "typology_id": "SAN004"
+    },
+    {
+      "advisory_id": "ADV-2026-0013",
+      "decided_at": "2026-09-24T14:46:56+00:00",
+      "link_key": "ADV-2026-0013::SAN007",
+      "note": "dual-use items to Russia (p4-5); sanctions twin correctly preferred over TBML007",
+      "proposal_ids": [
+        "7de829d37fb2bde4"
+      ],
+      "run_ids": [
+        "adv-2026-0013-extractor-f617bd3b00"
+      ],
+      "typology_id": "SAN007"
+    }
+  ],
+  "generated_from": "data/review_decisions.jsonl"
+}
