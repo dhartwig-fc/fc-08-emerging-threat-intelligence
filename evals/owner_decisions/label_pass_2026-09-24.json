@@ -1,0 +1,141 @@
+{
+  "date": "2026-09-24",
+  "what": "Owner decisions on the label-pass disputes (data/label_disputes). Covers the disputed entries only; unchallenged entries are not confirmed by this file.",
+  "decisions": [
+    {
+      "advisory_id": "ADV-2026-0001",
+      "typology_id": "TBML006",
+      "direction": "add",
+      "decision": "accept",
+      "note": "",
+      "decided_at": "2026-09-24T08:43:00.240Z",
+      "id": "ADV-2026-0001__TBML006__add"
+    },
+    {
+      "advisory_id": "ADV-2026-0001",
+      "typology_id": "TBML007",
+      "direction": "add",
+      "decision": "accept",
+      "note": "",
+      "decided_at": "2026-09-24T08:43:12.605Z",
+      "id": "ADV-2026-0001__TBML007__add"
+    },
+    {
+      "advisory_id": "ADV-2026-0002",
+      "typology_id": "BA006",
+      "direction": "add",
+      "decision": "accept",
+      "note": "",
+      "decided_at": "2026-09-24T08:43:29.878Z",
+      "id": "ADV-2026-0002__BA006__add"
+    },
+    {
+      "advisory_id": "ADV-2026-0002",
+      "typology_id": "BA008",
+      "direction": "add",
+      "decision": "accept",
+      "note": "",
+      "decided_at": "2026-09-24T08:44:22.779Z",
+      "id": "ADV-2026-0002__BA008__add"
+    },
+    {
+      "advisory_id": "ADV-2026-0002",
+      "typology_id": "PAT005",
+      "direction": "add",
+      "decision": "accept",
+      "note": "",
+      "decided_at": "2026-09-24T08:44:30.444Z",
+      "id": "ADV-2026-0002__PAT005__add"
+    },
+    {
+      "advisory_id": "ADV-2026-0002",
+      "typology_id": "TBML004",
+      "direction": "add",
+      "decision": "accept",
+      "note": "",
+      "decided_at": "2026-09-24T08:44:43.285Z",
+      "id": "ADV-2026-0002__TBML004__add"
+    },
+    {
+      "advisory_id": "ADV-2026-0004",
+      "typology_id": "SAN001",
+      "direction": "strike",
+      "decision": "reject",
+      "note": "",
+      "decided_at": "2026-09-24T08:47:25.538Z",
+      "id": "ADV-2026-0004__SAN001__strike"
+    },
+    {
+      "advisory_id": "ADV-2026-0004",
+      "typology_id": "SAN008",
+      "direction": "strike",
+      "decision": "reject",
+      "note": "",
+      "decided_at": "2026-09-24T08:47:20.498Z",
+      "id": "ADV-2026-0004__SAN008__strike"
+    },
+    {
+      "advisory_id": "ADV-2026-0004",
+      "typology_id": "TBML001",
+      "direction": "strike",
+      "decision": "reject",
+      "note": "",
+      "decided_at": "2026-09-24T08:47:18.835Z",
+      "id": "ADV-2026-0004__TBML001__strike"
+    },
+    {
+      "advisory_id": "ADV-2026-0004",
+      "typology_id": "TBML004",
+      "direction": "strike",
+      "decision": "reject",
+      "note": "",
+      "decided_at": "2026-09-24T08:47:16.658Z",
+      "id": "ADV-2026-0004__TBML004__strike"
+    },
+    {
+      "advisory_id": "ADV-2026-0005",
+      "typology_id": "BA006",
+      "direction": "add",
+      "decision": null,
+      "note": "no decision recorded in the label-pass database; 14 of 15 were saved",
+      "decided_at": null,
+      "id": "ADV-2026-0005__BA006__add"
+    },
+    {
+      "advisory_id": "ADV-2026-0005",
+      "typology_id": "PAT005",
+      "direction": "add",
+      "decision": "accept",
+      "note": "",
+      "decided_at": "2026-09-24T08:47:32.643Z",
+      "id": "ADV-2026-0005__PAT005__add"
+    },
+    {
+      "advisory_id": "ADV-2026-0015",
+      "typology_id": "SAN004",
+      "direction": "add",
+      "decision": "accept",
+      "note": "",
+      "decided_at": "2026-09-24T08:47:40.522Z",
+      "id": "ADV-2026-0015__SAN004__add"
+    },
+    {
+      "advisory_id": "ADV-2026-0017",
+      "typology_id": "PAT010",
+      "direction": "add",
+      "decision": "accept",
+      "note": "",
+      "decided_at": "2026-09-24T08:48:03.507Z",
+      "id": "ADV-2026-0017__PAT010__add"
+    },
+    {
+      "advisory_id": "ADV-2026-0018",
+      "typology_id": "TBML008",
+      "direction": "add",
+      "decision": "accept",
+      "note": "",
+      "decided_at": "2026-09-24T08:48:19.603Z",
+      "id": "ADV-2026-0018__TBML008__add"
+    }
+  ]
+}

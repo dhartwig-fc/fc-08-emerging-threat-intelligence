@@ -32,7 +32,7 @@
       "bytes": 3108080,
       "pages": 66,
       "selection_rationale": "tbml; week-1/2 reference record",
-      "label_status": "reviewed 2026-09-11 (Claude-drafted, Claude-reviewed); awaiting owner review"
+      "label_status": "reviewed 2026-09-11 (Claude-drafted, Claude-reviewed); owner-decided 2026-09-24 on 2 disputed entries (2 changed, 0 left as labelled, 0 open); the rest of the label awaits owner review"
     },
     {
       "advisory_id": "ADV-2026-0002",
@@ -48,7 +48,7 @@
       "bytes": 2079148,
       "pages": 10,
       "selection_rationale": "tbml; indicator-dense, short",
-      "label_status": "reviewed 2026-09-11 (Claude-drafted, Claude-reviewed); awaiting owner review"
+      "label_status": "reviewed 2026-09-11 (Claude-drafted, Claude-reviewed); owner-decided 2026-09-24 on 4 disputed entries (4 changed, 0 left as labelled, 0 open); the rest of the label awaits owner review"
     },
     {
       "advisory_id": "ADV-2026-0003",
@@ -80,7 +80,7 @@
       "bytes": 2781480,
       "pages": 190,
       "selection_rationale": "network; beneficial ownership, nominees, shell companies; longest document",
-      "label_status": "reviewed 2026-09-11 (Claude-drafted, Claude-reviewed); awaiting owner review"
+      "label_status": "reviewed 2026-09-11 (Claude-drafted, Claude-reviewed); owner-decided 2026-09-24 on 4 disputed entries (0 changed, 4 left as labelled, 0 open); the rest of the label awaits owner review"
     },
     {
       "advisory_id": "ADV-2026-0005",
@@ -96,7 +96,7 @@
       "bytes": 1132000,
       "pages": 24,
       "selection_rationale": "emergent: crypto family has no governed typologies",
-      "label_status": "reviewed 2026-09-11 (Claude-drafted, Claude-reviewed); awaiting owner review"
+      "label_status": "reviewed 2026-09-11 (Claude-drafted, Claude-reviewed); owner-decided 2026-09-24 on 2 disputed entries (1 changed, 0 left as labelled, 1 open); the rest of the label awaits owner review"
     },
     {
       "advisory_id": "ADV-2026-0006",
@@ -256,7 +256,7 @@
       "bytes": 297285,
       "pages": 15,
       "selection_rationale": "sanctions and network; ownership dilution below 50%, UBO changes; typology-list format",
-      "label_status": "reviewed 2026-09-11 (Claude-drafted, Claude-reviewed); awaiting owner review"
+      "label_status": "reviewed 2026-09-11 (Claude-drafted, Claude-reviewed); owner-decided 2026-09-24 on 1 disputed entry (1 changed, 0 left as labelled, 0 open); the rest of the label awaits owner review"
     },
     {
       "advisory_id": "ADV-2026-0016",
@@ -288,7 +288,7 @@
       "bytes": 631843,
       "pages": 8,
       "selection_rationale": "sanctions; shadow fleet network; date from PDF metadata, confirm at labelling",
-      "label_status": "reviewed 2026-09-11 (Claude-drafted, Claude-reviewed); awaiting owner review"
+      "label_status": "reviewed 2026-09-11 (Claude-drafted, Claude-reviewed); owner-decided 2026-09-24 on 1 disputed entry (1 changed, 0 left as labelled, 0 open); the rest of the label awaits owner review"
     },
     {
       "advisory_id": "ADV-2026-0018",
@@ -304,7 +304,7 @@
       "bytes": 567708,
       "pages": 30,
       "selection_rationale": "capital_markets; the only advisory-shaped document for that family in the matrix's publishers",
-      "label_status": "reviewed 2026-09-11 (Claude-drafted, Claude-reviewed); awaiting owner review"
+      "label_status": "reviewed 2026-09-11 (Claude-drafted, Claude-reviewed); owner-decided 2026-09-24 on 1 disputed entry (1 changed, 0 left as labelled, 0 open); the rest of the label awaits owner review"
     },
     {
       "advisory_id": "ADV-2026-0019",

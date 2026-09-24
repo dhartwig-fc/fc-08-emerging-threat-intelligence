@@ -280,6 +280,27 @@
           "quote": "Beneficial ownership changes to just below aggregated thresholds."
         }
       ]
+    },
+    {
+      "family": "sanctions",
+      "typology_id": "SAN004",
+      "label": "Front Companies",
+      "emergent": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 11,
+          "printed_folio": "11",
+          "paragraph": null,
+          "quote": "Numerous transfers of shares from sanctioned entities to non-sanctioned entities involving corporations incorporated by the same people and company (often with a registered office at the same physical address)."
+        },
+        {
+          "page": 11,
+          "printed_folio": "11",
+          "paragraph": null,
+          "quote": "A large number of off-the-shelf corporations with no trading record with nominee ownership used as throughputs."
+        }
+      ]
     }
   ],
   "actors": [

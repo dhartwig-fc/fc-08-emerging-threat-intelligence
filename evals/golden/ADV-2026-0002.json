@@ -193,6 +193,96 @@
           "quote": "Commodities imported into a country within the framework of temporary importation and inward processing regime are subsequently exported with falsified documents."
         }
       ]
+    },
+    {
+      "family": "correspondent_banking",
+      "typology_id": "BA006",
+      "label": "Dormant Reactivation",
+      "emergent": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 5,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "A trade entity has unexplained periods of dormancy."
+        },
+        {
+          "page": 6,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "A newly formed or recently re-activated trade entity engages in high-volume and high-value trade activity, e.g. an unknown entity suddenly appears and engages in trade activities in sectors with high barriers to market entry."
+        },
+        {
+          "page": 8,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "Transaction activity associated with a trade entity increases in volume quickly and significantly, and then goes dormant after a short period of time."
+        }
+      ]
+    },
+    {
+      "family": "correspondent_banking",
+      "typology_id": "BA008",
+      "label": "Fragmentation of Incoming Funds Through Unrelated Accounts and Offshore Routing",
+      "emergent": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 8,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "Incoming wire transfers to a trade-related account are split and forwarded to non-related multiple accounts that have little or no connection to commercial activity."
+        },
+        {
+          "page": 8,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "An account displays frequent deposits in cash which are subsequently transferred to persons or entities in free tra de zones or offshore jurisdictions without a business relationship to the account holder."
+        }
+      ]
+    },
+    {
+      "family": "network",
+      "typology_id": "PAT005",
+      "label": "Shared/Mass Registration Address Linking Shell Entities",
+      "emergent": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 5,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "A trade entity is registered at an address that is likely to be a mass registration address, e.g. high -density residential buildings, post -box addresses, commercial buildings or industrial complexes, especially when there is no reference to a specific unit."
+        },
+        {
+          "page": 5,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "This may also include the address of a trust and company service provider that manages a number of shell companies on behalf of its customers."
+        }
+      ]
+    },
+    {
+      "family": "tbml",
+      "typology_id": "TBML004",
+      "label": "Phantom Shipping",
+      "emergent": false,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 7,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "The value of registered imports of an entity displays significant m ismatches to the entity's volume of foreign bank transfers for imports. Conversely, the value of registered exports shows a significant mismatch with incoming foreign bank transfers."
+        },
+        {
+          "page": 7,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "Trade or customs documents supporting the transaction are missing, appear to be counterfeits, include false or misleading information, are a resubmission of previously rejected documents, or are frequently modified or amended."
+        }
+      ]
     }
   ],
   "actors": [],

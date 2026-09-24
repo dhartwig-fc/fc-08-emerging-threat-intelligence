@@ -207,6 +207,33 @@
           "quote": "through transhipments of oil and mixing operations to hide the Russian origin."
         }
       ]
+    },
+    {
+      "family": "network",
+      "typology_id": "PAT010",
+      "label": "Hidden Controller",
+      "emergent": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 3,
+          "printed_folio": null,
+          "paragraph": 2,
+          "quote": "In 2024, a network of companies run by UK-sanctioned Azeris Etibar EYYUB and Tahir GARAYEV1 traded more Russian oil than any other entity."
+        },
+        {
+          "page": 3,
+          "printed_folio": null,
+          "paragraph": 3,
+          "quote": "The “red” side of the network, with deliberately obscure ownership structures and many front companies designed to be replaced with ease if they are subject to Western sanctions, trades Russian oil directly."
+        },
+        {
+          "page": 4,
+          "printed_folio": null,
+          "paragraph": 2,
+          "quote": "the people behind it will likely continue to attempt to manipulate the system to benefit their trade by replacing sanctioned entities with freshly incorporated companies clean of sanctions but fulfilling the same role."
+        }
+      ]
     }
   ],
   "actors": [

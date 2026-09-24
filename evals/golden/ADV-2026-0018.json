@@ -267,6 +267,45 @@
           "quote": "The customer does not then trade on the account. Instead, two months later, it withdraws the cash to a third-party account."
         }
       ]
+    },
+    {
+      "family": "tbml",
+      "typology_id": "TBML008",
+      "label": "Third Party Payment Abuse",
+      "emergent": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 8,
+          "printed_folio": null,
+          "paragraph": 12,
+          "quote": "Our review identified instances of potential suspicious activity involving orders from unconnected third parties."
+        },
+        {
+          "page": 12,
+          "printed_folio": null,
+          "paragraph": 38,
+          "quote": "Participants mitigated similar activity by being aware of the risks around third-party payments and third-party transfers of assets, and by implementing strong transaction-monitoring controls in relation to these."
+        },
+        {
+          "page": 12,
+          "printed_folio": null,
+          "paragraph": 35,
+          "quote": "For example, if a customer informs their broker that the security should be delivered into an account held with a third-party broker, but this is not a usual instruction for that customer's account."
+        },
+        {
+          "page": 19,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "instructions or involvement from third parties"
+        },
+        {
+          "page": 29,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "it withdraws the cash to a third-party account."
+        }
+      ]
     }
   ],
   "actors": [

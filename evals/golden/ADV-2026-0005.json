@@ -403,6 +403,21 @@
           "quote": "Customer has provided forged documents or has edited photographs and/or identification documents as part of the on-boarding process."
         }
       ]
+    },
+    {
+      "family": "network",
+      "typology_id": "PAT005",
+      "label": "Common Address",
+      "emergent": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 8,
+          "printed_folio": "6",
+          "paragraph": null,
+          "quote": "In various instances, the individuals shared the same residential address; and most of the VA addresses were accessed from the same IP address – indicating the potential use of money mules by professional money launderers to launder the illicit proceeds."
+        }
+      ]
     }
   ],
   "actors": [

@@ -396,6 +396,36 @@
           "quote": "SBML schemes rely on exploiting the trade in services or other intangibles to disguise and justify the movement of illicit proceeds."
         }
       ]
+    },
+    {
+      "family": "tbml",
+      "typology_id": "TBML006",
+      "label": "Circular Trade (VAT chain round-tripping)",
+      "emergent": false,
+      "confidence": "low",
+      "citations": [
+        {
+          "page": 24,
+          "printed_folio": "22",
+          "paragraph": null,
+          "quote": "the OCG also registered and used legal entities and established a fake paper trail for sales and purchases to create value-added tax chains. They then exploited the trade process to both disguise the proceeds of their original criminality and generate additional criminal proceeds."
+        }
+      ]
+    },
+    {
+      "family": "tbml",
+      "typology_id": "TBML007",
+      "label": "Dual Use Goods (weaponizable technology diversion)",
+      "emergent": false,
+      "confidence": "low",
+      "citations": [
+        {
+          "page": 14,
+          "printed_folio": "12",
+          "paragraph": null,
+          "quote": "a sub-typology suggested is the procurement of items for use by terrorist groups. This includes typical goods such as firearms, but also logistical equipment and weaponizable technology such as used vehicles or drones to conflict zones."
+        }
+      ]
     }
   ],
   "actors": [
