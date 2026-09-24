@@ -181,11 +181,40 @@ def hook_checks() -> list:
                 "every event names its run, agent and advisory", ""))
 
     started = telemetry.run_started(RUN, "claude-sonnet-5", 5.0, 60)
-    done = telemetry.run_completed(RUN, telemetry.SUCCESS, "record validated", result=None, validated=True)
+    done = telemetry.run_completed(RUN, telemetry.SUCCESS, "record validated", result=None, validated=True,
+                                   terminal_check={"calls": 0, "unterminated": [], "duplicated": []})
     out.append((started["stage"] == telemetry.RUN_STARTED and done["stage"] == telemetry.RUN_COMPLETED
-                and done["payload"]["validated"] is True and started["payload"]["model"] == "claude-sonnet-5",
-                "run_started and run_completed are recorded, the latter with its validated flag",
+                and done["payload"]["validated"] is True and started["payload"]["model"] == "claude-sonnet-5"
+                and done["payload"].get("terminal_check") == {"calls": 0, "unterminated": [], "duplicated": []},
+                "run_started and run_completed are recorded, the latter with its validated flag and terminal_check",
                 "%s / %s" % (started["stage"], done["stage"])))
+    return out
+
+
+def reconcile_checks() -> list:
+    """The per-run proof of the invariant. The simulated run above shows the hooks
+    CAN leave one terminal event per call; only reconcile() says whether a real
+    run DID -- an emit that raised inside a hook, a cancelled callback, or a call
+    cut off by max_turns leaves zero, and nothing else would notice."""
+    out = []
+    run = RunIdentity(run_id="probe-reconcile", stage="extractor", advisory_id="ADV-2026-0002",
+                      pdf_path=ROOT / "data" / "advisories" / "not-read.pdf", pdf_sha256="a" * 64)
+    telemetry.emit(run, telemetry.TOOL_CALL, telemetry.SUCCESS, "clean", tool=GET, tool_use_id="r_clean",
+                   latency_ms=1, outcome="ok")
+    telemetry.emit(run, telemetry.TOOL_CALL, telemetry.SUCCESS, "twice", tool=PROPOSE, tool_use_id="r_twice",
+                   latency_ms=1, outcome="ok")
+    telemetry.emit(run, telemetry.PERMISSION_DENIED, telemetry.DENIED, "twice", tool=PROPOSE, tool_use_id="r_twice",
+                   latency_ms=None, outcome="x")
+    # ALLOWED is recorded but is not terminal: this call never finished.
+    telemetry.emit(run, telemetry.PERMISSION_ALLOWED, telemetry.ALLOWED, "open", tool=PROPOSE, tool_use_id="r_open",
+                   latency_ms=None, outcome="on the write allowlist")
+
+    got = telemetry.reconcile(run, ["r_clean", "r_twice", "r_open"])
+    out.append((got == {"calls": 3, "unterminated": ["r_open"], "duplicated": ["r_twice"]},
+                "reconcile() names the call with NO terminal event and the call with two", str(got)))
+    got = telemetry.reconcile(run, ["r_clean"])
+    out.append((got == {"calls": 1, "unterminated": [], "duplicated": []},
+                "reconcile() reports nothing for a clean set", str(got)))
     return out
 
 
@@ -240,7 +269,7 @@ def permission_checks() -> list:
 
 
 def all_checks() -> list:
-    return hook_checks() + permission_checks()
+    return hook_checks() + permission_checks() + reconcile_checks()
 
 
 def main(argv: list) -> int:

@@ -411,7 +411,10 @@ claude mcp add knowledge-centre -- "$PWD/.venv/bin/python" "$PWD/mcp_server/know
   `check_tool_surface.py --live` proves a writing tool is denied and never runs, and
   `--mutate-allowlist` proves the probe can fail. The live probe earned its place on its first run: at `ea5c54b` it FAILED its REFUSED check (that commit's message overclaims), because a structured-output MCP tool's refusal reaches PostToolUse as a JSON-encoded string, '{"result":"Rejected: ..."}', which the offline shapes had not included; `57a505d` decodes it and the probe passes 5/5.
   Every run writes `data/telemetry/<run_id>.jsonl`
-  with exactly one terminal event per tool call; a governed refusal reads REFUSED. NEXT: sub-project
+  built to leave exactly one terminal event per tool call; a governed refusal reads REFUSED. Whether a
+  given run DID is recorded per run, not assumed: `RUN_COMPLETED.terminal_check` carries
+  `telemetry.reconcile()` over every ToolUseBlock id the runner saw -- `unterminated` and `duplicated`
+  lists, recorded on success and failure alike, never raised. NEXT: sub-project
   C (desk digests; `network` routes to FIU liaison), then week 6.
 - [ ] Week 6: publish slice 1 on `future-capabilities.html`, tag `fc08-threatintel-slice1-v1.0.0`
 

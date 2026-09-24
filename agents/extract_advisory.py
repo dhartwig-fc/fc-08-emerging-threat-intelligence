@@ -210,6 +210,9 @@ async def extract(path: Path, advisory_id: str, model: str, max_budget_usd: floa
     structured = None
     failure: str | None = None
     tool_calls: Counter = Counter()
+    # Every call's id, so RUN_COMPLETED can record whether each one got exactly
+    # one terminal event (telemetry.reconcile) rather than assume it.
+    tool_use_ids: list = []
     result: ResultMessage | None = None
     try:
         with expected_shadowing():
@@ -218,6 +221,7 @@ async def extract(path: Path, advisory_id: str, model: str, max_budget_usd: floa
                     for block in message.content:
                         if isinstance(block, ToolUseBlock):
                             tool_calls[block.name] += 1
+                            tool_use_ids.append(block.id)
                 elif isinstance(message, ResultMessage):
                     result = message
                     if message.is_error:
@@ -236,12 +240,17 @@ async def extract(path: Path, advisory_id: str, model: str, max_budget_usd: floa
         record = AdvisoryRecord.model_validate(structured)
         _refuse_unknown_ids(record)
     except Exception as exc:
-        telemetry.run_completed(run, telemetry.FAILURE, str(exc)[:300], result=result, validated=False)
+        telemetry.run_completed(run, telemetry.FAILURE, str(exc)[:300], result=result, validated=False,
+                                terminal_check=telemetry.reconcile(run, tool_use_ids))
         raise
-    telemetry.run_completed(run, telemetry.SUCCESS, "record validated", result=result, validated=True)
+    terminal_check = telemetry.reconcile(run, tool_use_ids)
+    telemetry.run_completed(run, telemetry.SUCCESS, "record validated", result=result, validated=True,
+                            terminal_check=terminal_check)
 
     summary = {
         "tool_calls": dict(tool_calls),
+        "unterminated": len(terminal_check["unterminated"]),
+        "duplicated": len(terminal_check["duplicated"]),
         "turns": result.num_turns if result else None,
         "cost_usd": result.total_cost_usd if result else None,
         "duration_s": round(result.duration_ms / 1000, 1) if result else None,

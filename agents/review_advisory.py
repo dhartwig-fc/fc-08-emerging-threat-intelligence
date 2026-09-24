@@ -166,6 +166,8 @@ async def review(pdf: Path, record: dict, model: str, max_budget_usd: float, max
     structured = None
     failure: str | None = None
     tool_calls: Counter = Counter()
+    # Every call's id, for the per-run terminal_check (as extract_advisory).
+    tool_use_ids: list = []
     result: ResultMessage | None = None
     try:
         with expected_shadowing():
@@ -174,6 +176,7 @@ async def review(pdf: Path, record: dict, model: str, max_budget_usd: float, max
                     for block in message.content:
                         if isinstance(block, ToolUseBlock):
                             tool_calls[block.name] += 1
+                            tool_use_ids.append(block.id)
                 elif isinstance(message, ResultMessage):
                     result = message
                     if message.is_error:
@@ -206,12 +209,17 @@ async def review(pdf: Path, record: dict, model: str, max_budget_usd: float, max
         if repeats:
             raise ValueError("reviewer re-proposed typologies already in the record: %s" % ", ".join(repeats))
     except Exception as exc:
-        run_telemetry.run_completed(run, run_telemetry.FAILURE, str(exc)[:300], result=result, validated=False)
+        run_telemetry.run_completed(run, run_telemetry.FAILURE, str(exc)[:300], result=result, validated=False,
+                                    terminal_check=run_telemetry.reconcile(run, tool_use_ids))
         raise
-    run_telemetry.run_completed(run, run_telemetry.SUCCESS, "additions validated", result=result, validated=True)
+    terminal_check = run_telemetry.reconcile(run, tool_use_ids)
+    run_telemetry.run_completed(run, run_telemetry.SUCCESS, "additions validated", result=result, validated=True,
+                                terminal_check=terminal_check)
 
     telemetry = {
         "tool_calls": dict(tool_calls),
+        "unterminated": len(terminal_check["unterminated"]),
+        "duplicated": len(terminal_check["duplicated"]),
         "turns": result.num_turns if result else None,
         "cost_usd": result.total_cost_usd if result else None,
         "duration_s": round(result.duration_ms / 1000, 1) if result else None,

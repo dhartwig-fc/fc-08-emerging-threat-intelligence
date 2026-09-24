@@ -21,6 +21,8 @@ EXACTLY ONE TERMINAL EVENT PER TOOL CALL, from one of three places. Probed
     str that looks like JSON before it can see the refusal inside it. It decodes
     that ENVELOPE once and never the tool's data inside it (see _texts).
 A PreToolUse hook is not used: the Post inputs already carry duration_ms.
+That is the design. Whether a given run achieved it is reconcile()'s answer,
+recorded in RUN_COMPLETED as terminal_check.
 
 A REFUSAL IS NOT A SUCCESS. Before week 5, a propose_link that the server
 refused looked, from outside, exactly like one it accepted. The refusals are the
@@ -140,13 +142,43 @@ def tool_hooks(run) -> dict:
             "PostToolUseFailure": [HookMatcher(matcher=None, hooks=[post_failure])]}
 
 
+def reconcile(run, tool_use_ids) -> dict:
+    """Did THIS run leave exactly one terminal event per tool call? Read, not assumed.
+
+    The hooks and the callback are built to leave one each, and check_telemetry.py
+    proves they can. A real run can still leave zero -- an emit that raised inside a
+    hook, a cancelled callback, a call cut off by max_turns or the budget -- and
+    nothing downstream would notice. So each runner passes every ToolUseBlock id it
+    saw, and the answer goes into RUN_COMPLETED as terminal_check. A non-empty list
+    is RECORDED, never raised: a run's evidence must not be lost to its own
+    bookkeeping.
+    """
+    ids = list(dict.fromkeys(tool_use_ids))
+    counts = dict.fromkeys(ids, 0)
+    path = telemetry_path(run)
+    if path.exists():
+        for line in path.read_text(encoding="utf-8").splitlines():
+            if not line.strip():
+                continue
+            event = json.loads(line)
+            tool_use_id = event.get("payload", {}).get("tool_use_id")
+            if event.get("stage") in (TOOL_CALL, PERMISSION_DENIED) and tool_use_id in counts:
+                counts[tool_use_id] += 1
+    return {"calls": len(ids),
+            "unterminated": [i for i in ids if counts[i] == 0],
+            "duplicated": [i for i in ids if counts[i] > 1]}
+
+
 def run_started(run, model: str, max_budget_usd: float, max_turns: int) -> dict:
     return emit(run, RUN_STARTED, SUCCESS, "%s run started" % run.stage, model=model,
                 max_budget_usd=max_budget_usd, max_turns=max_turns, pdf_sha256=run.pdf_sha256)
 
 
-def run_completed(run, status: str, message: str, *, result=None, validated: bool = False) -> dict:
+def run_completed(run, status: str, message: str, *, result=None, validated: bool = False, **extra) -> dict:
+    """The run's closing event. `extra` is merged into the payload -- the runners pass
+    terminal_check=reconcile(...) so the invariant is recorded per run, not assumed."""
     return emit(run, RUN_COMPLETED, status, message, validated=validated,
                 turns=getattr(result, "num_turns", None), cost_usd=getattr(result, "total_cost_usd", None),
                 duration_ms=getattr(result, "duration_ms", None),
-                permission_denials=len(getattr(result, "permission_denials", None) or []) if result else None)
+                permission_denials=len(getattr(result, "permission_denials", None) or []) if result else None,
+                **extra)
