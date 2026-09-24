@@ -59,6 +59,10 @@ tools/review.py                    THE ONLY writer of approvals: interactive, --
 data/review_decisions.jsonl        append-only decision log (tracked); the two approvals files are rebuilt from it
 evals/check_proposal_contract.py   pins the proposal contract; --mutate citations|run
 evals/check_review_gate.py         pins the gate end to end; --mutate quarantine|overturn|evidence|contract
+agents/telemetry.py                one terminal telemetry event per tool call (Post hooks); RUN_STARTED/RUN_COMPLETED
+agents/permissions.py              THE write allowlist (propose_link only) and the can_use_tool callback that records every decision
+data/telemetry/                    one tracked {stage,status,timestamp,message,payload} file per run
+evals/check_telemetry.py           offline: hooks + callback driven with the SDK's measured input shapes; --mutate refusal|allowlist|terminal
 schemas/proposal_contract.py       THE proposal contract (schema, stages, quote bounds, proposal_id), shared by the MCP server and the gate
 evals/owner_decisions/             dated evidence of what the owner decided about the golden labels
 agents/review_advisory.py          the additive reviewer: what did the extraction miss, justified against doctrine
@@ -399,8 +403,16 @@ claude mcp add knowledge-centre -- "$PWD/.venv/bin/python" "$PWD/mcp_server/know
   `data/proposals/<run_id>.jsonl`; reviewer runs' telemetry lacking `run_id`; nothing runs
   `review.py --check` automatically.
 
-  NEXT: sub-project B (telemetry + the write allowlist; probe first whether `can_use_tool` needs a streamed
-  prompt), then C (desk digests; `network` routes to FIU liaison).
+  **Sub-project B DONE** (plan `docs/superpowers/plans/2026-09-24-week5-b-telemetry-and-write-allowlist.md`).
+  Probed first: a plain string prompt already runs the SDK's control protocol, so no streaming change;
+  a DENIED call fires no Post hook, so the permission callback records that call's terminal event;
+  Post hooks carry `duration_ms`. `allowed_tools` now pre-approves ONLY the three read-only tools --
+  pre-approving a tool shadows the callback entirely, which is why propose_link was moved out.
+  `check_tool_surface.py --live` proves a writing tool is denied and never runs, and
+  `--mutate-allowlist` proves the probe can fail. The live probe earned its place on its first run: at `ea5c54b` it FAILED its REFUSED check (that commit's message overclaims), because a structured-output MCP tool's refusal reaches PostToolUse as a JSON-encoded string, `'{\"result\":\"Rejected: ...\"}'`, which the offline shapes had not included; `57a505d` decodes it and the probe passes 5/5.
+  Every run writes `data/telemetry/<run_id>.jsonl`
+  with exactly one terminal event per tool call; a governed refusal reads REFUSED. NEXT: sub-project
+  C (desk digests; `network` routes to FIU liaison), then week 6.
 - [ ] Week 6: publish slice 1 on `future-capabilities.html`, tag `fc08-threatintel-slice1-v1.0.0`
 
 ## Journal
