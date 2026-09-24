@@ -18,7 +18,8 @@ EXACTLY ONE TERMINAL EVENT PER TOOL CALL, from one of three places. Probed
   - A structured-output MCP tool's reply reaches PostToolUse as a JSON-encoded
     STRING, not a dict -- measured live 2026-09-24 on knowledge_centre_propose_link:
     the reply arrives as '{"result": "Rejected: ..."}', so _texts() must decode a
-    str that looks like JSON before it can see the refusal inside it.
+    str that looks like JSON before it can see the refusal inside it. It decodes
+    that ENVELOPE once and never the tool's data inside it (see _texts).
 A PreToolUse hook is not used: the Post inputs already carry duration_ms.
 
 A REFUSAL IS NOT A SUCCESS. Before week 5, a propose_link that the server
@@ -67,7 +68,15 @@ def emit(run, stage: str, status: str, message: str, **payload) -> dict:
 
 
 def _texts(obj) -> list:
-    """Every text string in a tool reply, whatever shape the transport delivers it in."""
+    """Every text string in a tool reply, whatever shape the transport delivers it in.
+
+    DECODE THE TRANSPORT ENVELOPE, NEVER THE TOOL'S DATA. A top-level string that
+    parses as a JSON object or array is decoded ONCE; inside it, strings are taken
+    as they are. get_typology returns json.dumps(record), so its "result" is itself
+    a JSON document -- decoding that too found no text keys and recorded every
+    get_typology SUCCESS with an empty outcome, and would have read a record
+    holding "text": "Rejected: ..." as a refusal (final review, 2026-09-24).
+    """
     if isinstance(obj, str):
         stripped = obj.strip()
         if stripped[:1] in ("{", "["):
@@ -76,16 +85,26 @@ def _texts(obj) -> list:
             except json.JSONDecodeError:
                 return [obj]
             if isinstance(parsed, (dict, list)):
-                return _texts(parsed)
+                return _envelope_texts(parsed) or [obj]
+        return [obj]
+    return _envelope_texts(obj)
+
+
+def _envelope_texts(obj) -> list:
+    """Walk the MCP envelope: content / result / structuredContent / list items.
+
+    A string found here is text, never JSON to decode -- it is the tool's own reply.
+    """
+    if isinstance(obj, str):
         return [obj]
     if isinstance(obj, dict):
         found = [obj["text"]] if isinstance(obj.get("text"), str) else []
         for key in ("content", "result", "structuredContent"):
             if key in obj:
-                found += _texts(obj[key])
+                found += _envelope_texts(obj[key])
         return found
     if isinstance(obj, (list, tuple)):
-        return [t for item in obj for t in _texts(item)]
+        return [t for item in obj for t in _envelope_texts(item)]
     return []
 
 

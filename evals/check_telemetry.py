@@ -4,6 +4,8 @@ Pin the telemetry contract: one terminal event per tool call, and a refusal that
 Usage:
     python evals/check_telemetry.py
     python evals/check_telemetry.py --mutate refusal     # refusals classified as success; checks MUST fail
+    python evals/check_telemetry.py --mutate allowlist   # the allowlist admits a write and a read; MUST fail
+    python evals/check_telemetry.py --mutate terminal    # a denial leaves no event; MUST fail
 
 WHY. PLAN.md week 5: "telemetry for every decision". Probed 2026-09-24 (spec,
 Section 3): PostToolUse carries duration_ms and the tool's reply; PostToolUseFailure
@@ -66,6 +68,32 @@ POST_REFUSED_JSON_STRING = {
 # classify SUCCESS (there is no refusal text to find) and must not raise.
 POST_NOT_JSON = {"hook_event_name": "PostToolUse", "tool_name": SEARCH, "tool_use_id": "toolu_notjson",
                  "duration_ms": 5, "tool_input": {}, "tool_response": "{not json"}
+# get_typology returns json.dumps(record, indent=2), so on the stdio path its
+# reply is a JSON string whose "result" is ITSELF a JSON document. Only the
+# transport envelope may be decoded: decoding the doctrine record too found no
+# text keys and recorded every get_typology SUCCESS with an empty outcome
+# (final review, 2026-09-24).
+POST_GET_JSON_STRING = {
+    "hook_event_name": "PostToolUse", "tool_name": GET, "tool_use_id": "toolu_get",
+    "duration_ms": 6, "tool_input": {"typology_id": "SAN003"},
+    "tool_response": json.dumps({"result": json.dumps(
+        {"typology_id": "SAN003", "label": "Transshipment", "summary": "Goods routed via a third country."},
+        indent=2)}),
+}
+# Tool DATA that happens to hold a "text": "Rejected: ..." pair is not a refusal.
+# Walking into the inner document read it as one.
+POST_DATA_NOT_REFUSAL = {
+    "hook_event_name": "PostToolUse", "tool_name": GET, "tool_use_id": "toolu_data",
+    "duration_ms": 6, "tool_input": {},
+    "tool_response": json.dumps({"result": json.dumps({"text": "Rejected: x"})}),
+}
+# A refusal STARTS the reply. "Rejected:" mid-sentence is prose, not governance;
+# this pins startswith() against a substring test.
+POST_REJECTED_MIDSTRING = {
+    "hook_event_name": "PostToolUse", "tool_name": GET, "tool_use_id": "toolu_mid",
+    "duration_ms": 6, "tool_input": {},
+    "tool_response": json.dumps({"result": "Note: the earlier proposal was Rejected: by the owner"}),
+}
 POST_FAIL = {"hook_event_name": "PostToolUseFailure", "tool_name": GET, "tool_use_id": "toolu_fail",
              "duration_ms": 7, "tool_input": {}, "error": "boom: server raised", "is_interrupt": False}
 
@@ -118,6 +146,23 @@ def hook_checks() -> list:
     e = by_id("toolu_notjson")
     out.append((len(e) == 1 and e[0]["status"] == telemetry.SUCCESS,
                 "a plain string that only starts like JSON classifies SUCCESS without raising", str(e)[:160]))
+
+    fire("PostToolUse", POST_GET_JSON_STRING)
+    e = by_id("toolu_get")
+    out.append((len(e) == 1 and e[0]["status"] == telemetry.SUCCESS and "SAN003" in e[0]["payload"]["outcome"],
+                "a get_typology reply (JSON string wrapping a JSON document) is SUCCESS with the document as outcome",
+                str(e)[:160]))
+
+    fire("PostToolUse", POST_DATA_NOT_REFUSAL)
+    e = by_id("toolu_data")
+    out.append((len(e) == 1 and e[0]["status"] == telemetry.SUCCESS,
+                "tool DATA holding \"text\": \"Rejected: ...\" is SUCCESS: only the transport envelope is decoded",
+                str(e)[:160]))
+
+    fire("PostToolUse", POST_REJECTED_MIDSTRING)
+    e = by_id("toolu_mid")
+    out.append((len(e) == 1 and e[0]["status"] == telemetry.SUCCESS,
+                "\"Rejected:\" mid-sentence is SUCCESS: a refusal is a reply that STARTS with it", str(e)[:160]))
 
     fire("PostToolUseFailure", POST_FAIL)
     e = by_id("toolu_fail")
@@ -186,7 +231,8 @@ def permission_checks() -> list:
     counts = {}
     for e in terminal:
         counts[e["payload"]["tool_use_id"]] = counts.get(e["payload"]["tool_use_id"], 0) + 1
-    expected = {"toolu_ok", "toolu_ref", "toolu_ref2", "toolu_ref3", "toolu_fail", "toolu_write", "toolu_read"}
+    expected = {"toolu_ok", "toolu_ref", "toolu_ref2", "toolu_ref3", "toolu_notjson", "toolu_get", "toolu_data",
+                "toolu_mid", "toolu_fail", "toolu_write", "toolu_read"}
     out.append((expected <= set(counts) and all(counts[i] == 1 for i in expected) and "toolu_prop" not in counts,
                 "EXACTLY one terminal event per call: ran, refused, raised and denied alike",
                 str({i: counts.get(i, 0) for i in sorted(expected | {"toolu_prop"})})))
