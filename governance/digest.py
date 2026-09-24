@@ -76,8 +76,8 @@ def render_desk(desk: str, batch_id: str, entries: List[tuple], n_records: int, 
                 standing: dict, proposals_by_id: dict, advisories: dict) -> str:
     titles = routing["desk_titles"]
     out = ["# %s -- digest, batch %s" % (titles[desk], batch_id), "",
-           "Built from %d advisory records. Approvals are the owner's, from data/review_decisions.jsonl; "
-           "routing is data/desk_routing.json." % n_records,
+           "Built from %d advisory records. Approvals are the owner's, from the decision log "
+           "(tools/review.py); routing is data/desk_routing.json." % n_records,
            "A family desk receives an advisory only when it carries a typology of that family; %s also take "
            "the extraction agent's own suggestion, and say so." % ", ".join(
                titles[d] for d in routing["suggestion_only_desks"]),
