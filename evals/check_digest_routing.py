@@ -19,14 +19,19 @@ the real functions. No model, no PDF.
 from __future__ import annotations
 
 import argparse
+import dataclasses
 import json
 import sys
 from pathlib import Path
+from types import SimpleNamespace
 
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
 from governance import routing as gr  # noqa: E402
+from governance import decisions as gd  # noqa: E402
+from governance import digest as dg  # noqa: E402
+from governance.proposals import link_key  # noqa: E402
 from schemas.advisory import Desk  # noqa: E402
 
 LIBRARY = {t["typology_id"]: t for t in
@@ -83,19 +88,96 @@ def routing_checks(routing: dict) -> list:
     return out
 
 
+def decision(**kw):
+    """A Decision with every field defaulted, so the guard survives new fields."""
+    base = {f.name: (() if f.name in ("proposal_ids", "run_ids", "quotes_seen_sha256") else "")
+            for f in dataclasses.fields(gd.Decision)}
+    base.update(kw)
+    return gd.Decision(**base)
+
+
+def digest_checks(routing: dict) -> list:
+    out = []
+    aid = "ADV-X-9"
+    when = "2026-09-24T10:00:00+00:00"
+    rec = record(aid, [SAN, TBML], desks=["general_intel"])
+    approved = decision(decided_at=when, link_key=link_key(aid, SAN, None), kind="governed", advisory_id=aid,
+                        typology_id=SAN, decision="approve", proposal_ids=("p-ok",))
+    rejected = decision(decided_at=when, link_key=link_key(aid, TBML, None), kind="governed", advisory_id=aid,
+                        typology_id=TBML, decision="reject", proposal_ids=("p-rej",))
+    # Approved but NOT in the record: the SAN001 shape measured on ADV-2026-0013.
+    absent = decision(decided_at=when, link_key=link_key(aid, NET, None), kind="governed", advisory_id=aid,
+                      typology_id=NET, decision="approve", proposal_ids=("p-abs",))
+    emergent = decision(decided_at=when, link_key=link_key(aid, None, "Guard witness technique"), kind="emergent",
+                        advisory_id=aid, emergent_label="Guard witness technique", decision="approve",
+                        proposal_ids=("p-em",))
+    standing = {d.link_key: d for d in (approved, rejected, absent, emergent)}
+    props = {"p-ok": SimpleNamespace(citations=((3, "a sanctioned party routed goods via a hub"),)),
+             "p-rej": SimpleNamespace(citations=((4, "REJECTED QUOTE MUST NOT APPEAR"),)),
+             "p-abs": SimpleNamespace(citations=((5, "the network quote for the absent link"),)),
+             "p-em": SimpleNamespace(citations=((6, "the emergent quote"),))}
+    advisories = {aid: {"title": "Guard advisory", "publisher": "Guard"}}
+
+    batch = dg.build_batch("guard-batch", [rec], LIBRARY, routing, standing, props, advisories)
+    san = batch["sanctions_desk"]
+    out.append((("**%s " % SAN) in san and 'p3: "a sanctioned party routed goods via a hub"' in san,
+                "an approved link appears under Approved, quoted from the proposal the owner decided on", san[:160]))
+    out.append(("REJECTED QUOTE" not in san and ("**%s " % TBML) not in san,
+                "a rejected link never appears", ""))
+    out.append((("**%s " % NET) in san and "the network quote for the absent link" in san,
+                "an approved link the record does NOT carry still appears (the SAN001 case)", ""))
+    out.append(("### Approved emergent candidates" in san and "Guard witness technique" in san,
+                "an approved emergent candidate appears under its own heading", ""))
+
+    extra = next(t for t, v in sorted(LIBRARY.items()) if v.get("family") == "sanctions" and t != SAN)
+    undecided = record(aid, [SAN, TBML, NET, extra])
+    san2 = dg.build_batch("guard-batch", [undecided], LIBRARY, routing, standing, props, advisories)["sanctions_desk"]
+    awaiting = san2.split("### Awaiting review", 1)[1] if "### Awaiting review" in san2 else ""
+    out.append((extra in awaiting and SAN not in awaiting and TBML not in awaiting and NET not in awaiting,
+                "an asserted typology with no decision is listed under Awaiting review; decided ones are not",
+                awaiting[:120]))
+
+    out.append((dg.NO_ADVISORIES in batch["markets_desk"],
+                "a desk nothing routes to still gets a file that says so", batch["markets_desk"][-80:]))
+    again = dg.build_batch("guard-batch", [rec], LIBRARY, routing, standing, props, advisories)
+    out.append((batch == again and list(batch) == gr.desks_in_order(routing),
+                "a rebuild is byte-identical, with one digest per desk in desk order", str(list(batch))))
+    return out
+
+
+def real_checks() -> list:
+    out = []
+    sys.path.insert(0, str(ROOT / "tools"))
+    import build_digests  # noqa: E402
+    batch = build_digests.build("guard-real")
+    routed = [d for d, text in batch.items() if dg.NO_ADVISORIES not in text]
+    out.append((len(routed) >= 3,
+                "on the real records, at least three desks receive advisories (PLAN.md definition of done)",
+                "desks with advisories: %s" % routed))
+    san = batch.get("sanctions_desk", "")
+    block = san.split("## ADV-2026-0013", 1)[1].split("\n## ", 1)[0] if "## ADV-2026-0013" in san else ""
+    approved = block.split("### Approved links", 1)[1].split("###", 1)[0] if "### Approved links" in block else ""
+    out.append(("SAN001" in approved and "SAN003" in approved,
+                "the owner's ADV-2026-0013 approvals appear on the sanctions desk, SAN001 included", approved[:200]))
+    return out
+
+
 def all_checks(routing: dict) -> list:
-    return routing_checks(routing)
+    return routing_checks(routing) + digest_checks(routing) + real_checks()
 
 
 def main(argv: list) -> int:
     ap = argparse.ArgumentParser(description="Pin desk routing and digests")
-    ap.add_argument("--mutate", choices=("suggestion",), help="break one rule; checks MUST fail")
+    ap.add_argument("--mutate", choices=("suggestion", "rejected"), help="break one rule; checks MUST fail")
     args = ap.parse_args(argv)
 
     routing = gr.load_routing()
     if args.mutate == "suggestion":
         routing = dict(routing, suggestion_only_desks=[d.value for d in Desk])
         print("MUTATED: every desk accepts the agent's suggestion.\n")
+    elif args.mutate == "rejected":
+        dg._visible = lambda d: True
+        print("MUTATED: rejected links are shown as approved.\n")
 
     failures = 0
     for ok, label, detail in all_checks(routing):
