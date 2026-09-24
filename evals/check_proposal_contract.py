@@ -143,6 +143,16 @@ def checks() -> list:
                    rationale="Emergent witness: the guard proposes a label the library does not hold.")
     out.append((got.startswith("Accepted"), "an emergent proposal with a verified quote is accepted", got[:110]))
 
+    legacy = ROOT / "data" / "proposals.jsonl"
+    legacy_before = (legacy.stat().st_mtime, legacy.stat().st_size) if legacy.exists() else None
+    _run_env()
+    os.environ.pop("NEXUS_PROPOSALS_PATH", None)
+    got = _propose(**base)
+    os.environ["NEXUS_PROPOSALS_PATH"] = str(QUEUE)
+    legacy_after = (legacy.stat().st_mtime, legacy.stat().st_size) if legacy.exists() else None
+    out.append((got.startswith("Rejected") and "NEXUS_PROPOSALS_PATH" in got and legacy_after == legacy_before,
+                "a run with NO queue path is refused, and the legacy queue is never written", got[:140]))
+
     out.append((len(_lines()) == 3,
                 "refusals wrote NOTHING to the queue",
                 "%d lines; expected 3 (two identical proposals and one emergent)" % len(_lines())))

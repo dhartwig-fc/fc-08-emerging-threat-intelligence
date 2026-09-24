@@ -45,6 +45,11 @@ from schemas.citation_match import PageIndex, file_sha256  # noqa: E402
 # time, not import time, so a guard can vary them between calls.
 RUN_ENV = ("NEXUS_RUN_ID", "NEXUS_STAGE", "NEXUS_ADVISORY_ID", "NEXUS_PDF_PATH", "NEXUS_PDF_SHA256")
 
+# The queue path is part of the run identity too, with no default: a runner
+# that supplies the five identity keys but not this one must not fall back to
+# the retired data/proposals.jsonl.
+QUEUE_ENV = "NEXUS_PROPOSALS_PATH"
+
 mcp = FastMCP("knowledge_centre_mcp")
 
 
@@ -444,12 +449,12 @@ async def search_typologies(params: SearchTypologiesInput) -> str:
 
 
 def _run_context() -> Optional[dict]:
-    ctx = {k: os.environ.get(k, "") for k in RUN_ENV}
+    ctx = {k: os.environ.get(k, "") for k in RUN_ENV + (QUEUE_ENV,)}
     return ctx if all(ctx.values()) else None
 
 
-def _proposals_path() -> Path:
-    return Path(os.environ.get("NEXUS_PROPOSALS_PATH", ROOT / "data" / "proposals.jsonl"))
+def _proposals_path(run: dict) -> Path:
+    return Path(run[QUEUE_ENV])
 
 
 @lru_cache(maxsize=4)
@@ -504,7 +509,7 @@ async def propose_link(params: ProposeLinkInput) -> str:
     run = _run_context()
     if run is None:
         return ("Rejected: this server was started without a run identity (%s). A proposal that cannot be "
-                "traced to a run and a document cannot be reviewed." % ", ".join(RUN_ENV))
+                "traced to a run and a document cannot be reviewed." % ", ".join(RUN_ENV + (QUEUE_ENV,)))
     if bool(params.typology_id) == bool(params.emergent_label):
         return "Rejected: provide exactly one of typology_id or emergent_label."
     refusal = _refuse_for_run(params, run)
@@ -545,7 +550,7 @@ async def propose_link(params: ProposeLinkInput) -> str:
     canonical = json.dumps(body, sort_keys=True, ensure_ascii=False).encode("utf-8")
     record = {"proposal_id": hashlib.sha256(canonical).hexdigest()[:16],
               "proposed_at": datetime.now(timezone.utc).isoformat(), **body}
-    path = _proposals_path()
+    path = _proposals_path(run)
     path.parent.mkdir(parents=True, exist_ok=True)
     with open(path, "a", encoding="utf-8") as fh:
         fh.write(json.dumps(record, ensure_ascii=False) + "\n")
