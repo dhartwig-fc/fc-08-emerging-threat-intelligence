@@ -308,7 +308,7 @@ live run's proposals. Looking decisions up per record typology would have put an
 owner-approved link in no digest. So the Approved section is built from the
 decision log (the governed record of approval), each link quoted from the first
 citation of the first proposal the decision cites; Awaiting review stays built
-from the record; routing still uses the record's typologies. Desk titles live in
+from the record; routing still uses the record's typologies (superseded below: approvals add routes and rejections remove them). Desk titles live in
 `data/desk_routing.json` with the table. Every desk gets a file each batch, saying
 so when nothing routes to it. A batch is a snapshot: `tools/build_digests.py
 --check` fails after later decisions, which means cut a new batch id, never edit
@@ -322,6 +322,7 @@ emergent candidates appear on every desk the advisory reaches. An owner-approved
 link also routes its advisory to its family's desk, so an approval whose family
 the record lacks still reaches a desk. Measured reason: unscoped, the sanctions
 desk quoted BA005, a correspondent-banking finding, for ADV-2026-0013.
+Rejected typologies remove routes as well as quotes; a desk sees the whole advisory only when every reason it has is the agent's suggestion.
 
 ### Guard
 

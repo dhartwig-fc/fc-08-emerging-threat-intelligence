@@ -436,7 +436,7 @@ claude mcp add knowledge-centre -- "$PWD/.venv/bin/python" "$PWD/mcp_server/know
   `--live --mutate-allowlist`, which must breach.
 
   Of the three items deferred to B above, B closed one: reviewer runs' telemetry now carries `run_id`
-  (B3, `09c0dee`). The other two are **deferred to sub-project C / week 6**: the server binding its
+  (B3, `09c0dee`). The other two are **deferred to week 6**: the server binding its
   queue path to `data/proposals/<run_id>.jsonl`, and nothing running `review.py --check`
   automatically. **Parked from B:** whether the CLI skips `can_use_tool` for an MCP tool annotated
   `readOnlyHint` (unprobed; a PreToolUse deny-by-name hook would close the class); a run killed by
@@ -449,7 +449,7 @@ claude mcp add knowledge-centre -- "$PWD/.venv/bin/python" "$PWD/mcp_server/know
   alone never reaches a family desk). First batch `data/digests/slice1-2026-09-24/`: 7 of 7 desks
   receive advisories. Planning found that building "approved" from the records would have hidden an
   owner approval the record does not carry (ADV-2026-0013::SAN001), so approvals come from the
-  decision log. Content is scoped by desk (a family desk quotes only its own family's links and names the rest; a suggestion-routed desk sees the whole advisory), and an approval routes its advisory to its family desk -- unscoped, the sanctions desk had been quoting BA005. **Week 5's four PLAN.md items are delivered**: provenance on every proposal, a human
+  decision log. Content is scoped by desk (a family desk quotes only its own family's links and names the rest; a suggestion-routed desk sees the whole advisory), and an approval routes its advisory to its family desk -- unscoped, the sanctions desk had been quoting BA005. Deferred to week 6: nothing runs `build_digests --check`, and a committed batch cannot be re-checked after later decisions (pin the log length a batch was built from). **Week 5's four PLAN.md items are delivered**: provenance on every new-contract proposal, a human
   gate before every write, telemetry for every decision, desk-routed digests. NEXT: week 6 (publish
   slice 1, tag `fc08-threatintel-slice1-v1.0.0`), with the items deferred to it above.
 - [ ] Week 6: publish slice 1 on `future-capabilities.html`, tag `fc08-threatintel-slice1-v1.0.0`
