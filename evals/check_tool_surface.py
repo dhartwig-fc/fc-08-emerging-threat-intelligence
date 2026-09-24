@@ -43,6 +43,12 @@ ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
 from agents.extract_advisory import KC_TOOLS, SERVER_KEY, agent_options  # noqa: E402
+from agents.run_identity import QUEUE_DIR, RunIdentity  # noqa: E402
+
+# A fixed identity for the guard's own runs. The bait never calls propose_link,
+# so the hash is never checked; the env must still be complete.
+PROBE_RUN = RunIdentity(run_id="probe-tool-surface", stage="extractor", advisory_id="ADV-2026-0001",
+                        pdf_path=ROOT / "data" / "advisories" / "fatf-tbml-2020.pdf", pdf_sha256="0" * 64)
 
 from claude_agent_sdk import AssistantMessage, ResultMessage, ToolUseBlock, query  # noqa: E402
 from claude_agent_sdk._internal.transport.subprocess_cli import SubprocessCLITransport  # noqa: E402
@@ -86,7 +92,7 @@ def built_command(options) -> list:
 def static_checks() -> list:
     """(ok, label, detail) for each static claim."""
     out = []
-    o = agent_options("claude-sonnet-5", 1.0, 3)
+    o = agent_options("claude-sonnet-5", 1.0, 3, PROBE_RUN)
 
     out.append((o.tools == [], "options.tools is the empty list",
                 "tools=%r" % (o.tools,)))
@@ -104,12 +110,21 @@ def static_checks() -> list:
     out.append((set(o.allowed_tools) == expected,
                 "allowed_tools is exactly the %d Knowledge Centre tools" % len(KC_TOOLS),
                 "so KC calls do not prompt; this is NOT what restricts the surface"))
+
+    env = o.mcp_servers[SERVER_KEY]["env"]
+    missing = [k for k in ("NEXUS_RUN_ID", "NEXUS_STAGE", "NEXUS_ADVISORY_ID", "NEXUS_PDF_PATH",
+                           "NEXUS_PDF_SHA256", "NEXUS_PROPOSALS_PATH") if not env.get(k)]
+    out.append((not missing, "the MCP server is started with the run's identity",
+                "missing: %s" % missing if missing else "all six values present"))
+    out.append((Path(env.get("NEXUS_PROPOSALS_PATH", "")).parent == QUEUE_DIR,
+                "proposals go to the run's own tracked file under data/proposals/",
+                env.get("NEXUS_PROPOSALS_PATH", "")))
     return out
 
 
 async def live_probe(mutate: bool) -> tuple:
     """Run a real agent against BAIT. Returns (forbidden_calls, mcp_calls, text)."""
-    o = agent_options("claude-sonnet-5", 1.0, 6)
+    o = agent_options("claude-sonnet-5", 1.0, 6, PROBE_RUN)
     if mutate:
         # THE MUTATION: hand back the built-in tool set, exactly as it was before
         # the 2026-09-12 fix. In memory only.

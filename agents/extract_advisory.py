@@ -47,6 +47,8 @@ ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
 from schemas.advisory import AdvisoryRecord  # noqa: E402
+from agents.run_identity import RunIdentity  # noqa: E402
+from schemas.citation_match import file_sha256  # noqa: E402
 
 from claude_agent_sdk import AssistantMessage, ClaudeAgentOptions, ResultMessage, ToolUseBlock, query  # noqa: E402
 from claude_agent_sdk import ClaudeSDKError  # noqa: E402
@@ -54,7 +56,6 @@ from claude_agent_sdk import ClaudeSDKError  # noqa: E402
 SERVER_KEY = "knowledge_centre"
 SERVER_PATH = ROOT / "mcp_server" / "knowledge_centre_server.py"
 LIBRARY_PATH = ROOT / "data" / "typologies.json"
-PROPOSALS_PATH = ROOT / "data" / "proposals.jsonl"
 KC_TOOLS = (
     "knowledge_centre_list_typologies",
     "knowledge_centre_get_typology",
@@ -82,7 +83,7 @@ The Knowledge Centre:
 - A typology_id may only be one a tool returned. If the search reports no match, the typology is emergent: typology_id null, emergent true.
 - A search result marked TWIN carries the same technique as another code in a different family. The declaration names the twin and the preferred family where one exists. knowledge_centre_propose_link REFUSES the link unless your rationale names that twin and says why this family fits the advisory. Do not judge by whether the two labels look alike: SAN006 and TBML010 are the same technique with the words reordered.
 - When a result says its doctrine is authored as another id, prefer that id.
-- Before you finish, call knowledge_centre_propose_link once per typology in your record: with typology_id for a library match, with emergent_label for an emergent one. Cite page numbers in the rationale.
+- Before you finish, call knowledge_centre_propose_link once per typology in your record: with typology_id for a library match, with emergent_label for an emergent one. Pass the same citations as the record entry (page and verbatim quote); a quote that is not on the page it names is refused, and the refusal says where it is. Cite page numbers in the rationale.
 """
 
 
@@ -96,11 +97,7 @@ def pdf_to_pages(path: Path) -> list:
 
 
 def sha256_of(path: Path) -> str:
-    h = hashlib.sha256()
-    with open(path, "rb") as fh:
-        for chunk in iter(lambda: fh.read(1 << 20), b""):
-            h.update(chunk)
-    return h.hexdigest()
+    return file_sha256(path)
 
 
 def build_prompt(advisory_id: str, path: Path, pages: list) -> str:
@@ -133,18 +130,20 @@ def _count_lines(path: Path) -> int:
         return sum(1 for line in fh if line.strip())
 
 
-def mcp_servers() -> dict:
+def mcp_servers(run: RunIdentity) -> dict:
     return {
         SERVER_KEY: {
             "type": "stdio",
             "command": sys.executable,
             "args": [str(SERVER_PATH)],
-            "env": {"NEXUS_TYPOLOGY_PATH": str(LIBRARY_PATH), "NEXUS_PROPOSALS_PATH": str(PROPOSALS_PATH)},
+            # The run's identity reaches the server here and only here. The agent
+            # cannot set or change it (week 5, agents/run_identity.py).
+            "env": {"NEXUS_TYPOLOGY_PATH": str(LIBRARY_PATH), **run.env()},
         }
     }
 
 
-def agent_options(model: str, max_budget_usd: float, max_turns: int) -> ClaudeAgentOptions:
+def agent_options(model: str, max_budget_usd: float, max_turns: int, run: RunIdentity) -> ClaudeAgentOptions:
     """The agent's whole capability surface, in one place a guard can read.
 
     THE EXTRACTION AGENT HAS NO BUILT-IN TOOLS. `tools=[]` emits `--tools ""`
@@ -175,7 +174,7 @@ def agent_options(model: str, max_budget_usd: float, max_turns: int) -> ClaudeAg
         model=model,
         max_turns=max_turns,
         max_budget_usd=max_budget_usd,
-        mcp_servers=mcp_servers(),
+        mcp_servers=mcp_servers(run),
         # The CLI would also load the server registered with `claude mcp add` for
         # this folder, giving the model two copies with different names and four
         # permission denials per run (measured 2026-09-10). Only the one passed in.
@@ -190,9 +189,9 @@ def agent_options(model: str, max_budget_usd: float, max_turns: int) -> ClaudeAg
 
 async def extract(path: Path, advisory_id: str, model: str, max_budget_usd: float, max_turns: int) -> tuple:
     pages = pdf_to_pages(path)
-    proposals_before = _count_lines(PROPOSALS_PATH)
 
-    options = agent_options(model, max_budget_usd, max_turns)
+    run = RunIdentity.new("extractor", advisory_id, path)
+    options = agent_options(model, max_budget_usd, max_turns, run)
 
     structured = None
     failure: str | None = None
@@ -229,7 +228,9 @@ async def extract(path: Path, advisory_id: str, model: str, max_budget_usd: floa
         "cost_usd": result.total_cost_usd if result else None,
         "duration_s": round(result.duration_ms / 1000, 1) if result else None,
         "permission_denials": len(result.permission_denials or []) if result else None,
-        "proposals_written": _count_lines(PROPOSALS_PATH) - proposals_before,
+        "run_id": run.run_id,
+        "queue_path": str(run.queue_path.relative_to(ROOT)),
+        "proposals_written": _count_lines(run.queue_path),
     }
     return record, telemetry
 

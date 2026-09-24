@@ -71,6 +71,7 @@ sys.path.insert(0, str(ROOT))
 
 from schemas.advisory import Citation, Confidence, TypologyFamily  # noqa: E402
 from agents.extract_advisory import agent_options, library_ids, pdf_to_pages  # noqa: E402
+from agents.run_identity import RunIdentity  # noqa: E402
 
 from claude_agent_sdk import AssistantMessage, ClaudeSDKError, ResultMessage, ToolUseBlock, query  # noqa: E402
 
@@ -126,7 +127,7 @@ Rules for an addition:
 - In doctrine_justification, quote the doctrine's own words for the mechanism, then say how this document's evidence matches THAT mechanism.
 - Confidence carries the weight, not omission. One bullet supports low or medium; high needs the document to develop the technique.
 - Citation page is the n in the "=== PAGE n ===" marker, never the number printed on the page.
-- Call knowledge_centre_propose_link once per addition before you finish.
+- Call knowledge_centre_propose_link once per addition before you finish, passing the addition's citations (page and verbatim quote). A quote that is not on the page it names is refused.
 
 If you cannot justify an addition against doctrine, DO NOT PROPOSE IT. An unjustified addition costs more than a miss: precision is this pipeline's strongest property and you are the first mechanism built that can spend it.
 
@@ -153,7 +154,7 @@ async def review(pdf: Path, record: dict, model: str, max_budget_usd: float, max
 
     # Inherit the governed surface; replace only the brief and the output shape.
     options = dataclasses.replace(
-        agent_options(model, max_budget_usd, max_turns),
+        agent_options(model, max_budget_usd, max_turns, RunIdentity.new("reviewer", record["advisory_id"], pdf)),
         system_prompt=REVIEWER_PROMPT,
         output_format={"type": "json_schema", "schema": ReviewAdditions.model_json_schema()},
     )
