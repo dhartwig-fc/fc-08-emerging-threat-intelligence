@@ -44,6 +44,9 @@ sys.path.insert(0, str(ROOT))
 
 from agents.extract_advisory import KC_TOOLS, SERVER_KEY, agent_options  # noqa: E402
 from agents.run_identity import QUEUE_DIR, RunIdentity  # noqa: E402
+from agents.permissions import (  # noqa: E402
+    PROPOSE_TOOL, READ_ONLY_TOOLS, SHADOWING_MESSAGE, WRITE_ALLOWLIST, expected_shadowing,
+)
 
 # A fixed identity for the guard's own runs. The bait never calls propose_link,
 # so the hash is never checked; the env must still be complete.
@@ -106,10 +109,39 @@ def static_checks() -> list:
     out.append((o.strict_mcp_config is True, "strict_mcp_config is True",
                 "only the server passed in code is loaded"))
 
-    expected = {"mcp__%s__%s" % (SERVER_KEY, t) for t in KC_TOOLS}
-    out.append((set(o.allowed_tools) == expected,
-                "allowed_tools is exactly the %d Knowledge Centre tools" % len(KC_TOOLS),
-                "so KC calls do not prompt; this is NOT what restricts the surface"))
+    all_kc = {"mcp__%s__%s" % (SERVER_KEY, t) for t in KC_TOOLS}
+    out.append((list(o.allowed_tools) == list(READ_ONLY_TOOLS),
+                "allowed_tools pre-approves ONLY the three read-only Knowledge Centre tools",
+                "allowed_tools=%r" % (o.allowed_tools,)))
+    out.append((PROPOSE_TOOL not in o.allowed_tools and set(o.allowed_tools) | WRITE_ALLOWLIST == all_kc,
+                "propose_link is NOT pre-approved; read-only + allowlist cover the four tools exactly",
+                "so every non-read tool reaches the permission callback"))
+    out.append((o.can_use_tool is not None and o.permission_prompt_tool_name is None
+                and o.permission_mode in (None, "default"),
+                "a can_use_tool callback decides, and nothing bypasses it",
+                "permission_mode=%r" % (o.permission_mode,)))
+    out.append((sorted(o.hooks or {}) == ["PostToolUse", "PostToolUseFailure"],
+                "the Post hooks are installed for telemetry", str(sorted(o.hooks or {}))))
+
+    # The SDK warns whenever can_use_tool is set and a whole tool is pre-approved.
+    # PRIVATE SDK API, as built_command() above: if it is renamed, this raises
+    # rather than quietly passing.
+    from claude_agent_sdk import types as sdk_types
+    if not hasattr(sdk_types, "_get_can_use_tool_shadowed_warning"):
+        raise RuntimeError("SDK no longer exposes _get_can_use_tool_shadowed_warning; re-derive this check")
+    msg = sdk_types._get_can_use_tool_shadowed_warning(o.permission_mode, list(o.allowed_tools)) or ""
+    out.append((msg.startswith(SHADOWING_MESSAGE),
+                "the SDK's shadowing advisory names exactly the three read-only tools", msg[:100]))
+    import warnings
+    with warnings.catch_warnings(record=True) as seen:
+        warnings.simplefilter("always")
+        with expected_shadowing():
+            warnings.warn(msg, sdk_types.CanUseToolShadowedWarning)
+            warnings.warn("can_use_tool will not be invoked for: %s. x" % PROPOSE_TOOL,
+                          sdk_types.CanUseToolShadowedWarning)
+    out.append((len(seen) == 1 and PROPOSE_TOOL in str(seen[0].message),
+                "expected_shadowing() silences ONLY that advisory; any other shadowing still warns",
+                "%d warning(s) got through" % len(seen)))
 
     env = o.mcp_servers[SERVER_KEY]["env"]
     missing = [k for k in ("NEXUS_RUN_ID", "NEXUS_STAGE", "NEXUS_ADVISORY_ID", "NEXUS_PDF_PATH",

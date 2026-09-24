@@ -72,6 +72,8 @@ sys.path.insert(0, str(ROOT))
 from schemas.advisory import Citation, Confidence, TypologyFamily  # noqa: E402
 from agents.extract_advisory import agent_options, library_ids, pdf_to_pages  # noqa: E402
 from agents.run_identity import RunIdentity  # noqa: E402
+from agents import telemetry as run_telemetry  # noqa: E402
+from agents.permissions import expected_shadowing  # noqa: E402
 
 from claude_agent_sdk import AssistantMessage, ClaudeSDKError, ResultMessage, ToolUseBlock, query  # noqa: E402
 
@@ -153,52 +155,60 @@ async def review(pdf: Path, record: dict, model: str, max_budget_usd: float, max
     pages = pdf_to_pages(pdf)
 
     # Inherit the governed surface; replace only the brief and the output shape.
+    run = RunIdentity.new("reviewer", record["advisory_id"], pdf)
     options = dataclasses.replace(
-        agent_options(model, max_budget_usd, max_turns, RunIdentity.new("reviewer", record["advisory_id"], pdf)),
+        agent_options(model, max_budget_usd, max_turns, run),
         system_prompt=REVIEWER_PROMPT,
         output_format={"type": "json_schema", "schema": ReviewAdditions.model_json_schema()},
     )
 
+    run_telemetry.run_started(run, model, max_budget_usd, max_turns)
     structured = None
     failure: str | None = None
     tool_calls: Counter = Counter()
     result: ResultMessage | None = None
-    async for message in query(prompt=build_prompt(record, pages), options=options):
-        if isinstance(message, AssistantMessage):
-            for block in message.content:
-                if isinstance(block, ToolUseBlock):
-                    tool_calls[block.name] += 1
-        elif isinstance(message, ResultMessage):
-            result = message
-            if message.is_error:
-                # Recorded, not raised inside the loop: raising here abandons the
-                # SDK's generator and its teardown masks the real error.
-                failure = "Reviewer run failed: %s" % (message.errors or message.result)
-            else:
-                structured = message.structured_output
+    try:
+        with expected_shadowing():
+            async for message in query(prompt=build_prompt(record, pages), options=options):
+                if isinstance(message, AssistantMessage):
+                    for block in message.content:
+                        if isinstance(block, ToolUseBlock):
+                            tool_calls[block.name] += 1
+                elif isinstance(message, ResultMessage):
+                    result = message
+                    if message.is_error:
+                        # Recorded, not raised inside the loop: raising here abandons the
+                        # SDK's generator and its teardown masks the real error.
+                        failure = "Reviewer run failed: %s" % (message.errors or message.result)
+                    else:
+                        structured = message.structured_output
 
-    if failure:
-        raise RuntimeError(failure)
-    if structured is None:
-        raise RuntimeError("Reviewer returned no structured output (stop_reason=%s)"
-                           % (result.stop_reason if result else None))
+        if failure:
+            raise RuntimeError(failure)
+        if structured is None:
+            raise RuntimeError("Reviewer returned no structured output (stop_reason=%s)"
+                               % (result.stop_reason if result else None))
 
-    additions = ReviewAdditions.model_validate(structured)
+        additions = ReviewAdditions.model_validate(structured)
 
-    # The same governance the extractor has: an id the library does not hold
-    # cannot enter, whatever the prompt said.
-    known = library_ids()
-    unknown = sorted({a.typology_id for a in additions.additions
-                      if a.typology_id and a.typology_id not in known})
-    if unknown:
-        raise ValueError("reviewer proposed ids the library does not contain: %s" % ", ".join(unknown))
+        # The same governance the extractor has: an id the library does not hold
+        # cannot enter, whatever the prompt said.
+        known = library_ids()
+        unknown = sorted({a.typology_id for a in additions.additions
+                          if a.typology_id and a.typology_id not in known})
+        if unknown:
+            raise ValueError("reviewer proposed ids the library does not contain: %s" % ", ".join(unknown))
 
-    # And it may not re-propose what the extraction already claimed. The prompt
-    # asks for this; the prompt asking is advice, so it is also enforced here.
-    already = {t.get("typology_id") for t in record.get("typologies", []) if t.get("typology_id")}
-    repeats = sorted({a.typology_id for a in additions.additions if a.typology_id in already})
-    if repeats:
-        raise ValueError("reviewer re-proposed typologies already in the record: %s" % ", ".join(repeats))
+        # And it may not re-propose what the extraction already claimed. The prompt
+        # asks for this; the prompt asking is advice, so it is also enforced here.
+        already = {t.get("typology_id") for t in record.get("typologies", []) if t.get("typology_id")}
+        repeats = sorted({a.typology_id for a in additions.additions if a.typology_id in already})
+        if repeats:
+            raise ValueError("reviewer re-proposed typologies already in the record: %s" % ", ".join(repeats))
+    except Exception as exc:
+        run_telemetry.run_completed(run, run_telemetry.FAILURE, str(exc)[:300], result=result, validated=False)
+        raise
+    run_telemetry.run_completed(run, run_telemetry.SUCCESS, "additions validated", result=result, validated=True)
 
     telemetry = {
         "tool_calls": dict(tool_calls),
@@ -206,6 +216,9 @@ async def review(pdf: Path, record: dict, model: str, max_budget_usd: float, max
         "cost_usd": result.total_cost_usd if result else None,
         "duration_s": round(result.duration_ms / 1000, 1) if result else None,
         "additions": len(additions.additions),
+        "run_id": run.run_id,
+        "queue_path": str(run.queue_path.relative_to(ROOT)),
+        "telemetry_path": str(run_telemetry.telemetry_path(run).relative_to(ROOT)),
     }
     return additions, telemetry
 

@@ -52,7 +52,10 @@ from schemas.citation_match import file_sha256  # noqa: E402
 from claude_agent_sdk import AssistantMessage, ClaudeAgentOptions, ResultMessage, ToolUseBlock, query  # noqa: E402
 from claude_agent_sdk import ClaudeSDKError  # noqa: E402
 
-SERVER_KEY = "knowledge_centre"
+# One definition, shared with the permission callback's tool names.
+from agents.permissions import READ_ONLY_TOOLS, SERVER_KEY, expected_shadowing, permission_callback  # noqa: E402
+from agents import telemetry  # noqa: E402
+
 SERVER_PATH = ROOT / "mcp_server" / "knowledge_centre_server.py"
 LIBRARY_PATH = ROOT / "data" / "typologies.json"
 KC_TOOLS = (
@@ -167,6 +170,13 @@ def agent_options(model: str, max_budget_usd: float, max_turns: int, run: RunIde
     An extraction agent that can write files and run shell commands is outside
     its own contract whether or not it chooses to use them. Guarded by
     `evals/check_tool_surface.py`, which proves both directions.
+
+    Week 5 adds the other half. `allowed_tools` pre-approves only the three
+    read-only Knowledge Centre tools; `can_use_tool` (agents/permissions.py)
+    decides every other tool against WRITE_ALLOWLIST; and the Post hooks
+    (agents/telemetry.py) record one terminal event per call. Pre-approving a
+    tool shadows the callback entirely -- which is why propose_link is NOT in
+    allowed_tools.
     """
     return ClaudeAgentOptions(
         system_prompt=SYSTEM_PROMPT,
@@ -181,7 +191,11 @@ def agent_options(model: str, max_budget_usd: float, max_turns: int, run: RunIde
         # Capability, not permission. See the docstring.
         tools=[],
         setting_sources=[],
-        allowed_tools=["mcp__%s__%s" % (SERVER_KEY, t) for t in KC_TOOLS],
+        # Week 5: pre-approve ONLY the read-only tools, so every other tool --
+        # propose_link and anything a server adds -- is decided by the callback.
+        allowed_tools=list(READ_ONLY_TOOLS),
+        can_use_tool=permission_callback(run),
+        hooks=telemetry.tool_hooks(run),
         output_format={"type": "json_schema", "schema": AdvisoryRecord.model_json_schema()},
     )
 
@@ -192,36 +206,41 @@ async def extract(path: Path, advisory_id: str, model: str, max_budget_usd: floa
     run = RunIdentity.new("extractor", advisory_id, path)
     options = agent_options(model, max_budget_usd, max_turns, run)
 
+    telemetry.run_started(run, model, max_budget_usd, max_turns)
     structured = None
     failure: str | None = None
     tool_calls: Counter = Counter()
     result: ResultMessage | None = None
-    async for message in query(prompt=build_prompt(advisory_id, path, pages), options=options):
-        if isinstance(message, AssistantMessage):
-            for block in message.content:
-                if isinstance(block, ToolUseBlock):
-                    tool_calls[block.name] += 1
-        elif isinstance(message, ResultMessage):
-            result = message
-            if message.is_error:
-                # Recorded, NOT raised here. Raising from inside `async for`
-                # abandons the SDK's generator mid-iteration, and its teardown
-                # then prints "aclose(): asynchronous generator is already
-                # running" ABOVE the real error -- which is how a credit-balance
-                # failure came to look like an async bug. Let the loop end, then
-                # raise.
-                failure = "Agent run failed: %s" % (message.errors or message.result)
-            else:
-                structured = message.structured_output
+    try:
+        with expected_shadowing():
+            async for message in query(prompt=build_prompt(advisory_id, path, pages), options=options):
+                if isinstance(message, AssistantMessage):
+                    for block in message.content:
+                        if isinstance(block, ToolUseBlock):
+                            tool_calls[block.name] += 1
+                elif isinstance(message, ResultMessage):
+                    result = message
+                    if message.is_error:
+                        # Recorded, NOT raised here: raising inside `async for`
+                        # abandons the SDK's generator and its teardown masks the
+                        # real error. Let the loop end, then raise.
+                        failure = "Agent run failed: %s" % (message.errors or message.result)
+                    else:
+                        structured = message.structured_output
 
-    if failure:
-        raise RuntimeError(failure)
-    if structured is None:
-        raise RuntimeError("Agent returned no structured output (stop_reason=%s)" % (result.stop_reason if result else None))
-    record = AdvisoryRecord.model_validate(structured)
-    _refuse_unknown_ids(record)
+        if failure:
+            raise RuntimeError(failure)
+        if structured is None:
+            raise RuntimeError("Agent returned no structured output (stop_reason=%s)"
+                               % (result.stop_reason if result else None))
+        record = AdvisoryRecord.model_validate(structured)
+        _refuse_unknown_ids(record)
+    except Exception as exc:
+        telemetry.run_completed(run, telemetry.FAILURE, str(exc)[:300], result=result, validated=False)
+        raise
+    telemetry.run_completed(run, telemetry.SUCCESS, "record validated", result=result, validated=True)
 
-    telemetry = {
+    summary = {
         "tool_calls": dict(tool_calls),
         "turns": result.num_turns if result else None,
         "cost_usd": result.total_cost_usd if result else None,
@@ -229,9 +248,10 @@ async def extract(path: Path, advisory_id: str, model: str, max_budget_usd: floa
         "permission_denials": len(result.permission_denials or []) if result else None,
         "run_id": run.run_id,
         "queue_path": str(run.queue_path.relative_to(ROOT)),
+        "telemetry_path": str(telemetry.telemetry_path(run).relative_to(ROOT)),
         "proposals_written": _count_lines(run.queue_path),
     }
-    return record, telemetry
+    return record, summary
 
 
 def main() -> int:
