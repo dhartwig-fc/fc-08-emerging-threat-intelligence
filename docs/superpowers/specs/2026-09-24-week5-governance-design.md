@@ -301,6 +301,28 @@ read as awaiting review, which is true.
 Deterministic: sorted, no timestamps beyond `batch_id`, byte-identical on
 re-run.
 
+**Amended while planning, 2026-09-24: approvals come from the decision log.**
+Measured: the owner approved `ADV-2026-0013::SAN001`, which
+`data/records_merged/ADV-2026-0013.json` does not carry -- it came from the week 5
+live run's proposals. Looking decisions up per record typology would have put an
+owner-approved link in no digest. So the Approved section is built from the
+decision log (the governed record of approval), each link quoted from the first
+citation of the first proposal the decision cites; Awaiting review stays built
+from the record; routing still uses the record's typologies. Desk titles live in
+`data/desk_routing.json` with the table. Every desk gets a file each batch, saying
+so when nothing routes to it. A batch is a snapshot: `tools/build_digests.py
+--check` fails after later decisions, which means cut a new batch id, never edit
+the old one.
+
+**Amended while building, 2026-09-24: content is scoped by desk.** A family desk
+quotes only the approved links and awaiting items of its own family, and names --
+without quoting -- the advisory's approvals that belong to other desks. A desk
+reached by the extraction agent's suggestion sees the whole advisory. Approved
+emergent candidates appear on every desk the advisory reaches. An owner-approved
+link also routes its advisory to its family's desk, so an approval whose family
+the record lacks still reaches a desk. Measured reason: unscoped, the sanctions
+desk quoted BA005, a correspondent-banking finding, for ADV-2026-0013.
+
 ### Guard
 
 `evals/check_digest_routing.py`, mutation-verified: a sanctions typology routes

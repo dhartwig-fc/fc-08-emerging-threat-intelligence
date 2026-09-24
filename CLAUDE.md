@@ -63,6 +63,12 @@ agents/telemetry.py                one terminal telemetry event per tool call (P
 agents/permissions.py              THE write allowlist (propose_link only) and the can_use_tool callback that records every decision
 data/telemetry/                    one tracked {stage,status,timestamp,message,payload} file per run
 evals/check_telemetry.py           offline: hooks + callback driven with the SDK's measured input shapes; --mutate refusal|allowlist|terminal
+data/desk_routing.json             desk routing as DATA: family -> desk (network -> FIU liaison), suggestion-only desks, desk titles
+governance/routing.py              which desks an advisory reaches and why; a family desk needs a typology of its family
+governance/digest.py               one Markdown digest per desk: approvals from the decision log, awaiting review from the record
+tools/build_digests.py             writes data/digests/<batch_id>/<desk>.md; --check proves a committed batch rebuilds identically
+data/digests/                      committed digest batches (snapshots; a new state is a new batch id)
+evals/check_digest_routing.py      routing + digests, incl. the SAN001 case on real data; --mutate suggestion|rejected|scope
 schemas/proposal_contract.py       THE proposal contract (schema, stages, quote bounds, proposal_id), shared by the MCP server and the gate
 evals/owner_decisions/             dated evidence of what the owner decided about the golden labels
 agents/review_advisory.py          the additive reviewer: what did the extraction miss, justified against doctrine
@@ -371,7 +377,7 @@ claude mcp add knowledge-centre -- "$PWD/.venv/bin/python" "$PWD/mcp_server/know
   disputes are the question; the owner_decisions file is the answer. Extend it for new triage, do not
   regenerate over it.
 
-- [~] **Week 5** (started 2026-09-24): spec `docs/superpowers/specs/2026-09-24-week5-governance-design.md`.
+- [x] **Week 5** (started 2026-09-24): spec `docs/superpowers/specs/2026-09-24-week5-governance-design.md`.
   **Sub-project A DONE** (plan `docs/superpowers/plans/2026-09-24-week5-a-proposal-contract-and-review-gate.md`):
   every proposal names its run and carries quotes verified at proposal time and again at review; one
   tracked queue file per run; `tools/review.py` is the only writer of approvals, rebuilt from an
@@ -438,7 +444,14 @@ claude mcp add knowledge-centre -- "$PWD/.venv/bin/python" "$PWD/mcp_server/know
   would mask the run's real exception; per-run reconciliation is verified offline only -- the next live
   extraction's `terminal_check` is its first real measurement.
 
-  NEXT: sub-project C (desk digests; `network` routes to FIU liaison), then week 6.
+  **Sub-project C DONE** (plan `docs/superpowers/plans/2026-09-24-week5-c-desk-digests.md`): one
+  digest per desk per batch, routed by typology family from `data/desk_routing.json` (a suggestion
+  alone never reaches a family desk). First batch `data/digests/slice1-2026-09-24/`: 7 of 7 desks
+  receive advisories. Planning found that building "approved" from the records would have hidden an
+  owner approval the record does not carry (ADV-2026-0013::SAN001), so approvals come from the
+  decision log. **Week 5's four PLAN.md items are delivered**: provenance on every proposal, a human
+  gate before every write, telemetry for every decision, desk-routed digests. NEXT: week 6 (publish
+  slice 1, tag `fc08-threatintel-slice1-v1.0.0`), with the items deferred to it above.
 - [ ] Week 6: publish slice 1 on `future-capabilities.html`, tag `fc08-threatintel-slice1-v1.0.0`
 
 ## Journal
