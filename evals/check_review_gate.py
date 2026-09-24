@@ -331,9 +331,94 @@ def cli_checks(w: dict) -> list:
     return out
 
 
+def _review(*args, stdin: str = "") -> subprocess.CompletedProcess:
+    return subprocess.run([sys.executable, str(ROOT / "tools" / "review.py"), *args],
+                          input=stdin, capture_output=True, text=True, cwd=ROOT)
+
+
+def log_checks(w: dict) -> list:
+    """--check proves the log holds ONLY decisions the gate made, and the deciding modes cannot be pointed
+    at a stray queue while writing the real log.
+
+    The final week-5 review hand-wrote a log line approving ADV-2026-0001::TBML001
+    with proposal_ids [] and rebuilt the approvals from it: --check passed,
+    because it only asked whether the approvals match the log. Each witness here
+    rebuilds its approvals FROM its own log, so check_approved is satisfied and
+    only the new log check can catch it.
+    """
+    out = []
+    proposals, _ = gp.load_queue(QUEUE_DIR)
+    clean, quarantined = gp.recheck(proposals)
+    links = gp.group(clean)
+    q_links = gp.quarantined_links(quarantined, links)
+    a = links[w["a_key"]]
+
+    def forged(**changes) -> str:
+        d = gd.Decision(decided_at="2026-09-24T15:00:00+00:00", link_key=w["a_key"], kind="governed",
+                        advisory_id=ADVISORY, typology_id=w["a_tid"], emergent_label=None, decision="approve",
+                        note="hand-written", proposal_ids=a.proposal_ids, run_ids=a.run_ids,
+                        quotes_seen_sha256=tuple(sorted(a.quote_hashes())))
+        return gd.Decision(**{**d.__dict__, **changes}).to_line() + "\n"
+
+    witnesses = [
+        ("a decision the gate made", None, None),
+        ("a hand-written line with EMPTY proposal_ids",
+         forged(link_key="ADV-2026-0001::TBML001", advisory_id="ADV-2026-0001", typology_id="TBML001",
+                proposal_ids=()), "no proposal_ids"),
+        ("a line citing a proposal_id that does not exist",
+         forged(proposal_ids=("0000000000000000",)), "not in the queue"),
+        ("a line citing a real proposal of a DIFFERENT link",
+         forged(proposal_ids=(w["e_id"],)), "is for %s" % w["e_key"]),
+        ("a MALFORMED log line", "{not json\n", "line 1 of the log is malformed"),
+    ]
+    for n, (name, text, expect) in enumerate(witnesses):
+        d = WORK / "logcheck" / ("w%02d" % n)
+        d.mkdir(parents=True)
+        log, lk, em = d / "log.jsonl", d / "links.json", d / "emergent.json"
+        if text is None:
+            gd.apply([(w["a_key"], "approve", "made by the gate")], links, q_links, log_path=log,
+                     now="2026-09-24T15:00:00+00:00")
+        else:
+            log.write_text(text, encoding="utf-8")
+        try:
+            gd.write_approved(gd.load_log(log), lk, em)
+        except Exception:  # a malformed log cannot be rebuilt from: no approvals files, so none to disagree
+            pass
+        r = _review("--check", "--queue-dir", str(QUEUE_DIR), "--log", str(log),
+                    "--approved-links", str(lk), "--approved-emergent", str(em))
+        said = r.stdout + r.stderr
+        if expect is None:
+            ok, label = r.returncode == 0, "--check passes a log the gate wrote (the witnesses below are not vacuous)"
+        else:
+            ok = r.returncode == 1 and expect in said and "Traceback" not in said
+            label = "--check FAILS on %s, with the reason and no traceback" % name
+        out.append((ok, label, said.strip().replace("\n", " | ")[-150:]))
+
+    # Deciding modes refuse a split override. The requests name an UNKNOWN link,
+    # so even with the refusal gone apply() refuses before writing: this check can
+    # never write the real log. It also asserts the real log is untouched.
+    real = [(p, p.read_bytes() if p.exists() else None) for p in (gd.LOG, gd.APPROVED_LINKS, gd.APPROVED_EMERGENT)]
+    stray = WORK / "stray_decisions.txt"
+    stray.write_text("%s NOPE999: approve -- must never reach the real log\n" % ADVISORY, encoding="utf-8")
+    for name, args, stdin in (
+        ("--decisions with --queue-dir but not --log", ("--decisions", str(stray), "--queue-dir", str(QUEUE_DIR)), ""),
+        ("interactive with --queue-dir but not --log", ("--queue-dir", str(QUEUE_DIR)), "q\n"),
+        ("--decisions with --log but not --queue-dir",
+         ("--decisions", str(stray), "--log", str(WORK / "stray_log.jsonl")), ""),
+    ):
+        r = _review(*args, stdin=stdin)
+        said = r.stdout + r.stderr
+        out.append((r.returncode != 0 and "--queue-dir and --log" in said,
+                    "a deciding mode REFUSES %s" % name, said.strip()[-120:]))
+    after = [(p, p.read_bytes() if p.exists() else None) for p, _ in real]
+    out.append((after == real, "the real decision log and approvals files are untouched by this guard",
+                ", ".join(p.name for p, b in real if b is not None) or "none exist"))
+    return out
+
+
 def all_checks() -> list:
     w = build_fixture()
-    return queue_checks(w) + contract_checks(w) + decision_checks(w) + cli_checks(w)
+    return queue_checks(w) + contract_checks(w) + decision_checks(w) + cli_checks(w) + log_checks(w)
 
 
 def main(argv: list) -> int:

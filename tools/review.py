@@ -5,7 +5,7 @@ Usage:
     python tools/review.py                      # step through open links: approve / reject / skip / quit
     python tools/review.py --list               # what is open, decided, new evidence, quarantined, skipped
     python tools/review.py --decisions FILE     # apply a pasted list (e.g. from a phone)
-    python tools/review.py --check              # fail if the approvals files differ from the log
+    python tools/review.py --check              # fail unless approvals match the log AND the log is the gate's
 
 A decisions file holds one line per link; anything not starting "ADV-" is ignored:
     ADV-2026-0002 BA008: approve -- note
@@ -110,11 +110,23 @@ def cmd_decisions(args) -> int:
 
 
 def cmd_check(args) -> int:
-    problems = gd.check_approved(gd.load_log(args.log), args.approved_links, args.approved_emergent)
+    decisions, problems = gd.load_log_checked(args.log)
+    problems += gd.check_approved(decisions, args.approved_links, args.approved_emergent)
+    known = {p.proposal_id: p.link_key for p in gp.load_queue(args.queue_dir)[0]}
+    problems += gd.check_log(decisions, known)
     for p in problems:
         print("FAIL  %s" % p)
-    print("approvals match the decision log" if not problems else "approvals DO NOT match the decision log")
+    print("approvals match the decision log, and every decision cites the queue" if not problems
+          else "the approvals and the decision log DO NOT agree with the gate")
     return 1 if problems else 0
+
+
+def _split_override(args) -> bool:
+    """True when exactly one of --queue-dir / --log was pointed away from the real files: a
+    fixture queue must never feed the real log, nor the real queue a stray log."""
+    def moved(path, default) -> bool:
+        return Path(path).resolve() != Path(default).resolve()
+    return moved(args.queue_dir, gp.QUEUE_DIR) != moved(args.log, gd.LOG)
 
 
 def cmd_interactive(args) -> int:
@@ -169,6 +181,10 @@ def main(argv: list) -> int:
         return cmd_list(args)
     if args.check:
         return cmd_check(args)
+    if _split_override(args):
+        print("REFUSED: override --queue-dir and --log together or neither; a deciding mode must not "
+              "mix a real and a stray file", file=sys.stderr)
+        return 2
     if args.decisions:
         return cmd_decisions(args)
     return cmd_interactive(args)

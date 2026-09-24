@@ -6,6 +6,13 @@ from it, deterministically, every time -- so an approvals file can never say
 something the log does not, and a hand edit is caught by check_approved. Nothing
 else in the repository writes either file; evals/check_review_gate.py enforces it.
 
+The log is a plain file too, so check_log asks the other half: is every line a
+decision the GATE made? A line with no proposal_ids, or citing a proposal the
+queue does not hold, or one belonging to another link, was written by hand. The
+final week-5 review hand-wrote exactly that -- an approval of
+ADV-2026-0001::TBML001 citing nothing -- rebuilt the approvals from it, and
+check_approved alone passed it, because the approvals DID match the log.
+
 Refusals (GateRefusal), with NOTHING written -- the whole list is checked first:
   - the same link twice in one list;
   - a link that is not reviewable (unknown, or every proposal quarantined);
@@ -67,6 +74,43 @@ def load_log(path: Path = LOG) -> List[Decision]:
         return []
     return [Decision.from_line(json.loads(line)) for line in path.read_text(encoding="utf-8").splitlines()
             if line.strip()]
+
+
+def load_log_checked(path: Path = LOG) -> Tuple[List[Decision], List[str]]:
+    """(the decisions that parse, one problem per line that does not) -- for --check, which must report
+    a broken log rather than die on it."""
+    if not path.exists():
+        return [], []
+    decisions: List[Decision] = []
+    problems: List[str] = []
+    for n, line in enumerate(path.read_text(encoding="utf-8").splitlines(), start=1):
+        if not line.strip():
+            continue
+        try:
+            decisions.append(Decision.from_line(json.loads(line)))
+        except (json.JSONDecodeError, KeyError, TypeError, ValueError) as exc:
+            problems.append("line %d of the log is malformed: %s" % (n, exc))
+    return decisions, problems
+
+
+def check_log(decisions, known: Dict[str, str]) -> List[str]:
+    """Problems, empty when every decision cites proposals the queue holds, for the link it decides.
+
+    `known` maps proposal_id -> link_key for every proposal/2 line in the queue, clean or
+    quarantined: a decision may outlive a later quarantine, but never cite a proposal that
+    was never there.
+    """
+    problems = []
+    for n, d in enumerate(decisions, start=1):
+        where = "decision %d (%s %s, %s)" % (n, d.decision, d.link_key, d.decided_at[:10])
+        if not d.proposal_ids:
+            problems.append("%s has no proposal_ids: the gate never writes one, so it was written by hand" % where)
+        for pid in d.proposal_ids:
+            if pid not in known:
+                problems.append("%s cites proposal %s, which is not in the queue" % (where, pid))
+            elif known[pid] != d.link_key:
+                problems.append("%s cites proposal %s, which is for %s" % (where, pid, known[pid]))
+    return problems
 
 
 def latest(decisions) -> Dict[str, Decision]:
