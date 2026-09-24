@@ -129,15 +129,17 @@ def permission_checks() -> list:
     got = asyncio.run(ask(PROPOSE, {}, ToolPermissionContext(tool_use_id="toolu_prop")))
     e = by_id("toolu_prop")
     out.append((isinstance(got, PermissionResultAllow) and len(e) == 1
-                and e[0]["stage"] == telemetry.PERMISSION_ALLOWED and e[0]["status"] == telemetry.ALLOWED,
-                "propose_link is ALLOWED, and the decision is recorded", str(e)[:150]))
+                and e[0]["stage"] == telemetry.PERMISSION_ALLOWED and e[0]["status"] == telemetry.ALLOWED
+                and {"run_id", "agent", "advisory_id", "tool", "tool_use_id", "latency_ms", "outcome"} <= set(e[0]["payload"]),
+                "propose_link is ALLOWED, and the decision is recorded with full payload", str(e)[:150]))
 
     got = asyncio.run(ask(WRITE, {"typology_id": "TBML999"}, ToolPermissionContext(tool_use_id="toolu_write")))
     e = by_id("toolu_write")
     out.append((isinstance(got, PermissionResultDeny) and "allowlist" in got.message and len(e) == 1
                 and e[0]["stage"] == telemetry.PERMISSION_DENIED and e[0]["status"] == telemetry.DENIED
-                and e[0]["payload"]["tool"] == WRITE and e[0]["payload"]["latency_ms"] is None,
-                "a write tool NOT on the allowlist is DENIED, with one PERMISSION_DENIED event", str(e)[:150]))
+                and e[0]["payload"]["tool"] == WRITE and e[0]["payload"]["latency_ms"] is None
+                and {"run_id", "agent", "advisory_id", "tool", "tool_use_id", "latency_ms", "outcome"} <= set(e[0]["payload"]),
+                "a write tool NOT on the allowlist is DENIED, with one PERMISSION_DENIED event and full payload", str(e)[:150]))
 
     got = asyncio.run(ask(GET, {}, ToolPermissionContext(tool_use_id="toolu_read")))
     out.append((isinstance(got, PermissionResultDeny),

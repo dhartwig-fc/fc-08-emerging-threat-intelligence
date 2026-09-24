@@ -56,7 +56,7 @@ def permission_callback(run):
         if tool_name in WRITE_ALLOWLIST and all(run.env().values()):
             telemetry.emit(run, telemetry.PERMISSION_ALLOWED, telemetry.ALLOWED,
                            "%s allowed: on the write allowlist" % tool_name,
-                           tool=tool_name, tool_use_id=tool_use_id)
+                           tool=tool_name, tool_use_id=tool_use_id, latency_ms=None, outcome="on the write allowlist")
             return PermissionResultAllow()
         reason = ("%s is not on the write allowlist" % tool_name if tool_name not in WRITE_ALLOWLIST
                   else "the run identity is incomplete")
