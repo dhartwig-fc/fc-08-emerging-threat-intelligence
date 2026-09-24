@@ -454,22 +454,33 @@ def log_checks(w: dict) -> list:
             label = "--check FAILS on %s, with the reason and no traceback" % name
         out.append((ok, label, said.strip().replace("\n", " | ")[-150:]))
 
-    # Deciding modes refuse a split override. The requests name an UNKNOWN link,
-    # so even with the refusal gone apply() refuses before writing: this check can
-    # never write the real log. It also asserts the real log is untouched.
+    # Deciding modes refuse ANY mixture of real and overridden record paths:
+    # --queue-dir, --log, --approved-links and --approved-emergent travel together.
+    # The re-review found --queue-dir + --log overridden with the approvals left
+    # at default rebuilding the REAL approvals files from a scratch log. The
+    # requests name an UNKNOWN link, so even with the refusal gone apply() refuses
+    # before writing: this check can never write the real record. It also asserts
+    # the real files are untouched.
     real = [(p, p.read_bytes() if p.exists() else None) for p in (gd.LOG, gd.APPROVED_LINKS, gd.APPROVED_EMERGENT)]
     stray = WORK / "stray_decisions.txt"
     stray.write_text("%s NOPE999: approve -- must never reach the real log\n" % ADVISORY, encoding="utf-8")
-    for name, args, stdin in (
-        ("--decisions with --queue-dir but not --log", ("--decisions", str(stray), "--queue-dir", str(QUEUE_DIR)), ""),
-        ("interactive with --queue-dir but not --log", ("--queue-dir", str(QUEUE_DIR)), "q\n"),
-        ("--decisions with --log but not --queue-dir",
-         ("--decisions", str(stray), "--log", str(WORK / "stray_log.jsonl")), ""),
+    q, lg = ("--queue-dir", str(QUEUE_DIR)), ("--log", str(WORK / "stray_log.jsonl"))
+    lk = ("--approved-links", str(WORK / "stray_links.json"))
+    for name, args, stdin, moved in (
+        ("--decisions with --queue-dir and --log overridden, approvals at default",
+         ("--decisions", str(stray), *q, *lg), "", "--queue-dir, --log"),
+        ("interactive with --queue-dir and --log overridden, approvals at default", (*q, *lg), "q\n",
+         "--queue-dir, --log"),
+        ("--decisions with only --approved-links overridden", ("--decisions", str(stray), *lk), "",
+         "--approved-links"),
+        ("--decisions with --queue-dir but not --log", ("--decisions", str(stray), *q), "", "--queue-dir"),
+        ("interactive with --queue-dir but not --log", q, "q\n", "--queue-dir"),
+        ("--decisions with --log but not --queue-dir", ("--decisions", str(stray), *lg), "", "--log"),
     ):
         r = _review(*args, stdin=stdin)
         said = r.stdout + r.stderr
-        out.append((r.returncode != 0 and "--queue-dir and --log" in said,
-                    "a deciding mode REFUSES %s" % name, said.strip()[-120:]))
+        out.append((r.returncode != 0 and "travel together" in said and "overridden: %s;" % moved in said,
+                    "a deciding mode REFUSES %s" % name, said.strip()[-130:]))
     after = [(p, p.read_bytes() if p.exists() else None) for p, _ in real]
     out.append((after == real, "the real decision log and approvals files are untouched by this guard",
                 ", ".join(p.name for p, b in real if b is not None) or "none exist"))

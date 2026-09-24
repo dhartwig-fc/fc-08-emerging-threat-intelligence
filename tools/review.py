@@ -14,6 +14,10 @@ the whole list -- a decision is never silently dropped. An empty list is refused
     ADV-2026-0002 BA008: approve -- note
     - ADV-2026-0002 EMERGENT[shadow fleet ship-to-ship transfer]: reject -- note
 
+The deciding modes take --queue-dir, --log, --approved-links and
+--approved-emergent all overridden or none: any mixture is refused before
+anything is read or written, so a scratch run can never touch the real record.
+
 Both deciding modes go through governance.decisions.apply, which refuses an
 unknown or quarantined link, a link twice in one list, and overturning a decided
 link. Every decision is followed by rebuilding the approvals files from the
@@ -126,12 +130,23 @@ def cmd_check(args) -> int:
     return 1 if problems else 0
 
 
-def _split_override(args) -> bool:
-    """True when exactly one of --queue-dir / --log was pointed away from the real files: a
-    fixture queue must never feed the real log, nor the real queue a stray log."""
-    def moved(path, default) -> bool:
-        return Path(path).resolve() != Path(default).resolve()
-    return moved(args.queue_dir, gp.QUEUE_DIR) != moved(args.log, gd.LOG)
+def _mixed_record_paths(args) -> str:
+    """'' when the four record paths are all at their defaults (the real record) or all overridden;
+    otherwise the refusal, naming both sides.
+
+    They travel together because each one feeds the next: the queue feeds the log,
+    the log rebuilds the approvals. Pairing only --queue-dir and --log still let
+    a scratch log rebuild the REAL approvals files (found in the final re-review).
+    """
+    paths = (("--queue-dir", args.queue_dir, gp.QUEUE_DIR), ("--log", args.log, gd.LOG),
+             ("--approved-links", args.approved_links, gd.APPROVED_LINKS),
+             ("--approved-emergent", args.approved_emergent, gd.APPROVED_EMERGENT))
+    moved = [flag for flag, given, default in paths if Path(given).resolve() != Path(default).resolve()]
+    if not moved or len(moved) == len(paths):
+        return ""
+    kept = [flag for flag, _, _ in paths if flag not in moved]
+    return ("REFUSED: the four record paths travel together, all overridden or none -- overridden: %s; "
+            "at default: %s. Nothing was read or written." % (", ".join(moved), ", ".join(kept)))
 
 
 def cmd_interactive(args) -> int:
@@ -186,9 +201,9 @@ def main(argv: list) -> int:
         return cmd_list(args)
     if args.check:
         return cmd_check(args)
-    if _split_override(args):
-        print("REFUSED: override --queue-dir and --log together or neither; a deciding mode must not "
-              "mix a real and a stray file", file=sys.stderr)
+    refusal = _mixed_record_paths(args)  # deciding modes only: --list and --check write nothing
+    if refusal:
+        print(refusal, file=sys.stderr)
         return 2
     if args.decisions:
         return cmd_decisions(args)
