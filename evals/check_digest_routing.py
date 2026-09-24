@@ -4,6 +4,8 @@ Pin desk routing and the digests built on it.
 Usage:
     python evals/check_digest_routing.py
     python evals/check_digest_routing.py --mutate suggestion   # family desks take suggestions; checks MUST fail
+    python evals/check_digest_routing.py --mutate rejected     # rejections neither hide nor unroute; MUST fail
+    python evals/check_digest_routing.py --mutate scope        # every desk sees every family; MUST fail
 
 WHY. Measured 2026-09-24: the extraction agent's own suggested_desks named the
 sanctions desk on 17 of 20 advisories and the correspondent desk on 15, so
@@ -31,7 +33,7 @@ sys.path.insert(0, str(ROOT))
 from governance import routing as gr  # noqa: E402
 from governance import decisions as gd  # noqa: E402
 from governance import digest as dg  # noqa: E402
-from governance.proposals import link_key  # noqa: E402
+from governance.proposals import link_key, load_queue  # noqa: E402
 from schemas.advisory import Desk  # noqa: E402
 
 LIBRARY = {t["typology_id"]: t for t in
@@ -125,13 +127,21 @@ def digest_checks(routing: dict) -> list:
     trade = batch["trade_desk"]
     out.append((("**%s " % SAN) in san and 'p3: "a sanctioned party routed goods via a hub"' in san,
                 "an approved link appears under Approved, quoted from the proposal the owner decided on", san[:160]))
-    # Checked on trade_desk, TBML's OWN family desk (not sanctions_desk): family scoping now hides
-    # an out-of-scope typology for a reason that has nothing to do with rejection, which would mask
-    # a rejected link showing on the one desk it actually belongs to.
-    out.append(("REJECTED QUOTE" not in trade and ("**%s " % TBML) not in trade,
-                "a rejected link never appears", ""))
-    out.append((("**%s " % NET) in fiu and "the network quote for the absent link" in fiu,
-                "an approved link the record does NOT carry still appears (the SAN001 case)", ""))
+    # Checked on EVERY desk: family scoping hides an out-of-scope typology for a reason that has
+    # nothing to do with rejection, and a rejection now unroutes the advisory from its family desk,
+    # so the one desk a rejected link could still surface on is a suggestion-routed one.
+    out.append((all("REJECTED QUOTE" not in text and ("**%s " % TBML) not in text for text in batch.values()),
+                "a rejected link never appears, on any desk", ""))
+    # The reviewer's reproduction: TBML is this record's ONLY trade typology, and the owner rejected it.
+    # Routing on it anyway put the advisory on the trade desk "because" of a link the owner refused.
+    out.append((("## %s " % aid) not in trade and TBML not in trade,
+                "an advisory whose only trade typology was rejected does not reach the trade desk at all",
+                trade[:200]))
+    label = "Routed here because: %s %s (%s; owner-approved, not in the record)" % (
+        NET, LIBRARY[NET]["label"], LIBRARY[NET]["family"])
+    out.append((("**%s " % NET) in fiu and "the network quote for the absent link" in fiu and label in fiu,
+                "an approved link the record does NOT carry still appears (the SAN001 case), and the "
+                "reason says the route came from the owner's approval, not the record", label))
     out.append(("### Approved emergent candidates" in san and "Guard witness technique" in san,
                 "an approved emergent candidate appears under its own heading", ""))
 
@@ -151,6 +161,25 @@ def digest_checks(routing: dict) -> list:
     out.append((extra in awaiting and SAN not in awaiting and TBML not in awaiting and NET not in awaiting,
                 "an asserted typology with no decision is listed under Awaiting review; decided ones are not",
                 awaiting[:120]))
+
+    # The check above runs on the sanctions desk, where TBML is out of family scope anyway, so it
+    # passed with rejections counted as undecided. This one runs where the rejected link IS in scope:
+    # the trade desk, reached through a DIFFERENT, undecided trade typology.
+    tbml2 = next(t for t, v in sorted(LIBRARY.items()) if v.get("family") == "tbml" and t != TBML)
+    trade2 = dg.build_batch("guard-batch", [record(aid, [TBML, tbml2])], LIBRARY, routing, standing, props,
+                            advisories)["trade_desk"]
+    awaiting2 = trade2.split("### Awaiting review", 1)[1] if "### Awaiting review" in trade2 else ""
+    out.append((tbml2 in awaiting2 and TBML not in awaiting2 and TBML not in trade2,
+                "on the rejected link's own family desk, Awaiting review lists the undecided typology; the "
+                "rejected one appears nowhere -- not awaiting, not approved, not as a reason", awaiting2[:160]))
+
+    # A desk with ANY family reason is scoped to its families, even when the agent also suggested it:
+    # the suggestion is the signal routing distrusts, so it must not widen what the desk is shown.
+    fiu3 = dg.build_batch("guard-batch", [record(aid, [NET], desks=["fiu_liaison"])], LIBRARY, routing, standing,
+                          props, advisories)["fiu_liaison"]
+    out.append((("**%s " % NET) in fiu3 and ("**%s " % SAN) not in fiu3,
+                "a desk reached by a family typology AND the agent's suggestion quotes only its own family",
+                fiu3[:200]))
 
     out.append((dg.NO_ADVISORIES in batch["markets_desk"],
                 "a desk nothing routes to still gets a file that says so", batch["markets_desk"][-80:]))
@@ -181,6 +210,30 @@ def real_checks() -> list:
     out.append(("**BA005 " not in block and "**BA005 " in corr_block,
                 "BA005 is not quoted on the sanctions desk but is on the correspondent desk",
                 "sanctions block: %s | correspondent block: %s" % (block[:120], corr_block[:120])))
+
+    # Invariants over the whole real batch, not one witness advisory. Scoping and routing now both
+    # take decisions into account, so the failure to fear is an approval or a record falling between
+    # desks -- present in the data, shown on no desk.
+    records = sorted(p.stem for p in dg.RECORDS_DIR.glob("ADV-*.json"))
+    standing = gd.latest(gd.load_log())
+    proposals, _ = load_queue()
+    props = {p.proposal_id: p for p in proposals}
+
+    def blocks(aid):
+        return [text.split("## %s " % aid, 1)[1].split("\n## ", 1)[0] for text in batch.values()
+                if "## %s " % aid in text]
+
+    approved = [d for d in sorted(standing.values(), key=lambda d: d.link_key)
+                if d.decision == "approve" and d.advisory_id in records]
+    lost = [d.link_key for d in approved
+            if not any(("**%s" % (d.typology_id or d.emergent_label)) in b and dg._cite(d, props) in b
+                       for b in blocks(d.advisory_id))]
+    out.append((approved and not lost,
+                "every standing approval for an advisory in the batch is quoted on at least one desk",
+                "%d approvals; not quoted anywhere: %s" % (len(approved), lost)))
+    unrouted = [aid for aid in records if not blocks(aid)]
+    out.append((records and not unrouted, "every record in the batch reaches at least one desk",
+                "%d records; reaching no desk: %s" % (len(records), unrouted)))
     return out
 
 
@@ -199,7 +252,8 @@ def main(argv: list) -> int:
         print("MUTATED: every desk accepts the agent's suggestion.\n")
     elif args.mutate == "rejected":
         dg._visible = lambda d: True
-        print("MUTATED: rejected links are shown as approved.\n")
+        dg._rejected = lambda d: False
+        print("MUTATED: rejected links are shown as approved, and still route their advisory.\n")
     elif args.mutate == "scope":
         dg._in_scope = lambda *a, **k: True
         print("MUTATED: desk scoping is off; every desk sees every family's approvals.\n")
