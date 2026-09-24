@@ -54,6 +54,18 @@ POST_REFUSED_DICT = {"hook_event_name": "PostToolUse", "tool_name": PROPOSE, "to
                      "duration_ms": 9, "tool_input": {},
                      "tool_response": {"content": [{"type": "text", "text": REJECTION}],
                                        "structuredContent": {"result": REJECTION}}}
+# The EXACT shape measured live 2026-09-24 on knowledge_centre_propose_link: a
+# structured-output MCP tool's reply reaches PostToolUse as a JSON-encoded
+# STRING, not a dict -- the refusal is nested inside it, not at the top level.
+POST_REFUSED_JSON_STRING = {
+    "hook_event_name": "PostToolUse", "tool_name": PROPOSE, "tool_use_id": "toolu_ref3",
+    "duration_ms": 12, "tool_input": {},
+    "tool_response": '{"result":"Rejected: document hash mismatch: x.pdf is not the document this run was started on"}',
+}
+# A plain string that merely starts like JSON but is not valid JSON. It must
+# classify SUCCESS (there is no refusal text to find) and must not raise.
+POST_NOT_JSON = {"hook_event_name": "PostToolUse", "tool_name": SEARCH, "tool_use_id": "toolu_notjson",
+                 "duration_ms": 5, "tool_input": {}, "tool_response": "{not json"}
 POST_FAIL = {"hook_event_name": "PostToolUseFailure", "tool_name": GET, "tool_use_id": "toolu_fail",
              "duration_ms": 7, "tool_input": {}, "error": "boom: server raised", "is_interrupt": False}
 
@@ -95,6 +107,17 @@ def hook_checks() -> list:
     e = by_id("toolu_ref2")
     out.append((len(e) == 1 and e[0]["status"] == telemetry.REFUSED,
                 "a governed refusal (dict-shaped MCP reply) is REFUSED too", str(e)[:160]))
+
+    fire("PostToolUse", POST_REFUSED_JSON_STRING)
+    e = by_id("toolu_ref3")
+    out.append((len(e) == 1 and e[0]["status"] == telemetry.REFUSED and "Rejected:" in e[0]["payload"]["outcome"],
+                "a governed refusal (JSON-STRING-shaped MCP reply, the real stdio path) is REFUSED too",
+                str(e)[:160]))
+
+    fire("PostToolUse", POST_NOT_JSON)
+    e = by_id("toolu_notjson")
+    out.append((len(e) == 1 and e[0]["status"] == telemetry.SUCCESS,
+                "a plain string that only starts like JSON classifies SUCCESS without raising", str(e)[:160]))
 
     fire("PostToolUseFailure", POST_FAIL)
     e = by_id("toolu_fail")
@@ -163,7 +186,7 @@ def permission_checks() -> list:
     counts = {}
     for e in terminal:
         counts[e["payload"]["tool_use_id"]] = counts.get(e["payload"]["tool_use_id"], 0) + 1
-    expected = {"toolu_ok", "toolu_ref", "toolu_ref2", "toolu_fail", "toolu_write", "toolu_read"}
+    expected = {"toolu_ok", "toolu_ref", "toolu_ref2", "toolu_ref3", "toolu_fail", "toolu_write", "toolu_read"}
     out.append((expected <= set(counts) and all(counts[i] == 1 for i in expected) and "toolu_prop" not in counts,
                 "EXACTLY one terminal event per call: ran, refused, raised and denied alike",
                 str({i: counts.get(i, 0) for i in sorted(expected | {"toolu_prop"})})))

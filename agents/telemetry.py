@@ -15,6 +15,10 @@ EXACTLY ONE TERMINAL EVENT PER TOOL CALL, from one of three places. Probed
     duration_ms -> FAILURE.
   - A call the permission callback DENIED fires neither. agents/permissions.py
     records that call's PERMISSION_DENIED event; it is the terminal one.
+  - A structured-output MCP tool's reply reaches PostToolUse as a JSON-encoded
+    STRING, not a dict -- measured live 2026-09-24 on knowledge_centre_propose_link:
+    the reply arrives as '{"result": "Rejected: ..."}', so _texts() must decode a
+    str that looks like JSON before it can see the refusal inside it.
 A PreToolUse hook is not used: the Post inputs already carry duration_ms.
 
 A REFUSAL IS NOT A SUCCESS. Before week 5, a propose_link that the server
@@ -65,6 +69,14 @@ def emit(run, stage: str, status: str, message: str, **payload) -> dict:
 def _texts(obj) -> list:
     """Every text string in a tool reply, whatever shape the transport delivers it in."""
     if isinstance(obj, str):
+        stripped = obj.strip()
+        if stripped[:1] in ("{", "["):
+            try:
+                parsed = json.loads(stripped)
+            except json.JSONDecodeError:
+                return [obj]
+            if isinstance(parsed, (dict, list)):
+                return _texts(parsed)
         return [obj]
     if isinstance(obj, dict):
         found = [obj["text"]] if isinstance(obj.get("text"), str) else []
