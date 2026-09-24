@@ -12,30 +12,20 @@ The plan's week-4 reviewer subagent does the same check inside the pipeline.
 from __future__ import annotations
 
 import json
-import re
 import sys
 from pathlib import Path
 
-from pypdf import PdfReader
+ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(ROOT))
 
-
-def norm(s: str) -> str:
-    s = s.replace("’", "'").replace("‘", "'").replace("“", '"').replace("”", '"')
-    s = s.replace("–", "-").replace("—", "-").replace("­", "")
-    return re.sub(r"\s+", " ", s).strip().lower()
+from schemas.citation_match import EXACT, OFF_PAGE, SPACING, PageIndex  # noqa: E402
 
 
 def main(record_path: str, pdf_path: str) -> int:
     record = json.loads(Path(record_path).read_text(encoding="utf-8"))
-    pages = [norm(p.extract_text() or "") for p in PdfReader(pdf_path).pages]
-    all_text = " ".join(pages)
-
-    # pypdf splits words ("collus ion", "t o believe") on born-digital FATF PDFs. A
-    # second tier compares with ALL whitespace removed, so an honest quote whose only
-    # difference is the extractor's spacing is OK-SPACING rather than MISSING. This
-    # is deliberately not a fuzzy match on meaning.
-    tight_pages = [p.replace(" ", "") for p in pages]
-    tight_all = "".join(tight_pages)
+    # The matching rule lives in schemas/citation_match.py, shared with the MCP
+    # server and the review gate, so all three accept and refuse the same quotes.
+    index = PageIndex.from_pdf(pdf_path)
 
     checked = 0
     exact = 0
@@ -47,28 +37,21 @@ def main(record_path: str, pdf_path: str) -> int:
             label = item.get("label") or item.get("name") or item.get("description", "")[:60]
             for c in item.get("citations", []):
                 checked += 1
-                q = norm(c["quote"])
-                tq = q.replace(" ", "")
-                page_idx = c["page"] - 1
-                in_range = 0 <= page_idx < len(pages)
-                on_page = in_range and q in pages[page_idx]
-                on_page_tight = in_range and tq in tight_pages[page_idx]
-                anywhere = tq in tight_all
-                if on_page:
+                hit = index.locate(c["page"], c["quote"])
+                if hit.status == EXACT:
                     exact += 1
                     status = "OK       "
-                elif on_page_tight:
+                elif hit.status == SPACING:
                     spacing += 1
                     status = "OK-SPACING"
-                elif anywhere:
+                elif hit.status == OFF_PAGE:
                     off_page += 1
-                    where = [i + 1 for i, p in enumerate(tight_pages) if tq in p]
-                    status = "OFF-PAGE  (found on %s)" % where
+                    status = "OFF-PAGE  (found on %s)" % list(hit.found_on)
                 else:
                     missing += 1
                     status = "MISSING  "
                 print("%s p%-3d %-10s %s" % (status, c["page"], section[:10], label[:60]))
-                if not (on_page or on_page_tight):
+                if not hit.ok:
                     print("           quote: %r" % c["quote"][:140])
 
     print()
