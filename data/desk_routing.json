@@ -1,0 +1,20 @@
+{
+  "note": "Desk routing for digests. Data, not code: a family desk receives an advisory only when it carries a governed typology of that family; the suggestion-only desks also take the extraction agent's suggested_desks. network -> fiu_liaison was an owner decision on 2026-09-24. desk_titles lists every Desk in schemas.advisory enum order.",
+  "family_desks": {
+    "tbml": "trade_desk",
+    "sanctions": "sanctions_desk",
+    "correspondent_banking": "correspondent_desk",
+    "capital_markets": "markets_desk",
+    "network": "fiu_liaison"
+  },
+  "suggestion_only_desks": ["fraud_desk", "fiu_liaison", "general_intel"],
+  "desk_titles": {
+    "trade_desk": "Trade desk",
+    "sanctions_desk": "Sanctions desk",
+    "correspondent_desk": "Correspondent banking desk",
+    "markets_desk": "Markets desk",
+    "fraud_desk": "Fraud desk",
+    "fiu_liaison": "FIU liaison",
+    "general_intel": "General intelligence"
+  }
+}
