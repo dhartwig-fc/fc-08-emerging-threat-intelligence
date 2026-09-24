@@ -53,6 +53,7 @@ Three sub-projects, each with its own plan, in this order:
 | `NEXUS_STAGE` | `extractor` or `reviewer` |
 | `NEXUS_ADVISORY_ID` | the advisory this run is extracting |
 | `NEXUS_PDF_PATH`, `NEXUS_PDF_SHA256` | the source document and its hash |
+| `NEXUS_PROPOSALS_PATH` | data/proposals/<run_id>.jsonl |
 
 The agent cannot set these. `propose_link` still takes `advisory_id` from the
 agent and **refuses a mismatch** with `NEXUS_ADVISORY_ID`: today nothing stops a
@@ -93,9 +94,17 @@ module, `schemas/citation_match.py`, imported by the server, `review.py` and
 ### The legacy queue
 
 Copied byte-identical to a tracked `data/proposals_legacy_2026-09-10_to_13.jsonl`
-before anything else changes. `review.py` reads only `proposal/2` lines and
-reports how many lines it skipped and why, so nothing disappears silently.
-Nothing is deleted.
+before anything else changes. `data/proposals.jsonl` is never written again and
+never truncated.
+
+**Amended while planning, 2026-09-24: one queue file per run.** The server
+writes to `data/proposals/<run_id>.jsonl` (the runner sets
+`NEXUS_PROPOSALS_PATH`), and those files are TRACKED. A single shared
+`data/proposals.jsonl` is gitignored, so every `proposal/2` line a decision cites
+would have existed on one machine -- the trap `data/records/` was in until
+`e0dbfb6`. Per-run files are also never appended to by two processes at once,
+and pair with the per-run telemetry file in Section 3. `review.py` reads
+`data/proposals/*.jsonl` and reports any line that is not `proposal/2`.
 
 ### Guard
 
@@ -143,9 +152,12 @@ mind needs its own dated record").
 `data/review_decisions.jsonl`, tracked, append-only:
 
 ```
-{decided_at, link_key, kind: governed|emergent, decision: approve|reject,
- note, proposal_ids[], run_ids[], quotes_seen_sha256[]}
+{decided_at, link_key, kind: governed|emergent, advisory_id, typology_id,
+ emergent_label, decision: approve|reject, note, proposal_ids[], run_ids[],
+ quotes_seen_sha256[]}
 ```
+
+`advisory_id`, `typology_id` and `emergent_label` were added while planning, so the approvals files are rebuilt from the log without parsing link keys.
 
 ### Later proposals for a decided link
 
