@@ -1,6 +1,6 @@
 # Sanctions desk -- digest, batch slice1-2026-09-24
 
-Built from 20 advisory records. Approvals are the owner's, from the decision log (tools/review.py); routing is data/desk_routing.json.
+This batch covers 20 advisory records; 11 reach this desk. Approvals are the owner's, from the decision log (tools/review.py); routing is data/desk_routing.json.
 A family desk receives an advisory only when it carries a typology of that family; Fraud desk, FIU liaison, General intelligence also take the extraction agent's own suggestion, and say so.
 
 ## ADV-2026-0004 -- Concealment of Beneficial Ownership
@@ -85,7 +85,7 @@ Routed here because: SAN002 Shadow Fleet (sanctions); SAN003 Transshipment (sanc
 
 Publisher: OFAC / BIS / DOJ
 
-Routed here because: SAN001 Ownership Evasion (sanctions); SAN003 Transshipment (sanctions); SAN004 Front Companies (sanctions); SAN005 Name Screening Evasion (sanctions); SAN007 Dual Use Goods (sanctions).
+Routed here because: SAN001 Ownership Evasion (sanctions; owner-approved, not in the record); SAN003 Transshipment (sanctions); SAN004 Front Companies (sanctions); SAN005 Name Screening Evasion (sanctions); SAN007 Dual Use Goods (sanctions).
 
 ### Approved links
 

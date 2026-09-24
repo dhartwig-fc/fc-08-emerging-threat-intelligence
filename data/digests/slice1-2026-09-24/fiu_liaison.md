@@ -1,6 +1,6 @@
 # FIU liaison -- digest, batch slice1-2026-09-24
 
-Built from 20 advisory records. Approvals are the owner's, from the decision log (tools/review.py); routing is data/desk_routing.json.
+This batch covers 20 advisory records; 16 reach this desk. Approvals are the owner's, from the decision log (tools/review.py); routing is data/desk_routing.json.
 A family desk receives an advisory only when it carries a typology of that family; Fraud desk, FIU liaison, General intelligence also take the extraction agent's own suggestion, and say so.
 
 ## ADV-2026-0001 -- Trade-Based Money Laundering: Trends and Developments
@@ -52,12 +52,7 @@ Routed here because: PAT007 Shell Company Network (network); suggested by the ex
 
 ### Awaiting review
 
-- BA001 Structuring -- asserted by the pipeline, not yet decided
-- BA002 Funnel Accounts -- asserted by the pipeline, not yet decided
-- BA003 Mule Accounts -- asserted by the pipeline, not yet decided
 - PAT007 Shell Company Network -- asserted by the pipeline, not yet decided
-- TBML001 Over Invoicing -- asserted by the pipeline, not yet decided
-- TBML004 Phantom Shipping -- asserted by the pipeline, not yet decided
 
 ## ADV-2026-0004 -- Concealment of Beneficial Ownership
 
@@ -71,13 +66,11 @@ Routed here because: FND003 Beneficial Ownership Intelligence (network); PAT003 
 
 ### Awaiting review
 
-- BA004 Circular Funds Flow -- asserted by the pipeline, not yet decided
 - FND003 Beneficial Ownership Intelligence -- asserted by the pipeline, not yet decided
 - PAT003 Layered Ownership -- asserted by the pipeline, not yet decided
 - PAT004 Circular Ownership -- asserted by the pipeline, not yet decided
 - PAT007 Shell Company Network -- asserted by the pipeline, not yet decided
 - PAT010 Hidden Controller -- asserted by the pipeline, not yet decided
-- SAN004 Front Companies -- asserted by the pipeline, not yet decided
 
 ## ADV-2026-0005 -- Virtual Assets Red Flag Indicators of Money Laundering and Terrorist Financing
 
@@ -91,15 +84,7 @@ Routed here because: PAT005 Common Address (network); suggested by the extractio
 
 ### Awaiting review
 
-- BA001 Structuring -- asserted by the pipeline, not yet decided
-- BA002 Funnel Accounts -- asserted by the pipeline, not yet decided
-- BA003 Mule Accounts -- asserted by the pipeline, not yet decided
-- BA005 Rapid Movement -- asserted by the pipeline, not yet decided
-- BA006 Dormant Reactivation -- asserted by the pipeline, not yet decided
-- BA008 Layering -- asserted by the pipeline, not yet decided
-- CMI010 Cryptocurrency Evasion -- asserted by the pipeline, not yet decided
 - PAT005 Common Address -- asserted by the pipeline, not yet decided
-- SAN008 High Risk Jurisdictions -- asserted by the pipeline, not yet decided
 
 ## ADV-2026-0006 -- Money Laundering from Environmental Crime
 
@@ -113,15 +98,8 @@ Routed here because: PAT007 Shell Company Network (network); PAT010 Hidden Contr
 
 ### Awaiting review
 
-- BA007 Cash Intensive Activity -- asserted by the pipeline, not yet decided
-- BA008 Layering -- asserted by the pipeline, not yet decided
 - PAT007 Shell Company Network -- asserted by the pipeline, not yet decided
 - PAT010 Hidden Controller -- asserted by the pipeline, not yet decided
-- TBML001 Over Invoicing -- asserted by the pipeline, not yet decided
-- TBML002U Under Invoicing -- asserted by the pipeline, not yet decided
-- TBML005 False Description Of Goods -- asserted by the pipeline, not yet decided
-- TBML008 Third Party Payment Abuse -- asserted by the pipeline, not yet decided
-- TBML009 Shell Company Trading -- asserted by the pipeline, not yet decided
 
 ## ADV-2026-0007 -- Illicit Financial Flows from Cyber-Enabled Fraud
 
@@ -135,13 +113,7 @@ Routed here because: PAT007 Shell Company Network (network); suggested by the ex
 
 ### Awaiting review
 
-- BA001 Structuring -- asserted by the pipeline, not yet decided
-- BA003 Mule Accounts -- asserted by the pipeline, not yet decided
-- BA005 Rapid Movement -- asserted by the pipeline, not yet decided
-- BA009 Transaction Laundering -- asserted by the pipeline, not yet decided
-- CMI010 Cryptocurrency Evasion -- asserted by the pipeline, not yet decided
 - PAT007 Shell Company Network -- asserted by the pipeline, not yet decided
-- TBML001 Over Invoicing -- asserted by the pipeline, not yet decided
 
 ## ADV-2026-0008 -- Investigating Professional Money Laundering, Underground Banking, and the Use of Hawala and Other Similar Service Providers
 
@@ -195,13 +167,7 @@ Routed here because: PAT007 Shell Company Network (network); suggested by the ex
 
 ### Awaiting review
 
-- BA008 Layering -- asserted by the pipeline, not yet decided
 - PAT007 Shell Company Network -- asserted by the pipeline, not yet decided
-- SAN002 Shadow Fleet -- asserted by the pipeline, not yet decided
-- SAN003 Transshipment -- asserted by the pipeline, not yet decided
-- SAN004 Front Companies -- asserted by the pipeline, not yet decided
-- SAN006 Trade Based Sanctions Evasion -- asserted by the pipeline, not yet decided
-- SAN007 Dual Use Goods -- asserted by the pipeline, not yet decided
 
 ## ADV-2026-0011 -- Advisory on the Use of Chinese Money Laundering Networks by Mexico-Based Transnational Criminal Organizations (FIN-2025-A003)
 
@@ -252,14 +218,7 @@ Routed here because: PAT007 Shell Company Network (network); suggested by the ex
 
 ### Awaiting review
 
-- CMI010 Cryptocurrency Evasion -- asserted by the pipeline, not yet decided
 - PAT007 Shell Company Network -- asserted by the pipeline, not yet decided
-- SAN001 Ownership Evasion -- asserted by the pipeline, not yet decided
-- SAN004 Front Companies -- asserted by the pipeline, not yet decided
-- SAN008 High Risk Jurisdictions -- asserted by the pipeline, not yet decided
-- SAN009 Complex Ownership Structures -- asserted by the pipeline, not yet decided
-- TBML008 Third Party Payment Abuse -- asserted by the pipeline, not yet decided
-- TBML010 Sanctions Evasion Through Trade -- asserted by the pipeline, not yet decided
 
 ## ADV-2026-0017 -- Red Alert: Shadow Fleet Sanctions Evasion and Avoidance Network
 
