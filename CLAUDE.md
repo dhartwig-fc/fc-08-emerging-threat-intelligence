@@ -50,6 +50,15 @@ tools/build_emergent_candidates.py  the week-4 deliverable: every emergent entry
 tools/merge_reviewer_additions.py   merges reviewer additions into records under schema 1.4.0; non-destructive by default
 tools/build_label_disputes.py      builds the owner label-pass disputes from evidence on disk; deterministic
 tools/apply_label_decisions.py     applies owner decisions to evals/golden/; validates before writing, refuses to overturn a decided dispute
+schemas/citation_match.py          THE quote-on-page rule, shared by the MCP server, the review gate and check_citations.py
+agents/run_identity.py             who a run is; the runner hands it to the MCP server, never the agent
+data/proposals/                    the review queue: one tracked proposal/2 file per run (week 5)
+data/proposals_legacy_2026-09-10_to_13.jsonl   the 383 pre-week-5 proposals, frozen, never reviewed
+governance/                        the review gate: proposals.py (load, re-check, group), decisions.py (log, refusals, rebuild), card.py
+tools/review.py                    THE ONLY writer of approvals: interactive, --decisions, --list, --check
+data/review_decisions.jsonl        append-only decision log (tracked); the two approvals files are rebuilt from it
+evals/check_proposal_contract.py   pins the proposal contract; --mutate citations|run
+evals/check_review_gate.py         pins the gate end to end; --mutate quarantine|overturn|evidence
 evals/owner_decisions/             dated evidence of what the owner decided about the golden labels
 agents/review_advisory.py          the additive reviewer: what did the extraction miss, justified against doctrine
 evals/review_ADV-2026-0001.md      week-1 review: what the first real run got wrong and why
@@ -357,7 +366,13 @@ claude mcp add knowledge-centre -- "$PWD/.venv/bin/python" "$PWD/mcp_server/know
   disputes are the question; the owner_decisions file is the answer. Extend it for new triage, do not
   regenerate over it.
 
-- [ ] Week 5: hooks, telemetry, `review.py` gate, desk digests
+- [~] **Week 5** (started 2026-09-24): spec `docs/superpowers/specs/2026-09-24-week5-governance-design.md`.
+  **Sub-project A DONE** (plan `docs/superpowers/plans/2026-09-24-week5-a-proposal-contract-and-review-gate.md`):
+  every proposal names its run and carries quotes verified at proposal time and again at review; one
+  tracked queue file per run; `tools/review.py` is the only writer of approvals, rebuilt from an
+  append-only decision log. The 383 legacy proposals are frozen, not reviewed -- they carry no quotes and
+  no run. NEXT: sub-project B (telemetry + the write allowlist; probe first whether `can_use_tool` needs a
+  streamed prompt), then C (desk digests).
 - [ ] Week 6: publish slice 1 on `future-capabilities.html`, tag `fc08-threatintel-slice1-v1.0.0`
 
 ## Journal
