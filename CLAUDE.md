@@ -29,7 +29,9 @@ tools/fetch_fatf_via_chrome.js     fetches fatf-gafi.org PDFs, which refuse ever
 data/typologies.json               GOVERNED export of fc-10's doctrine library (57 typologies); never hand-edit
 tools/import_fc10_doctrine.py      regenerates it from fc-10's indexes/doctrine_library.json; deterministic, provenance = fc-10 commit + sha256
 data/advisories/                   source PDFs (gitignored)
-data/records/                      validated AdvisoryRecord JSON (gitignored)
+data/records/                      extraction-only AdvisoryRecords -- TRACKED since e0dbfb6, the evidence behind every published figure
+data/records_merged/               extraction + reviewer additions under schema 1.4.0; the pipeline's output (tracked)
+data/label_disputes/               the 15 owner label-pass disputes, built by tools/build_label_disputes.py (tracked)
 data/proposals.jsonl               review queue written by the MCP server (gitignored)
 evals/example_record.json          golden record proving the schema
 evals/validate_record.py           validator for any record
@@ -46,6 +48,9 @@ evals/traces/                       where recall goes and what was built about i
 tools/batch_remaining.sh           extracts every advisory with no record; resumable and idempotent, shortest first
 tools/build_emergent_candidates.py  the week-4 deliverable: every emergent entry with its evidence and near neighbours
 tools/merge_reviewer_additions.py   merges reviewer additions into records under schema 1.4.0; non-destructive by default
+tools/build_label_disputes.py      builds the owner label-pass disputes from evidence on disk; deterministic
+tools/apply_label_decisions.py     applies owner decisions to evals/golden/; validates before writing, refuses to overturn a decided dispute
+evals/owner_decisions/             dated evidence of what the owner decided about the golden labels
 agents/review_advisory.py          the additive reviewer: what did the extraction miss, justified against doctrine
 evals/review_ADV-2026-0001.md      week-1 review: what the first real run got wrong and why
 setup.sh                           bootstrap + smoke tests
@@ -75,7 +80,7 @@ claude mcp add knowledge-centre -- "$PWD/.venv/bin/python" "$PWD/mcp_server/know
 - [x] Week 0: repo scaffolded, schema validates, MCP server imports on mcp 2.2.0
 - [x] Week 1 (2026-09-10): FATF TBML 2020 extracted twice; schema argued with and bumped to 1.1.0 (PDF page index + printed_folio, published_on_precision, ActorType.CATEGORY). Review and numbers in `evals/review_ADV-2026-0001.md`; citation checker in `evals/check_citations.py`. Committed as 6841abd.
 - [~] Week 2 (started 2026-09-10): MCP server registered (`claude mcp get knowledge-centre` shows Connected) and driven over stdio by a client; fixture replaced by the governed fc-10 export (schema 1.2.0 widens typology_id to allow TBML002U). Agent wired via `mcp_servers` with `strict_mcp_config=True` (the folder's `claude mcp add` registration otherwise loads too and causes permission denials); library removed from the prompt; `_refuse_unknown_ids` guards in code. Tool-grounded run: 7 library ids + 5 emergent, 12 proposals, $1.14, 49 turns. Citation page/folio SWAPPED in 15 of 21 under tool load: prompt advice does not hold; structural fix deferred to the golden set. Week 2 DONE, committed as 98a7d6e + 971aa34. Search tool rewritten (stemmed IDF + label bonus + floor 0.25); `evals/search_probes.py` went 8-of-12 missing to 12-of-12, mutation-verified. Run it after ANY change to the library or the scorer. ALSO run `evals/search_recall.py`, which measures the tool against the golden set's 413 real advisory citations -- the 12 hand-written probes are short phrases and hid a length bug for a day. Search rewritten again 2026-09-11: the score is now length-invariant (max of query-normalised and label-normalised, label needing 2 terms), top-5 recall 0.351 -> 0.496 with the emergent guard still 12/12.
-- [x] Week 3 (2026-09-10 to 09-12): twenty advisories selected from Source Matrix tiers 1-2, every URL verified, all downloaded to `data/advisories/` (gitignored, 920 pages, all born-digital), listed with hashes in `evals/golden/advisory_list.json`. All 20 labelled 2026-09-11 (3 in-session, 17 by subagents), every one validating and every citation on its page; ALL are drafts pending owner review. Schema 1.3.0 raised the extraction_notes cap to 4000 because reviewer notes on long reports hit the old 1000. Read `evals/golden/README.md` "State of the set" before scoring: emergent labels are NOT normalised (the same technique is named three ways), so an exact-string scorer will understate emergent recall. `evals/score.py` written and mutation-verified: governed ids exact, emergent by token containment **>= 0.50 since 2026-09-13** (was 0.60; 1.00 would score paraphrases 0.000), actors alias-aware at 0.60. **The two thresholds are separate constants and were being conflated.** The 0.60 emergent value was defended by "0.50 collapses 2Rivers DMCC into 2Rivers PTE" -- a REAL pair, both companies in ADV-2026-0017's label, scoring exactly 0.50 -- but they are ACTORS, matched under the ACTOR threshold. An actor case was holding up the emergent constant. (An earlier note in this file called that example synthetic; it is not, and the correction matters because it is exactly why DEFAULT_ACTOR_THRESHOLD must STAY at 0.60.) Measured on the full 20, emergent 0.60 -> 0.50 credits 7 further matches, every one read pair by pair and every one a genuine restatement, and merges nothing: F1 0.208 -> 0.306, precision 0.441 -> 0.647. **0.40 is a real floor**, merging "Professional Intermediary Gatekeeper Complicity" with "Trusts and legal arrangements interposed" at 0.43 on ADV-2026-0004 -- different mechanisms sharing legal vocabulary. Pinned by `evals/check_emergent_threshold.py`, mutation-verified. See `evals/traces/EMERGENT_AUDIT_2026-09-12.md`, actors alias-aware, zero-against-zero reports n/a not 1.000. Self-score of the golden set is 1.000 on all four fields. FULL-SET BASELINE RAN 2026-09-12 (see below). Extraction is FREE on the subscription token (`claude setup-token`), so the remaining work is time, not money -- the "~$23" framing is void. NOT YET: resolve_actor tool, and the owner review of the labels, which is the one thing here code cannot do. fatf-gafi.org needs a real browser: `tools/fetch_fatf_via_chrome.js` (cached playwright module + installed Chrome, stealth headless) works; the Playwright MCP servers drop on downloads. **SETTLED 2026-09-12 with eight runs of the five advisories: the search fix changed NOTHING measurable, and the claim that the tool was half the recall gap is FALSIFIED.** Four pre-fix runs (the original baseline + 3 repeats in a worktree at `6d19027^`, validated at top-5 recall 0.351) against four post-fix runs (the rerun + 3 repeats, 0.496). Every field's band OVERLAPS:
+- [x] Week 3 (2026-09-10 to 09-12): twenty advisories selected from Source Matrix tiers 1-2, every URL verified, all downloaded to `data/advisories/` (gitignored, 920 pages, all born-digital), listed with hashes in `evals/golden/advisory_list.json`. All 20 labelled 2026-09-11 (3 in-session, 17 by subagents), every one validating and every citation on its page; ALL are drafts pending owner review (the 15 DISPUTED entries were owner-decided 2026-09-24 -- see the label pass entry below; the rest still await review). Schema 1.3.0 raised the extraction_notes cap to 4000 because reviewer notes on long reports hit the old 1000. Read `evals/golden/README.md` "State of the set" before scoring: emergent labels are NOT normalised (the same technique is named three ways), so an exact-string scorer will understate emergent recall. `evals/score.py` written and mutation-verified: governed ids exact, emergent by token containment **>= 0.50 since 2026-09-13** (was 0.60; 1.00 would score paraphrases 0.000), actors alias-aware at 0.60. **The two thresholds are separate constants and were being conflated.** The 0.60 emergent value was defended by "0.50 collapses 2Rivers DMCC into 2Rivers PTE" -- a REAL pair, both companies in ADV-2026-0017's label, scoring exactly 0.50 -- but they are ACTORS, matched under the ACTOR threshold. An actor case was holding up the emergent constant. (An earlier note in this file called that example synthetic; it is not, and the correction matters because it is exactly why DEFAULT_ACTOR_THRESHOLD must STAY at 0.60.) Measured on the full 20, emergent 0.60 -> 0.50 credits 7 further matches, every one read pair by pair and every one a genuine restatement, and merges nothing: F1 0.208 -> 0.306, precision 0.441 -> 0.647. **0.40 is a real floor**, merging "Professional Intermediary Gatekeeper Complicity" with "Trusts and legal arrangements interposed" at 0.43 on ADV-2026-0004 -- different mechanisms sharing legal vocabulary. Pinned by `evals/check_emergent_threshold.py`, mutation-verified. See `evals/traces/EMERGENT_AUDIT_2026-09-12.md`, actors alias-aware, zero-against-zero reports n/a not 1.000. Self-score of the golden set is 1.000 on all four fields. FULL-SET BASELINE RAN 2026-09-12 (see below). Extraction is FREE on the subscription token (`claude setup-token`), so the remaining work is time, not money -- the "~$23" framing is void. NOT YET: resolve_actor tool, and an owner review of the UNDISPUTED label entries, which is the one thing here code cannot do. fatf-gafi.org needs a real browser: `tools/fetch_fatf_via_chrome.js` (cached playwright module + installed Chrome, stealth headless) works; the Playwright MCP servers drop on downloads. **SETTLED 2026-09-12 with eight runs of the five advisories: the search fix changed NOTHING measurable, and the claim that the tool was half the recall gap is FALSIFIED.** Four pre-fix runs (the original baseline + 3 repeats in a worktree at `6d19027^`, validated at top-5 recall 0.351) against four post-fix runs (the rerun + 3 repeats, 0.496). Every field's band OVERLAPS:
 
   | F1 | pre-fix min-max (mean) | post-fix min-max (mean) |
   |---|---|---|
@@ -211,8 +216,8 @@ claude mcp add knowledge-centre -- "$PWD/.venv/bin/python" "$PWD/mcp_server/know
      asks what each bullet evidences, which is week 4, not the prompt. The `a5abcc9` rule STAYS:
      incomplete rather than wrong, cost nothing, tightened ADV-2026-0013's variance to zero.
      Evidence and instrument limits: `evals/traces/SHAPE_COUNT_2026-09-13.md`.
-  4. **Owner label pass.** Gates every published figure. `evals/traces/TRIAGE_ADV-2026-0004_LABEL.md`
-     is a four-decision list: TBML001 and SAN008 to strike or keep, TBML004 and SAN001 to judge thin.
+  4. ~~**Owner label pass.**~~ **DONE 2026-09-24** -- all four ADV-2026-0004 entries KEPT, against the
+     triage's UNSUPPORTED on TBML001 and SAN008. See the label pass entry below.
 
 - [~] Week 4 (started 2026-09-13): **built the ADDITIVE reviewer only, not the four stations PLAN.md lists,
   and it PASSES its acceptance test.** The fetcher is deterministic Python already working; the classifier is a
@@ -308,12 +313,49 @@ claude mcp add knowledge-centre -- "$PWD/.venv/bin/python" "$PWD/mcp_server/know
 - [x] **Week 4 COMPLETE** (2026-09-13): additive reviewer, acceptance bands, full-set run, emergent
   candidates, schema 1.4.0, the merge step, the --in-place decision, and the single-vs-multi write-up. Sixteen of the twenty are SINGLE runs;
   only the four concentrated documents have bands. **DO NOT plan the rest against better retrieval.** Measured three ways on 2026-09-12: the search fix lifted top-5 recall 41% relative and moved extraction recall by nothing; typologies were retrieved, confirmed with `get_typology`, and then not asserted; and the agent asserts the same handful whether the document holds 5 golden typologies or 20. Build against the three mechanisms below, in that order. And note precision 0.889 is this pipeline's best property -- an assertion budget IS a precision strategy, so a reviewer that justifies each extra assertion beats simply asserting more
-- [~] **OWNER LABEL PASS, opened 2026-09-24.** 15 disputes across 7 advisories, built from evidence by
-  `tools/build_label_disputes.py` into `data/label_disputes/` and seeded into the adjudication page
-  https://claude.ai/artifact/LFCH42byYGnCYexc3UBmVH (collections `disputes`, `decisions`). 11 are ADD
-  (a reviewer addition the label lacks; checked on all 20) and 4 are STRIKE (ADV-2026-0004's triage; checked
-  on ONE advisory) — so the 13 advisories with no dispute are UNCHALLENGED, not confirmed. Decisions are
-  read back with `ArtifactData list decisions` and applied to `evals/golden/`; that apply step is not built.
+- [x] **OWNER LABEL PASS, CLOSED 2026-09-24** (`b1d8ffa`, `500d320`). 15 disputes across 7 advisories,
+  built from evidence by `tools/build_label_disputes.py` into `data/label_disputes/`. 11 are ADD (a reviewer
+  addition the label lacks; checked on all 20) and 4 are STRIKE (ADV-2026-0004's triage; checked on ONE
+  advisory). **All 11 additions ACCEPTED; all 4 strikes REJECTED** -- ADV-2026-0004 keeps TBML001, SAN008,
+  TBML004 and SAN001. Evidence, with the page's own timestamps:
+  `evals/owner_decisions/label_pass_2026-09-24.json`. `label_status` in `advisory_list.json` says how many
+  DISPUTED entries the owner decided and never that a label is owner-reviewed outright: **the 13 advisories
+  with no dispute are UNCHALLENGED, not confirmed**, and strike-direction triage still covers one advisory.
+
+  Typologies F1 against the corrected key:
+
+  | | before the pass | after |
+  |---|---|---|
+  | extraction only (`data/records`) | 0.510 | 0.492 |
+  | extraction + reviewer (`data/records_merged`) | 0.665 | **0.704** |
+
+  **The key changed, so these are not the same measurement as week 4's.** 0.510 / 0.665 stay the week-4
+  result against the week-4 key; quote the new pair only as "against the owner-corrected key". And the
+  merged figure rose PARTLY BY CONSTRUCTION: every accepted addition came from the reviewer being scored.
+  What it does show is 11 of 11 reviewer additions survived owner adjudication. The extraction-only score
+  fell because the key grew and the extractor misses the new entries too.
+
+  **How it nearly recorded nothing.** The first adjudication page loaded its disputes FROM its database, and
+  in the owner's view `claude.use("db")` resolved null -- so it rendered no cards, the owner saw an empty page,
+  and the decisions collection stayed empty while the pass was reported done. Version 2 embeds the disputes
+  in the page and, where the database is absent, keeps choices on the device with a "Copy my decisions"
+  button. **A page that collects decisions must render its content without its database**, and a read of the
+  decisions collection is the only evidence the pass happened. The page saved 14 of 15; the fifteenth
+  (ADV-2026-0005 BA006) was given in chat.
+
+  **`tools/apply_label_decisions.py`, and two defects its first runs found in itself.** The first run
+  appended a provenance sentence to `extraction_notes` and pushed ADV-2026-0018 past the 4000-character cap;
+  only a separate `validate_record.py` run caught it. The tool now validates every label before writing
+  anything (mutation-verified: a planted overlong note is refused with nothing written) and leaves
+  `extraction_notes` alone. The second run, for the one late decision, would have OVERWRITTEN the day's
+  evidence file with one decision; it now folds a run into the day's record, may settle an open dispute,
+  and refuses to overturn a decided one ("a change of mind needs its own dated record"). A fresh run from
+  `2fbe1d9` reproduced the applied labels byte for byte.
+
+  **Do not re-run `build_label_disputes.py` to "refresh" the set.** It rebuilds from the CURRENT golden,
+  so accepted additions vanish from it and the record of what the owner was asked is lost. The committed
+  disputes are the question; the owner_decisions file is the answer. Extend it for new triage, do not
+  regenerate over it.
 
 - [ ] Week 5: hooks, telemetry, `review.py` gate, desk digests
 - [ ] Week 6: publish slice 1 on `future-capabilities.html`, tag `fc08-threatintel-slice1-v1.0.0`
