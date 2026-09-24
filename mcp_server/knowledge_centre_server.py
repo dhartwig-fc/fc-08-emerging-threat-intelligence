@@ -16,11 +16,14 @@ Register in Claude Code:
 
 from __future__ import annotations
 
+import hashlib
 import json
 import math
 import os
 import re
+import sys
 from datetime import datetime, timezone
+from functools import lru_cache
 from pathlib import Path
 from typing import List, Optional
 
@@ -33,7 +36,14 @@ from pydantic import BaseModel, ConfigDict, Field
 
 ROOT = Path(__file__).resolve().parent.parent
 TYPOLOGY_PATH = Path(os.environ.get("NEXUS_TYPOLOGY_PATH", ROOT / "data" / "typologies.json"))
-PROPOSALS_PATH = Path(os.environ.get("NEXUS_PROPOSALS_PATH", ROOT / "data" / "proposals.jsonl"))
+
+# The server is launched as a script, so the repo root is not on sys.path.
+sys.path.insert(0, str(ROOT))
+from schemas.citation_match import PageIndex, file_sha256  # noqa: E402
+
+# Set by the RUNNER (agents/run_identity.py), never by the agent. Read at call
+# time, not import time, so a guard can vary them between calls.
+RUN_ENV = ("NEXUS_RUN_ID", "NEXUS_STAGE", "NEXUS_ADVISORY_ID", "NEXUS_PDF_PATH", "NEXUS_PDF_SHA256")
 
 mcp = FastMCP("knowledge_centre_mcp")
 
@@ -78,6 +88,13 @@ class SearchTypologiesInput(BaseModel):
     limit: int = Field(5, ge=1, le=20)
 
 
+class ProposedCitation(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    page: int = Field(..., ge=1, description="PDF page index: the n in the '=== PAGE n ===' marker")
+    quote: str = Field(..., min_length=10, max_length=600, description="Verbatim text from that page")
+
+
 class ProposeLinkInput(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
@@ -90,6 +107,11 @@ class ProposeLinkInput(BaseModel):
     emergent_label: Optional[str] = Field(None, min_length=3, max_length=120)
     rationale: str = Field(..., min_length=20, max_length=1000, description="Why this link holds, citing page numbers")
     confidence: str = Field(..., pattern=r"^(high|medium|low)$")
+    citations: List[ProposedCitation] = Field(
+        ..., min_length=1, max_length=5,
+        description="The page and verbatim quote this link rests on -- the same citations as the record entry. "
+                    "A quote that is not on the page it names is refused.",
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -421,6 +443,49 @@ async def search_typologies(params: SearchTypologiesInput) -> str:
     return "\n".join(out)
 
 
+def _run_context() -> Optional[dict]:
+    ctx = {k: os.environ.get(k, "") for k in RUN_ENV}
+    return ctx if all(ctx.values()) else None
+
+
+def _proposals_path() -> Path:
+    return Path(os.environ.get("NEXUS_PROPOSALS_PATH", ROOT / "data" / "proposals.jsonl"))
+
+
+@lru_cache(maxsize=4)
+def _page_index(pdf_path: str, expected_sha: str) -> PageIndex:
+    if file_sha256(pdf_path) != expected_sha:
+        raise ValueError("document hash mismatch: %s is not the document this run was started on" % pdf_path)
+    return PageIndex.from_pdf(pdf_path)
+
+
+def _refuse_for_run(params: "ProposeLinkInput", run: dict) -> Optional[str]:
+    if params.advisory_id != run["NEXUS_ADVISORY_ID"]:
+        return ("Rejected: this run is extracting %s; a proposal for %s cannot come from it."
+                % (run["NEXUS_ADVISORY_ID"], params.advisory_id))
+    return None
+
+
+def _refuse_citations(params: "ProposeLinkInput", run: dict) -> Optional[str]:
+    try:
+        index = _page_index(run["NEXUS_PDF_PATH"], run["NEXUS_PDF_SHA256"])
+    except (OSError, ValueError) as exc:
+        return "Rejected: %s" % exc
+    bad = []
+    for c in params.citations:
+        hit = index.locate(c.page, c.quote)
+        if hit.ok:
+            continue
+        where = (" It appears on page %s." % ", ".join(str(n) for n in hit.found_on)) if hit.found_on \
+            else " It is not in the document."
+        bad.append("page %d: %r.%s" % (c.page, c.quote[:80], where))
+    if bad:
+        return ("Rejected: %d citation%s not found on the page named. Quote the page text verbatim, with the "
+                "page number from its '=== PAGE n ===' marker, and propose again. %s"
+                % (len(bad), "" if len(bad) == 1 else "s", " | ".join(bad[:3])))
+    return None
+
+
 @mcp.tool(
     name="knowledge_centre_propose_link",
     annotations={"title": "Propose advisory link", "readOnlyHint": False, "destructiveHint": False, "idempotentHint": False, "openWorldHint": False},
@@ -429,11 +494,22 @@ async def propose_link(params: ProposeLinkInput) -> str:
     """
     Propose that an advisory be pinned to a typology, or propose an emergent typology.
 
-    This never writes to the library. It appends to a review queue that a human
-    approves in week 5. Exactly one of typology_id or emergent_label must be given.
+    This never writes to the library. It appends to this run's review queue; a
+    human decides in tools/review.py. Exactly one of typology_id or
+    emergent_label must be given, and every proposal carries the citations it
+    rests on, each verified against the page it names.
     """
+    # GOVERNANCE: a proposal nobody can trace to a run and a document cannot be
+    # reviewed. The runner supplies the identity; without it, nothing is written.
+    run = _run_context()
+    if run is None:
+        return ("Rejected: this server was started without a run identity (%s). A proposal that cannot be "
+                "traced to a run and a document cannot be reviewed." % ", ".join(RUN_ENV))
     if bool(params.typology_id) == bool(params.emergent_label):
         return "Rejected: provide exactly one of typology_id or emergent_label."
+    refusal = _refuse_for_run(params, run)
+    if refusal:
+        return refusal
     if params.typology_id and not any(r["typology_id"] == params.typology_id for r in _typologies()):
         return "Rejected: %s is not in the library. Use emergent_label if this is new." % params.typology_id
 
@@ -448,21 +524,35 @@ async def propose_link(params: ProposeLinkInput) -> str:
                 "why this family fits the advisory's framing, then propose again."
                 % (params.typology_id, twin["twin"], twin["note"], twin["twin"]))
 
-    record = {
-        "proposed_at": datetime.now(timezone.utc).isoformat(),
+    # GOVERNANCE: the quote is checked where it is made, so the agent can correct
+    # it, and again by the review gate, because the queue is a file.
+    refusal = _refuse_citations(params, run)
+    if refusal:
+        return refusal
+
+    body = {
+        "schema": "proposal/2",
+        "run_id": run["NEXUS_RUN_ID"],
+        "stage": run["NEXUS_STAGE"],
         "advisory_id": params.advisory_id,
+        "document_sha256": run["NEXUS_PDF_SHA256"],
         "typology_id": params.typology_id,
         "emergent_label": params.emergent_label,
         "rationale": params.rationale,
         "confidence": params.confidence,
-        "status": "pending_review",
+        "citations": [{"page": c.page, "quote": c.quote} for c in params.citations],
     }
-    PROPOSALS_PATH.parent.mkdir(parents=True, exist_ok=True)
-    with open(PROPOSALS_PATH, "a", encoding="utf-8") as fh:
-        fh.write(json.dumps(record) + "\n")
-    return "Accepted into review queue: %s -> %s" % (
+    canonical = json.dumps(body, sort_keys=True, ensure_ascii=False).encode("utf-8")
+    record = {"proposal_id": hashlib.sha256(canonical).hexdigest()[:16],
+              "proposed_at": datetime.now(timezone.utc).isoformat(), **body}
+    path = _proposals_path()
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with open(path, "a", encoding="utf-8") as fh:
+        fh.write(json.dumps(record, ensure_ascii=False) + "\n")
+    return "Accepted into review queue: %s -> %s (proposal %s)" % (
         params.advisory_id,
         params.typology_id or "EMERGENT(%s)" % params.emergent_label,
+        record["proposal_id"],
     )
 
 

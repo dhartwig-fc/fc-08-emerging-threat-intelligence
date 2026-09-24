@@ -52,14 +52,27 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
+ADVISORY = "ADV-2026-0017"
+
 # Redirect the review queue BEFORE importing the server: propose_link appends to
 # it, and a guard must never write into the real queue a human reviews.
 _TMP_QUEUE = Path(tempfile.gettempdir()) / "fc08_twin_probe_queue.jsonl"
 os.environ["NEXUS_PROPOSALS_PATH"] = str(_TMP_QUEUE)
 
-from mcp_server import knowledge_centre_server as kc  # noqa: E402
+# Since week 5 propose_link refuses a proposal it cannot trace to a run and a
+# document, and verifies every quote. Give it a real identity and a real quote,
+# so a refusal seen here is the TWIN rule and not the contract.
+_ENTRY = {a["advisory_id"]: a for a in json.loads(
+    (ROOT / "evals" / "golden" / "advisory_list.json").read_text(encoding="utf-8"))["advisories"]}[ADVISORY]
+PDF = ROOT / "data" / "advisories" / Path(_ENTRY["file"]).name
+os.environ.update({"NEXUS_RUN_ID": "probe-twin-pairs", "NEXUS_STAGE": "extractor",
+                   "NEXUS_ADVISORY_ID": ADVISORY, "NEXUS_PDF_PATH": str(PDF),
+                   "NEXUS_PDF_SHA256": _ENTRY["sha256"]})
+_GOLD = json.loads((ROOT / "evals" / "golden" / ("%s.json" % ADVISORY)).read_text(encoding="utf-8"))
+CITE = [{"page": c["page"], "quote": c["quote"]} for c in
+        next(t for t in _GOLD["typologies"] if t.get("typology_id") == "SAN006")["citations"][:1]]
 
-ADVISORY = "ADV-2026-0017"
+from mcp_server import knowledge_centre_server as kc  # noqa: E402
 
 
 def _call(tool, model, **kw):
@@ -123,19 +136,19 @@ def checks() -> list:
     # The refusal, both ways round.
     bad = _call(kc.propose_link, kc.ProposeLinkInput, advisory_id=ADVISORY, typology_id="SAN006",
                 rationale="The alert describes sanctioned goods moving through third countries.",
-                confidence="medium")
+                confidence="medium", citations=CITE)
     out.append((bad.startswith("Rejected"), "propose_link REFUSES a twinned link with no twin named",
                 bad[:104]))
 
     good = _call(kc.propose_link, kc.ProposeLinkInput, advisory_id=ADVISORY, typology_id="SAN006",
                  rationale="Chosen over its twin TBML010 because the alert is framed as sanctions "
                            "and export-control evasion, so the sanctions family applies.",
-                 confidence="medium")
+                 confidence="medium", citations=CITE)
     out.append((good.startswith("Accepted"), "propose_link ACCEPTS it once the twin is named",
                 good[:104]))
 
     untwinned = _call(kc.propose_link, kc.ProposeLinkInput, advisory_id=ADVISORY, typology_id="SAN004",
-                      rationale="Front companies named on page 3.", confidence="low")
+                      rationale="Front companies named on page 3.", confidence="low", citations=CITE)
     out.append((untwinned.startswith("Accepted"), "an UNTWINNED code is unaffected",
                 "SAN004 has no twin and must not be caught by the refusal"))
 
@@ -151,7 +164,7 @@ def checks() -> list:
 
     ok = _call(kc.propose_link, kc.ProposeLinkInput, advisory_id=ADVISORY, typology_id="BA008",
                rationale="Chain of transfers through intermediaries severing the audit trail, p.4.",
-               confidence="medium")
+               confidence="medium", citations=CITE)
     out.append((ok.startswith("Accepted"),
                 "propose_link ACCEPTS BA008 with no twin named",
                 "the most-used typology in the golden set must not carry a spurious requirement"))
@@ -163,6 +176,11 @@ def main(argv: list) -> int:
     ap.add_argument("--mutate", action="store_true",
                     help="empty TYPOLOGY_TWINS; the declaration and refusal MUST stop")
     args = ap.parse_args(argv)
+
+    if not PDF.exists():
+        print("CANNOT RUN: %s is not on this machine (data/advisories/ is gitignored).\n"
+              "Nothing was checked; this is not a pass." % PDF.relative_to(ROOT))
+        return 2
 
     if args.mutate:
         kc.TYPOLOGY_TWINS = {}
