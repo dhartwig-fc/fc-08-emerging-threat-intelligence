@@ -37,7 +37,7 @@ evals/example_record.json          golden record proving the schema
 evals/validate_record.py           validator for any record
 evals/check_citations.py           proves every citation quote exists on the PDF page it names
 evals/score.py                     scores predicted records against the golden set (P/R/F1 per field)
-evals/check_tool_surface.py        proves the agent cannot reach Bash/Write/Read; run with --live --mutate
+evals/check_tool_surface.py        proves the agent cannot reach Bash/Write/Read, and (live write probe) that a write tool off the allowlist is denied and never runs; --live --mutate, --live --mutate-allowlist
 evals/search_aliases_probe.py       guards SEARCH_ALIASES: direction pair fixed, emergent guard intact; --mutate
 evals/check_twin_pairs.py           guards the cross-family twin relation and the propose_link refusal; --mutate
 evals/check_added_by.py             pins schema 1.4.0's added_by / review_justification pair; --mutate
@@ -414,7 +414,11 @@ claude mcp add knowledge-centre -- "$PWD/.venv/bin/python" "$PWD/mcp_server/know
   built to leave exactly one terminal event per tool call; a governed refusal reads REFUSED. Whether a
   given run DID is recorded per run, not assumed: `RUN_COMPLETED.terminal_check` carries
   `telemetry.reconcile()` over every ToolUseBlock id the runner saw -- `unterminated` and `duplicated`
-  lists, recorded on success and failure alike, never raised. NEXT: sub-project
+  lists, recorded on success and failure alike, never raised. Of the three items deferred to B above,
+  B closed one: reviewer runs' telemetry now carries `run_id` (B3, `09c0dee`: `review()` records its
+  own telemetry file and reports `run_id` and `queue_path`). The other two are **deferred to
+  sub-project C / week 6**: the server binding its queue path to `data/proposals/<run_id>.jsonl`,
+  and nothing running `review.py --check` automatically. NEXT: sub-project
   C (desk digests; `network` routes to FIU liaison), then week 6.
 - [ ] Week 6: publish slice 1 on `future-capabilities.html`, tag `fc08-threatintel-slice1-v1.0.0`
 

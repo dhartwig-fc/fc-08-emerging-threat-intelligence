@@ -173,7 +173,9 @@ def agent_options(model: str, max_budget_usd: float, max_turns: int, run: RunIde
 
     Week 5 adds the other half. `allowed_tools` pre-approves only the three
     read-only Knowledge Centre tools; `can_use_tool` (agents/permissions.py)
-    decides every other tool against WRITE_ALLOWLIST; and the Post hooks
+    decides every other MCP tool against WRITE_ALLOWLIST -- the CLI's own
+    StructuredOutput tool is auto-allowed and never reaches it (measured in the
+    ADV-2026-0013 run); and the Post hooks
     (agents/telemetry.py) record one terminal event per call. Pre-approving a
     tool shadows the callback entirely -- which is why propose_link is NOT in
     allowed_tools.
@@ -293,7 +295,7 @@ def main() -> int:
     # So: one line on stderr saying what happened, and a non-zero exit any caller
     # can test. Week 4's batch runner and any CI step get this for free.
     try:
-        record, telemetry = asyncio.run(
+        record, summary = asyncio.run(
             extract(args.pdf, args.advisory_id, args.model, args.max_budget_usd, args.max_turns))
     except (RuntimeError, ClaudeSDKError) as exc:
         # ClaudeSDKError too: the SDK raises ResultError from inside its own
@@ -323,7 +325,7 @@ def main() -> int:
         len(record.indicators),
         ", ".join(d.value for d in record.suggested_desks),
     ))
-    print("Telemetry: %s" % json.dumps(telemetry, sort_keys=True))
+    print("Telemetry: %s" % json.dumps(summary, sort_keys=True))
     return 0
 
 

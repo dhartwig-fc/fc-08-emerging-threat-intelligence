@@ -180,6 +180,27 @@ def static_checks() -> list:
                 and o.permission_mode in (None, "default"),
                 "a can_use_tool callback decides, and nothing bypasses it",
                 "permission_mode=%r" % (o.permission_mode,)))
+
+    # `can_use_tool is not None` is satisfied by a callback that allows
+    # everything. Ask the INSTALLED callback, offline: it must deny a write tool
+    # off the allowlist and allow propose_link. Its events go to the temp
+    # TELEMETRY_DIR redirected at import, never data/telemetry/.
+    from claude_agent_sdk import PermissionResultDeny
+    from claude_agent_sdk.types import ToolPermissionContext
+    ctx = ToolPermissionContext(tool_use_id="static")
+    denied = asyncio.run(o.can_use_tool("mcp__x__knowledge_centre_write_typology", {}, ctx))
+    allowed = asyncio.run(o.can_use_tool(PROPOSE_TOOL, {}, ctx))
+    out.append((isinstance(denied, PermissionResultDeny) and isinstance(allowed, PermissionResultAllow),
+                "the installed callback DENIES a write tool off the allowlist and ALLOWS propose_link",
+                "write -> %s, propose_link -> %s" % (type(denied).__name__, type(allowed).__name__)))
+
+    # And the argv: the CLI must be told to pre-approve exactly the three reads,
+    # and must not be handed a mode that skips the callback.
+    allowed_arg = cmd[cmd.index("--allowedTools") + 1] if "--allowedTools" in cmd else ""
+    out.append((sorted(allowed_arg.split(",")) == sorted(READ_ONLY_TOOLS)
+                and "--permission-mode" not in cmd and "--dangerously-skip-permissions" not in cmd,
+                "argv pre-approves exactly the three read-only tools, with no permission mode or skip flag",
+                "--allowedTools %s" % allowed_arg))
     out.append((sorted(o.hooks or {}) == ["PostToolUse", "PostToolUseFailure"],
                 "the Post hooks are installed for telemetry", str(sorted(o.hooks or {}))))
 

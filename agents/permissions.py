@@ -9,13 +9,21 @@ CanUseToolShadowedWarning). As first specified, this item would have passed whil
 checking nothing.
 
 So allowed_tools pre-approves ONLY the three read-only tools, and every other
-tool -- propose_link, and anything a future server exposes -- reaches this
-callback. It allows a tool on WRITE_ALLOWLIST, and only when the run's identity
-is complete; it denies everything else, including a read-only tool that somehow
-reached it (reads are pre-approved, never decided here).
+MCP tool -- propose_link, and anything a future server exposes -- reaches this
+callback. The CLI's own StructuredOutput tool does not: it is auto-allowed and
+never consulted here (measured in the ADV-2026-0013 run). The callback allows a
+tool on WRITE_ALLOWLIST, and only when the run's identity is complete; it denies
+everything else, including a read-only tool that somehow reached it (reads are
+pre-approved, never decided here).
 
 A DENIED call fires no Post hook (probed 2026-09-24), so the callback records
 that call's terminal telemetry event itself. Every decision it makes is an event.
+
+ALLOWED IS NOT ACCEPTED. The callback allows propose_link by NAME; the server
+still decides the proposal. A server refusal ("Rejected: ...") reaches telemetry
+as REFUSED. A schema-level refusal does not: propose_link's input model rejects
+out-of-bounds arguments (pydantic bounds, e.g. missing citations) before the
+tool body runs, the call raises, and PostToolUseFailure records it as FAILURE.
 """
 
 from __future__ import annotations
