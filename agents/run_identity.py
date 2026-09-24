@@ -19,8 +19,9 @@ ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
 from schemas.citation_match import file_sha256  # noqa: E402
+# The gate quarantines a stage not in this tuple, so the runner reads the same one.
+from schemas.proposal_contract import STAGES  # noqa: E402
 
-STAGES = ("extractor", "reviewer")
 QUEUE_DIR = ROOT / "data" / "proposals"
 
 

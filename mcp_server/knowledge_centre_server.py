@@ -16,7 +16,6 @@ Register in Claude Code:
 
 from __future__ import annotations
 
-import hashlib
 import json
 import math
 import os
@@ -40,6 +39,8 @@ TYPOLOGY_PATH = Path(os.environ.get("NEXUS_TYPOLOGY_PATH", ROOT / "data" / "typo
 # The server is launched as a script, so the repo root is not on sys.path.
 sys.path.insert(0, str(ROOT))
 from schemas.citation_match import PageIndex, file_sha256  # noqa: E402
+# The contract the review gate re-asserts: one definition for both sides.
+from schemas.proposal_contract import QUOTE_MAX, QUOTE_MIN, SCHEMA, proposal_id  # noqa: E402
 
 # Set by the RUNNER (agents/run_identity.py), never by the agent. Read at call
 # time, not import time, so a guard can vary them between calls.
@@ -97,7 +98,7 @@ class ProposedCitation(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     page: int = Field(..., ge=1, description="PDF page index: the n in the '=== PAGE n ===' marker")
-    quote: str = Field(..., min_length=10, max_length=600, description="Verbatim text from that page")
+    quote: str = Field(..., min_length=QUOTE_MIN, max_length=QUOTE_MAX, description="Verbatim text from that page")
 
 
 class ProposeLinkInput(BaseModel):
@@ -536,7 +537,7 @@ async def propose_link(params: ProposeLinkInput) -> str:
         return refusal
 
     body = {
-        "schema": "proposal/2",
+        "schema": SCHEMA,
         "run_id": run["NEXUS_RUN_ID"],
         "stage": run["NEXUS_STAGE"],
         "advisory_id": params.advisory_id,
@@ -547,8 +548,7 @@ async def propose_link(params: ProposeLinkInput) -> str:
         "confidence": params.confidence,
         "citations": [{"page": c.page, "quote": c.quote} for c in params.citations],
     }
-    canonical = json.dumps(body, sort_keys=True, ensure_ascii=False).encode("utf-8")
-    record = {"proposal_id": hashlib.sha256(canonical).hexdigest()[:16],
+    record = {"proposal_id": proposal_id(body),
               "proposed_at": datetime.now(timezone.utc).isoformat(), **body}
     path = _proposals_path(run)
     path.parent.mkdir(parents=True, exist_ok=True)

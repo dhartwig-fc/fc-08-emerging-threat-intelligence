@@ -6,6 +6,7 @@ Usage:
     python evals/check_review_gate.py --mutate quarantine   # re-check disabled; tampered proposal MUST surface
     python evals/check_review_gate.py --mutate overturn     # decided links reopen; overturn MUST go through
     python evals/check_review_gate.py --mutate evidence     # new quotes ignored; new evidence MUST stay hidden
+    python evals/check_review_gate.py --mutate contract     # contract re-checks off; tampered lines MUST pass
 
 Builds a throwaway queue from REAL quotes in the ADV-2026-0002 golden label, plus
 one tampered proposal and one legacy line, and drives governance/ against it.
@@ -29,6 +30,8 @@ sys.path.insert(0, str(ROOT))
 
 from governance import proposals as gp  # noqa: E402
 from governance import decisions as gd  # noqa: E402
+from schemas.citation_match import MISSING, PageIndex  # noqa: E402
+from schemas.proposal_contract import QUOTE_MAX, proposal_id  # noqa: E402
 
 ADVISORY = "ADV-2026-0002"
 _LIST = {a["advisory_id"]: a for a in json.loads(gp.ADVISORY_LIST.read_text(encoding="utf-8"))["advisories"]}
@@ -45,12 +48,14 @@ def _gold_citations() -> list:
             for c in t["citations"]]
 
 
-def _line(run_id: str, pid: str, typology_id, emergent_label, page: int, quote: str) -> dict:
-    return {"schema": "proposal/2", "proposal_id": pid, "proposed_at": "2026-09-24T12:00:00+00:00",
-            "run_id": run_id, "stage": "extractor", "advisory_id": ADVISORY, "document_sha256": SHA,
-            "typology_id": typology_id, "emergent_label": emergent_label,
-            "rationale": "Guard fixture rationale for %s." % (typology_id or emergent_label),
-            "confidence": "medium", "citations": [{"page": page, "quote": quote}]}
+def _line(run_id: str, typology_id, emergent_label, page: int, quote: str) -> dict:
+    """A queue line as the server writes it: its proposal_id recomputes, since the gate re-asserts that."""
+    d = {"schema": "proposal/2", "proposed_at": "2026-09-24T12:00:00+00:00",
+         "run_id": run_id, "stage": "extractor", "advisory_id": ADVISORY, "document_sha256": SHA,
+         "typology_id": typology_id, "emergent_label": emergent_label,
+         "rationale": "Guard fixture rationale for %s." % (typology_id or emergent_label),
+         "confidence": "medium", "citations": [{"page": page, "quote": quote}]}
+    return {"proposal_id": proposal_id(d), **d}
 
 
 def build_fixture() -> dict:
@@ -61,18 +66,19 @@ def build_fixture() -> dict:
     t_tid = next(t for t, _, _ in cites if t != a_tid)
     QUEUE_DIR.mkdir(parents=True, exist_ok=True)
     rows_1 = [
-        _line("run-one", "p-a1", a_tid, None, a_page, a_quote),
-        _line("run-one", "p-e1", None, "Guard  Witness emergent technique", a_page, a_quote),
-        _line("run-one", "p-t1", t_tid, None, a_page, a_quote + " FABRICATED BY THE GUARD"),
+        _line("run-one", a_tid, None, a_page, a_quote),
+        _line("run-one", None, "Guard  Witness emergent technique", a_page, a_quote),
+        _line("run-one", t_tid, None, a_page, a_quote + " FABRICATED BY THE GUARD"),
         {"advisory_id": ADVISORY, "typology_id": a_tid, "status": "pending_review"},  # legacy shape
     ]
-    rows_2 = [_line("run-two", "p-a2", a_tid, None, a_page, a_quote)]  # same link, same quote, second run
+    rows_2 = [_line("run-two", a_tid, None, a_page, a_quote)]  # same link, same quote, second run
     (QUEUE_DIR / "run-one.jsonl").write_text("".join(json.dumps(r) + "\n" for r in rows_1), encoding="utf-8")
     (QUEUE_DIR / "run-two.jsonl").write_text("".join(json.dumps(r) + "\n" for r in rows_2), encoding="utf-8")
     new_quote = next((p, q) for t, p, q in cites if (p, q) != (a_page, a_quote))
     return {"a_key": gp.link_key(ADVISORY, a_tid, None), "t_key": gp.link_key(ADVISORY, t_tid, None),
             "e_key": gp.link_key(ADVISORY, None, "guard witness emergent technique"),
-            "a_tid": a_tid, "new_quote": new_quote}
+            "a_tid": a_tid, "new_quote": new_quote, "t_id": rows_1[2]["proposal_id"],
+            "e_id": rows_1[1]["proposal_id"], "cite": (a_page, a_quote), "cites": cites}
 
 
 def queue_checks(w: dict) -> list:
@@ -82,7 +88,7 @@ def queue_checks(w: dict) -> list:
                 "load_queue reads proposal/2 lines and REPORTS the legacy line it skips",
                 "%d proposals, skipped: %s" % (len(proposals), skipped)))
     clean, quarantined = gp.recheck(proposals)
-    out.append(([q.proposal.proposal_id for q in quarantined] == ["p-t1"],
+    out.append(([q.proposal.proposal_id for q in quarantined] == [w["t_id"]],
                 "re-check QUARANTINES exactly the tampered proposal",
                 "; ".join("%s: %s" % (q.proposal.proposal_id, q.reason) for q in quarantined) or "none"))
     out.append((any("page" in q.reason for q in quarantined),
@@ -103,6 +109,68 @@ def queue_checks(w: dict) -> list:
     out.append((list(q_links) == [w["t_key"]],
                 "a link with NO clean proposal is reported as quarantined, not presented",
                 str(q_links)))
+    return out
+
+
+def contract_checks(w: dict) -> list:
+    """Each tampered copy of a clean line, in its OWN queue dir, must quarantine with its own reason.
+
+    The final week-5 review measured six hand-tampered copies of a real line
+    passing the re-check clean: the gate verified quotes and nothing else. One
+    dir per witness so a witness can never lean on another's quarantine, and the
+    shared fixture's counts above are untouched.
+    """
+    out = []
+    page, quote = w["cite"]
+    base = _line("run-c", w["a_tid"], None, page, quote)
+
+    def sealed(**changes) -> dict:
+        """The clean line with `changes`, and a proposal_id that recomputes -- so only the change is wrong."""
+        d = {k: v for k, v in base.items() if k != "proposal_id"}
+        d.update(changes)
+        return {"proposal_id": proposal_id(d), **d}
+
+    def cite(q: str, pg: int = page) -> list:
+        return [{"page": pg, "quote": q}]
+
+    index = PageIndex.from_pdf(PDF)
+    off_page = next((pg, q) for _, pg, q in w["cites"]
+                    if not index.locate(pg + 1, q).ok and index.locate(pg + 1, q).found_on)
+    witnesses = [
+        ("clean", sealed(), None),
+        ("empty quote", sealed(citations=cite("")), "characters after strip"),
+        ("quote 'the'", sealed(citations=cite("the")), "characters after strip"),
+        ("quote padded to length", sealed(citations=cite("   the    ")), "characters after strip"),
+        ("quote over QUOTE_MAX", sealed(citations=cite("x" * (QUOTE_MAX + 1))), "characters after strip"),
+        ("neither typology nor emergent", sealed(typology_id=None, emergent_label=None), "names neither"),
+        ("empty strings are absent", sealed(typology_id="", emergent_label=""), "names neither"),
+        ("both typology and emergent", sealed(emergent_label="Guard witness label"), "names both"),
+        ("stage not in STAGES", sealed(stage="whoever"), "is not one of"),
+        ("run_id is not the file stem", sealed(run_id="run-elsewhere"), "does not match its queue file"),
+        ("rationale edited, old id kept", {**base, "rationale": base["rationale"] + " Edited by hand."},
+         "does not recompute"),
+        ("quote on another page", sealed(citations=cite(off_page[1], off_page[0] + 1)),
+         "quote not on page %d (it appears on page" % (off_page[0] + 1)),
+        ("quote not in the document", sealed(citations=cite(quote + " FABRICATED BY THE GUARD")),
+         "quote not in the document"),
+    ]
+    for n, (name, line, expect) in enumerate(witnesses):
+        qdir = WORK / "contract" / ("w%02d" % n)
+        qdir.mkdir(parents=True)
+        (qdir / "run-c.jsonl").write_text(json.dumps(line) + "\n", encoding="utf-8")
+        proposals, skipped = gp.load_queue(qdir)
+        clean, quarantined = gp.recheck(proposals)
+        reason = quarantined[0].reason if quarantined else ""
+        if expect is None:
+            ok = len(proposals) == 1 and len(clean) == 1 and not quarantined and not skipped
+            label = "an untampered line in the same style passes clean (the witnesses below are not vacuous)"
+        else:
+            ok = len(proposals) == 1 and not clean and len(quarantined) == 1 and expect in reason
+            label = "%s: QUARANTINED with its own reason" % name
+        out.append((ok, label, reason[:110] or "clean %d, skipped %s" % (len(clean), skipped)))
+    hit = PageIndex(["some page text"]).locate(1, "   ")
+    out.append((hit.status == MISSING, "PageIndex.locate: an empty quote is MISSING, not an exact match",
+                hit.status))
     return out
 
 
@@ -162,7 +230,7 @@ def decision_checks(w: dict) -> list:
     # New evidence: a third run proposes the approved link with a quote not seen before.
     page, quote = w["new_quote"]
     third = QUEUE_DIR / "run-three.jsonl"
-    third.write_text(json.dumps(_line("run-three", "p-a3", w["a_tid"], None, page, quote)) + "\n",
+    third.write_text(json.dumps(_line("run-three", w["a_tid"], None, page, quote)) + "\n",
                      encoding="utf-8")
     clean3, quarantined3 = gp.recheck(gp.load_queue(QUEUE_DIR)[0])
     links3 = gp.group(clean3)
@@ -212,14 +280,12 @@ def cli_checks(w: dict) -> list:
     # has a clean proposal must still be listed with its reason -- it currently
     # appears nowhere, because quarantined_links() only reports links with NO
     # clean proposal at all.
-    proposals0, _ = gp.load_queue(QUEUE_DIR)
-    a1 = next(p for p in proposals0 if p.proposal_id == "p-a1")
-    page, quote = a1.citations[0]
+    page, quote = w["cite"]
     mixed = QUEUE_DIR / "run-mixed.jsonl"
-    mixed.write_text(json.dumps(_line("run-mixed", "p-a9", w["a_tid"], None, page, quote + " TAMPERED")) + "\n",
-                     encoding="utf-8")
+    a9 = _line("run-mixed", w["a_tid"], None, page, quote + " TAMPERED")
+    mixed.write_text(json.dumps(a9) + "\n", encoding="utf-8")
     r = run("--list")
-    out.append((r.returncode == 0 and "p-a9" in r.stdout and "quote not on page" in r.stdout,
+    out.append((r.returncode == 0 and a9["proposal_id"] in r.stdout and "quote not in the document" in r.stdout,
                 "--list names a quarantined proposal even when its link has a clean one", r.stdout[-200:]))
     mixed.unlink()
 
@@ -267,12 +333,12 @@ def cli_checks(w: dict) -> list:
 
 def all_checks() -> list:
     w = build_fixture()
-    return queue_checks(w) + decision_checks(w) + cli_checks(w)
+    return queue_checks(w) + contract_checks(w) + decision_checks(w) + cli_checks(w)
 
 
 def main(argv: list) -> int:
     ap = argparse.ArgumentParser(description="Pin the review gate")
-    ap.add_argument("--mutate", choices=("quarantine", "overturn", "evidence"),
+    ap.add_argument("--mutate", choices=("quarantine", "overturn", "evidence", "contract"),
                     help="remove one gate rule; the checks that depend on it MUST fail")
     args = ap.parse_args(argv)
 
@@ -290,6 +356,9 @@ def main(argv: list) -> int:
     elif args.mutate == "evidence":
         gp.Link.quote_hashes = lambda self: frozenset()
         print("MUTATED: a link's quotes are ignored when deciding whether it has new evidence.\n")
+    elif args.mutate == "contract":
+        gp._contract_problem = lambda proposal: None
+        print("MUTATED: the review-time contract re-checks are removed; only the quote check is left.\n")
 
     failures = 0
     for ok, label, detail in all_checks():

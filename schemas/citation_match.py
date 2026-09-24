@@ -14,6 +14,10 @@ The match is deliberately NOT fuzzy on meaning. Two tiers only:
            born-digital FATF PDFs ("collus ion", "t o believe"). An honest quote
            whose only difference is the extractor's spacing is not a fabrication.
 Anything else is off_page (right words, wrong page) or missing.
+
+An EMPTY quote is missing. The empty string is a substring of every page, so
+until the final week-5 review a quote of "" located as an exact match -- a
+citation that cites nothing, verified.
 """
 
 from __future__ import annotations
@@ -70,6 +74,8 @@ class PageIndex:
     def locate(self, page: int, quote: str) -> Located:
         q = norm(quote)
         tq = q.replace(" ", "")
+        if not tq:
+            return Located(MISSING)
         i = page - 1
         in_range = 0 <= i < len(self.pages)
         if in_range and q in self.pages[i]:

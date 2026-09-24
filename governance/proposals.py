@@ -7,6 +7,13 @@ verifies them AGAIN, because the queue is a plain file and anything could have
 changed it since -- a proposal that fails is quarantined: shown with its reason,
 never approvable.
 
+The re-check re-asserts the WHOLE proposal contract (schemas/proposal_contract.py),
+not only the quotes: the id still recomputes, exactly one of typology and
+emergent label, a known stage, the run_id is its queue file's name, and every
+quote is within bounds. The final week-5 review measured six hand-tampered lines
+passing a quotes-only re-check clean, one of them an approvable link to
+"EMERGENT[]".
+
 A LINK is what a human decides: one advisory + one typology (or one emergent
 label), collecting every proposal behind it from every run. One decision per
 link, not per proposal -- measured 2026-09-24, one legacy link was proposed 11
@@ -26,13 +33,13 @@ ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
 from schemas.citation_match import PageIndex, file_sha256, norm  # noqa: E402
+from schemas.proposal_contract import QUOTE_MAX, QUOTE_MIN, SCHEMA, STAGES, proposal_id  # noqa: E402
 
 QUEUE_DIR = ROOT / "data" / "proposals"
 LEGACY_QUEUE = ROOT / "data" / "proposals_legacy_2026-09-10_to_13.jsonl"
 ADVISORY_LIST = ROOT / "evals" / "golden" / "advisory_list.json"
 ADVISORIES_DIR = ROOT / "data" / "advisories"
 LIBRARY = ROOT / "data" / "typologies.json"
-SCHEMA = "proposal/2"
 
 
 def quote_hash(page: int, quote: str) -> str:
@@ -58,14 +65,27 @@ class Proposal:
     rationale: str
     confidence: str
     citations: Tuple[Tuple[int, str], ...]
+    # The queue file the line was read from. Not part of the proposal: never in
+    # body(), so never in the id. The re-check holds it against run_id.
+    source_file: str = ""
 
     @classmethod
-    def from_line(cls, d: dict) -> "Proposal":
+    def from_line(cls, d: dict, source_file: str = "") -> "Proposal":
         return cls(proposal_id=d["proposal_id"], proposed_at=d["proposed_at"], run_id=d["run_id"],
                    stage=d["stage"], advisory_id=d["advisory_id"], document_sha256=d["document_sha256"],
                    typology_id=d.get("typology_id"), emergent_label=d.get("emergent_label"),
                    rationale=d["rationale"], confidence=d["confidence"],
-                   citations=tuple((int(c["page"]), c["quote"]) for c in d["citations"]))
+                   citations=tuple((int(c["page"]), c["quote"]) for c in d["citations"]),
+                   source_file=source_file)
+
+    def body(self) -> dict:
+        """What the server hashed: the line minus proposal_id and proposed_at, rebuilt from the fields
+        the gate actually uses -- so the id covers everything a reviewer is shown."""
+        return {"schema": SCHEMA, "run_id": self.run_id, "stage": self.stage, "advisory_id": self.advisory_id,
+                "document_sha256": self.document_sha256, "typology_id": self.typology_id,
+                "emergent_label": self.emergent_label, "rationale": self.rationale,
+                "confidence": self.confidence,
+                "citations": [{"page": pg, "quote": q} for pg, q in self.citations]}
 
     @property
     def kind(self) -> str:
@@ -139,7 +159,7 @@ def load_queue(queue_dir: Path = QUEUE_DIR) -> Tuple[List[Proposal], List[str]]:
                 skipped.append("%s:%d has schema %r, not %s" % (path.name, n, d.get("schema"), SCHEMA))
                 continue
             try:
-                proposals.append(Proposal.from_line(d))
+                proposals.append(Proposal.from_line(d, source_file=path.name))
             except (KeyError, TypeError, ValueError) as exc:
                 skipped.append("%s:%d is malformed (%s)" % (path.name, n, exc))
     return proposals, skipped
@@ -151,6 +171,29 @@ def _advisories(path: Path) -> Dict[str, dict]:
 
 def _library_ids(path: Path) -> frozenset:
     return frozenset(t["typology_id"] for t in json.loads(path.read_text(encoding="utf-8"))["typologies"])
+
+
+def _contract_problem(p: Proposal) -> Optional[str]:
+    """Why p breaks the proposal contract, or None. Factored out so the guard can remove it
+    (evals/check_review_gate.py --mutate contract) and watch its checks fail."""
+    recomputed = proposal_id(p.body())
+    if recomputed != p.proposal_id:
+        return ("proposal_id %s does not recompute (the line hashes to %s): it was changed after the "
+                "server wrote it" % (p.proposal_id, recomputed))
+    has_typology, has_label = bool((p.typology_id or "").strip()), bool((p.emergent_label or "").strip())
+    if has_typology == has_label:
+        return ("names %s of typology_id and emergent_label; a proposal names exactly one"
+                % ("both" if has_typology else "neither"))
+    if p.stage not in STAGES:
+        return "stage %r is not one of %s" % (p.stage, ", ".join(STAGES))
+    if Path(p.source_file).stem != p.run_id:
+        return "run_id %s does not match its queue file %s" % (p.run_id, p.source_file or "(none)")
+    for page, q in p.citations:
+        n = len(q.strip())
+        if not QUOTE_MIN <= n <= QUOTE_MAX:
+            return ("quote on page %d is %d characters after strip; the contract allows %d to %d"
+                    % (page, n, QUOTE_MIN, QUOTE_MAX))
+    return None
 
 
 def recheck(proposals, advisory_list: Path = ADVISORY_LIST, advisories_dir: Path = ADVISORIES_DIR,
@@ -170,27 +213,35 @@ def recheck(proposals, advisory_list: Path = ADVISORY_LIST, advisories_dir: Path
             indexes[aid] = PageIndex.from_pdf(pdf) if ok else None
         return indexes[aid]
 
-    for p in proposals:
+    def evidence_problem(p: Proposal) -> Optional[str]:
+        """Why p's advisory, typology or quotes do not stand up against the documents, or None."""
         a = advisories.get(p.advisory_id)
-        reason = None
         if a is None:
-            reason = "advisory %s is not in the advisory list" % p.advisory_id
-        elif p.document_sha256 != a["sha256"]:
-            reason = ("document hash %s... is not the advisory list's %s..."
-                      % (p.document_sha256[:12], a["sha256"][:12]))
-        elif p.typology_id and p.typology_id not in known:
-            reason = "%s is not in the library" % p.typology_id
-        elif not p.citations:
-            reason = "no citations"
-        else:
-            index = index_for(a)
-            if index is None:
-                reason = ("the source PDF for %s is missing or does not match its hash on this machine; "
-                          "its quotes cannot be re-checked" % p.advisory_id)
-            else:
-                bad = [(pg, q) for pg, q in p.citations if not index.locate(pg, q).ok]
-                if bad:
-                    reason = "quote not on page %d: %r" % (bad[0][0], bad[0][1][:70])
+            return "advisory %s is not in the advisory list" % p.advisory_id
+        if p.document_sha256 != a["sha256"]:
+            return ("document hash %s... is not the advisory list's %s..."
+                    % (p.document_sha256[:12], a["sha256"][:12]))
+        if p.typology_id and p.typology_id not in known:
+            return "%s is not in the library" % p.typology_id
+        if not p.citations:
+            return "no citations"
+        index = index_for(a)
+        if index is None:
+            return ("the source PDF for %s is missing or does not match its hash on this machine; "
+                    "its quotes cannot be re-checked" % p.advisory_id)
+        for pg, q in p.citations:
+            hit = index.locate(pg, q)
+            if hit.ok:
+                continue
+            if hit.found_on:
+                return "quote not on page %d (it appears on page %s): %r" % (
+                    pg, ", ".join(str(n) for n in hit.found_on), q[:70])
+            return "quote not in the document (cited page %d): %r" % (pg, q[:70])
+        return None
+
+    for p in proposals:
+        # The contract first: a line that is not what the server wrote is not evidence of anything.
+        reason = _contract_problem(p) or evidence_problem(p)
         if reason:
             quarantined.append(Quarantined(p, reason))
         else:
