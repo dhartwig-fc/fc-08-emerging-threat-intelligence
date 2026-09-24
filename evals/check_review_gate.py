@@ -19,6 +19,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import subprocess
 import sys
 import tempfile
 from pathlib import Path
@@ -191,9 +192,82 @@ def decision_checks(w: dict) -> list:
     return out
 
 
+def cli_checks(w: dict) -> list:
+    out = []
+    cli = WORK / "cli"
+    cli.mkdir(exist_ok=True)
+    paths = ["--queue-dir", str(QUEUE_DIR), "--log", str(cli / "log.jsonl"),
+             "--approved-links", str(cli / "links.json"), "--approved-emergent", str(cli / "emergent.json")]
+
+    def run(*args, stdin: str = "") -> subprocess.CompletedProcess:
+        return subprocess.run([sys.executable, str(ROOT / "tools" / "review.py"), *args, *paths],
+                              input=stdin, capture_output=True, text=True, cwd=ROOT)
+
+    r = run("--list")
+    out.append((r.returncode == 0 and w["a_key"] in r.stdout and "quarantined links: 1" in r.stdout
+                and "skipped lines: 1" in r.stdout,
+                "--list shows open links, the quarantined link and the skipped line", r.stdout[-200:]))
+
+    # Controller ruling (Task 5 review): a quarantined proposal whose link ALSO
+    # has a clean proposal must still be listed with its reason -- it currently
+    # appears nowhere, because quarantined_links() only reports links with NO
+    # clean proposal at all.
+    proposals0, _ = gp.load_queue(QUEUE_DIR)
+    a1 = next(p for p in proposals0 if p.proposal_id == "p-a1")
+    page, quote = a1.citations[0]
+    mixed = QUEUE_DIR / "run-mixed.jsonl"
+    mixed.write_text(json.dumps(_line("run-mixed", "p-a9", w["a_tid"], None, page, quote + " TAMPERED")) + "\n",
+                     encoding="utf-8")
+    r = run("--list")
+    out.append((r.returncode == 0 and "p-a9" in r.stdout and "quote not on page" in r.stdout,
+                "--list names a quarantined proposal even when its link has a clean one", r.stdout[-200:]))
+    mixed.unlink()
+
+    decisions = cli / "decisions.txt"
+    decisions.write_text("FC08 review decisions\n%s %s: approve -- from a pasted list\n"
+                         % (ADVISORY, w["a_tid"]), encoding="utf-8")
+    r = run("--decisions", str(decisions))
+    links = json.loads((cli / "links.json").read_text(encoding="utf-8"))["approved"] \
+        if (cli / "links.json").exists() else []
+    out.append((r.returncode == 0 and [x["link_key"] for x in links] == [w["a_key"]],
+                "--decisions applies a pasted list and rebuilds the approvals", (r.stdout + r.stderr)[-160:]))
+
+    r = run("--decisions", str(decisions))
+    out.append((r.returncode != 0 and "change of mind" in (r.stdout + r.stderr),
+                "the same list again is REFUSED, exit non-zero", (r.stdout + r.stderr)[-120:]))
+
+    r = run("--check")
+    out.append((r.returncode == 0, "--check passes on files the CLI wrote", r.stdout[-100:]))
+    (cli / "links.json").write_text("{}\n", encoding="utf-8")
+    r = run("--check")
+    out.append((r.returncode != 0, "--check FAILS on a hand-edited approvals file", r.stdout[-100:]))
+
+    # Interactive: the only open link left in THIS log is the emergent one (A is
+    # approved above, T is quarantined), so the first card is the emergent link.
+    r = run(stdin="r\nno mechanism on the page\nq\n")
+    log_file = cli / "log.jsonl"
+    log = [json.loads(x) for x in log_file.read_text(encoding="utf-8").splitlines()] if log_file.exists() else []
+    out.append((r.returncode == 0 and bool(log) and log[-1]["link_key"] == w["e_key"]
+                and log[-1]["decision"] == "reject" and log[-1]["note"] == "no mechanism on the page",
+                "interactive mode records a decision with its note through the same writer",
+                (r.stdout + r.stderr)[-160:]))
+
+    writers = []
+    for py in ROOT.rglob("*.py"):
+        rel = py.relative_to(ROOT).as_posix()
+        if rel.startswith((".venv/", "evals/")) or rel == "governance/decisions.py":
+            continue
+        text = py.read_text(encoding="utf-8", errors="replace")
+        if "approved_links.json" in text or "approved_emergent.json" in text:
+            writers.append(rel)
+    out.append((writers == [], "NOTHING outside governance/decisions.py names the approvals files",
+                "found in: %s" % writers if writers else "only the gate"))
+    return out
+
+
 def all_checks() -> list:
     w = build_fixture()
-    return queue_checks(w) + decision_checks(w)
+    return queue_checks(w) + decision_checks(w) + cli_checks(w)
 
 
 def main(argv: list) -> int:
