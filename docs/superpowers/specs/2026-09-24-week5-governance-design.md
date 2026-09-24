@@ -224,6 +224,35 @@ a minimal probe that settles this. If streaming is required, the prompt is sent
 as a one-message stream, and the week 2-4 guards are re-run to show nothing else
 moved.
 
+### Probed 2026-09-24 — settled, and three mechanics amended
+
+Source first, then two live runs on Haiku ($0.006 and $0.005) with an in-process
+MCP server offering a pre-approved read tool, a pre-approved tool that raises,
+and a write tool NOT pre-approved; SDK 0.2.152.
+
+- **No streaming change is needed.** `query()` always runs the control protocol
+  (`_internal/client.py`: "Always use streaming mode internally"); a string
+  prompt is written after initialize and stdin stays open until the result.
+  Measured: with a plain string prompt, `can_use_tool` was consulted for the
+  write tool and NOT for the pre-approved ones; the denied tool's body never ran.
+- **A denied call fires `PreToolUse` and NO `PostToolUse` / `PostToolUseFailure`.**
+  So the Post hooks cannot be the only source of per-call events: the
+  `can_use_tool` callback writes the event for a denied call
+  (`PERMISSION_DENIED`, carrying `context.tool_use_id`, which the SDK guarantees
+  non-empty in the callback). Amends "one event per call" above: every call gets
+  exactly one terminal event — from `PostToolUse`, `PostToolUseFailure`, or the
+  permission denial.
+- **`PostToolUse` and `PostToolUseFailure` already carry `duration_ms`.** The
+  `PreToolUse` start-time hook is dropped; latency is read from the Post input.
+  `PostToolUse.tool_response` is the tool's content blocks, so a governed
+  refusal is read from its text (`Rejected:` prefix) and recorded as `REFUSED`.
+  `PostToolUseFailure` carries `error` and `is_interrupt` — recorded as `FAILURE`.
+- **The SDK warns, by design, when `can_use_tool` is set and `allowed_tools`
+  pre-approves whole tools** (`CanUseToolShadowedWarning`, naming each). The three
+  read-only Knowledge Centre tools are pre-approved on purpose, so the warning is
+  filtered for exactly that category at the call site, with a comment saying why
+  — never globally.
+
 ---
 
 ## Section 4: desk digests
