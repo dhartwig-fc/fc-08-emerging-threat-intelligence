@@ -418,6 +418,21 @@
           "quote": "In various instances, the individuals shared the same residential address; and most of the VA addresses were accessed from the same IP address – indicating the potential use of money mules by professional money launderers to launder the illicit proceeds."
         }
       ]
+    },
+    {
+      "family": "correspondent_banking",
+      "typology_id": "BA006",
+      "label": "Dormant Reactivation",
+      "emergent": false,
+      "confidence": "low",
+      "citations": [
+        {
+          "page": 8,
+          "printed_folio": "6",
+          "paragraph": null,
+          "quote": "o to a newly created or to a previously inactive account."
+        }
+      ]
     }
   ],
   "actors": [

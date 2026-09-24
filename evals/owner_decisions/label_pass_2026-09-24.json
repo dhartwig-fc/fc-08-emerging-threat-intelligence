@@ -96,9 +96,9 @@
       "advisory_id": "ADV-2026-0005",
       "typology_id": "BA006",
       "direction": "add",
-      "decision": null,
-      "note": "no decision recorded in the label-pass database; 14 of 15 were saved",
-      "decided_at": null,
+      "decision": "accept",
+      "note": "given in chat after the page saved 14 of 15",
+      "decided_at": "2026-09-24T09:23:44.000Z",
       "id": "ADV-2026-0005__BA006__add"
     },
     {

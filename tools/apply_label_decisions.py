@@ -33,8 +33,10 @@ the label is owner-reviewed outright.
 
 REFUSES, writing nothing, when any label it would write fails the schema, when
 a decision names a dispute that does not exist in
-data/label_disputes, names one twice, adds an id the label already carries, or
-strikes one it does not. The last two are what a second run of the same
+data/label_disputes, names one twice, overturns one the day's evidence file
+already records as decided, adds an id the label already carries, or strikes one
+it does not. A later run for the same date may settle a dispute left open; the
+evidence file then holds both runs' decisions. The last two are what a second run of the same
 decisions looks like, so applying twice is refused rather than silently doubled.
 """
 
@@ -104,8 +106,31 @@ def _check(decisions: list) -> dict:
     return seen
 
 
+def _merge_prior(by_id: dict, date: str) -> dict:
+    """The day's evidence file so far, with these decisions folded in.
+
+    A later decision may SETTLE a dispute left open (undecided or unsure) and
+    may add one not yet decided. It may not overturn one already decided:
+    that is a change of mind, and it belongs in its own dated record rather
+    than silently replacing the first. Without this, a second run for the same
+    date overwrote the file with only its own decisions -- the evidence of the
+    first run gone.
+    """
+    path = EVIDENCE / ("label_pass_%s.json" % date)
+    prior = {}
+    if path.exists():
+        prior = {d["id"]: {k: v for k, v in d.items() if k != "id"}
+                 for d in json.loads(path.read_text(encoding="utf-8"))["decisions"]}
+    for did in by_id:
+        if did in prior and prior[did]["decision"] not in (None, "unsure"):
+            raise SystemExit("%s was already decided (%s) in %s -- a change of mind needs its own dated record"
+                             % (did, prior[did]["decision"], path.name))
+    return dict(prior, **by_id)
+
+
 def apply(decisions: list, date: str, dry_run: bool) -> int:
     by_id = _check(decisions)
+    merged = _merge_prior(by_id, date)
     golden = {}
     changes = {}  # advisory -> [(verb, typology, direction)]
     for did, d in sorted(by_id.items()):
@@ -149,10 +174,12 @@ def apply(decisions: list, date: str, dry_run: bool) -> int:
         aid = row["advisory_id"]
         if aid not in changes:
             continue
-        c = changes[aid]
-        n_acc = sum(1 for v, _, _ in c if v in ("added", "struck"))
-        n_rej = sum(1 for v, _, _ in c if v == "reject")
-        base = row["label_status"].replace("; awaiting owner review", "")
+        # Counted over the whole day's record, not this run, so settling one
+        # open dispute rewrites the clause rather than appending a second.
+        c = [d for d in merged.values() if d["advisory_id"] == aid]
+        n_acc = sum(1 for d in c if d["decision"] == "accept")
+        n_rej = sum(1 for d in c if d["decision"] == "reject")
+        base = row["label_status"].split("; owner-decided")[0].replace("; awaiting owner review", "")
         row["label_status"] = ("%s; owner-decided %s on %d disputed entr%s (%d changed, %d left as labelled, "
                                "%d open); the rest of the label awaits owner review"
                                % (base, date, len(c), "y" if len(c) == 1 else "ies",
@@ -162,14 +189,14 @@ def apply(decisions: list, date: str, dry_run: bool) -> int:
         "date": date,
         "what": "Owner decisions on the label-pass disputes (data/label_disputes). "
                 "Covers the disputed entries only; unchallenged entries are not confirmed by this file.",
-        "decisions": [dict(by_id[k], id=k) for k in sorted(by_id)],
+        "decisions": [dict(merged[k], id=k) for k in sorted(merged)],
     }
     for aid in sorted(changes):
         print("%s  %s" % (aid, "; ".join("%s %s" % (words[(v, d)], tid) for v, tid, d in changes[aid])))
-    open_ = sorted(k for k, d in by_id.items() if d["decision"] in (None, "unsure"))
-    print("%d decisions: %d applied to labels, %d open%s"
-          % (len(by_id), sum(1 for d in by_id.values() if d["decision"] == "accept"), len(open_),
-             (" (" + ", ".join(open_) + ")") if open_ else ""))
+    open_ = sorted(k for k, d in merged.items() if d["decision"] in (None, "unsure"))
+    print("%d decisions this run, %d applied to labels; %d on record for %s, %d open%s"
+          % (len(by_id), sum(1 for d in by_id.values() if d["decision"] == "accept"),
+             len(merged), date, len(open_), (" (" + ", ".join(open_) + ")") if open_ else ""))
     # Validate before writing, so a label the schema would reject is never
     # written. The first real run appended a provenance sentence to
     # extraction_notes and pushed ADV-2026-0018 past its 4000-character cap;
