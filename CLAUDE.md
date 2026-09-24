@@ -308,6 +308,13 @@ claude mcp add knowledge-centre -- "$PWD/.venv/bin/python" "$PWD/mcp_server/know
 - [x] **Week 4 COMPLETE** (2026-09-13): additive reviewer, acceptance bands, full-set run, emergent
   candidates, schema 1.4.0, the merge step, the --in-place decision, and the single-vs-multi write-up. Sixteen of the twenty are SINGLE runs;
   only the four concentrated documents have bands. **DO NOT plan the rest against better retrieval.** Measured three ways on 2026-09-12: the search fix lifted top-5 recall 41% relative and moved extraction recall by nothing; typologies were retrieved, confirmed with `get_typology`, and then not asserted; and the agent asserts the same handful whether the document holds 5 golden typologies or 20. Build against the three mechanisms below, in that order. And note precision 0.889 is this pipeline's best property -- an assertion budget IS a precision strategy, so a reviewer that justifies each extra assertion beats simply asserting more
+- [~] **OWNER LABEL PASS, opened 2026-09-24.** 15 disputes across 7 advisories, built from evidence by
+  `tools/build_label_disputes.py` into `data/label_disputes/` and seeded into the adjudication page
+  https://claude.ai/artifact/LFCH42byYGnCYexc3UBmVH (collections `disputes`, `decisions`). 11 are ADD
+  (a reviewer addition the label lacks; checked on all 20) and 4 are STRIKE (ADV-2026-0004's triage; checked
+  on ONE advisory) — so the 13 advisories with no dispute are UNCHALLENGED, not confirmed. Decisions are
+  read back with `ArtifactData list decisions` and applied to `evals/golden/`; that apply step is not built.
+
 - [ ] Week 5: hooks, telemetry, `review.py` gate, desk digests
 - [ ] Week 6: publish slice 1 on `future-capabilities.html`, tag `fc08-threatintel-slice1-v1.0.0`
 

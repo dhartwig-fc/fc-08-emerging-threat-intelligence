@@ -1,0 +1,26 @@
+{
+  "advisory_id": "ADV-2026-0002",
+  "advisory_title": "Trade-Based Money Laundering: Risk Indicators",
+  "argument": "Found in Account and transaction activity risk indicators, page 8 (sub-bullets under pay-through/transit account). BA008 doctrine: 'funds already placed into the financial system are pushed through a chain of transfers designed to sever the audit trail... Intermediaries that are shell companies or nominee entities with no independent [purpose]... Cross-border routing through recognised secrecy or offshore jurisdictions... the seed amount split into multiple fragments across the chain.' The advisory describes a single incoming transfer being split and forwarded to multiple unrelated accounts, and cash routed onward to free-trade-zone/offshore parties with no business relationship -- the fragmentation-plus-offshore-routing mechanism BA008 names, which is distinct from the closed-loop pattern (BA004) and the intraday pass-through speed pattern (BA005) already claimed for this advisory.",
+  "argument_source": "additive reviewer, merged under schema 1.4.0",
+  "confidence": "medium",
+  "direction": "add",
+  "doctrine_summary": "Layering is the classic middle stage of money laundering: funds already placed into the financial system are pushed through a chain of transfers designed to sever the audit trail from their source before the proceeds are integrated into legitimate-looking assets. Unlike BA004 Circular Funds Flow (engineered to return to the originator), a layering chain has no obligation to close a loop \u2014 its only job is to put distance, opacity and jurisdictional friction between the seed account and wherever the funds end up.",
+  "evidence": [
+    {
+      "page": 8,
+      "quote": "Incoming wire transfers to a trade-related account are split and forwarded to non-related multiple accounts that have little or no connection to commercial activity."
+    },
+    {
+      "page": 8,
+      "quote": "An account displays frequent deposits in cash which are subsequently transferred to persons or entities in free tra de zones or offshore jurisdictions without a business relationship to the account holder."
+    }
+  ],
+  "family": "correspondent_banking",
+  "id": "ADV-2026-0002__BA008__add",
+  "order": 3,
+  "publisher": "FATF",
+  "question": "Should the ADV-2026-0002 label carry BA008 Layering?",
+  "typology_id": "BA008",
+  "typology_label": "Layering"
+}

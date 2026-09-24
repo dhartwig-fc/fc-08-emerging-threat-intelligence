@@ -1,0 +1,26 @@
+{
+  "advisory_id": "ADV-2026-0004",
+  "advisory_title": "Concealment of Beneficial Ownership",
+  "argument": "UNSUPPORTED. SAN008's doctrine is exposure to *sanctioned, embargoed or high-risk* jurisdictions as a sanctions-relevant finding in its own right \u2014 \"the jurisdiction... IS the finding.\" Both cited sections (\"Low-Tax Jurisdictions,\" para 211-212, and \"Trade and Financial Centres,\" para 206-210) are about tax-haven and secrecy-jurisdiction shopping used to conceal beneficial ownership \u2014 a distinct concealment mechanism, not a sanctions/embargo exposure signal. Neither passage names a sanctioned or embargoed jurisdiction, an entity's sanctions-relevant footprint, or a designated party's jurisdictional exposure; both are generic exposition about why criminals like low-tax financial hubs, illustrated by cases about ownership concealment (Case Study 12's securities fraud, Case Study 3's invoice fraud) that have nothing to do with sanctions. This is vocabulary overlap (\"jurisdiction,\" and the document elsewhere clearly is sanctions-adjacent via Bank Melli/Iran) without mechanism overlap \u2014 the document's actual sanctions-jurisdiction material (Bank Melli/Iran, UNSCR 1803) is cited elsewhere for SAN004, not here. ---",
+  "argument_source": "evals/traces/TRIAGE_ADV-2026-0004_LABEL.md",
+  "confidence": "medium",
+  "direction": "strike",
+  "doctrine_summary": "High-Risk-Jurisdiction exposure measures how much of an entity's footprint \u2014 where it is registered and operates, the corridors it trades, who owns it, who it deals with \u2014 touches sanctioned, embargoed or high-risk jurisdictions. Here the jurisdiction is not an aggravating detail behind another finding; it *is* the finding.",
+  "evidence": [
+    {
+      "page": 81,
+      "quote": "FIUs, law enforcement, and other competent authorities regularly identify criminals using legal persons and bank accounts established in low-tax jurisdictions."
+    },
+    {
+      "page": 79,
+      "quote": "criminals will often establish legal persons and bank accounts in cities that are considered to be major regional and global trade and financial centres."
+    }
+  ],
+  "family": "sanctions",
+  "id": "ADV-2026-0004__SAN008__strike",
+  "order": 7,
+  "publisher": "FATF / Egmont Group",
+  "question": "Should the ADV-2026-0004 label keep SAN008 High Risk Jurisdictions?",
+  "typology_id": "SAN008",
+  "typology_label": "High Risk Jurisdictions"
+}

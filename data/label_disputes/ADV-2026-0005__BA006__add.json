@@ -1,0 +1,22 @@
+{
+  "advisory_id": "ADV-2026-0005",
+  "advisory_title": "Virtual Assets Red Flag Indicators of Money Laundering and Terrorist Financing",
+  "argument": "Found in Red flag bullet under 'Size and frequency of transactions', page 8 (printed p.6). BA006 doctrine: 'an account that has sat idle...suddenly comes back to life with flows that dwarf anything it ever carried while active... the CONTRAST between the account's long silence and the size, shape and speed of what happens the moment it wakes up.' The advisory names a previously-inactive account receiving multiple high-value VA transactions as a red flag, matching this contrast mechanism, but only as a single embedded clause with no developed case or detail on idle duration, so confidence is held to low.",
+  "argument_source": "additive reviewer, merged under schema 1.4.0",
+  "confidence": "low",
+  "direction": "add",
+  "doctrine_summary": "Dormant reactivation is the behavioural-anomaly signal at the far end of the account lifecycle: an account that has sat idle -- sometimes for months, sometimes for years -- suddenly comes back to life with flows that dwarf anything it ever carried while active. The finding is not any single transaction on its own; a large deposit or a new counterparty can each look ordinary in isolation. What makes it a finding is the CONTRAST between the account's long silence and the size, shape and speed of what happens the moment it wakes up.",
+  "evidence": [
+    {
+      "page": 8,
+      "quote": "o to a newly created or to a previously inactive account."
+    }
+  ],
+  "family": "correspondent_banking",
+  "id": "ADV-2026-0005__BA006__add",
+  "order": 10,
+  "publisher": "FATF",
+  "question": "Should the ADV-2026-0005 label carry BA006 Dormant Reactivation?",
+  "typology_id": "BA006",
+  "typology_label": "Dormant Reactivation"
+}

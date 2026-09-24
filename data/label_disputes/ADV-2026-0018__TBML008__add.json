@@ -1,0 +1,38 @@
+{
+  "advisory_id": "ADV-2026-0018",
+  "advisory_title": "TR19/4: Understanding the Money Laundering Risks in the Capital Markets",
+  "argument": "Found in Findings 2.12 and 2.35-2.38 (p.8, p.12), Annex red-flag list item 'instructions or involvement from third parties' (p.19), Example 7b (p.29). TBML008 states: 'Third Party Payment Abuse settles a trade through a payer who is not the trade counterparty \u2014 an unrelated third party, split settlement, or a payment that does not match the trade. The payment breaks the link between the trade and the funds.' The advisory evidences exactly this mechanism repeatedly and independently of the already-claimed FOP/MTN/omnibus/wash-trading/account-funding items: unconnected third parties instructing trades (2.12), non-standard settlement into a third-party broker's account (2.35), explicit recognition of 'third-party payments and third-party transfers of assets' as a laundering risk mitigated by monitoring controls (2.38), a standalone Annex red-flag bullet for third-party involvement, and a cash withdrawal to a third-party account in Example 7b -- each instance breaking the link between the trading customer and the ultimate recipient of funds/assets, matching TBML008's core tell.",
+  "argument_source": "additive reviewer, merged under schema 1.4.0",
+  "confidence": "medium",
+  "direction": "add",
+  "doctrine_summary": "Third Party Payment Abuse settles a trade through a payer who is not the trade counterparty \u2014 an unrelated third party, split settlement, or a payment that does not match the trade. The payment breaks the link between the trade and the funds, letting value enter or leave under cover of a legitimate-looking transaction while the true source or destination of the money is obscured.",
+  "evidence": [
+    {
+      "page": 8,
+      "quote": "Our review identified instances of potential suspicious activity involving orders from unconnected third parties."
+    },
+    {
+      "page": 12,
+      "quote": "Participants mitigated similar activity by being aware of the risks around third-party payments and third-party transfers of assets, and by implementing strong transaction-monitoring controls in relation to these."
+    },
+    {
+      "page": 12,
+      "quote": "For example, if a customer informs their broker that the security should be delivered into an account held with a third-party broker, but this is not a usual instruction for that customer's account."
+    },
+    {
+      "page": 19,
+      "quote": "instructions or involvement from third parties"
+    },
+    {
+      "page": 29,
+      "quote": "it withdraws the cash to a third-party account."
+    }
+  ],
+  "family": "tbml",
+  "id": "ADV-2026-0018__TBML008__add",
+  "order": 14,
+  "publisher": "FCA",
+  "question": "Should the ADV-2026-0018 label carry TBML008 Third Party Payment Abuse?",
+  "typology_id": "TBML008",
+  "typology_label": "Third Party Payment Abuse"
+}

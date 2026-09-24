@@ -1,0 +1,30 @@
+{
+  "advisory_id": "ADV-2026-0017",
+  "advisory_title": "Red Alert: Shadow Fleet Sanctions Evasion and Avoidance Network",
+  "argument": "Found in Background/network description, pages 3-4 (network run by EYYUB and GARAYEV, obscure ownership, entity replacement). PAT010 Hidden Controller 'identifies individuals or entities exercising effective control over an organisation despite not appearing as the declared owner, director or controller,' with indicators including 'Concealed ownership arrangement,' 'Network-wide control concentration,' 'Cross-Network Control Patterns' and 'Indirect sanctions exposure.' The advisory develops exactly this mechanism across pages 3-4: it names EYYUB and GARAYEV as the individuals who 'run' the entire network -- not as declared directors of any single designated entity but as personal-relationship-driven controllers behind a deliberately obscure, rotating cast of front companies. When one entity (e.g. 2RIVERS, NORD AXIS) is sanctioned, control persists because the same personally-sanctioned individuals simply stand up 'freshly incorporated companies... fulfilling the same role,' demonstrating control-without-ownership and indirect sanctions exposure at the network level, distinct from the entity-level Front Companies (SAN004) mechanism already claimed.",
+  "argument_source": "additive reviewer, merged under schema 1.4.0",
+  "confidence": "medium",
+  "direction": "add",
+  "doctrine_summary": "NI010 Hidden Controller identifies individuals or entities exercising effective control over an organisation despite not appearing as the declared owner, director or controller.",
+  "evidence": [
+    {
+      "page": 3,
+      "quote": "In 2024, a network of companies run by UK-sanctioned Azeris Etibar EYYUB and Tahir GARAYEV1 traded more Russian oil than any other entity."
+    },
+    {
+      "page": 3,
+      "quote": "The \u201cred\u201d side of the network, with deliberately obscure ownership structures and many front companies designed to be replaced with ease if they are subject to Western sanctions, trades Russian oil directly."
+    },
+    {
+      "page": 4,
+      "quote": "the people behind it will likely continue to attempt to manipulate the system to benefit their trade by replacing sanctioned entities with freshly incorporated companies clean of sanctions but fulfilling the same role."
+    }
+  ],
+  "family": "network",
+  "id": "ADV-2026-0017__PAT010__add",
+  "order": 13,
+  "publisher": "NCA / NECC",
+  "question": "Should the ADV-2026-0017 label carry PAT010 Hidden Controller?",
+  "typology_id": "PAT010",
+  "typology_label": "Hidden Controller"
+}

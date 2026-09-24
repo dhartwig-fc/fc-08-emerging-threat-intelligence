@@ -1,0 +1,26 @@
+{
+  "advisory_id": "ADV-2026-0002",
+  "advisory_title": "Trade-Based Money Laundering: Risk Indicators",
+  "argument": "Found in Structural risk indicators, page 5 (including footnote 4). PAT005 doctrine: 'identifies entities connected through a shared address,' with indicators 'Twenty entities registered at same address' and 'Address linked to shell companies'. The advisory's footnote makes explicit that the mass-registration address flag captures a single address (often a TCSP) that 'manages a number of shell companies on behalf of its customers' -- i.e. multiple entities clustered at one address -- which is the shared-address network signature PAT005 names, distinct from the individual shell-company-trading indicator already claimed.",
+  "argument_source": "additive reviewer, merged under schema 1.4.0",
+  "confidence": "medium",
+  "direction": "add",
+  "doctrine_summary": "NI005 Common Address identifies entities connected through a shared address.",
+  "evidence": [
+    {
+      "page": 5,
+      "quote": "A trade entity is registered at an address that is likely to be a mass registration address, e.g. high -density residential buildings, post -box addresses, commercial buildings or industrial complexes, especially when there is no reference to a specific unit."
+    },
+    {
+      "page": 5,
+      "quote": "This may also include the address of a trust and company service provider that manages a number of shell companies on behalf of its customers."
+    }
+  ],
+  "family": "network",
+  "id": "ADV-2026-0002__PAT005__add",
+  "order": 4,
+  "publisher": "FATF",
+  "question": "Should the ADV-2026-0002 label carry PAT005 Common Address?",
+  "typology_id": "PAT005",
+  "typology_label": "Common Address"
+}

@@ -1,0 +1,26 @@
+{
+  "advisory_id": "ADV-2026-0002",
+  "advisory_title": "Trade-Based Money Laundering: Risk Indicators",
+  "argument": "Found in Trade document and commodity risk indicators, page 7. TBML004 doctrine: 'Phantom Shipping settles or invoices a trade for goods that were never actually shipped. There is a payment, an invoice and often a contract, but no genuine movement of goods -- the shipping record is missing, forged, or inconsistent with the trade.' The advisory's indicators describe exactly this pattern: a mismatch between the financial flow (bank transfers) and the declared trade value, plus missing/counterfeit/falsified trade and customs documents -- i.e. paperwork and payment exist without a verifiable, genuine goods movement behind them, matching doctrine's 'Missing Shipment', 'No Bill of Lading', 'Document Discrepancy' and 'Payment Without Delivery' indicators.",
+  "argument_source": "additive reviewer, merged under schema 1.4.0",
+  "confidence": "high",
+  "direction": "add",
+  "doctrine_summary": "Phantom Shipping settles or invoices a trade for goods that were never actually shipped. There is a payment, an invoice and often a contract, but no genuine movement of goods \u2014 the shipping record is missing, forged, or inconsistent with the trade. The trade exists only on paper to justify a cross-border payment.",
+  "evidence": [
+    {
+      "page": 7,
+      "quote": "The value of registered imports of an entity displays significant m ismatches to the entity's volume of foreign bank transfers for imports. Conversely, the value of registered exports shows a significant mismatch with incoming foreign bank transfers."
+    },
+    {
+      "page": 7,
+      "quote": "Trade or customs documents supporting the transaction are missing, appear to be counterfeits, include false or misleading information, are a resubmission of previously rejected documents, or are frequently modified or amended."
+    }
+  ],
+  "family": "tbml",
+  "id": "ADV-2026-0002__TBML004__add",
+  "order": 5,
+  "publisher": "FATF",
+  "question": "Should the ADV-2026-0002 label carry TBML004 Phantom Shipping?",
+  "typology_id": "TBML004",
+  "typology_label": "Phantom Shipping"
+}

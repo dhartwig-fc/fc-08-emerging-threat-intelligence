@@ -1,0 +1,26 @@
+{
+  "advisory_id": "ADV-2026-0004",
+  "advisory_title": "Concealment of Beneficial Ownership",
+  "argument": "UNSUPPORTED. TBML001's doctrine is specifically inflating the price of traded goods to move value across borders in international trade. Neither cited case is that. Case Study 3 is a domestic Australian kickback scheme \u2014 a university and construction companies inflating invoices for maintenance work (a service, not traded goods), with proceeds laundered into racehorses; there is no import/export of goods described at all in the cited passage. Case Study 101 is a mortgage fraud scheme \u2014 inflating invoices for property \"improvements\" (again a service, not goods) specifically to overstate collateral value on fraudulent loan applications; this is loan/collateral fraud, not trade value transfer. Both quotes share TBML001's vocabulary (\"inflated invoices\") while describing a different mechanism entirely \u2014 exactly the failure class the mechanism test exists to catch, and the same class of error the golden-set review already found and removed once on a different advisory (ADV-2026-0013's TBML002U, per evals/golden/README.md's \"First baseline\" section) and that the extraction agent independently made too on that same advisory. This is the same error, unremoved, on this one.",
+  "argument_source": "evals/traces/TRIAGE_ADV-2026-0004_LABEL.md",
+  "confidence": "medium",
+  "direction": "strike",
+  "doctrine_summary": "Over-invoicing is a common Trade-Based Money Laundering technique whereby the price of goods is intentionally inflated beyond their true market value.",
+  "evidence": [
+    {
+      "page": 66,
+      "quote": "The managers approved inflated invoices for maintenance work to be carried out by the construction companies"
+    },
+    {
+      "page": 70,
+      "quote": "the defendant altered invoices directed to one of the entities by inflating the cost of the work listed on the original invoices"
+    }
+  ],
+  "family": "tbml",
+  "id": "ADV-2026-0004__TBML001__strike",
+  "order": 8,
+  "publisher": "FATF / Egmont Group",
+  "question": "Should the ADV-2026-0004 label keep TBML001 Over Invoicing?",
+  "typology_id": "TBML001",
+  "typology_label": "Over Invoicing"
+}

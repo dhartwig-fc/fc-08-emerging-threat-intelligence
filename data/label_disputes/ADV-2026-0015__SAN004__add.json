@@ -1,0 +1,26 @@
+{
+  "advisory_id": "ADV-2026-0015",
+  "advisory_title": "Red Alert: Financial Sanctions Evasion Typologies, Russian Elites and Enablers",
+  "argument": "Found in Indicators 20-21, 'For detection of enablers' sub-section, page 11. SAN004 doctrine: 'A front company is an entity with little or no genuine economic substance, established to give a sanctioned interest a clean commercial face. It exists to transact -- to hold accounts, sign contracts and move goods -- while the real party stays hidden behind it.' Indicator 21 describes exactly this: off-the-shelf corporations with no trading record and nominee ownership used purely as 'throughputs', and indicator 20 shows them absorbing share transfers from sanctioned entities. The entities have no substance of their own and exist solely to move the sanctioned interest's value onward, matching SAN004's mechanism rather than the broader shell-network pattern-matching already claimed under PAT007.",
+  "argument_source": "additive reviewer, merged under schema 1.4.0",
+  "confidence": "medium",
+  "direction": "add",
+  "doctrine_summary": "A front company is an entity with little or no genuine economic substance, established to give a sanctioned interest a clean commercial face. It exists to transact \u2014 to hold accounts, sign contracts and move goods \u2014 while the real party stays hidden behind it.",
+  "evidence": [
+    {
+      "page": 11,
+      "quote": "Numerous transfers of shares from sanctioned entities to non-sanctioned entities involving corporations incorporated by the same people and company (often with a registered office at the same physical address)."
+    },
+    {
+      "page": 11,
+      "quote": "A large number of off-the-shelf corporations with no trading record with nominee ownership used as throughputs."
+    }
+  ],
+  "family": "sanctions",
+  "id": "ADV-2026-0015__SAN004__add",
+  "order": 12,
+  "publisher": "NCA / NECC / OFSI",
+  "question": "Should the ADV-2026-0015 label carry SAN004 Front Companies?",
+  "typology_id": "SAN004",
+  "typology_label": "Front Companies"
+}

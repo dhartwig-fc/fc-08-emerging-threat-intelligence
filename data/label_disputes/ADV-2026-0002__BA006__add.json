@@ -1,0 +1,30 @@
+{
+  "advisory_id": "ADV-2026-0002",
+  "advisory_title": "Trade-Based Money Laundering: Risk Indicators",
+  "argument": "Found in Structural risk indicators (p5), Trade activity risk indicators (p6), Account and transaction activity risk indicators (p8). BA006 doctrine: 'an account that has sat idle... suddenly comes back to life with flows that dwarf anything it ever carried while active... What makes it a finding is the CONTRAST between the account's long silence and the size, shape and speed of what happens the moment it wakes up.' The advisory develops this same contrast across three sections: unexplained dormancy, a re-activated entity suddenly transacting at high volume/value, and volume that surges then goes dormant again -- the idle/surge lifecycle anomaly BA006 names, not merely the rapid-movement or structuring already claimed.",
+  "argument_source": "additive reviewer, merged under schema 1.4.0",
+  "confidence": "medium",
+  "direction": "add",
+  "doctrine_summary": "Dormant reactivation is the behavioural-anomaly signal at the far end of the account lifecycle: an account that has sat idle -- sometimes for months, sometimes for years -- suddenly comes back to life with flows that dwarf anything it ever carried while active. The finding is not any single transaction on its own; a large deposit or a new counterparty can each look ordinary in isolation. What makes it a finding is the CONTRAST between the account's long silence and the size, shape and speed of what happens the moment it wakes up.",
+  "evidence": [
+    {
+      "page": 5,
+      "quote": "A trade entity has unexplained periods of dormancy."
+    },
+    {
+      "page": 6,
+      "quote": "A newly formed or recently re-activated trade entity engages in high-volume and high-value trade activity, e.g. an unknown entity suddenly appears and engages in trade activities in sectors with high barriers to market entry."
+    },
+    {
+      "page": 8,
+      "quote": "Transaction activity associated with a trade entity increases in volume quickly and significantly, and then goes dormant after a short period of time."
+    }
+  ],
+  "family": "correspondent_banking",
+  "id": "ADV-2026-0002__BA006__add",
+  "order": 2,
+  "publisher": "FATF",
+  "question": "Should the ADV-2026-0002 label carry BA006 Dormant Reactivation?",
+  "typology_id": "BA006",
+  "typology_label": "Dormant Reactivation"
+}

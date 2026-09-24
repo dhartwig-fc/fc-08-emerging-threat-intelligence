@@ -1,0 +1,22 @@
+{
+  "advisory_id": "ADV-2026-0004",
+  "advisory_title": "Concealment of Beneficial Ownership",
+  "argument": "THIN, not SUPPORTED or UNSUPPORTED. The exact vocabulary of TBML004's doctrine appears verbatim (\"do not result in the actual movement of goods\"), so this is not a vocabulary-only match \u2014 but it is the document's abstract framing sentence, not a developed example, and the case study it introduces doesn't itself instantiate the mechanism. The golden label's own extraction_notes records that a second, weaker citation (p44, \"the use of false loans and invoices to fraudulently disguise the beneficial ownership of a transaction\") was already stripped from this typology on the mechanism test during the 2026-09-11 review \u2014 which means this typology has already been through one round of citation pruning and is now down to its last, thinnest citation. medium confidence is defensible under the README's single-bullet rule, but the single bullet here is a scope statement, not a technique statement.",
+  "argument_source": "evals/traces/TRIAGE_ADV-2026-0004_LABEL.md",
+  "confidence": "medium",
+  "direction": "strike",
+  "doctrine_summary": "Phantom Shipping settles or invoices a trade for goods that were never actually shipped. There is a payment, an invoice and often a contract, but no genuine movement of goods \u2014 the shipping record is missing, forged, or inconsistent with the trade. The trade exists only on paper to justify a cross-border payment.",
+  "evidence": [
+    {
+      "page": 79,
+      "quote": "including those that do not result in the actual movement of goods, or which purport to involve the provision and/or acquisition of services to or from other international businesses."
+    }
+  ],
+  "family": "tbml",
+  "id": "ADV-2026-0004__TBML004__strike",
+  "order": 9,
+  "publisher": "FATF / Egmont Group",
+  "question": "Should the ADV-2026-0004 label keep TBML004 Phantom Shipping?",
+  "typology_id": "TBML004",
+  "typology_label": "Phantom Shipping"
+}

@@ -1,0 +1,22 @@
+{
+  "advisory_id": "ADV-2026-0004",
+  "advisory_title": "Concealment of Beneficial Ownership",
+  "argument": "THIN. The quote is compound and only half of it is SAN001's mechanism. \"Holder of assets... in his own name\" describes a freezing order violation (openly continuing to hold frozen assets), which is not ownership *evasion* at all \u2014 it is the opposite, a failure to conceal anything. Only the second clause (\"otherwise available through corporate vehicles\") touches SAN001's actual doctrine (layered structures concealing a designated party's control). The label picked a real designated-party case but the cited sentence does not cleanly develop the evasion mechanism on its own; a cleaner quote describing the corporate-vehicle layering specifically may exist elsewhere in this case's fuller writeup and was not located in this pass. low confidence on a single citation is consistent with the README's own rule, which is the one thing this citation gets structurally right.",
+  "argument_source": "evals/traces/TRIAGE_ADV-2026-0004_LABEL.md",
+  "confidence": "low",
+  "direction": "strike",
+  "doctrine_summary": "Beneficial Ownership Evasion is the use of layered holding structures, nominee arrangements and secrecy jurisdictions to conceal that a designated party ultimately owns or controls an entity. The entity itself is not on any sanctions list and passes conventional name screening; the exposure sits in the ownership chain behind it.",
+  "evidence": [
+    {
+      "page": 138,
+      "quote": "the designated individual was the holder of assets and economic resources in his own name or otherwise available through corporate vehicles that had been under freezing orders since 2014."
+    }
+  ],
+  "family": "sanctions",
+  "id": "ADV-2026-0004__SAN001__strike",
+  "order": 6,
+  "publisher": "FATF / Egmont Group",
+  "question": "Should the ADV-2026-0004 label keep SAN001 Ownership Evasion?",
+  "typology_id": "SAN001",
+  "typology_label": "Ownership Evasion"
+}

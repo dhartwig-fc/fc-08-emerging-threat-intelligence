@@ -1,0 +1,22 @@
+{
+  "advisory_id": "ADV-2026-0001",
+  "advisory_title": "Trade-Based Money Laundering: Trends and Developments",
+  "argument": "Found in Case study Box 2.6, page 24 (vehicle/textile TBML scheme, Spain/Italy/Europol). TBML006 describes Circular Trade as goods or funds cycled 'through a chain of related parties so that value leaves an entity and returns to it with no genuine change of ownership or economic purpose... only when the chain is assembled does the loop appear.' Box 2.6 describes the OCG creating fake sales-and-purchase paper trails between its own controlled legal entities specifically 'to create value-added tax chains' -- the hallmark VAT-carousel structure of fabricated related-party trades generating and reclaiming value with no genuine underlying commerce, matching the closed-loop, common-control mechanism the doctrine names.",
+  "argument_source": "additive reviewer, merged under schema 1.4.0",
+  "confidence": "low",
+  "direction": "add",
+  "doctrine_summary": "Circular Trade (round-tripping) cycles goods or funds through a chain of related parties so that value leaves an entity and returns to it with no genuine change of ownership or economic purpose. Each individual trade looks legitimate; only when the chain is assembled does the loop appear \u2014 the same goods, or the value they represent, come back to where they started.",
+  "evidence": [
+    {
+      "page": 24,
+      "quote": "the OCG also registered and used legal entities and established a fake paper trail for sales and purchases to create value-added tax chains. They then exploited the trade process to both disguise the proceeds of their original criminality and generate additional criminal proceeds."
+    }
+  ],
+  "family": "tbml",
+  "id": "ADV-2026-0001__TBML006__add",
+  "order": 0,
+  "publisher": "FATF / Egmont Group",
+  "question": "Should the ADV-2026-0001 label carry TBML006 Circular Trade?",
+  "typology_id": "TBML006",
+  "typology_label": "Circular Trade"
+}

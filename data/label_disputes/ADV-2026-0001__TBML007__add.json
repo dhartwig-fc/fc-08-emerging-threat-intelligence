@@ -1,0 +1,22 @@
+{
+  "advisory_id": "ADV-2026-0001",
+  "advisory_title": "Trade-Based Money Laundering: Trends and Developments",
+  "argument": "Found in Footnote 11, page 14, under the TBTF definitions discussion. TBML007 defines Dual Use Goods as 'items with a legitimate civilian use that can also serve a military or proliferation purpose... the risk turns on the commodity's classification, its end-use and its destination... used to divert controlled items to prohibited end-uses under cover of ordinary commerce.' Footnote 11 names exactly this mechanism -- ordinarily civilian goods (used vehicles, drones) procured and diverted to conflict-zone terrorist end-use, with destination (conflict zone) as the risk driver rather than the parties themselves.",
+  "argument_source": "additive reviewer, merged under schema 1.4.0",
+  "confidence": "low",
+  "direction": "add",
+  "doctrine_summary": "Dual Use Goods are items with a legitimate civilian use that can also serve a military or proliferation purpose \u2014 electronics, precision instruments, controlled technology. When such goods move through trade, the risk turns on the commodity's classification, its end-use and its destination, not merely on the parties named. Trade in dual-use goods can be used to divert controlled items to prohibited end-uses under cover of ordinary commerce.",
+  "evidence": [
+    {
+      "page": 14,
+      "quote": "a sub-typology suggested is the procurement of items for use by terrorist groups. This includes typical goods such as firearms, but also logistical equipment and weaponizable technology such as used vehicles or drones to conflict zones."
+    }
+  ],
+  "family": "tbml",
+  "id": "ADV-2026-0001__TBML007__add",
+  "order": 1,
+  "publisher": "FATF / Egmont Group",
+  "question": "Should the ADV-2026-0001 label carry TBML007 Dual Use Goods?",
+  "typology_id": "TBML007",
+  "typology_label": "Dual Use Goods"
+}

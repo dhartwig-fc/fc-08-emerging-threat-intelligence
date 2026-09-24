@@ -1,0 +1,22 @@
+{
+  "advisory_id": "ADV-2026-0005",
+  "advisory_title": "Virtual Assets Red Flag Indicators of Money Laundering and Terrorist Financing",
+  "argument": "Found in Case Study 1, page 8 (South Africa). PAT005 doctrine: 'identifies entities connected through a shared address' with the intelligence question 'Do two or more entities share the same address?' Case Study 1 evidences exactly this mechanism: more than 150 individuals who appear as separate accountholders are tied together as one professional mule network specifically because investigators found them sharing the same residential address, not merely because both documents mention 'address' in passing.",
+  "argument_source": "additive reviewer, merged under schema 1.4.0",
+  "confidence": "medium",
+  "direction": "add",
+  "doctrine_summary": "NI005 Common Address identifies entities connected through a shared address.",
+  "evidence": [
+    {
+      "page": 8,
+      "quote": "In various instances, the individuals shared the same residential address; and most of the VA addresses were accessed from the same IP address \u2013 indicating the potential use of money mules by professional money launderers to launder the illicit proceeds."
+    }
+  ],
+  "family": "network",
+  "id": "ADV-2026-0005__PAT005__add",
+  "order": 11,
+  "publisher": "FATF",
+  "question": "Should the ADV-2026-0005 label carry PAT005 Common Address?",
+  "typology_id": "PAT005",
+  "typology_label": "Common Address"
+}
