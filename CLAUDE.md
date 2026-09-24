@@ -373,8 +373,34 @@ claude mcp add knowledge-centre -- "$PWD/.venv/bin/python" "$PWD/mcp_server/know
   tracked queue file per run; `tools/review.py` is the only writer of approvals, rebuilt from an
   append-only decision log. The 383 legacy proposals are frozen, not reviewed -- they carry no quotes and
   no run. `.venv/bin/python tools/review.py --check` proves the approvals and the log agree, and that every
-  logged decision cites real queue proposals for its own link. NEXT: sub-project B (telemetry + the write
-  allowlist; probe first whether `can_use_tool` needs a streamed prompt), then C (desk digests).
+  logged decision cites real queue proposals for its own link.
+
+  **Built subagent-per-task with a review after each, and the final whole-branch review earned its seat.**
+  It found three Important gaps every per-task review had passed: the review-time re-check did not
+  re-assert the proposal contract (an EMPTY quote matched every page, and a line naming neither a typology
+  nor an emergent label became an approvable `EMERGENT[]` link); nothing checked that the log held only
+  decisions the gate made (a hand-written approval with `proposal_ids: []` passed `--check`); and
+  `--queue-dir` + `--log` overridden with the approvals paths left at default rebuilt the REAL approvals
+  files from a scratch log. All fixed (`7c231b2`..`be365a7`): `schemas/proposal_contract.py` is now the one
+  definition of `proposal_id`, stages and quote bounds, shared by server and gate; the four record paths
+  are overridden together or not at all. Guards: `check_proposal_contract.py` 12 checks,
+  `check_review_gate.py` 57, every rule mutation-verified (`--mutate contract` added).
+
+  **First decisions through the gate, 2026-09-24 (`332eaab`).** The live ADV-2026-0013 run
+  (`adv-2026-0013-extractor-f617bd3b00`) proposed 5 links, every quote verified; the owner approved all
+  five (SAN003, SAN007, SAN004; SAN001 and BA005 at medium, each on a single red-flag bullet).
+  `approved_links.json` now holds 5, `approved_emergent.json` 0. **The log has no `decided_by` field, so
+  every line in it is the owner's by construction:** Claude renders the cards and recommends, the owner
+  confirms, and only then is `--decisions` run. Never apply a decision the owner has not confirmed in chat.
+
+  **Parked, deliberately:** the server bounds quote length on the raw string and the gate after strip (a
+  padded short quote is quarantined at review, never approved); the writer-scan self-test was never seen
+  failing inside the guard. **Deferred to B:** the server binding its queue path to
+  `data/proposals/<run_id>.jsonl`; reviewer runs' telemetry lacking `run_id`; nothing runs
+  `review.py --check` automatically.
+
+  NEXT: sub-project B (telemetry + the write allowlist; probe first whether `can_use_tool` needs a streamed
+  prompt), then C (desk digests; `network` routes to FIU liaison).
 - [ ] Week 6: publish slice 1 on `future-capabilities.html`, tag `fc08-threatintel-slice1-v1.0.0`
 
 ## Journal
