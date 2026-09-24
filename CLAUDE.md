@@ -409,7 +409,7 @@ claude mcp add knowledge-centre -- "$PWD/.venv/bin/python" "$PWD/mcp_server/know
   Post hooks carry `duration_ms`. `allowed_tools` now pre-approves ONLY the three read-only tools --
   pre-approving a tool shadows the callback entirely, which is why propose_link was moved out.
   `check_tool_surface.py --live` proves a writing tool is denied and never runs, and
-  `--mutate-allowlist` proves the probe can fail. The live probe earned its place on its first run: at `ea5c54b` it FAILED its REFUSED check (that commit's message overclaims), because a structured-output MCP tool's refusal reaches PostToolUse as a JSON-encoded string, `'{\"result\":\"Rejected: ...\"}'`, which the offline shapes had not included; `57a505d` decodes it and the probe passes 5/5.
+  `--mutate-allowlist` proves the probe can fail. The live probe earned its place on its first run: at `ea5c54b` it FAILED its REFUSED check (that commit's message overclaims), because a structured-output MCP tool's refusal reaches PostToolUse as a JSON-encoded string, '{"result":"Rejected: ..."}'`, which the offline shapes had not included; `57a505d` decodes it and the probe passes 5/5.
   Every run writes `data/telemetry/<run_id>.jsonl`
   with exactly one terminal event per tool call; a governed refusal reads REFUSED. NEXT: sub-project
   C (desk digests; `network` routes to FIU liaison), then week 6.
