@@ -403,23 +403,42 @@ claude mcp add knowledge-centre -- "$PWD/.venv/bin/python" "$PWD/mcp_server/know
   `data/proposals/<run_id>.jsonl`; reviewer runs' telemetry lacking `run_id`; nothing runs
   `review.py --check` automatically.
 
-  **Sub-project B DONE** (plan `docs/superpowers/plans/2026-09-24-week5-b-telemetry-and-write-allowlist.md`).
-  Probed first: a plain string prompt already runs the SDK's control protocol, so no streaming change;
-  a DENIED call fires no Post hook, so the permission callback records that call's terminal event;
-  Post hooks carry `duration_ms`. `allowed_tools` now pre-approves ONLY the three read-only tools --
-  pre-approving a tool shadows the callback entirely, which is why propose_link was moved out.
-  `check_tool_surface.py --live` proves a writing tool is denied and never runs, and
-  `--mutate-allowlist` proves the probe can fail. The live probe earned its place on its first run: at `ea5c54b` it FAILED its REFUSED check (that commit's message overclaims), because a structured-output MCP tool's refusal reaches PostToolUse as a JSON-encoded string, '{"result":"Rejected: ..."}', which the offline shapes had not included; `57a505d` decodes it and the probe passes 5/5.
-  Every run writes `data/telemetry/<run_id>.jsonl`
-  built to leave exactly one terminal event per tool call; a governed refusal reads REFUSED. Whether a
-  given run DID is recorded per run, not assumed: `RUN_COMPLETED.terminal_check` carries
-  `telemetry.reconcile()` over every ToolUseBlock id the runner saw -- `unterminated` and `duplicated`
-  lists, recorded on success and failure alike, never raised. Of the three items deferred to B above,
-  B closed one: reviewer runs' telemetry now carries `run_id` (B3, `09c0dee`: `review()` records its
-  own telemetry file and reports `run_id` and `queue_path`). The other two are **deferred to
-  sub-project C / week 6**: the server binding its queue path to `data/proposals/<run_id>.jsonl`,
-  and nothing running `review.py --check` automatically. NEXT: sub-project
-  C (desk digests; `network` routes to FIU liaison), then week 6.
+  **Sub-project B DONE, pushed 2026-09-24 (`b0ff55d`)** (plan
+  `docs/superpowers/plans/2026-09-24-week5-b-telemetry-and-write-allowlist.md`). Probed first, from SDK
+  source and two live Haiku runs: a plain string prompt already runs the SDK's control protocol, so no
+  streaming change; a DENIED call fires no Post hook, so the permission callback records that call's
+  terminal event; Post hooks carry `duration_ms`. `allowed_tools` now pre-approves ONLY the three
+  read-only tools -- pre-approving a tool shadows the callback entirely, which is why propose_link was
+  moved out. Every other MCP tool reaches `can_use_tool`, which allows `propose_link` only, with a
+  complete run identity; the CLI's own StructuredOutput tool is auto-allowed.
+
+  Every run writes `data/telemetry/<run_id>.jsonl` built to leave exactly one terminal event per tool
+  call; a governed refusal reads REFUSED. Whether a given run DID is recorded, not assumed:
+  `RUN_COMPLETED.terminal_check` carries `telemetry.reconcile()` over every ToolUseBlock id the runner
+  saw -- `unterminated` and `duplicated` lists, on success and failure alike, never raised.
+
+  **The live probe earned its place on its first run.** At `ea5c54b` it FAILED its REFUSED check (that
+  commit's message overclaims): a structured-output MCP tool's refusal reaches PostToolUse as a
+  JSON-encoded string, '{"result":"Rejected: ..."}', which the offline shapes had not included.
+  `57a505d` decoded it -- and the final whole-branch review then found that fix OVER-REACHED, decoding the
+  tool's own data too, so every `get_typology` success recorded an empty outcome. `190abf9` decodes the
+  transport envelope ONCE and never a string inside it; witnesses pin both, plus a mid-string "Rejected:"
+  that must read SUCCESS. The same review made the static check ASK the installed callback (deny a write,
+  allow propose_link) and read the built argv, instead of checking only that a callback exists.
+  Guards: `check_telemetry.py` 21 checks, `--mutate refusal|allowlist|terminal`;
+  `check_tool_surface.py` 14 static checks, plus `--live` (Bash probe + write probe) and
+  `--live --mutate-allowlist`, which must breach.
+
+  Of the three items deferred to B above, B closed one: reviewer runs' telemetry now carries `run_id`
+  (B3, `09c0dee`). The other two are **deferred to sub-project C / week 6**: the server binding its
+  queue path to `data/proposals/<run_id>.jsonl`, and nothing running `review.py --check`
+  automatically. **Parked from B:** whether the CLI skips `can_use_tool` for an MCP tool annotated
+  `readOnlyHint` (unprobed; a PreToolUse deny-by-name hook would close the class); a run killed by
+  KeyboardInterrupt/CancelledError writes RUN_STARTED only; `reconcile()` on a corrupt telemetry line
+  would mask the run's real exception; per-run reconciliation is verified offline only -- the next live
+  extraction's `terminal_check` is its first real measurement.
+
+  NEXT: sub-project C (desk digests; `network` routes to FIU liaison), then week 6.
 - [ ] Week 6: publish slice 1 on `future-capabilities.html`, tag `fc08-threatintel-slice1-v1.0.0`
 
 ## Journal
