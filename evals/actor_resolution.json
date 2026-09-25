@@ -1,4 +1,834 @@
 {
+  "actors": [
+    {
+      "actor_id": "ACT-b683a04801",
+      "advisory_id": "ADV-2026-0003",
+      "entries": [],
+      "matched": "Altaf Khanani",
+      "name": "Altaf Khanani",
+      "status": "resolved"
+    },
+    {
+      "actor_id": "ACT-75493f8693",
+      "advisory_id": "ADV-2026-0003",
+      "entries": [],
+      "matched": "Khanani MLO",
+      "name": "Khanani Money Laundering Organisation",
+      "status": "resolved"
+    },
+    {
+      "actor_id": "ACT-cb24318645",
+      "advisory_id": "ADV-2026-0003",
+      "entries": [],
+      "matched": "Al Zarooni Exchange",
+      "name": "Al Zarooni Exchange",
+      "status": "resolved"
+    },
+    {
+      "actor_id": null,
+      "advisory_id": "ADV-2026-0003",
+      "entries": [],
+      "matched": null,
+      "name": "Subject X",
+      "status": "unresolved"
+    },
+    {
+      "actor_id": null,
+      "advisory_id": "ADV-2026-0003",
+      "entries": [],
+      "matched": null,
+      "name": "Company X",
+      "status": "unresolved"
+    },
+    {
+      "actor_id": "ACT-f3994098e2",
+      "advisory_id": "ADV-2026-0003",
+      "entries": [],
+      "matched": "LCN",
+      "name": "La Cosa Nostra",
+      "status": "resolved"
+    },
+    {
+      "actor_id": "ACT-ddf480f823",
+      "advisory_id": "ADV-2026-0003",
+      "entries": [],
+      "matched": "PacNet",
+      "name": "PacNet",
+      "status": "resolved"
+    },
+    {
+      "actor_id": "ACT-438ef2d14b",
+      "advisory_id": "ADV-2026-0003",
+      "entries": [],
+      "matched": "BTC-e",
+      "name": "BTC-e",
+      "status": "resolved"
+    },
+    {
+      "actor_id": null,
+      "advisory_id": "ADV-2026-0004",
+      "entries": [],
+      "matched": null,
+      "name": "Financial Action Task Force (FATF)",
+      "status": "unresolved"
+    },
+    {
+      "actor_id": null,
+      "advisory_id": "ADV-2026-0004",
+      "entries": [],
+      "matched": null,
+      "name": "Egmont Group of Financial Intelligence Units",
+      "status": "unresolved"
+    },
+    {
+      "actor_id": "ACT-1caa2b5f6c",
+      "advisory_id": "ADV-2026-0004",
+      "entries": [],
+      "matched": "Bank Melli",
+      "name": "Bank Melli",
+      "status": "resolved"
+    },
+    {
+      "actor_id": "ACT-c8905a5e7c",
+      "advisory_id": "ADV-2026-0004",
+      "entries": [],
+      "matched": "Alavi Foundation",
+      "name": "Alavi Foundation",
+      "status": "resolved"
+    },
+    {
+      "actor_id": null,
+      "advisory_id": "ADV-2026-0004",
+      "entries": [],
+      "matched": null,
+      "name": "Mossack Fonseca",
+      "status": "unresolved"
+    },
+    {
+      "actor_id": null,
+      "advisory_id": "ADV-2026-0004",
+      "entries": [],
+      "matched": null,
+      "name": "Appleby",
+      "status": "unresolved"
+    },
+    {
+      "actor_id": "ACT-f49a3063c2",
+      "advisory_id": "ADV-2026-0005",
+      "entries": [],
+      "matched": "AlphaBay",
+      "name": "AlphaBay",
+      "status": "resolved"
+    },
+    {
+      "actor_id": "ACT-bab2c39e19",
+      "advisory_id": "ADV-2026-0005",
+      "entries": [],
+      "matched": "Helix",
+      "name": "Helix",
+      "status": "resolved"
+    },
+    {
+      "actor_id": "ACT-c99a585e36",
+      "advisory_id": "ADV-2026-0005",
+      "entries": [],
+      "matched": "DDW",
+      "name": "DeepDotWeb (DDW)",
+      "status": "resolved"
+    },
+    {
+      "actor_id": null,
+      "advisory_id": "ADV-2026-0006",
+      "entries": [],
+      "matched": null,
+      "name": "FATF",
+      "status": "unresolved"
+    },
+    {
+      "actor_id": "ACT-c6a3b2c5f4",
+      "advisory_id": "ADV-2026-0006",
+      "entries": [],
+      "matched": "Dan Gertler",
+      "name": "Dan Gertler",
+      "status": "resolved"
+    },
+    {
+      "actor_id": null,
+      "advisory_id": "ADV-2026-0006",
+      "entries": [],
+      "matched": null,
+      "name": "Joseph Kabila",
+      "status": "unresolved"
+    },
+    {
+      "actor_id": "ACT-3694db86b3",
+      "advisory_id": "ADV-2026-0006",
+      "entries": [],
+      "matched": "Fleurette Properties",
+      "name": "Fleurette Properties",
+      "status": "resolved"
+    },
+    {
+      "actor_id": "ACT-adb59c28c7",
+      "advisory_id": "ADV-2026-0006",
+      "entries": [],
+      "matched": "Beny Steinmetz",
+      "name": "Beny Steinmetz",
+      "status": "resolved"
+    },
+    {
+      "actor_id": "ACT-d60eabeb80",
+      "advisory_id": "ADV-2026-0006",
+      "entries": [],
+      "matched": "NTR Metals Miami",
+      "name": "NTR Metals Miami",
+      "status": "resolved"
+    },
+    {
+      "actor_id": "ACT-87b2a02fa8",
+      "advisory_id": "ADV-2026-0006",
+      "entries": [],
+      "matched": "Chilean gold-smuggling TCO (Operation Diez Condores)",
+      "name": "Chilean gold-smuggling TCO (Operation Diez Condores)",
+      "status": "resolved"
+    },
+    {
+      "actor_id": "ACT-7aec1dbb9f",
+      "advisory_id": "ADV-2026-0007",
+      "entries": [],
+      "matched": "QQAAZZ",
+      "name": "QQAAZZ",
+      "status": "resolved"
+    },
+    {
+      "actor_id": null,
+      "advisory_id": "ADV-2026-0007",
+      "entries": [],
+      "matched": null,
+      "name": "Person MS",
+      "status": "unresolved"
+    },
+    {
+      "actor_id": null,
+      "advisory_id": "ADV-2026-0007",
+      "entries": [],
+      "matched": null,
+      "name": "Mr. O",
+      "status": "unresolved"
+    },
+    {
+      "actor_id": null,
+      "advisory_id": "ADV-2026-0008",
+      "entries": [],
+      "matched": null,
+      "name": "Chinese-speaking money laundering networks",
+      "status": "unresolved"
+    },
+    {
+      "actor_id": null,
+      "advisory_id": "ADV-2026-0008",
+      "entries": [],
+      "matched": null,
+      "name": "Islamic State in Iraq and the Levant (ISIL)",
+      "status": "unresolved"
+    },
+    {
+      "actor_id": "ACT-9a7f7c81c2",
+      "advisory_id": "ADV-2026-0009",
+      "entries": [],
+      "matched": "Vladimir Putin",
+      "name": "Vladimir Putin",
+      "status": "resolved"
+    },
+    {
+      "actor_id": "ACT-80e7ed0914",
+      "advisory_id": "ADV-2026-0009",
+      "entries": [],
+      "matched": "Mark Lambert",
+      "name": "Mark Lambert",
+      "status": "resolved"
+    },
+    {
+      "actor_id": "ACT-4e14c28aa1",
+      "advisory_id": "ADV-2026-0009",
+      "entries": [],
+      "matched": "Vadim Mikerin",
+      "name": "Vadim Mikerin",
+      "status": "resolved"
+    },
+    {
+      "actor_id": "ACT-cfa05f45ea",
+      "advisory_id": "ADV-2026-0009",
+      "entries": [],
+      "matched": "TENEX",
+      "name": "JSC Techsnabexport (TENEX)",
+      "status": "resolved"
+    },
+    {
+      "actor_id": "ACT-24e5151ad8",
+      "advisory_id": "ADV-2026-0009",
+      "entries": [],
+      "matched": "Odebrecht S.A.",
+      "name": "Odebrecht S.A.",
+      "status": "resolved"
+    },
+    {
+      "actor_id": "ACT-ee53ea3a62",
+      "advisory_id": "ADV-2026-0009",
+      "entries": [],
+      "matched": "Braskem S.A.",
+      "name": "Braskem S.A.",
+      "status": "resolved"
+    },
+    {
+      "actor_id": "ACT-13dd2c8f96",
+      "advisory_id": "ADV-2026-0009",
+      "entries": [],
+      "matched": "Alyaksandr Ryhorovich Lukashenka",
+      "name": "Alyaksandr Ryhorovich Lukashenka",
+      "status": "resolved"
+    },
+    {
+      "actor_id": "ACT-a2da1873c2",
+      "advisory_id": "ADV-2026-0009",
+      "entries": [],
+      "matched": "Aliaksei Aleksin",
+      "name": "Aliaksei Aleksin",
+      "status": "resolved"
+    },
+    {
+      "actor_id": "ACT-345196cec2",
+      "advisory_id": "ADV-2026-0009",
+      "entries": [],
+      "matched": "Martha Carolina Recinos De Bernal",
+      "name": "Martha Carolina Recinos De Bernal",
+      "status": "resolved"
+    },
+    {
+      "actor_id": "ACT-e2eec9750e",
+      "advisory_id": "ADV-2026-0009",
+      "entries": [],
+      "matched": "Dmitriy Sergeevich Peskov",
+      "name": "Dmitriy Sergeevich Peskov",
+      "status": "resolved"
+    },
+    {
+      "actor_id": null,
+      "advisory_id": "ADV-2026-0010",
+      "entries": [],
+      "matched": null,
+      "name": "Islamic Republic of Iran",
+      "status": "unresolved"
+    },
+    {
+      "actor_id": null,
+      "advisory_id": "ADV-2026-0010",
+      "entries": [
+        "ACT-a2b3525c6a",
+        "ACT-115b430fe1"
+      ],
+      "matched": null,
+      "name": "Islamic Revolutionary Guard Corps",
+      "status": "ambiguous"
+    },
+    {
+      "actor_id": null,
+      "advisory_id": "ADV-2026-0010",
+      "entries": [
+        "ACT-299fe3e04b",
+        "ACT-115b430fe1"
+      ],
+      "matched": null,
+      "name": "IRGC-Qods Force",
+      "status": "ambiguous"
+    },
+    {
+      "actor_id": "ACT-667e720a51",
+      "advisory_id": "ADV-2026-0010",
+      "entries": [],
+      "matched": "Ministry of Defense and Armed Forces Logistics",
+      "name": "Ministry of Defense and Armed Forces Logistics",
+      "status": "resolved"
+    },
+    {
+      "actor_id": "ACT-0a2e3bf96f",
+      "advisory_id": "ADV-2026-0010",
+      "entries": [],
+      "matched": "Iranian Armed Forces General Staff",
+      "name": "Iranian Armed Forces General Staff",
+      "status": "resolved"
+    },
+    {
+      "actor_id": "ACT-25b2fdac82",
+      "advisory_id": "ADV-2026-0010",
+      "entries": [],
+      "matched": "National Iranian Oil Company",
+      "name": "National Iranian Oil Company",
+      "status": "resolved"
+    },
+    {
+      "actor_id": null,
+      "advisory_id": "ADV-2026-0010",
+      "entries": [],
+      "matched": null,
+      "name": "Hamas",
+      "status": "unresolved"
+    },
+    {
+      "actor_id": "ACT-d64634bfe6",
+      "advisory_id": "ADV-2026-0010",
+      "entries": [],
+      "matched": "Hizballah",
+      "name": "Lebanese Hizballah",
+      "status": "resolved"
+    },
+    {
+      "actor_id": "ACT-0a507471ce",
+      "advisory_id": "ADV-2026-0010",
+      "entries": [],
+      "matched": "Houthis",
+      "name": "Ansarallah",
+      "status": "resolved"
+    },
+    {
+      "actor_id": null,
+      "advisory_id": "ADV-2026-0010",
+      "entries": [],
+      "matched": null,
+      "name": "Palestinian Islamic Jihad",
+      "status": "unresolved"
+    },
+    {
+      "actor_id": "ACT-324b86ce52",
+      "advisory_id": "ADV-2026-0010",
+      "entries": [],
+      "matched": "Mansour Zarringhalam",
+      "name": "Mansour Zarringhalam",
+      "status": "resolved"
+    },
+    {
+      "actor_id": "ACT-5a8491c466",
+      "advisory_id": "ADV-2026-0010",
+      "entries": [],
+      "matched": "Nasser Zarringhalam",
+      "name": "Nasser Zarringhalam",
+      "status": "resolved"
+    },
+    {
+      "actor_id": "ACT-588f9b3cd1",
+      "advisory_id": "ADV-2026-0010",
+      "entries": [],
+      "matched": "Fazlolah Zarringhalam",
+      "name": "Fazlolah Zarringhalam",
+      "status": "resolved"
+    },
+    {
+      "actor_id": "ACT-062bacc38e",
+      "advisory_id": "ADV-2026-0010",
+      "entries": [],
+      "matched": "GCM Exchange",
+      "name": "GCM Exchange",
+      "status": "resolved"
+    },
+    {
+      "actor_id": "ACT-32ec7fb46c",
+      "advisory_id": "ADV-2026-0010",
+      "entries": [],
+      "matched": "Berelian Exchange",
+      "name": "Berelian Exchange",
+      "status": "resolved"
+    },
+    {
+      "actor_id": "ACT-b869cd7b00",
+      "advisory_id": "ADV-2026-0010",
+      "entries": [],
+      "matched": "Sahara Thunder",
+      "name": "Sahara Thunder",
+      "status": "resolved"
+    },
+    {
+      "actor_id": "ACT-3c6904be80",
+      "advisory_id": "ADV-2026-0010",
+      "entries": [],
+      "matched": "Joint Stock Company Special Economic Zone of Industrial Production Alabuga",
+      "name": "Joint Stock Company Special Economic Zone of Industrial Production Alabuga",
+      "status": "resolved"
+    },
+    {
+      "actor_id": "ACT-0595f0cfc4",
+      "advisory_id": "ADV-2026-0011",
+      "entries": [],
+      "matched": "Sinaloa cartel",
+      "name": "Sinaloa Cartel",
+      "status": "resolved"
+    },
+    {
+      "actor_id": "ACT-2e28bb6ddf",
+      "advisory_id": "ADV-2026-0011",
+      "entries": [],
+      "matched": "CJNG",
+      "name": "Jalisco New Generation Cartel (CJNG)",
+      "status": "resolved"
+    },
+    {
+      "actor_id": "ACT-4c19c289c3",
+      "advisory_id": "ADV-2026-0011",
+      "entries": [],
+      "matched": "Gulf Cartel",
+      "name": "Gulf Cartel",
+      "status": "resolved"
+    },
+    {
+      "actor_id": "ACT-43060f5872",
+      "advisory_id": "ADV-2026-0011",
+      "entries": [],
+      "matched": "Edgar Joel Martinez-Reyes",
+      "name": "Edgar Joel Martinez-Reyes",
+      "status": "resolved"
+    },
+    {
+      "actor_id": null,
+      "advisory_id": "ADV-2026-0012",
+      "entries": [],
+      "matched": null,
+      "name": "North Korea",
+      "status": "unresolved"
+    },
+    {
+      "actor_id": null,
+      "advisory_id": "ADV-2026-0012",
+      "entries": [],
+      "matched": null,
+      "name": "Iran",
+      "status": "unresolved"
+    },
+    {
+      "actor_id": null,
+      "advisory_id": "ADV-2026-0012",
+      "entries": [],
+      "matched": null,
+      "name": "Syria",
+      "status": "unresolved"
+    },
+    {
+      "actor_id": null,
+      "advisory_id": "ADV-2026-0012",
+      "entries": [
+        "ACT-a2b3525c6a",
+        "ACT-115b430fe1"
+      ],
+      "matched": null,
+      "name": "Islamic Revolutionary Guard Corps (IRGC)",
+      "status": "ambiguous"
+    },
+    {
+      "actor_id": null,
+      "advisory_id": "ADV-2026-0012",
+      "entries": [
+        "ACT-299fe3e04b",
+        "ACT-115b430fe1"
+      ],
+      "matched": null,
+      "name": "IRGC-Qods Force (IRGC-QF)",
+      "status": "ambiguous"
+    },
+    {
+      "actor_id": "ACT-d64634bfe6",
+      "advisory_id": "ADV-2026-0012",
+      "entries": [],
+      "matched": "Hizballah",
+      "name": "Hizballah",
+      "status": "resolved"
+    },
+    {
+      "actor_id": null,
+      "advisory_id": "ADV-2026-0012",
+      "entries": [],
+      "matched": null,
+      "name": "Hamas",
+      "status": "unresolved"
+    },
+    {
+      "actor_id": "ACT-25b2fdac82",
+      "advisory_id": "ADV-2026-0012",
+      "entries": [],
+      "matched": "National Iranian Oil Company",
+      "name": "National Iranian Oil Company",
+      "status": "resolved"
+    },
+    {
+      "actor_id": "ACT-413458a3e6",
+      "advisory_id": "ADV-2026-0012",
+      "entries": [],
+      "matched": "National Iranian Tanker Company",
+      "name": "National Iranian Tanker Company",
+      "status": "resolved"
+    },
+    {
+      "actor_id": "ACT-c112e4cc46",
+      "advisory_id": "ADV-2026-0012",
+      "entries": [],
+      "matched": "Islamic Republic of Iran Shipping Lines",
+      "name": "Islamic Republic of Iran Shipping Lines",
+      "status": "resolved"
+    },
+    {
+      "actor_id": "ACT-a159b2c77a",
+      "advisory_id": "ADV-2026-0012",
+      "entries": [],
+      "matched": "Maritime Assistance LLC",
+      "name": "Maritime Assistance LLC",
+      "status": "resolved"
+    },
+    {
+      "actor_id": null,
+      "advisory_id": "ADV-2026-0012",
+      "entries": [],
+      "matched": null,
+      "name": "Government of Syria / Bashar al-Assad regime",
+      "status": "unresolved"
+    },
+    {
+      "actor_id": "ACT-8310058ab6",
+      "advisory_id": "ADV-2026-0012",
+      "entries": [],
+      "matched": "Syrian Company for Oil Transport",
+      "name": "Syrian Company for Oil Transport",
+      "status": "resolved"
+    },
+    {
+      "actor_id": "ACT-df4b8092f3",
+      "advisory_id": "ADV-2026-0012",
+      "entries": [],
+      "matched": "Banias Refinery Company",
+      "name": "Banias Refinery Company",
+      "status": "resolved"
+    },
+    {
+      "actor_id": null,
+      "advisory_id": "ADV-2026-0013",
+      "entries": [],
+      "matched": null,
+      "name": "Office of Foreign Assets Control (OFAC)",
+      "status": "unresolved"
+    },
+    {
+      "actor_id": null,
+      "advisory_id": "ADV-2026-0013",
+      "entries": [],
+      "matched": null,
+      "name": "Bureau of Industry and Security (BIS)",
+      "status": "unresolved"
+    },
+    {
+      "actor_id": null,
+      "advisory_id": "ADV-2026-0013",
+      "entries": [],
+      "matched": null,
+      "name": "Department of Justice (DOJ)",
+      "status": "unresolved"
+    },
+    {
+      "actor_id": null,
+      "advisory_id": "ADV-2026-0013",
+      "entries": [],
+      "matched": null,
+      "name": "Task Force KleptoCapture",
+      "status": "unresolved"
+    },
+    {
+      "actor_id": "ACT-4d02ddb9cb",
+      "advisory_id": "ADV-2026-0013",
+      "entries": [],
+      "matched": "AO PKK Milandr",
+      "name": "AO PKK Milandr",
+      "status": "resolved"
+    },
+    {
+      "actor_id": "ACT-acad19cf90",
+      "advisory_id": "ADV-2026-0013",
+      "entries": [],
+      "matched": "Vorago Technologies",
+      "name": "Vorago Technologies",
+      "status": "resolved"
+    },
+    {
+      "actor_id": "ACT-bd6a576a0b",
+      "advisory_id": "ADV-2026-0014",
+      "entries": [],
+      "matched": "Garantex",
+      "name": "Garantex",
+      "status": "resolved"
+    },
+    {
+      "actor_id": null,
+      "advisory_id": "ADV-2026-0014",
+      "entries": [],
+      "matched": null,
+      "name": "National Crime Agency (NCA)",
+      "status": "unresolved"
+    },
+    {
+      "actor_id": "ACT-5eb7e4986c",
+      "advisory_id": "ADV-2026-0014",
+      "entries": [],
+      "matched": "Russian money laundering network (Operation Destabilise)",
+      "name": "Russian money laundering network (Operation Destabilise)",
+      "status": "resolved"
+    },
+    {
+      "actor_id": null,
+      "advisory_id": "ADV-2026-0015",
+      "entries": [],
+      "matched": null,
+      "name": "National Economic Crime Centre (NECC)",
+      "status": "unresolved"
+    },
+    {
+      "actor_id": null,
+      "advisory_id": "ADV-2026-0015",
+      "entries": [],
+      "matched": null,
+      "name": "HM Treasury Office of Financial Sanctions Implementation (OFSI)",
+      "status": "unresolved"
+    },
+    {
+      "actor_id": null,
+      "advisory_id": "ADV-2026-0015",
+      "entries": [],
+      "matched": null,
+      "name": "Joint Money Laundering Intelligence Taskforce (JMLIT)",
+      "status": "unresolved"
+    },
+    {
+      "actor_id": null,
+      "advisory_id": "ADV-2026-0015",
+      "entries": [],
+      "matched": null,
+      "name": "Combating Kleptocracy Cell (CKC)",
+      "status": "unresolved"
+    },
+    {
+      "actor_id": "ACT-2d1ed5d738",
+      "advisory_id": "ADV-2026-0016",
+      "entries": [],
+      "matched": "Turkik Union",
+      "name": "TURKIK UNION",
+      "status": "resolved"
+    },
+    {
+      "actor_id": "ACT-514a723e0b",
+      "advisory_id": "ADV-2026-0016",
+      "entries": [],
+      "matched": "AZU International",
+      "name": "AZU INTERNATIONAL",
+      "status": "resolved"
+    },
+    {
+      "actor_id": "ACT-73a61648a0",
+      "advisory_id": "ADV-2026-0016",
+      "entries": [],
+      "matched": "Aeromotus Unmanned Aerial Vehicles Trading LLC",
+      "name": "AEROMOTUS UNMANNED AERIAL VEHICLES TRADING LLC",
+      "status": "resolved"
+    },
+    {
+      "actor_id": "ACT-d4e7ed33b5",
+      "advisory_id": "ADV-2026-0016",
+      "entries": [],
+      "matched": "LIMITED LIABILITY COMPANY TECHNOLOGICAL COMPANY FLY BRIDGE",
+      "name": "LIMITED LIABILITY COMPANY TECHNOLOGICAL COMPANY FLY BRIDGE",
+      "status": "resolved"
+    },
+    {
+      "actor_id": "ACT-09a72dc0ec",
+      "advisory_id": "ADV-2026-0016",
+      "entries": [],
+      "matched": "NPP Istok",
+      "name": "NPP ISTOK",
+      "status": "resolved"
+    },
+    {
+      "actor_id": "ACT-49bcd52358",
+      "advisory_id": "ADV-2026-0016",
+      "entries": [],
+      "matched": "Ecitech",
+      "name": "ECITECH",
+      "status": "resolved"
+    },
+    {
+      "actor_id": "ACT-927d8c6b57",
+      "advisory_id": "ADV-2026-0017",
+      "entries": [],
+      "matched": "Etibar Eyyub",
+      "name": "Etibar EYYUB",
+      "status": "resolved"
+    },
+    {
+      "actor_id": "ACT-30b020be28",
+      "advisory_id": "ADV-2026-0017",
+      "entries": [],
+      "matched": "Tahir Garayev",
+      "name": "Tahir GARAYEV",
+      "status": "resolved"
+    },
+    {
+      "actor_id": "ACT-8ded0f15e8",
+      "advisory_id": "ADV-2026-0017",
+      "entries": [],
+      "matched": "Igor Sechin",
+      "name": "Igor SECHIN",
+      "status": "resolved"
+    },
+    {
+      "actor_id": "ACT-54409afd1c",
+      "advisory_id": "ADV-2026-0017",
+      "entries": [],
+      "matched": "Rosneft",
+      "name": "ROSNEFT",
+      "status": "resolved"
+    },
+    {
+      "actor_id": "ACT-4242937668",
+      "advisory_id": "ADV-2026-0017",
+      "entries": [],
+      "matched": "2Rivers DMCC",
+      "name": "2RIVERS DMCC",
+      "status": "resolved"
+    },
+    {
+      "actor_id": "ACT-b21554d4be",
+      "advisory_id": "ADV-2026-0017",
+      "entries": [],
+      "matched": "2Rivers PTE",
+      "name": "2RIVERS PTE",
+      "status": "resolved"
+    },
+    {
+      "actor_id": "ACT-8307c938a0",
+      "advisory_id": "ADV-2026-0017",
+      "entries": [],
+      "matched": "Nord Axis",
+      "name": "NORD AXIS",
+      "status": "resolved"
+    },
+    {
+      "actor_id": null,
+      "advisory_id": "ADV-2026-0018",
+      "entries": [],
+      "matched": null,
+      "name": "Deutsche Bank",
+      "status": "unresolved"
+    },
+    {
+      "actor_id": "ACT-eb59af72ce",
+      "advisory_id": "ADV-2026-0019",
+      "entries": [],
+      "matched": "ChipMixer",
+      "name": "ChipMixer",
+      "status": "resolved"
+    }
+  ],
   "ambiguous": 4,
   "ambiguous_actors": [
     {

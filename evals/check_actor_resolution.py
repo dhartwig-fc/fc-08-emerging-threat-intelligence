@@ -9,6 +9,7 @@ Usage:
     python evals/check_actor_resolution.py --mutate same-advisory  # builder merges within one advisory; MUST fail
     python evals/check_actor_resolution.py --mutate category       # a category may resolve; MUST fail
     python evals/check_actor_resolution.py --mutate positional     # ids counted by position; MUST fail
+    python evals/check_actor_resolution.py --mutate tool           # the SERVER tool resolves suggestions; MUST fail
 
 WHY. Measured 2026-09-25 against the extractor's records: of five actors a containment
 rule at 0.60 would have resolved, four were wrong -- "Iran" and "Islamic Republic of Iran"
@@ -16,12 +17,15 @@ to Islamic Republic of Iran Shipping Lines, "Syria" to the Iran-Syria oil procur
 network, "Company X" to National Iranian Oil Company.
 
 OFFLINE. The REAL labels and records; the register is rebuilt in memory so the builder
-mutations take effect. No model, no PDF.
+mutations take effect. The MCP tool itself is called in-process against the committed
+register (data/actor_register.json), so a server that stopped using the exact-match rule
+fails here even while schemas/actor_match.py is correct. No model, no PDF, no env vars.
 """
 
 from __future__ import annotations
 
 import argparse
+import asyncio
 import copy
 import sys
 from pathlib import Path
@@ -30,11 +34,18 @@ ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
 from evals.actor_resolution import load_records, report  # noqa: E402
+from mcp_server import knowledge_centre_server as kc  # noqa: E402
 from schemas.actor_match import resolve  # noqa: E402
 from tools.build_actor_register import build_register, load_labels  # noqa: E402
 
 FLAGS = {"resolve": {}, "build": {}}
 WITNESS = "Guard Witness Trading LLC"
+
+
+def _tool(name: str, actor_type=None) -> str:
+    """The knowledge_centre_resolve_actor tool's reply, called in-process."""
+    fn = getattr(kc.resolve_actor, "fn", kc.resolve_actor)
+    return asyncio.run(fn(kc.ResolveActorInput(name=name, actor_type=actor_type)))
 
 
 def checks() -> list:
@@ -144,12 +155,32 @@ def checks() -> list:
                 "witness in %s; %d of %d original (id, name) pairs changed%s"
                 % (inserted[0]["advisory_id"], len(moved), len(before), (", e.g. %s" % (moved[:2],)) if moved else "")))
 
+    # Per-actor rows (final review F2): one per named actor, and the rows say which is which.
+    rows = rep.get("actors", [])
+    out.append((len(rows) == rep["named"], "the report has one per-actor row per named actor",
+                "%d rows, %d named" % (len(rows), rep["named"])))
+    milandr = [r for r in rows if r["advisory_id"] == "ADV-2026-0013" and r["name"] == "AO PKK Milandr"]
+    out.append((len(milandr) == 1 and milandr[0]["status"] == "resolved" and milandr[0]["actor_id"],
+                "ADV-2026-0013's rows include AO PKK Milandr, resolved to an id", str(milandr)))
+
+    # The MCP tool itself (final review F3), against the committed register.
+    said = _tool("Iran")
+    out.append((not said.startswith("Resolved"), 'the TOOL does not resolve "Iran"', said[:140]))
+    said = _tool("Milandr")
+    out.append((said.startswith("Resolved") and "ACT-" in said, 'the TOOL resolves "Milandr" to an ACT- id',
+                said[:140]))
+    said = _tool("IRGC")
+    out.append((said.startswith("Ambiguous"), 'the TOOL answers "IRGC" as Ambiguous', said[:140]))
+    said = _tool("Iranian UAV entities", "category")
+    out.append((said.startswith("Not resolvable"), "the TOOL never resolves a category", said[:140]))
+
     return out
 
 
 def main(argv: list) -> int:
     ap = argparse.ArgumentParser(description="Pin actor identity")
-    ap.add_argument("--mutate", choices=("containment", "ambiguous", "same-advisory", "category", "positional"))
+    ap.add_argument("--mutate", choices=("containment", "ambiguous", "same-advisory", "category", "positional",
+                                         "tool"))
     args = ap.parse_args(argv)
     if args.mutate == "containment":
         FLAGS["resolve"] = {"suggestions_resolve": True}
@@ -161,6 +192,10 @@ def main(argv: list) -> int:
         FLAGS["build"] = {"merge_same_advisory": True}
     elif args.mutate == "positional":
         FLAGS["build"] = {"positional_ids": True}
+    elif args.mutate == "tool":
+        # In memory only: the SERVER's resolver lets a containment suggestion resolve.
+        kc.resolve_names = lambda names, actor_type, register: resolve(names, actor_type, register,
+                                                                        suggestions_resolve=True)
     if args.mutate:
         print("MUTATED: %s\n" % args.mutate)
     failures = 0

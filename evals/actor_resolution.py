@@ -37,8 +37,10 @@ def load_records(records_dir: Path = RECORDS) -> list:
 
 
 def report(records, register, **flags) -> dict:
+    # "actors" is one row per NAMED actor in record order, so a reader can see WHICH actor
+    # resolved to what -- the counts alone cannot say. Categories get no row.
     out = {"named": 0, "resolved": 0, "ambiguous": 0, "unresolved": 0, "unresolved_with_suggestions": 0,
-           "categories": 0, "per_advisory": {}, "ambiguous_actors": [], "suggestions": []}
+           "categories": 0, "per_advisory": {}, "ambiguous_actors": [], "suggestions": [], "actors": []}
     for rec in sorted(records, key=lambda r: r["advisory_id"]):
         aid = rec["advisory_id"]
         per = out["per_advisory"].setdefault(aid, {"named": 0, "resolved": 0})
@@ -49,6 +51,11 @@ def report(records, register, **flags) -> dict:
                 continue
             out["named"] += 1
             per["named"] += 1
+            out["actors"].append({
+                "advisory_id": aid, "name": a["name"], "status": got["status"],
+                "actor_id": got["actor_id"] if got["status"] == "resolved" else None,
+                "matched": got["matched"] if got["status"] == "resolved" else None,
+                "entries": [e["actor_id"] for e in got["entries"]] if got["status"] == "ambiguous" else []})
             if got["status"] == "resolved":
                 out["resolved"] += 1
                 per["resolved"] += 1
