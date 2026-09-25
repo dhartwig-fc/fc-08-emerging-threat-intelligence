@@ -14,7 +14,10 @@ Identity is the owner's, so the builder merges only what needs no judgement:
     matching both of ADV-2026-0010's separate entries; merging into either would make the
     other answer to the wrong name;
   - two actors from the SAME advisory never merge -- the label counted them as two
-    (`same advisory`);
+    (`same advisory`). Decided against a SNAPSHOT of the register as it stood before
+    the advisory: two actors of one advisory are BOTH blocked from merging if they
+    share an exact key with each other, or if their snapshot hits share an entry --
+    checked pairwise, so the rule cannot depend on which actor is labelled first;
   - different entries whose spellings reach containment >= SUGGEST_MIN are listed
     `similar names` with their score. Measured, most such pairs are different parties
     (National Iranian Oil vs Tanker Company, GCM vs Berelian Exchange).
@@ -59,26 +62,65 @@ def _aliases(name: str, spellings) -> list:
 
 def build_register(labels, merge_same_advisory: bool = False, merge_ambiguous: bool = False):
     entries, candidates, spellings = [], [], {}   # spellings: actor_id -> every spelling seen
+
     for label in sorted(labels, key=lambda r: r["advisory_id"]):
         aid = label["advisory_id"]
-        for actor in label.get("actors", []):
-            if actor.get("actor_type") == "category":
-                continue
-            mine = variants_of(actor)
-            keys = {norm(v) for v in mine}
-            hits = [e for e in entries if {norm(v) for v in spellings[e["actor_id"]]} & keys]
-            same = [e for e in hits if any(n["advisory_id"] == aid for n in e["named_in"])]
-            other = [e for e in hits if e not in same]
-            for e in same:
-                candidates.append({"reason": "same advisory", "advisory_id": aid, "actor": actor["name"],
-                                   "entries": [e["actor_id"]], "score": None})
-            if merge_same_advisory and same and not other:
-                other, same = same, []
-            if len(other) > 1 and not merge_ambiguous:
+        named = [a for a in label.get("actors", []) if a.get("actor_type") != "category"]
+
+        if merge_same_advisory:
+            # Mutation handle: the pre-fix sequential behaviour, with NO same-advisory
+            # check at all -- each actor is matched against the LIVE register as it
+            # grows within this advisory, so a constructed pair sharing an alias
+            # merges into one entry rather than being blocked.
+            for actor in named:
+                mine = variants_of(actor)
+                keys = {norm(v) for v in mine}
+                hits = [e for e in entries if {norm(v) for v in spellings[e["actor_id"]]} & keys]
+                if len(hits) > 1 and not merge_ambiguous:
+                    candidates.append({"reason": "ambiguous", "advisory_id": aid, "actor": actor["name"],
+                                       "entries": [e["actor_id"] for e in hits], "score": None})
+                if hits and (len(hits) == 1 or merge_ambiguous):
+                    target = hits[0]
+                    target["named_in"].append({"advisory_id": aid, "name_as_labelled": actor["name"]})
+                    spellings[target["actor_id"]].extend(mine)
+                    continue
+                actor_id = "ACT-%04d" % (len(entries) + 1)
+                entries.append({"actor_id": actor_id, "name": actor["name"], "actor_type": actor.get("actor_type"),
+                                "aliases": [], "named_in": [{"advisory_id": aid, "name_as_labelled": actor["name"]}],
+                                "entity_key": None})
+                spellings[actor_id] = list(mine)
+            continue
+
+        # Decide this whole advisory against a SNAPSHOT of the register as it stood
+        # before it, so which actor is labelled first cannot change what gets caught.
+        snapshot = [(e["actor_id"], frozenset(norm(v) for v in spellings[e["actor_id"]])) for e in entries]
+        variants = [variants_of(actor) for actor in named]
+        actor_keys = [frozenset(norm(v) for v in mine) for mine in variants]
+        actor_hits = [[eid for eid, ekeys in snapshot if ekeys & keys] for keys in actor_keys]
+
+        blocked = set()
+        for i in range(len(named)):
+            for j in range(i + 1, len(named)):
+                shared_hits = sorted(set(actor_hits[i]) & set(actor_hits[j]))
+                if (actor_keys[i] & actor_keys[j]) or shared_hits:
+                    blocked.update((i, j))
+                    candidates.append({"reason": "same advisory", "advisory_id": aid,
+                                       "actor": "%s / %s" % (named[i]["name"], named[j]["name"]),
+                                       "entries": shared_hits, "score": None})
+
+        for i, actor in enumerate(named):
+            mine = variants[i]
+            hits = [] if i in blocked else actor_hits[i]
+            if len(hits) > 1:
+                if merge_ambiguous:
+                    target = next(e for e in entries if e["actor_id"] == hits[0])
+                    target["named_in"].append({"advisory_id": aid, "name_as_labelled": actor["name"]})
+                    spellings[target["actor_id"]].extend(mine)
+                    continue
                 candidates.append({"reason": "ambiguous", "advisory_id": aid, "actor": actor["name"],
-                                   "entries": [e["actor_id"] for e in other], "score": None})
-            if other and not same and (len(other) == 1 or merge_ambiguous):
-                target = other[0]
+                                   "entries": hits, "score": None})
+            elif len(hits) == 1:
+                target = next(e for e in entries if e["actor_id"] == hits[0])
                 target["named_in"].append({"advisory_id": aid, "name_as_labelled": actor["name"]})
                 spellings[target["actor_id"]].extend(mine)
                 continue
@@ -87,6 +129,7 @@ def build_register(labels, merge_same_advisory: bool = False, merge_ambiguous: b
                             "aliases": [], "named_in": [{"advisory_id": aid, "name_as_labelled": actor["name"]}],
                             "entity_key": None})
             spellings[actor_id] = list(mine)
+
     for e in entries:
         e["aliases"] = _aliases(e["name"], spellings[e["actor_id"]])
     for i, a in enumerate(entries):
