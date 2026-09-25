@@ -43,8 +43,14 @@ evidence rows it cannot use are exactly the rows on reviewer-added items, and th
 asserts that too, so the restriction cannot quietly swallow a row. Both mutations break
 repair() itself, and this is the check they must fail.
 
---merged-dir / --evidence (hidden; not for interactive use) point the checks at a
-temporary COPY of the merged records or of the evidence, so the RED half of each check
+THE ATTESTED SET IS TIED TO THIS REPAIR. Every entry of evals/attested_citations.json must
+be accounted for by this evidence (attested in place, or a start-page re-page), and the
+file must match the evidence's sha256 pin byte for byte. So a FUTURE attestation -- or any
+edit to an entry's reason or evidence -- fails this guard until the guard is updated for
+it (a new dated evidence file, or a deliberate change to these checks).
+
+--merged-dir / --evidence / --attested (hidden; not for interactive use) point the checks
+at a temporary COPY of the merged records, the evidence or the attestations, so the RED half of each check
 can be watched without writing the real tree -- the same arrangement as
 check_citations.py --records-dir. data/records has no such switch: nothing here may
 write it, and its check is proved red through a copy of the evidence's pin instead.
@@ -133,6 +139,13 @@ def checks() -> list:
                 "every entry of evals/attested_citations.json is attested in place or a start-page re-page, "
                 "and nothing else is", "%d attested, %d accounted for, differ: %s"
                 % (len(attested), len(accounted), sorted(attested ^ accounted)[:2])))
+
+    # 2c. The attestation file is byte-for-byte the one the repair was built on: a changed reason,
+    # evidence excerpt or note is a change to what the owner attested, and must be re-decided.
+    now_sha = tool._sha_file(ATTESTED) if ATTESTED.exists() else None
+    out.append((now_sha is not None and now_sha == ev.get("attested_citations_sha256"),
+                "evals/attested_citations.json is byte-identical to the evidence's sha256 pin",
+                "pinned %s, now %s" % (str(ev.get("attested_citations_sha256"))[:16], str(now_sha)[:16])))
 
     # 3. data/records is exactly what the repair was built on.
     now = tool.records_pin()
@@ -238,15 +251,17 @@ def checks() -> list:
 
 
 def main(argv: list) -> int:
-    global MERGED, EVIDENCE
+    global MERGED, EVIDENCE, ATTESTED
     ap = argparse.ArgumentParser(description="Pin the owner's 2026-09-25 citation repair")
     ap.add_argument("--mutate", choices=("keep-uncited", "repage-ambiguous"),
                     help="break repair(); checks MUST fail")
     ap.add_argument("--merged-dir", type=Path, help=argparse.SUPPRESS)
     ap.add_argument("--evidence", type=Path, help=argparse.SUPPRESS)
+    ap.add_argument("--attested", type=Path, help=argparse.SUPPRESS)
     args = ap.parse_args(argv)
     MERGED = args.merged_dir or MERGED
     EVIDENCE = args.evidence or EVIDENCE
+    ATTESTED = args.attested or ATTESTED
     if args.mutate:
         tool._MUTATE = args.mutate
         print("MUTATED: %s\n" % {

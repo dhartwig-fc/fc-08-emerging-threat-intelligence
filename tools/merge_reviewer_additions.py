@@ -46,6 +46,14 @@ reviewer additions, makes the merge refuse until the evidence is rebuilt -- and 
 then writes NOTHING, not the other nineteen records: a batch half repaired and half
 not is a state no evidence file describes. (A record that merely fails schema
 validation is skipped and reported, as before.)
+
+"Rebuilt" is a procedure, not a flag: (1) write a NEW dated evidence file under evals/owner_decisions/ from the then-current
+baseline (--build-evidence refuses to overwrite an existing one, because an owner
+decision's evidence is never rewritten); (2) change the code that names the evidence file
+-- REPAIR_EVIDENCE in tools/merge_reviewer_additions.py and EVIDENCE in
+tools/apply_citation_repair.py -- in the same commit; (3) update
+evals/check_citation_repair.py, whose pins describe this repair. There is no in-place
+rebuild of citation_repair_2026-09-25.json.
 """
 
 from __future__ import annotations

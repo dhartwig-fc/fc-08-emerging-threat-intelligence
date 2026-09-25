@@ -19,6 +19,11 @@ duplicated. An attestation is an exemption from a governance check, so this guar
 how NARROW it is: one citation, by its full identity (advisory, section, item, page,
 quote sha256), and nothing else.
 
+TIED TO ONE REPAIR, for now. evals/check_citation_repair.py requires every entry of the
+list to be accounted for by the 2026-09-25 repair's evidence and the file to match that
+evidence's sha256 pin, so a future attestation needs that guard updated as well as this
+list.
+
 COLD. The logic is exercised over synthetic pages (PageIndex over strings) and synthetic
 records, through the same functions check_citations --all calls. The committed list, if
 there is one, is checked cold for its schema and that every identity exists in the

@@ -73,7 +73,11 @@ verified-by-attestation (reported separately), NOT as a defect, and REFUSES (exi
 list when an entry is malformed, appears twice, matches no citation ("stale
 attestation"), or is now placed by the matcher ("attestation no longer needed -- remove
 it"). The list is read here only; the matcher, the MCP server and the review gate never
-see it. Pinned cold by evals/check_attestations.py.
+see it. Pinned cold by evals/check_attestations.py. The two-argument form honours it too,
+through the same apply_attestations, scoped to the one advisory. NOTE: the attested set is
+currently tied to the 2026-09-25 citation repair -- evals/check_citation_repair.py requires
+every entry to be accounted for by that repair's evidence and the file to match the
+evidence's sha256 pin -- so adding a FUTURE attestation needs that guard updated too.
 
 --records-dir (hidden; not for interactive use) points the defect computation
 at a different directory of ADV-*.json records instead of data/records_merged.
@@ -122,66 +126,77 @@ BASELINE_NOTE = ("emptied 2026-09-25 by the owner's citation repair, "
 # ---------------------------------------------------------------------------
 
 def check_record(record_path, pdf_path, verbose: bool = True):
-    """Check one record against one PDF. Returns (checked, exact, spacing, artefact, off_page, missing).
+    """Check one record against one PDF.
 
-    "artefact" counts every tier past spacing -- artefact and ellipsis -- so the tuple
-    keeps its shape; the verbose line names the tier. Before 2026-09-25 an ellipsis
-    hit fell through to MISSING here while --all (which asks hit.ok) accepted it.
+    Returns (checked, exact, spacing, artefact, off_page, missing, attested, problems).
+    "artefact" counts every tier past spacing -- artefact and ellipsis -- and the verbose
+    line names the tier. Owner-attested citations (evals/attested_citations.json) are
+    honoured exactly as --all honours them, through the same apply_attestations: an
+    attested citation the matcher refuses is ATTESTED, not off_page or missing, and a
+    stale, still-needed or malformed entry for THIS advisory is a problem. Until the
+    2026-09-25 review this form ignored attestations, so ADV-2026-0010 exited 1 on four
+    citations --all counted as verified.
     """
     record = json.loads(Path(record_path).read_text(encoding="utf-8"))
+    advisory_id = record.get("advisory_id") or Path(record_path).stem
     # The matching rule lives in schemas/citation_match.py, shared with the MCP
     # server and the review gate, so all three accept and refuse the same quotes.
     index = PageIndex.from_pdf(pdf_path)
+    attested, problems = load_attestations()
+    mine = [e for e in attested if e["advisory_id"] == advisory_id]
+    covered = {attestation_identity(e) for e in mine}
 
-    checked = 0
-    exact = 0
-    spacing = 0
-    artefact = 0
-    off_page = 0
-    missing = 0
+    counts = {EXACT: 0, SPACING: 0, "artefact": 0, OFF_PAGE: 0, "missing": 0, "attested": 0}
+    rows = []
     for section in ("typologies", "actors", "indicators"):
         for item in record.get(section, []):
-            label = item.get("label") or item.get("name") or item.get("description", "")[:60]
+            label = _label_for(item)
             for c in item.get("citations", []):
-                checked += 1
                 hit = index.locate(c["page"], c["quote"])
+                ident = (advisory_id, section, label, c["page"], _quote_sha256(c["quote"]))
+                rows.append((ident, hit.ok, None if hit.ok else {"kind": hit.status}))
                 if hit.status == EXACT:
-                    exact += 1
+                    counts[EXACT] += 1
                     status = "OK         "
                 elif hit.status == SPACING:
-                    spacing += 1
+                    counts[SPACING] += 1
                     status = "OK-SPACING "
-                elif hit.status == ARTEFACT:
-                    artefact += 1
-                    status = "OK-ARTEFACT"
-                elif hit.status == ELLIPSIS:
-                    # counted with the artefact tier in the summary; named per line
-                    artefact += 1
+                elif hit.status in (ARTEFACT, ELLIPSIS):
+                    counts["artefact"] += 1
                     status = "OK-%s" % hit.status.upper()
+                elif ident in covered:
+                    counts["attested"] += 1
+                    status = "ATTESTED   "
                 elif hit.status == OFF_PAGE:
-                    off_page += 1
+                    counts[OFF_PAGE] += 1
                     status = "OFF-PAGE  (found on %s)" % list(hit.found_on)
                 else:
-                    missing += 1
+                    counts["missing"] += 1
                     status = "MISSING    "
                 if verbose:
                     print("%s p%-3d %-10s %s" % (status, c["page"], section[:10], label[:60]))
-                    if not hit.ok:
+                    if not hit.ok and ident not in covered:
                         print("           quote: %r" % c["quote"][:140])
-    return checked, exact, spacing, artefact, off_page, missing
+    _, _, more = apply_attestations(rows, mine)
+    return (len(rows), counts[EXACT], counts[SPACING], counts["artefact"], counts[OFF_PAGE], counts["missing"],
+            counts["attested"], problems + more)
 
 
 def main(record_path: str, pdf_path: str) -> int:
-    checked, exact, spacing, artefact, off_page, missing = check_record(record_path, pdf_path, verbose=True)
+    checked, exact, spacing, artefact, off_page, missing, attested, problems = check_record(
+        record_path, pdf_path, verbose=True)
 
     print()
+    for problem in problems:
+        print("ATTESTATION REFUSED: %s" % problem)
     print("citations checked: %d | exact on page: %d | on page modulo pypdf spacing: %d | "
-          "on page modulo PDF artefacts, ellipses or a page break: %d | right quote wrong page: %d | not in document: %d"
-          % (checked, exact, spacing, artefact, off_page, missing))
+          "on page modulo PDF artefacts or ellipses: %d | owner-attested: %d | right quote wrong page: %d | "
+          "not in document: %d"
+          % (checked, exact, spacing, artefact, attested, off_page, missing))
     if checked == 0:
         print("FAIL: no citations examined; a record with nothing to check is not a pass")
         return 1
-    return 0 if missing == 0 and off_page == 0 else 1
+    return 0 if missing == 0 and off_page == 0 and not problems else 1
 
 
 # ---------------------------------------------------------------------------

@@ -60,6 +60,18 @@ So --apply on already-repaired records refuses cleanly: the re-paged citations a
 longer on their old pages and the removed ones are gone, so the evidence no longer
 matches, and nothing is written.
 
+RE-EXTRACTING AN ADVISORY THAT HAS EVIDENCE ROWS makes this evidence stop matching, and
+the merge then refuses. The procedure: (1) write a NEW dated evidence file under evals/owner_decisions/ from the then-current
+baseline (--build-evidence refuses to overwrite an existing one, because an owner
+decision's evidence is never rewritten); (2) change the code that names the evidence file
+-- REPAIR_EVIDENCE in tools/merge_reviewer_additions.py and EVIDENCE in
+tools/apply_citation_repair.py -- in the same commit; (3) update
+evals/check_citation_repair.py, whose pins describe this repair.
+
+ATTESTATIONS ARE TIED TO THIS REPAIR. evals/check_citation_repair.py requires every entry
+of evals/attested_citations.json to be accounted for by this evidence and the file to
+match its sha256 pin, so a future attestation needs that guard updated with it.
+
 tools/merge_reviewer_additions.py applies repair() after merging whenever the evidence
 file exists, so regenerating data/records_merged from data/records + the reviewer's
 additions reproduces the repaired files byte for byte. --check proves exactly that. It
