@@ -1,5 +1,5 @@
 {
-  "note": "record citations never re-verified after week 1; pinned 2026-09-25 pending an owner decision on remediation; an entry is removed only in the commit that fixes it",
+  "note": "record citations never re-verified after week 1; pinned 2026-09-25 pending an owner decision on remediation; an entry is removed only in the commit that fixes it; re-measured 2026-09-25 after the matcher gained the ARTEFACT tier (footnote digits, line-break hyphens); was 118",
   "defects": [
     {
       "advisory_id": "ADV-2026-0001",
@@ -139,8 +139,10 @@
       "item": "Services-Based Money Laundering",
       "page": 35,
       "quote_sha256": "7ab80231c1ddab7be3ae0f8da996aa31b2396ab409bdf49023d05e7faad8832f",
-      "kind": "missing",
-      "found_on": []
+      "kind": "off_page",
+      "found_on": [
+        37
+      ]
     },
     {
       "advisory_id": "ADV-2026-0001",
@@ -185,51 +187,6 @@
       "found_on": [
         28
       ]
-    },
-    {
-      "advisory_id": "ADV-2026-0002",
-      "section": "indicators",
-      "item": "An account tied to a trade entity behaves as a pay-through o",
-      "page": 8,
-      "quote_sha256": "d3f2cf67c01f42836a01ef543dec28b89fd62fc1d10b0b477abdcab3191f16a5",
-      "kind": "missing",
-      "found_on": []
-    },
-    {
-      "advisory_id": "ADV-2026-0002",
-      "section": "indicators",
-      "item": "Trade entity consistently displays unreasonably low profit m",
-      "page": 6,
-      "quote_sha256": "6ce4dfb04c19a457e890df67fad2a8264520fe09ffb3e7c083924ecc4a271891",
-      "kind": "missing",
-      "found_on": []
-    },
-    {
-      "advisory_id": "ADV-2026-0002",
-      "section": "typologies",
-      "item": "Over Invoicing",
-      "page": 6,
-      "quote_sha256": "6ce4dfb04c19a457e890df67fad2a8264520fe09ffb3e7c083924ecc4a271891",
-      "kind": "missing",
-      "found_on": []
-    },
-    {
-      "advisory_id": "ADV-2026-0002",
-      "section": "typologies",
-      "item": "Rapid Movement",
-      "page": 8,
-      "quote_sha256": "d3f2cf67c01f42836a01ef543dec28b89fd62fc1d10b0b477abdcab3191f16a5",
-      "kind": "missing",
-      "found_on": []
-    },
-    {
-      "advisory_id": "ADV-2026-0002",
-      "section": "typologies",
-      "item": "Under Invoicing",
-      "page": 6,
-      "quote_sha256": "6ce4dfb04c19a457e890df67fad2a8264520fe09ffb3e7c083924ecc4a271891",
-      "kind": "missing",
-      "found_on": []
     },
     {
       "advisory_id": "ADV-2026-0003",
@@ -553,15 +510,6 @@
     {
       "advisory_id": "ADV-2026-0003",
       "section": "typologies",
-      "item": "Professional Money Laundering (Third-Party PML Organisations/Networks)",
-      "page": 12,
-      "quote_sha256": "2bdfe8f53d73aba797535b02cb1939c645728c2118584bc0f8e32abaf3b09941",
-      "kind": "missing",
-      "found_on": []
-    },
-    {
-      "advisory_id": "ADV-2026-0003",
-      "section": "typologies",
       "item": "Proxy Networks (Shell Company Layering)",
       "page": 26,
       "quote_sha256": "1cd364dead8bffdddda9fb1eabd2dc7594a0ccc5bf6b39f8d7d26214f017e486",
@@ -747,8 +695,10 @@
       "item": "Front Companies",
       "page": 32,
       "quote_sha256": "f00f2994b00823c510d7e43e63472a6da1966e168869f11ed95dd9fc3ccaf6f2",
-      "kind": "missing",
-      "found_on": []
+      "kind": "off_page",
+      "found_on": [
+        34
+      ]
     },
     {
       "advisory_id": "ADV-2026-0004",
@@ -794,15 +744,6 @@
       "item": "Chilean gold-smuggling TCO (Operation Diez Condores)",
       "page": 34,
       "quote_sha256": "c779f455d1b1040feb54f851210cefd045c86c4de823cdee643b60af593974b2",
-      "kind": "missing",
-      "found_on": []
-    },
-    {
-      "advisory_id": "ADV-2026-0006",
-      "section": "actors",
-      "item": "Dan Gertler",
-      "page": 63,
-      "quote_sha256": "3a264c30a492abd44c1b5adeef0ba75ba1a678af12c366fa3f43545c8924d282",
       "kind": "missing",
       "found_on": []
     },
@@ -896,8 +837,10 @@
       "item": "Informal Value Transfer (Hawala) Networks for Environmental Crime Proceeds",
       "page": 31,
       "quote_sha256": "2fe569761bb56d469909c910576e1f45a7b8cebe85a896728a064bc5f13e8b64",
-      "kind": "missing",
-      "found_on": []
+      "kind": "off_page",
+      "found_on": [
+        33
+      ]
     },
     {
       "advisory_id": "ADV-2026-0006",
@@ -967,15 +910,6 @@
       "item": "Structuring",
       "page": 22,
       "quote_sha256": "0d9f85cc25562f5f350472422950879addb4e8f12a5f836b03f700e890cce988",
-      "kind": "missing",
-      "found_on": []
-    },
-    {
-      "advisory_id": "ADV-2026-0008",
-      "section": "actors",
-      "item": "Chinese-speaking money laundering networks",
-      "page": 40,
-      "quote_sha256": "5a5d09ab17c4aeedacdfc08af0556a9a1495c3bd103e9a80e137fda709152dc3",
       "kind": "missing",
       "found_on": []
     },
@@ -1132,56 +1066,11 @@
       "found_on": []
     },
     {
-      "advisory_id": "ADV-2026-0011",
-      "section": "actors",
-      "item": "Daigou buyers and operators",
-      "page": 7,
-      "quote_sha256": "9282ab8d51587df9de1828625968f1371f1fe955ebf0ae930445d112182cbd58",
-      "kind": "missing",
-      "found_on": []
-    },
-    {
-      "advisory_id": "ADV-2026-0011",
-      "section": "indicators",
-      "item": "Business owned by a Chinese national receives deposits from ",
-      "page": 10,
-      "quote_sha256": "7caeb190b5986c4b5ae72311fac44eba71a6b219db1ccde9cc849ae630fbec8a",
-      "kind": "missing",
-      "found_on": []
-    },
-    {
-      "advisory_id": "ADV-2026-0011",
-      "section": "typologies",
-      "item": "Funnel Accounts",
-      "page": 6,
-      "quote_sha256": "fc5d8f559222501cda0b0883f2cdc453c017e28dc1055327338da182806e106c",
-      "kind": "missing",
-      "found_on": []
-    },
-    {
-      "advisory_id": "ADV-2026-0011",
-      "section": "typologies",
-      "item": "Shell Company Trading",
-      "page": 10,
-      "quote_sha256": "7caeb190b5986c4b5ae72311fac44eba71a6b219db1ccde9cc849ae630fbec8a",
-      "kind": "missing",
-      "found_on": []
-    },
-    {
       "advisory_id": "ADV-2026-0012",
       "section": "actors",
       "item": "IRGC-Qods Force (IRGC-QF)",
       "page": 7,
       "quote_sha256": "f4d07bd1db68619b14a6371382e5fa99c90e0d06055cb19e335e0b6fedeb2819",
-      "kind": "missing",
-      "found_on": []
-    },
-    {
-      "advisory_id": "ADV-2026-0014",
-      "section": "actors",
-      "item": "Professional enablers",
-      "page": 12,
-      "quote_sha256": "b7581c329a1b46c8364de4c5727fae546414c50fd22c55bbdb5f9c5cfcf006d9",
       "kind": "missing",
       "found_on": []
     },
@@ -1198,29 +1087,11 @@
       ]
     },
     {
-      "advisory_id": "ADV-2026-0015",
-      "section": "actors",
-      "item": "HM Treasury Office of Financial Sanctions Implementation (OFSI)",
-      "page": 1,
-      "quote_sha256": "58b1a428716f9b325f84d6000b3c4c642b52d283ee8e321fa4ffaf82b4ee190b",
-      "kind": "missing",
-      "found_on": []
-    },
-    {
       "advisory_id": "ADV-2026-0019",
       "section": "actors",
       "item": "Corruption brokers",
       "page": 23,
       "quote_sha256": "537118c4ce447021375787db6a5f201d573804d4ff60b1f15df3354126e9b0d7",
-      "kind": "missing",
-      "found_on": []
-    },
-    {
-      "advisory_id": "ADV-2026-0020",
-      "section": "indicators",
-      "item": "A documentary credit is constantly amended or extended, or i",
-      "page": 45,
-      "quote_sha256": "4a8742a1189d7f8da21cdee114eb87f90ad0d618775e7099eb77e3c7343539aa",
       "kind": "missing",
       "found_on": []
     },

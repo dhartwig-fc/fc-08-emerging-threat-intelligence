@@ -20,7 +20,8 @@ review.py --check -- all three passed cold. The measurement wins; they are class
 
 evals/check_citations.py --all does not simply pass or fail: it diffs the current
 citation-defect set against the frozen baseline in evals/known_citation_defects.json
-(118 known, pre-existing defects, pinned 2026-09-25 pending an owner decision -- see
+(103 known, pre-existing defects -- 118 until the matcher's ARTEFACT tier, same day --
+pinned 2026-09-25 pending an owner decision -- see
 that file's "note" and the module docstring). It needs the PDFs to compute that set,
 so it is classed needs-pdfs even though its usual outcome, given the PDFs, is a clean
 diff against the baseline rather than a raw pass.
@@ -43,6 +44,7 @@ GUARDS = [
     ("check_digest_routing", ["evals/check_digest_routing.py"], "cold"),
     ("check_digest_batch", ["evals/check_digest_batch.py"], "cold"),
     ("check_emergent_threshold", ["evals/check_emergent_threshold.py"], "cold"),
+    ("check_citation_match", ["evals/check_citation_match.py"], "cold"),
     ("check_added_by", ["evals/check_added_by.py"], "cold"),
     ("check_actor_resolution", ["evals/check_actor_resolution.py"], "cold"),
     ("check_telemetry", ["evals/check_telemetry.py"], "cold"),
