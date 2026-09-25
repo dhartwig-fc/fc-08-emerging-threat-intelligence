@@ -29,6 +29,15 @@ record holds -- enforced in `review_advisory.py`, not asked for in its prompt.
 Emergent additions carry no id, so they are deduplicated here on the normalised
 label, using the scorer's own tokeniser rather than a second definition of
 "the same string".
+
+THE OWNER'S CITATION REPAIR (2026-09-25). When
+evals/owner_decisions/citation_repair_2026-09-25.json exists, each merged record is
+passed through tools/apply_citation_repair.repair() before it is validated and
+written, so regenerating data/records_merged reproduces the repaired, committed files
+byte for byte (tools/apply_citation_repair.py --check proves it). The repair is for
+the MERGED output only: --in-place writes data/records, the extractor's evidence,
+which the decision leaves untouched with its defects, so --in-place is REFUSED while
+the evidence file exists.
 """
 
 from __future__ import annotations
@@ -115,6 +124,16 @@ def merge(record: dict, additions: list) -> tuple:
 
 
 ARCHIVE = ROOT / "data" / "records_extraction_only"
+REPAIR_EVIDENCE = ROOT / "evals" / "owner_decisions" / "citation_repair_2026-09-25.json"
+
+
+def _repair_tool():
+    """tools/apply_citation_repair.py, loaded by path (tools/ is not a package)."""
+    spec = importlib.util.spec_from_file_location("fc08_apply_citation_repair",
+                                                  ROOT / "tools" / "apply_citation_repair.py")
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
 
 
 def archive_extraction_records() -> bool:
@@ -176,6 +195,16 @@ def main(argv: list) -> int:
             print("No record for %s" % args.advisory, file=sys.stderr)
             return 2
 
+    repair_evidence = None
+    if REPAIR_EVIDENCE.exists():
+        if args.in_place:
+            print("REFUSED: --in-place would write the owner's citation repair (%s) into data/records,\n"
+                  "  the extractor's evidence, which that decision leaves untouched. The repair is for\n"
+                  "  the merged output only." % REPAIR_EVIDENCE.relative_to(ROOT), file=sys.stderr)
+            return 2
+        repair_evidence = json.loads(REPAIR_EVIDENCE.read_text(encoding="utf-8"))
+        repair = _repair_tool().repair
+
     out_dir = (ROOT / "data" / "records") if args.in_place else args.out_dir
     if args.in_place and not archive_extraction_records():
         return 2
@@ -191,9 +220,11 @@ def main(argv: list) -> int:
             no_additions.append(aid)
         merged, kept, dup = merge(record, adds)
         try:
+            if repair_evidence is not None:
+                merged = repair(merged, repair_evidence)
             AdvisoryRecord.model_validate(merged)
         except Exception as exc:
-            print("  %s FAILED validation after merge: %s" % (aid, str(exc)[:160]), file=sys.stderr)
+            print("  %s FAILED validation or repair after merge: %s" % (aid, str(exc)[:300]), file=sys.stderr)
             failed += 1
             continue
         (out_dir / ("%s.json" % aid)).write_text(json.dumps(merged, indent=2) + "\n", encoding="utf-8")
