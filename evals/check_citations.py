@@ -29,9 +29,10 @@ the matcher could not see -- 15 are on the cited page and are no longer defects,
 
 Re-measured again 2026-09-25 after the ELLIPSIS and SPANS tiers (owner's decision): the
 12 ellipsis quotations with every fragment on the cited page left the baseline; the
-SPANS tier, as specified, moved none of the 5 page-spanning quotes (the matcher's
-docstring says why). 91 remain (78 off_page, 13 missing); the baseline file is the live
-number, not this paragraph.
+SPANS tier moved none of the 5 page-spanning quotes and was removed the same day (the
+owner chose to attest true quotes the matcher cannot place rather than widen the shared
+rule). 91 remain (78 off_page, 13 missing); the baseline file is the live number, not
+this paragraph.
 
 So --all does not simply fail red forever. It compares the CURRENT defect set
 against a frozen baseline, evals/known_citation_defects.json (tracked, an
@@ -70,7 +71,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
-from schemas.citation_match import ARTEFACT, ELLIPSIS, EXACT, OFF_PAGE, SPACING, SPANS, PageIndex  # noqa: E402
+from schemas.citation_match import ARTEFACT, ELLIPSIS, EXACT, OFF_PAGE, SPACING, PageIndex  # noqa: E402
 
 BASELINE_PATH = ROOT / "evals" / "known_citation_defects.json"
 DEFAULT_RECORDS_DIR = ROOT / "data" / "records_merged"
@@ -90,8 +91,8 @@ BASELINE_NOTE = ("record citations never re-verified after week 1; pinned 2026-0
 def check_record(record_path, pdf_path, verbose: bool = True):
     """Check one record against one PDF. Returns (checked, exact, spacing, artefact, off_page, missing).
 
-    "artefact" counts every tier past spacing -- artefact, ellipsis and spans -- so the tuple
-    keeps its shape; the verbose line names the tier. Before 2026-09-25 an ellipsis or spans
+    "artefact" counts every tier past spacing -- artefact and ellipsis -- so the tuple
+    keeps its shape; the verbose line names the tier. Before 2026-09-25 an ellipsis
     hit fell through to MISSING here while --all (which asks hit.ok) accepted it.
     """
     record = json.loads(Path(record_path).read_text(encoding="utf-8"))
@@ -120,7 +121,7 @@ def check_record(record_path, pdf_path, verbose: bool = True):
                 elif hit.status == ARTEFACT:
                     artefact += 1
                     status = "OK-ARTEFACT"
-                elif hit.status in (ELLIPSIS, SPANS):
+                elif hit.status == ELLIPSIS:
                     # counted with the artefact tier in the summary; named per line
                     artefact += 1
                     status = "OK-%s" % hit.status.upper()

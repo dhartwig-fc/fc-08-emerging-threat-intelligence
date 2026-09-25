@@ -14,7 +14,6 @@ Usage:
     python evals/check_citation_match.py --mutate no-nfc          # accents not composed; a decomposed "Müller" MUST match "Muller"
     python evals/check_citation_match.py --mutate ellipsis-unordered  # fragments matched anywhere; an out-of-order quote MUST pass
     python evals/check_citation_match.py --mutate ellipsis-short  # 10-letter fragment floor removed; "... goods" MUST pass
-    python evals/check_citation_match.py --mutate spans-anywhere  # spans prefix need not end the page; a mid-page prefix MUST pass
 
 WHY. schemas/citation_match.py is the ONE rule for "is this quote on this page", shared
 by the MCP server (propose_link refuses), the review gate (re-checks) and
@@ -32,14 +31,12 @@ letters-only coincidence and an empty quote do not -- and a page whose accent is
 DECOMPOSED ("u" + U+0308) does not match a plain "Muller", because the letters form is
 NFC-composed first (added 2026-09-25; without it the combining mark was deleted).
 
-The ELLIPSIS and SPANS tiers (2026-09-25, owner's decision after 12 of the 25 remaining
-"missing" citations proved to be ellipsis quotations whose every fragment is on the
-cited page, and 5 quotes that run over a page break) are pinned the same way: an
-ellipsis quote passes only with every fragment >= 10 letters and on the page IN ORDER
-(out of order, a short fragment, or a fragment not on the page is refused); a spanning
-quote passes only when its prefix ENDS the cited page, running header/footer lines
-aside, and its remainder BEGINS the next page (a mid-page prefix, or a continuation on
-the page after next, is refused).
+The ELLIPSIS tier (2026-09-25, owner's decision after 12 of the 25 remaining "missing"
+citations proved to be ellipsis quotations whose every fragment is on the cited page) is
+pinned the same way: an ellipsis quote passes only with every fragment >= 10 letters and
+on the page IN ORDER (out of order, a short fragment, or a fragment not on the page is
+refused). A page-spanning tier was added and removed the same day -- it matched none of
+the real page-spanning quotes -- so its checks are gone with it.
 
 Fix round 1 (2026-09-25) closed two holes in the rule as first written: digit runs were
 matched as SUBSTRINGS, so a truncated number passed ("48" is inside "480"); and the
@@ -82,7 +79,6 @@ MUTATIONS = {
     "no-nfc": ('unicodedata.normalize("NFC", normed))', 'normed)'),
     "ellipsis-unordered": ("at = letters_page.find(lf, pos)", "at = letters_page.find(lf)"),
     "ellipsis-short": ("        if len(lf) < ARTEFACT_MIN_LETTERS:\n            return False", "        pass"),
-    "spans-anywhere": ("end.endswith(letters_q[:k])", "letters_q[:k] in end"),
     "no-floor": ("len(letters_q) >= ARTEFACT_MIN_LETTERS", "len(letters_q) >= 1"),
     "no-letters": ("and letters_q in letters_page", "and True"),
     "empty": ("        if not tq:\n            return Located(MISSING)", "        pass"),
@@ -99,18 +95,6 @@ PAGE_2 = ("Several companies were engaged in re- selling goods through third cou
 # extractors emit it. The combining mark is not a letter to the [\W\d_] rule, so without NFC
 # composition it is deleted and the page's letters read "hansmuller" -- a different name.
 PAGE_3 = "The partner Hans Mu\u0308ller approved the loans."
-
-# A second document for the SPANS tier, built from lines as pypdf returns them. The header
-# and footer repeat on every page, so they are RUNNING lines: stripped from a page's end
-# and the next page's start before the halves of a spanning quote are joined.
-SPAN_DOC = ["\n".join(lines) for lines in (
-    ["EXAMPLE REPORT", "Opening text about the case.", "The network moved the funds through several",
-     "\u00a9 Example Report 2026"],
-    ["EXAMPLE REPORT", "offshore accounts before the audit began.", "Middle text of page two appears here.",
-     "It closes with a line on trade finance.", "\u00a9 Example Report 2026"],
-    ["EXAMPLE REPORT", "shell entities registered abroad were used.", "\u00a9 Example Report 2026"],
-    ["EXAMPLE REPORT", "A final page with nothing to span.", "\u00a9 Example Report 2026"],
-)]
 
 
 def load_matcher(mutation):
@@ -227,26 +211,6 @@ def checks(cm) -> list:
          "The institution continued to trade ... The bank failed to file reports without delay",
          lambda h: (h.status == cm.OFF_PAGE and h.found_on == (1,), "off_page, found_on=(1,)"))
 
-    # SPANS: prefix ends the cited page (running lines aside), remainder begins the next.
-    spans = getattr(cm, "SPANS", "spans")
-    doc = cm.PageIndex(SPAN_DOC)
-
-    def span_case(label, page, quote, want):
-        hit = doc.locate(page, quote)
-        ok, expect = want(hit)
-        out.append((ok, label, "span doc p%d %r -> %s%s; expected %s"
-                    % (page, quote, hit.status, " found_on=%s" % (hit.found_on,) if hit.found_on else "",
-                       expect)))
-
-    span_case("a quote running into the next page across a running footer and header is SPANS", 1,
-              "The network moved the funds through several offshore accounts before the audit",
-              lambda h: (h.ok and h.status == spans, "ok, spans"))
-    span_case("a quote continuing on the page AFTER next is refused", 1,
-              "The network moved the funds through several shell entities registered abroad",
-              lambda h: (not h.ok, "not ok"))
-    span_case("a spanning quote whose prefix is NOT at the end of the page is refused", 1,
-              "Opening text about the case offshore accounts before the audit",
-              lambda h: (not h.ok, "not ok"))
     return out
 
 

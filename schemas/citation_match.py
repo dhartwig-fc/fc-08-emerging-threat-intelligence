@@ -8,7 +8,7 @@ defect nobody can see. So there is one rule and three callers:
 mcp_server/knowledge_centre_server.py (refuses at proposal time),
 governance/proposals.py (re-checks at review time) and evals/check_citations.py.
 
-The match is deliberately NOT fuzzy on meaning. Five ok tiers, tried in order:
+The match is deliberately NOT fuzzy on meaning. Four ok tiers, tried in order:
   exact    the normalised quote is a substring of the normalised page;
   spacing  the same with ALL whitespace removed, because pypdf splits words on
            born-digital FATF PDFs ("collus ion", "t o believe"). An honest quote
@@ -51,27 +51,18 @@ The match is deliberately NOT fuzzy on meaning. Five ok tiers, tried in order:
            overlapping. It tolerates a quotation with omissions. It does NOT tolerate
            fragments out of order, a fragment that is not on the page, or a short
            fragment ("not ... guilty": a few letters match anywhere).
-  spans    the quote runs over a page break (added 2026-09-25, same decision). It holds on
-           cited page p when the quote's letters split into a prefix of >= 10 letters
-           that ENDS page p and a remainder (>= 1 letter) that BEGINS page p+1, each page
-           first stripped of RUNNING lines at that edge -- normalised lines found on at
-           least half the document's pages (and at least 2), i.e. running headers and
-           footers -- and every digit run in the quote is a whole number on p or p+1.
-           It does NOT tolerate a prefix from the middle of page p, a continuation on
-           any page but p+1, or a quote cited at p+1. A header that carries its page
-           number ("CRIMES | 29") is a different line on every page, so it is not a
-           running line and still blocks the join.
-           Why both: of the 25 citations still "missing" after the artefact tier, 12
-           were ellipsis quotations with every fragment verbatim on the cited page and 5
-           ran over a page break -- true quotes, and rule (a) of the owner's citation
-           repair would have removed three golden-key typologies over them.
-           MEASURED on the real 717: ellipsis accepts all 12 (the 10-letter floor excludes
-           none). spans, as specified here, accepts NONE of the 5: one next page opens
-           with a letterless page-number line ("| 23") that is not a running line, so
-           trimming stops before the running title lines behind it; one document's
-           header carries its page number and alternates sides, so neither form reaches
-           half the pages; three quotes are cited at p+1, the page they END on. The rule
-           stands as decided; widening it is a separate decision.
+           Why: of the 25 citations still "missing" after the artefact tier, 12 were
+           ellipsis quotations with every fragment verbatim on the cited page -- true
+           quotes, and rule (a) of the owner's citation repair would have removed
+           three golden-key typologies over them. Measured on the real 717: it accepts
+           all 12 (the 10-letter fragment floor excludes none).
+  NO PAGE-SPANNING TIER. One was added on 2026-09-25 and removed the same day: it
+           matched none of the 5 real quotes that run over a page break (page-number
+           lines, alternating headers, footnote blocks and quotes cited at the page
+           they end on all defeated it), and every tolerance added here also loosens
+           propose_link's gate. The owner chose to stop widening this shared rule:
+           true quotes the matcher cannot place are ATTESTED instead
+           (evals/attested_citations.json, read by evals/check_citations.py only).
 Anything else is off_page (right words, wrong page -- by the spacing rule over the
 whole document first, then by the artefact rule page by page, then by the ellipsis rule
 when it holds on exactly ONE other page) or missing.
@@ -88,15 +79,13 @@ citation that cites nothing, verified.
 from __future__ import annotations
 
 import hashlib
-import math
 import re
 import unicodedata
-from collections import Counter
 from dataclasses import dataclass
 from typing import Sequence, Tuple
 
 EXACT, SPACING, ARTEFACT, OFF_PAGE, MISSING = "exact", "spacing", "artefact", "off_page", "missing"
-ELLIPSIS, SPANS = "ellipsis", "spans"
+ELLIPSIS = "ellipsis"
 _ELLIPSIS_MARK = re.compile(r"\.\.\.|\u2026")
 
 # A letters-only match shorter than this is too ambiguous to call the same text.
@@ -177,37 +166,17 @@ class Located:
 
     @property
     def ok(self) -> bool:
-        return self.status in (EXACT, SPACING, ARTEFACT, ELLIPSIS, SPANS)
+        return self.status in (EXACT, SPACING, ARTEFACT, ELLIPSIS)
 
 
 class PageIndex:
     """Normalised page text for one document, indexed by 1-based PDF page."""
 
     def __init__(self, page_texts: Sequence[str]):
-        raw = [t or "" for t in page_texts]
-        self.pages = [norm(t) for t in raw]
+        self.pages = [norm(t or "") for t in page_texts]
         self.tight = [p.replace(" ", "") for p in self.pages]
         self.tight_all = "".join(self.tight)
         self.letters = [_letters(p) for p in self.pages]
-        # SPANS: each page's normalised lines, and the RUNNING lines (headers, footers) --
-        # those on at least half the pages, and at least two. Plain strings work too: a
-        # string's lines are str.splitlines().
-        lines = [[norm(l) for l in t.splitlines()] for t in raw]
-        seen = Counter(l for ls in lines for l in set(ls) if l)
-        floor = max(2, math.ceil(len(raw) / 2))
-        self.running = frozenset(l for l, n in seen.items() if n >= floor)
-
-        def trim_end(ls):
-            ls = list(ls)
-            while ls and (not ls[-1] or ls[-1] in self.running):
-                ls.pop()
-            return ls
-
-        def trim_start(ls):
-            return list(reversed(trim_end(list(reversed(ls)))))
-
-        self.end_letters = [_letters(" ".join(trim_end(ls))) for ls in lines]
-        self.start_letters = [_letters(" ".join(trim_start(ls))) for ls in lines]
 
     @classmethod
     def from_pdf(cls, path) -> "PageIndex":
@@ -216,17 +185,6 @@ class PageIndex:
 
     def __len__(self) -> int:
         return len(self.pages)
-
-    def _spans_holds(self, i: int, letters_q: str, digits_q) -> bool:
-        """The SPANS rule: letters_q = prefix (ends page i) + remainder (begins page i+1)."""
-        if not 0 <= i < len(self.pages) - 1:
-            return False
-        end, start = self.end_letters[i], self.start_letters[i + 1]
-        if not any(end.endswith(letters_q[:k]) and start.startswith(letters_q[k:])
-                   for k in range(ARTEFACT_MIN_LETTERS, len(letters_q))):
-            return False
-        return all(_digits_whole([d], self.tight[i]) or _digits_whole([d], self.tight[i + 1])
-                   for d in digits_q)
 
     def locate(self, page: int, quote: str) -> Located:
         q = norm(quote)
@@ -245,8 +203,6 @@ class PageIndex:
         frags = [(_letters(f), re.findall(r"\d+", f)) for f in _fragments(q)]
         if in_range and _ellipsis_holds(frags, self.letters[i], self.tight[i]):
             return Located(ELLIPSIS)
-        if in_range and self._spans_holds(i, lq, dq):
-            return Located(SPANS)
         if tq in self.tight_all:
             return Located(OFF_PAGE, tuple(n + 1 for n, p in enumerate(self.tight) if tq in p))
         found = tuple(n + 1 for n in range(len(self.pages))
