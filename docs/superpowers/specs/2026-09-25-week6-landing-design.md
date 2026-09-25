@@ -94,14 +94,14 @@ and writes nothing, and that check must be watched failing against the current c
 
 | Class | Meaning | Examples |
 |---|---|---|
-| `cold` | runs from a fresh clone | `check_proposal_contract`, `check_telemetry`, `check_tool_surface` (static), `check_digest_routing`, `check_emergent_threshold`, `check_twin_pairs`, `check_added_by`, `build_digests --check`, `actor_resolution --check` |
-| `needs-pdfs` | re-finds quotes on gitignored PDF pages | `check_review_gate`, `review.py --check`, `check_citations` |
+| `cold` | runs from a fresh clone | candidates, to be confirmed by running each in a fresh clone: `check_digest_routing`, `check_emergent_threshold`, `check_added_by`, `check_actor_resolution`, `build_digests --check`, `actor_resolution --check` |
+| `needs-pdfs` | re-finds quotes on gitignored PDF pages | candidates: `check_review_gate`, `review.py --check`, `check_citations`, `check_proposal_contract`, `check_telemetry`, `check_tool_surface` (static), `check_twin_pairs` |
 | `needs-portfolio` | reads the portfolio checkout (added in Section 9) | `check_published_walkthrough` |
 
 - `--cold` runs the `cold` entries and prints every other entry as `NOT RUN (<class>): <name>`.
 - The default runs everything and fails if a `needs-pdfs` input is missing, rather than skipping it.
 - It exits non-zero on any failure.
-- The two measured facts to classify each guard: whether it opens a file under `data/advisories/`, and whether it reads outside the repository.
+- Each guard's class is MEASURED, not read from its source: run it in a fresh clone (no gitignored files). It is `cold` only if it passes there.
 
 **Every `evals/check_*.py` must appear in the list.** The runner globs them and fails if one is unlisted. A
 new guard therefore cannot be silently left out. The same filename-convention lesson as fc-10's 429E applies:
@@ -115,11 +115,26 @@ every push and pull request. The log shows each NOT RUN line, so a green run say
 
 ### Section 5: `resolve_actor`
 
-**Shared matching code.** `actor_score` and `DEFAULT_ACTOR_THRESHOLD` (0.60), with the `norm`/`tokens`/`containment`
-helpers they use, move from `evals/score.py` to `schemas/actor_match.py`. `score.py` imports them. That is the
-same move week 5 made with `citation_match`: the server must not import from `evals/`, and the scorer and the
-tool must not hold two copies of one threshold. The golden set's self-score must still be 1.000 on all four fields
-after the move.
+> **Amended 2026-09-25, before the plan, on measurement.** This section first had the tool resolve on
+> containment >= `DEFAULT_ACTOR_THRESHOLD` (0.60), importing the scorer's constant so the two could not drift.
+> Measured over the extractor's 105 named actors against a register built from the golden labels: 72 resolve
+> on an exact name or alias, 5 more only through containment, 28 not at all. **Four of the five containment
+> resolutions were wrong**: "Iran" and "Islamic Republic of Iran" to Islamic Republic of Iran Shipping Lines,
+> "Syria" to the Iran-Syria oil procurement network, "Company X" to National Iranian Oil Company. Only ISIL was
+> right. Register pairs at >= 0.60 are mostly different parties too: National Iranian Oil vs National Iranian
+> Tanker Company (0.75), GCM Exchange vs Berelian Exchange (0.80), the Orekhov and Grinin procurement networks
+> (0.67). And one EXACT alias merge was wrong: IRGC and IRGC-Qods Force, two actors in ADV-2026-0010's own
+> label, collapse through a shared alias.
+>
+> Containment divides by the SHORTER name. That suits scoring (is this the actor I labelled in THIS advisory,
+> among a handful) and fails identity (a one-word "Iran" is wholly contained in every name carrying it). Scoring
+> and identity share the normaliser, not the threshold. Owner decision 2026-09-25: option (a) of three.
+
+**Shared normalising code.** `norm`, `tokens`, `containment` and the `_STOP` list move from `evals/score.py` to
+`schemas/actor_match.py`, and `score.py` imports them (its existing callers keep working through `sc.norm`,
+`sc.tokens`, `sc.containment`). The server must not import from `evals/`, and there must be one normaliser. The
+scorer's thresholds stay in `score.py`: they are scoring constants, and the resolver uses neither. The golden
+set's self-score must still be 1.000 on all four fields after the move.
 
 **The register.** `tools/build_actor_register.py` builds `data/actor_register.json` (tracked) from the golden
 labels' named actors: `organisation`, `person` and `network`, with categories excluded.
@@ -130,36 +145,52 @@ labels' named actors: `organisation`, `person` and `network`, with categories ex
   "name": "AO PKK Milandr",
   "actor_type": "organisation",
   "aliases": ["Milandr"],
-  "named_in": [{"advisory_id": "ADV-2026-0013", "page": 3, "quote": "..."}],
+  "named_in": [{"advisory_id": "ADV-2026-0013", "name_as_labelled": "AO PKK Milandr"}],
   "entity_key": null
 }
 ```
 
-- Entries merge **only on an exact normalised name or alias match**.
-- Pairs scoring at or above the threshold without an exact match go to `data/actor_register_candidates.json` for the owner to decide. They are never merged automatically. Two names being one party is an identity claim, and identity claims are the owner's (the same rule as fc-10's `shared_id_declarations.json`).
-- Ids are assigned in a deterministic order (by first advisory id, then name) so a rebuild is byte-identical. `--check` proves it.
+- Entries merge **only on an exact normalised name or alias match, and only across advisories**. Measured: three
+  real merges (Sinaloa cartel in 0004 and 0011; National Iranian Oil Company in 0010 and 0012; IRGC-Qods Force in
+  0010 and 0012).
+- **Two actors from the same advisory never merge**, even on an exact alias: the label counted them as two. The
+  pair goes to `data/actor_register_candidates.json` with reason `same advisory`.
+- Pairs with containment >= 0.60 and no exact match also go to the candidates file, with their score and reason
+  `similar names`. They are never merged automatically. Two names being one party is an identity claim, and
+  identity claims are the owner's (the same rule as fc-10's `shared_id_declarations.json`).
+- Ids are assigned in a deterministic order (by first advisory id, then name) so a rebuild is byte-identical.
+  `--check` proves it.
 
 **The tool.** `knowledge_centre_resolve_actor(name: str, actor_type: str | None)` is read-only.
 
-- It returns the best register entry at or above the threshold (`actor_id`, `name`, the alias that matched, the score), or `unresolved` with up to three nearest entries and their scores.
+- `resolved`: an exact normalised match to exactly one entry's name or alias. It returns `actor_id`, the
+  register name and the spelling that matched.
+- `ambiguous`: an exact match to more than one entry. It lists them and resolves none.
+- `unresolved`: no exact match. It returns up to three **suggestions** with containment >= 0.60 and their scores,
+  labelled as suggestions a human must confirm. A suggestion is never a resolution.
 - A `category` never resolves, and the tool says so.
-- It is added to `READ_ONLY_TOOLS`. `check_tool_surface`'s expected surface gains it, and a check asserts it is pre-approved and read-only.
+- It is added to `READ_ONLY_TOOLS`. `check_tool_surface`'s expected surface gains it, and a check asserts it is
+  pre-approved and read-only.
 
 **The measurement.** `evals/actor_resolution.py` resolves every actor in the **extractor's** records
 (`data/records/`), not the labels, so building the register from the labels is not circular. It reports:
 
-- named actors resolved / named actors, overall and per advisory;
+- named actors resolved / named actors, overall and per advisory (measured before the build: 72 of 105);
+- how many unresolved actors carry a suggestion, and each suggestion, so a reader can see what containment
+  would have claimed;
 - categories, counted separately and never in the denominator.
 
-`--check` compares the numbers with a committed `evals/actor_resolution.json`.
+`--check` compares the report with a committed `evals/actor_resolution.json`.
 
-**Guard: `evals/check_actor_resolution.py`**, with mutations:
-- `--mutate threshold-down`: the threshold at 0.50 must merge 2Rivers DMCC with 2Rivers PTE, a real pair scoring exactly 0.50 in ADV-2026-0017.
-- `--mutate threshold-up`: the threshold at 0.90 must lose a known alias match.
-- `--mutate category`: a category allowed to resolve must be caught.
+**Guard: `evals/check_actor_resolution.py`**, over the real register and records, with mutations:
+- `--mutate containment`: suggestions count as resolutions. Must be caught by a check that "Iran" in
+  ADV-2026-0012's record does NOT resolve to Islamic Republic of Iran Shipping Lines.
+- `--mutate same-advisory`: the builder merges exact matches within one advisory. Must be caught by a check that
+  IRGC and IRGC-Qods Force are separate entries.
+- `--mutate category`: a category may resolve. Must be caught.
 
-A check also asserts the register holds at least one real cross-advisory merge, or reports that none exists. It
-must not pass by finding nothing.
+Non-vacuous checks: at least one real cross-advisory merge exists (three are expected), at least one `ambiguous` or
+`same advisory` case is exercised, and the resolved count is above zero. It must not pass by finding nothing.
 
 No live model runs are needed for sub-project 1.
 
@@ -177,7 +208,7 @@ has ten sections:
 3. **Extraction**: each typology in the record with its page and verbatim quote.
 4. **Grounding**: each `propose_link` from run `f617bd3b00`, with the quote re-found on its page when proposed.
 5. **Review gate**: the card `governance/card.py` renders for each decided link, and the 5 decision lines, rendered from the tool's own output. There are no screenshots: a PNG of a terminal cannot be re-checked.
-6. **Actors**: each named actor resolved to its `ACT-` id, and each category shown as not resolvable. The `entity_key` seam is shown empty, with the reason: the estate the platform resolves against is synthetic, and a real designation will never name a synthetic party.
+6. **Actors**: each named actor resolved to its `ACT-` id or shown unresolved with any suggestion labelled as one, and each category shown as not resolvable. The `entity_key` seam is shown empty, with the reason: the estate the platform resolves against is synthetic, and a real designation will never name a synthetic party.
 7. **Digest**: the sanctions desk's ADV-2026-0013 block from batch `slice1-2026-09-24`, stating the decision-log line count it was pinned to.
 8. **Telemetry**: tool calls, terminal outcomes and the reconcile verdict for run `69eeab7b41`.
 9. **Score**: the 20-advisory precision, recall and F1 as bands from the repeats, never one run's figure. This is where the golden set's score is published.
