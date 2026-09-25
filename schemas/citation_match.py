@@ -23,7 +23,8 @@ The match is deliberately NOT fuzzy on meaning. Three ok tiers, tried in order:
            hyphens ("re- selling" for "reselling"), list-bullet glyphs, and
            punctuation. It does NOT tolerate a different word, accented or
            non-Latin letters included (the letters must match in order,
-           contiguously), or a different number ("$480,000" is refused on a page
+           contiguously, after NFC composition so a decomposed accent is still
+           a letter), or a different number ("$480,000" is refused on a page
            reading "$48,000", and so is the truncation the other way round).
            Short quotes are excluded because a few letters match by coincidence.
            RESIDUALS, stated because they are real and the rule cannot see them:
@@ -57,6 +58,7 @@ from __future__ import annotations
 
 import hashlib
 import re
+import unicodedata
 from dataclasses import dataclass
 from typing import Sequence, Tuple
 
@@ -80,8 +82,13 @@ def _letters(normed: str) -> str:
     (the private-use bullet glyph pypdf emits for list markers). It was [^a-z] until
     fix round 1, which deleted every non-ASCII letter: "Hans Möller" matched a page
     reading "Hans Müller", and a swapped Cyrillic name matched anything.
+
+    The text is NFC-composed first. A page that encodes "ü" as "u" + U+0308 (a combining
+    diaeresis, which is not a letter) otherwise loses the mark here and reads "Muller", so
+    a quote of a DIFFERENT name matched it -- and the true composed quote "Müller" did not.
+    Added 2026-09-25; unobserved in the corpus, and the 717 real citations locate the same.
     """
-    return re.sub(r"[\W\d_]", "", normed)
+    return re.sub(r"[\W\d_]", "", unicodedata.normalize("NFC", normed))
 
 
 def _artefact_holds(letters_q: str, digits_q, letters_page: str, tight_page: str) -> bool:

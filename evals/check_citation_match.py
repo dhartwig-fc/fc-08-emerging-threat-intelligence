@@ -11,6 +11,7 @@ Usage:
     python evals/check_citation_match.py --mutate substring-digits  # digit runs matched as substrings; a truncated number MUST pass
     python evals/check_citation_match.py --mutate ascii-letters   # letters form a-z only; a changed accented name MUST pass
     python evals/check_citation_match.py --mutate keeps-digits    # letters form keeps digits; a glued footnote MUST be refused
+    python evals/check_citation_match.py --mutate no-nfc          # accents not composed; a decomposed "Müller" MUST match "Muller"
 
 WHY. schemas/citation_match.py is the ONE rule for "is this quote on this page", shared
 by the MCP server (propose_link refuses), the review gate (re-checks) and
@@ -24,7 +25,9 @@ The fix loosens a governance check, so this guard pins BOTH sides: the three art
 shapes pass (also around an accented word), and a paraphrase (a different word), a wrong
 number ($480,000 against a page reading $48,000), a TRUNCATED number ($48,000 against
 $480,000; 30 against 300), a changed non-ASCII letter (Möller against Müller), a short
-letters-only coincidence and an empty quote do not.
+letters-only coincidence and an empty quote do not -- and a page whose accent is
+DECOMPOSED ("u" + U+0308) does not match a plain "Muller", because the letters form is
+NFC-composed first (added 2026-09-25; without it the combining mark was deleted).
 
 Fix round 1 (2026-09-25) closed two holes in the rule as first written: digit runs were
 matched as SUBSTRINGS, so a truncated number passed ("48" is inside "480"); and the
@@ -46,6 +49,7 @@ import argparse
 import re
 import sys
 import types
+import unicodedata
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -61,8 +65,9 @@ MUTATIONS = {
                       "and True"),
     "substring-digits": ("all(re.search(r\"(?<!\\d)%s(?!\\d)\" % re.escape(d), tight_page) for d in digits_q)",
                          "all(d in tight_page for d in digits_q)"),
-    "ascii-letters": ('return re.sub(r"[\\W\\d_]", "", normed)', 'return re.sub(r"[^a-z]", "", normed)'),
-    "keeps-digits": ('return re.sub(r"[\\W\\d_]", "", normed)', 'return re.sub(r"[\\W_]", "", normed)'),
+    "ascii-letters": ('return re.sub(r"[\\W\\d_]", "", unicodedata', 'return re.sub(r"[^a-z]", "", unicodedata'),
+    "keeps-digits": ('return re.sub(r"[\\W\\d_]", "", unicodedata', 'return re.sub(r"[\\W_]", "", unicodedata'),
+    "no-nfc": ('unicodedata.normalize("NFC", normed))', 'normed)'),
     "no-floor": ("len(letters_q) >= ARTEFACT_MIN_LETTERS", "len(letters_q) >= 1"),
     "no-letters": ("and letters_q in letters_page", "and True"),
     "empty": ("        if not tq:\n            return Located(MISSING)", "        pass"),
@@ -75,6 +80,10 @@ PAGE_1 = ("The institution continued to trade without reporting19. The bank then
 PAGE_2 = ("Several companies were engaged in re- selling goods through third countries. A payment "
           "of $480,000 was wired offshore. Some 300 shipments were declared at the border. The "
           "director Hans Müller signed the contracts. The Société Générale19. branch opened accounts.")
+# A page whose accent is DECOMPOSED: "u" followed by U+0308 COMBINING DIAERESIS, as some PDF
+# extractors emit it. The combining mark is not a letter to the [\W\d_] rule, so without NFC
+# composition it is deleted and the page's letters read "hansmuller" -- a different name.
+PAGE_3 = "The partner Hans Mu\u0308ller approved the loans."
 
 
 def load_matcher(mutation):
@@ -96,7 +105,7 @@ def load_matcher(mutation):
 
 def checks(cm) -> list:
     artefact = getattr(cm, "ARTEFACT", "artefact")
-    index = cm.PageIndex([PAGE_1, PAGE_2])
+    index = cm.PageIndex([PAGE_1, PAGE_2, PAGE_3])
     out = []
 
     def case(label, page, quote, want):
@@ -138,6 +147,12 @@ def checks(cm) -> list:
     case("a glued footnote beside accented words is still tolerated", 2,
          "The Société Générale branch opened accounts",
          lambda h: (h.ok and h.status == artefact, "ok, artefact"))
+    case("a plain name is refused against a DECOMPOSED accent (Muller quoted, page reads Mu+U+0308ller)",
+         3, "Hans Muller",
+         lambda h: (not h.ok and h.status != artefact, "not ok"))
+    case("a composed quote of a DECOMPOSED accent is tolerated (Müller quoted, page reads Mu+U+0308ller)",
+         3, "Hans M\u00fcller approved the loans",
+         lambda h: (h.ok and h.status == artefact, "ok, artefact"))
 
     # WITNESSES. A refusal is only the rule's if the quote matches the page in every other
     # respect. These use their own letter forms, not the matcher's, so a matcher bug
@@ -156,6 +171,13 @@ def checks(cm) -> list:
                 "the Möller witness differs ONLY in a non-ASCII letter",
                 "a-z form %r IS on the page and the Unicode form is not, so only the letters form "
                 "decides it" % asc(q)))
+    raw = lambda t: re.sub(r"[\W\d_]", "", cm.norm(t))  # no composition: the pre-2026-09-25 form
+    nfc = lambda t: re.sub(r"[\W\d_]", "", unicodedata.normalize("NFC", cm.norm(t)))
+    q = "Hans Muller"
+    out.append((raw(q) in raw(PAGE_3) and nfc(q) not in nfc(PAGE_3),
+                "the decomposed-accent witness differs ONLY in the composition of one letter",
+                "uncomposed form %r IS on the page and the composed form is not, so only NFC "
+                "decides it" % raw(q)))
     return out
 
 
