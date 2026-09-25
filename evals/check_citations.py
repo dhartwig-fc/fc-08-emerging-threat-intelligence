@@ -25,8 +25,13 @@ finding for the owner, not something this guard fixes by rewriting records.
 Re-measured 2026-09-25 after schemas/citation_match.py gained the ARTEFACT tier
 (footnote markers, line-break hyphens): 18 of the 43 "missing" were true quotes
 the matcher could not see -- 15 are on the cited page and are no longer defects,
-3 are on another page and are now off_page. 103 remain (78 off_page, 25 missing);
-the baseline file is the live number, not this paragraph.
+3 are on another page and are now off_page. 103 remained (78 off_page, 25 missing).
+
+Re-measured again 2026-09-25 after the ELLIPSIS and SPANS tiers (owner's decision): the
+12 ellipsis quotations with every fragment on the cited page left the baseline; the
+SPANS tier, as specified, moved none of the 5 page-spanning quotes (the matcher's
+docstring says why). 91 remain (78 off_page, 13 missing); the baseline file is the live
+number, not this paragraph.
 
 So --all does not simply fail red forever. It compares the CURRENT defect set
 against a frozen baseline, evals/known_citation_defects.json (tracked, an
@@ -65,7 +70,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
-from schemas.citation_match import ARTEFACT, EXACT, OFF_PAGE, SPACING, PageIndex  # noqa: E402
+from schemas.citation_match import ARTEFACT, ELLIPSIS, EXACT, OFF_PAGE, SPACING, SPANS, PageIndex  # noqa: E402
 
 BASELINE_PATH = ROOT / "evals" / "known_citation_defects.json"
 DEFAULT_RECORDS_DIR = ROOT / "data" / "records_merged"
@@ -74,8 +79,8 @@ ADVISORY_LIST = ROOT / "evals" / "golden" / "advisory_list.json"
 
 BASELINE_NOTE = ("record citations never re-verified after week 1; pinned 2026-09-25 "
                   "pending an owner decision on remediation; an entry is removed only in "
-                  "the commit that fixes it; re-measured 2026-09-25 after the matcher gained "
-                  "the ARTEFACT tier (footnote digits, line-break hyphens); was 118")
+                  "the commit that fixes it; re-measured 2026-09-25 after the ELLIPSIS and "
+                  "SPANS tiers; was 103")
 
 
 # ---------------------------------------------------------------------------
@@ -83,7 +88,12 @@ BASELINE_NOTE = ("record citations never re-verified after week 1; pinned 2026-0
 # ---------------------------------------------------------------------------
 
 def check_record(record_path, pdf_path, verbose: bool = True):
-    """Check one record against one PDF. Returns (checked, exact, spacing, artefact, off_page, missing)."""
+    """Check one record against one PDF. Returns (checked, exact, spacing, artefact, off_page, missing).
+
+    "artefact" counts every tier past spacing -- artefact, ellipsis and spans -- so the tuple
+    keeps its shape; the verbose line names the tier. Before 2026-09-25 an ellipsis or spans
+    hit fell through to MISSING here while --all (which asks hit.ok) accepted it.
+    """
     record = json.loads(Path(record_path).read_text(encoding="utf-8"))
     # The matching rule lives in schemas/citation_match.py, shared with the MCP
     # server and the review gate, so all three accept and refuse the same quotes.
@@ -110,6 +120,10 @@ def check_record(record_path, pdf_path, verbose: bool = True):
                 elif hit.status == ARTEFACT:
                     artefact += 1
                     status = "OK-ARTEFACT"
+                elif hit.status in (ELLIPSIS, SPANS):
+                    # counted with the artefact tier in the summary; named per line
+                    artefact += 1
+                    status = "OK-%s" % hit.status.upper()
                 elif hit.status == OFF_PAGE:
                     off_page += 1
                     status = "OFF-PAGE  (found on %s)" % list(hit.found_on)
@@ -128,7 +142,7 @@ def main(record_path: str, pdf_path: str) -> int:
 
     print()
     print("citations checked: %d | exact on page: %d | on page modulo pypdf spacing: %d | "
-          "on page modulo PDF artefacts: %d | right quote wrong page: %d | not in document: %d"
+          "on page modulo PDF artefacts, ellipses or a page break: %d | right quote wrong page: %d | not in document: %d"
           % (checked, exact, spacing, artefact, off_page, missing))
     if checked == 0:
         print("FAIL: no citations examined; a record with nothing to check is not a pass")

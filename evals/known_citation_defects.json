@@ -1,5 +1,5 @@
 {
-  "note": "record citations never re-verified after week 1; pinned 2026-09-25 pending an owner decision on remediation; an entry is removed only in the commit that fixes it; re-measured 2026-09-25 after the matcher gained the ARTEFACT tier (footnote digits, line-break hyphens); was 118",
+  "note": "record citations never re-verified after week 1; pinned 2026-09-25 pending an owner decision on remediation; an entry is removed only in the commit that fixes it; re-measured 2026-09-25 after the ELLIPSIS and SPANS tiers; was 103",
   "defects": [
     {
       "advisory_id": "ADV-2026-0001",
@@ -683,15 +683,6 @@
     {
       "advisory_id": "ADV-2026-0004",
       "section": "typologies",
-      "item": "Circular Funds Flow",
-      "page": 45,
-      "quote_sha256": "9750a21c0c3c9fcf7773c2ecc9170f6232198b30762ff7576d9851b232f178d6",
-      "kind": "missing",
-      "found_on": []
-    },
-    {
-      "advisory_id": "ADV-2026-0004",
-      "section": "typologies",
       "item": "Front Companies",
       "page": 32,
       "quote_sha256": "f00f2994b00823c510d7e43e63472a6da1966e168869f11ed95dd9fc3ccaf6f2",
@@ -699,15 +690,6 @@
       "found_on": [
         34
       ]
-    },
-    {
-      "advisory_id": "ADV-2026-0004",
-      "section": "typologies",
-      "item": "Front Companies",
-      "page": 172,
-      "quote_sha256": "d9c0713915b5c427e143e4c244a7c380c5b7625a200690084a4c2d3cf228ee12",
-      "kind": "missing",
-      "found_on": []
     },
     {
       "advisory_id": "ADV-2026-0004",
@@ -726,24 +708,6 @@
       "item": "Rapid Movement",
       "page": 8,
       "quote_sha256": "5473e35bbea5f5bd07380535d0dd0b8d17f267caeb88f46a739cb99a3e24ddf5",
-      "kind": "missing",
-      "found_on": []
-    },
-    {
-      "advisory_id": "ADV-2026-0006",
-      "section": "actors",
-      "item": "Beny Steinmetz",
-      "page": 64,
-      "quote_sha256": "a47c402b437fa8f41aee2baacc9378eafc356e0cd8180626b9338948100e808b",
-      "kind": "missing",
-      "found_on": []
-    },
-    {
-      "advisory_id": "ADV-2026-0006",
-      "section": "actors",
-      "item": "Chilean gold-smuggling TCO (Operation Diez Condores)",
-      "page": 34,
-      "quote_sha256": "c779f455d1b1040feb54f851210cefd045c86c4de823cdee643b60af593974b2",
       "kind": "missing",
       "found_on": []
     },
@@ -868,15 +832,6 @@
       "advisory_id": "ADV-2026-0006",
       "section": "typologies",
       "item": "Shell Company Network",
-      "page": 24,
-      "quote_sha256": "4a0fa94a5dd5faa06f055dd98a0fd308dfafb448c5be8a62f12a65c6c9f85c4c",
-      "kind": "missing",
-      "found_on": []
-    },
-    {
-      "advisory_id": "ADV-2026-0006",
-      "section": "typologies",
-      "item": "Shell Company Network",
       "page": 30,
       "quote_sha256": "44eb66274be0af57358cb095732a55c6e483810da9e230d0926f0d9699550189",
       "kind": "missing",
@@ -910,24 +865,6 @@
       "item": "Structuring",
       "page": 22,
       "quote_sha256": "0d9f85cc25562f5f350472422950879addb4e8f12a5f836b03f700e890cce988",
-      "kind": "missing",
-      "found_on": []
-    },
-    {
-      "advisory_id": "ADV-2026-0008",
-      "section": "indicators",
-      "item": "Automated, threshold-triggered 'sweeping' of funds from mule",
-      "page": 29,
-      "quote_sha256": "205a7ed739af330d5e314d80c04b97aaf79762cfe17e99b779c1df18b31336ed",
-      "kind": "missing",
-      "found_on": []
-    },
-    {
-      "advisory_id": "ADV-2026-0008",
-      "section": "indicators",
-      "item": "Prepaid cards and vouchers used as bridging instruments betw",
-      "page": 32,
-      "quote_sha256": "7880115ba65ae48a826489bb41ff22efcfcde632f884a47d45c9998c60f44f60",
       "kind": "missing",
       "found_on": []
     },
@@ -987,24 +924,6 @@
     {
       "advisory_id": "ADV-2026-0008",
       "section": "typologies",
-      "item": "Rapid Movement (automated threshold-triggered account sweeping)",
-      "page": 29,
-      "quote_sha256": "23cf4c299e42651147977ff25210144cbd8514db773504384f669348e6e65418",
-      "kind": "missing",
-      "found_on": []
-    },
-    {
-      "advisory_id": "ADV-2026-0008",
-      "section": "typologies",
-      "item": "Structuring (cash fragmentation / cuckoo smurfing to evade AML thresholds)",
-      "page": 27,
-      "quote_sha256": "613060be74dee4a966f6a7de43412bbd7ef1d5cf2718f66f90e4e2cbe04c4f80",
-      "kind": "missing",
-      "found_on": []
-    },
-    {
-      "advisory_id": "ADV-2026-0008",
-      "section": "typologies",
       "item": "Third Party Payment Abuse",
       "page": 24,
       "quote_sha256": "51c7d1b2dccb6541c511bc4c9799e7100e114685d0c3118712b3538f7d725b61",
@@ -1050,15 +969,6 @@
     {
       "advisory_id": "ADV-2026-0010",
       "section": "typologies",
-      "item": "Shell Company Network",
-      "page": 6,
-      "quote_sha256": "e16fe662a3dfb240de7f758c12d5907976bcbc4e9c2bb39c800752ca7eab3bd6",
-      "kind": "missing",
-      "found_on": []
-    },
-    {
-      "advisory_id": "ADV-2026-0010",
-      "section": "typologies",
       "item": "Transshipment",
       "page": 7,
       "quote_sha256": "f3b403eebbe18b5ea00b9a305d3ecf69425c837ecafbe76fb29cd95873878fc4",
@@ -1085,24 +995,6 @@
         7,
         23
       ]
-    },
-    {
-      "advisory_id": "ADV-2026-0019",
-      "section": "actors",
-      "item": "Corruption brokers",
-      "page": 23,
-      "quote_sha256": "537118c4ce447021375787db6a5f201d573804d4ff60b1f15df3354126e9b0d7",
-      "kind": "missing",
-      "found_on": []
-    },
-    {
-      "advisory_id": "ADV-2026-0020",
-      "section": "typologies",
-      "item": "Related Party Trading",
-      "page": 12,
-      "quote_sha256": "32f53c585a12480118fbd9d3dd5bb9c906d0f99ef2c5b4f9f9e2f1123bcc0db2",
-      "kind": "missing",
-      "found_on": []
     }
   ]
 }
