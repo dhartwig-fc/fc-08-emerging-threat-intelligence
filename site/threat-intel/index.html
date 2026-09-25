@@ -81,6 +81,21 @@
   .why{margin:2px 0 6px;font-size:13px;color:var(--ink2)}
   .why summary{cursor:pointer;font-family:var(--mono);font-size:11px;color:var(--ink3)}
   .why p{margin:6px 0 0;overflow-wrap:anywhere}
+  table.two th:nth-child(1){width:44%}
+  table.two th:nth-child(2){width:auto}
+  table.tel th:nth-child(n){width:auto}
+  table.tel th:nth-child(1),table.score th:nth-child(1){width:46%}
+  table.score th:nth-child(n+2){width:18%}
+  table.tel td:nth-child(n+2),table.score td:nth-child(n+2){font-family:var(--mono);font-size:13px}
+  table.score{margin:0 0 16px}
+  caption{text-align:left;font-size:13px;color:var(--ink);padding:0 0 6px}
+  .role{display:block;font-size:12.5px;color:var(--ink3);margin-top:2px}
+  .cats,.limits,.fails{margin:0 0 12px;padding-left:18px;color:var(--ink2)}
+  .cats li,.limits li,.fails li{margin:0 0 6px}
+  .limits strong{color:var(--ink)}
+  .nr{color:var(--ink3);font-size:13px}
+  .err{font-family:var(--mono);font-size:12px;overflow-wrap:anywhere}
+  pre.digest{background:var(--panel);border:1px solid var(--edge);border-radius:10px;padding:12px 14px}
   @media (max-width:640px){
     h1{font-size:23px}
     table.rows thead{display:none}
@@ -88,6 +103,7 @@
     table.rows tr{border-bottom:1px solid var(--edge);padding:8px 0}
     table.rows td{border:0;padding:3px 0}
     table.rows td:nth-child(2),table.rows td:nth-child(3),table.rows td:nth-child(4){display:inline-block;width:auto;margin-right:18px}
+    table.two td:nth-child(2){display:block;margin-right:0}
     table.rows td::before{content:attr(data-h);display:block;font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink3)}
     .facts{grid-template-columns:1fr;gap:0}
     .facts dd{margin-bottom:8px}
@@ -112,7 +128,7 @@
   </div>
 
   <h1>One advisory, from PDF to owner-approved typology links</h1>
-  <p class="lede">ADV-2026-0013, followed through extraction, grounding and review. Every figure and quote on this page is read from a governed file when the page is built.</p>
+  <p class="lede">ADV-2026-0013, followed through extraction, grounding and review to the desks it reaches, with the actors it names, what the agent did, how the extraction scores and what this slice does not do yet. Every figure and quote on this page is read from a governed file when the page is built.</p>
 
 <section id="question">
   <h2><span class="n">01</span> The question</h2>
@@ -381,6 +397,142 @@ FROM  1 proposal, runs: adv-2026-0013-extractor-f617bd3b00, stages: extractor</p
       <li class="decision"><time>2026-09-24</time> <b class="approve">APPROVE</b> <span class="note">dual-use items to Russia (p4-5); sanctions twin correctly preferred over TBML007</span></li>
     </ul>
   </article>
+</section>
+
+<section id="actors">
+  <h2><span class="n">06</span> Actors: who the advisory names</h2>
+  <p>The record names 10 actors: 6 named actors and 4 categories. The reviewer agent added none &mdash; these are the extractor&rsquo;s. Each named actor is looked up in the actor register: 86 entries built from the parties the reference labels name, each with an <code>ACT-</code> id. The lookup shown is the actor-resolution evaluation&rsquo;s, run over the extractor&rsquo;s committed records after extraction (section 10 says why).</p>
+  <table class="rows two">
+    <thead><tr><th>Actor</th><th>Resolution</th></tr></thead>
+    <tbody>
+    <tr class="actor" data-actor="Office of Foreign Assets Control (OFAC)" data-status="unresolved" data-act="" data-entries="">
+      <td data-h="Actor">Office of Foreign Assets Control (OFAC)<span class="role">Treasury sanctions regulator co-issuing the note; designates SDNs and maintains sanctions lists</span></td>
+      <td data-h="Resolution">unresolved: no register entry matches it; no suggestion</td>
+    </tr>
+    <tr class="actor" data-actor="Bureau of Industry and Security (BIS)" data-status="unresolved" data-act="" data-entries="">
+      <td data-h="Actor">Bureau of Industry and Security (BIS)<span class="role">Commerce export control regulator co-issuing the note; maintains Entity List and civil enforcement</span></td>
+      <td data-h="Resolution">unresolved: no register entry matches it; no suggestion</td>
+    </tr>
+    <tr class="actor" data-actor="Department of Justice (DOJ)" data-status="unresolved" data-act="" data-entries="">
+      <td data-h="Actor">Department of Justice (DOJ)<span class="role">Prosecutes criminal sanctions and export control violations</span></td>
+      <td data-h="Resolution">unresolved: no register entry matches it; no suggestion</td>
+    </tr>
+    <tr class="actor" data-actor="Task Force KleptoCapture" data-status="unresolved" data-act="" data-entries="">
+      <td data-h="Actor">Task Force KleptoCapture<span class="role">DOJ task force leading enforcement against Russia-related sanctions evasion</span></td>
+      <td data-h="Resolution">unresolved: no register entry matches it; no suggestion</td>
+    </tr>
+    <tr class="actor" data-actor="AO PKK Milandr" data-status="resolved" data-act="ACT-4d02ddb9cb" data-entries="">
+      <td data-h="Actor">AO PKK Milandr<span class="role">Russian microelectronics company maintaining a global procurement network that used front companies to divert microchips to Russia</span></td>
+      <td data-h="Resolution">resolved to <code>ACT-4d02ddb9cb</code>, matched as &ldquo;AO PKK Milandr&rdquo;</td>
+    </tr>
+    <tr class="actor" data-actor="Vorago Technologies" data-status="resolved" data-act="ACT-acad19cf90" data-entries="">
+      <td data-h="Actor">Vorago Technologies<span class="role">Austin, Texas company penalized for shipping controlled integrated circuit components to Russia via a Bulgarian front company</span></td>
+      <td data-h="Resolution">resolved to <code>ACT-acad19cf90</code>, matched as &ldquo;Vorago Technologies&rdquo;</td>
+    </tr>
+    </tbody>
+  </table>
+  <p>3 of the 4 named actors that do not resolve are the note&rsquo;s own publishers &mdash; <span class="who" data-publisher="Office of Foreign Assets Control (OFAC)">Office of Foreign Assets Control (OFAC)</span>, <span class="who" data-publisher="Bureau of Industry and Security (BIS)">Bureau of Industry and Security (BIS)</span>, <span class="who" data-publisher="Department of Justice (DOJ)">Department of Justice (DOJ)</span>. The extractor recorded the note&rsquo;s issuers as actors; the register, built from the parties the reference labels name, has no entry for them. Task Force KleptoCapture is unresolved too, with no register entry to match.</p>
+  <p>The record&rsquo;s categories are classes of actor, never looked up:</p>
+  <ul class="cats">
+    <li class="category" data-actor="Iranian drone entities">Iranian drone entities <span class="nr">not resolvable: a class of actor, not a named party</span></li>
+    <li class="category" data-actor="Orekhov network (six Russian nationals and one Spanish national)">Orekhov network (six Russian nationals and one Spanish national) <span class="nr">not resolvable: a class of actor, not a named party</span></li>
+    <li class="category" data-actor="Grinin network (five Russian nationals including a suspected FSB officer, and two U.S. citizens)">Grinin network (five Russian nationals including a suspected FSB officer, and two U.S. citizens) <span class="nr">not resolvable: a class of actor, not a named party</span></li>
+    <li class="category" data-actor="Third-party intermediaries and transshipment points">Third-party intermediaries and transshipment points <span class="nr">not resolvable: a class of actor, not a named party</span></li>
+  </ul>
+  <dl class="facts">
+    <dt>entity_key</dt><dd data-entity-key="empty" data-empty="86" data-of="86">empty, on all 86 register entries</dd>
+  </dl>
+  <p>The <code>entity_key</code> is the seam where a register entry would link to the platform&rsquo;s resolved-entity estate. It is left empty on purpose: that estate is synthetic demonstration data, and a real designation will never name a synthetic party. A link waits for a real substrate.</p>
+</section>
+
+<section id="digest">
+  <h2><span class="n">07</span> What a desk receives</h2>
+  <p>The advisory reached 3 desks (section 1). This is the Sanctions desk&rsquo;s entry for it, exactly as written in digest batch <code data-batch="slice1-2026-09-25">slice1-2026-09-25</code>, which was built from the first <span data-count="digest-log-lines">5</span> lines of the decision log &mdash; the same lines section 5 reads. It is markdown, shown as written; &ldquo;asserted by the pipeline&rdquo; means in the record, awaiting the owner.</p>
+  <pre class="digest">## ADV-2026-0013 -- Tri-Seal Compliance Note: Cracking Down on Third-Party Intermediaries Used to Evade Russia-Related Sanctions and Export Controls
+
+Publisher: OFAC / BIS / DOJ
+
+Routed here because: SAN001 Ownership Evasion (sanctions; owner-approved, not in the record); SAN003 Transshipment (sanctions); SAN004 Front Companies (sanctions); SAN005 Name Screening Evasion (sanctions); SAN007 Dual Use Goods (sanctions).
+
+### Approved links
+
+- **SAN001 Ownership Evasion** -- p2: &quot;Use of corporate vehicles (i.e., legal entities, such as shell companies, and legal arrangements) to obscure (i) ownership, (ii) source of funds, or (iii) countries involved, particularly sanctioned jurisdictions&quot; (approved 2026-09-24)
+- **SAN003 Transshipment** -- p3: &quot;Routing purchases through certain transshipment points commonly used to illegally redirect restricted items to Russia or Belarus.&quot; (approved 2026-09-24)
+- **SAN004 Front Companies** -- p4: &quot;used a front company to transfer funds from Milandr to another front in a third country, which purchased microchips to divert to Russia&quot; (approved 2026-09-24)
+- **SAN007 Dual Use Goods** -- p4: &quot;illegally export military and sensitive dual-use items to Russia and embargoed Venezuelan oil to Russian and Chinese end users&quot; (approved 2026-09-24)
+- also approved on this advisory, for other desks: BA005 Rapid Movement
+
+### Awaiting review
+
+- SAN005 Name Screening Evasion -- asserted by the pipeline, not yet decided</pre>
+</section>
+
+<section id="telemetry">
+  <h2><span class="n">08</span> Telemetry: what the agent did</h2>
+  <p>Every tool call and permission decision in an extraction run is logged as it happens. The run with telemetry for this advisory is <code>adv-2026-0013-extractor-69eeab7b41</code> (claude-sonnet-5, started 2026-09-24): <span class="count" data-count="events">37</span> events.</p>
+  <table class="rows tel">
+    <thead><tr><th>Tool call</th><th>Succeeded</th><th>Refused</th><th>Failed</th></tr></thead>
+    <tbody>
+    <tr><td data-h="Tool"><code>StructuredOutput</code></td><td data-h="Succeeded" data-tool="StructuredOutput" data-status="SUCCESS">1</td><td data-h="Refused" data-tool="StructuredOutput" data-status="REFUSED">0</td><td data-h="Failed" data-tool="StructuredOutput" data-status="FAILURE">1</td></tr>
+    <tr><td data-h="Tool"><code>knowledge_centre_get_typology</code></td><td data-h="Succeeded" data-tool="mcp__knowledge_centre__knowledge_centre_get_typology" data-status="SUCCESS">9</td><td data-h="Refused" data-tool="mcp__knowledge_centre__knowledge_centre_get_typology" data-status="REFUSED">0</td><td data-h="Failed" data-tool="mcp__knowledge_centre__knowledge_centre_get_typology" data-status="FAILURE">0</td></tr>
+    <tr><td data-h="Tool"><code>knowledge_centre_list_typologies</code></td><td data-h="Succeeded" data-tool="mcp__knowledge_centre__knowledge_centre_list_typologies" data-status="SUCCESS">1</td><td data-h="Refused" data-tool="mcp__knowledge_centre__knowledge_centre_list_typologies" data-status="REFUSED">0</td><td data-h="Failed" data-tool="mcp__knowledge_centre__knowledge_centre_list_typologies" data-status="FAILURE">0</td></tr>
+    <tr><td data-h="Tool"><code>knowledge_centre_propose_link</code></td><td data-h="Succeeded" data-tool="mcp__knowledge_centre__knowledge_centre_propose_link" data-status="SUCCESS">7</td><td data-h="Refused" data-tool="mcp__knowledge_centre__knowledge_centre_propose_link" data-status="REFUSED">0</td><td data-h="Failed" data-tool="mcp__knowledge_centre__knowledge_centre_propose_link" data-status="FAILURE">0</td></tr>
+    <tr><td data-h="Tool"><code>knowledge_centre_search_typologies</code></td><td data-h="Succeeded" data-tool="mcp__knowledge_centre__knowledge_centre_search_typologies" data-status="SUCCESS">8</td><td data-h="Refused" data-tool="mcp__knowledge_centre__knowledge_centre_search_typologies" data-status="REFUSED">0</td><td data-h="Failed" data-tool="mcp__knowledge_centre__knowledge_centre_search_typologies" data-status="FAILURE">1</td></tr>
+    </tbody>
+  </table>
+  <p><code>StructuredOutput</code> is the agent SDK&rsquo;s tool for handing in the finished record. &ldquo;Refused&rdquo; would mean a tool declined the call under its own rules, as <code>knowledge_centre_propose_link</code> does with a quote it cannot place; &ldquo;failed&rdquo; means the call raised an error.</p>
+  <p>2 calls failed. The error each logged, first line:</p>
+  <ul class="fails">
+    <li><code>knowledge_centre_search_typologies</code> <span class="err">Error executing tool knowledge_centre_search_typologies: 1 validation error for search_typologiesArguments</span></li>
+    <li><code>StructuredOutput</code> <span class="err">Output does not match required schema: root: must have required property &#x27;advisory_id&#x27;, root: must have requir…</span></li>
+  </ul>
+  <p>Permission decisions: <span data-perm="PERMISSION_ALLOWED">7</span> allowed, <span data-perm="PERMISSION_DENIED">0</span> denied. Every decision concerns <code>knowledge_centre_propose_link</code>, the agent&rsquo;s one write. The read-only lookup tools are pre-approved and never reach the check.</p>
+  <dl class="facts">
+    <dt>Turns</dt><dd data-rc="turns" data-raw="29">29 of at most 60</dd>
+    <dt>Duration</dt><dd data-rc="duration_ms" data-raw="250345">250.3 seconds</dd>
+    <dt>Cost</dt><dd data-rc="cost_usd" data-raw="0.4985208">US$0.50, as reported by the agent SDK (budget US$5.00)</dd>
+    <dt>Record validated</dt><dd data-rc="validated" data-raw="true">yes</dd>
+  </dl>
+  <p class="flag">This run is not the one the owner decided (<code>adv-2026-0013-extractor-f617bd3b00</code>, sections 4 and 5). Its 7 successful <code>knowledge_centre_propose_link</code> calls match the 7 proposals in its queue: <span class="ids" data-set="tel-proposed">BA008, SAN003, SAN004, SAN005, SAN006, SAN007, SAN009</span>. They are separate from the decided run&rsquo;s proposals: <span data-count="tel-cited">0</span> of them are cited by any decision in the pinned log, so as proposals they remain undecided. Of the links they name, <span class="ids" data-set="tel-decided-elsewhere">SAN003, SAN004, SAN007</span> were decided on proposals from run <code>adv-2026-0013-extractor-f617bd3b00</code> (all approved); <span class="ids" data-set="tel-no-decision">BA008, SAN005, SAN006, SAN009</span> have no decision.</p>
+</section>
+
+<section id="score">
+  <h2><span class="n">09</span> How well the extraction scores</h2>
+  <p>Across the <span class="count" data-count="scored">20</span> advisories with a hand-written reference answer (a golden label), ADV-2026-0013 among them, each record is scored against its label. Precision: of what the pipeline asserted, the share the label holds. Recall: of what the label holds, the share the pipeline asserted. F1 balances the two. Computed when this page was built.</p>
+  <table class="rows score">
+    <caption>Extraction only: the extractor&rsquo;s committed records</caption>
+    <thead><tr><th>Field</th><th>Precision</th><th>Recall</th><th>F1</th></tr></thead>
+    <tbody>
+      <tr><td data-h="Field">Typologies (library)</td><td data-h="Precision" data-score="extraction" data-field="typologies" data-m="precision">0.889</td><td data-h="Recall" data-score="extraction" data-field="typologies" data-m="recall">0.340</td><td data-h="F1" data-score="extraction" data-field="typologies" data-m="f1">0.492</td></tr>
+      <tr><td data-h="Field">Emergent typologies</td><td data-h="Precision" data-score="extraction" data-field="emergent" data-m="precision">0.647</td><td data-h="Recall" data-score="extraction" data-field="emergent" data-m="recall">0.200</td><td data-h="F1" data-score="extraction" data-field="emergent" data-m="f1">0.306</td></tr>
+      <tr><td data-h="Field">Actors</td><td data-h="Precision" data-score="extraction" data-field="actors" data-m="precision">0.701</td><td data-h="Recall" data-score="extraction" data-field="actors" data-m="recall">0.684</td><td data-h="F1" data-score="extraction" data-field="actors" data-m="f1">0.692</td></tr>
+      <tr><td data-h="Field">Jurisdictions</td><td data-h="Precision" data-score="extraction" data-field="jurisdictions" data-m="precision">0.843</td><td data-h="Recall" data-score="extraction" data-field="jurisdictions" data-m="recall">0.644</td><td data-h="F1" data-score="extraction" data-field="jurisdictions" data-m="f1">0.730</td></tr>
+    </tbody>
+  </table>
+  <table class="rows score">
+    <caption>Extraction + reviewer: the merged records, with the reviewer agent&rsquo;s additions</caption>
+    <thead><tr><th>Field</th><th>Precision</th><th>Recall</th><th>F1</th></tr></thead>
+    <tbody>
+      <tr><td data-h="Field">Typologies (library)</td><td data-h="Precision" data-score="reviewer" data-field="typologies" data-m="precision">0.930</td><td data-h="Recall" data-score="reviewer" data-field="typologies" data-m="recall">0.566</td><td data-h="F1" data-score="reviewer" data-field="typologies" data-m="f1">0.704</td></tr>
+      <tr><td data-h="Field">Emergent typologies</td><td data-h="Precision" data-score="reviewer" data-field="emergent" data-m="precision">0.571</td><td data-h="Recall" data-score="reviewer" data-field="emergent" data-m="recall">0.255</td><td data-h="F1" data-score="reviewer" data-field="emergent" data-m="f1">0.352</td></tr>
+      <tr><td data-h="Field">Actors</td><td data-h="Precision" data-score="reviewer" data-field="actors" data-m="precision">0.701</td><td data-h="Recall" data-score="reviewer" data-field="actors" data-m="recall">0.684</td><td data-h="F1" data-score="reviewer" data-field="actors" data-m="f1">0.692</td></tr>
+      <tr><td data-h="Field">Jurisdictions</td><td data-h="Precision" data-score="reviewer" data-field="jurisdictions" data-m="precision">0.843</td><td data-h="Recall" data-score="reviewer" data-field="jurisdictions" data-m="recall">0.644</td><td data-h="F1" data-score="reviewer" data-field="jurisdictions" data-m="f1">0.730</td></tr>
+    </tbody>
+  </table>
+  <p>Adding the reviewer moves typologies (library) F1 0.492 &rarr; 0.704; emergent typologies F1 0.306 &rarr; 0.352. Actors and jurisdictions score the same in both tables.</p>
+  <p class="flag">Each table is a single full-set run: one extraction of each advisory, scored once. Repeat runs, which measure how much a figure moves from run to run, are not committed, so no bands are shown. The committed trace of the <a href="https://github.com/dhartwig-fc/fc-08-emerging-threat-intelligence/blob/main/evals/traces/FULL_BASELINE_2026-09-12.md" rel="noopener">first full-set run, 2026-09-12</a>, describes what limits typology recall; its figures are that day&rsquo;s, not these.</p>
+</section>
+
+<section id="limits">
+  <h2><span class="n">10</span> What this slice does not do yet</h2>
+  <ul class="limits">
+    <li><strong>Actor resolution is not part of extraction.</strong> The extraction agent has the resolver among its tools, but its instructions do not ask it to use it: run <code>adv-2026-0013-extractor-69eeab7b41</code> made <span data-count="resolver-calls">0</span> calls to <code>knowledge_centre_resolve_actor</code>. Section 6&rsquo;s resolution was run afterwards, over the committed records. Resolving during extraction is slice 2.</li>
+    <li><strong>No actor is linked to the platform&rsquo;s entities.</strong> <span data-count="entity-keys">0</span> of the <span data-count="register">86</span> register entries carry an <code>entity_key</code>; section 6 says why.</li>
+    <li><strong>Digests are built, not delivered.</strong> A batch is cut on demand; nothing sends it to a desk.</li>
+    <li><strong>Approved emergent candidates are not doctrine.</strong> An emergent typology the owner approves is recorded as approved; it is not added to the typology library. The pinned log holds <span data-count="emergent-approved">0</span> such approvals.</li>
+    <li><strong>Some citations are attested, not matched.</strong> <span data-count="attested">12</span> citations across the merged records are true quotes the citation matcher cannot place on their page (8 across a page break, 2 with a list bullet extracted as a letter, 1 with an accent dropped, 1 with an ellipsis spanning pages); the owner checked each by hand. <span data-count="attested-here">0</span> of them are on ADV-2026-0013.</li>
+    <li><strong>The scores are single runs.</strong> Section 9 shows one extraction per advisory, without bands.</li>
+  </ul>
 </section>
 </div>
 </body>

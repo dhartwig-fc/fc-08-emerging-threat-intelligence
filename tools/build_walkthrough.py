@@ -15,6 +15,14 @@ WHAT IT READS (inputs(), once each; paths through the owning modules' constants)
   the decision log, THAT prefix    -> section 5 (the owner's decisions), via log_prefix only
   the golden label                 -> the review card's context line, as the owner saw it
   the desk routing table           -> "desks reached", through the digest's own routing rule
+  the actor-resolution report      -> section 6 (each named actor's resolution), over the extractor's records
+  the actor register               -> section 6 (the entity_key seam) and section 10
+  the Sanctions desk digest file   -> section 7 (the advisory's block only; never the file's header)
+  the telemetry run's event file   -> section 8 (tool calls, permissions, the RUN_COMPLETED payload)
+  the telemetry run's queue file   -> section 8 (its proposals, separate from the decided run's)
+  evals/golden vs both record sets -> section 9, scored by evals.score.score_dirs at build time
+  the owner-attested citations     -> section 10 (how many the matcher cannot place)
+  the extractor's tools and prompt -> section 10 (whether it is asked to resolve actors)
 
 DETERMINISTIC. No clock, no git, no PDF, no gitignored file: the same inputs give the same
 bytes. A decision appended to the log after the batch was cut does not reach the page --
@@ -30,6 +38,7 @@ from __future__ import annotations
 import argparse
 import html
 import json
+import re
 import sys
 from pathlib import Path
 
@@ -42,14 +51,28 @@ from governance.digest import (APPROVED_NOT_IN_RECORD, DIGESTS_DIR, RECORDS_DIR,
                                _routes, _visible)
 from governance.proposals import ADVISORY_LIST, LIBRARY, QUEUE_DIR, group, link_key, load_queue_files  # noqa: E402
 from governance.routing import load_routing  # noqa: E402
+from agents import telemetry  # noqa: E402
+from agents.extract_advisory import KC_TOOLS, SYSTEM_PROMPT  # noqa: E402
+from agents.permissions import PROPOSE_TOOL, READ_ONLY_TOOLS  # noqa: E402
+from evals.actor_resolution import RECORDS as EXTRACTOR_RECORDS, REPORT as ACTOR_REPORT  # noqa: E402
+from evals.check_citations import ATTESTED_PATH  # noqa: E402
+from evals.score import score_dirs  # noqa: E402
+from tools.build_actor_register import load_register  # noqa: E402
 
 OUT = ROOT / "site" / "threat-intel" / "index.html"
 ADVISORY = "ADV-2026-0013"
 DECIDED_RUN = "adv-2026-0013-extractor-f617bd3b00"
 TELEMETRY_RUN = "adv-2026-0013-extractor-69eeab7b41"
 GOLDEN_DIR = ROOT / "evals" / "golden"
+DIGEST_DESK = "sanctions_desk"
+RESOLVER = "knowledge_centre_resolve_actor"
+TRACE = "evals/traces/FULL_BASELINE_2026-09-12.md"
+TRACE_URL = "https://github.com/dhartwig-fc/fc-08-emerging-threat-intelligence/blob/main/" + TRACE
+SCORE_FIELDS = (("typologies", "Typologies (library)"), ("emergent", "Emergent typologies"),
+                ("actors", "Actors"), ("jurisdictions", "Jurisdictions"))
 _MUTATE = None  # set only by evals/check_walkthrough.py through --_mutate
-MUTATIONS = ("drop-citation", "unpinned-log", "wrong-page", "swap-notes", "wrong-count", "desk-scope", "two-runs")
+MUTATIONS = ("drop-citation", "unpinned-log", "wrong-page", "swap-notes", "wrong-count", "desk-scope", "two-runs",
+             "typed-score", "actor-id", "digest-header", "telemetry-count", "attested-count")
 
 e = html.escape
 PAST = {"approve": "approved", "reject": "rejected"}
@@ -57,6 +80,12 @@ PAST = {"approve": "approved", "reject": "rejected"}
 
 def _json(path: Path):
     return json.loads(path.read_text(encoding="utf-8"))
+
+
+class _RunId:
+    """The one attribute telemetry.telemetry_path reads, so the path comes from its owner."""
+    def __init__(self, run_id: str):
+        self.run_id = run_id
 
 
 def inputs(log: Path = gd.LOG) -> dict:
@@ -92,6 +121,46 @@ def inputs(log: Path = gd.LOG) -> dict:
 
     golden = _json(GOLDEN_DIR / ("%s.json" % ADVISORY))
     routing = load_routing()
+
+    # Section 6. The resolution report reads the EXTRACTOR's records; the page's record is the merged
+    # one. Say so only because it is true: the two must carry the same actors for this advisory.
+    resolution = _json(ACTOR_REPORT)
+    actor_rows = [r for r in resolution["actors"] if r["advisory_id"] == ADVISORY]
+    suggestions = {s["name"]: s["suggestions"] for s in resolution["suggestions"] if s["advisory_id"] == ADVISORY}
+    if _json(EXTRACTOR_RECORDS / ("%s.json" % ADVISORY))["actors"] != record["actors"]:
+        raise ValueError("the merged record's actors are not the extractor record's; section 6 says they are")
+    categories = [a for a in record["actors"] if a.get("actor_type") == "category"]
+    if [r["name"] for r in actor_rows] != [a["name"] for a in record["actors"] if a.get("actor_type") != "category"]:
+        raise ValueError("the actor-resolution report's rows are not this record's named actors: re-run "
+                         "evals/actor_resolution.py")
+    register = load_register()
+    if any(a.get("entity_key") is not None for a in register):
+        raise ValueError("a register entry now carries an entity_key; sections 6 and 10 say none does")
+
+    # Section 7: the advisory's block of the desk file, cut below the file's header.
+    desk_text = (DIGESTS_DIR / batch / ("%s.md" % DIGEST_DESK)).read_text(encoding="utf-8")
+    m = re.search(r"^## %s -- .*?(?=^## |\Z)" % re.escape(ADVISORY), desk_text, re.S | re.M)
+    if not m:
+        raise ValueError("batch %s's %s file has no %s block" % (batch, DIGEST_DESK, ADVISORY))
+    digest_block = (desk_text[:m.end()] if _MUTATE == "digest-header" else m.group(0)).rstrip("\n")
+
+    # Section 8: the run with telemetry, which is not the decided run.
+    events = [json.loads(line) for line in telemetry.telemetry_path(_RunId(TELEMETRY_RUN))
+              .read_text(encoding="utf-8").splitlines() if line.strip()]
+    started = [ev for ev in events if ev["stage"] == telemetry.RUN_STARTED]
+    completed = [ev for ev in events if ev["stage"] == telemetry.RUN_COMPLETED]
+    if len(started) != 1 or len(completed) != 1:
+        raise ValueError("run %s's telemetry does not hold exactly one start and one completion" % TELEMETRY_RUN)
+    if started[0]["payload"].get("pdf_sha256") != doc or started[0]["payload"].get("run_id") != TELEMETRY_RUN:
+        raise ValueError("run %s's telemetry is not about this document" % TELEMETRY_RUN)
+    tel_proposals, skipped = load_queue_files([QUEUE_DIR / ("%s.jsonl" % TELEMETRY_RUN)])
+    if skipped or any(p.document_sha256 != doc or p.advisory_id != ADVISORY for p in tel_proposals):
+        raise ValueError("run %s's queue is unreadable or not about this document" % TELEMETRY_RUN)
+
+    # Section 10: "the extractor is not asked to resolve actors" must stay true to be said.
+    if RESOLVER in SYSTEM_PROMPT:
+        raise ValueError("the extractor's prompt now names %s; section 10 says it is not asked to" % RESOLVER)
+
     return {
         "advisory": advisory,
         "advisories": advisories,
@@ -106,6 +175,19 @@ def inputs(log: Path = gd.LOG) -> dict:
         "golden_ids": {t["typology_id"] for t in golden["typologies"] if t.get("typology_id")},
         "routing": routing,
         "desks": _routes(record, gd.latest(decisions), library, routing),
+        "all_decisions": decisions,
+        "actor_rows": actor_rows,
+        "suggestions": suggestions,
+        "categories": categories,
+        "register": register,
+        "digest_block": digest_block,
+        "events": events,
+        "run_started": started[0]["payload"],
+        "run_completed": completed[0]["payload"],
+        "tel_proposals": tel_proposals,
+        "scores": {"extraction": score_dirs(GOLDEN_DIR, EXTRACTOR_RECORDS), "reviewer": score_dirs(GOLDEN_DIR, RECORDS_DIR)},
+        "attested": _json(ATTESTED_PATH)["attested"],
+        "resolver_available": RESOLVER in KC_TOOLS,
     }
 
 
@@ -364,6 +446,275 @@ def section_review(inp: dict) -> str:
        e(ADVISORY), e(DECIDED_RUN), "\n".join(blocks), tail)
 
 
+def section_actors(inp: dict) -> str:
+    rec, rows, cats, register = inp["record"], inp["actor_rows"], inp["categories"], inp["register"]
+    by_name = {a["name"]: a for a in rec["actors"]}
+    trs = []
+    for r in rows:
+        a = by_name[r["name"]]
+        act = r["actor_id"] or ""
+        if r["status"] == "resolved":
+            if _MUTATE == "actor-id":
+                act = ""
+                res = "resolved, matched as &ldquo;%s&rdquo;" % e(r["matched"])
+            else:
+                res = "resolved to <code>%s</code>, matched as &ldquo;%s&rdquo;" % (e(act), e(r["matched"]))
+        elif r["status"] == "ambiguous":
+            res = "ambiguous: matches %s; the resolver does not choose" % _ids(r["entries"])
+        else:
+            sug = inp["suggestions"].get(r["name"], [])
+            res = "unresolved: no register entry matches it; " + (
+                "suggested, not confirmed: %s" % ", ".join("<code>%s</code> %s" % (e(x["actor_id"]), e(x["name"]))
+                                                         for x in sug) if sug else "no suggestion")
+        trs.append("""    <tr class="actor" data-actor="%s" data-status="%s" data-act="%s" data-entries="%s">
+      <td data-h="Actor">%s<span class="role">%s</span></td>
+      <td data-h="Resolution">%s</td>
+    </tr>""" % (e(r["name"]), e(r["status"]), e(act), e(",".join(r["entries"])), e(r["name"]),
+                e(a.get("role") or ""), res))
+    publishers = {t.strip() for t in inp["advisory"]["publisher"].split("/")}
+    unresolved = [r["name"] for r in rows if r["status"] == "unresolved"]
+    own = [n for n in unresolved if ({n} | set(by_name[n].get("aliases", []))) & publishers]
+    rest = [n for n in unresolved if n not in own]
+    own_html = ", ".join('<span class="who" data-publisher="%s">%s</span>' % (e(n), e(n)) for n in own)
+    note = ""
+    if own:
+        note = ("<p>%s of the %s named actors that do not resolve are the note&rsquo;s own publishers &mdash; %s. "
+                "The extractor recorded the note&rsquo;s issuers as actors; the register, built from the parties "
+                "the reference labels name, has no entry for them.%s</p>"
+                % (len(own), len(unresolved), own_html,
+                   (" %s %s unresolved too, with no register entry to match." % (e(", ".join(rest)),
+                                                                                "is" if len(rest) == 1 else "are"))
+                   if rest else ""))
+    lis = "".join('\n    <li class="category" data-actor="%s">%s <span class="nr">not resolvable: a class of actor, '
+                  'not a named party</span></li>' % (e(a["name"]), e(a["name"])) for a in cats)
+    empty = sum(1 for a in register if a.get("entity_key") is None)
+    return """<section id="actors">
+  <h2><span class="n">06</span> Actors: who the advisory names</h2>
+  <p>The record names %s: %s and %s. The reviewer agent added none &mdash; these are the extractor&rsquo;s. Each named actor is looked up in the actor register: %s built from the parties the reference labels name, each with an <code>ACT-</code> id. The lookup shown is the actor-resolution evaluation&rsquo;s, run over the extractor&rsquo;s committed records after extraction (section 10 says why).</p>
+  <table class="rows two">
+    <thead><tr><th>Actor</th><th>Resolution</th></tr></thead>
+    <tbody>
+%s
+    </tbody>
+  </table>
+  %s
+  <p>The record&rsquo;s categories are classes of actor, never looked up:</p>
+  <ul class="cats">%s
+  </ul>
+  <dl class="facts">
+    <dt>entity_key</dt><dd data-entity-key="empty" data-empty="%d" data-of="%d">empty, on all %d register entries</dd>
+  </dl>
+  <p>The <code>entity_key</code> is the seam where a register entry would link to the platform&rsquo;s resolved-entity estate. It is left empty on purpose: that estate is synthetic demonstration data, and a real designation will never name a synthetic party. A link waits for a real substrate.</p>
+</section>
+""" % (_plural(len(rec["actors"]), "actor"), _plural(len(rows), "named actor"), _plural(len(cats), "category", "categories"),
+       _plural(len(register), "entry", "entries"), "\n".join(trs), note, lis, empty, len(register), len(register))
+
+
+def section_digest(inp: dict) -> str:
+    title = inp["routing"]["desk_titles"].get(DIGEST_DESK, DIGEST_DESK)
+    if DIGEST_DESK not in inp["desks"]:
+        raise ValueError("%s does not reach the %s; section 7 shows its entry there" % (ADVISORY, title))
+    return """<section id="digest">
+  <h2><span class="n">07</span> What a desk receives</h2>
+  <p>The advisory reached %s (section 1). This is the %s&rsquo;s entry for it, exactly as written in digest batch <code data-batch="%s">%s</code>, which was built from the first <span data-count="digest-log-lines">%d</span> lines of the decision log &mdash; the same lines section 5 reads. It is markdown, shown as written; &ldquo;asserted by the pipeline&rdquo; means in the record, awaiting the owner.</p>
+  <pre class="digest">%s</pre>
+</section>
+""" % (_plural(len(inp["desks"]), "desk"), e(title), e(inp["batch"]), e(inp["batch"]), inp["log_lines"],
+       e(inp["digest_block"]))
+
+
+STATUS_ORDER = (telemetry.SUCCESS, telemetry.REFUSED, telemetry.FAILURE)
+STATUS_SHOWN = {telemetry.SUCCESS: "Succeeded", telemetry.REFUSED: "Refused", telemetry.FAILURE: "Failed"}
+
+
+def _short(tool: str) -> str:
+    return tool.split("__")[-1]
+
+
+def _first_line(text: str, width: int = 110) -> str:
+    line = (text or "").splitlines()[0] if text else ""
+    return line if len(line) <= width else line[:width].rstrip() + "…"
+
+
+def section_telemetry(inp: dict) -> str:
+    events, s0, done = inp["events"], inp["run_started"], inp["run_completed"]
+    calls = [ev for ev in events if ev["stage"] == telemetry.TOOL_CALL]
+    if _MUTATE == "telemetry-count":
+        calls = [ev for ev in calls if ev["status"] != telemetry.FAILURE]
+    statuses = list(STATUS_ORDER) + sorted({ev["status"] for ev in calls} - set(STATUS_ORDER))
+    tools = sorted({ev["payload"]["tool"] for ev in calls}, key=lambda t: (_short(t), t))
+    count = {}
+    for ev in calls:
+        k = (ev["payload"]["tool"], ev["status"])
+        count[k] = count.get(k, 0) + 1
+    head = "".join("<th>%s</th>" % e(STATUS_SHOWN.get(st, st)) for st in statuses)
+    body = "\n".join("    <tr><td data-h=\"Tool\"><code>%s</code></td>%s</tr>" % (
+        e(_short(t)), "".join('<td data-h="%s" data-tool="%s" data-status="%s">%d</td>'
+                              % (e(STATUS_SHOWN.get(st, st)), e(t), e(st), count.get((t, st), 0)) for st in statuses)) for t in tools)
+    perm = {st: [ev for ev in events if ev["stage"] == st]
+            for st in (telemetry.PERMISSION_ALLOWED, telemetry.PERMISSION_DENIED)}
+    perm_tools = sorted({ev["payload"].get("tool") for evs in perm.values() for ev in evs})
+    pre = ""
+    if not set(perm_tools) & set(READ_ONLY_TOOLS):
+        pre = " The read-only lookup tools are pre-approved and never reach the check."
+    about = ""
+    if perm_tools:
+        about = " Every decision concerns %s%s." % (", ".join("<code>%s</code>" % e(_short(t)) for t in perm_tools),
+                                                    ", the agent&rsquo;s one write" if perm_tools == [PROPOSE_TOOL] else "")
+    failed = [ev for ev in calls if ev["status"] == telemetry.FAILURE]
+    fails = ""
+    if failed:
+        fails = ("\n  <p>%s failed. The error each logged, first line:</p>\n  <ul class=\"fails\">%s\n  </ul>"
+                 % (_plural(len(failed), "call"), "".join(
+                     '\n    <li><code>%s</code> <span class="err">%s</span></li>'
+                     % (e(_short(ev["payload"]["tool"])), e(_first_line(ev["payload"].get("outcome", ""))))
+                     for ev in failed)))
+
+    def rc(key: str, shown: str) -> str:
+        return '<dd data-rc="%s" data-raw="%s">%s</dd>' % (key, e(json.dumps(done[key])), e(shown))
+    facts = "\n    ".join([
+        "<dt>Turns</dt>" + rc("turns", "%d of at most %d" % (done["turns"], s0["max_turns"])),
+        "<dt>Duration</dt>" + rc("duration_ms", "%.1f seconds" % (done["duration_ms"] / 1000)),
+        "<dt>Cost</dt>" + rc("cost_usd", "US$%.2f, as reported by the agent SDK (budget US$%.2f)"
+                             % (done["cost_usd"], s0["max_budget_usd"])),
+        "<dt>Record validated</dt>" + rc("validated", "yes" if done["validated"] else "no")])
+
+    # Its proposals: separate from the decided run's. Say, per link, what the pinned log decided.
+    tel = inp["tel_proposals"]
+    pinned = inp["decisions"]
+    cited = {pid for d in pinned for pid in d.proposal_ids}
+    standing = _standing(inp)
+
+    def name(p):
+        return p.typology_id or p.emergent_label
+    decided = sorted(name(p) for p in tel if p.link_key in standing)
+    undecided = sorted(name(p) for p in tel if p.link_key not in standing)
+    by_runs = sorted({r for p in tel if p.link_key in standing for r in standing[p.link_key].run_ids})
+    verdicts = sorted({PAST[standing[p.link_key].decision] for p in tel if p.link_key in standing})
+    n_cited = sum(1 for p in tel if p.proposal_id in cited)
+    n_propose = sum(count.get((t, telemetry.SUCCESS), 0) for t in tools if t == PROPOSE_TOOL)
+    match = ("Its %s successful <code>%s</code> calls match the %s in its queue"
+             % (n_propose, e(_short(PROPOSE_TOOL)), _plural(len(tel), "proposal"))) if n_propose == len(tel) else (
+        "Its queue holds %s against %d successful <code>%s</code> calls"
+        % (_plural(len(tel), "proposal"), n_propose, e(_short(PROPOSE_TOOL))))
+    if decided:
+        decided_line = ('Of the links they name, <span class="ids" data-set="tel-decided-elsewhere">%s</span> were decided '
+                        "on proposals from run %s (%s); " % (_ids(decided), ", ".join("<code>%s</code>" % e(r) for r in by_runs),
+                                                            "all " + verdicts[0] if len(verdicts) == 1 else ", ".join(verdicts)))
+    else:
+        decided_line = ('Of the links they name, <span class="ids" data-set="tel-decided-elsewhere">none</span> is '
+                        "decided; ")
+    sdk = ""
+    if any(_short(t) == "StructuredOutput" for t in tools):
+        sdk = (" <code>StructuredOutput</code> is the agent SDK&rsquo;s tool for handing in the finished record. "
+               "&ldquo;Refused&rdquo; would mean a tool declined the call under its own rules, as "
+               "<code>%s</code> does with a quote it cannot place; &ldquo;failed&rdquo; means the call raised an error."
+               % e(_short(PROPOSE_TOOL)))
+    return """<section id="telemetry">
+  <h2><span class="n">08</span> Telemetry: what the agent did</h2>
+  <p>Every tool call and permission decision in an extraction run is logged as it happens. The run with telemetry for this advisory is <code>%s</code> (%s, started %s): <span class="count" data-count="events">%d</span> events.</p>
+  <table class="rows tel">
+    <thead><tr><th>Tool call</th>%s</tr></thead>
+    <tbody>
+%s
+    </tbody>
+  </table>
+  <p>%s</p>%s
+  <p>Permission decisions: <span data-perm="%s">%d</span> allowed, <span data-perm="%s">%d</span> denied.%s%s</p>
+  <dl class="facts">
+    %s
+  </dl>
+  <p class="flag">This run is not the one the owner decided (<code>%s</code>, sections 4 and 5). %s: <span class="ids" data-set="tel-proposed">%s</span>. They are separate from the decided run&rsquo;s proposals: <span data-count="tel-cited">%d</span> of them %s cited by any decision in the pinned log, so as proposals they remain undecided. %s%s</p>
+</section>
+""" % (e(TELEMETRY_RUN), e(s0.get("model", "?")), e(events[0]["timestamp"][:10]), len(events), head, body,
+       sdk.strip(), fails,
+       telemetry.PERMISSION_ALLOWED, len(perm[telemetry.PERMISSION_ALLOWED]), telemetry.PERMISSION_DENIED,
+       len(perm[telemetry.PERMISSION_DENIED]), about, pre, facts, e(DECIDED_RUN), match,
+       _ids(sorted(name(p) for p in tel)), n_cited, "is" if n_cited == 1 else "are", decided_line,
+       ('<span class="ids" data-set="tel-no-decision">%s</span> %s no decision.'
+        % (_ids(undecided) or "none", "has" if len(undecided) == 1 else "have")))
+
+
+def _score_table(key: str, caption: str, report: dict) -> str:
+    rows = []
+    for field, label in SCORE_FIELDS:
+        cells = []
+        for metric in ("precision", "recall", "f1"):
+            v = "%.3f" % report["totals"][field][metric]
+            if _MUTATE == "typed-score" and key == "reviewer" and field == "typologies" and metric == "f1":
+                v = "0.700"
+            cells.append('<td data-h="%s" data-score="%s" data-field="%s" data-m="%s">%s</td>'
+                         % ({"f1": "F1"}.get(metric, metric.capitalize()), key, field, metric, v))
+        rows.append("      <tr><td data-h=\"Field\">%s</td>%s</tr>" % (e(label), "".join(cells)))
+    return """  <table class="rows score">
+    <caption>%s</caption>
+    <thead><tr><th>Field</th><th>Precision</th><th>Recall</th><th>F1</th></tr></thead>
+    <tbody>
+%s
+    </tbody>
+  </table>""" % (caption, "\n".join(rows))
+
+
+def section_score(inp: dict) -> str:
+    ext, rev = inp["scores"]["extraction"], inp["scores"]["reviewer"]
+    if ext["scored"] != rev["scored"]:
+        raise ValueError("the two record sets score different advisories; the tables would not compare")
+    same = [label.lower() for field, label in SCORE_FIELDS if ext["totals"][field] == rev["totals"][field]]
+    moved = ["%s F1 %.3f &rarr; %.3f" % (e(label.lower()), ext["totals"][f]["f1"], rev["totals"][f]["f1"])
+             for f, label in SCORE_FIELDS if ext["totals"][f] != rev["totals"][f]]
+    diff = ""
+    if moved:
+        diff = "<p>Adding the reviewer moves %s.%s</p>" % ("; ".join(moved), (
+            " %s score the same in both tables." % e(" and ".join(same)).capitalize()) if same else "")
+    return """<section id="score">
+  <h2><span class="n">09</span> How well the extraction scores</h2>
+  <p>Across the <span class="count" data-count="scored">%d</span> advisories with a hand-written reference answer (a golden label), %s among them, each record is scored against its label. Precision: of what the pipeline asserted, the share the label holds. Recall: of what the label holds, the share the pipeline asserted. F1 balances the two. Computed when this page was built.</p>
+%s
+%s
+  %s
+  <p class="flag">Each table is a single full-set run: one extraction of each advisory, scored once. Repeat runs, which measure how much a figure moves from run to run, are not committed, so no bands are shown. The committed trace of the <a href="%s" rel="noopener">first full-set run, 2026-09-12</a>, describes what limits typology recall; its figures are that day&rsquo;s, not these.</p>
+</section>
+""" % (len(ext["scored"]), ("ADV-2026-0013" if ADVISORY in ext["scored"] else "not including " + e(ADVISORY)),
+       _score_table("extraction", "Extraction only: the extractor&rsquo;s committed records", ext),
+       _score_table("reviewer", "Extraction + reviewer: the merged records, with the reviewer agent&rsquo;s additions",
+                    rev), diff, e(TRACE_URL, quote=True))
+
+
+ATTEST_REASONS = {"page_break": "across a page break", "bullet_glyph": "with a list bullet extracted as a letter",
+                  "dropped_accent": "with an accent dropped", "ellipsis_across_pages": "with an ellipsis spanning pages"}
+
+
+def section_limits(inp: dict) -> str:
+    attested = inp["attested"]
+    counted = [a for a in attested if a["advisory_id"] == ADVISORY] if _MUTATE == "attested-count" else attested
+    reasons = {}
+    for a in attested:
+        reasons[a["reason"]] = reasons.get(a["reason"], 0) + 1
+    why = ", ".join("%d %s" % (n, e(ATTEST_REASONS.get(r, r)))
+                    for r, n in sorted(reasons.items(), key=lambda kv: (-kv[1], kv[0])))
+    here = sum(1 for a in attested if a["advisory_id"] == ADVISORY)
+    calls = sum(1 for ev in inp["events"] if ev["stage"] == telemetry.TOOL_CALL
+                and _short(ev["payload"]["tool"]) == RESOLVER)
+    register = inp["register"]
+    keyed = sum(1 for a in register if a.get("entity_key") is not None)
+    emergent_ok = sum(1 for d in gd.latest(inp["all_decisions"]).values()
+                      if d.kind == "emergent" and d.decision == "approve")
+    tools = ("The extraction agent has the resolver among its tools, but its instructions do not ask it to use it"
+             if inp["resolver_available"] else "The extraction agent does not have the resolver among its tools")
+    return """<section id="limits">
+  <h2><span class="n">10</span> What this slice does not do yet</h2>
+  <ul class="limits">
+    <li><strong>Actor resolution is not part of extraction.</strong> %s: run <code>%s</code> made <span data-count="resolver-calls">%d</span> calls to <code>%s</code>. Section 6&rsquo;s resolution was run afterwards, over the committed records. Resolving during extraction is slice 2.</li>
+    <li><strong>No actor is linked to the platform&rsquo;s entities.</strong> <span data-count="entity-keys">%d</span> of the <span data-count="register">%d</span> register entries carry an <code>entity_key</code>; section 6 says why.</li>
+    <li><strong>Digests are built, not delivered.</strong> A batch is cut on demand; nothing sends it to a desk.</li>
+    <li><strong>Approved emergent candidates are not doctrine.</strong> An emergent typology the owner approves is recorded as approved; it is not added to the typology library. The pinned log holds <span data-count="emergent-approved">%d</span> such approvals.</li>
+    <li><strong>Some citations are attested, not matched.</strong> <span data-count="attested">%d</span> citations across the merged records are true quotes the citation matcher cannot place on their page (%s); the owner checked each by hand. <span data-count="attested-here">%d</span> of them are on %s.</li>
+    <li><strong>The scores are single runs.</strong> Section 9 shows one extraction per advisory, without bands.</li>
+  </ul>
+</section>
+""" % (tools, e(TELEMETRY_RUN), calls, RESOLVER, keyed, len(register), emergent_ok, len(counted), why, here, e(ADVISORY))
+
+
 # ---------------------------------------------------------------- the page
 
 HEAD = """<!doctype html>
@@ -449,6 +800,21 @@ HEAD = """<!doctype html>
   .why{margin:2px 0 6px;font-size:13px;color:var(--ink2)}
   .why summary{cursor:pointer;font-family:var(--mono);font-size:11px;color:var(--ink3)}
   .why p{margin:6px 0 0;overflow-wrap:anywhere}
+  table.two th:nth-child(1){width:44%}
+  table.two th:nth-child(2){width:auto}
+  table.tel th:nth-child(n){width:auto}
+  table.tel th:nth-child(1),table.score th:nth-child(1){width:46%}
+  table.score th:nth-child(n+2){width:18%}
+  table.tel td:nth-child(n+2),table.score td:nth-child(n+2){font-family:var(--mono);font-size:13px}
+  table.score{margin:0 0 16px}
+  caption{text-align:left;font-size:13px;color:var(--ink);padding:0 0 6px}
+  .role{display:block;font-size:12.5px;color:var(--ink3);margin-top:2px}
+  .cats,.limits,.fails{margin:0 0 12px;padding-left:18px;color:var(--ink2)}
+  .cats li,.limits li,.fails li{margin:0 0 6px}
+  .limits strong{color:var(--ink)}
+  .nr{color:var(--ink3);font-size:13px}
+  .err{font-family:var(--mono);font-size:12px;overflow-wrap:anywhere}
+  pre.digest{background:var(--panel);border:1px solid var(--edge);border-radius:10px;padding:12px 14px}
   @media (max-width:640px){
     h1{font-size:23px}
     table.rows thead{display:none}
@@ -456,6 +822,7 @@ HEAD = """<!doctype html>
     table.rows tr{border-bottom:1px solid var(--edge);padding:8px 0}
     table.rows td{border:0;padding:3px 0}
     table.rows td:nth-child(2),table.rows td:nth-child(3),table.rows td:nth-child(4){display:inline-block;width:auto;margin-right:18px}
+    table.two td:nth-child(2){display:block;margin-right:0}
     table.rows td::before{content:attr(data-h);display:block;font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink3)}
     .facts{grid-template-columns:1fr;gap:0}
     .facts dd{margin-bottom:8px}
@@ -491,10 +858,11 @@ TAIL = """</div>
 def build(inp: dict) -> str:
     intro = """
   <h1>One advisory, from PDF to owner-approved typology links</h1>
-  <p class="lede">%s, followed through extraction, grounding and review. Every figure and quote on this page is read from a governed file when the page is built.</p>
+  <p class="lede">%s, followed through extraction, grounding and review to the desks it reaches, with the actors it names, what the agent did, how the extraction scores and what this slice does not do yet. Every figure and quote on this page is read from a governed file when the page is built.</p>
 """ % e(ADVISORY)
     sections = [section_question(inp), section_source(inp), section_extraction(inp),
-                section_grounding(inp), section_review(inp)]
+                section_grounding(inp), section_review(inp), section_actors(inp), section_digest(inp),
+                section_telemetry(inp), section_score(inp), section_limits(inp)]
     return HEAD + BRAND + intro + "\n" + "\n".join(sections) + TAIL
 
 

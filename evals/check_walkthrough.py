@@ -11,6 +11,11 @@ Usage:
     python evals/check_walkthrough.py --mutate wrong-count     # section 1 miscounts the extractor's typologies; MUST fail
     python evals/check_walkthrough.py --mutate desk-scope      # a desk is shown every family's links; MUST fail
     python evals/check_walkthrough.py --mutate two-runs        # the record-only set counts reviewer additions; MUST fail
+    python evals/check_walkthrough.py --mutate typed-score     # merged typology F1 is a typed 0.700, not computed; MUST fail
+    python evals/check_walkthrough.py --mutate actor-id        # a resolved actor is shown without its ACT- id; MUST fail
+    python evals/check_walkthrough.py --mutate digest-header   # the digest cut starts at the desk file's header; MUST fail
+    python evals/check_walkthrough.py --mutate telemetry-count # FAILURE tool calls are left out of the counts; MUST fail
+    python evals/check_walkthrough.py --mutate attested-count  # #limits counts only this advisory's attestations; MUST fail
 
 WHY. The page will leave this repository. A page that drifts from its inputs, differs
 between two machines, or quietly drops a citation says something the governance never
@@ -44,11 +49,21 @@ from governance import publish_boundary as pb  # noqa: E402
 from governance.digest import DIGESTS_DIR, RECORDS_DIR  # noqa: E402
 from governance.proposals import QUEUE_DIR, load_queue_files  # noqa: E402
 from governance.routing import load_routing  # noqa: E402
+from agents.telemetry import TELEMETRY_DIR  # noqa: E402
+from evals.actor_resolution import REPORT as ACTOR_REPORT  # noqa: E402
+from evals.check_citations import ATTESTED_PATH  # noqa: E402
+from evals.score import score_dirs  # noqa: E402
+from tools.build_actor_register import load_register  # noqa: E402
+
+TRACE_URL = ("https://github.com/dhartwig-fc/fc-08-emerging-threat-intelligence/blob/main/"
+             "evals/traces/FULL_BASELINE_2026-09-12.md")
 
 BUILDER = ROOT / "tools" / "build_walkthrough.py"
-SECTIONS = ("question", "source", "extraction", "grounding", "review")
+SECTIONS = ("question", "source", "extraction", "grounding", "review",
+            "actors", "digest", "telemetry", "score", "limits")
 SEEDS = ("0", "1", "4242", "987654")
-MUTATIONS = ("drop-citation", "unpinned-log", "wrong-page", "swap-notes", "wrong-count", "desk-scope", "two-runs")
+MUTATIONS = ("drop-citation", "unpinned-log", "wrong-page", "swap-notes", "wrong-count", "desk-scope", "two-runs",
+             "typed-score", "actor-id", "digest-header", "telemetry-count", "attested-count")
 MUTATION = None
 
 
@@ -95,6 +110,168 @@ def _pinned_advisory_decisions(advisory: str) -> list:
     return [d for d in decisions if d.advisory_id == advisory]
 
 
+def _attrs(block: str, attr: str) -> dict:
+    """{attr value: inner text} for every element carrying attr in block (values unescaped)."""
+    return {html.unescape(m.group(1)): html.unescape(m.group(2))
+            for m in re.finditer(r'<[a-z]+[^>]*? %s="([^"]*)"[^>]*>([^<]*)<' % re.escape(attr), block)}
+
+
+def _desk_cut(text: str, advisory: str) -> str:
+    """The guard's OWN cut of one advisory's block from a desk digest: its heading line up to the
+    next level-2 heading or the end. String search, not the builder's regex, so the two can disagree."""
+    start = text.find("\n## %s -- " % advisory)
+    if start < 0:
+        return ""
+    start += 1
+    end = text.find("\n## ", start)
+    return (text[start:] if end < 0 else text[start:end]).rstrip("\n")
+
+
+def checks_sections_6_to_10(bw, page: str, record: dict, pinned: list) -> list:
+    out = []
+
+    # 6 -- actors. Every resolution row for the advisory, with its ACT- id when resolved, its
+    # entries when ambiguous; every category actor as not resolvable; the entity_key seam empty.
+    actors = section(page, "actors")
+    rows = [r for r in json.loads(ACTOR_REPORT.read_text(encoding="utf-8"))["actors"]
+            if r["advisory_id"] == bw.ADVISORY]
+    shown = {html.unescape(m.group(1)): (m.group(2), html.unescape(m.group(3)), html.unescape(m.group(4)))
+             for m in re.finditer(r'<tr class="actor" data-actor="([^"]*)" data-status="([a-z]*)" '
+                                  r'data-act="([^"]*)" data-entries="([^"]*)">', actors)}
+    want = {r["name"]: (r["status"], r["actor_id"] or "", ",".join(r["entries"])) for r in rows}
+    ids_visible = all(r["actor_id"] in actors for r in rows if r["status"] == "resolved")
+    out.append((bool(rows) and shown == want and ids_visible,
+                "#actors shows each %s resolution row: name, status, ACT- id when resolved, entries when ambiguous"
+                % bw.ADVISORY, "want %s; page %s" % (want, shown)))
+    cats = [a["name"] for a in record["actors"] if a.get("actor_type") == "category"]
+    cat_shown = [html.unescape(m.group(1)) for m in
+                 re.finditer(r'<li class="category" data-actor="([^"]*)">[^<]*<span class="nr">not resolvable: '
+                             r'a class of actor, not a named party</span></li>', actors)]
+    out.append((bool(cats) and cat_shown == cats and len(rows) + len(cats) == len(record["actors"]),
+                "#actors lists every category actor in the record, in order, as not resolvable",
+                "record %s; page %s; named rows %d + categories %d vs %d actors"
+                % (cats, cat_shown, len(rows), len(cats), len(record["actors"]))))
+    publishers = {t.strip() for t in bw.inputs()["advisory"]["publisher"].split("/")}
+    by_name = {a["name"]: a for a in record["actors"]}
+    own = sorted(r["name"] for r in rows if r["status"] == "unresolved"
+                 and ({r["name"]} | set(by_name.get(r["name"], {}).get("aliases", []))) & publishers)
+    said = sorted(html.unescape(m.group(1)) for m in re.finditer(r'data-publisher="([^"]*)"', actors))
+    out.append((bool(own) and said == own,
+                "#actors names exactly the unresolved actors that are the note's own publishers",
+                "computed %s; page %s" % (own, said)))
+    register = load_register()
+    empty = sum(1 for a in register if a.get("entity_key") is None)
+    m = re.search(r'data-entity-key="empty" data-empty="(\d+)" data-of="(\d+)"', actors)
+    out.append((bool(m) and (int(m.group(1)), int(m.group(2))) == (empty, len(register)) and empty == len(register),
+                "#actors shows the entity_key seam empty, with the register's own count",
+                "register %d/%d empty; page %s" % (empty, len(register), m.groups() if m else None)))
+
+    # 7 -- digest. The advisory's block from the Sanctions desk file of the CURRENT batch, verbatim.
+    digest = section(page, "digest")
+    batch = (DIGESTS_DIR / "CURRENT").read_text(encoding="utf-8").strip()
+    desk_text = (DIGESTS_DIR / batch / "sanctions_desk.md").read_text(encoding="utf-8")
+    cut = _desk_cut(desk_text, bw.ADVISORY)
+    out.append((bool(cut) and ('<pre class="digest">%s</pre>' % html.escape(cut)) in digest,
+                "#digest carries the %s block of batch %s's Sanctions desk file, exactly (escaped)"
+                % (bw.ADVISORY, batch), "%d chars cut; %s" % (len(cut), "present" if cut and html.escape(cut) in digest
+                                                               else "NOT on the page as cut")))
+    manifest = json.loads((DIGESTS_DIR / batch / "manifest.json").read_text(encoding="utf-8"))
+    shown_batch = _attrs(digest, "data-batch")
+    shown_lines = _attrs(digest, "data-count").get("digest-log-lines")
+    out.append((list(shown_batch) == [batch] and shown_lines == str(manifest["decision_log"]["lines"]),
+                "#digest names the CURRENT batch and its pinned decision-log line count",
+                "CURRENT %s, %d lines; page %s, %s" % (batch, manifest["decision_log"]["lines"],
+                                                      list(shown_batch), shown_lines)))
+
+    # 8 -- telemetry. Every count recomputed from the run's own file.
+    tel = section(page, "telemetry")
+    events = [json.loads(l) for l in (TELEMETRY_DIR / ("%s.jsonl" % bw.TELEMETRY_RUN))
+              .read_text(encoding="utf-8").splitlines() if l.strip()]
+    calls = {}
+    for ev in events:
+        if ev["stage"] == "FC08_TOOL_CALL":
+            k = (ev["payload"]["tool"], ev["status"])
+            calls[k] = calls.get(k, 0) + 1
+    got = {(html.unescape(m.group(1)), m.group(2)): int(m.group(3))
+           for m in re.finditer(r'data-tool="([^"]*)" data-status="([A-Z]+)">(\d+)<', tel)}
+    got = {k: v for k, v in got.items() if v}
+    perms = {st: sum(1 for ev in events if ev["stage"] == st) for st in ("PERMISSION_ALLOWED", "PERMISSION_DENIED")}
+    got_perms = {k: int(v) for k, v in _attrs(tel, "data-perm").items()}
+    n_events = _attrs(tel, "data-count").get("events")
+    out.append((bool(calls) and got == calls and got_perms == perms and n_events == str(len(events)),
+                "#telemetry's per-tool, per-status call counts, permission counts and event total equal the file's",
+                "file %s %s %d; page %s %s %s" % (sorted(calls.items()), perms, len(events), sorted(got.items()),
+                                                 got_perms, n_events)))
+    done = [ev for ev in events if ev["stage"] == "RUN_COMPLETED"]
+    started = [ev for ev in events if ev["stage"] == "RUN_STARTED"]
+    raw = {m.group(1): (json.loads(html.unescape(m.group(2))), html.unescape(m.group(3)))
+           for m in re.finditer(r'data-rc="([a-z_]+)" data-raw="([^"]*)">([^<]*)<', tel)}
+    ok_rc, why = len(done) == 1 and len(started) == 1, []
+    if ok_rc:
+        p, s0 = done[0]["payload"], started[0]["payload"]
+        expect = {"turns": (p["turns"], "%d of at most %d" % (p["turns"], s0["max_turns"])),
+                  "duration_ms": (p["duration_ms"], "%.1f seconds" % (p["duration_ms"] / 1000)),
+                  "cost_usd": (p["cost_usd"], "US$%.2f, as reported by the agent SDK (budget US$%.2f)"
+                               % (p["cost_usd"], s0["max_budget_usd"])),
+                  "validated": (p["validated"], "yes" if p["validated"] else "no")}
+        ok_rc = raw == expect
+        why = [expect, raw]
+    out.append((ok_rc, "#telemetry's turns, duration, cost and validated equal the RUN_COMPLETED payload", str(why)))
+    queued, _ = load_queue_files([QUEUE_DIR / ("%s.jsonl" % bw.TELEMETRY_RUN)])
+    cited = {pid for d in pinned for pid in d.proposal_ids}
+    decided_links = {d.link_key for d in pinned}
+    tel_ids = [q.typology_id or q.emergent_label for q in queued]
+    sets = {"tel-proposed": sorted(tel_ids),
+            "tel-decided-elsewhere": sorted(q.typology_id or q.emergent_label for q in queued
+                                            if q.link_key in decided_links),
+            "tel-no-decision": sorted(q.typology_id or q.emergent_label for q in queued
+                                      if q.link_key not in decided_links)}
+    shown_sets = {k: sorted(x.strip() for x in v.split(",") if x.strip() and x.strip() != "none")
+                  for k, v in _attrs(tel, "data-set").items()}
+    n_cited = _attrs(tel, "data-count").get("tel-cited")
+    out.append((bool(queued) and bw.TELEMETRY_RUN in tel and shown_sets == sets
+                and n_cited == str(sum(1 for q in queued if q.proposal_id in cited)),
+                "#telemetry names its run, its proposals, and which of their links the pinned log decided",
+                "want %s cited %d; page %s cited %s" % (sets, sum(1 for q in queued if q.proposal_id in cited),
+                                                        shown_sets, n_cited)))
+
+    # 9 -- score. All 24 values recomputed with the scorer at check time.
+    sc = section(page, "score")
+    wrong = []
+    n = 0
+    for run, pred in (("extraction", ROOT / "data" / "records"), ("reviewer", RECORDS_DIR)):
+        totals = score_dirs(ROOT / "evals" / "golden", pred)["totals"]
+        for field in ("typologies", "emergent", "actors", "jurisdictions"):
+            for metric in ("precision", "recall", "f1"):
+                n += 1
+                cell = re.search(r'data-score="%s" data-field="%s" data-m="%s">([^<]*)<' % (run, field, metric), sc)
+                want_v = "%.3f" % totals[field][metric]
+                if not cell or cell.group(1) != want_v:
+                    wrong.append("%s/%s/%s want %s page %s" % (run, field, metric, want_v,
+                                                              cell.group(1) if cell else None))
+    out.append((n == 24 and not wrong, "#score's 24 precision/recall/F1 values equal score_dirs recomputed now",
+                "; ".join(wrong) or "all 24 equal"))
+    out.append(('href="%s"' % html.escape(TRACE_URL) in sc and "single" in sc,
+                "#score says the figures are single runs and links the committed full-set trace", ""))
+
+    # 10 -- limits. Every count recomputed.
+    lim = section(page, "limits")
+    attested = json.loads(ATTESTED_PATH.read_text(encoding="utf-8"))["attested"]
+    tel_calls = sum(1 for ev in events if ev["stage"] == "FC08_TOOL_CALL"
+                    and ev["payload"]["tool"].endswith("knowledge_centre_resolve_actor"))
+    emergent_ok = sum(1 for d in gd.latest(gd.log_prefix(manifest["decision_log"]["lines"])[2]).values()
+                      if d.kind == "emergent" and d.decision == "approve")
+    want_lim = {"attested": str(len(attested)),
+                "attested-here": str(sum(1 for a in attested if a["advisory_id"] == bw.ADVISORY)),
+                "resolver-calls": str(tel_calls),
+                "entity-keys": str(len(register) - empty), "register": str(len(register)),
+                "emergent-approved": str(emergent_ok)}
+    got_lim = _attrs(lim, "data-count")
+    out.append((got_lim == want_lim, "every count in #limits equals the guard's own count from the files",
+                "want %s; page %s" % (want_lim, got_lim)))
+    return out
+
+
 def checks() -> list:
     out = []
     try:
@@ -120,7 +297,7 @@ def checks() -> list:
                 ", ".join(bad_seeds) or "all identical"))
 
     counts = {sid: len(re.findall(r'<section id="%s"' % sid, page)) for sid in SECTIONS}
-    out.append((all(n == 1 for n in counts.values()), "each of the five section ids appears exactly once",
+    out.append((all(n == 1 for n in counts.values()), "each of the %d section ids appears exactly once" % len(SECTIONS),
                 str(counts)))
 
     found = pb.violations(page)
@@ -221,6 +398,8 @@ def checks() -> list:
     out.append((bool(pinned) and not misplaced,
                 "every pinned decision's verdict and note sit in the card naming its typology",
                 "misplaced: %s" % misplaced))
+
+    out += checks_sections_6_to_10(bw, page, record, pinned)
 
     for sid in ("grounding", "review"):
         out.append((bw.DECIDED_RUN in section(page, sid), "#%s names the decided run %s" % (sid, bw.DECIDED_RUN),
