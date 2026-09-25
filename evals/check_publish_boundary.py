@@ -28,24 +28,33 @@ from governance import decisions as gd  # noqa: E402
 from governance import publish_boundary as pb  # noqa: E402
 
 CLEAN = "<p>ADV-2026-0013 was approved on 2026-09-24; see github.com/example/repo/blob/main/evals/traces/X.md</p>"
-CASES = [
+PASS_CASES = [
+    ("legitimate URL with data/ in path", "https://www.example.gov/sanctions/data/downloads/sdn.xml"),
+    ("prose mentioning metadata/provenance fields", "governed metadata/provenance fields"),
+]
+REFUSE_CASES = [
     ("an absolute macOS path", "<p>built at /Users/someone/fc-08/site</p>", "/Users/"),
     ("a home-relative path", "<p>see ~/fc-08-emerging-threat-intelligence</p>", "~/"),
     ("a Windows drive path", "<p>C:\\work\\fc08</p>", "C:\\"),
     ("a queue file", "<p>adv-2026-0013-extractor-f617bd3b00.jsonl</p>", ".jsonl"),
     ("the decision log's filename", "<p>%s</p>" % gd.LOG.name, gd.LOG.name),
     ("an approvals file's filename", "<p>%s</p>" % gd.APPROVED_LINKS.name, gd.APPROVED_LINKS.name),
-    ("a data/ path", "<p>data/desk_routing.json</p>", "data/"),
+    ("a repo-relative data/ path", "<p>data/desk_routing.json</p>", "data/"),
     ("the SDD workspace", "<p>.superpowers/sdd</p>", ".superpowers"),
     ("the virtualenv", "<p>.venv/bin/python</p>", ".venv"),
     ("an email address", "<p>contact someone@example.com</p>", "someone@example.com"),
+    ("a percent-encoded path", "<p>href=\"/r?u=%2FUsers%2Fsomeone%2Ffc-08\"</p>", "/Users/"),
+    ("the approved-emergent filename", "<p>%s</p>" % gd.APPROVED_EMERGENT.name, gd.APPROVED_EMERGENT.name),
 ]
 
 
 def checks() -> list:
     out = [(pb.violations(CLEAN) == [], "a clean page passes (a GitHub URL and ids are not violations)",
             str(pb.violations(CLEAN)))]
-    for label, text, token in CASES:
+    for label, text in PASS_CASES:
+        got = pb.violations(text)
+        out.append((got == [], "allowed: %s" % label, str(got)))
+    for label, text, token in REFUSE_CASES:
         got = pb.violations(text)
         out.append((any(token in v for v in got), "refused: %s" % label, str(got)))
     return out
@@ -59,6 +68,7 @@ def main(argv: list) -> int:
         pb._PATH_PATTERNS = ()
     elif args.mutate == "no-internal":
         pb.FORBIDDEN_LITERALS = ()
+        pb._INTERNAL_PATTERNS = ()
     elif args.mutate == "no-email":
         pb._EMAIL = None
     if args.mutate:
