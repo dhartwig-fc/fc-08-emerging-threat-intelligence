@@ -142,11 +142,11 @@ class Link:
         return tuple(sorted({p.stage for p in self.proposals}))
 
 
-def load_queue(queue_dir: Path = QUEUE_DIR) -> Tuple[List[Proposal], List[str]]:
-    """Every proposal/2 line under queue_dir, and one note per line skipped -- none vanish silently."""
+def load_queue_files(paths) -> Tuple[List[Proposal], List[str]]:
+    """Every proposal/2 line in the given files, in the order given, and one note per line skipped."""
     proposals: List[Proposal] = []
     skipped: List[str] = []
-    for path in (sorted(queue_dir.glob("*.jsonl")) if queue_dir.exists() else []):
+    for path in paths:
         for n, line in enumerate(path.read_text(encoding="utf-8").splitlines(), start=1):
             if not line.strip():
                 continue
@@ -163,6 +163,11 @@ def load_queue(queue_dir: Path = QUEUE_DIR) -> Tuple[List[Proposal], List[str]]:
             except (KeyError, TypeError, ValueError) as exc:
                 skipped.append("%s:%d is malformed (%s)" % (path.name, n, exc))
     return proposals, skipped
+
+
+def load_queue(queue_dir: Path = QUEUE_DIR) -> Tuple[List[Proposal], List[str]]:
+    """Every proposal/2 line under queue_dir, and one note per line skipped -- none vanish silently."""
+    return load_queue_files(sorted(queue_dir.glob("*.jsonl")) if queue_dir.exists() else [])
 
 
 def _advisories(path: Path) -> Dict[str, dict]:

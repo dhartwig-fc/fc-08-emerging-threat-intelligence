@@ -33,7 +33,7 @@ sys.path.insert(0, str(ROOT))
 from governance import routing as gr  # noqa: E402
 from governance import decisions as gd  # noqa: E402
 from governance import digest as dg  # noqa: E402
-from governance.proposals import link_key, load_queue  # noqa: E402
+from governance.proposals import QUEUE_DIR, link_key, load_queue  # noqa: E402
 from schemas.advisory import Desk  # noqa: E402
 
 LIBRARY = {t["typology_id"]: t for t in
@@ -193,7 +193,8 @@ def real_checks() -> list:
     out = []
     sys.path.insert(0, str(ROOT / "tools"))
     import build_digests  # noqa: E402
-    batch = build_digests.build("guard-real")
+    records, queue = build_digests._current_inputs(dg.RECORDS_DIR, QUEUE_DIR)
+    batch, _ = build_digests.build("guard-real", records, queue, gd.LOG)
     routed = [d for d, text in batch.items() if dg.NO_ADVISORIES not in text]
     out.append((len(routed) >= 3,
                 "on the real records, at least three desks receive advisories (PLAN.md definition of done)",

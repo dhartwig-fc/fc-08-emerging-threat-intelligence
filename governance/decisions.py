@@ -24,6 +24,7 @@ Refusals (GateRefusal), with NOTHING written -- the whole list is checked first:
 
 from __future__ import annotations
 
+import hashlib
 import json
 from collections import Counter
 from dataclasses import asdict, dataclass
@@ -92,6 +93,24 @@ def load_log_checked(path: Path = LOG) -> Tuple[List[Decision], List[str]]:
         except (json.JSONDecodeError, KeyError, TypeError, ValueError) as exc:
             problems.append("line %d of the log is malformed: %s" % (n, exc))
     return decisions, problems
+
+
+def log_prefix(n: Optional[int] = None, path: Path = LOG) -> Tuple[int, str, List[Decision]]:
+    """(lines, sha256, decisions) for the first n lines of the log, all of it when n is None.
+
+    The log is append-only, so a prefix is an immutable snapshot: a digest batch pins
+    (lines, sha256) and rebuilds from exactly the decisions it saw, however many are
+    appended later. Lines are counted and hashed as stored bytes, blank lines included.
+    """
+    raw = path.read_bytes().splitlines(keepends=True) if path.exists() else []
+    if n is None:
+        n = len(raw)
+    if n > len(raw):
+        raise ValueError("the log has %d lines; %d were pinned, so lines were removed" % (len(raw), n))
+    prefix = b"".join(raw[:n])
+    decisions = [Decision.from_line(json.loads(line)) for line in prefix.decode("utf-8").splitlines()
+                 if line.strip()]
+    return n, hashlib.sha256(prefix).hexdigest(), decisions
 
 
 def check_log(decisions, known: Dict[str, str]) -> List[str]:

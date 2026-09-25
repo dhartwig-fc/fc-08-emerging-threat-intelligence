@@ -2,19 +2,31 @@
 Build (or check) one batch of desk digests.
 
 Usage:
-    python tools/build_digests.py --batch-id slice1-2026-09-24            # write data/digests/<batch_id>/<desk>.md
-    python tools/build_digests.py --batch-id slice1-2026-09-24 --check    # fail if the committed files differ
+    python tools/build_digests.py --batch-id slice1-2026-09-24            # write data/digests/<batch_id>/
+    python tools/build_digests.py --batch-id slice1-2026-09-24 --check    # prove the committed batch
+    python tools/build_digests.py --batch-id slice1-2026-09-24 --backfill-manifest
 
-A batch is a SNAPSHOT: the records, the decision log and the proposal queue as
-they stood when it was built. A later decision does not change a committed batch;
-build a new batch id for the new state. --check proves a committed batch still
-matches what its inputs rebuild to -- it will fail after new decisions, which is
-the signal to cut a new batch, not to edit the old one.
+A batch is a SNAPSHOT. manifest.json pins what it was built from: the decision log's
+first N lines (count and hash) and the hash of every record and queue file. The log is
+append-only, so --check rebuilds from exactly those N lines however many decisions land
+later, and says which of three things went wrong when it fails:
+
+  the decision log ...                     a pinned log line was edited or removed
+  inputs moved since this batch: <file>    a pinned record or queue file changed --
+                                           cut a new batch; the old one is still true
+  same inputs, different output: <desk>    the renderer changed -- a defect
+
+A batch is never overwritten (exit 2): a committed batch is evidence. A record or queue
+file added after the batch is not one of its inputs and is ignored.
+
+--backfill-manifest writes a manifest for a batch built before manifests existed, and
+only when a fresh build from today's inputs reproduces its desk files byte for byte.
 """
 
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import re
 import sys
@@ -25,55 +37,136 @@ sys.path.insert(0, str(ROOT))
 
 from governance import decisions as gd  # noqa: E402
 from governance.digest import DIGESTS_DIR, NO_ADVISORIES, RECORDS_DIR, build_batch  # noqa: E402
-from governance.proposals import ADVISORY_LIST, LIBRARY, load_queue  # noqa: E402
+from governance.proposals import ADVISORY_LIST, LIBRARY, QUEUE_DIR, load_queue_files  # noqa: E402
 from governance.routing import load_routing  # noqa: E402
 
 BATCH_ID = re.compile(r"^[a-z0-9][a-z0-9-]{0,60}$")
+MANIFEST = "manifest.json"
+_MUTATE = None  # set only by evals/check_digest_batch.py through --_mutate
 
 
-def build(batch_id: str, records_dir: Path = RECORDS_DIR) -> dict:
-    records = [json.loads(p.read_text(encoding="utf-8")) for p in sorted(records_dir.glob("ADV-*.json"))]
+def _sha(path: Path) -> str:
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def build(batch_id: str, record_paths, queue_paths, log_path: Path, log_lines=None):
+    """(desk -> Markdown, manifest) from exactly these inputs and the first log_lines of the log."""
+    lines, log_sha, decisions = gd.log_prefix(log_lines, log_path)
+    records = [json.loads(p.read_text(encoding="utf-8")) for p in record_paths]
     library = {t["typology_id"]: t for t in json.loads(LIBRARY.read_text(encoding="utf-8"))["typologies"]}
     advisories = {a["advisory_id"]: a for a in json.loads(ADVISORY_LIST.read_text(encoding="utf-8"))["advisories"]}
-    proposals, _ = load_queue()
-    return build_batch(batch_id, records, library, load_routing(), gd.latest(gd.load_log()),
-                       {p.proposal_id: p for p in proposals}, advisories)
+    proposals, _ = load_queue_files(queue_paths)
+    batch = build_batch(batch_id, records, library, load_routing(), gd.latest(decisions),
+                        {p.proposal_id: p for p in proposals}, advisories)
+    manifest = {
+        "batch_id": batch_id,
+        "decision_log": {"lines": lines, "sha256": log_sha},
+        "records": {p.name: _sha(p) for p in record_paths},
+        "proposals": {p.name: _sha(p) for p in queue_paths},
+    }
+    return batch, manifest
+
+
+def _current_inputs(records_dir: Path, queue_dir: Path):
+    return (sorted(records_dir.glob("ADV-*.json")),
+            sorted(queue_dir.glob("*.jsonl")) if queue_dir.exists() else [])
+
+
+def _manifest_text(manifest: dict) -> str:
+    return json.dumps(manifest, indent=2, sort_keys=True) + "\n"
+
+
+def check(batch_id: str, out_dir: Path, records_dir: Path, queue_dir: Path, log_path: Path) -> list:
+    folder = out_dir / batch_id
+    mpath = folder / MANIFEST
+    if not mpath.exists():
+        return ["%s has no %s: it cannot say what it was built from" % (batch_id, MANIFEST)]
+    m = json.loads(mpath.read_text(encoding="utf-8"))
+    pinned = m["decision_log"]
+    try:
+        lines, sha, _ = gd.log_prefix(pinned["lines"], log_path)
+    except ValueError as exc:
+        return ["the decision log no longer holds this batch's lines: %s" % exc]
+    if sha != pinned["sha256"]:
+        return ["the decision log's first %d lines were edited since this batch was built" % lines]
+
+    moved = [name for name, want in sorted(m["records"].items())
+             if not (records_dir / name).exists() or _sha(records_dir / name) != want]
+    moved += [name for name, want in sorted(m["proposals"].items())
+              if not (queue_dir / name).exists() or _sha(queue_dir / name) != want]
+    if moved:
+        return ["inputs moved since this batch: %s" % n for n in moved]
+
+    rebuild_from = None if _MUTATE == "prefix" else pinned["lines"]
+    batch, rebuilt = build(batch_id, [records_dir / n for n in sorted(m["records"])],
+                           [queue_dir / n for n in sorted(m["proposals"])], log_path, rebuild_from)
+    problems = []
+    for desk, text in batch.items():
+        path = folder / ("%s.md" % desk)
+        if not path.exists():
+            problems.append("same inputs, different output: %s is missing" % desk)
+        elif path.read_text(encoding="utf-8") != text:
+            problems.append("same inputs, different output: %s" % desk)
+    problems += ["%s is not a desk in this batch" % p.name for p in sorted(folder.glob("*.md")) if p.stem not in batch]
+    if rebuilt != m and _MUTATE != "prefix":
+        problems.append("same inputs, different output: %s" % MANIFEST)
+    return problems
 
 
 def main(argv: list) -> int:
+    global _MUTATE
     ap = argparse.ArgumentParser(description="Build or check a batch of desk digests")
     ap.add_argument("--batch-id", required=True)
     ap.add_argument("--records-dir", type=Path, default=RECORDS_DIR)
+    ap.add_argument("--queue-dir", type=Path, default=QUEUE_DIR)
+    ap.add_argument("--log", type=Path, default=gd.LOG)
     ap.add_argument("--out-dir", type=Path, default=DIGESTS_DIR)
-    ap.add_argument("--check", action="store_true")
+    mode = ap.add_mutually_exclusive_group()
+    mode.add_argument("--check", action="store_true")
+    mode.add_argument("--backfill-manifest", action="store_true")
+    ap.add_argument("--_mutate", choices=("prefix", "overwrite"), help=argparse.SUPPRESS)
     args = ap.parse_args(argv)
+    _MUTATE = args._mutate
     if not BATCH_ID.match(args.batch_id):
         print("batch id must match %s" % BATCH_ID.pattern, file=sys.stderr)
         return 2
-
-    batch = build(args.batch_id, args.records_dir)
     folder = args.out_dir / args.batch_id
+
     if args.check:
-        problems = []
-        for desk, text in batch.items():
-            path = folder / ("%s.md" % desk)
-            if not path.exists():
-                problems.append("%s is missing" % path.name)
-            elif path.read_text(encoding="utf-8") != text:
-                problems.append("%s differs from a fresh build" % path.name)
-        extra = sorted(p.name for p in folder.glob("*.md") if p.stem not in batch) if folder.exists() else []
-        problems += ["%s is not a desk in this batch" % n for n in extra]
+        problems = check(args.batch_id, args.out_dir, args.records_dir, args.queue_dir, args.log)
         for p in problems:
             print("FAIL  %s" % p)
-        print("batch %s matches a fresh build" % args.batch_id if not problems
-              else "batch %s does NOT match a fresh build" % args.batch_id)
+        print("batch %s matches a fresh build from its pinned inputs" % args.batch_id if not problems
+              else "batch %s does NOT match" % args.batch_id)
         return 1 if problems else 0
 
+    records, queue = _current_inputs(args.records_dir, args.queue_dir)
+    batch, manifest = build(args.batch_id, records, queue, args.log)
+
+    if args.backfill_manifest:
+        if (folder / MANIFEST).exists():
+            print("%s already has a manifest; nothing to back-fill" % args.batch_id, file=sys.stderr)
+            return 2
+        differs = [d for d, t in batch.items() if not (folder / ("%s.md" % d)).exists()
+                   or (folder / ("%s.md" % d)).read_text(encoding="utf-8") != t]
+        if differs:
+            print("REFUSED: today's inputs do not reproduce %s (%s); its inputs are unknown, so no manifest "
+                  "can honestly be written" % (args.batch_id, ", ".join(differs)), file=sys.stderr)
+            return 1
+        (folder / MANIFEST).write_text(_manifest_text(manifest), encoding="utf-8")
+        print("back-filled %s/%s (decision log: %d lines)" % (args.batch_id, MANIFEST, manifest["decision_log"]["lines"]))
+        return 0
+
+    if folder.exists() and _MUTATE != "overwrite":
+        print("REFUSED: batch %s already exists. A committed batch is evidence; build a new batch id for "
+              "the new state." % args.batch_id, file=sys.stderr)
+        return 2
     folder.mkdir(parents=True, exist_ok=True)
     for desk, text in batch.items():
         (folder / ("%s.md" % desk)).write_text(text, encoding="utf-8")
+    (folder / MANIFEST).write_text(_manifest_text(manifest), encoding="utf-8")
     routed = sum(1 for t in batch.values() if NO_ADVISORIES not in t)
-    print("wrote %d digests to %s (%d desks receive advisories)" % (len(batch), folder, routed))
+    print("wrote %d digests and %s to %s (%d desks receive advisories)" % (len(batch), MANIFEST, folder, routed))
     return 0
 
 
