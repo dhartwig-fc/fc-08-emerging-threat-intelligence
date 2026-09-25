@@ -6,6 +6,9 @@ Usage:
     python evals/check_tool_surface.py --live       # also run a real agent and try to make it use Bash
     python evals/check_tool_surface.py --live --mutate
                                                    # remove the restriction; the live probe MUST fail
+    python evals/check_tool_surface.py --mutate-queue
+                                                   # static only: the server's QUEUE_DIR points elsewhere
+                                                   # (in memory); the queue-agreement checks MUST fail
 
 WHY THIS EXISTS.
 
@@ -46,6 +49,7 @@ sys.path.insert(0, str(ROOT))
 
 from agents.extract_advisory import KC_TOOLS, SERVER_KEY, agent_options  # noqa: E402
 from agents.run_identity import QUEUE_DIR, RunIdentity  # noqa: E402
+from governance.proposals import QUEUE_DIR as GOVERNANCE_QUEUE_DIR  # noqa: E402
 from agents.permissions import (  # noqa: E402
     PROPOSE_TOOL, READ_ONLY_TOOLS, SHADOWING_MESSAGE, WRITE_ALLOWLIST, expected_shadowing,
 )
@@ -250,6 +254,20 @@ def static_checks() -> list:
                 if t.annotations is not None and getattr(t.annotations, "read_only_hint", False))
     out.append((ro == sorted(READ_ONLY_TOOLS), "the tools annotated readOnlyHint are exactly READ_ONLY_TOOLS",
                 str(ro)))
+
+    # The runner, the review gate and the server each define QUEUE_DIR. If they drift,
+    # the runner hands the server a queue path the server refuses (every propose_link
+    # rejected), or the gate reads a directory nobody writes. One directory, three names.
+    dirs = {"agents.run_identity": QUEUE_DIR.resolve(), "governance.proposals": GOVERNANCE_QUEUE_DIR.resolve(),
+            "knowledge_centre_server": Path(kc.QUEUE_DIR).resolve()}
+    out.append((len(set(dirs.values())) == 1, "runner, review gate and server agree on QUEUE_DIR",
+                "; ".join("%s=%s" % (k, v) for k, v in dirs.items())))
+    # And the server accepts the queue the runner names, built the way _run_context()
+    # builds it from the environment the runner sets.
+    run = {k: PROBE_RUN.env().get(k, "") for k in kc.RUN_ENV + (kc.QUEUE_ENV,)}
+    refusal = kc._refuse_queue(run) if all(run.values()) else "incomplete run env: %s" % sorted(run)
+    out.append((refusal is None, "the server accepts the queue path a RunIdentity names",
+                refusal or run[kc.QUEUE_ENV]))
     return out
 
 
@@ -285,13 +303,26 @@ def main(argv: list) -> int:
                     help="with --live: remove the restriction; the probe MUST fail")
     ap.add_argument("--mutate-allowlist", action="store_true",
                     help="with --live: a callback that allows everything; the write probe MUST breach")
+    ap.add_argument("--mutate-queue", action="store_true",
+                    help="static only: point the server's QUEUE_DIR elsewhere in memory; checks MUST fail")
     args = ap.parse_args(argv)
+    if args.mutate_queue and args.live:
+        ap.error("--mutate-queue is a static mutation; do not combine it with --live")
 
     failures = 0
+    if args.mutate_queue:
+        # THE MUTATION: the server's queue directory drifts from the runner's. In memory only.
+        from mcp_server import knowledge_centre_server as kc
+        kc.QUEUE_DIR = Path(tempfile.mkdtemp(prefix="fc08_drifted_queue_"))
+        print("MUTATED: the server's QUEUE_DIR is %s\n" % kc.QUEUE_DIR)
     print("=== static ===")
     for ok, label, detail in static_checks():
         print("  %-4s %s\n         %s" % ("PASS" if ok else "FAIL", label, detail))
         failures += 0 if ok else 1
+    if args.mutate_queue:
+        print("\n%s" % ("HELD: the probe detects the defect when the rule is removed" if failures
+                        else "NOTHING PROVED: it passed with the rule gone"))
+        return 0 if failures else 1
 
     if args.live:
         print("\n=== live probe%s ===" % (" (MUTATED: restriction removed)" if args.mutate else ""))
