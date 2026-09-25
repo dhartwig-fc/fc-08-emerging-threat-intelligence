@@ -13,18 +13,29 @@ The match is deliberately NOT fuzzy on meaning. Three ok tiers, tried in order:
   spacing  the same with ALL whitespace removed, because pypdf splits words on
            born-digital FATF PDFs ("collus ion", "t o believe"). An honest quote
            whose only difference is the extractor's spacing is not a fabrication.
-  artefact the quote's LETTERS (a-z only, after norm) are a substring of the page's
-           letters, every maximal digit run in the quote occurs in the page's
-           whitespace-free text, and the quote has at least ARTEFACT_MIN_LETTERS
-           letters. It tolerates what pypdf leaves in running text: footnote
-           markers glued to a word ("reporting19.") or standing between sentences
-           ("margins. 5 in its trade"), line-break hyphens ("re- selling" for
-           "reselling"), and punctuation. It does NOT tolerate a different word
-           (the letters must match in order, contiguously) or a different number
-           (the quote's digit runs must be on the page: "$480,000" is refused on a
-           page reading "$48,000"). Residual: a digit run that happens to occur
-           elsewhere on the same page satisfies the digit rule. Short quotes are
-           excluded because a few letters match by coincidence. Added 2026-09-25
+  artefact the quote's LETTERS (Unicode letters, after norm; digits, punctuation
+           and symbols dropped) are a substring of the page's letters, every
+           maximal digit run in the quote occurs as a WHOLE number in the page's
+           whitespace-free text (no digit either side of it), and the quote has at
+           least ARTEFACT_MIN_LETTERS letters. It tolerates what pypdf leaves in
+           running text: footnote markers glued to a word ("reporting19.") or
+           standing between sentences ("margins. 5 in its trade"), line-break
+           hyphens ("re- selling" for "reselling"), list-bullet glyphs, and
+           punctuation. It does NOT tolerate a different word, accented or
+           non-Latin letters included (the letters must match in order,
+           contiguously), or a different number ("$480,000" is refused on a page
+           reading "$48,000", and so is the truncation the other way round).
+           Short quotes are excluded because a few letters match by coincidence.
+           RESIDUALS, stated because they are real and the rule cannot see them:
+             - a quoted number that occurs ELSEWHERE on the same page as a whole
+               number satisfies the digit rule;
+             - a quote that DROPS a number, or a trailing digit group, from the
+               page's text passes -- to this rule it is indistinguishable from a
+               footnote marker being dropped;
+             - a line-break-hyphen fusion that forms a different word passes
+               ("re- sign" on the page, "resign" in the quote);
+             - a dropped minus sign passes (the sign is punctuation, not a digit).
+           Added 2026-09-25
            because a review measured 18 of the 43 citations check_citations
            called "missing" as present in the PDF on exactly one page (13 on the
            cited page), missed only because of these artefacts -- and this rule
@@ -63,15 +74,26 @@ def norm(s: str) -> str:
 
 
 def _letters(normed: str) -> str:
-    """The a-z letters of already-normalised text: drops digits, spaces, hyphens, punctuation."""
-    return re.sub(r"[^a-z]", "", normed)
+    """The letters of already-normalised text, Unicode letters included.
+
+    Drops digits, spaces, hyphens, punctuation, underscores and non-letter symbols
+    (the private-use bullet glyph pypdf emits for list markers). It was [^a-z] until
+    fix round 1, which deleted every non-ASCII letter: "Hans Möller" matched a page
+    reading "Hans Müller", and a swapped Cyrillic name matched anything.
+    """
+    return re.sub(r"[\W\d_]", "", normed)
 
 
 def _artefact_holds(letters_q: str, digits_q, letters_page: str, tight_page: str) -> bool:
-    """The ARTEFACT rule for one page: same letters in order, every digit run present, long enough."""
+    """The ARTEFACT rule for one page: same letters in order, every digit run present, long enough.
+
+    A digit run must occur as a WHOLE number on the page (no digit either side). As a plain
+    substring test, until fix round 1, a truncated number passed: "48" is inside "480", so
+    "$48,000" was accepted against a page reading "$480,000", and "30" against "300".
+    """
     return (len(letters_q) >= ARTEFACT_MIN_LETTERS
             and letters_q in letters_page
-            and all(d in tight_page for d in digits_q))
+            and all(re.search(r"(?<!\d)%s(?!\d)" % re.escape(d), tight_page) for d in digits_q))
 
 
 def file_sha256(path) -> str:

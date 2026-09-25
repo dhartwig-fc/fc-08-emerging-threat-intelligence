@@ -8,6 +8,9 @@ Usage:
     python evals/check_citation_match.py --mutate no-floor        # 10-letter floor removed; a short quote MUST pass
     python evals/check_citation_match.py --mutate no-letters      # letters rule removed; a paraphrase MUST pass
     python evals/check_citation_match.py --mutate empty           # empty-quote refusal removed; "" MUST pass
+    python evals/check_citation_match.py --mutate substring-digits  # digit runs matched as substrings; a truncated number MUST pass
+    python evals/check_citation_match.py --mutate ascii-letters   # letters form a-z only; a changed accented name MUST pass
+    python evals/check_citation_match.py --mutate keeps-digits    # letters form keeps digits; a glued footnote MUST be refused
 
 WHY. schemas/citation_match.py is the ONE rule for "is this quote on this page", shared
 by the MCP server (propose_link refuses), the review gate (re-checks) and
@@ -18,8 +21,16 @@ between sentences ("margins. 5 in its trade"), and line-break hyphens ("re- sell
 The same defect was refusing true quotes in all three callers.
 
 The fix loosens a governance check, so this guard pins BOTH sides: the three artefact
-shapes pass, and a paraphrase (a different word), a wrong number ($480,000 against a
-page reading $48,000), a short letters-only coincidence and an empty quote do not.
+shapes pass (also around an accented word), and a paraphrase (a different word), a wrong
+number ($480,000 against a page reading $48,000), a TRUNCATED number ($48,000 against
+$480,000; 30 against 300), a changed non-ASCII letter (Möller against Müller), a short
+letters-only coincidence and an empty quote do not.
+
+Fix round 1 (2026-09-25) closed two holes in the rule as first written: digit runs were
+matched as SUBSTRINGS, so a truncated number passed ("48" is inside "480"); and the
+letters form was [^a-z], which deleted every non-ASCII letter, so a changed accented or
+non-Latin name passed. Each "witness" check below proves its refusal case differs ONLY
+in the thing under test, so the refusal is the rule's and not a coincidence of wording.
 
 COLD. Synthetic pages only (PageIndex over two strings); no PDF, no records.
 
@@ -32,6 +43,7 @@ failure, so a refactor cannot silently turn a mutation into a no-op.
 from __future__ import annotations
 
 import argparse
+import re
 import sys
 import types
 from pathlib import Path
@@ -45,7 +57,12 @@ MATCHER = ROOT / "schemas" / "citation_match.py"
 MUTATIONS = {
     "no-artefact": ("    return (len(letters_q) >= ARTEFACT_MIN_LETTERS",
                     "    return False and (len(letters_q) >= ARTEFACT_MIN_LETTERS"),
-    "ignore-digits": ("and all(d in tight_page for d in digits_q)", "and True"),
+    "ignore-digits": ("and all(re.search(r\"(?<!\\d)%s(?!\\d)\" % re.escape(d), tight_page) for d in digits_q)",
+                      "and True"),
+    "substring-digits": ("all(re.search(r\"(?<!\\d)%s(?!\\d)\" % re.escape(d), tight_page) for d in digits_q)",
+                         "all(d in tight_page for d in digits_q)"),
+    "ascii-letters": ('return re.sub(r"[\\W\\d_]", "", normed)', 'return re.sub(r"[^a-z]", "", normed)'),
+    "keeps-digits": ('return re.sub(r"[\\W\\d_]", "", normed)', 'return re.sub(r"[\\W_]", "", normed)'),
     "no-floor": ("len(letters_q) >= ARTEFACT_MIN_LETTERS", "len(letters_q) >= 1"),
     "no-letters": ("and letters_q in letters_page", "and True"),
     "empty": ("        if not tq:\n            return Located(MISSING)", "        pass"),
@@ -55,7 +72,9 @@ PAGE_1 = ("The institution continued to trade without reporting19. The bank then
           "transfers. Firms with low profit margins. 5 in its trade with the region were flagged. "
           "The bank failed to file reports without delay. It recorded an invoice of $48,000 for "
           "goods shipped. Evidence of collus ion was found.")
-PAGE_2 = "Several companies were engaged in re- selling goods through third countries."
+PAGE_2 = ("Several companies were engaged in re- selling goods through third countries. A payment "
+          "of $480,000 was wired offshore. Some 300 shipments were declared at the border. The "
+          "director Hans Müller signed the contracts. The Société Générale19. branch opened accounts.")
 
 
 def load_matcher(mutation):
@@ -107,13 +126,36 @@ def checks(cm) -> list:
          lambda h: (h.status != artefact and not h.ok, "not ok, not artefact"))
     case("an empty quote is MISSING", 1, "",
          lambda h: (h.status == cm.MISSING, "missing"))
+    case("a truncated number is refused ($48,000 quoted, page reads $480,000)", 2,
+         "A payment of $48,000 was wired offshore",
+         lambda h: (not h.ok and h.status != artefact, "not ok"))
+    case("a truncated count is refused (30 quoted, page reads 300)", 2,
+         "Some 30 shipments were declared at the border",
+         lambda h: (not h.ok and h.status != artefact, "not ok"))
+    case("a changed accented letter is refused (Möller quoted, page reads Müller)", 2,
+         "The director Hans Möller signed the contracts",
+         lambda h: (not h.ok and h.status != artefact, "not ok"))
+    case("a glued footnote beside accented words is still tolerated", 2,
+         "The Société Générale branch opened accounts",
+         lambda h: (h.ok and h.status == artefact, "ok, artefact"))
 
-    # The wrong-number check is only worth something if the LETTERS match: otherwise it
-    # passes because the words differ, and the digit rule is never what refuses it.
-    lq = "".join(ch for ch in cm.norm("an invoice of $480,000 for goods") if "a" <= ch <= "z")
-    lp = "".join(ch for ch in cm.norm(PAGE_1) if "a" <= ch <= "z")
-    out.append((lq in lp, "the wrong-number witness differs ONLY in its digits",
-                "letters-only %r is on page 1, so only the digit rule can refuse it" % lq))
+    # WITNESSES. A refusal is only the rule's if the quote matches the page in every other
+    # respect. These use their own letter forms, not the matcher's, so a matcher bug
+    # cannot make its own witness agree with it.
+    uni = lambda t: re.sub(r"[\W\d_]", "", cm.norm(t))
+    asc = lambda t: re.sub(r"[^a-z]", "", cm.norm(t))
+    for label, page_text, quote in (
+            ("wrong number ($480,000 vs $48,000)", PAGE_1, "an invoice of $480,000 for goods"),
+            ("truncated number ($48,000 vs $480,000)", PAGE_2, "A payment of $48,000 was wired offshore"),
+            ("truncated count (30 vs 300)", PAGE_2, "Some 30 shipments were declared at the border")):
+        lq = uni(quote)
+        out.append((lq in uni(page_text), "the %s witness differs ONLY in its digits" % label,
+                    "letters-only %r is on the page, so only the digit rule can refuse it" % lq))
+    q = "The director Hans Möller signed the contracts"
+    out.append((asc(q) in asc(PAGE_2) and uni(q) not in uni(PAGE_2),
+                "the Möller witness differs ONLY in a non-ASCII letter",
+                "a-z form %r IS on the page and the Unicode form is not, so only the letters form "
+                "decides it" % asc(q)))
     return out
 
 

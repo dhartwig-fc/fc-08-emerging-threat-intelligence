@@ -79,7 +79,7 @@ BASELINE_NOTE = ("record citations never re-verified after week 1; pinned 2026-0
 
 
 # ---------------------------------------------------------------------------
-# Two-argument form: one record against one PDF, verbose. Unchanged since week 1.
+# Two-argument form: one record against one PDF, verbose. Week 1's form, plus the ARTEFACT tier (2026-09-25).
 # ---------------------------------------------------------------------------
 
 def check_record(record_path, pdf_path, verbose: bool = True):
@@ -103,10 +103,10 @@ def check_record(record_path, pdf_path, verbose: bool = True):
                 hit = index.locate(c["page"], c["quote"])
                 if hit.status == EXACT:
                     exact += 1
-                    status = "OK       "
+                    status = "OK         "
                 elif hit.status == SPACING:
                     spacing += 1
-                    status = "OK-SPACING"
+                    status = "OK-SPACING "
                 elif hit.status == ARTEFACT:
                     artefact += 1
                     status = "OK-ARTEFACT"
@@ -115,7 +115,7 @@ def check_record(record_path, pdf_path, verbose: bool = True):
                     status = "OFF-PAGE  (found on %s)" % list(hit.found_on)
                 else:
                     missing += 1
-                    status = "MISSING  "
+                    status = "MISSING    "
                 if verbose:
                     print("%s p%-3d %-10s %s" % (status, c["page"], section[:10], label[:60]))
                     if not hit.ok:
