@@ -232,12 +232,6 @@
       "confidence": "medium",
       "citations": [
         {
-          "page": 22,
-          "printed_folio": "20",
-          "paragraph": 3,
-          "quote": "criminals employ various techniques and mechanisms: e.g., smurfing; hopping through accounts across different financial, remittance or payment service providers; and conversion to other types of financial assets"
-        },
-        {
           "page": 30,
           "printed_folio": "28",
           "paragraph": null,
@@ -361,8 +355,7 @@
       "confidence": "medium",
       "citations": [
         {
-          "page": 15,
-          "printed_folio": null,
+          "page": 17,
           "paragraph": null,
           "quote": "Jurisdictions have observed the involvement of professional ML groups as well as third- party professional enablers including lawyers, accountants, tax adviso rs, company secretaries and bankers."
         }

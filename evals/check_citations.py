@@ -31,8 +31,16 @@ Re-measured again 2026-09-25 after the ELLIPSIS and SPANS tiers (owner's decisio
 12 ellipsis quotations with every fragment on the cited page left the baseline; the
 SPANS tier moved none of the 5 page-spanning quotes and was removed the same day (the
 owner chose to attest true quotes the matcher cannot place rather than widen the shared
-rule). 91 remain (78 off_page, 13 missing); the baseline file is the live number, not
-this paragraph.
+rule). 91 remained (78 off_page, 13 missing).
+
+Emptied 2026-09-25 by the owner's citation repair (evidence:
+evals/owner_decisions/citation_repair_2026-09-25.json, replayed cold by
+evals/check_citation_repair.py): in data/records_merged 80 citations were re-paged (75
+quotes found on exactly one other page, and 5 page-break quotes moved to the page they
+start on), 4 missing or ambiguous-page citations removed, and the 2 facts left uncited
+removed; 12 true quotes the matcher cannot place are owner-attested
+(evals/attested_citations.json) and count as verified-by-attestation. The baseline file
+is the live number, not this paragraph.
 
 So --all does not simply fail red forever. It compares the CURRENT defect set
 against a frozen baseline, evals/known_citation_defects.json (tracked, an
@@ -103,10 +111,10 @@ DEFAULT_RECORDS_DIR = ROOT / "data" / "records_merged"
 ADVISORIES_DIR = ROOT / "data" / "advisories"
 ADVISORY_LIST = ROOT / "evals" / "golden" / "advisory_list.json"
 
-BASELINE_NOTE = ("record citations never re-verified after week 1; pinned 2026-09-25 "
-                  "pending an owner decision on remediation; an entry is removed only in "
-                  "the commit that fixes it; re-measured 2026-09-25 after the ELLIPSIS and "
-                  "SPANS tiers; was 103")
+BASELINE_NOTE = ("emptied 2026-09-25 by the owner's citation repair, "
+                  "evals/owner_decisions/citation_repair_2026-09-25.json (after the matcher's "
+                  "ARTEFACT and ELLIPSIS tiers corrected the set 118 -> 103 -> 91; 12 true quotes "
+                  "the matcher cannot place are owner-attested in evals/attested_citations.json)")
 
 
 # ---------------------------------------------------------------------------

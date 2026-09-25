@@ -1,0 +1,137 @@
+{
+  "note": "owner-attested citations, approved 2026-09-25: true quotes the shared matcher cannot place (page_break, ellipsis_across_pages, dropped_accent, bullet_glyph). Read by evals/check_citations.py only, which counts each as verified-by-attestation and refuses a stale, duplicated or no-longer-needed entry. Five were cited at the page the quote ends on and are attested at the page it starts on, after the owner's start-page re-page (evals/owner_decisions/citation_repair_2026-09-25.json).",
+  "attested": [
+    {
+      "advisory_id": "ADV-2026-0005",
+      "section": "typologies",
+      "item": "Rapid Movement",
+      "page": 8,
+      "quote_sha256": "5473e35bbea5f5bd07380535d0dd0b8d17f267caeb88f46a739cb99a3e24ddf5",
+      "reason": "bullet_glyph",
+      "evidence": "p8: \"...then often immediately – o withdrawing the VAs without ad ditional exchange activity to other VAs...\" -- the list bullet is extracted as the letter \"o\", which the quote omits; its second fragment, after \"...\", is also on p8.",
+      "attested_by": "owner",
+      "attested_on": "2026-09-25"
+    },
+    {
+      "advisory_id": "ADV-2026-0006",
+      "section": "actors",
+      "item": "Fleurette Properties",
+      "page": 63,
+      "quote_sha256": "6407c455084bc888498687dd30120930351b94132ac5ce9eff2f7f2d6f9ce5f2",
+      "reason": "dropped_accent",
+      "evidence": "p63: \"Fleurette Properties, one of Gertler’s companies, has been accused of buying mining assets below market value from Gécamines, and then selling them for a profit\" -- the quote writes \"Gecamines\".",
+      "attested_by": "owner",
+      "attested_on": "2026-09-25"
+    },
+    {
+      "advisory_id": "ADV-2026-0006",
+      "section": "indicators",
+      "item": "A company in the metals/waste sector lacking an adequate org",
+      "page": 58,
+      "quote_sha256": "3f5b6800d3def597cf218484bddbc84e1e020fb483b0e02867a0ced7097185ca",
+      "reason": "bullet_glyph",
+      "evidence": "p58: \"...characteristics or behaviours: o Lacks an adequate organizational structure, o Holds an address that is not linked to any economic activity, o Has shares sold at lower than book value, and o...\" -- each list bullet is extracted as the letter \"o\"; the quote omits them.",
+      "attested_by": "owner",
+      "attested_on": "2026-09-25"
+    },
+    {
+      "advisory_id": "ADV-2026-0006",
+      "section": "typologies",
+      "item": "Shell Company Network",
+      "page": 30,
+      "quote_sha256": "44eb66274be0af57358cb095732a55c6e483810da9e230d0926f0d9699550189",
+      "reason": "page_break",
+      "evidence": "p30 ends \"They relied on shell companies located overseas to move funds back and forth under\" | p31 begins, after the header \"MONEY LAUNDERING FROM ENVIRONMENTAL CRIMES | 29 © FATF/OECD 2021\", \"the guise of invoices for processing their waste.\"",
+      "attested_by": "owner",
+      "attested_on": "2026-09-25"
+    },
+    {
+      "advisory_id": "ADV-2026-0008",
+      "section": "indicators",
+      "item": "Transnational network divided into specialised branches (e.g",
+      "page": 41,
+      "quote_sha256": "6d0672d1f4aa8efe1f8dda44c234dac8c43aa788ae3a10e1035df6cc05b57648",
+      "reason": "ellipsis_across_pages",
+      "evidence": "p41: \"One branch, of Chinese origin, provided and distributed cash in Spain in exchange for VA payments.\" p41 ends \"The second\" + footnote 17 | p42 begins, after the running header, \"branch, of Arab origin, received funds in different jurisdictions...\"",
+      "attested_by": "owner",
+      "attested_on": "2026-09-25"
+    },
+    {
+      "advisory_id": "ADV-2026-0008",
+      "section": "typologies",
+      "item": "Third Party Payment Abuse",
+      "page": 24,
+      "quote_sha256": "51c7d1b2dccb6541c511bc4c9799e7100e114685d0c3118712b3538f7d725b61",
+      "reason": "page_break",
+      "evidence": "p24 ends \"...through unconnected third parties . Rather than HOSSPs\" | p25 begins, after \"| 23\" and the running header, \"settling directly with one another, debts are cleared by arranging or directing payments of invoices...\"",
+      "attested_by": "owner",
+      "attested_on": "2026-09-25"
+    },
+    {
+      "advisory_id": "ADV-2026-0009",
+      "section": "actors",
+      "item": "JSC Techsnabexport (TENEX)",
+      "page": 4,
+      "quote_sha256": "c066ec98efdcd395a9cb1ca03b695f5e12070fc9224d46c467b5fff934e89b18",
+      "reason": "page_break",
+      "evidence": "p4 body ends \"...and the sole supplier and exporter of\"; the rest of p4 is footnotes 14-17 | p5 begins, after \"FINCEN ADVISORY 5\", \"Russian Federation uranium and uranium enrichment services to nuclear power companies worldwide, in order to secure contracts with TENEX.\"",
+      "attested_by": "owner",
+      "attested_on": "2026-09-25"
+    },
+    {
+      "advisory_id": "ADV-2026-0010",
+      "section": "actors",
+      "item": "Exchange houses and trading companies (class)",
+      "page": 2,
+      "quote_sha256": "fd5cefb1f247439ef0053de3f2a46c015a887d5599999a81bc1e1dda6b24cb48",
+      "reason": "page_break",
+      "evidence": "Quote starts on p2, which ends \"...to move oil globally and a\"; p3 begins, after \"FINCEN ADVISORY 3\", \"multijurisdictional “shadow banking” network of financial intermediaries including exchange houses, trading companies...\". Re-paged from p3 (end page) to p2.",
+      "attested_by": "owner",
+      "attested_on": "2026-09-25"
+    },
+    {
+      "advisory_id": "ADV-2026-0010",
+      "section": "actors",
+      "item": "Money services businesses, legal entities and TCSPs (class)",
+      "page": 4,
+      "quote_sha256": "c29bd725fac8de304e8ea07e978236898b468eb57d1ec03499d1491da9fe1cf3",
+      "reason": "page_break",
+      "evidence": "Quote starts on p4, which ends \"...bolstered by a network of facilitators, including\"; p5 begins, after \"FINCEN ADVISORY 5\", \"money services businesses (MSBs), legal entities, and trust and company service providers (TCSPs)...\". Re-paged from p5 to p4.",
+      "attested_by": "owner",
+      "attested_on": "2026-09-25"
+    },
+    {
+      "advisory_id": "ADV-2026-0010",
+      "section": "typologies",
+      "item": "Dual Use Goods",
+      "page": 6,
+      "quote_sha256": "f3b403eebbe18b5ea00b9a305d3ecf69425c837ecafbe76fb29cd95873878fc4",
+      "reason": "page_break",
+      "evidence": "Quote starts on p6, which ends \"...Southeast Asia.58 These procurement networks use a\"; p7 begins, after \"FINCEN ADVISORY 7\", \"variety of techniques to further obscure Iran as the end user...\". Re-paged from p7 to p6.",
+      "attested_by": "owner",
+      "attested_on": "2026-09-25"
+    },
+    {
+      "advisory_id": "ADV-2026-0010",
+      "section": "typologies",
+      "item": "Transshipment",
+      "page": 6,
+      "quote_sha256": "f3b403eebbe18b5ea00b9a305d3ecf69425c837ecafbe76fb29cd95873878fc4",
+      "reason": "page_break",
+      "evidence": "Quote starts on p6, which ends \"...Southeast Asia.58 These procurement networks use a\"; p7 begins, after \"FINCEN ADVISORY 7\", \"variety of techniques to further obscure Iran as the end user...\". Re-paged from p7 to p6.",
+      "attested_by": "owner",
+      "attested_on": "2026-09-25"
+    },
+    {
+      "advisory_id": "ADV-2026-0012",
+      "section": "actors",
+      "item": "IRGC-Qods Force (IRGC-QF)",
+      "page": 6,
+      "quote_sha256": "f4d07bd1db68619b14a6371382e5fa99c90e0d06055cb19e335e0b6fedeb2819",
+      "reason": "page_break",
+      "evidence": "Quote starts on p6: \"The IRGC-QF supports terrorist operations outside Iran\", then footnotes 3-4 end the page; p7 begins \"via militant groups, such as Hizballah and Hamas.\" Re-paged from p7 to p6.",
+      "attested_by": "owner",
+      "attested_on": "2026-09-25"
+    }
+  ]
+}

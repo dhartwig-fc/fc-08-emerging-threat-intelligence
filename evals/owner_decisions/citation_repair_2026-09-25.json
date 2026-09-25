@@ -1,0 +1,1254 @@
+{
+  "decided": "2026-09-25",
+  "decision": "owner chose (a): re-page quotes found on exactly one other page; remove missing or ambiguous-page citations; remove facts left uncited",
+  "rejected": [
+    "(b) remove all 118: 87 facts incl. ADV-2026-0001's seven TBML typologies",
+    "(c) remove only the 43 missing"
+  ],
+  "owner_decisions": [
+    {
+      "decided": "2026-09-25",
+      "decision": "approved the 12 attestations: true quotes the matcher cannot place are attested in evals/attested_citations.json (attested_by owner), not removed",
+      "rejected": [
+        "widen the shared matcher further (a page-spanning tier was added and removed: every tolerance there also loosens propose_link's gate)"
+      ]
+    },
+    {
+      "decided": "2026-09-25",
+      "decision": "chose (a) for the five quotes cited at the page they end on: re-page each to the page where the quote STARTS, then attest it at that page",
+      "rejected": [
+        "attest them at the page cited (where the quote ends)"
+      ]
+    }
+  ],
+  "implementation_notes": [
+    "printed_folio: a re-paged citation's printed_folio named the printed page number of the OLD, wrong page; it is dropped, not recomputed, and the row records the value dropped as printed_folio_dropped.",
+    "applied to data/records_merged only (and by tools/merge_reviewer_additions.py on regeneration); data/records, the extractor's evidence, is untouched and pinned by data_records_sha256.",
+    "the defect set is evals/known_citation_defects.json as corrected by the matcher's ARTEFACT tier (118 -> 103) and ELLIPSIS tier (103 -> 91), 2026-09-25; a first attempt on the uncorrected 118 was reset before it was pushed.",
+    "the five start-page re-pages carry reason 'page_break_start' and found_on [] (the matcher places them on no page); each start page was verified against the PDF text before use, and each re-paged identity must be an entry of evals/attested_citations.json. For ADV-2026-0010 'Exchange houses' the part of the quote on its start page (p2) is the single word 'a'.",
+    "citations attested at their cited page get no row: they are not repaired, only attested; they are listed in attested_in_place so the evidence accounts for every baseline defect."
+  ],
+  "data_records_sha256": {
+    "ADV-2026-0001.json": "698d3c4a087793a24d5856fc86fd2d1bd1f4ccb87589212069fe23d9ecb3354d",
+    "ADV-2026-0001.schema-1.0.0.json": "b423b7ca70c89506d172f898a7460ba047479aa7b3257a3519a0b3c3434d3ed1",
+    "ADV-2026-0001.week1-schema-1.1.0.json": "e92797ade3f523f86448f25fcade340184f5f5e1c5a6d5f82e85547bc31afaad",
+    "ADV-2026-0002.json": "af9784df1a34b08f463ce926491dda18dd17532e1aa443167ccea17d101c06f8",
+    "ADV-2026-0003.json": "6da623b0d53a35eddda8a6bc27499c482b4536a7660b8c323e587f74cebfa650",
+    "ADV-2026-0004.json": "59c2ea52135a630e97c7bbcafd812acc493b22cc18e22baae6a228695630cca4",
+    "ADV-2026-0005.json": "e4b19b4c3562e5d9ad1a799ebe056f5e67fce2b8697d2a45689be4935a9b220f",
+    "ADV-2026-0006.json": "56cc248efd7bde44d99c1b70f5ba7d720fbcbc6621cefc267e05861bf50fa229",
+    "ADV-2026-0007.json": "6aa1f7ac325bda6e613db684e09c1fef092788dab33bf1efde1fcbdb76ef8d27",
+    "ADV-2026-0008.json": "b23f858ab88a343e64c2240394a8d20def5adecb0c0d518d62d4221b01f44b47",
+    "ADV-2026-0009.json": "8964cf58131f39b49b22ef31a5262aadd965f8f4a043b9476483c4ce6b157e79",
+    "ADV-2026-0010.json": "8623d11007aa0da8178de563def487a8a6fcfacbb2a482384b84cdb4e96aff3d",
+    "ADV-2026-0011.json": "c878c0c93179c691bdf6613f4f55a9c105a0635412807478eae1698505ea9643",
+    "ADV-2026-0012.json": "1b0884cbf8c362406af76be90e56b7d0b7b36a2f6d2314bf190fe5c1c721a8ee",
+    "ADV-2026-0013.json": "dc972247cc2f75b43877de695187da1f8d013999fc974f121eb27c3eeb0b11fe",
+    "ADV-2026-0014.json": "c7134e556f20c8ad1e9b0c37c17397b838a8eca779c003fa905bdd4b8a78f631",
+    "ADV-2026-0015.json": "b4ddd5050ed891bdf07e4c95e8489d3060c2d5b8088141cc8d569c67ac51b795",
+    "ADV-2026-0016.json": "39f090ba7f8cb2a304acf2ea2dda3bb0f35498e9f825d80d0b63b66dbe2d0820",
+    "ADV-2026-0017.json": "6c4f6ece27ec4e5fa888124db725fe55c8ff75d6e70ffb3a31356c3f3d311a5a",
+    "ADV-2026-0018.json": "169798ae047cb72503790de2c37aefc4ec7df891fffc2e69134bc7e68b689a3d",
+    "ADV-2026-0019.json": "b3159c40e7561b72029e78956ce1abfe6b69067e0b8f7f99d149a3e82234b57e",
+    "ADV-2026-0020.json": "5fc980a51d32ac97aadfbe5c0630e95ac6630d53744031f6dd6e82f82b5be9ff"
+  },
+  "attested_citations_sha256": "c6a54b3dfd7fefcef026962196bb4006ed9eb528cd9c03201d79e3e6718310ac",
+  "citations": [
+    {
+      "advisory_id": "ADV-2026-0001",
+      "section": "indicators",
+      "item": "Business shows consistent, significant cash payments, includ",
+      "page": 25,
+      "quote_sha256": "e38e7fabae764db6c1c11769a66ce984045d2e99732ee3ebb7ae5e2bf900f9fa",
+      "found_on": [
+        27
+      ],
+      "action": "re_page",
+      "to_page": 27,
+      "printed_folio_dropped": "23",
+      "reason": "off_page: not on p25; found on exactly one page, p27"
+    },
+    {
+      "advisory_id": "ADV-2026-0001",
+      "section": "indicators",
+      "item": "Exporter has no discoverable trading presence, including use",
+      "page": 14,
+      "quote_sha256": "f096fa5dd4709e6d1e0f655eed4f956373371b35a8602e2b5057185f076167aa",
+      "found_on": [
+        16
+      ],
+      "action": "re_page",
+      "to_page": 16,
+      "printed_folio_dropped": "12",
+      "reason": "off_page: not on p14; found on exactly one page, p16"
+    },
+    {
+      "advisory_id": "ADV-2026-0001",
+      "section": "indicators",
+      "item": "Exporter uses a personal email address instead of a legitima",
+      "page": 14,
+      "quote_sha256": "667f18f29227336a4ff0041087a627debcee1ba3dc9fd9922b301e2cfb2d176f",
+      "found_on": [
+        16
+      ],
+      "action": "re_page",
+      "to_page": 16,
+      "printed_folio_dropped": "12",
+      "reason": "off_page: not on p14; found on exactly one page, p16"
+    },
+    {
+      "advisory_id": "ADV-2026-0001",
+      "section": "indicators",
+      "item": "Newly formed companies show rapid growth into existing, esta",
+      "page": 25,
+      "quote_sha256": "bdb323581d33ab98077a5cd4b4a7de94a0aca22e36408e99f83f14f3609a7030",
+      "found_on": [
+        27
+      ],
+      "action": "re_page",
+      "to_page": 27,
+      "printed_folio_dropped": "23",
+      "reason": "off_page: not on p25; found on exactly one page, p27"
+    },
+    {
+      "advisory_id": "ADV-2026-0001",
+      "section": "indicators",
+      "item": "Trade documentation is obviously recycled from previous tran",
+      "page": 14,
+      "quote_sha256": "51735fc55aea0475c847cd775fa3b30ba9ce75bdd63803a8e78377779538fff7",
+      "found_on": [
+        16
+      ],
+      "action": "re_page",
+      "to_page": 16,
+      "printed_folio_dropped": "12",
+      "reason": "off_page: not on p14; found on exactly one page, p16"
+    },
+    {
+      "advisory_id": "ADV-2026-0001",
+      "section": "typologies",
+      "item": "Black Market Peso Exchange",
+      "page": 27,
+      "quote_sha256": "e0ad52c4639003a55d447a228013bcc09b41fcd6840af9299ef61e0cb5919cd5",
+      "found_on": [
+        29
+      ],
+      "action": "re_page",
+      "to_page": 29,
+      "printed_folio_dropped": "25",
+      "reason": "off_page: not on p27; found on exactly one page, p29"
+    },
+    {
+      "advisory_id": "ADV-2026-0001",
+      "section": "typologies",
+      "item": "False Description Of Goods",
+      "page": 27,
+      "quote_sha256": "9c8b1f3341fdad53c3c32c5d1d796cb646fe5a940672f95ec5295a1e398faf6a",
+      "found_on": [
+        29
+      ],
+      "action": "re_page",
+      "to_page": 29,
+      "printed_folio_dropped": "25",
+      "reason": "off_page: not on p27; found on exactly one page, p29"
+    },
+    {
+      "advisory_id": "ADV-2026-0001",
+      "section": "typologies",
+      "item": "Gold/Precious Metals as Cash Proxy (Commodity-for-Cash Value Transfer)",
+      "page": 21,
+      "quote_sha256": "9deb672cacf57c83391a592b7f1c24718bb67476a2f6e85927c3507435f1acef",
+      "found_on": [
+        23
+      ],
+      "action": "re_page",
+      "to_page": 23,
+      "printed_folio_dropped": "19",
+      "reason": "off_page: not on p21; found on exactly one page, p23"
+    },
+    {
+      "advisory_id": "ADV-2026-0001",
+      "section": "typologies",
+      "item": "Infiltration of Legitimate Supply Chains",
+      "page": 31,
+      "quote_sha256": "85ed6911d8d39d449d6dd6e1cbfff5ed6e2206b65cb753652cdb18ba2ab5e372",
+      "found_on": [
+        33
+      ],
+      "action": "re_page",
+      "to_page": 33,
+      "printed_folio_dropped": "29",
+      "reason": "off_page: not on p31; found on exactly one page, p33"
+    },
+    {
+      "advisory_id": "ADV-2026-0001",
+      "section": "typologies",
+      "item": "Multiple Invoicing",
+      "page": 27,
+      "quote_sha256": "e4b8101af2b2fb12edb64ce7a5cb65eb08356f850b95e86f382fdd728308003c",
+      "found_on": [
+        29
+      ],
+      "action": "re_page",
+      "to_page": 29,
+      "printed_folio_dropped": "25",
+      "reason": "off_page: not on p27; found on exactly one page, p29"
+    },
+    {
+      "advisory_id": "ADV-2026-0001",
+      "section": "typologies",
+      "item": "Over Invoicing",
+      "page": 26,
+      "quote_sha256": "21c20fb88cd2e9e9646daccc5a2d53faf7f40b46a04cc38fedc093f578a6e338",
+      "found_on": [
+        28
+      ],
+      "action": "re_page",
+      "to_page": 28,
+      "printed_folio_dropped": "24",
+      "reason": "off_page: not on p26; found on exactly one page, p28"
+    },
+    {
+      "advisory_id": "ADV-2026-0001",
+      "section": "typologies",
+      "item": "Phantom Shipping",
+      "page": 27,
+      "quote_sha256": "ac2ed30809b6c7280779e4ecc652c09cdddcb37d7f97b02d67de6a03f9a7935f",
+      "found_on": [
+        29
+      ],
+      "action": "re_page",
+      "to_page": 29,
+      "printed_folio_dropped": "25",
+      "reason": "off_page: not on p27; found on exactly one page, p29"
+    },
+    {
+      "advisory_id": "ADV-2026-0001",
+      "section": "typologies",
+      "item": "Services-Based Money Laundering",
+      "page": 35,
+      "quote_sha256": "7ab80231c1ddab7be3ae0f8da996aa31b2396ab409bdf49023d05e7faad8832f",
+      "found_on": [
+        37
+      ],
+      "action": "re_page",
+      "to_page": 37,
+      "printed_folio_dropped": "33",
+      "reason": "off_page: not on p35; found on exactly one page, p37"
+    },
+    {
+      "advisory_id": "ADV-2026-0001",
+      "section": "typologies",
+      "item": "Shell Company Trading",
+      "page": 25,
+      "quote_sha256": "ab40539e1226d4ceb535b8f7c5221c63c57d876da13a01ae92e46bf58623c2b1",
+      "found_on": [
+        27
+      ],
+      "action": "re_page",
+      "to_page": 27,
+      "printed_folio_dropped": "23",
+      "reason": "off_page: not on p25; found on exactly one page, p27"
+    },
+    {
+      "advisory_id": "ADV-2026-0001",
+      "section": "typologies",
+      "item": "Surrogate Shopping Networks",
+      "page": 31,
+      "quote_sha256": "3e56a41ffb3c59f89ec8e843cc265d9a8025e5d3a8c291dc762e0d4a334e2ac2",
+      "found_on": [
+        33
+      ],
+      "action": "re_page",
+      "to_page": 33,
+      "printed_folio_dropped": "29",
+      "reason": "off_page: not on p31; found on exactly one page, p33"
+    },
+    {
+      "advisory_id": "ADV-2026-0001",
+      "section": "typologies",
+      "item": "Third Party Payment Abuse",
+      "page": 29,
+      "quote_sha256": "3e08214649d160c55ec9b94c6ec2e9a1f3a54c5b86c1d77b08ca948ed401fa27",
+      "found_on": [
+        31
+      ],
+      "action": "re_page",
+      "to_page": 31,
+      "printed_folio_dropped": "27",
+      "reason": "off_page: not on p29; found on exactly one page, p31"
+    },
+    {
+      "advisory_id": "ADV-2026-0001",
+      "section": "typologies",
+      "item": "Under Invoicing",
+      "page": 26,
+      "quote_sha256": "c136e0e6a7c98c32b809d5f563a1b47f5d508ba1f536588b8a5a527e5e9edb97",
+      "found_on": [
+        28
+      ],
+      "action": "re_page",
+      "to_page": 28,
+      "printed_folio_dropped": "24",
+      "reason": "off_page: not on p26; found on exactly one page, p28"
+    },
+    {
+      "advisory_id": "ADV-2026-0003",
+      "section": "actors",
+      "item": "Al Zarooni Exchange",
+      "page": 14,
+      "quote_sha256": "5d905ce984896c9560cdbc8b28de20f7d8ee386df8df9f5ed7e4fa2f42e53826",
+      "found_on": [
+        16
+      ],
+      "action": "re_page",
+      "to_page": 16,
+      "reason": "off_page: not on p14; found on exactly one page, p16"
+    },
+    {
+      "advisory_id": "ADV-2026-0003",
+      "section": "actors",
+      "item": "Altaf Khanani",
+      "page": 13,
+      "quote_sha256": "af3f19a00bf58edfc375d87344142ea1208e33646c87ddaa265dd556c14fff89",
+      "found_on": [
+        15
+      ],
+      "action": "re_page",
+      "to_page": 15,
+      "reason": "off_page: not on p13; found on exactly one page, p15"
+    },
+    {
+      "advisory_id": "ADV-2026-0003",
+      "section": "actors",
+      "item": "BTC-e",
+      "page": 47,
+      "quote_sha256": "37a8a6c575132b04eba7e6829020448062b854c7deeeea294be87698ff66e4ff",
+      "found_on": [
+        49
+      ],
+      "action": "re_page",
+      "to_page": 49,
+      "reason": "off_page: not on p47; found on exactly one page, p49"
+    },
+    {
+      "advisory_id": "ADV-2026-0003",
+      "section": "actors",
+      "item": "Company X",
+      "page": 34,
+      "quote_sha256": "721b66d84050f21322f5d75e6a88af861595416c3928ee550a7c6d794fb9ae3a",
+      "found_on": [
+        36
+      ],
+      "action": "re_page",
+      "to_page": 36,
+      "reason": "off_page: not on p34; found on exactly one page, p36"
+    },
+    {
+      "advisory_id": "ADV-2026-0003",
+      "section": "actors",
+      "item": "Khanani Money Laundering Organisation",
+      "page": 13,
+      "quote_sha256": "55c76b2a581e0958c9b8d1af4799471536ed0f8a839232ab493a8e0857a2a1d5",
+      "found_on": [
+        15
+      ],
+      "action": "re_page",
+      "to_page": 15,
+      "reason": "off_page: not on p13; found on exactly one page, p15"
+    },
+    {
+      "advisory_id": "ADV-2026-0003",
+      "section": "actors",
+      "item": "La Cosa Nostra",
+      "page": 42,
+      "quote_sha256": "28931e140b687de16e83a1fec993f110a1a0933f6c65e6af8cdad4f4e34467f8",
+      "found_on": [
+        44
+      ],
+      "action": "re_page",
+      "to_page": 44,
+      "reason": "off_page: not on p42; found on exactly one page, p44"
+    },
+    {
+      "advisory_id": "ADV-2026-0003",
+      "section": "actors",
+      "item": "Money mule herders",
+      "page": 22,
+      "quote_sha256": "f334b231d71bb780345804581b69116bc607268d410aa46711a846c7be6cfd7e",
+      "found_on": [
+        24
+      ],
+      "action": "re_page",
+      "to_page": 24,
+      "reason": "off_page: not on p22; found on exactly one page, p24"
+    },
+    {
+      "advisory_id": "ADV-2026-0003",
+      "section": "actors",
+      "item": "PacNet",
+      "page": 45,
+      "quote_sha256": "adfb348fb6f9ba1b2565a03ee448f65339d8c4a33ea3f014fd1502de293c7cbb",
+      "found_on": [
+        47
+      ],
+      "action": "re_page",
+      "to_page": 47,
+      "reason": "off_page: not on p45; found on exactly one page, p47"
+    },
+    {
+      "advisory_id": "ADV-2026-0003",
+      "section": "actors",
+      "item": "Subject X",
+      "page": 34,
+      "quote_sha256": "6dfad0a29505e1895644a9509fc9929cd43777e1df1eeb47a33a1bcc54bb2735",
+      "found_on": [
+        36
+      ],
+      "action": "re_page",
+      "to_page": 36,
+      "reason": "off_page: not on p34; found on exactly one page, p36"
+    },
+    {
+      "advisory_id": "ADV-2026-0003",
+      "section": "indicators",
+      "item": "A licensed professional (banker, lawyer, accountant, MVTS ag",
+      "page": 35,
+      "quote_sha256": "430a8289c4aea67fda7a6daa6b57749031ce10b4204392c3fa6f0ae58009eded",
+      "found_on": [
+        37
+      ],
+      "action": "re_page",
+      "to_page": 37,
+      "reason": "off_page: not on p35; found on exactly one page, p37"
+    },
+    {
+      "advisory_id": "ADV-2026-0003",
+      "section": "indicators",
+      "item": "Bank cards or e-wallets are issued in the names of nominees ",
+      "page": 25,
+      "quote_sha256": "90c8ac8b6675c2c5850a25c882a09d00f786d0564185ddef4dc337005109b26e",
+      "found_on": [
+        27
+      ],
+      "action": "re_page",
+      "to_page": 27,
+      "reason": "off_page: not on p25; found on exactly one page, p27"
+    },
+    {
+      "advisory_id": "ADV-2026-0003",
+      "section": "indicators",
+      "item": "Cash deposits structured in amounts kept deliberately under ",
+      "page": 19,
+      "quote_sha256": "4a0f958c656aa2d1c9d38dfaa01154d49c6dfb61ccf80d2d0f675670821ed582",
+      "found_on": [
+        21
+      ],
+      "action": "re_page",
+      "to_page": 21,
+      "reason": "off_page: not on p19; found on exactly one page, p21"
+    },
+    {
+      "advisory_id": "ADV-2026-0003",
+      "section": "indicators",
+      "item": "Cash proceeds of crime collected across multiple countries a",
+      "page": 21,
+      "quote_sha256": "3f423fd8c6e3079ad3c83a75f1074da2f0eb626efeed7546347958bd50f53323",
+      "found_on": [
+        23
+      ],
+      "action": "re_page",
+      "to_page": 23,
+      "reason": "off_page: not on p21; found on exactly one page, p23"
+    },
+    {
+      "advisory_id": "ADV-2026-0003",
+      "section": "indicators",
+      "item": "Client funds are moved through a complex chain of domestic a",
+      "page": 26,
+      "quote_sha256": "54c53718a24ec693f10ce81bbab45128951ef25e375a1c7cc86a9a28aa102bed",
+      "found_on": [
+        28
+      ],
+      "action": "re_page",
+      "to_page": 28,
+      "reason": "off_page: not on p26; found on exactly one page, p28"
+    },
+    {
+      "advisory_id": "ADV-2026-0003",
+      "section": "indicators",
+      "item": "Funds received into a personal (mule) account are transferre",
+      "page": 23,
+      "quote_sha256": "97851b3073aeaa0b794e30e52532fb49a6c6e75b39ed5215b803ad6d5e705093",
+      "found_on": [
+        25
+      ],
+      "action": "re_page",
+      "to_page": 25,
+      "reason": "off_page: not on p23; found on exactly one page, p25"
+    },
+    {
+      "advisory_id": "ADV-2026-0003",
+      "section": "indicators",
+      "item": "Multiple large cash deposits made per day using bank 'quick-",
+      "page": 37,
+      "quote_sha256": "9b661ba09455fd7f00342064f508f62b2967639af0068ab94f7cfccf0fbf40e2",
+      "found_on": [
+        39
+      ],
+      "action": "re_page",
+      "to_page": 39,
+      "reason": "off_page: not on p37; found on exactly one page, p39"
+    },
+    {
+      "advisory_id": "ADV-2026-0003",
+      "section": "indicators",
+      "item": "PML keeps a parallel 'shadow accounting' system (spreadsheet",
+      "page": 12,
+      "quote_sha256": "1f491a3c0fb1e90c16d929e1012dd73e788aa3095a741dc892b5c2b48c01376e",
+      "found_on": [
+        14
+      ],
+      "action": "re_page",
+      "to_page": 14,
+      "reason": "off_page: not on p12; found on exactly one page, p14"
+    },
+    {
+      "advisory_id": "ADV-2026-0003",
+      "section": "indicators",
+      "item": "Payments made under trade contracts for goods that are ultim",
+      "page": 30,
+      "quote_sha256": "9d9910fea666ce3be017e057de8fb67a2259dec59096bd48aa598e6b4a6757c5",
+      "found_on": [
+        32
+      ],
+      "action": "re_page",
+      "to_page": 32,
+      "reason": "off_page: not on p30; found on exactly one page, p32"
+    },
+    {
+      "advisory_id": "ADV-2026-0003",
+      "section": "indicators",
+      "item": "Sharp, sustained decline in formal remittance flows on a giv",
+      "page": 37,
+      "quote_sha256": "3875acfa172f997741d7812fa8836ec2a32073eb3b6d4e43b217813d66596d78",
+      "found_on": [
+        39
+      ],
+      "action": "re_page",
+      "to_page": 39,
+      "reason": "off_page: not on p37; found on exactly one page, p39"
+    },
+    {
+      "advisory_id": "ADV-2026-0003",
+      "section": "indicators",
+      "item": "Trade transactions where the invoiced quantity or value of g",
+      "page": 30,
+      "quote_sha256": "0044711a7bd5a0eca30d3ba5984e88ae9516a1d8826ea0f16869413f1e3d87f8",
+      "found_on": [
+        32
+      ],
+      "action": "re_page",
+      "to_page": 32,
+      "reason": "off_page: not on p30; found on exactly one page, p32"
+    },
+    {
+      "advisory_id": "ADV-2026-0003",
+      "section": "indicators",
+      "item": "Transactions are conducted through an informal/underground b",
+      "page": 34,
+      "quote_sha256": "549e9129a246ecd101c5cf11c89e34a51ac869a8706c053f8cce17c537d2921c",
+      "found_on": [
+        36
+      ],
+      "action": "re_page",
+      "to_page": 36,
+      "reason": "off_page: not on p34; found on exactly one page, p36"
+    },
+    {
+      "advisory_id": "ADV-2026-0003",
+      "section": "typologies",
+      "item": "Account Settlement Mechanism (Cross-Border Netting via OCG Accounts)",
+      "page": 33,
+      "quote_sha256": "54553f744df12b377ac57b5f790718c40cf48460b057f4c3cc15c97bd3daa1d9",
+      "found_on": [
+        35
+      ],
+      "action": "re_page",
+      "to_page": 35,
+      "reason": "off_page: not on p33; found on exactly one page, p35"
+    },
+    {
+      "advisory_id": "ADV-2026-0003",
+      "section": "typologies",
+      "item": "Account Settlement Mechanism (Cross-Border Netting via OCG Accounts)",
+      "page": 33,
+      "quote_sha256": "6693d9e2cf03514798e497bef58ef804336becd50d81947cff80632537af3338",
+      "found_on": [
+        35
+      ],
+      "action": "re_page",
+      "to_page": 35,
+      "reason": "off_page: not on p33; found on exactly one page, p35"
+    },
+    {
+      "advisory_id": "ADV-2026-0003",
+      "section": "typologies",
+      "item": "Complicit Financial Service Providers and Professional Gatekeepers",
+      "page": 35,
+      "quote_sha256": "430a8289c4aea67fda7a6daa6b57749031ce10b4204392c3fa6f0ae58009eded",
+      "found_on": [
+        37
+      ],
+      "action": "re_page",
+      "to_page": 37,
+      "reason": "off_page: not on p35; found on exactly one page, p37"
+    },
+    {
+      "advisory_id": "ADV-2026-0003",
+      "section": "typologies",
+      "item": "Complicit Financial Service Providers and Professional Gatekeepers",
+      "page": 45,
+      "quote_sha256": "adfb348fb6f9ba1b2565a03ee448f65339d8c4a33ea3f014fd1502de293c7cbb",
+      "found_on": [
+        47
+      ],
+      "action": "re_page",
+      "to_page": 47,
+      "reason": "off_page: not on p45; found on exactly one page, p47"
+    },
+    {
+      "advisory_id": "ADV-2026-0003",
+      "section": "typologies",
+      "item": "Money Mule Networks (Mule Accounts)",
+      "page": 22,
+      "quote_sha256": "f334b231d71bb780345804581b69116bc607268d410aa46711a846c7be6cfd7e",
+      "found_on": [
+        24
+      ],
+      "action": "re_page",
+      "to_page": 24,
+      "reason": "off_page: not on p22; found on exactly one page, p24"
+    },
+    {
+      "advisory_id": "ADV-2026-0003",
+      "section": "typologies",
+      "item": "Money Mule Networks (Mule Accounts)",
+      "page": 23,
+      "quote_sha256": "97851b3073aeaa0b794e30e52532fb49a6c6e75b39ed5215b803ad6d5e705093",
+      "found_on": [
+        25
+      ],
+      "action": "re_page",
+      "to_page": 25,
+      "reason": "off_page: not on p23; found on exactly one page, p25"
+    },
+    {
+      "advisory_id": "ADV-2026-0003",
+      "section": "typologies",
+      "item": "Money Transport and Cash Controller Networks",
+      "page": 19,
+      "quote_sha256": "73123949aae199b714ddb7495b30c41a956330d7600d4fd97d2a5bd9a8cbab67",
+      "found_on": [
+        21
+      ],
+      "action": "re_page",
+      "to_page": 21,
+      "reason": "off_page: not on p19; found on exactly one page, p21"
+    },
+    {
+      "advisory_id": "ADV-2026-0003",
+      "section": "typologies",
+      "item": "Money Transport and Cash Controller Networks",
+      "page": 21,
+      "quote_sha256": "3f423fd8c6e3079ad3c83a75f1074da2f0eb626efeed7546347958bd50f53323",
+      "found_on": [
+        23
+      ],
+      "action": "re_page",
+      "to_page": 23,
+      "reason": "off_page: not on p21; found on exactly one page, p23"
+    },
+    {
+      "advisory_id": "ADV-2026-0003",
+      "section": "typologies",
+      "item": "Proxy Networks (Shell Company Layering)",
+      "page": 26,
+      "quote_sha256": "1cd364dead8bffdddda9fb1eabd2dc7594a0ccc5bf6b39f8d7d26214f017e486",
+      "found_on": [
+        28
+      ],
+      "action": "re_page",
+      "to_page": 28,
+      "reason": "off_page: not on p26; found on exactly one page, p28"
+    },
+    {
+      "advisory_id": "ADV-2026-0003",
+      "section": "typologies",
+      "item": "Proxy Networks (Shell Company Layering)",
+      "page": 26,
+      "quote_sha256": "54c53718a24ec693f10ce81bbab45128951ef25e375a1c7cc86a9a28aa102bed",
+      "found_on": [
+        28
+      ],
+      "action": "re_page",
+      "to_page": 28,
+      "reason": "off_page: not on p26; found on exactly one page, p28"
+    },
+    {
+      "advisory_id": "ADV-2026-0003",
+      "section": "typologies",
+      "item": "Trade-Based Money Laundering - Over/Under-Invoicing",
+      "page": 30,
+      "quote_sha256": "0044711a7bd5a0eca30d3ba5984e88ae9516a1d8826ea0f16869413f1e3d87f8",
+      "found_on": [
+        32
+      ],
+      "action": "re_page",
+      "to_page": 32,
+      "reason": "off_page: not on p30; found on exactly one page, p32"
+    },
+    {
+      "advisory_id": "ADV-2026-0003",
+      "section": "typologies",
+      "item": "Trade-Based Money Laundering - Phantom Shipments",
+      "page": 30,
+      "quote_sha256": "9d9910fea666ce3be017e057de8fb67a2259dec59096bd48aa598e6b4a6757c5",
+      "found_on": [
+        32
+      ],
+      "action": "re_page",
+      "to_page": 32,
+      "reason": "off_page: not on p30; found on exactly one page, p32"
+    },
+    {
+      "advisory_id": "ADV-2026-0003",
+      "section": "typologies",
+      "item": "Underground Banking and Alternative Banking Platforms",
+      "page": 34,
+      "quote_sha256": "31c2552a892a8ab027b88e372b9c4b404ee59c471e2cd75efb2aaa4c0b37ce7f",
+      "found_on": [
+        36
+      ],
+      "action": "re_page",
+      "to_page": 36,
+      "reason": "off_page: not on p34; found on exactly one page, p36"
+    },
+    {
+      "advisory_id": "ADV-2026-0003",
+      "section": "typologies",
+      "item": "Underground Banking and Alternative Banking Platforms",
+      "page": 35,
+      "quote_sha256": "b31413154d77dfd5294b5bfed62fbe54b11a3930d1b66797abb954160b06f39f",
+      "found_on": [
+        37
+      ],
+      "action": "re_page",
+      "to_page": 37,
+      "reason": "off_page: not on p35; found on exactly one page, p37"
+    },
+    {
+      "advisory_id": "ADV-2026-0003",
+      "section": "typologies",
+      "item": "Virtual Currency / Digital Money Laundering Networks",
+      "page": 25,
+      "quote_sha256": "7f67453a22d7bbee089b297000b07f07f736368add3b8ea0e497170877efd914",
+      "found_on": [
+        27
+      ],
+      "action": "re_page",
+      "to_page": 27,
+      "reason": "off_page: not on p25; found on exactly one page, p27"
+    },
+    {
+      "advisory_id": "ADV-2026-0004",
+      "section": "actors",
+      "item": "Alavi Foundation",
+      "page": 33,
+      "quote_sha256": "e254b62069636db7295659e51862b468f5fffe981fc339282409b075eb491b90",
+      "found_on": [
+        34
+      ],
+      "action": "re_page",
+      "to_page": 34,
+      "printed_folio_dropped": "31",
+      "reason": "off_page: not on p33; found on exactly one page, p34"
+    },
+    {
+      "advisory_id": "ADV-2026-0004",
+      "section": "actors",
+      "item": "Bank Melli",
+      "page": 33,
+      "quote_sha256": "67b0144529e43b98503770f95c82ec1d9eaebcca01769c558cf7e20b137159f8",
+      "found_on": [
+        34
+      ],
+      "action": "re_page",
+      "to_page": 34,
+      "printed_folio_dropped": "31",
+      "reason": "off_page: not on p33; found on exactly one page, p34"
+    },
+    {
+      "advisory_id": "ADV-2026-0004",
+      "section": "indicators",
+      "item": "Corporate entity exhibits classic shell-company traits: no p",
+      "page": 186,
+      "quote_sha256": "5ebf7b7718e3ec9d4cfd6a720a4ad28a491108afeca1b6a7c4da059a9f08e4e8",
+      "found_on": [
+        187
+      ],
+      "action": "re_page",
+      "to_page": 187,
+      "printed_folio_dropped": "184",
+      "reason": "off_page: not on p186; found on exactly one page, p187"
+    },
+    {
+      "advisory_id": "ADV-2026-0004",
+      "section": "indicators",
+      "item": "False invoices are created for services or goods not actuall",
+      "page": 185,
+      "quote_sha256": "62217feaf79189e4e3d40bd5b019b28f521ef5fca42fee734b4760b8ebb7a350",
+      "found_on": [
+        112,
+        115,
+        116,
+        118,
+        122,
+        124,
+        129,
+        133,
+        137,
+        140,
+        145,
+        149,
+        152,
+        153,
+        154,
+        159,
+        161,
+        186
+      ],
+      "action": "remove",
+      "reason": "off_page, ambiguous: not on p185; found on 18 pages"
+    },
+    {
+      "advisory_id": "ADV-2026-0004",
+      "section": "indicators",
+      "item": "Funds are received as loans from private third parties witho",
+      "page": 186,
+      "quote_sha256": "11ccfb9ab22d4424676a4d6935c13109cccc89b54dc6be6fc76ba529ffbd54ab",
+      "found_on": [
+        129,
+        162,
+        187
+      ],
+      "action": "remove",
+      "reason": "off_page, ambiguous: not on p186; found on 3 pages"
+    },
+    {
+      "advisory_id": "ADV-2026-0004",
+      "section": "indicators",
+      "item": "Transaction flows appear cyclical: outgoing and incoming amo",
+      "page": 187,
+      "quote_sha256": "0efbefa1bf2d940f0e6025dc4e949f4a050f6dd4421562bc152da86e51e8dedb",
+      "found_on": [
+        188
+      ],
+      "action": "re_page",
+      "to_page": 188,
+      "printed_folio_dropped": "185",
+      "reason": "off_page: not on p187; found on exactly one page, p188"
+    },
+    {
+      "advisory_id": "ADV-2026-0004",
+      "section": "typologies",
+      "item": "Beneficial Ownership Intelligence",
+      "page": 176,
+      "quote_sha256": "5cd222d9b3a7504e8d849f4cd6814d47426d0bc8b60e8219795841d2c4a45a9e",
+      "found_on": [
+        179
+      ],
+      "action": "re_page",
+      "to_page": 179,
+      "printed_folio_dropped": "174",
+      "reason": "off_page: not on p176; found on exactly one page, p179"
+    },
+    {
+      "advisory_id": "ADV-2026-0004",
+      "section": "typologies",
+      "item": "Front Companies",
+      "page": 32,
+      "quote_sha256": "f00f2994b00823c510d7e43e63472a6da1966e168869f11ed95dd9fc3ccaf6f2",
+      "found_on": [
+        34
+      ],
+      "action": "re_page",
+      "to_page": 34,
+      "printed_folio_dropped": "31",
+      "reason": "off_page: not on p32; found on exactly one page, p34"
+    },
+    {
+      "advisory_id": "ADV-2026-0004",
+      "section": "typologies",
+      "item": "Shell Company Network",
+      "page": 186,
+      "quote_sha256": "22c787de8b6488431381b00462c34d2cd97925c70d80798d0bf80fdbe1975b26",
+      "found_on": [
+        187
+      ],
+      "action": "re_page",
+      "to_page": 187,
+      "printed_folio_dropped": "184",
+      "reason": "off_page: not on p186; found on exactly one page, p187"
+    },
+    {
+      "advisory_id": "ADV-2026-0006",
+      "section": "indicators",
+      "item": "Falsified shipping, customs or loan/letter-of-credit documen",
+      "page": 32,
+      "quote_sha256": "e99508b9b5b90dbb9818b200abb5d4183ae7d25ed7caa736de941bd1a8f4bdb5",
+      "found_on": [
+        31
+      ],
+      "action": "re_page",
+      "to_page": 31,
+      "printed_folio_dropped": "30",
+      "reason": "off_page: not on p32; found on exactly one page, p31"
+    },
+    {
+      "advisory_id": "ADV-2026-0006",
+      "section": "indicators",
+      "item": "Timber or gold exported at below-market declared prices, wit",
+      "page": 60,
+      "quote_sha256": "28e086388f5359f1c699738a559eef9d0f14b3dae6804737793ad00a51796cbc",
+      "found_on": [
+        58
+      ],
+      "action": "re_page",
+      "to_page": 58,
+      "printed_folio_dropped": "58",
+      "reason": "off_page: not on p60; found on exactly one page, p58"
+    },
+    {
+      "advisory_id": "ADV-2026-0006",
+      "section": "typologies",
+      "item": "Cash Intensive Activity",
+      "page": 57,
+      "quote_sha256": "aea51c7c585c60e37323563902afe9ddc59421a37a5809e0ea57ca26e803092d",
+      "found_on": [
+        55
+      ],
+      "action": "re_page",
+      "to_page": 55,
+      "printed_folio_dropped": "55",
+      "reason": "off_page: not on p57; found on exactly one page, p55"
+    },
+    {
+      "advisory_id": "ADV-2026-0006",
+      "section": "typologies",
+      "item": "False Description Of Goods",
+      "page": 32,
+      "quote_sha256": "e99508b9b5b90dbb9818b200abb5d4183ae7d25ed7caa736de941bd1a8f4bdb5",
+      "found_on": [
+        31
+      ],
+      "action": "re_page",
+      "to_page": 31,
+      "printed_folio_dropped": "30",
+      "reason": "off_page: not on p32; found on exactly one page, p31"
+    },
+    {
+      "advisory_id": "ADV-2026-0006",
+      "section": "typologies",
+      "item": "Hidden Controller via Nominee Directors/Shareholders",
+      "page": 19,
+      "quote_sha256": "be3ed0329dc93b8677c7e8ced83944116ab5e4a8930f6b2bac6758d64e27ae18",
+      "found_on": [
+        21
+      ],
+      "action": "re_page",
+      "to_page": 21,
+      "reason": "off_page: not on p19; found on exactly one page, p21"
+    },
+    {
+      "advisory_id": "ADV-2026-0006",
+      "section": "typologies",
+      "item": "Hidden Controller via Nominee Directors/Shareholders",
+      "page": 22,
+      "quote_sha256": "e6339dbeea2c7d88c229989eb0604340b29c3089891175cb3d2ff9710380e012",
+      "found_on": [
+        24
+      ],
+      "action": "re_page",
+      "to_page": 24,
+      "reason": "off_page: not on p22; found on exactly one page, p24"
+    },
+    {
+      "advisory_id": "ADV-2026-0006",
+      "section": "typologies",
+      "item": "Informal Value Transfer (Hawala) Networks for Environmental Crime Proceeds",
+      "page": 31,
+      "quote_sha256": "2fe569761bb56d469909c910576e1f45a7b8cebe85a896728a064bc5f13e8b64",
+      "found_on": [
+        33
+      ],
+      "action": "re_page",
+      "to_page": 33,
+      "reason": "off_page: not on p31; found on exactly one page, p33"
+    },
+    {
+      "advisory_id": "ADV-2026-0006",
+      "section": "typologies",
+      "item": "Layering via Nested Correspondent Activity",
+      "page": 23,
+      "quote_sha256": "af842e85694d96f6df07637156bbeac600ed06ef25fba489a45bdc60a6ea34dd",
+      "found_on": [
+        25
+      ],
+      "action": "re_page",
+      "to_page": 25,
+      "reason": "off_page: not on p23; found on exactly one page, p25"
+    },
+    {
+      "advisory_id": "ADV-2026-0006",
+      "section": "typologies",
+      "item": "Layering via Nested Correspondent Activity",
+      "page": 23,
+      "quote_sha256": "bdb76bcd13e563a14b920c1e93336e190b8003b7cdd01e40db15739d9f559d37",
+      "found_on": [
+        25
+      ],
+      "action": "re_page",
+      "to_page": 25,
+      "reason": "off_page: not on p23; found on exactly one page, p25"
+    },
+    {
+      "advisory_id": "ADV-2026-0006",
+      "section": "typologies",
+      "item": "Under Invoicing",
+      "page": 60,
+      "quote_sha256": "28e086388f5359f1c699738a559eef9d0f14b3dae6804737793ad00a51796cbc",
+      "found_on": [
+        58
+      ],
+      "action": "re_page",
+      "to_page": 58,
+      "printed_folio_dropped": "58",
+      "reason": "off_page: not on p60; found on exactly one page, p58"
+    },
+    {
+      "advisory_id": "ADV-2026-0007",
+      "section": "actors",
+      "item": "Professional money laundering groups and third-party professional enablers",
+      "page": 15,
+      "quote_sha256": "733090cfc706ec159cef44cc5bc56d6a669ff81cfe99f3ded25e9af48dab5a0d",
+      "found_on": [
+        17
+      ],
+      "action": "re_page",
+      "to_page": 17,
+      "reason": "off_page: not on p15; found on exactly one page, p17"
+    },
+    {
+      "advisory_id": "ADV-2026-0007",
+      "section": "typologies",
+      "item": "Structuring",
+      "page": 22,
+      "quote_sha256": "0d9f85cc25562f5f350472422950879addb4e8f12a5f836b03f700e890cce988",
+      "found_on": [],
+      "action": "remove",
+      "reason": "missing: the quote is on no page of the document"
+    },
+    {
+      "advisory_id": "ADV-2026-0008",
+      "section": "indicators",
+      "item": "Structured transfers of funds of unknown origin to legal pro",
+      "page": 29,
+      "quote_sha256": "53118fb98a67741caa66a131b66723f146b00f688a3f8d873d9a5ce0460a43a1",
+      "found_on": [
+        31
+      ],
+      "action": "re_page",
+      "to_page": 31,
+      "printed_folio_dropped": "27",
+      "reason": "off_page: not on p29; found on exactly one page, p31"
+    },
+    {
+      "advisory_id": "ADV-2026-0008",
+      "section": "typologies",
+      "item": "Black Market Peso Exchange (BMPE) Trade-Based Settlement",
+      "page": 39,
+      "quote_sha256": "bb97a82b05c26678d0815b772d052b00b315a66b243a1b961210b588ae2c67df",
+      "found_on": [
+        38
+      ],
+      "action": "re_page",
+      "to_page": 38,
+      "printed_folio_dropped": "37",
+      "reason": "off_page: not on p39; found on exactly one page, p38"
+    },
+    {
+      "advisory_id": "ADV-2026-0008",
+      "section": "typologies",
+      "item": "Black Market Peso Exchange (BMPE) Trade-Based Settlement",
+      "page": 41,
+      "quote_sha256": "f2ddecb771ace70d53c70fd4fb4a4f5ff38094f9d29dae06f0a524a53b2b4f7f",
+      "found_on": [
+        39
+      ],
+      "action": "re_page",
+      "to_page": 39,
+      "printed_folio_dropped": "39",
+      "reason": "off_page: not on p41; found on exactly one page, p39"
+    },
+    {
+      "advisory_id": "ADV-2026-0008",
+      "section": "typologies",
+      "item": "Digital Hawala / Virtual-Asset-Based Settlement Between Underground Banking Operators",
+      "page": 27,
+      "quote_sha256": "5d23666132732841dde589047ef5ad000e9d024678be0e8158db37eab0455426",
+      "found_on": [
+        28
+      ],
+      "action": "re_page",
+      "to_page": 28,
+      "printed_folio_dropped": "25",
+      "reason": "off_page: not on p27; found on exactly one page, p28"
+    },
+    {
+      "advisory_id": "ADV-2026-0010",
+      "section": "actors",
+      "item": "Exchange houses and trading companies (class)",
+      "page": 3,
+      "quote_sha256": "fd5cefb1f247439ef0053de3f2a46c015a887d5599999a81bc1e1dda6b24cb48",
+      "found_on": [],
+      "action": "re_page",
+      "to_page": 2,
+      "reason": "page_break_start"
+    },
+    {
+      "advisory_id": "ADV-2026-0010",
+      "section": "actors",
+      "item": "Money services businesses, legal entities and TCSPs (class)",
+      "page": 5,
+      "quote_sha256": "c29bd725fac8de304e8ea07e978236898b468eb57d1ec03499d1491da9fe1cf3",
+      "found_on": [],
+      "action": "re_page",
+      "to_page": 4,
+      "reason": "page_break_start"
+    },
+    {
+      "advisory_id": "ADV-2026-0010",
+      "section": "typologies",
+      "item": "Dual Use Goods",
+      "page": 7,
+      "quote_sha256": "f3b403eebbe18b5ea00b9a305d3ecf69425c837ecafbe76fb29cd95873878fc4",
+      "found_on": [],
+      "action": "re_page",
+      "to_page": 6,
+      "reason": "page_break_start"
+    },
+    {
+      "advisory_id": "ADV-2026-0010",
+      "section": "typologies",
+      "item": "Transshipment",
+      "page": 7,
+      "quote_sha256": "f3b403eebbe18b5ea00b9a305d3ecf69425c837ecafbe76fb29cd95873878fc4",
+      "found_on": [],
+      "action": "re_page",
+      "to_page": 6,
+      "reason": "page_break_start"
+    },
+    {
+      "advisory_id": "ADV-2026-0012",
+      "section": "actors",
+      "item": "IRGC-Qods Force (IRGC-QF)",
+      "page": 7,
+      "quote_sha256": "f4d07bd1db68619b14a6371382e5fa99c90e0d06055cb19e335e0b6fedeb2819",
+      "found_on": [],
+      "action": "re_page",
+      "to_page": 6,
+      "reason": "page_break_start"
+    },
+    {
+      "advisory_id": "ADV-2026-0014",
+      "section": "typologies",
+      "item": "Cryptocurrency Evasion",
+      "page": 12,
+      "quote_sha256": "b0fe342449fed1cbf40b5f17546c1524a7a79a93046ca7d8245743d8411f0a4a",
+      "found_on": [
+        7,
+        23
+      ],
+      "action": "remove",
+      "reason": "off_page, ambiguous: not on p12; found on 2 pages"
+    }
+  ],
+  "attested_in_place": [
+    {
+      "advisory_id": "ADV-2026-0005",
+      "section": "typologies",
+      "item": "Rapid Movement",
+      "page": 8,
+      "quote_sha256": "5473e35bbea5f5bd07380535d0dd0b8d17f267caeb88f46a739cb99a3e24ddf5"
+    },
+    {
+      "advisory_id": "ADV-2026-0006",
+      "section": "actors",
+      "item": "Fleurette Properties",
+      "page": 63,
+      "quote_sha256": "6407c455084bc888498687dd30120930351b94132ac5ce9eff2f7f2d6f9ce5f2"
+    },
+    {
+      "advisory_id": "ADV-2026-0006",
+      "section": "indicators",
+      "item": "A company in the metals/waste sector lacking an adequate org",
+      "page": 58,
+      "quote_sha256": "3f5b6800d3def597cf218484bddbc84e1e020fb483b0e02867a0ced7097185ca"
+    },
+    {
+      "advisory_id": "ADV-2026-0006",
+      "section": "typologies",
+      "item": "Shell Company Network",
+      "page": 30,
+      "quote_sha256": "44eb66274be0af57358cb095732a55c6e483810da9e230d0926f0d9699550189"
+    },
+    {
+      "advisory_id": "ADV-2026-0008",
+      "section": "indicators",
+      "item": "Transnational network divided into specialised branches (e.g",
+      "page": 41,
+      "quote_sha256": "6d0672d1f4aa8efe1f8dda44c234dac8c43aa788ae3a10e1035df6cc05b57648"
+    },
+    {
+      "advisory_id": "ADV-2026-0008",
+      "section": "typologies",
+      "item": "Third Party Payment Abuse",
+      "page": 24,
+      "quote_sha256": "51c7d1b2dccb6541c511bc4c9799e7100e114685d0c3118712b3538f7d725b61"
+    },
+    {
+      "advisory_id": "ADV-2026-0009",
+      "section": "actors",
+      "item": "JSC Techsnabexport (TENEX)",
+      "page": 4,
+      "quote_sha256": "c066ec98efdcd395a9cb1ca03b695f5e12070fc9224d46c467b5fff934e89b18"
+    }
+  ],
+  "removed_items": [
+    {
+      "advisory_id": "ADV-2026-0004",
+      "section": "indicators",
+      "item": "False invoices are created for services or goods not actuall",
+      "typology_id": null,
+      "added_by": null
+    },
+    {
+      "advisory_id": "ADV-2026-0004",
+      "section": "indicators",
+      "item": "Funds are received as loans from private third parties witho",
+      "typology_id": null,
+      "added_by": null
+    }
+  ]
+}

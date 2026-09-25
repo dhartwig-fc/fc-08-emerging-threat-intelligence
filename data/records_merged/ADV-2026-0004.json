@@ -47,8 +47,7 @@
           "quote": "Analysis of 106 case studies demonstrates that legal persons, principally shell companies, are a key feature in schemes designed to disguise beneficial ownership"
         },
         {
-          "page": 176,
-          "printed_folio": "174",
+          "page": 179,
           "paragraph": null,
           "quote": "IP addresses"
         }
@@ -89,8 +88,7 @@
           "quote": "shell companies are the most common type of legal person used in schemes and structures designed to obscure beneficial ownership"
         },
         {
-          "page": 186,
-          "printed_folio": "184",
+          "page": 187,
           "paragraph": null,
           "quote": "Address of mass registration (usually the address of a TCSP that manages a number of shell companies on behalf of its customers)"
         }
@@ -161,8 +159,7 @@
       "confidence": "medium",
       "citations": [
         {
-          "page": 32,
-          "printed_folio": "31",
+          "page": 34,
           "paragraph": null,
           "quote": "US authorities identified front companies used to conceal the ownership of certain U.S. assets by Bank Melli, which was previously designated by US authorities for providing financial services to entities involved in Iran's nuclear and ballistic missile program."
         },
@@ -384,8 +381,7 @@
       "confidence": "high",
       "citations": [
         {
-          "page": 33,
-          "printed_folio": "31",
+          "page": 34,
           "paragraph": null,
           "quote": "U.S. authorities identified front companies used to conceal the ownership of certain U.S. assets by Bank Melli"
         }
@@ -400,8 +396,7 @@
       "confidence": "high",
       "citations": [
         {
-          "page": 33,
-          "printed_folio": "31",
+          "page": 34,
           "paragraph": null,
           "quote": "The ownership of the office tower was split between Bank Melli (40%) and the Alavi Foundation (60%)"
         }
@@ -490,24 +485,9 @@
       "confidence": "high",
       "citations": [
         {
-          "page": 186,
-          "printed_folio": "184",
+          "page": 187,
           "paragraph": null,
           "quote": "Does not have a physical presence."
-        }
-      ]
-    },
-    {
-      "indicator_type": "transactional",
-      "description": "Funds are received as loans from private third parties without supporting loan agreements, collateral or regular interest repayments.",
-      "detectable_in_transaction_data": true,
-      "confidence": "medium",
-      "citations": [
-        {
-          "page": 186,
-          "printed_folio": "184",
-          "paragraph": null,
-          "quote": "Loans are received from private third parties without any supporting loan agreements, collateral, or regular interest repayments"
         }
       ]
     },
@@ -518,8 +498,7 @@
       "confidence": "high",
       "citations": [
         {
-          "page": 187,
-          "printed_folio": "185",
+          "page": 188,
           "paragraph": null,
           "quote": "appears cyclical (outgoing and incoming transactions are similar in size and are sent to, and received from, the same accounts, indicating that outgoing funds are being returned with little loss)"
         }
@@ -536,20 +515,6 @@
           "printed_folio": "181",
           "paragraph": null,
           "quote": "insist on the use of an intermediary (either professional or informal) in all interactions without sufficient justification"
-        }
-      ]
-    },
-    {
-      "indicator_type": "documentary",
-      "description": "False invoices are created for services or goods not actually carried out or delivered, used to justify fund transfers between related entities.",
-      "detectable_in_transaction_data": false,
-      "confidence": "high",
-      "citations": [
-        {
-          "page": 185,
-          "printed_folio": "183",
-          "paragraph": null,
-          "quote": "false invoices created for services not carried out"
         }
       ]
     },

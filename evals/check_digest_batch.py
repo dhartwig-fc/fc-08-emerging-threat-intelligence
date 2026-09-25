@@ -148,11 +148,16 @@ def checks() -> list:
                 "a file added after the batch is not one of its inputs: a NEW record and a NEW queue file "
                 "leave --check matching", r.stdout.strip()[-160:]))
 
-    real = ROOT / "data" / "digests" / "slice1-2026-09-24" / "manifest.json"
+    # The committed batch is the one data/digests/CURRENT names -- data, not a string here, so
+    # cutting a new batch never edits this guard. An older batch whose inputs have since moved
+    # (slice1-2026-09-24, after the 2026-09-25 citation repair) correctly reports INPUTS MOVED.
+    current = (ROOT / "data" / "digests" / "CURRENT").read_text(encoding="utf-8").strip()
+    real = ROOT / "data" / "digests" / current / "manifest.json"
     r = subprocess.run([sys.executable, str(ROOT / "tools" / "build_digests.py"), "--batch-id",
-                        "slice1-2026-09-24", "--check"], capture_output=True, text=True, cwd=ROOT)
+                        current, "--check"], capture_output=True, text=True, cwd=ROOT)
     out.append((real.exists() and r.returncode == 0,
-                "the committed batch slice1-2026-09-24 has a manifest and matches", r.stdout.strip()[-160:]))
+                "the committed batch data/digests/CURRENT names (%s) has a manifest and matches" % current,
+                r.stdout.strip()[-160:]))
     return out
 
 
