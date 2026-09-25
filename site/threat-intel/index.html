@@ -1,0 +1,381 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Threat Intelligence Walkthrough</title>
+<style>
+  :root{
+    --bg0:#060910; --bg1:#0b1120; --panel:rgba(255,255,255,.035);
+    --edge:rgba(255,255,255,.10);
+    --ink:#eaf1f9; --ink2:#a7b7cd; --ink3:#71839a;
+    --acc:#79c4ff; --gold:#e9c877;
+    --crit:#ff5d6c; --good:#4fdca0;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    --mono:"SF Mono",ui-monospace,"Roboto Mono",Menlo,monospace;
+    --maxw:820px;
+    --wm:linear-gradient(180deg,#f4f8ff,#aec0d7 58%,#7f92ac);
+  }
+  @media (prefers-color-scheme: light){
+    :root{
+      --bg0:#f5f7fb; --bg1:#ffffff; --panel:rgba(10,30,60,.04);
+      --edge:rgba(10,30,60,.14);
+      --ink:#0f1a2a; --ink2:#34465e; --ink3:#5b6d84;
+      --acc:#0b64b8; --gold:#8a5f00;
+      --crit:#c42636; --good:#0f7d52;
+      --wm:linear-gradient(180deg,#1b2b45,#33496a 58%,#51678a);
+    }
+  }
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{margin:0;background:var(--bg0);color:var(--ink);font-family:var(--sans);line-height:1.6;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:32px 16px 72px}
+  a{color:var(--acc);text-decoration:none;overflow-wrap:anywhere}
+  a:hover{text-decoration:underline}
+  code{font-family:var(--mono);font-size:.88em;color:var(--ink);overflow-wrap:anywhere}
+  .backlink{display:inline-block;margin-bottom:10px;font-family:var(--mono);font-size:11px;letter-spacing:.08em;color:var(--ink3)}
+  .brand{display:flex;align-items:center;gap:13px;margin-bottom:6px}
+  .shield{width:38px;height:44px;flex:none;filter:drop-shadow(0 0 10px rgba(121,196,255,.35))}
+  .wm{font-weight:800;letter-spacing:.2em;font-size:19px;background:var(--wm);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .wm .x{color:var(--acc);-webkit-text-fill-color:var(--acc)}
+  .kicker{font-family:var(--mono);font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:var(--ink3);margin-top:3px}
+  h1{font-size:27px;line-height:1.22;font-weight:800;letter-spacing:-.015em;margin:24px 0 10px}
+  .lede{font-size:16px;color:var(--ink2);margin:0 0 8px}
+  section{margin-top:40px}
+  h2{font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--acc);font-weight:700;margin:0 0 14px;padding-bottom:9px;border-bottom:1px solid var(--edge);display:flex;gap:9px}
+  h2 .n{font-family:var(--mono);color:var(--ink3);font-size:11px}
+  p{margin:0 0 13px;color:var(--ink2)}
+  p strong{color:var(--ink)}
+  .chain{list-style:none;margin:0;padding:0}
+  .chain li{border-left:2px solid var(--edge);padding:0 0 4px 14px;margin:0 0 6px}
+  .chain li:last-child{border-left-color:var(--gold)}
+  .step{display:block;font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);margin-bottom:3px}
+  .facts{display:grid;grid-template-columns:max-content 1fr;gap:6px 16px;margin:0 0 14px}
+  .facts dt{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink3);padding-top:3px}
+  .facts dd{margin:0;color:var(--ink);min-width:0;overflow-wrap:anywhere}
+  .hash{font-family:var(--mono);font-size:12px;overflow-wrap:anywhere;word-break:break-all}
+  table.rows{width:100%;border-collapse:collapse;table-layout:fixed;font-size:14px}
+  table.rows th{text-align:left;font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink3);font-weight:600;padding:6px 8px;border-bottom:1px solid var(--edge)}
+  table.rows th:nth-child(1){width:22%}
+  table.rows th:nth-child(2){width:14%}
+  table.rows th:nth-child(3){width:12%}
+  table.rows th:nth-child(4){width:14%}
+  table.rows td{vertical-align:top;padding:10px 8px;border-bottom:1px solid var(--edge);color:var(--ink2);overflow-wrap:anywhere;min-width:0}
+  .cite{display:flex;gap:8px;align-items:baseline;margin:0 0 8px}
+  .pg{flex:none;font-family:var(--mono);font-size:11px;color:var(--gold)}
+  blockquote{margin:0;padding:2px 0 2px 10px;border-left:2px solid var(--edge);color:var(--ink);font-size:14px;overflow-wrap:anywhere;min-width:0}
+  .props{list-style:none;margin:0;padding:0}
+  .proposal{background:var(--panel);border:1px solid var(--edge);border-radius:10px;padding:12px 14px;margin:0 0 10px}
+  .ph{margin-bottom:8px;color:var(--ink)}
+  .conf{font-family:var(--mono);font-size:11px;color:var(--ink3);margin-left:6px}
+  .link{background:var(--panel);border:1px solid var(--edge);border-radius:10px;padding:12px 14px;margin:0 0 14px}
+  pre{white-space:pre-wrap;overflow-wrap:anywhere;font-family:var(--mono);font-size:11.5px;line-height:1.5;color:var(--ink2);margin:0 0 10px}
+  .decisions{list-style:none;margin:0;padding:8px 0 0;border-top:1px solid var(--edge)}
+  .decisions li{margin:0 0 4px;color:var(--ink2)}
+  .decisions time{font-family:var(--mono);font-size:12px;color:var(--ink3)}
+  .approve{color:var(--good)}
+  .reject{color:var(--crit)}
+  .flag{border-left:2px solid var(--gold);padding-left:10px;color:var(--ink)}
+  @media (max-width:640px){
+    h1{font-size:23px}
+    table.rows thead{display:none}
+    table.rows,table.rows tbody,table.rows tr,table.rows td{display:block;width:100%}
+    table.rows tr{border-bottom:1px solid var(--edge);padding:8px 0}
+    table.rows td{border:0;padding:3px 0}
+    table.rows td:nth-child(2),table.rows td:nth-child(3),table.rows td:nth-child(4){display:inline-block;width:auto;margin-right:18px}
+    table.rows td::before{content:attr(data-h);display:block;font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink3)}
+    .facts{grid-template-columns:1fr;gap:0}
+    .facts dd{margin-bottom:8px}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a href="../future-capabilities.html" class="backlink">&larr; Future capabilities</a>
+  <div class="brand">
+    <svg class="shield" viewBox="0 0 40 46" fill="none" aria-hidden="true">
+      <path d="M20 2 L36 8 V22 C36 33 29 41 20 44 C11 41 4 33 4 22 V8 Z"
+            fill="rgba(121,196,255,.06)" stroke="url(#sg)" stroke-width="1.6"/>
+      <path d="M14 30 V16 L26 30 V16" stroke="var(--acc)" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+      <defs><linearGradient id="sg" x1="4" y1="2" x2="36" y2="44" gradientUnits="userSpaceOnUse">
+        <stop stop-color="#79c4ff"/><stop offset="1" stop-color="#e9c877"/></linearGradient></defs>
+    </svg>
+    <div>
+      <div class="wm">NE<span class="x">X</span>US</div>
+      <div class="kicker">Threat Intelligence &middot; Slice 1</div>
+    </div>
+  </div>
+
+  <h1>One advisory, from PDF to owner-approved typology links</h1>
+  <p class="lede">ADV-2026-0013, followed through extraction, grounding and review. Every figure and quote on this page is read from a governed file when the page is built.</p>
+
+<section id="question">
+  <h2><span class="n">01</span> The question</h2>
+  <ol class="chain">
+    <li><span class="step">Question</span>
+      <p>What does <strong>Tri-Seal Compliance Note: Cracking Down on Third-Party Intermediaries Used to Evade Russia-Related Sanctions and Export Controls</strong> (OFAC / BIS / DOJ, 2023-03-02) tell a financial-crime team to look for, and which desks need to hear it?</p></li>
+    <li><span class="step">Capability</span>
+      <p>An extraction agent reads the advisory and writes a governed record: every typology it asserts carries a page number and a verbatim quote from a document pinned by its sha256. The agent's only write is <code>propose_link</code>, which will not record a proposal whose quote it cannot find on the cited page. A second, reviewer agent adds what the extractor missed, each addition with its justification; the owner decides each proposed link at a review gate; every decision is a dated line in an append-only log.</p></li>
+    <li><span class="step">Intelligence produced</span>
+      <p>9 typologies asserted in the record &mdash; 5 by the extractor, 4 added by the reviewer agent, 1 of them emergent (not in the typology library). Run <code>adv-2026-0013-extractor-f617bd3b00</code> proposed 5 links; the owner approved 5 and rejected 0.</p></li>
+    <li><span class="step">Investigator outcome</span>
+      <p>The advisory reached 3 desks: Trade desk, Sanctions desk, Correspondent banking desk. Each desk reads the approved links in its own family, quoted from the page they came from.</p></li>
+  </ol>
+</section>
+
+<section id="source">
+  <h2><span class="n">02</span> The source</h2>
+  <dl class="facts">
+    <dt>Title</dt><dd>Tri-Seal Compliance Note: Cracking Down on Third-Party Intermediaries Used to Evade Russia-Related Sanctions and Export Controls</dd>
+    <dt>Publisher</dt><dd>OFAC / BIS / DOJ</dd>
+    <dt>Published</dt><dd>2023-03-02</dd>
+    <dt>Document</dt><dd><a href="https://ofac.treasury.gov/media/931471/download?inline=" rel="noopener">https://ofac.treasury.gov/media/931471/download?inline=</a></dd>
+    <dt>Pages</dt><dd>6</dd>
+    <dt>sha256</dt><dd class="hash">826d69174369f68372b92031fcc27ebfdf61649da0730d5e4382593ae59d1e3e</dd>
+  </dl>
+  <p>Every citation below is pinned to this hash: a page number and a quote name a place in exactly this document, and the build refuses a record or proposal that names any other.</p>
+</section>
+
+<section id="extraction">
+  <h2><span class="n">03</span> What the record asserts</h2>
+  <p>The merged record for ADV-2026-0013: 9 typologies, each with the quotes that ground it. &ldquo;Owner&rdquo; is the standing decision in the pinned decision log, where there is one.</p>
+  <table class="rows">
+    <thead><tr><th>Typology</th><th>Family</th><th>Asserted by</th><th>Owner</th><th>Citations</th></tr></thead>
+    <tbody>
+    <tr>
+      <td data-h="Typology"><code>SAN003</code> Transshipment</td>
+      <td data-h="Family">sanctions</td>
+      <td data-h="Asserted by">extractor</td>
+      <td data-h="Owner">approved 2026-09-24</td>
+      <td data-h="Citations"><div class="cite"><span class="pg">p1</span><blockquote>transshipment points to circumvent restrictions, disguise the involvement of Specially Designated</blockquote></div><div class="cite"><span class="pg">p3</span><blockquote>Routing purchases through certain transshipment points commonly used to illegally redirect restricted items to Russia or Belarus.  Such locations may include China</blockquote></div></td>
+    </tr>
+    <tr>
+      <td data-h="Typology"><code>SAN004</code> Front Companies</td>
+      <td data-h="Family">sanctions</td>
+      <td data-h="Asserted by">extractor</td>
+      <td data-h="Owner">approved 2026-09-24</td>
+      <td data-h="Citations"><div class="cite"><span class="pg">p4</span><blockquote>AO PKK Milandr, which used a front company to transfer funds from Milandr to another front in</blockquote></div><div class="cite"><span class="pg">p5</span><blockquote>Claiming that shell companies located in third countries were intermediaries or end</blockquote></div></td>
+    </tr>
+    <tr>
+      <td data-h="Typology"><code>SAN007</code> Dual Use Goods</td>
+      <td data-h="Family">sanctions</td>
+      <td data-h="Asserted by">extractor</td>
+      <td data-h="Owner">approved 2026-09-24</td>
+      <td data-h="Citations"><div class="cite"><span class="pg">p4</span><blockquote>Austin, Texas company, for shipping integrated circuit components, which are critical</blockquote></div><div class="cite"><span class="pg">p5</span><blockquote>The sensitive items at issue included advanced electronics and</blockquote></div></td>
+    </tr>
+    <tr>
+      <td data-h="Typology"><code>BA008</code> Layering</td>
+      <td data-h="Family">correspondent_banking</td>
+      <td data-h="Asserted by">extractor</td>
+      <td data-h="Owner">not decided</td>
+      <td data-h="Citations"><div class="cite"><span class="pg">p5</span><blockquote>Transferring funds from shell companies in foreign jurisdictions into U.S. bank accounts</blockquote></div></td>
+    </tr>
+    <tr>
+      <td data-h="Typology"><code>TBML002U</code> Under Invoicing</td>
+      <td data-h="Family">tbml</td>
+      <td data-h="Asserted by">extractor</td>
+      <td data-h="Owner">not decided</td>
+      <td data-h="Citations"><div class="cite"><span class="pg">p5</span><blockquote>Making false or misleading statements on shipping forms, including underestimating the</blockquote></div><div class="cite"><span class="pg">p5</span><blockquote>purchase price of merchandise by more than five times the actual amount</blockquote></div></td>
+    </tr>
+    <tr>
+      <td data-h="Typology"><code>SAN005</code> Name Screening Evasion</td>
+      <td data-h="Family">sanctions</td>
+      <td data-h="Asserted by">reviewer</td>
+      <td data-h="Owner">not decided</td>
+      <td data-h="Citations"><div class="cite"><span class="pg">p5</span><blockquote>Using aliases for the identities of the intermediaries and end users21;</blockquote></div></td>
+    </tr>
+    <tr>
+      <td data-h="Typology"><code>TBML008</code> Third Party Payment Abuse</td>
+      <td data-h="Family">tbml</td>
+      <td data-h="Asserted by">reviewer</td>
+      <td data-h="Owner">not decided</td>
+      <td data-h="Citations"><div class="cite"><span class="pg">p2</span><blockquote>Payment coming from a third-party country or business not listed on the End-User Statement3 or other applicable end-user form;</blockquote></div></td>
+    </tr>
+    <tr>
+      <td data-h="Typology"><code>BA005</code> Rapid Movement</td>
+      <td data-h="Family">correspondent_banking</td>
+      <td data-h="Asserted by">reviewer</td>
+      <td data-h="Owner">approved 2026-09-24</td>
+      <td data-h="Citations"><div class="cite"><span class="pg">p5</span><blockquote>Transferring funds from shell companies in foreign jurisdictions into U.S. bank accounts and quickly forwarding or distributing funds to obfuscate the audit trail or the foreign source of the money22;</blockquote></div></td>
+    </tr>
+    <tr>
+      <td data-h="Typology"><code>emergent</code> Shipment Splitting to Evade Export Control Detection</td>
+      <td data-h="Family">sanctions</td>
+      <td data-h="Asserted by">reviewer</td>
+      <td data-h="Owner">not decided</td>
+      <td data-h="Citations"><div class="cite"><span class="pg">p5</span><blockquote>Dividing shipments of controlled items into multiple, smaller shipments to try to avoid law enforcement detection20;</blockquote></div></td>
+    </tr>
+    </tbody>
+  </table>
+  <p class="flag"><code>SAN001</code> is approved but not in this record: it reached the owner as a proposal from run adv-2026-0013-extractor-f617bd3b00, not through the record. Section 5 shows the decision.</p>
+</section>
+
+<section id="grounding">
+  <h2><span class="n">04</span> Grounding: the proposals</h2>
+  <p>Run <code>adv-2026-0013-extractor-f617bd3b00</code> proposed 5 proposals. Each quote was located on its cited page of the pinned document by <code>propose_link</code> before the proposal was written &mdash; that is the tool's contract, and a quote it cannot place is refused, never queued. This page is built without the PDF and does not re-check them.</p>
+  <ol class="props">
+    <li class="proposal">
+      <div class="ph"><code>SAN003</code> Transshipment <span class="conf">confidence high</span></div>
+      <div class="cite"><span class="pg">p3</span><blockquote>Routing purchases through certain transshipment points commonly used to illegally redirect restricted items to Russia or Belarus.</blockquote></div><div class="cite"><span class="pg">p4</span><blockquote>shipping integrated circuit components, which are critical components in missiles and military satellites, to Russia via a Bulgarian front company</blockquote></div>
+    </li>
+    <li class="proposal">
+      <div class="ph"><code>SAN004</code> Front Companies <span class="conf">confidence high</span></div>
+      <div class="cite"><span class="pg">p4</span><blockquote>used a front company to transfer funds from Milandr to another front in a third country, which purchased microchips to divert to Russia</blockquote></div><div class="cite"><span class="pg">p2</span><blockquote>Use of corporate vehicles (i.e., legal entities, such as shell companies, and legal arrangements) to obscure (i) ownership, (ii) source of funds, or (iii) countries involved</blockquote></div>
+    </li>
+    <li class="proposal">
+      <div class="ph"><code>SAN007</code> Dual Use Goods <span class="conf">confidence high</span></div>
+      <div class="cite"><span class="pg">p4</span><blockquote>illegally export military and sensitive dual-use items to Russia and embargoed Venezuelan oil to Russian and Chinese end users</blockquote></div><div class="cite"><span class="pg">p5</span><blockquote>The sensitive items at issue included advanced electronics and sophisticated testing equipment used in quantum computing, hypersonic, and nuclear weapons development</blockquote></div>
+    </li>
+    <li class="proposal">
+      <div class="ph"><code>SAN001</code> Ownership Evasion <span class="conf">confidence medium</span></div>
+      <div class="cite"><span class="pg">p2</span><blockquote>Use of corporate vehicles (i.e., legal entities, such as shell companies, and legal arrangements) to obscure (i) ownership, (ii) source of funds, or (iii) countries involved, particularly sanctioned jurisdictions</blockquote></div>
+    </li>
+    <li class="proposal">
+      <div class="ph"><code>BA005</code> Rapid Movement <span class="conf">confidence medium</span></div>
+      <div class="cite"><span class="pg">p5</span><blockquote>Transferring funds from shell companies in foreign jurisdictions into U.S. bank accounts and quickly forwarding or distributing funds to obfuscate the audit trail or the foreign source of the money</blockquote></div>
+    </li>
+  </ol>
+</section>
+
+<section id="review">
+  <h2><span class="n">05</span> Review: what the owner saw, and decided</h2>
+  <p>Each card is rendered exactly as the review gate showed it, from run <code>adv-2026-0013-extractor-f617bd3b00</code>'s queue, followed by the owner's decision. Built from the first 5 lines of the decision log, the prefix digest batch <code>slice1-2026-09-25</code> pinned (sha256 <span class="hash">7edd4aba25f738993abbbe2c86cfd2b554167c87e34d8a7eb1ffd32165bdb9c2</span>); 5 of them decide ADV-2026-0013.</p>
+  <article class="link">
+    <pre>====================================================================================================
+ADV-2026-0013  Tri-Seal Compliance Note: Cracking Down on Third-Party Intermediaries Used to Evade Russia-Related Sanctions and Export Controls
+PROPOSED LINK  BA005  Rapid Movement  [correspondent_banking]
+    Rapid movement is the velocity / layering signal at the heart of correspondent-banking
+    monitoring: funds land on an account and clear back out again almost immediately, resting
+    only long enough to register a balance change before they are gone. It is not defined by who
+    sent the money or where it ends up — those can look entirely ordinary on any single leg — it
+    is defined by HOW FAST the funds move and HOW MUCH volume passes through an account relative
+    to what it normally holds.
+  golden label HOLDS this link (context only, never a rule)
+QUOTES
+  p5   
+        “Transferring funds from shell companies in foreign jurisdictions into U.S. bank
+        accounts and quickly forwarding or distributing funds to obfuscate the audit trail or
+        the foreign source of the money”
+RATIONALE
+    DOJ&#x27;s indictment tactics list describes funds landing and clearing out almost immediately to
+    defeat tracing: &#x27;Transferring funds from shell companies in foreign jurisdictions into U.S.
+    bank accounts and quickly forwarding or distributing funds to obfuscate the audit trail or
+    the foreign source of the money&#x27; (p.5), matching BA005&#x27;s velocity-of-funds mechanism. This
+    rests on a single bullet, so confidence is medium.
+FROM  1 proposal, runs: adv-2026-0013-extractor-f617bd3b00, stages: extractor</pre>
+    <ul class="decisions">
+      <li class="decision"><time>2026-09-24</time> <b class="approve">APPROVE</b> <span class="note">single bullet, fast forwarding to break the audit trail (p5); medium, weakest of the five</span></li>
+    </ul>
+  </article>
+  <article class="link">
+    <pre>====================================================================================================
+ADV-2026-0013  Tri-Seal Compliance Note: Cracking Down on Third-Party Intermediaries Used to Evade Russia-Related Sanctions and Export Controls
+PROPOSED LINK  SAN001  Ownership Evasion  [sanctions]
+    Beneficial Ownership Evasion is the use of layered holding structures, nominee arrangements
+    and secrecy jurisdictions to conceal that a designated party ultimately owns or controls an
+    entity. The entity itself is not on any sanctions list and passes conventional name
+    screening; the exposure sits in the ownership chain behind it.
+  golden label HOLDS this link (context only, never a rule)
+QUOTES
+  p2   
+        “Use of corporate vehicles (i.e., legal entities, such as shell companies, and legal
+        arrangements) to obscure (i) ownership, (ii) source of funds, or (iii) countries
+        involved, particularly sanctioned jurisdictions”
+RATIONALE
+    The red-flag list states use of corporate vehicles to &#x27;obscure (i) ownership, (ii) source of
+    funds, or (iii) countries involved, particularly sanctioned jurisdictions&#x27; (p.2), matching
+    SAN001&#x27;s concealment-of-ultimate-ownership mechanism. This rests on a single red-flag bullet
+    rather than a developed case narrative, so confidence is medium rather than high.
+FROM  1 proposal, runs: adv-2026-0013-extractor-f617bd3b00, stages: extractor</pre>
+    <p class="flag"><code>SAN001</code> is not in the merged record: it reached the owner as this run's proposal, not through the record. The digest still routes it, to the Sanctions desk, marked &ldquo;owner-approved, not in the record&rdquo;.</p>
+    <ul class="decisions">
+      <li class="decision"><time>2026-09-24</time> <b class="approve">APPROVE</b> <span class="note">single red-flag bullet naming ownership concealment (p2); medium</span></li>
+    </ul>
+  </article>
+  <article class="link">
+    <pre>====================================================================================================
+ADV-2026-0013  Tri-Seal Compliance Note: Cracking Down on Third-Party Intermediaries Used to Evade Russia-Related Sanctions and Export Controls
+PROPOSED LINK  SAN003  Transshipment  [sanctions]
+    Transshipment Evasion is the routing of goods through an intermediary jurisdiction to
+    disguise their true origin or destination and defeat origin-based sanctions controls. Cargo
+    that could not move directly between two points is re-papered at a hub — a free zone, an
+    entrepôt — so the declared trade route no longer reveals the sanctioned leg.
+  golden label HOLDS this link (context only, never a rule)
+QUOTES
+  p3   
+        “Routing purchases through certain transshipment points commonly used to illegally
+        redirect restricted items to Russia or Belarus.”
+  p4   
+        “shipping integrated circuit components, which are critical components in missiles and
+        military satellites, to Russia via a Bulgarian front company”
+RATIONALE
+    The advisory develops transshipment as a core evasion mechanism: it lists &#x27;Routing purchases
+    through certain transshipment points commonly used to illegally redirect restricted items to
+    Russia or Belarus&#x27; (p.3) naming specific hub jurisdictions, and illustrates it with the
+    Vorago Technologies case where ICs were &#x27;shipp[ed]...to Russia via a Bulgarian front
+    company&#x27; (p.4), matching SAN003&#x27;s routing-through-an-intermediary-hub mechanism.
+FROM  1 proposal, runs: adv-2026-0013-extractor-f617bd3b00, stages: extractor</pre>
+    <ul class="decisions">
+      <li class="decision"><time>2026-09-24</time> <b class="approve">APPROVE</b> <span class="note">mechanism developed: named transshipment hubs (p3) + Bulgarian front case (p4)</span></li>
+    </ul>
+  </article>
+  <article class="link">
+    <pre>====================================================================================================
+ADV-2026-0013  Tri-Seal Compliance Note: Cracking Down on Third-Party Intermediaries Used to Evade Russia-Related Sanctions and Export Controls
+PROPOSED LINK  SAN004  Front Companies  [sanctions]
+    A front company is an entity with little or no genuine economic substance, established to
+    give a sanctioned interest a clean commercial face. It exists to transact — to hold
+    accounts, sign contracts and move goods — while the real party stays hidden behind it.
+  golden label HOLDS this link (context only, never a rule)
+QUOTES
+  p2   
+        “Use of corporate vehicles (i.e., legal entities, such as shell companies, and legal
+        arrangements) to obscure (i) ownership, (ii) source of funds, or (iii) countries
+        involved”
+  p4   
+        “used a front company to transfer funds from Milandr to another front in a third
+        country, which purchased microchips to divert to Russia”
+RATIONALE
+    Front companies with no genuine economic substance recur throughout: the red-flag list cites
+    &#x27;Use of corporate vehicles (i.e., legal entities, such as shell companies...)&#x27; (p.2), the
+    Milandr network &#x27;used a front company to transfer funds...to another front in a third
+    country&#x27; (p.4), and DOJ indictments allege shell companies &#x27;consisted of an empty room in a
+    strip mall&#x27; (p.5) -- matching SAN004&#x27;s entity-with-no-substance mechanism.
+FROM  1 proposal, runs: adv-2026-0013-extractor-f617bd3b00, stages: extractor</pre>
+    <ul class="decisions">
+      <li class="decision"><time>2026-09-24</time> <b class="approve">APPROVE</b> <span class="note">Milandr front-to-front transfer (p4) is the mechanism itself</span></li>
+    </ul>
+  </article>
+  <article class="link">
+    <pre>====================================================================================================
+ADV-2026-0013  Tri-Seal Compliance Note: Cracking Down on Third-Party Intermediaries Used to Evade Russia-Related Sanctions and Export Controls
+PROPOSED LINK  SAN007  Dual Use Goods  [sanctions]
+    Dual-use goods are items with a legitimate civilian use that can also serve a military or
+    proliferation purpose — electronics, precision instruments, controlled technology. Sanctions
+    and export controls turn on the commodity&#x27;s classification, its end-use and its destination,
+    not merely on the parties named.
+  golden label HOLDS this link (context only, never a rule)
+QUOTES
+  p4   
+        “illegally export military and sensitive dual-use items to Russia and embargoed
+        Venezuelan oil to Russian and Chinese end users”
+  p5   
+        “The sensitive items at issue included advanced electronics and sophisticated testing
+        equipment used in quantum computing, hypersonic, and nuclear weapons development”
+RATIONALE
+    SAN007 is the TWIN of TBML007; this document is framed squarely as sanctions and export-
+    control evasion (a Commerce/Treasury/DOJ compliance note on Russia sanctions and export
+    controls), so per the twin convention SAN007 is preferred. The advisory describes &#x27;military
+    and sensitive dual-use items&#x27; exported to Russia (p.4) and items used in &#x27;quantum computing,
+    hypersonic, and nuclear weapons development...fighter aircraft, missile systems, smart
+    munitions, radar, and satellites&#x27; (p.5), matching SAN007&#x27;s dual-use/military-end-use
+    mechanism.
+FROM  1 proposal, runs: adv-2026-0013-extractor-f617bd3b00, stages: extractor</pre>
+    <ul class="decisions">
+      <li class="decision"><time>2026-09-24</time> <b class="approve">APPROVE</b> <span class="note">dual-use items to Russia (p4-5); sanctions twin correctly preferred over TBML007</span></li>
+    </ul>
+  </article>
+</section>
+</div>
+</body>
+</html>
