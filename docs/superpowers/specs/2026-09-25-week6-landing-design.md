@@ -124,7 +124,8 @@ every push and pull request. The log shows each NOT RUN line, so a green run say
 > right. Register pairs at >= 0.60 are mostly different parties too: National Iranian Oil vs National Iranian
 > Tanker Company (0.75), GCM Exchange vs Berelian Exchange (0.80), the Orekhov and Grinin procurement networks
 > (0.67). And one EXACT alias merge was wrong: IRGC and IRGC-Qods Force, two actors in ADV-2026-0010's own
-> label, collapse through a shared alias.
+> label, collapse -- measured first as a flat merge; the builder rule below shows it is ADV-2026-0012's label
+> naming IRGC-Qods Force with both organisations' names as aliases.
 >
 > Containment divides by the SHORTER name. That suits scoring (is this the actor I labelled in THIS advisory,
 > among a handful) and fails identity (a one-word "Iran" is wholly contained in every name carrying it). Scoring
@@ -150,11 +151,17 @@ labels' named actors: `organisation`, `person` and `network`, with categories ex
 }
 ```
 
-- Entries merge **only on an exact normalised name or alias match, and only across advisories**. Measured: three
-  real merges (Sinaloa cartel in 0004 and 0011; National Iranian Oil Company in 0010 and 0012; IRGC-Qods Force in
-  0010 and 0012).
+- Entries merge **only on an exact normalised name or alias match, and only across advisories**. The builder
+  reads advisories in id order and actors in label order. An actor exactly matching ONE existing entry from other
+  advisories merges into it; matching NONE starts a new entry; matching TWO OR MORE starts its own entry and goes
+  to `data/actor_register_candidates.json` with reason `ambiguous`, naming the entries. Simulated on the golden
+  labels before the plan: 86 entries, two merges (Sinaloa cartel in 0004 and 0011; National Iranian Oil Company in
+  0010 and 0012), one `ambiguous`: ADV-2026-0012 labels "IRGC-Qods Force" with the aliases "IRGC" and "Islamic
+  Revolutionary Guard Corps", so it matches BOTH of ADV-2026-0010's separate IRGC and IRGC-Qods Force entries.
+  Merging it into either would make the other answer to the wrong name.
 - **Two actors from the same advisory never merge**, even on an exact alias: the label counted them as two. The
-  pair goes to `data/actor_register_candidates.json` with reason `same advisory`.
+  pair goes to the candidates file with reason `same advisory`. No real case exists today; the rule is witnessed
+  in the guard with a constructed label.
 - Pairs with containment >= 0.60 and no exact match also go to the candidates file, with their score and reason
   `similar names`. They are never merged automatically. Two names being one party is an identity claim, and
   identity claims are the owner's (the same rule as fc-10's `shared_id_declarations.json`).
@@ -175,7 +182,9 @@ labels' named actors: `organisation`, `person` and `network`, with categories ex
 **The measurement.** `evals/actor_resolution.py` resolves every actor in the **extractor's** records
 (`data/records/`), not the labels, so building the register from the labels is not circular. It reports:
 
-- named actors resolved / named actors, overall and per advisory (measured before the build: 72 of 105);
+- named actors resolved / named actors, overall and per advisory (about 72 of 105 measured against a flat register
+  before the plan; the committed report is the number);
+- how many are `ambiguous`, each listed;
 - how many unresolved actors carry a suggestion, and each suggestion, so a reader can see what containment
   would have claimed;
 - categories, counted separately and never in the denominator.
@@ -185,12 +194,17 @@ labels' named actors: `organisation`, `person` and `network`, with categories ex
 **Guard: `evals/check_actor_resolution.py`**, over the real register and records, with mutations:
 - `--mutate containment`: suggestions count as resolutions. Must be caught by a check that "Iran" in
   ADV-2026-0012's record does NOT resolve to Islamic Republic of Iran Shipping Lines.
-- `--mutate same-advisory`: the builder merges exact matches within one advisory. Must be caught by a check that
-  IRGC and IRGC-Qods Force are separate entries.
+- `--mutate ambiguous`: the builder merges an ambiguous actor into the first entry it matches. Must be caught by a
+  check that ADV-2026-0012's "IRGC-Qods Force" sits in an entry of its own, that the Islamic Revolutionary Guard
+  Corps entry's `named_in` holds ADV-2026-0010 only, and that the candidates file lists the ambiguous case. (With
+  the correct builder, "IRGC" and "IRGC-Qods Force" both resolve `ambiguous`, which is the honest answer while the
+  0012 label conflates two organisations; correcting that label is an owner decision.)
+- `--mutate same-advisory`: the builder merges exact matches within one advisory. Must be caught on a constructed
+  label holding two actors that share an alias.
 - `--mutate category`: a category may resolve. Must be caught.
 
-Non-vacuous checks: at least one real cross-advisory merge exists (three are expected), at least one `ambiguous` or
-`same advisory` case is exercised, and the resolved count is above zero. It must not pass by finding nothing.
+Non-vacuous checks: at least one real cross-advisory merge exists (two are expected), the real `ambiguous` case is
+exercised, and the resolved count is above zero. It must not pass by finding nothing.
 
 No live model runs are needed for sub-project 1.
 
