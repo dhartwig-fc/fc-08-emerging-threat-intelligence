@@ -48,8 +48,12 @@ RUN_ENV = ("NEXUS_RUN_ID", "NEXUS_STAGE", "NEXUS_ADVISORY_ID", "NEXUS_PDF_PATH",
 
 # The queue path is part of the run identity too, with no default: a runner
 # that supplies the five identity keys but not this one must not fall back to
-# the retired data/proposals.jsonl.
+# the retired data/proposals.jsonl. Since week 6 it can no longer CHOOSE the
+# file: the server derives <QUEUE_DIR>/<run_id>.jsonl and refuses any other,
+# so the environment cannot redirect a governed write.
 QUEUE_ENV = "NEXUS_PROPOSALS_PATH"
+QUEUE_DIR = ROOT / "data" / "proposals"
+RUN_ID_PATTERN = re.compile(r"^[a-z0-9][a-z0-9-]{0,80}$")
 
 mcp = FastMCP("knowledge_centre_mcp")
 
@@ -455,7 +459,17 @@ def _run_context() -> Optional[dict]:
 
 
 def _proposals_path(run: dict) -> Path:
-    return Path(run[QUEUE_ENV])
+    return QUEUE_DIR / ("%s.jsonl" % run["NEXUS_RUN_ID"])
+
+
+def _refuse_queue(run: dict) -> Optional[str]:
+    if not RUN_ID_PATTERN.match(run["NEXUS_RUN_ID"]):
+        return "Rejected: run id %r is not a safe file name." % run["NEXUS_RUN_ID"]
+    want = _proposals_path(run)
+    if Path(run[QUEUE_ENV]).resolve() != want.resolve():
+        return ("Rejected: this run's queue is %s, but the runner named %s. A proposal is written only to "
+                "its own run's queue." % (want.name, Path(run[QUEUE_ENV]).name))
+    return None
 
 
 @lru_cache(maxsize=4)
@@ -511,6 +525,9 @@ async def propose_link(params: ProposeLinkInput) -> str:
     if run is None:
         return ("Rejected: this server was started without a run identity (%s). A proposal that cannot be "
                 "traced to a run and a document cannot be reviewed." % ", ".join(RUN_ENV + (QUEUE_ENV,)))
+    refusal = _refuse_queue(run)
+    if refusal:
+        return refusal
     if bool(params.typology_id) == bool(params.emergent_label):
         return "Rejected: provide exactly one of typology_id or emergent_label."
     refusal = _refuse_for_run(params, run)

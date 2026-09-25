@@ -35,11 +35,17 @@ sys.path.insert(0, str(ROOT))
 
 ADVISORY = "ADV-2026-0002"
 OTHER_ADVISORY = "ADV-2026-0013"
-QUEUE = Path(tempfile.mkdtemp(prefix="fc08_contract_")) / "queue.jsonl"
-# Redirect the queue BEFORE importing the server: a guard never writes the real one.
+QUEUE_DIR = Path(tempfile.mkdtemp(prefix="fc08_contract_"))
+RUN_ID = "probe-contract"
+QUEUE = QUEUE_DIR / ("%s.jsonl" % RUN_ID)
+# Redirect the queue BEFORE any proposal: a guard never writes the real one. The
+# server owns the directory (a module constant, repointed here in-process); the
+# file name is the run id.
 os.environ["NEXUS_PROPOSALS_PATH"] = str(QUEUE)
 
 from mcp_server import knowledge_centre_server as kc  # noqa: E402
+
+kc.QUEUE_DIR = QUEUE_DIR
 
 _LIST = {a["advisory_id"]: a for a in
          json.loads((ROOT / "evals" / "golden" / "advisory_list.json").read_text(encoding="utf-8"))["advisories"]}
@@ -48,7 +54,7 @@ SHA = _LIST[ADVISORY]["sha256"]
 
 
 def _run_env(**override) -> None:
-    env = {"NEXUS_RUN_ID": "probe-contract", "NEXUS_STAGE": "extractor", "NEXUS_ADVISORY_ID": ADVISORY,
+    env = {"NEXUS_RUN_ID": RUN_ID, "NEXUS_STAGE": "extractor", "NEXUS_ADVISORY_ID": ADVISORY,
            "NEXUS_PDF_PATH": str(PDF), "NEXUS_PDF_SHA256": SHA}
     env.update(override)
     for k in kc.RUN_ENV:
@@ -153,6 +159,15 @@ def checks() -> list:
     out.append((got.startswith("Rejected") and "NEXUS_PROPOSALS_PATH" in got and legacy_after == legacy_before,
                 "a run with NO queue path is refused, and the legacy queue is never written", got[:140]))
 
+    stray = QUEUE_DIR / "elsewhere.jsonl"
+    _run_env()
+    os.environ["NEXUS_PROPOSALS_PATH"] = str(stray)
+    got = _propose(**base)
+    os.environ["NEXUS_PROPOSALS_PATH"] = str(QUEUE)
+    out.append((got.startswith("Rejected") and "probe-contract.jsonl" in got and not stray.exists(),
+                "a queue path that is not <queue dir>/<run_id>.jsonl is REFUSED, and nothing is written there",
+                got[:160]))
+
     out.append((len(_lines()) == 3,
                 "refusals wrote NOTHING to the queue",
                 "%d lines; expected 3 (two identical proposals and one emergent)" % len(_lines())))
@@ -161,7 +176,7 @@ def checks() -> list:
 
 def main(argv: list) -> int:
     ap = argparse.ArgumentParser(description="Pin the proposal contract")
-    ap.add_argument("--mutate", choices=("citations", "run"),
+    ap.add_argument("--mutate", choices=("citations", "run", "queue"),
                     help="remove one refusal; the checks that depend on it MUST fail")
     args = ap.parse_args(argv)
 
@@ -176,6 +191,10 @@ def main(argv: list) -> int:
     elif args.mutate == "run":
         kc._refuse_for_run = lambda params, run: None
         print("MUTATED: the advisory-must-match-the-run check is removed.\n")
+    elif args.mutate == "queue":
+        kc._refuse_queue = lambda run: None
+        kc._proposals_path = lambda run: Path(run[kc.QUEUE_ENV])
+        print("MUTATED: the queue path is taken from the environment again.\n")
 
     failures = 0
     for ok, label, detail in checks():
