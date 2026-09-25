@@ -55,8 +55,11 @@ sys.path.insert(0, str(ROOT))
 ADVISORY = "ADV-2026-0017"
 
 # Redirect the review queue BEFORE importing the server: propose_link appends to
-# it, and a guard must never write into the real queue a human reviews.
-_TMP_QUEUE = Path(tempfile.gettempdir()) / "fc08_twin_probe_queue.jsonl"
+# it, and a guard must never write into the real queue a human reviews. Since
+# ae7c1b9 the server derives the one legal path itself (QUEUE_DIR / <run_id>.jsonl)
+# and refuses anything else, so the file name must equal NEXUS_RUN_ID below.
+_TMP_QUEUE_DIR = Path(tempfile.mkdtemp(prefix="fc08_twin_"))
+_TMP_QUEUE = _TMP_QUEUE_DIR / "probe-twin-pairs.jsonl"
 os.environ["NEXUS_PROPOSALS_PATH"] = str(_TMP_QUEUE)
 
 # Since week 5 propose_link refuses a proposal it cannot trace to a run and a
@@ -73,6 +76,11 @@ CITE = [{"page": c["page"], "quote": c["quote"]} for c in
         next(t for t in _GOLD["typologies"] if t.get("typology_id") == "SAN006")["citations"][:1]]
 
 from mcp_server import knowledge_centre_server as kc  # noqa: E402
+
+# QUEUE_DIR is a fixed module constant (data/proposals/), not env-overridable --
+# only importer-side monkeypatching redirects it. Without this, a successful
+# propose_link call above would write into the REAL review queue a human reads.
+kc.QUEUE_DIR = _TMP_QUEUE_DIR
 
 
 def _call(tool, model, **kw):
