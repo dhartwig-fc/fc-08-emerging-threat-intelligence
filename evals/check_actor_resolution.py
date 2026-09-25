@@ -8,6 +8,7 @@ Usage:
     python evals/check_actor_resolution.py --mutate ambiguous      # builder merges into the first match; MUST fail
     python evals/check_actor_resolution.py --mutate same-advisory  # builder merges within one advisory; MUST fail
     python evals/check_actor_resolution.py --mutate category       # a category may resolve; MUST fail
+    python evals/check_actor_resolution.py --mutate positional     # ids counted by position; MUST fail
 
 WHY. Measured 2026-09-25 against the extractor's records: of five actors a containment
 rule at 0.60 would have resolved, four were wrong -- "Iran" and "Islamic Republic of Iran"
@@ -21,6 +22,7 @@ mutations take effect. No model, no PDF.
 from __future__ import annotations
 
 import argparse
+import copy
 import sys
 from pathlib import Path
 
@@ -32,6 +34,7 @@ from schemas.actor_match import resolve  # noqa: E402
 from tools.build_actor_register import build_register, load_labels  # noqa: E402
 
 FLAGS = {"resolve": {}, "build": {}}
+WITNESS = "Guard Witness Trading LLC"
 
 
 def checks() -> list:
@@ -127,12 +130,26 @@ def checks() -> list:
                 "same-advisory is order-independent: 'Other Co' never merges into Acme Corp, in either label order",
                 "[Other Co, Acme Holdings]: %s | [Acme Holdings, Other Co]: %s" % (detail_xy, detail_yx)))
 
+    # Stable ids (final review F1). Insert an actor at the START of the first label: a
+    # positional counter renumbers every later entry; a content id leaves them alone.
+    labels = load_labels()
+    inserted = copy.deepcopy(labels)
+    inserted[0].setdefault("actors", []).insert(0, {"name": WITNESS, "actor_type": "organisation", "aliases": []})
+    before = {(e["actor_id"], e["name"]) for e in entries}
+    i_entries, _ = build_register(inserted, **FLAGS["build"])
+    after = {(e["actor_id"], e["name"]) for e in i_entries if e["name"] != WITNESS}
+    moved = sorted(before - after)
+    out.append((len(i_entries) == len(entries) + 1 and after == before,
+                "inserting an actor into an early advisory leaves every other id unchanged",
+                "witness in %s; %d of %d original (id, name) pairs changed%s"
+                % (inserted[0]["advisory_id"], len(moved), len(before), (", e.g. %s" % (moved[:2],)) if moved else "")))
+
     return out
 
 
 def main(argv: list) -> int:
     ap = argparse.ArgumentParser(description="Pin actor identity")
-    ap.add_argument("--mutate", choices=("containment", "ambiguous", "same-advisory", "category"))
+    ap.add_argument("--mutate", choices=("containment", "ambiguous", "same-advisory", "category", "positional"))
     args = ap.parse_args(argv)
     if args.mutate == "containment":
         FLAGS["resolve"] = {"suggestions_resolve": True}
@@ -142,6 +159,8 @@ def main(argv: list) -> int:
         FLAGS["build"] = {"merge_ambiguous": True}
     elif args.mutate == "same-advisory":
         FLAGS["build"] = {"merge_same_advisory": True}
+    elif args.mutate == "positional":
+        FLAGS["build"] = {"positional_ids": True}
     if args.mutate:
         print("MUTATED: %s\n" % args.mutate)
     failures = 0

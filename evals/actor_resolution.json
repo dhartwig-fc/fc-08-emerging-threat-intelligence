@@ -4,32 +4,32 @@
     {
       "advisory_id": "ADV-2026-0010",
       "entries": [
-        "ACT-0033",
-        "ACT-0052"
+        "ACT-a2b3525c6a",
+        "ACT-115b430fe1"
       ],
       "name": "Islamic Revolutionary Guard Corps"
     },
     {
       "advisory_id": "ADV-2026-0010",
       "entries": [
-        "ACT-0034",
-        "ACT-0052"
+        "ACT-299fe3e04b",
+        "ACT-115b430fe1"
       ],
       "name": "IRGC-Qods Force"
     },
     {
       "advisory_id": "ADV-2026-0012",
       "entries": [
-        "ACT-0033",
-        "ACT-0052"
+        "ACT-a2b3525c6a",
+        "ACT-115b430fe1"
       ],
       "name": "Islamic Revolutionary Guard Corps (IRGC)"
     },
     {
       "advisory_id": "ADV-2026-0012",
       "entries": [
-        "ACT-0034",
-        "ACT-0052"
+        "ACT-299fe3e04b",
+        "ACT-115b430fe1"
       ],
       "name": "IRGC-Qods Force (IRGC-QF)"
     }
@@ -125,17 +125,17 @@
       "name": "Company X",
       "suggestions": [
         {
-          "actor_id": "ACT-0037",
+          "actor_id": "ACT-25b2fdac82",
           "name": "National Iranian Oil Company",
           "score": 1.0
         },
         {
-          "actor_id": "ACT-0042",
+          "actor_id": "ACT-062bacc38e",
           "name": "GCM Exchange",
           "score": 1.0
         },
         {
-          "actor_id": "ACT-0043",
+          "actor_id": "ACT-32ec7fb46c",
           "name": "Berelian Exchange",
           "score": 1.0
         }
@@ -146,7 +146,7 @@
       "name": "Islamic State in Iraq and the Levant (ISIL)",
       "suggestions": [
         {
-          "actor_id": "ACT-0021",
+          "actor_id": "ACT-fd6c064f43",
           "name": "Islamic State in Iraq and the Levant",
           "score": 1.0
         }
@@ -157,12 +157,12 @@
       "name": "Islamic Republic of Iran",
       "suggestions": [
         {
-          "actor_id": "ACT-0054",
+          "actor_id": "ACT-c112e4cc46",
           "name": "Islamic Republic of Iran Shipping Lines",
           "score": 1.0
         },
         {
-          "actor_id": "ACT-0056",
+          "actor_id": "ACT-013fc81ae0",
           "name": "Iran-Syria oil procurement network",
           "score": 1.0
         }
@@ -173,12 +173,12 @@
       "name": "Iran",
       "suggestions": [
         {
-          "actor_id": "ACT-0054",
+          "actor_id": "ACT-c112e4cc46",
           "name": "Islamic Republic of Iran Shipping Lines",
           "score": 1.0
         },
         {
-          "actor_id": "ACT-0056",
+          "actor_id": "ACT-013fc81ae0",
           "name": "Iran-Syria oil procurement network",
           "score": 1.0
         }
@@ -189,7 +189,7 @@
       "name": "Syria",
       "suggestions": [
         {
-          "actor_id": "ACT-0056",
+          "actor_id": "ACT-013fc81ae0",
           "name": "Iran-Syria oil procurement network",
           "score": 1.0
         }

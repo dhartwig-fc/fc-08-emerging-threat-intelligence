@@ -4,8 +4,8 @@
       "actor": "IRGC-Qods Force",
       "advisory_id": "ADV-2026-0012",
       "entries": [
-        "ACT-0033",
-        "ACT-0034"
+        "ACT-a2b3525c6a",
+        "ACT-299fe3e04b"
       ],
       "reason": "ambiguous",
       "score": null
@@ -14,8 +14,8 @@
       "actor": "Altaf Khanani Money Laundering Organisation / Altaf Khanani",
       "advisory_id": null,
       "entries": [
-        "ACT-0001",
-        "ACT-0002"
+        "ACT-75493f8693",
+        "ACT-b683a04801"
       ],
       "reason": "similar names",
       "score": 1.0
@@ -24,8 +24,8 @@
       "actor": "Islamic Revolutionary Guard Corps / IRGC-Qods Force",
       "advisory_id": null,
       "entries": [
-        "ACT-0033",
-        "ACT-0034"
+        "ACT-a2b3525c6a",
+        "ACT-299fe3e04b"
       ],
       "reason": "similar names",
       "score": 1.0
@@ -34,8 +34,8 @@
       "actor": "Islamic Revolutionary Guard Corps / IRGC-Qods Force",
       "advisory_id": null,
       "entries": [
-        "ACT-0033",
-        "ACT-0052"
+        "ACT-a2b3525c6a",
+        "ACT-115b430fe1"
       ],
       "reason": "similar names",
       "score": 1.0
@@ -44,8 +44,8 @@
       "actor": "IRGC-Qods Force / IRGC-Qods Force",
       "advisory_id": null,
       "entries": [
-        "ACT-0034",
-        "ACT-0052"
+        "ACT-299fe3e04b",
+        "ACT-115b430fe1"
       ],
       "reason": "similar names",
       "score": 1.0
@@ -54,8 +54,8 @@
       "actor": "National Iranian Oil Company / National Iranian Tanker Company",
       "advisory_id": null,
       "entries": [
-        "ACT-0037",
-        "ACT-0053"
+        "ACT-25b2fdac82",
+        "ACT-413458a3e6"
       ],
       "reason": "similar names",
       "score": 0.75
@@ -64,8 +64,8 @@
       "actor": "GCM Exchange / Berelian Exchange",
       "advisory_id": null,
       "entries": [
-        "ACT-0042",
-        "ACT-0043"
+        "ACT-062bacc38e",
+        "ACT-32ec7fb46c"
       ],
       "reason": "similar names",
       "score": 0.8
@@ -74,8 +74,8 @@
       "actor": "Iran-Syria oil procurement network / Orekhov procurement network",
       "advisory_id": null,
       "entries": [
-        "ACT-0056",
-        "ACT-0061"
+        "ACT-013fc81ae0",
+        "ACT-a764bcc886"
       ],
       "reason": "similar names",
       "score": 0.67
@@ -84,8 +84,8 @@
       "actor": "Iran-Syria oil procurement network / Grinin procurement network",
       "advisory_id": null,
       "entries": [
-        "ACT-0056",
-        "ACT-0062"
+        "ACT-013fc81ae0",
+        "ACT-938966b9a7"
       ],
       "reason": "similar names",
       "score": 0.67
@@ -94,8 +94,8 @@
       "actor": "Orekhov procurement network / Grinin procurement network",
       "advisory_id": null,
       "entries": [
-        "ACT-0061",
-        "ACT-0062"
+        "ACT-a764bcc886",
+        "ACT-938966b9a7"
       ],
       "reason": "similar names",
       "score": 0.67
@@ -104,8 +104,8 @@
       "actor": "Etibar Eyyub / 2Rivers network",
       "advisory_id": null,
       "entries": [
-        "ACT-0071",
-        "ACT-0078"
+        "ACT-927d8c6b57",
+        "ACT-0091e20947"
       ],
       "reason": "similar names",
       "score": 1.0
@@ -114,8 +114,8 @@
       "actor": "Tahir Garayev / 2Rivers network",
       "advisory_id": null,
       "entries": [
-        "ACT-0072",
-        "ACT-0078"
+        "ACT-30b020be28",
+        "ACT-0091e20947"
       ],
       "reason": "similar names",
       "score": 1.0

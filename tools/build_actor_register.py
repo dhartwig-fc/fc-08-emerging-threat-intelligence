@@ -22,12 +22,20 @@ Identity is the owner's, so the builder merges only what needs no judgement:
     `similar names` with their score. Measured, most such pairs are different parties
     (National Iranian Oil vs Tanker Company, GCM vs Berelian Exchange).
 Categories are classes, not parties, and are left out. Advisories are read in id order
-and actors in label order, so ids are stable and a rebuild is byte-identical.
+and actors in label order, so the file lists entries in creation order and a rebuild is
+byte-identical.
+
+An id is derived from CONTENT, not position: "ACT-" + the first 10 hex of
+sha256("<advisory that created the entry>|<norm(name as first labelled)>"). A positional
+counter renumbered every later actor whenever one was inserted or split in an early
+advisory; a content id changes only for the entry whose own creating label changed. Two
+entries deriving one id raise rather than silently collide.
 """
 
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import sys
 from pathlib import Path
@@ -50,6 +58,11 @@ def load_register(path: Path = REGISTER) -> list:
     return json.loads(path.read_text(encoding="utf-8"))["actors"]
 
 
+def actor_id_for(advisory_id: str, name: str) -> str:
+    """The id of the entry created by `name` as first labelled in `advisory_id`."""
+    return "ACT-" + hashlib.sha256(("%s|%s" % (advisory_id, norm(name))).encode("utf-8")).hexdigest()[:10]
+
+
 def _aliases(name: str, spellings) -> list:
     """Every spelling other than the name, one per normalised form, sorted."""
     seen, out = {norm(name)}, []
@@ -60,8 +73,19 @@ def _aliases(name: str, spellings) -> list:
     return out
 
 
-def build_register(labels, merge_same_advisory: bool = False, merge_ambiguous: bool = False):
+def build_register(labels, merge_same_advisory: bool = False, merge_ambiguous: bool = False,
+                   positional_ids: bool = False):
     entries, candidates, spellings = [], [], {}   # spellings: actor_id -> every spelling seen
+
+    def new_id(aid: str, name: str) -> str:
+        if positional_ids:
+            # Mutation handle: the pre-fix positional counter, which renumbers every
+            # later entry when an early advisory gains or splits an actor.
+            return "ACT-%04d" % (len(entries) + 1)
+        actor_id = actor_id_for(aid, name)
+        if actor_id in spellings:
+            raise ValueError("two register entries derive the id %s (%s, %r)" % (actor_id, aid, name))
+        return actor_id
 
     for label in sorted(labels, key=lambda r: r["advisory_id"]):
         aid = label["advisory_id"]
@@ -84,7 +108,7 @@ def build_register(labels, merge_same_advisory: bool = False, merge_ambiguous: b
                     target["named_in"].append({"advisory_id": aid, "name_as_labelled": actor["name"]})
                     spellings[target["actor_id"]].extend(mine)
                     continue
-                actor_id = "ACT-%04d" % (len(entries) + 1)
+                actor_id = new_id(aid, actor["name"])
                 entries.append({"actor_id": actor_id, "name": actor["name"], "actor_type": actor.get("actor_type"),
                                 "aliases": [], "named_in": [{"advisory_id": aid, "name_as_labelled": actor["name"]}],
                                 "entity_key": None})
@@ -124,7 +148,7 @@ def build_register(labels, merge_same_advisory: bool = False, merge_ambiguous: b
                 target["named_in"].append({"advisory_id": aid, "name_as_labelled": actor["name"]})
                 spellings[target["actor_id"]].extend(mine)
                 continue
-            actor_id = "ACT-%04d" % (len(entries) + 1)
+            actor_id = new_id(aid, actor["name"])
             entries.append({"actor_id": actor_id, "name": actor["name"], "actor_type": actor.get("actor_type"),
                             "aliases": [], "named_in": [{"advisory_id": aid, "name_as_labelled": actor["name"]}],
                             "entity_key": None})

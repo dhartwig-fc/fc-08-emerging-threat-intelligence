@@ -87,7 +87,9 @@ def resolve(names, actor_type, register, allow_category: bool = False, suggestio
         s = max((containment(tokens(a), tokens(b)) for a in names for b in spellings), default=0.0)
         if s >= SUGGEST_MIN:
             scored.append((s, e))
-    scored.sort(key=lambda p: (-p[0], p[1]["actor_id"]))
+    # Ties keep REGISTER order (creation order): a stable sort on score alone. Ids are
+    # content hashes since week 6.1, so breaking ties on the id would order them at random.
+    scored.sort(key=lambda p: -p[0])
     suggestions = [{"actor_id": e["actor_id"], "name": e["name"], "score": round(s, 2)} for s, e in scored[:3]]
     if suggestions_resolve and suggestions:
         top = suggestions[0]

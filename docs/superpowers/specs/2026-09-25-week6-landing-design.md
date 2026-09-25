@@ -142,7 +142,7 @@ labels' named actors: `organisation`, `person` and `network`, with categories ex
 
 ```json
 {
-  "actor_id": "ACT-0001",
+  "actor_id": "ACT-<10 hex>",
   "name": "AO PKK Milandr",
   "actor_type": "organisation",
   "aliases": ["Milandr"],
@@ -165,7 +165,7 @@ labels' named actors: `organisation`, `person` and `network`, with categories ex
 - Pairs with containment >= 0.60 and no exact match also go to the candidates file, with their score and reason
   `similar names`. They are never merged automatically. Two names being one party is an identity claim, and
   identity claims are the owner's (the same rule as fc-10's `shared_id_declarations.json`).
-- Ids are assigned in a deterministic order (by first advisory id, then name) so a rebuild is byte-identical.
+- Ids are derived from content -- the first advisory's id and the actor's normalised name as first labelled -- so a rebuild is byte-identical and editing one label never renumbers another actor.
   `--check` proves it.
 
 **The tool.** `knowledge_centre_resolve_actor(name: str, actor_type: str | None)` is read-only.
