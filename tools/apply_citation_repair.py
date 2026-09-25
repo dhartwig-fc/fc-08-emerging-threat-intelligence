@@ -287,7 +287,7 @@ def apply_all() -> int:
     return 0
 
 
-def check() -> int:
+def check(merged_dir: Path = MERGED) -> int:
     with tempfile.TemporaryDirectory(prefix="fc08_repair_check_") as tmp:
         r = subprocess.run([sys.executable, str(ROOT / "tools" / "merge_reviewer_additions.py"),
                             "--out-dir", tmp], capture_output=True, text=True, cwd=ROOT)
@@ -295,7 +295,7 @@ def check() -> int:
             print("FAIL: the merge did not run\n%s" % (r.stdout + r.stderr)[-600:])
             return 1
         fresh = {p.name: p.read_bytes() for p in Path(tmp).glob("ADV-*.json")}
-    committed = {p.name: p.read_bytes() for p in MERGED.glob("ADV-*.json")}
+    committed = {p.name: p.read_bytes() for p in merged_dir.glob("ADV-*.json")}
     bad = sorted(n for n in set(fresh) | set(committed) if fresh.get(n) != committed.get(n))
     for n in bad:
         print("differs: %s" % n)
@@ -313,6 +313,9 @@ def main(argv: list) -> int:
     g.add_argument("--build-evidence", action="store_true")
     g.add_argument("--apply", action="store_true")
     g.add_argument("--check", action="store_true")
+    # Hidden: compare against a COPY of the merged records, so --check's red half can be
+    # watched without writing the real tree. Not for interactive use.
+    ap.add_argument("--merged-dir", type=Path, default=MERGED, help=argparse.SUPPRESS)
     a = ap.parse_args(argv)
     if a.build_evidence:
         if EVIDENCE.exists():
@@ -326,7 +329,7 @@ def main(argv: list) -> int:
         return 0
     if a.apply:
         return apply_all()
-    return check()
+    return check(a.merged_dir)
 
 
 if __name__ == "__main__":
