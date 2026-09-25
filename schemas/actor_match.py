@@ -34,7 +34,7 @@ _STOP = frozenset(
 
 def norm(text: str) -> str:
     text = (text or "").lower()
-    text = text.replace("&", " and ").replace("'", "").replace("'", "")
+    text = text.replace("&", " and ").replace("'", "").replace("’", "")
     text = re.sub(r"[^a-z0-9]+", " ", text)
     return re.sub(r"\s+", " ", text).strip()
 
