@@ -1,5 +1,10 @@
 {
   "batch_id": "slice1-2026-09-24",
+  "config": {
+    "advisory_list.json": "597004eb4587a7c5ba227f8788a5fbea90960c318890ddde9218debb37a5079a",
+    "desk_routing.json": "4d2c2be2a19a0f596786cb5b99560805ca577e2b6507e3ec0e66b1ca10742799",
+    "typologies.json": "e4b1a72363338d426db584af64fcf6d7104b31c2badacd0585fb4424b0bb95c2"
+  },
   "decision_log": {
     "lines": 5,
     "sha256": "7edd4aba25f738993abbbe2c86cfd2b554167c87e34d8a7eb1ffd32165bdb9c2"

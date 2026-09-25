@@ -30,7 +30,8 @@ sys.path.insert(0, str(ROOT))
 
 from governance import decisions as gd  # noqa: E402
 from governance.digest import RECORDS_DIR  # noqa: E402
-from governance.proposals import QUEUE_DIR  # noqa: E402
+from governance.proposals import ADVISORY_LIST, LIBRARY, QUEUE_DIR  # noqa: E402
+from governance.routing import ROUTING  # noqa: E402
 
 WORK = Path(tempfile.mkdtemp(prefix="fc08_batch_"))
 MUTATION = None
@@ -113,6 +114,26 @@ def checks() -> list:
     r = _cli("--batch-id", "guard-c", "--check", *_args(s))
     out.append((r.returncode == 1 and "decision log" in r.stdout,
                 "a log with a pinned line REMOVED fails, naming the decision log", r.stdout.strip()[-160:]))
+
+    # The manifest also pins the typology library, advisory list and routing table:
+    # build_batch() reads all three, so any of them moving is as much a moved input as a
+    # record is. A temp copy of the routing table (never the real data/ tree) proves it.
+    t = _copy_inputs("d")
+    r = _cli("--batch-id", "guard-d", *_args(t))
+    manifest_d_path = t["--out-dir"] / "guard-d" / "manifest.json"
+    manifest_d = json.loads(manifest_d_path.read_text(encoding="utf-8")) if manifest_d_path.exists() else {}
+    out.append((set(manifest_d.get("config", {})) == {LIBRARY.name, ADVISORY_LIST.name, ROUTING.name},
+                "the manifest pins the library, advisory list and routing table by filename",
+                str(sorted(manifest_d.get("config", {})))))
+
+    routing_copy = WORK / "d" / "moved_routing" / ROUTING.name
+    routing_copy.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copy(ROUTING, routing_copy)
+    routing_copy.write_text(routing_copy.read_text(encoding="utf-8") + "\n", encoding="utf-8")
+    r = _cli("--batch-id", "guard-d", "--check", *_args(t), "--routing", str(routing_copy))
+    out.append((r.returncode == 1 and ("inputs moved since this batch: %s" % ROUTING.name) in r.stdout,
+                "a routing table changed via --routing (the real data/ tree untouched) reads as INPUTS "
+                "MOVED, naming desk_routing.json", r.stdout.strip()[-160:]))
 
     real = ROOT / "data" / "digests" / "slice1-2026-09-24" / "manifest.json"
     r = subprocess.run([sys.executable, str(ROOT / "tools" / "build_digests.py"), "--batch-id",

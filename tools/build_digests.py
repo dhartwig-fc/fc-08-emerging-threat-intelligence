@@ -7,9 +7,12 @@ Usage:
     python tools/build_digests.py --batch-id slice1-2026-09-24 --backfill-manifest
 
 A batch is a SNAPSHOT. manifest.json pins what it was built from: the decision log's
-first N lines (count and hash) and the hash of every record and queue file. The log is
-append-only, so --check rebuilds from exactly those N lines however many decisions land
-later, and says which of three things went wrong when it fails:
+first N lines (count and hash), the hash of every record and queue file, and the hash of
+the typology library, advisory list and routing table it read (the "config" section --
+build_batch() reads all three, and any of them moving after a batch changes what a fresh
+build renders just as surely as a moved record does). The log is append-only, so --check
+rebuilds from exactly those N lines however many decisions land later, and says which of
+three things went wrong when it fails:
 
   the decision log ...                     a pinned log line was edited or removed
   inputs moved since this batch: <file>    a pinned record or queue file changed --
@@ -38,7 +41,7 @@ sys.path.insert(0, str(ROOT))
 from governance import decisions as gd  # noqa: E402
 from governance.digest import DIGESTS_DIR, NO_ADVISORIES, RECORDS_DIR, build_batch  # noqa: E402
 from governance.proposals import ADVISORY_LIST, LIBRARY, QUEUE_DIR, load_queue_files  # noqa: E402
-from governance.routing import load_routing  # noqa: E402
+from governance.routing import ROUTING, load_routing  # noqa: E402
 
 BATCH_ID = re.compile(r"^[a-z0-9][a-z0-9-]{0,60}$")
 MANIFEST = "manifest.json"
@@ -49,20 +52,32 @@ def _sha(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
-def build(batch_id: str, record_paths, queue_paths, log_path: Path, log_lines=None):
+def _config_paths(routing_path: Path) -> dict:
+    """Filename -> path for the governed inputs build_batch() reads besides records/queue/log.
+
+    Keyed by filename, not path, so a temp copy of the routing table under a different
+    directory but the same basename is still recognised as the same pinned input.
+    """
+    return {LIBRARY.name: LIBRARY, ADVISORY_LIST.name: ADVISORY_LIST, routing_path.name: routing_path}
+
+
+def build(batch_id: str, record_paths, queue_paths, log_path: Path, log_lines=None,
+         routing_path: Path = ROUTING):
     """(desk -> Markdown, manifest) from exactly these inputs and the first log_lines of the log."""
     lines, log_sha, decisions = gd.log_prefix(log_lines, log_path)
     records = [json.loads(p.read_text(encoding="utf-8")) for p in record_paths]
     library = {t["typology_id"]: t for t in json.loads(LIBRARY.read_text(encoding="utf-8"))["typologies"]}
     advisories = {a["advisory_id"]: a for a in json.loads(ADVISORY_LIST.read_text(encoding="utf-8"))["advisories"]}
     proposals, _ = load_queue_files(queue_paths)
-    batch = build_batch(batch_id, records, library, load_routing(), gd.latest(decisions),
+    routing = load_routing(routing_path)
+    batch = build_batch(batch_id, records, library, routing, gd.latest(decisions),
                         {p.proposal_id: p for p in proposals}, advisories)
     manifest = {
         "batch_id": batch_id,
         "decision_log": {"lines": lines, "sha256": log_sha},
         "records": {p.name: _sha(p) for p in record_paths},
         "proposals": {p.name: _sha(p) for p in queue_paths},
+        "config": {name: _sha(p) for name, p in _config_paths(routing_path).items()},
     }
     return batch, manifest
 
@@ -76,7 +91,8 @@ def _manifest_text(manifest: dict) -> str:
     return json.dumps(manifest, indent=2, sort_keys=True) + "\n"
 
 
-def check(batch_id: str, out_dir: Path, records_dir: Path, queue_dir: Path, log_path: Path) -> list:
+def check(batch_id: str, out_dir: Path, records_dir: Path, queue_dir: Path, log_path: Path,
+         routing_path: Path = ROUTING) -> list:
     folder = out_dir / batch_id
     mpath = folder / MANIFEST
     if not mpath.exists():
@@ -94,12 +110,17 @@ def check(batch_id: str, out_dir: Path, records_dir: Path, queue_dir: Path, log_
              if not (records_dir / name).exists() or _sha(records_dir / name) != want]
     moved += [name for name, want in sorted(m["proposals"].items())
               if not (queue_dir / name).exists() or _sha(queue_dir / name) != want]
+    config_paths = _config_paths(routing_path)
+    moved += [name for name, want in sorted(m.get("config", {}).items())
+              if name not in config_paths or not config_paths[name].exists()
+              or _sha(config_paths[name]) != want]
     if moved:
         return ["inputs moved since this batch: %s" % n for n in moved]
 
     rebuild_from = None if _MUTATE == "prefix" else pinned["lines"]
     batch, rebuilt = build(batch_id, [records_dir / n for n in sorted(m["records"])],
-                           [queue_dir / n for n in sorted(m["proposals"])], log_path, rebuild_from)
+                           [queue_dir / n for n in sorted(m["proposals"])], log_path, rebuild_from,
+                           routing_path)
     problems = []
     for desk, text in batch.items():
         path = folder / ("%s.md" % desk)
@@ -125,6 +146,7 @@ def main(argv: list) -> int:
     mode.add_argument("--check", action="store_true")
     mode.add_argument("--backfill-manifest", action="store_true")
     ap.add_argument("--_mutate", choices=("prefix", "overwrite"), help=argparse.SUPPRESS)
+    ap.add_argument("--routing", type=Path, default=ROUTING, help=argparse.SUPPRESS)
     args = ap.parse_args(argv)
     _MUTATE = args._mutate
     if not BATCH_ID.match(args.batch_id):
@@ -133,7 +155,7 @@ def main(argv: list) -> int:
     folder = args.out_dir / args.batch_id
 
     if args.check:
-        problems = check(args.batch_id, args.out_dir, args.records_dir, args.queue_dir, args.log)
+        problems = check(args.batch_id, args.out_dir, args.records_dir, args.queue_dir, args.log, args.routing)
         for p in problems:
             print("FAIL  %s" % p)
         print("batch %s matches a fresh build from its pinned inputs" % args.batch_id if not problems
@@ -141,7 +163,7 @@ def main(argv: list) -> int:
         return 1 if problems else 0
 
     records, queue = _current_inputs(args.records_dir, args.queue_dir)
-    batch, manifest = build(args.batch_id, records, queue, args.log)
+    batch, manifest = build(args.batch_id, records, queue, args.log, routing_path=args.routing)
 
     if args.backfill_manifest:
         if (folder / MANIFEST).exists():
