@@ -158,6 +158,12 @@ def main(argv: list) -> int:
     ap.add_argument("--routing", type=Path, default=ROUTING, help=argparse.SUPPRESS)
     args = ap.parse_args(argv)
     _MUTATE = args._mutate
+    if _MUTATE == "overwrite" and args.out_dir.resolve() == DIGESTS_DIR.resolve():
+        # The mutation exists to prove the guard catches an overwrite -- over TEMP copies.
+        # Pointed at the real tree it would rewrite committed evidence.
+        print("REFUSED: the overwrite mutation never runs against %s; give --out-dir a temporary directory"
+              % DIGESTS_DIR.relative_to(ROOT), file=sys.stderr)
+        return 2
     if args.current:
         if not args.check:
             print("--current is only for --check: a new batch is built under an id you name", file=sys.stderr)

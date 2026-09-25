@@ -93,6 +93,9 @@ def main(argv: list) -> int:
         print("%-4s %-30s %s" % ("ok" if r.returncode == 0 else "FAIL", name, tail[:90]))
         if r.returncode != 0:
             failed.append(name)
+            # A guard that dies (a traceback, a refusal) says why on stderr, not in its last stdout line.
+            for line in r.stderr.strip().splitlines()[-5:]:
+                print("       %s" % line)
     for line in not_run:
         print(line)
     print("\n%s: %d run, %d not run, %d failed" % ("PASS" if not failed else "FAIL",

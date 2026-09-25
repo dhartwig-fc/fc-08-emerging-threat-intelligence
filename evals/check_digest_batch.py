@@ -135,6 +135,19 @@ def checks() -> list:
                 "a routing table changed via --routing (the real data/ tree untouched) reads as INPUTS "
                 "MOVED, naming desk_routing.json", r.stdout.strip()[-160:]))
 
+    # A record or queue file added AFTER the batch is not one of its inputs: --check reads
+    # the manifest's filenames, never a fresh glob, so the batch still matches.
+    u = _copy_inputs("e")
+    _cli("--batch-id", "guard-e", *_args(u))
+    first = sorted(u["--records-dir"].glob("ADV-*.json"))[0]
+    shutil.copy(first, u["--records-dir"] / "ADV-9999-0001.json")
+    queue_files = sorted(u["--queue-dir"].glob("*.jsonl"))
+    shutil.copy(queue_files[0], u["--queue-dir"] / "guard-added-after-the-batch.jsonl")
+    r = _cli("--batch-id", "guard-e", "--check", *_args(u))
+    out.append((r.returncode == 0,
+                "a file added after the batch is not one of its inputs: a NEW record and a NEW queue file "
+                "leave --check matching", r.stdout.strip()[-160:]))
+
     real = ROOT / "data" / "digests" / "slice1-2026-09-24" / "manifest.json"
     r = subprocess.run([sys.executable, str(ROOT / "tools" / "build_digests.py"), "--batch-id",
                         "slice1-2026-09-24", "--check"], capture_output=True, text=True, cwd=ROOT)
@@ -153,7 +166,12 @@ def main(argv: list) -> int:
         print("MUTATED: %s\n" % {"prefix": "--check rebuilds from the whole log, not the pinned prefix.",
                                  "overwrite": "an existing batch id may be rebuilt over."}[MUTATION])
     failures = 0
-    for ok, label, detail in checks():
+    try:
+        results = checks()
+    finally:
+        # Every copy lives under WORK; remove it whether the checks passed, failed or raised.
+        shutil.rmtree(WORK, ignore_errors=True)
+    for ok, label, detail in results:
         print("  %-4s %s\n         %s" % ("PASS" if ok else "FAIL", label, detail))
         failures += 0 if ok else 1
     if MUTATION:

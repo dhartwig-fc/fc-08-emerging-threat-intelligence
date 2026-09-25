@@ -53,7 +53,8 @@ Each sub-project gets its own plan.
   "batch_id": "slice1-2026-09-24",
   "decision_log": {"lines": 5, "sha256": "<sha256 of those lines, bytes as stored>"},
   "records":   {"ADV-2026-0001.json": "<sha256>", "...": "..."},
-  "proposals": {"adv-2026-0013-extractor-f617bd3b00.jsonl": "<sha256>", "...": "..."}
+  "proposals": {"adv-2026-0013-extractor-f617bd3b00.jsonl": "<sha256>", "...": "..."},
+  "config":    {"typologies.json": "<sha256>", "advisory_list.json": "<sha256>", "desk_routing.json": "<sha256>"}
 }
 ```
 
