@@ -69,6 +69,8 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
+from schemas.actor_match import containment, norm, tokens  # noqa: E402,F401  (re-exported: sc.norm etc.)
+
 # EMERGENT 0.50, ACTORS 0.60, and the two are not interchangeable.
 #
 # Emergent was 0.60 until 2026-09-13. The full-set audit
@@ -99,38 +101,6 @@ sys.path.insert(0, str(ROOT))
 # Guarded by evals/check_emergent_threshold.py, mutation-verified.
 DEFAULT_EMERGENT_THRESHOLD = 0.50
 DEFAULT_ACTOR_THRESHOLD = 0.60
-
-# Dropped before token comparison: grammatical words only.
-#
-# Corporate suffixes are DELIBERATELY NOT dropped, and this was measured. An
-# earlier version stripped ltd/llc/dmcc/pte and friends so that "2Rivers DMCC"
-# would match a bare "2Rivers". It also made "2Rivers DMCC" and "2Rivers PTE"
-# score 1.00 — two different companies on the blue side of the shadow fleet
-# network (ADV-2026-0017), scored as one actor. Keeping the suffix as a token
-# separates them (0.50, below threshold) while containment still matches the
-# bare short form (1.00) and survives Ltd/Limited spelling drift (0.67).
-_STOP = frozenset(
-    "the and of a an to in for by with on or as is are that this these those their its from at "
-    "into through via use used using such other another one two both all any each more most".split()
-)
-
-
-def norm(text: str) -> str:
-    text = (text or "").lower()
-    text = text.replace("&", " and ").replace("'", "").replace("’", "")
-    text = re.sub(r"[^a-z0-9]+", " ", text)
-    return re.sub(r"\s+", " ", text).strip()
-
-
-def tokens(text: str) -> frozenset:
-    return frozenset(w for w in norm(text).split() if w not in _STOP and len(w) > 2)
-
-
-def containment(a: frozenset, b: frozenset) -> float:
-    """Overlap over the SHORTER set, so a long restatement still matches a short one."""
-    if not a or not b:
-        return 0.0
-    return len(a & b) / min(len(a), len(b))
 
 
 # ---------------------------------------------------------------------------
