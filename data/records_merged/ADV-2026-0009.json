@@ -236,24 +236,6 @@
       ]
     },
     {
-      "name": "JSC Techsnabexport (TENEX)",
-      "actor_type": "organisation",
-      "aliases": [
-        "TENEX"
-      ],
-      "jurisdiction": "RU",
-      "role": "Subsidiary of Russia's State Atomic Energy Corporation; sole supplier/exporter of Russian uranium, used as bribery vehicle",
-      "confidence": "high",
-      "citations": [
-        {
-          "page": 4,
-          "printed_folio": "4",
-          "paragraph": null,
-          "quote": "a subsidiary of Russia\u2019s State Atomic Energy Corporation and the sole supplier and exporter of Russian Federation uranium and uranium enrichment services to nuclear power companies worldwide, in order to secure contracts with TENEX"
-        }
-      ]
-    },
-    {
       "name": "Odebrecht S.A.",
       "actor_type": "organisation",
       "aliases": [],

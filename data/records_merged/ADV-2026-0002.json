@@ -37,36 +37,6 @@
     },
     {
       "family": "tbml",
-      "typology_id": "TBML001",
-      "label": "Over Invoicing",
-      "emergent": false,
-      "confidence": "medium",
-      "citations": [
-        {
-          "page": 6,
-          "printed_folio": "4",
-          "paragraph": null,
-          "quote": "A trade entity consistently displays unreasonably low profit margins in its trade transactions, e.g. importing wholesale commodities at or above retail value, or re-selling commodities at the same or below purchase price."
-        }
-      ]
-    },
-    {
-      "family": "tbml",
-      "typology_id": "TBML002U",
-      "label": "Under Invoicing",
-      "emergent": false,
-      "confidence": "medium",
-      "citations": [
-        {
-          "page": 6,
-          "printed_folio": "4",
-          "paragraph": null,
-          "quote": "A trade entity consistently displays unreasonably low profit margins in its trade transactions, e.g. importing wholesale commodities at or above retail value, or re-selling commodities at the same or below purchase price."
-        }
-      ]
-    },
-    {
-      "family": "tbml",
       "typology_id": "TBML005",
       "label": "False Description Of Goods",
       "emergent": false,
@@ -98,21 +68,6 @@
           "printed_folio": "6",
           "paragraph": null,
           "quote": "Payment for imported commodities is made by an entity other than the consignee of the commodities with no clear economic reasons, e.g. by a shell or front company not involved in the trade transaction."
-        }
-      ]
-    },
-    {
-      "family": "correspondent_banking",
-      "typology_id": "BA005",
-      "label": "Rapid Movement",
-      "emergent": false,
-      "confidence": "high",
-      "citations": [
-        {
-          "page": 8,
-          "printed_folio": "6",
-          "paragraph": null,
-          "quote": "An account of a trade entity appears to be a pay-through or transit account with a rapid movement of high-volume transactions and a small end-of-day balance without clear business reasons"
         }
       ]
     },
@@ -307,20 +262,6 @@
       ]
     },
     {
-      "indicator_type": "transactional",
-      "description": "Trade entity consistently displays unreasonably low profit margins, e.g. importing at or above retail value, or reselling at or below purchase price.",
-      "detectable_in_transaction_data": true,
-      "confidence": "high",
-      "citations": [
-        {
-          "page": 6,
-          "printed_folio": "4",
-          "paragraph": null,
-          "quote": "A trade entity consistently displays unreasonably low profit margins in its trade transactions, e.g. importing wholesale commodities at or above retail value, or re-selling commodities at the same or below purchase price."
-        }
-      ]
-    },
-    {
       "indicator_type": "behavioural",
       "description": "A newly formed or recently re-activated trade entity suddenly engages in high-volume, high-value trade in a sector with high barriers to market entry.",
       "detectable_in_transaction_data": true,
@@ -359,20 +300,6 @@
           "printed_folio": "5",
           "paragraph": null,
           "quote": "Trade or customs documents supporting the transaction are missing, appear to be counterfeits, include false or misleading information, are a resubmission of previously rejected documents, or are frequently modified or amended."
-        }
-      ]
-    },
-    {
-      "indicator_type": "transactional",
-      "description": "An account tied to a trade entity behaves as a pay-through or transit account: high-volume transactions move through it rapidly, leaving only a small end-of-day balance with no clear business reason.",
-      "detectable_in_transaction_data": true,
-      "confidence": "high",
-      "citations": [
-        {
-          "page": 8,
-          "printed_folio": "6",
-          "paragraph": null,
-          "quote": "An account of a trade entity appears to be a pay-through or transit account with a rapid movement of high-volume transactions and a small end-of-day balance without clear business reasons"
         }
       ]
     },

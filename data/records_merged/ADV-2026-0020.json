@@ -195,12 +195,6 @@
       "confidence": "medium",
       "citations": [
         {
-          "page": 12,
-          "printed_folio": null,
-          "paragraph": null,
-          "quote": "Generally, these techniques rely upon collusion between the seller and buyer... The collusion may arise because both parties are controlled by the same persons."
-        },
-        {
           "page": 45,
           "printed_folio": null,
           "paragraph": null,
@@ -340,20 +334,6 @@
           "printed_folio": null,
           "paragraph": null,
           "quote": "Third parties are funding or part funding the DC value (just in time account credits to \nthe settlement account)"
-        }
-      ]
-    },
-    {
-      "indicator_type": "behavioural",
-      "description": "A documentary credit is constantly amended or extended, or is routinely cancelled or left unutilised.",
-      "detectable_in_transaction_data": true,
-      "confidence": "medium",
-      "citations": [
-        {
-          "page": 45,
-          "printed_folio": null,
-          "paragraph": null,
-          "quote": "Constantly amended or extended \n Routinely cancelled or unutilised"
         }
       ]
     },

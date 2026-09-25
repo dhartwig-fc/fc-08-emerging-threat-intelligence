@@ -21,6 +21,9 @@ MERGED records are a different, and real, story: 118 of 717 citations in
 data/records_merged cite the wrong page or text that is not in the document at
 all. Nobody re-verified a record's citations after week 1. That is a release
 finding for the owner, not something this guard fixes by rewriting records.
+The owner decided it the same day: evals/owner_decisions/citation_repair_2026-09-25.json
+re-paged 72, removed 46 and removed the 31 facts left uncited (tools/apply_citation_repair.py),
+and the baseline below was emptied in that commit. data/records keeps its defects.
 
 So --all does not simply fail red forever. It compares the CURRENT defect set
 against a frozen baseline, evals/known_citation_defects.json (tracked, an
@@ -66,9 +69,8 @@ DEFAULT_RECORDS_DIR = ROOT / "data" / "records_merged"
 ADVISORIES_DIR = ROOT / "data" / "advisories"
 ADVISORY_LIST = ROOT / "evals" / "golden" / "advisory_list.json"
 
-BASELINE_NOTE = ("record citations never re-verified after week 1; pinned 2026-09-25 "
-                  "pending an owner decision on remediation; an entry is removed only in "
-                  "the commit that fixes it")
+BASELINE_NOTE = ("emptied 2026-09-25 by the owner's citation repair, "
+                  "evals/owner_decisions/citation_repair_2026-09-25.json")
 
 
 # ---------------------------------------------------------------------------

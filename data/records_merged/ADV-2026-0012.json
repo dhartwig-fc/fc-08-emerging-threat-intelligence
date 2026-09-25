@@ -197,25 +197,6 @@
       ]
     },
     {
-      "name": "IRGC-Qods Force (IRGC-QF)",
-      "actor_type": "organisation",
-      "aliases": [
-        "IRGC-QF",
-        "Qods Force"
-      ],
-      "jurisdiction": "IR",
-      "role": "Supports terrorist operations outside Iran via militant proxy groups",
-      "confidence": "high",
-      "citations": [
-        {
-          "page": 7,
-          "printed_folio": null,
-          "paragraph": null,
-          "quote": "The IRGC-QF supports terrorist operations outside Iran via militant groups, such as Hizballah and Hamas."
-        }
-      ]
-    },
-    {
       "name": "Hizballah",
       "actor_type": "organisation",
       "aliases": [],

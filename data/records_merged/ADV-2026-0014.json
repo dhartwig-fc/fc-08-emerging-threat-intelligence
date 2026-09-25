@@ -103,12 +103,6 @@
           "printed_folio": null,
           "paragraph": null,
           "quote": "Cryptoasset to fiat transactions (or vice versa) involving a Russian DP's family members or associates"
-        },
-        {
-          "page": 12,
-          "printed_folio": null,
-          "paragraph": null,
-          "quote": "Enablers have almost certainly used alternative payment methods, in particular cryptoassets, to breach UK financial sanctions prohibitions on Russia."
         }
       ]
     },
@@ -213,22 +207,6 @@
           "printed_folio": null,
           "paragraph": null,
           "quote": "Enablers, which are defined below, can provide various services to Russian DPs"
-        }
-      ]
-    },
-    {
-      "name": "Professional enablers",
-      "actor_type": "category",
-      "aliases": [],
-      "jurisdiction": null,
-      "role": "Individuals/organisations providing professional services (wealth management, advisory, corporate/property management) that enable DPs to breach sanctions",
-      "confidence": "high",
-      "citations": [
-        {
-          "page": 12,
-          "printed_folio": null,
-          "paragraph": null,
-          "quote": "A professional enabler is defined as \u201can individual or organisation that is providing professional services that enable criminality.\u201d"
         }
       ]
     },

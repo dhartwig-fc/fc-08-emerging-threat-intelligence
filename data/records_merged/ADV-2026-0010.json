@@ -96,12 +96,6 @@
           "printed_folio": null,
           "paragraph": null,
           "quote": "the United States imposes substantial controls on exports to Iran, which Iran seeks to evade via elaborate, long-standing networks of procurement agents, front companies, intermediaries, and suppliers operating in third countries"
-        },
-        {
-          "page": 7,
-          "printed_folio": null,
-          "paragraph": null,
-          "quote": "These procurement networks use a variety of techniques to further obscure Iran as the end user, including transaction layering, falsifying documentation, and transshipping through third countries."
         }
       ]
     },
@@ -138,12 +132,6 @@
           "printed_folio": null,
           "paragraph": null,
           "quote": "In some instances, Iranian oil is blended with oil from third countries to further disguise its origins, or forged documents will relabel the oil as the product of another jurisdiction, most commonly as \u201cMalaysian blend.\u201d"
-        },
-        {
-          "page": 7,
-          "printed_folio": null,
-          "paragraph": null,
-          "quote": "These procurement networks use a variety of techniques to further obscure Iran as the end user, including transaction layering, falsifying documentation, and transshipping through third countries."
         },
         {
           "page": 8,
@@ -190,12 +178,6 @@
           "printed_folio": null,
           "paragraph": null,
           "quote": "Multiple companies incorporated at roughly the same time share counterparties, addresses, owners, or name similarities and demonstrate similar transaction profiles.  Such companies may have little to no web presence and transact in large, recurring amounts."
-        },
-        {
-          "page": 6,
-          "printed_folio": null,
-          "paragraph": null,
-          "quote": "Mansour Zarringhalam (Mansour) and Nasser Zarringhalam (Nasser) operate Iran-based exchange houses... through which they oversee a sprawling network of front companies, largely operating out of the UAE and Hong Kong."
         },
         {
           "page": 5,
@@ -522,41 +504,6 @@
           "printed_folio": null,
           "paragraph": null,
           "quote": "These front companies\u2014which are often recently incorporated, have minimal to no web presence, and transact in large amounts with no clear business purpose or using falsified invoices"
-        }
-      ]
-    },
-    {
-      "name": "Exchange houses and trading companies (class)",
-      "actor_type": "category",
-      "aliases": [],
-      "jurisdiction": null,
-      "role": "Financial intermediaries used to convert and move sanctioned Iranian proceeds and access correspondent banking",
-      "confidence": "high",
-      "citations": [
-        {
-          "page": 3,
-          "printed_folio": null,
-          "paragraph": null,
-          "quote": "a multijurisdictional \"shadow banking\" network of financial intermediaries including exchange houses, trading companies, and front companies to move and settle funds"
-        }
-      ]
-    },
-    {
-      "name": "Money services businesses, legal entities and TCSPs (class)",
-      "actor_type": "category",
-      "aliases": [
-        "MSBs",
-        "TCSPs"
-      ],
-      "jurisdiction": null,
-      "role": "Facilitators orchestrating complex money laundering and sanctions evasion schemes for the shadow banking network",
-      "confidence": "medium",
-      "citations": [
-        {
-          "page": 5,
-          "printed_folio": null,
-          "paragraph": null,
-          "quote": "a network of facilitators, including money services businesses (MSBs), legal entities, and trust and company service providers (TCSPs), that have played pivotal roles in orchestrating complex money laundering and sanctions evasion schemes"
         }
       ]
     }

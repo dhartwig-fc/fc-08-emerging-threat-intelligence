@@ -314,22 +314,6 @@
       ]
     },
     {
-      "name": "Corruption brokers",
-      "actor_type": "category",
-      "aliases": [],
-      "jurisdiction": null,
-      "role": "Intermediaries emerging under the crime-as-a-service model to facilitate corrupt access to public and private sector systems",
-      "confidence": "medium",
-      "citations": [
-        {
-          "page": 23,
-          "printed_folio": "23",
-          "paragraph": null,
-          "quote": "corruption has adapted to the broader trends toward digitalisation and a crime-as-a-service model, with several threats becoming increasingly visible: ... the elevated role of corruption brokers."
-        }
-      ]
-    },
-    {
       "name": "ChipMixer",
       "actor_type": "organisation",
       "aliases": [],

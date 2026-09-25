@@ -248,25 +248,6 @@
       ]
     },
     {
-      "name": "HM Treasury Office of Financial Sanctions Implementation (OFSI)",
-      "actor_type": "organisation",
-      "aliases": [
-        "OFSI",
-        "HMT OFSI"
-      ],
-      "jurisdiction": "GB",
-      "role": "Competent authority for financial sanctions implementation; joint issuer",
-      "confidence": "high",
-      "citations": [
-        {
-          "page": 1,
-          "printed_folio": null,
-          "paragraph": null,
-          "quote": "HM Treasury\u2019s Office of Financial Sanctions Implementation (OFSI) working in conjunction with law enforcement and financial sector partners as part of the \nJoint Money Laundering Intelligence Taskforce (JMLIT)."
-        }
-      ]
-    },
-    {
       "name": "Joint Money Laundering Intelligence Taskforce (JMLIT)",
       "actor_type": "organisation",
       "aliases": [

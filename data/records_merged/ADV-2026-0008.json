@@ -76,8 +76,7 @@
           "quote": "\u201cDigital hawala\u201d broadly refers to the use of digital technologies to facilitate the co-ordination, execution, settlement, or concealment of informal value transfer."
         },
         {
-          "page": 27,
-          "printed_folio": "25",
+          "page": 28,
           "paragraph": null,
           "quote": "The model relies on fiat collection, conversion into VAs, wallet-to-wallet transfers, and conversion back into fiat or other stores of value."
         }
@@ -136,21 +135,6 @@
     },
     {
       "family": "tbml",
-      "typology_id": "TBML008",
-      "label": "Third Party Payment Abuse",
-      "emergent": false,
-      "confidence": "medium",
-      "citations": [
-        {
-          "page": 24,
-          "printed_folio": "22",
-          "paragraph": null,
-          "quote": "Rather than HOSSPs settling directly with one another, debts are cleared by arranging or directing payments of invoices, commercial obligations, repayment of debts or other financial transfers conducted by third parties."
-        }
-      ]
-    },
-    {
-      "family": "tbml",
       "typology_id": "TBML009",
       "label": "Shell Company Trading",
       "emergent": false,
@@ -172,14 +156,12 @@
       "confidence": "high",
       "citations": [
         {
-          "page": 39,
-          "printed_folio": "37",
+          "page": 38,
           "paragraph": null,
           "quote": "The Black Market Peso Exchange (BMPE) remains a well-established regional ML mechanism in Latin America."
         },
         {
-          "page": 41,
-          "printed_folio": "39",
+          "page": 39,
           "paragraph": null,
           "quote": "Operation Cymbal identified a PML scheme that exploited Venezuela\u2019s controlled exchange-rate system through mechanisms comparable to underground banking."
         }
@@ -284,12 +266,6 @@
           "printed_folio": "24",
           "paragraph": 74,
           "quote": "Third party money mules are commonly used to fragment large-sum criminal cash into multiple small deposits and transfer them to designated accounts, avoiding the AML monitoring thresholds of FIs."
-        },
-        {
-          "page": 27,
-          "printed_folio": "25",
-          "paragraph": 75,
-          "quote": "Another frequently reported method is 'cuckoo smurfing', a form of third-party payment whereby illicit cash is deposited into the bank account of an unsuspecting legitimate remitter... the structured cash deposits are used to balance domestic payouts."
         }
       ],
       "added_by": "reviewer",
@@ -317,23 +293,6 @@
       ],
       "added_by": "reviewer",
       "review_justification": "Found in Para 71(ii) page 25; Box 4 Germany case study page 27. BA007 doctrine: 'A cash-intensive business is a legitimate cover for laundering physical cash... The tell is not the presence of cash \u2014 it is cash disproportionate to the business's own declared profile.' The advisory identifies specific cash-intensive front businesses (vehicle/luxury goods traders, kiosks, hookah bars, mobile phone shops) explicitly used to 'exhibit frequent cash deposits' and to 'provide cover for cash deposits' within underground banking settlement chains -- matching BA007's mechanism of a cash-heavy declared business masking placement of illicit cash."
-    },
-    {
-      "family": "correspondent_banking",
-      "typology_id": "BA005",
-      "label": "Rapid Movement (automated threshold-triggered account sweeping)",
-      "emergent": false,
-      "confidence": "medium",
-      "citations": [
-        {
-          "page": 29,
-          "printed_folio": "27",
-          "paragraph": null,
-          "quote": "These tools can be configured to move funds from mule, third-party, or compromised accounts once deposits reach a specified amount... this threshold-triggered 'sweeping' helps move funds rapidly through multiple accounts, reducing the time proceeds remain in any single account and limiting manual intervention by operators."
-        }
-      ],
-      "added_by": "reviewer",
-      "review_justification": "Found in Box 6, Japan case study, page 29. BA005 doctrine: Rapid Movement is defined by funds landing on an account and clearing 'back out again almost immediately, resting only long enough to register a balance change before they are gone... defined by HOW FAST the funds move.' The Japan case study describes automated tooling that sweeps funds out of mule/third-party accounts the instant a deposit threshold is reached, explicitly to minimise dwell time across multiple accounts -- a direct match to BA005's velocity-based mechanism, distinct from the already-claimed BA003 Mule Accounts which concerns the accounts themselves rather than the sweeping velocity technique."
     }
   ],
   "actors": [
@@ -402,24 +361,6 @@
           "printed_folio": "16",
           "paragraph": null,
           "quote": "Across multiple jurisdictions, transnational organised crime groups remain the primary users of underground banking and HOSSPs for PML."
-        }
-      ]
-    },
-    {
-      "name": "Chinese-speaking money laundering networks",
-      "actor_type": "network",
-      "aliases": [
-        "Chinese money laundering organisations/networks"
-      ],
-      "jurisdiction": null,
-      "role": "High-capacity, industrialised transnational PML service network aggregating criminal cash from diverse organised crime groups",
-      "confidence": "medium",
-      "citations": [
-        {
-          "page": 40,
-          "printed_folio": "38",
-          "paragraph": null,
-          "quote": "referred to by some law-enforcement agencies in jurisdictions including the United Kingdom and in the United States as \u201cChinese-speaking money laundering networks\u201d or \u201cChinese money laundering organisations/networks\u201d"
         }
       ]
     },
@@ -500,20 +441,6 @@
       ]
     },
     {
-      "indicator_type": "network",
-      "description": "Transnational network divided into specialised branches (e.g., a cash-provisioning branch and a settlement/VA-payout branch) coordinating cross-border cash-for-VA settlement.",
-      "detectable_in_transaction_data": false,
-      "confidence": "medium",
-      "citations": [
-        {
-          "page": 41,
-          "printed_folio": "39",
-          "paragraph": null,
-          "quote": "One branch, of Chinese origin, provided and distributed cash in Spain in exchange for VA payments... The second branch, of Arab origin, received funds in different jurisdictions and settled the equivalent value by arranging cash payouts in Spain."
-        }
-      ]
-    },
-    {
       "indicator_type": "behavioural",
       "description": "Use of tokens, typically a unique banknote serial number, communicated through the transfer chain and matched at collection to authenticate criminal cash handovers.",
       "detectable_in_transaction_data": false,
@@ -538,20 +465,6 @@
           "printed_folio": "30",
           "paragraph": null,
           "quote": "vIBANs are increasingly used to mask the true destination of funds or give cross-border transfers the appearance of domestic payments. Multiple \u2018alias accounts\u2019 may route incoming payments to a central master account, creating a nesting effect"
-        }
-      ]
-    },
-    {
-      "indicator_type": "transactional",
-      "description": "Automated, threshold-triggered 'sweeping' of funds from mule/third-party accounts once deposits reach a specified amount, often followed by conversion into VAs and transfer to overseas wallets.",
-      "detectable_in_transaction_data": true,
-      "confidence": "medium",
-      "citations": [
-        {
-          "page": 29,
-          "printed_folio": "27",
-          "paragraph": null,
-          "quote": "this threshold-triggered \u201csweeping\u201d helps move funds rapidly through multiple accounts, reducing the time proceeds remain in any single account... The automated transfer may also be followed by conversion into VAs and onward transfer to overseas wallets."
         }
       ]
     },
@@ -590,8 +503,7 @@
       "confidence": "medium",
       "citations": [
         {
-          "page": 29,
-          "printed_folio": "27",
+          "page": 31,
           "paragraph": null,
           "quote": "competent authorities identify structured transfers of funds of unknown origin to legal professionals, often without clear economic purpose or identifiable relationship between the parties"
         }
@@ -608,20 +520,6 @@
           "printed_folio": "33",
           "paragraph": null,
           "quote": "mobile money is used by customers to cash in and cash out funds to and from underground banking operators and HOSSPs, with end users experiencing near-instant transfers through mobile wallets. Underlying settlement, however, often occurs off-platform, including through physical cash or trade goods."
-        }
-      ]
-    },
-    {
-      "indicator_type": "product",
-      "description": "Prepaid cards and vouchers used as bridging instruments between cash-based underground banking arrangements and the formal payment system, frequently linked to mule accounts or misused identities.",
-      "detectable_in_transaction_data": true,
-      "confidence": "medium",
-      "citations": [
-        {
-          "page": 32,
-          "printed_folio": "30",
-          "paragraph": null,
-          "quote": "the selective but well-established use of prepaid cards and vouchers as bridging instruments between cash-based underground banking arrangements and the formal payment system... Frequently linked to mule accounts or misused identities"
         }
       ]
     }
