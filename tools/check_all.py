@@ -11,6 +11,7 @@ from its source:
   cold             passes from a fresh clone
   needs-pdfs       re-finds quotes on data/advisories/*.pdf, which is gitignored
   needs-portfolio  reads the portfolio checkout (sub-project 2)
+  needs-reviewed   reads data/reviewed/, the reviewer's additions, which is gitignored
 --cold prints every other guard as NOT RUN, so a green CI run says what it did not cover.
 
 The measurement disagreed with the plan's guess for three guards -- check_telemetry,
@@ -19,14 +20,23 @@ review.py --check -- all three passed cold. The measurement wins; they are class
 "cold" below.
 
 evals/check_citations.py --all does not simply pass or fail: it diffs the current
-citation-defect set against the frozen baseline in evals/known_citation_defects.json
-(103 known, pre-existing defects -- 118 until the matcher's ARTEFACT tier, same day --
-pinned 2026-09-25 pending an owner decision -- see
-that file's "note" and the module docstring). It needs the PDFs to compute that set,
+citation-defect set against the frozen baseline in evals/known_citation_defects.json.
+That baseline held 118 pre-existing defects (103 after the matcher's ARTEFACT tier, 91
+after its ELLIPSIS tier) until the owner's citation repair of 2026-09-25
+(evals/owner_decisions/citation_repair_2026-09-25.json) emptied it; 12 true quotes the
+matcher cannot place are owner-attested. It needs the PDFs to compute that set,
 so it is classed needs-pdfs even though its usual outcome, given the PDFs, is a clean
 diff against the baseline rather than a raw pass. It also reads the owner's citation
 attestations (evals/attested_citations.json) and refuses a stale, duplicated or
 no-longer-needed entry; evals/check_attestations.py pins that logic cold.
+
+The citation repair has two guards on purpose. evals/check_citation_repair.py replays
+the evidence against the tracked data/records and data/records_merged and is cold.
+tools/apply_citation_repair.py --check regenerates the merge from data/records plus the
+reviewer's additions in data/reviewed/ (gitignored) and compares byte for byte, so it is
+needs-reviewed and --cold prints it NOT RUN. Both classes were measured in a fresh
+depth-1 clone: the replay passed; --check refused, because without the reviewer's
+additions the merge does not match the evidence and writes nothing.
 
 Every evals/check_*.py must be in GUARDS, and every GUARDS entry must exist: a new
 guard cannot be silently left out, and a deleted one cannot linger as a name.
@@ -61,8 +71,10 @@ GUARDS = [
     ("check_proposal_contract", ["evals/check_proposal_contract.py"], "needs-pdfs"),
     ("check_twin_pairs", ["evals/check_twin_pairs.py"], "needs-pdfs"),
     ("check_citations --all", ["evals/check_citations.py", "--all"], "needs-pdfs"),
+    ("check_citation_repair", ["evals/check_citation_repair.py"], "cold"),
+    ("apply_citation_repair --check", ["tools/apply_citation_repair.py", "--check"], "needs-reviewed"),
 ]
-CLASSES = ("cold", "needs-pdfs", "needs-portfolio")
+CLASSES = ("cold", "needs-pdfs", "needs-portfolio", "needs-reviewed")
 
 
 def coverage_problems() -> list:
