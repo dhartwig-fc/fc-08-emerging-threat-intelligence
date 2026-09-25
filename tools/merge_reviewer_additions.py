@@ -29,6 +29,23 @@ record holds -- enforced in `review_advisory.py`, not asked for in its prompt.
 Emergent additions carry no id, so they are deduplicated here on the normalised
 label, using the scorer's own tokeniser rather than a second definition of
 "the same string".
+
+THE OWNER'S CITATION REPAIR (2026-09-25). When
+evals/owner_decisions/citation_repair_2026-09-25.json exists, each merged record is
+passed through tools/apply_citation_repair.repair() before it is validated and
+written, so regenerating data/records_merged reproduces the repaired, committed files
+byte for byte (tools/apply_citation_repair.py --check proves it). The repair is for
+the MERGED output only: --in-place writes data/records, the extractor's evidence,
+which the decision leaves untouched with its defects, so --in-place is REFUSED while
+the evidence file exists.
+
+A REFUSED REPAIR REFUSES THE WHOLE RUN. repair() names each citation by advisory,
+item, page and quote hash, and refuses rather than guesses when a row no longer
+matches. So re-extracting an advisory that has evidence rows, or changing its
+reviewer additions, makes the merge refuse until the evidence is rebuilt -- and it
+then writes NOTHING, not the other nineteen records: a batch half repaired and half
+not is a state no evidence file describes. (A record that merely fails schema
+validation is skipped and reported, as before.)
 """
 
 from __future__ import annotations
@@ -115,6 +132,16 @@ def merge(record: dict, additions: list) -> tuple:
 
 
 ARCHIVE = ROOT / "data" / "records_extraction_only"
+REPAIR_EVIDENCE = ROOT / "evals" / "owner_decisions" / "citation_repair_2026-09-25.json"
+
+
+def _repair_tool():
+    """tools/apply_citation_repair.py, loaded by path (tools/ is not a package)."""
+    spec = importlib.util.spec_from_file_location("fc08_apply_citation_repair",
+                                                  ROOT / "tools" / "apply_citation_repair.py")
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
 
 
 def archive_extraction_records() -> bool:
@@ -176,13 +203,23 @@ def main(argv: list) -> int:
             print("No record for %s" % args.advisory, file=sys.stderr)
             return 2
 
+    repair_evidence = None
+    if REPAIR_EVIDENCE.exists():
+        if args.in_place:
+            print("REFUSED: --in-place would write the owner's citation repair (%s) into data/records,\n"
+                  "  the extractor's evidence, which that decision leaves untouched. The repair is for\n"
+                  "  the merged output only." % REPAIR_EVIDENCE.relative_to(ROOT), file=sys.stderr)
+            return 2
+        repair_evidence = json.loads(REPAIR_EVIDENCE.read_text(encoding="utf-8"))
+        repair_tool = _repair_tool()
+
     out_dir = (ROOT / "data" / "records") if args.in_place else args.out_dir
     if args.in_place and not archive_extraction_records():
         return 2
     out_dir.mkdir(parents=True, exist_ok=True)
 
     total_kept = total_dup = failed = 0
-    no_additions = []
+    no_additions, refused, pending = [], [], []
     for p in src:
         record = json.loads(p.read_text(encoding="utf-8"))
         aid = record["advisory_id"]
@@ -190,12 +227,30 @@ def main(argv: list) -> int:
         if not adds:
             no_additions.append(aid)
         merged, kept, dup = merge(record, adds)
+        if repair_evidence is not None:
+            try:
+                merged = repair_tool.repair(merged, repair_evidence)
+            except repair_tool.RepairError as exc:
+                refused.append((aid, str(exc)))
+                continue
         try:
             AdvisoryRecord.model_validate(merged)
         except Exception as exc:
-            print("  %s FAILED validation after merge: %s" % (aid, str(exc)[:160]), file=sys.stderr)
+            print("  %s FAILED validation after merge: %s" % (aid, str(exc)[:300]), file=sys.stderr)
             failed += 1
             continue
+        pending.append((aid, merged, kept, dup, sub))
+
+    if refused:
+        # Nothing is written: a batch half repaired and half not matches no evidence file.
+        print("REFUSED, nothing written: the owner's citation repair (%s) does not match %d merged "
+              "record(s) -- rebuild the evidence before regenerating:"
+              % (str(REPAIR_EVIDENCE).replace(str(ROOT) + "/", ""), len(refused)), file=sys.stderr)
+        for aid, msg in refused:
+            print("  %s: %s" % (aid, msg[:300]), file=sys.stderr)
+        return 2
+
+    for aid, merged, kept, dup, sub in pending:
         (out_dir / ("%s.json" % aid)).write_text(json.dumps(merged, indent=2) + "\n", encoding="utf-8")
         total_kept += kept
         total_dup += dup
