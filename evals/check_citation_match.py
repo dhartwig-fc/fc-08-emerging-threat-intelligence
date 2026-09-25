@@ -13,7 +13,11 @@ Usage:
     python evals/check_citation_match.py --mutate keeps-digits    # letters form keeps digits; a glued footnote MUST be refused
     python evals/check_citation_match.py --mutate no-nfc          # accents not composed; a decomposed "Müller" MUST match "Muller"
     python evals/check_citation_match.py --mutate ellipsis-unordered  # fragments matched anywhere; an out-of-order quote MUST pass
-    python evals/check_citation_match.py --mutate ellipsis-short  # 10-letter fragment floor removed; "... goods" MUST pass
+    python evals/check_citation_match.py --mutate ellipsis-short  # fragment floor back to 10; a 15-letter fragment MUST pass
+    python evals/check_citation_match.py --mutate ellipsis-overlap  # fragments may overlap; a repeated phrase MUST pass
+    python evals/check_citation_match.py --mutate ellipsis-ignore-digits  # fragment digits unchecked; $48,000 vs $480,000 MUST pass
+    python evals/check_citation_match.py --mutate ellipsis-multi-page  # 2+ other pages is OFF_PAGE; it MUST become off_page
+    python evals/check_citation_match.py --mutate ellipsis-unbounded  # no gap bound; fragments 700 letters apart MUST pass
 
 WHY. schemas/citation_match.py is the ONE rule for "is this quote on this page", shared
 by the MCP server (propose_link refuses), the review gate (re-checks) and
@@ -33,9 +37,12 @@ NFC-composed first (added 2026-09-25; without it the combining mark was deleted)
 
 The ELLIPSIS tier (2026-09-25, owner's decision after 12 of the 25 remaining "missing"
 citations proved to be ellipsis quotations whose every fragment is on the cited page) is
-pinned the same way: an ellipsis quote passes only with every fragment >= 10 letters and
-on the page IN ORDER (out of order, a short fragment, or a fragment not on the page is
-refused). A page-spanning tier was added and removed the same day -- it matched none of
+pinned the same way: an ellipsis quote passes only with every fragment >= 20 letters, on
+the page IN ORDER without overlapping, each fragment's numbers whole on the page, and no
+fragment more than 600 letters after the previous one; off the cited page it is OFF_PAGE
+only on exactly one other page. Each clause has a check and a mutation (review,
+2026-09-25: non-overlap, fragment digits and the multi-page branch were unpinned; the
+floor went 10 -> 20 and the gap bound was added by controller ruling). A page-spanning tier was added and removed the same day -- it matched none of
 the real page-spanning quotes -- so its checks are gone with it.
 
 Fix round 1 (2026-09-25) closed two holes in the rule as first written: digit runs were
@@ -78,7 +85,12 @@ MUTATIONS = {
     "keeps-digits": ('return re.sub(r"[\\W\\d_]", "", unicodedata', 'return re.sub(r"[\\W_]", "", unicodedata'),
     "no-nfc": ('unicodedata.normalize("NFC", normed))', 'normed)'),
     "ellipsis-unordered": ("at = letters_page.find(lf, pos)", "at = letters_page.find(lf)"),
-    "ellipsis-short": ("        if len(lf) < ARTEFACT_MIN_LETTERS:\n            return False", "        pass"),
+    "ellipsis-short": ("ELLIPSIS_MIN_FRAGMENT_LETTERS = 20", "ELLIPSIS_MIN_FRAGMENT_LETTERS = 10"),
+    "ellipsis-overlap": ("if fits(k + 1, at + len(lf)):", "if fits(k + 1, at):"),
+    "ellipsis-ignore-digits": ("    if not all(_digits_whole(df, tight_page) for _, df in frags):\n        return False",
+                               "    pass"),
+    "ellipsis-multi-page": ("        if len(found) == 1:", "        if found:"),
+    "ellipsis-unbounded": ("if k and at - pos > ELLIPSIS_MAX_GAP_LETTERS:", "if False:"),
     "no-floor": ("len(letters_q) >= ARTEFACT_MIN_LETTERS", "len(letters_q) >= 1"),
     "no-letters": ("and letters_q in letters_page", "and True"),
     "empty": ("        if not tq:\n            return Located(MISSING)", "        pass"),
@@ -95,6 +107,20 @@ PAGE_2 = ("Several companies were engaged in re- selling goods through third cou
 # extractors emit it. The combining mark is not a letter to the [\W\d_] rule, so without NFC
 # composition it is deleted and the page's letters read "hansmuller" -- a different name.
 PAGE_3 = "The partner Hans Mu\u0308ller approved the loans."
+
+# A separate document for the ELLIPSIS clauses, so the pages above keep their found_on.
+# E1: a phrase that occurs ONCE (overlap), and $480,000 where a quote will say $48,000 (digits).
+# E2: three fragments, the 2nd about 450 letters after the 1st, the 3rd about 450 after the 2nd.
+# E3, E4: the same two sentences on two pages (multi-page).
+_FILLER = "Unrelated routine text fills the space here. " * 12
+ELLIPSIS_DOC = [
+    'Funds moved through shell companies in Cyprus before the audit. An invoice of $480,000 was traced to the firm. Later the regulator fined the firm heavily.',
+    ("The first fragment of this page is right here. " + _FILLER +
+     "The second fragment sits within the bound. " + _FILLER +
+     "The third fragment is far beyond the bound."),
+    'Alpha sentence about correspondent accounts here. Beta sentence about nested relationships there.',
+    'Alpha sentence about correspondent accounts here. Beta sentence about nested relationships there.',
+]
 
 
 def load_matcher(mutation):
@@ -201,6 +227,9 @@ def checks(cm) -> list:
     case("ellipsis fragments OUT OF ORDER are refused", 1,
          "The bank failed to file reports without delay ... The institution continued to trade",
          lambda h: (not h.ok, "not ok"))
+    case("an ellipsis fragment of 15 letters is refused (fragments need >= 20)", 1,
+         "The institution continued to trade ... for goods shipped",
+         lambda h: (not h.ok, "not ok"))
     case("an ellipsis fragment under 10 letters is refused", 1,
          "The bank failed to file reports ... goods",
          lambda h: (not h.ok, "not ok"))
@@ -211,6 +240,41 @@ def checks(cm) -> list:
          "The institution continued to trade ... The bank failed to file reports without delay",
          lambda h: (h.status == cm.OFF_PAGE and h.found_on == (1,), "off_page, found_on=(1,)"))
 
+    edoc = cm.PageIndex(ELLIPSIS_DOC)
+
+    def ecase(label, page, quote, want):
+        hit = edoc.locate(page, quote)
+        ok, expect = want(hit)
+        out.append((ok, label, "ellipsis doc p%d %r -> %s%s; expected %s"
+                    % (page, quote, hit.status, " found_on=%s" % (hit.found_on,) if hit.found_on else "", expect)))
+
+    ecase("ellipsis fragments may not OVERLAP (a phrase on the page once cannot supply both)", 1,
+          "Funds moved through shell ... through shell companies in Cyprus",
+          lambda h: (not h.ok, "not ok"))
+    ecase("an ellipsis fragment's number must be WHOLE on the page ($48,000 quoted, page reads $480,000)", 1,
+          "an invoice of $48,000 was traced to the firm ... the regulator fined the firm heavily",
+          lambda h: (not h.ok, "not ok"))
+    ecase("ellipsis fragments about 450 letters apart are accepted", 2,
+          "The first fragment of this page is right here ... The second fragment sits within the bound",
+          lambda h: (h.ok and h.status == ellipsis, "ok, ellipsis"))
+    ecase("ellipsis fragments more than 600 letters apart are refused", 2,
+          "The first fragment of this page is right here ... The third fragment is far beyond the bound",
+          lambda h: (not h.ok, "not ok"))
+    ecase("an ellipsis quote that holds on TWO other pages is MISSING, not OFF_PAGE", 1,
+          "Alpha sentence about correspondent accounts ... Beta sentence about nested relationships",
+          lambda h: (h.status == cm.MISSING, "missing"))
+
+    # Witnesses: the refusals above are the clause's, not a coincidence of wording.
+    uni = lambda t: re.sub(r"[\W\d_]", "", cm.norm(t))
+    e1, e2 = uni(ELLIPSIS_DOC[0]), uni(ELLIPSIS_DOC[1])
+    out.append((e1.count(uni("through shell companies in Cyprus")) == 1 and uni("Funds moved through shell") in e1,
+                "the overlap witness: both fragments are on E1, the shared phrase once",
+                "so only the non-overlap clause can refuse it"))
+    a, b = e2.find(uni("The first fragment of this page is right here")), e2.find(uni("The third fragment is far beyond the bound"))
+    gap = b - (a + len(uni("The first fragment of this page is right here")))
+    near = e2.find(uni("The second fragment sits within the bound")) - (a + len(uni("The first fragment of this page is right here")))
+    out.append((600 < gap and 20 <= near <= 600, "the gap witnesses: %d letters (refused case) and %d (accepted case)" % (gap, near),
+                "the bound, 600, sits between them"))
     return out
 
 

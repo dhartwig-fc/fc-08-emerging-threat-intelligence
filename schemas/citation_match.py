@@ -45,17 +45,25 @@ The match is deliberately NOT fuzzy on meaning. Four ok tiers, tried in order:
   ellipsis the quote contains "..." or "…" (added 2026-09-25, owner's decision). It is split
            there into fragments (stripped; an empty fragment, from a leading or trailing
            ellipsis, is dropped), and it holds when there are at least two, EVERY one
-           has >= ARTEFACT_MIN_LETTERS letters, and each matches the cited page by the
-           ARTEFACT rule (same letters, every digit run a whole number on the page) at a
-           letters-form position AFTER the previous fragment's match -- in order, not
-           overlapping. It tolerates a quotation with omissions. It does NOT tolerate
-           fragments out of order, a fragment that is not on the page, or a short
-           fragment ("not ... guilty": a few letters match anywhere).
+           has >= ELLIPSIS_MIN_FRAGMENT_LETTERS (20) letters, and each matches the cited
+           page by the ARTEFACT rule (same letters, every digit run a whole number on the
+           page) at a letters-form position AFTER the previous fragment's match ends -- in
+           order, not overlapping -- and no more than ELLIPSIS_MAX_GAP_LETTERS (600)
+           letters after it. It tolerates a quotation with omissions. It does NOT
+           tolerate fragments out of order or overlapping, a fragment that is not on the
+           page, a short fragment ("not ... guilty": a few letters match anywhere), or
+           fragments spliced from far apart on the page. The floor and the gap bound
+           were tightened by a controller ruling after review (first written as 10
+           letters, unbounded): this rule also gates propose_link, and an unbounded
+           ellipsis lets a proposal splice two unrelated sentences of one page into a
+           claim the page never makes. Measured on the 12 real ellipsis quotes: shortest
+           fragment 21 letters, widest gap 560 -- all still pass.
            Why: of the 25 citations still "missing" after the artefact tier, 12 were
            ellipsis quotations with every fragment verbatim on the cited page -- true
            quotes, and rule (a) of the owner's citation repair would have removed
            three golden-key typologies over them. Measured on the real 717: it accepts
-           all 12 (the 10-letter fragment floor excludes none).
+           all 12. Off the cited page, an ellipsis quote is OFF_PAGE only when it holds
+           on exactly ONE other page; on two or more it is MISSING.
   NO PAGE-SPANNING TIER. One was added on 2026-09-25 and removed the same day: it
            matched none of the 5 real quotes that run over a page break (page-number
            lines, alternating headers, footnote blocks and quotes cited at the page
@@ -90,6 +98,11 @@ _ELLIPSIS_MARK = re.compile(r"\.\.\.|\u2026")
 
 # A letters-only match shorter than this is too ambiguous to call the same text.
 ARTEFACT_MIN_LETTERS = 10
+# ELLIPSIS: each fragment at least this many letters, and at most this many letters of page
+# between one fragment's end and the next fragment's start. Measured on the 12 real ellipsis
+# quotes (2026-09-25): shortest fragment 21 letters, widest gap 560.
+ELLIPSIS_MIN_FRAGMENT_LETTERS = 20
+ELLIPSIS_MAX_GAP_LETTERS = 600
 
 
 def norm(s: str) -> str:
@@ -137,18 +150,36 @@ def _fragments(normed: str) -> list:
 
 
 def _ellipsis_holds(frags, letters_page: str, tight_page: str) -> bool:
-    """The ELLIPSIS rule for one page. frags: [(letters, digit runs)] per fragment, in quote order."""
+    """The ELLIPSIS rule for one page. frags: [(letters, digit runs)] per fragment, in quote order.
+
+    Every fragment is placed after the previous one ends (in order, not overlapping), no more
+    than ELLIPSIS_MAX_GAP_LETTERS after it. The search tries every occurrence of a fragment,
+    not only the first: with a gap bound, a later occurrence of an earlier fragment can be
+    the one close enough to the next. For a fragment after the first, later occurrences only
+    widen the gap, so the search stops at the first one past the bound.
+    """
     if len(frags) < 2:
         return False
-    pos = 0
-    for lf, df in frags:
-        if len(lf) < ARTEFACT_MIN_LETTERS:
+    for lf, _ in frags:
+        if len(lf) < ELLIPSIS_MIN_FRAGMENT_LETTERS:
             return False
+    if not all(_digits_whole(df, tight_page) for _, df in frags):
+        return False
+
+    def fits(k: int, pos: int) -> bool:
+        if k == len(frags):
+            return True
+        lf = frags[k][0]
         at = letters_page.find(lf, pos)
-        if at < 0 or not _digits_whole(df, tight_page):
-            return False
-        pos = at + len(lf)
-    return True
+        while at >= 0:
+            if k and at - pos > ELLIPSIS_MAX_GAP_LETTERS:
+                return False
+            if fits(k + 1, at + len(lf)):
+                return True
+            at = letters_page.find(lf, at + 1)
+        return False
+
+    return fits(0, 0)
 
 
 def file_sha256(path) -> str:
