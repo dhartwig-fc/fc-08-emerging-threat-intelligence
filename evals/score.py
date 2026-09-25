@@ -246,29 +246,45 @@ def _load(path: Path) -> dict:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
-def main(argv: list) -> int:
-    ap = argparse.ArgumentParser(description="Score predicted AdvisoryRecords against the golden set")
-    ap.add_argument("--golden", type=Path, default=ROOT / "evals" / "golden")
-    ap.add_argument("--predicted", type=Path, default=ROOT / "data" / "records")
-    ap.add_argument("--emergent-threshold", type=float, default=DEFAULT_EMERGENT_THRESHOLD)
-    ap.add_argument("--actor-threshold", type=float, default=DEFAULT_ACTOR_THRESHOLD)
-    ap.add_argument("--verbose", action="store_true", help="per-advisory detail and what was missed")
-    ap.add_argument("--json", type=Path, default=None, help="write the full report here")
-    args = ap.parse_args(argv)
+class NothingToScoreError(Exception):
+    """Raised by score_dirs when there is nothing to score.
 
+    `not_scored_no_prediction` / `ignored_no_golden` are None when the golden
+    directory itself had no usable labels -- in that case `main` printed
+    nothing before the error, and still does not.
+    """
+
+    def __init__(self, message, *, not_scored_no_prediction=None, ignored_no_golden=None):
+        super().__init__(message)
+        self.not_scored_no_prediction = not_scored_no_prediction
+        self.ignored_no_golden = ignored_no_golden
+
+
+def score_dirs(golden_dir: Path, predicted_dir: Path,
+               emergent_threshold: float = DEFAULT_EMERGENT_THRESHOLD,
+               actor_threshold: float = DEFAULT_ACTOR_THRESHOLD) -> dict:
+    """Load golden/predicted AdvisoryRecords under the two directories and score
+    every matched pair. Returns exactly the dict `main` writes with --json:
+    golden_dir, predicted_dir, emergent_threshold, actor_threshold, scored,
+    not_scored_no_prediction, ignored_no_golden, totals, per_advisory.
+
+    Raises NothingToScoreError -- carrying whatever `main` needs to reproduce
+    its old stdout/stderr exactly -- when there are no golden labels, or no
+    advisory id present in both directories.
+    """
     golden = {}
-    for p in sorted(args.golden.glob("ADV-*.json")):
+    for p in sorted(golden_dir.glob("ADV-*.json")):
         try:
             golden[_load(p)["advisory_id"]] = _load(p)
         except (KeyError, json.JSONDecodeError) as exc:
             print("skipping unreadable golden label %s: %s" % (p.name, exc), file=sys.stderr)
     if not golden:
-        print("No golden labels found in %s. Nothing to score against." % args.golden, file=sys.stderr)
-        return 1
+        raise NothingToScoreError(
+            "No golden labels found in %s. Nothing to score against." % golden_dir)
 
     predicted = {}
-    if args.predicted.is_dir():
-        for p in sorted(args.predicted.glob("ADV-*.json")):
+    if predicted_dir.is_dir():
+        for p in sorted(predicted_dir.glob("ADV-*.json")):
             # Only the current record per advisory; sidecars such as
             # ADV-2026-0001.week1-schema-1.1.0.json are history, not predictions.
             if not re.fullmatch(r"ADV-\d{4}-\d{4}", p.stem):
@@ -281,35 +297,82 @@ def main(argv: list) -> int:
     scored_ids = sorted(set(golden) & set(predicted))
     unpredicted = sorted(set(golden) - set(predicted))
     unlabelled = sorted(set(predicted) - set(golden))
-
-    print("golden labels: %d | predicted records: %d | scored: %d"
-          % (len(golden), len(predicted), len(scored_ids)))
-    if unpredicted:
-        print("NOT SCORED, no predicted record (%d): %s" % (len(unpredicted), ", ".join(unpredicted)))
-    if unlabelled:
-        print("ignored, predicted but not in the golden set (%d): %s" % (len(unlabelled), ", ".join(unlabelled)))
     if not scored_ids:
-        print("\nNothing was scored. A scorer with no pairs reports no number, not a perfect one.", file=sys.stderr)
-        return 1
-    print("emergent matching: token containment >= %.2f | actor matching: alias-aware, >= %.2f"
-          % (args.emergent_threshold, args.actor_threshold))
+        raise NothingToScoreError(
+            "\nNothing was scored. A scorer with no pairs reports no number, not a perfect one.",
+            not_scored_no_prediction=unpredicted, ignored_no_golden=unlabelled)
 
     totals = {f: Tally() for f in FIELDS}
     per_advisory = {}
     for aid in scored_ids:
-        detail = score_pair(golden[aid], predicted[aid], args.emergent_threshold, args.actor_threshold)
+        detail = score_pair(golden[aid], predicted[aid], emergent_threshold, actor_threshold)
         per_advisory[aid] = detail
         for f in FIELDS:
             totals[f].add(detail[f]["tp"], detail[f]["fp"], detail[f]["fn"])
+
+    return {
+        "golden_dir": str(golden_dir), "predicted_dir": str(predicted_dir),
+        "emergent_threshold": emergent_threshold, "actor_threshold": actor_threshold,
+        "scored": scored_ids, "not_scored_no_prediction": unpredicted, "ignored_no_golden": unlabelled,
+        "totals": {f: dict(tp=totals[f].tp, fp=totals[f].fp, fn=totals[f].fn,
+                           precision=totals[f].prf()[0], recall=totals[f].prf()[1], f1=totals[f].prf()[2])
+                   for f in FIELDS},
+        "per_advisory": per_advisory,
+    }
+
+
+def main(argv: list) -> int:
+    ap = argparse.ArgumentParser(description="Score predicted AdvisoryRecords against the golden set")
+    ap.add_argument("--golden", type=Path, default=ROOT / "evals" / "golden")
+    ap.add_argument("--predicted", type=Path, default=ROOT / "data" / "records")
+    ap.add_argument("--emergent-threshold", type=float, default=DEFAULT_EMERGENT_THRESHOLD)
+    ap.add_argument("--actor-threshold", type=float, default=DEFAULT_ACTOR_THRESHOLD)
+    ap.add_argument("--verbose", action="store_true", help="per-advisory detail and what was missed")
+    ap.add_argument("--json", type=Path, default=None, help="write the full report here")
+    args = ap.parse_args(argv)
+
+    try:
+        report = score_dirs(args.golden, args.predicted, args.emergent_threshold, args.actor_threshold)
+    except NothingToScoreError as exc:
+        if exc.not_scored_no_prediction is not None:
+            n_golden = len(exc.not_scored_no_prediction)
+            n_predicted = len(exc.ignored_no_golden)
+            print("golden labels: %d | predicted records: %d | scored: 0" % (n_golden, n_predicted))
+            if exc.not_scored_no_prediction:
+                print("NOT SCORED, no predicted record (%d): %s"
+                      % (len(exc.not_scored_no_prediction), ", ".join(exc.not_scored_no_prediction)))
+            if exc.ignored_no_golden:
+                print("ignored, predicted but not in the golden set (%d): %s"
+                      % (len(exc.ignored_no_golden), ", ".join(exc.ignored_no_golden)))
+        print(str(exc), file=sys.stderr)
+        return 1
+
+    scored_ids = report["scored"]
+    unpredicted = report["not_scored_no_prediction"]
+    unlabelled = report["ignored_no_golden"]
+    n_golden = len(scored_ids) + len(unpredicted)
+    n_predicted = len(scored_ids) + len(unlabelled)
+
+    print("golden labels: %d | predicted records: %d | scored: %d"
+          % (n_golden, n_predicted, len(scored_ids)))
+    if unpredicted:
+        print("NOT SCORED, no predicted record (%d): %s" % (len(unpredicted), ", ".join(unpredicted)))
+    if unlabelled:
+        print("ignored, predicted but not in the golden set (%d): %s" % (len(unlabelled), ", ".join(unlabelled)))
+    print("emergent matching: token containment >= %.2f | actor matching: alias-aware, >= %.2f"
+          % (args.emergent_threshold, args.actor_threshold))
+
+    totals = report["totals"]
+    per_advisory = report["per_advisory"]
 
     print()
     print("%-14s %7s %7s %7s   %9s %7s %7s" % ("field", "TP", "FP", "FN", "precision", "recall", "F1"))
     print("-" * 66)
     for f in FIELDS:
         t = totals[f]
-        p, r, f1 = t.prf()
-        note = "   (nothing to score)" if t.seen == 0 else ""
-        print("%-14s %7d %7d %7d   %9s %7s %7s%s" % (f, t.tp, t.fp, t.fn, pct(p), pct(r), pct(f1), note))
+        note = "   (nothing to score)" if (t["tp"] + t["fp"] + t["fn"]) == 0 else ""
+        print("%-14s %7d %7d %7d   %9s %7s %7s%s"
+              % (f, t["tp"], t["fp"], t["fn"], pct(t["precision"]), pct(t["recall"]), pct(t["f1"]), note))
 
     if args.verbose:
         for aid in scored_ids:
@@ -327,22 +390,13 @@ def main(argv: list) -> int:
                             print("      fuzzy %.2f: %s  ~  %s" % (m["score"], str(m["gold"])[:45], str(m["predicted"])[:45]))
 
     if args.json:
-        report = {
-            "golden_dir": str(args.golden), "predicted_dir": str(args.predicted),
-            "emergent_threshold": args.emergent_threshold, "actor_threshold": args.actor_threshold,
-            "scored": scored_ids, "not_scored_no_prediction": unpredicted, "ignored_no_golden": unlabelled,
-            "totals": {f: dict(tp=totals[f].tp, fp=totals[f].fp, fn=totals[f].fn,
-                               precision=totals[f].prf()[0], recall=totals[f].prf()[1], f1=totals[f].prf()[2])
-                       for f in FIELDS},
-            "per_advisory": per_advisory,
-        }
         args.json.parent.mkdir(parents=True, exist_ok=True)
         args.json.write_text(json.dumps(report, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
         print("\nwrote %s" % args.json)
 
-    if len(scored_ids) < len(golden):
+    if len(scored_ids) < n_golden:
         print("\nPartial run: %d of %d golden labels had a predicted record. These numbers describe "
-              "that subset only." % (len(scored_ids), len(golden)))
+              "that subset only." % (len(scored_ids), n_golden))
     return 0
 
 
