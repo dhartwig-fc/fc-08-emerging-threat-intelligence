@@ -24,7 +24,9 @@ citation-defect set against the frozen baseline in evals/known_citation_defects.
 pinned 2026-09-25 pending an owner decision -- see
 that file's "note" and the module docstring). It needs the PDFs to compute that set,
 so it is classed needs-pdfs even though its usual outcome, given the PDFs, is a clean
-diff against the baseline rather than a raw pass.
+diff against the baseline rather than a raw pass. It also reads the owner's citation
+attestations (evals/attested_citations.json) and refuses a stale, duplicated or
+no-longer-needed entry; evals/check_attestations.py pins that logic cold.
 
 Every evals/check_*.py must be in GUARDS, and every GUARDS entry must exist: a new
 guard cannot be silently left out, and a deleted one cannot linger as a name.
@@ -45,6 +47,7 @@ GUARDS = [
     ("check_digest_batch", ["evals/check_digest_batch.py"], "cold"),
     ("check_emergent_threshold", ["evals/check_emergent_threshold.py"], "cold"),
     ("check_citation_match", ["evals/check_citation_match.py"], "cold"),
+    ("check_attestations", ["evals/check_attestations.py"], "cold"),
     ("check_added_by", ["evals/check_added_by.py"], "cold"),
     ("check_actor_resolution", ["evals/check_actor_resolution.py"], "cold"),
     ("check_telemetry", ["evals/check_telemetry.py"], "cold"),

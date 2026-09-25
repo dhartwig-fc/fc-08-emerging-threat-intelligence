@@ -54,6 +54,19 @@ that would hide the regression check_citations.py exists to catch, not close
 it. Only the commit that actually fixes a record's citation may remove that
 record's entry from the baseline.
 
+ATTESTATION (owner's decision 2026-09-25). Some true quotes cannot be placed by the shared
+matcher -- a quote running over a page break, an ellipsis whose fragment crosses a page,
+a dropped accent, a list bullet pypdf extracts as a letter -- and the owner chose not to
+widen the matcher for them (every tolerance there also loosens propose_link's gate). They
+are ATTESTED instead, in evals/attested_citations.json, one entry per citation by its full
+identity (advisory_id, section, item, page, quote_sha256) with a reason, a page-text
+excerpt as evidence, attested_by "owner" and a date. --all counts an attested citation as
+verified-by-attestation (reported separately), NOT as a defect, and REFUSES (exit 1) the
+list when an entry is malformed, appears twice, matches no citation ("stale
+attestation"), or is now placed by the matcher ("attestation no longer needed -- remove
+it"). The list is read here only; the matcher, the MCP server and the review gate never
+see it. Pinned cold by evals/check_attestations.py.
+
 --records-dir (hidden; not for interactive use) points the defect computation
 at a different directory of ADV-*.json records instead of data/records_merged.
 It exists solely so a guard on this guard can run --all against a temporary,
@@ -64,6 +77,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import re
 import sys
 from collections import Counter
 from pathlib import Path
@@ -74,6 +88,17 @@ sys.path.insert(0, str(ROOT))
 from schemas.citation_match import ARTEFACT, ELLIPSIS, EXACT, OFF_PAGE, SPACING, PageIndex  # noqa: E402
 
 BASELINE_PATH = ROOT / "evals" / "known_citation_defects.json"
+ATTESTED_PATH = ROOT / "evals" / "attested_citations.json"
+ATTEST_REASONS = ("page_break", "ellipsis_across_pages", "dropped_accent", "bullet_glyph")
+ATTEST_FIELDS = ("advisory_id", "section", "item", "page", "quote_sha256", "reason", "evidence",
+                 "attested_by", "attested_on")
+ATTEST_EVIDENCE_MAX = 300
+# Set only by evals/check_attestations.py, in-process, to prove its checks bite:
+#   cover-anything   an attestation covers any citation of the same advisory and item
+#   no-stale         an attestation matching no citation is accepted
+#   no-still-needed  an attestation of a citation the matcher places is accepted
+#   no-dup           a duplicated entry is accepted
+_MUTATE = None
 DEFAULT_RECORDS_DIR = ROOT / "data" / "records_merged"
 ADVISORIES_DIR = ROOT / "data" / "advisories"
 ADVISORY_LIST = ROOT / "evals" / "golden" / "advisory_list.json"
@@ -163,8 +188,108 @@ def _label_for(item: dict) -> str:
     return item.get("label") or item.get("name") or item.get("description", "")[:60]
 
 
-def compute_current_defects(records_dir: Path):
-    """Returns (defects, total_checked, missing_pdf_advisory_ids).
+def attestation_identity(e: dict) -> tuple:
+    return (e["advisory_id"], e["section"], e["item"], e["page"], e["quote_sha256"])
+
+
+def load_attestations(path: Path = ATTESTED_PATH):
+    """(entries, problems). No file is no attestations. Every entry is schema-checked."""
+    if not path.exists():
+        return [], []
+    try:
+        entries = json.loads(path.read_text(encoding="utf-8")).get("attested")
+    except (ValueError, AttributeError) as exc:
+        return [], ["%s is not a JSON object with an 'attested' list: %s" % (path.name, exc)]
+    if not isinstance(entries, list):
+        return [], ["%s: 'attested' is not a list" % path.name]
+    problems, good = [], []
+    for n, e in enumerate(entries):
+        where = "attested[%d]" % n
+        if not isinstance(e, dict) or set(e) != set(ATTEST_FIELDS):
+            problems.append("%s: fields must be exactly %s" % (where, ", ".join(ATTEST_FIELDS)))
+            continue
+        bad = []
+        if e["reason"] not in ATTEST_REASONS:
+            bad.append("reason %r is not one of %s" % (e["reason"], ", ".join(ATTEST_REASONS)))
+        if not isinstance(e["evidence"], str) or not e["evidence"].strip() or len(e["evidence"]) > ATTEST_EVIDENCE_MAX:
+            bad.append("evidence must be a non-empty excerpt of at most %d characters" % ATTEST_EVIDENCE_MAX)
+        if e["attested_by"] != "owner":
+            bad.append("attested_by must be 'owner', not %r" % e["attested_by"])
+        if not isinstance(e["page"], int) or not re.fullmatch(r"[0-9a-f]{64}", str(e["quote_sha256"])) \
+                or not re.fullmatch(r"\d{4}-\d{2}-\d{2}", str(e["attested_on"])):
+            bad.append("page must be an int, quote_sha256 64 hex, attested_on YYYY-MM-DD")
+        if bad:
+            problems.append("%s (%s p%s): %s" % (where, e["advisory_id"], e["page"], "; ".join(bad)))
+        else:
+            good.append(e)
+    seen = Counter(attestation_identity(e) for e in good)
+    if _MUTATE != "no-dup":
+        for ident, k in sorted(seen.items()):
+            if k > 1:
+                problems.append("attestation appears twice (x%d): %s %s %r p%d" % (k, ident[0], ident[1], ident[2][:40], ident[3]))
+    return good, problems
+
+
+def _attest_key(ident: tuple) -> tuple:
+    if _MUTATE == "cover-anything":
+        return (ident[0], ident[2])
+    return ident
+
+
+def check_record_citations(advisory_id: str, record: dict, index) -> list:
+    """[(identity, ok, defect-or-None)] for every citation of one record, in record order."""
+    out = []
+    for section in ("typologies", "actors", "indicators"):
+        for item in record.get(section, []):
+            label = _label_for(item)
+            for c in item.get("citations", []):
+                ident = (advisory_id, section, label, c["page"], _quote_sha256(c["quote"]))
+                hit = index.locate(c["page"], c["quote"])
+                if hit.ok:  # exact, spacing, artefact or ellipsis -- the matcher decides, not a list here
+                    out.append((ident, True, None))
+                    continue
+                if hit.status == OFF_PAGE:
+                    kind, found_on = "off_page", sorted(hit.found_on)
+                else:
+                    kind, found_on = "missing", []
+                out.append((ident, False, {
+                    "advisory_id": advisory_id, "section": section, "item": label, "page": c["page"],
+                    "quote_sha256": ident[4], "kind": kind, "found_on": found_on}))
+    return out
+
+
+def apply_attestations(checked: list, attested: list, unchecked=()):
+    """(defects, n_attested, problems): attested citations leave the defects; bad entries are problems.
+
+    An entry covers ONE citation, by its full identity. Entries for an advisory in
+    `unchecked` (its PDF is not on this machine) are not judged either way.
+    """
+    keys = {}
+    for e in attested:
+        keys.setdefault(_attest_key(attestation_identity(e)), e)
+    used, defects, problems, n = set(), [], [], 0
+    for ident, ok, defect in checked:
+        k = _attest_key(ident)
+        if k in keys:
+            used.add(k)
+            if ok and _MUTATE != "no-still-needed":
+                problems.append("attestation no longer needed -- remove it: %s %s %r p%d (the matcher places it)"
+                                % (ident[0], ident[1], ident[2][:40], ident[3]))
+            elif not ok:
+                n += 1
+            continue
+        if defect is not None:
+            defects.append(defect)
+    if _MUTATE != "no-stale":
+        for k, e in sorted(keys.items(), key=lambda kv: attestation_identity(kv[1])):
+            if k not in used and e["advisory_id"] not in unchecked:
+                problems.append("stale attestation: %s %s %r p%d matches no citation in the records"
+                                % (e["advisory_id"], e["section"], e["item"][:40], e["page"]))
+    return defects, n, problems
+
+
+def compute_current_defects(records_dir: Path, attested=None):
+    """Returns (defects, total_checked, missing_pdf_advisory_ids, (n_attested, attestation_problems)).
 
     defects is a list of dicts: advisory_id, section, item, page, quote_sha256,
     kind ("off_page"|"missing"), found_on (list of pages, [] for missing).
@@ -175,7 +300,7 @@ def compute_current_defects(records_dir: Path):
     by_id = {a["advisory_id"]: a for a in
               json.loads(ADVISORY_LIST.read_text(encoding="utf-8"))["advisories"]}
 
-    defects = []
+    checked = []
     missing_pdfs = []
     total_checked = 0
     for record_path in sorted(records_dir.glob("ADV-*.json")):
@@ -190,29 +315,15 @@ def compute_current_defects(records_dir: Path):
             continue
 
         record = json.loads(record_path.read_text(encoding="utf-8"))
-        index = PageIndex.from_pdf(pdf_path)
-        for section in ("typologies", "actors", "indicators"):
-            for item in record.get(section, []):
-                label = _label_for(item)
-                for c in item.get("citations", []):
-                    total_checked += 1
-                    hit = index.locate(c["page"], c["quote"])
-                    if hit.ok:  # exact, spacing or artefact -- the matcher decides, not a list here
-                        continue
-                    if hit.status == OFF_PAGE:
-                        kind, found_on = "off_page", sorted(hit.found_on)
-                    else:
-                        kind, found_on = "missing", []
-                    defects.append({
-                        "advisory_id": advisory_id,
-                        "section": section,
-                        "item": label,
-                        "page": c["page"],
-                        "quote_sha256": _quote_sha256(c["quote"]),
-                        "kind": kind,
-                        "found_on": found_on,
-                    })
-    return defects, total_checked, missing_pdfs
+        rows = check_record_citations(advisory_id, record, PageIndex.from_pdf(pdf_path))
+        total_checked += len(rows)
+        checked += rows
+    if attested is None:
+        attested, problems = load_attestations()
+    else:
+        problems = []
+    defects, n_attested, more = apply_attestations(checked, attested, unchecked=set(missing_pdfs))
+    return defects, total_checked, missing_pdfs, (n_attested, problems + more)
 
 
 def _sort_key(d: dict):
@@ -241,7 +352,14 @@ def write_baseline(defects: list) -> None:
 
 
 def main_all(records_dir: Path = DEFAULT_RECORDS_DIR, write_baseline_flag: bool = False) -> int:
-    defects, total_checked, missing_pdfs = compute_current_defects(records_dir)
+    defects, total_checked, missing_pdfs, (n_attested, attest_problems) = compute_current_defects(records_dir)
+
+    for problem in attest_problems:
+        print("ATTESTATION REFUSED: %s" % problem)
+    if attest_problems:
+        print("\ncitations: %s is refused (%d problem%s); nothing was compared against the baseline"
+              % (ATTESTED_PATH.relative_to(ROOT), len(attest_problems), "" if len(attest_problems) == 1 else "s"))
+        return 1
 
     if write_baseline_flag:
         write_baseline(defects)
@@ -277,8 +395,8 @@ def main_all(records_dir: Path = DEFAULT_RECORDS_DIR, write_baseline_flag: bool 
 
     n_new = sum(new_counts.values())
     n_fixed = sum(fixed_counts.values())
-    print("\ncitations: %d checked, %d known defects pinned, %d new, %d fixed"
-          % (total_checked, len(baseline), n_new, n_fixed))
+    print("\ncitations: %d checked, %d verified by attestation, %d known defects pinned, %d new, %d fixed"
+          % (total_checked, n_attested, len(baseline), n_new, n_fixed))
     return 1 if (n_new or n_fixed) else 0
 
 
