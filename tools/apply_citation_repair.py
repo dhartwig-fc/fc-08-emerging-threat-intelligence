@@ -8,10 +8,16 @@ Usage:
 
 THE DECISION. evals/check_citations.py --all found 118 citations in the published
 merged records whose quote is not on the page they name. The shared matcher then gained
-an ARTEFACT tier (footnote markers, line-break hyphens): 18 of the 118 were true quotes
-it could not see, and the corrected set is 103 (evals/known_citation_defects.json). The
-owner's choice (a), re-applied to the corrected set:
+an ARTEFACT tier (footnote markers, line-break hyphens; 118 -> 103) and an ELLIPSIS tier
+(a quotation with omissions whose fragments are on the page in order; 103 -> 91). Of the
+91, the owner ATTESTED 12 true quotes the matcher cannot place (a page break, an
+ellipsis fragment across pages, a dropped accent, a list bullet extracted as a letter):
+evals/attested_citations.json. Five of those were cited at the page the quote ENDS on;
+the owner chose to re-page each to the page where it STARTS and attest it there. The
+owner's choice (a), applied to the rest:
   off_page, found on exactly ONE other page      -> RE-PAGE to that page
+  attested page-break quote cited at its end page -> RE-PAGE to its start page ("page_break_start")
+  attested at its cited page                     -> no action (verified by attestation)
   missing, or off_page found on 2+ pages         -> REMOVE the citation
   a typology / actor / indicator left uncited    -> REMOVE the item
 "No citation, no fact." The counts are the evidence file's, measured when it was built;
@@ -91,10 +97,41 @@ IMPLEMENTATION_NOTES = [
     "applied to data/records_merged only (and by tools/merge_reviewer_additions.py on regeneration); "
     "data/records, the extractor's evidence, is untouched and pinned by data_records_sha256.",
     "the defect set is evals/known_citation_defects.json as corrected by the matcher's ARTEFACT tier "
-    "(118 -> 103, 2026-09-25); a first attempt on the uncorrected 118 was reset before it was pushed.",
+    "(118 -> 103) and ELLIPSIS tier (103 -> 91), 2026-09-25; a first attempt on the uncorrected 118 was "
+    "reset before it was pushed.",
+    "the five start-page re-pages carry reason 'page_break_start' and found_on [] (the matcher places "
+    "them on no page); each start page was verified against the PDF text before use, and each re-paged "
+    "identity must be an entry of evals/attested_citations.json. For ADV-2026-0010 'Exchange houses' "
+    "the part of the quote on its start page (p2) is the single word 'a'.",
+    "citations attested at their cited page get no row: they are not repaired, only attested; they are "
+    "listed in attested_in_place so the evidence accounts for every baseline defect.",
 ]
 REJECTED = ["(b) remove all 118: 87 facts incl. ADV-2026-0001's seven TBML typologies",
             "(c) remove only the 43 missing"]
+# The owner's later rulings on the same repair, dated, in the owner's terms.
+OWNER_DECISIONS = [
+    {"decided": "2026-09-25",
+     "decision": "approved the 12 attestations: true quotes the matcher cannot place are attested in "
+                 "evals/attested_citations.json (attested_by owner), not removed",
+     "rejected": ["widen the shared matcher further (a page-spanning tier was added and removed: every "
+                  "tolerance there also loosens propose_link's gate)"]},
+    {"decided": "2026-09-25",
+     "decision": "chose (a) for the five quotes cited at the page they end on: re-page each to the page "
+                 "where the quote STARTS, then attest it at that page",
+     "rejected": ["attest them at the page cited (where the quote ends)"]},
+]
+# The owner's start-page re-pages, as approved: (advisory, section, item prefix, cited page, start page).
+# Each start page was verified against the PDF text before it was used: the quote's letters are a
+# tail of the start page's body plus the head of the next page.
+START_PAGE_REPAGES = [
+    ("ADV-2026-0010", "actors", "Exchange houses and trading companies", 3, 2),
+    ("ADV-2026-0010", "actors", "Money services businesses, legal entities and TCSPs", 5, 4),
+    ("ADV-2026-0010", "typologies", "Dual Use Goods", 7, 6),
+    ("ADV-2026-0010", "typologies", "Transshipment", 7, 6),
+    ("ADV-2026-0012", "actors", "IRGC-Qods Force", 7, 6),
+]
+PAGE_BREAK_START = "page_break_start"
+ATTESTED = ROOT / "evals" / "attested_citations.json"
 
 _spec = importlib.util.spec_from_file_location("fc08_check_citations", ROOT / "evals" / "check_citations.py")
 _cc = importlib.util.module_from_spec(_spec)
@@ -231,10 +268,45 @@ def build_evidence() -> dict:
                 for c in item["citations"]:
                     folio[(aid, section, label_for(item), c["page"], quote_sha256(c["quote"]))] = c.get("printed_folio")
 
-    rows = []
+    attested, problems = _cc.load_attestations(ATTESTED)
+    if problems or not attested:
+        raise SystemExit("REFUSED: %s is missing or malformed -- the owner's attestations are an input: %s"
+                         % (ATTESTED.relative_to(ROOT), problems[:3]))
+    attested_ids = {_cc.attestation_identity(e) for e in attested}
+
+    start = {}
+    for aid, section, prefix, page, to_page in START_PAGE_REPAGES:
+        hits = [d for d in baseline if d["advisory_id"] == aid and d["section"] == section
+                and d["item"].startswith(prefix) and d["page"] == page]
+        if len(hits) != 1:
+            raise SystemExit("REFUSED: start-page re-page %s %s %r p%d matches %d baseline defects, not 1"
+                             % (aid, section, prefix, page, len(hits)))
+        start[_cc._sort_key(hits[0])] = to_page
+
+    rows, in_place, used = [], [], set()
     for d in baseline:
+        key = _cc._sort_key(d)
         row = {k: d[k] for k in ("advisory_id", "section", "item", "page", "quote_sha256")}
         row["found_on"] = list(d["found_on"])
+        if key in start:
+            to_page = start[key]
+            new_id = (d["advisory_id"], d["section"], d["item"], to_page, d["quote_sha256"])
+            if new_id not in attested_ids or d["found_on"]:
+                raise SystemExit("REFUSED: %s %r p%d -> p%d is not attested at p%d, or the matcher places it"
+                                 % (d["advisory_id"], d["item"][:40], d["page"], to_page, to_page))
+            used.add(new_id)
+            row["action"] = "re_page"
+            row["to_page"] = to_page
+            f = folio.get(key)
+            if f is not None:
+                row["printed_folio_dropped"] = f
+            row["reason"] = PAGE_BREAK_START
+            rows.append(row)
+            continue
+        if key in attested_ids:
+            used.add(key)
+            in_place.append({k: d[k] for k in ("advisory_id", "section", "item", "page", "quote_sha256")})
+            continue
         if d["kind"] == "off_page" and len(d["found_on"]) == 1:
             row["action"] = "re_page"
             row["to_page"] = d["found_on"][0]
@@ -246,6 +318,11 @@ def build_evidence() -> dict:
         row["reason"] = _reason(d)
         rows.append(row)
     rows.sort(key=_cc._sort_key)
+    in_place.sort(key=_cc._sort_key)
+    unaccounted = attested_ids - used
+    if unaccounted:
+        raise SystemExit("REFUSED: %d attestation(s) match no baseline defect or start-page re-page: %s"
+                         % (len(unaccounted), sorted(unaccounted)[:2]))
 
     # Which items does removing the "remove" rows leave with no citation at all?
     gone = {_cc._sort_key(r) for r in rows if r["action"] == "remove"}
@@ -264,10 +341,13 @@ def build_evidence() -> dict:
     return {
         "decided": "2026-09-25",
         "decision": DECISION,
-        "implementation_notes": IMPLEMENTATION_NOTES,
         "rejected": REJECTED,
+        "owner_decisions": OWNER_DECISIONS,
+        "implementation_notes": IMPLEMENTATION_NOTES,
         "data_records_sha256": records_pin(),
+        "attested_citations_sha256": _sha_file(ATTESTED),
         "citations": rows,
+        "attested_in_place": in_place,
         "removed_items": removed_items,
     }
 
@@ -277,8 +357,9 @@ def _counts(ev: dict) -> str:
     by = {}
     for r in ev["removed_items"]:
         by[r["section"]] = by.get(r["section"], 0) + 1
-    return ("%d re_page, %d remove, %d removed items (%s)"
-            % (acts.count("re_page"), acts.count("remove"), len(ev["removed_items"]),
+    return ("%d re_page (%d %s), %d remove, %d attested in place, %d removed items (%s)"
+            % (acts.count("re_page"), sum(1 for r in ev["citations"] if r["reason"] == PAGE_BREAK_START),
+               PAGE_BREAK_START, acts.count("remove"), len(ev.get("attested_in_place", [])), len(ev["removed_items"]),
                ", ".join("%d %s" % (by[s], s) for s in SECTIONS if s in by)))
 
 
