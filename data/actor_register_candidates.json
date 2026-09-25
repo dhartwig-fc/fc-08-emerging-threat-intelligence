@@ -1,0 +1,125 @@
+{
+  "candidates": [
+    {
+      "actor": "IRGC-Qods Force",
+      "advisory_id": "ADV-2026-0012",
+      "entries": [
+        "ACT-0033",
+        "ACT-0034"
+      ],
+      "reason": "ambiguous",
+      "score": null
+    },
+    {
+      "actor": "Altaf Khanani Money Laundering Organisation / Altaf Khanani",
+      "advisory_id": null,
+      "entries": [
+        "ACT-0001",
+        "ACT-0002"
+      ],
+      "reason": "similar names",
+      "score": 1.0
+    },
+    {
+      "actor": "Islamic Revolutionary Guard Corps / IRGC-Qods Force",
+      "advisory_id": null,
+      "entries": [
+        "ACT-0033",
+        "ACT-0034"
+      ],
+      "reason": "similar names",
+      "score": 1.0
+    },
+    {
+      "actor": "Islamic Revolutionary Guard Corps / IRGC-Qods Force",
+      "advisory_id": null,
+      "entries": [
+        "ACT-0033",
+        "ACT-0052"
+      ],
+      "reason": "similar names",
+      "score": 1.0
+    },
+    {
+      "actor": "IRGC-Qods Force / IRGC-Qods Force",
+      "advisory_id": null,
+      "entries": [
+        "ACT-0034",
+        "ACT-0052"
+      ],
+      "reason": "similar names",
+      "score": 1.0
+    },
+    {
+      "actor": "National Iranian Oil Company / National Iranian Tanker Company",
+      "advisory_id": null,
+      "entries": [
+        "ACT-0037",
+        "ACT-0053"
+      ],
+      "reason": "similar names",
+      "score": 0.75
+    },
+    {
+      "actor": "GCM Exchange / Berelian Exchange",
+      "advisory_id": null,
+      "entries": [
+        "ACT-0042",
+        "ACT-0043"
+      ],
+      "reason": "similar names",
+      "score": 0.8
+    },
+    {
+      "actor": "Iran-Syria oil procurement network / Orekhov procurement network",
+      "advisory_id": null,
+      "entries": [
+        "ACT-0056",
+        "ACT-0061"
+      ],
+      "reason": "similar names",
+      "score": 0.67
+    },
+    {
+      "actor": "Iran-Syria oil procurement network / Grinin procurement network",
+      "advisory_id": null,
+      "entries": [
+        "ACT-0056",
+        "ACT-0062"
+      ],
+      "reason": "similar names",
+      "score": 0.67
+    },
+    {
+      "actor": "Orekhov procurement network / Grinin procurement network",
+      "advisory_id": null,
+      "entries": [
+        "ACT-0061",
+        "ACT-0062"
+      ],
+      "reason": "similar names",
+      "score": 0.67
+    },
+    {
+      "actor": "Etibar Eyyub / 2Rivers network",
+      "advisory_id": null,
+      "entries": [
+        "ACT-0071",
+        "ACT-0078"
+      ],
+      "reason": "similar names",
+      "score": 1.0
+    },
+    {
+      "actor": "Tahir Garayev / 2Rivers network",
+      "advisory_id": null,
+      "entries": [
+        "ACT-0072",
+        "ACT-0078"
+      ],
+      "reason": "similar names",
+      "score": 1.0
+    }
+  ],
+  "note": "For the owner to decide. Nothing here is merged."
+}

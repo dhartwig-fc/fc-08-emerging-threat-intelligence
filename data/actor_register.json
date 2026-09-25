@@ -1,0 +1,1240 @@
+{
+  "actors": [
+    {
+      "actor_id": "ACT-0001",
+      "actor_type": "organisation",
+      "aliases": [
+        "Khanani MLO",
+        "Khanani Money Laundering Organisation"
+      ],
+      "entity_key": null,
+      "name": "Altaf Khanani Money Laundering Organisation",
+      "named_in": [
+        {
+          "advisory_id": "ADV-2026-0003",
+          "name_as_labelled": "Altaf Khanani Money Laundering Organisation"
+        }
+      ]
+    },
+    {
+      "actor_id": "ACT-0002",
+      "actor_type": "person",
+      "aliases": [],
+      "entity_key": null,
+      "name": "Altaf Khanani",
+      "named_in": [
+        {
+          "advisory_id": "ADV-2026-0003",
+          "name_as_labelled": "Altaf Khanani"
+        }
+      ]
+    },
+    {
+      "actor_id": "ACT-0003",
+      "actor_type": "organisation",
+      "aliases": [],
+      "entity_key": null,
+      "name": "Al Zarooni Exchange",
+      "named_in": [
+        {
+          "advisory_id": "ADV-2026-0003",
+          "name_as_labelled": "Al Zarooni Exchange"
+        }
+      ]
+    },
+    {
+      "actor_id": "ACT-0004",
+      "actor_type": "network",
+      "aliases": [
+        "Avalanche"
+      ],
+      "entity_key": null,
+      "name": "Avalanche network",
+      "named_in": [
+        {
+          "advisory_id": "ADV-2026-0003",
+          "name_as_labelled": "Avalanche network"
+        }
+      ]
+    },
+    {
+      "actor_id": "ACT-0005",
+      "actor_type": "organisation",
+      "aliases": [],
+      "entity_key": null,
+      "name": "PacNet",
+      "named_in": [
+        {
+          "advisory_id": "ADV-2026-0003",
+          "name_as_labelled": "PacNet"
+        }
+      ]
+    },
+    {
+      "actor_id": "ACT-0006",
+      "actor_type": "organisation",
+      "aliases": [],
+      "entity_key": null,
+      "name": "BTC-e",
+      "named_in": [
+        {
+          "advisory_id": "ADV-2026-0003",
+          "name_as_labelled": "BTC-e"
+        }
+      ]
+    },
+    {
+      "actor_id": "ACT-0007",
+      "actor_type": "organisation",
+      "aliases": [
+        "LCN"
+      ],
+      "entity_key": null,
+      "name": "La Cosa Nostra (Palermo)",
+      "named_in": [
+        {
+          "advisory_id": "ADV-2026-0003",
+          "name_as_labelled": "La Cosa Nostra (Palermo)"
+        }
+      ]
+    },
+    {
+      "actor_id": "ACT-0008",
+      "actor_type": "organisation",
+      "aliases": [],
+      "entity_key": null,
+      "name": "Bank Melli",
+      "named_in": [
+        {
+          "advisory_id": "ADV-2026-0004",
+          "name_as_labelled": "Bank Melli"
+        }
+      ]
+    },
+    {
+      "actor_id": "ACT-0009",
+      "actor_type": "organisation",
+      "aliases": [],
+      "entity_key": null,
+      "name": "Alavi Foundation",
+      "named_in": [
+        {
+          "advisory_id": "ADV-2026-0004",
+          "name_as_labelled": "Alavi Foundation"
+        }
+      ]
+    },
+    {
+      "actor_id": "ACT-0010",
+      "actor_type": "network",
+      "aliases": [
+        "Sinaloa drug cartel"
+      ],
+      "entity_key": null,
+      "name": "Sinaloa cartel",
+      "named_in": [
+        {
+          "advisory_id": "ADV-2026-0004",
+          "name_as_labelled": "Sinaloa cartel"
+        },
+        {
+          "advisory_id": "ADV-2026-0011",
+          "name_as_labelled": "Sinaloa Cartel"
+        }
+      ]
+    },
+    {
+      "actor_id": "ACT-0011",
+      "actor_type": "network",
+      "aliases": [
+        "Camorra"
+      ],
+      "entity_key": null,
+      "name": "Camorra-linked organised crime group",
+      "named_in": [
+        {
+          "advisory_id": "ADV-2026-0004",
+          "name_as_labelled": "Camorra-linked organised crime group"
+        }
+      ]
+    },
+    {
+      "actor_id": "ACT-0012",
+      "actor_type": "organisation",
+      "aliases": [
+        "Alpha Bay"
+      ],
+      "entity_key": null,
+      "name": "AlphaBay",
+      "named_in": [
+        {
+          "advisory_id": "ADV-2026-0005",
+          "name_as_labelled": "AlphaBay"
+        }
+      ]
+    },
+    {
+      "actor_id": "ACT-0013",
+      "actor_type": "organisation",
+      "aliases": [],
+      "entity_key": null,
+      "name": "Helix",
+      "named_in": [
+        {
+          "advisory_id": "ADV-2026-0005",
+          "name_as_labelled": "Helix"
+        }
+      ]
+    },
+    {
+      "actor_id": "ACT-0014",
+      "actor_type": "organisation",
+      "aliases": [
+        "DDW",
+        "Deep Dot Web"
+      ],
+      "entity_key": null,
+      "name": "DeepDotWeb",
+      "named_in": [
+        {
+          "advisory_id": "ADV-2026-0005",
+          "name_as_labelled": "DeepDotWeb"
+        }
+      ]
+    },
+    {
+      "actor_id": "ACT-0015",
+      "actor_type": "person",
+      "aliases": [],
+      "entity_key": null,
+      "name": "Dan Gertler",
+      "named_in": [
+        {
+          "advisory_id": "ADV-2026-0006",
+          "name_as_labelled": "Dan Gertler"
+        }
+      ]
+    },
+    {
+      "actor_id": "ACT-0016",
+      "actor_type": "organisation",
+      "aliases": [],
+      "entity_key": null,
+      "name": "Fleurette Properties",
+      "named_in": [
+        {
+          "advisory_id": "ADV-2026-0006",
+          "name_as_labelled": "Fleurette Properties"
+        }
+      ]
+    },
+    {
+      "actor_id": "ACT-0017",
+      "actor_type": "person",
+      "aliases": [],
+      "entity_key": null,
+      "name": "Beny Steinmetz",
+      "named_in": [
+        {
+          "advisory_id": "ADV-2026-0006",
+          "name_as_labelled": "Beny Steinmetz"
+        }
+      ]
+    },
+    {
+      "actor_id": "ACT-0018",
+      "actor_type": "organisation",
+      "aliases": [
+        "NTR",
+        "NTR Metals"
+      ],
+      "entity_key": null,
+      "name": "NTR Metals Miami",
+      "named_in": [
+        {
+          "advisory_id": "ADV-2026-0006",
+          "name_as_labelled": "NTR Metals Miami"
+        }
+      ]
+    },
+    {
+      "actor_id": "ACT-0019",
+      "actor_type": "network",
+      "aliases": [
+        "Chilean TCO"
+      ],
+      "entity_key": null,
+      "name": "Chilean gold-smuggling TCO (Operation Diez Condores)",
+      "named_in": [
+        {
+          "advisory_id": "ADV-2026-0006",
+          "name_as_labelled": "Chilean gold-smuggling TCO (Operation Diez Condores)"
+        }
+      ]
+    },
+    {
+      "actor_id": "ACT-0020",
+      "actor_type": "network",
+      "aliases": [
+        "QQAAZZ criminal network",
+        "QQAAZZ network"
+      ],
+      "entity_key": null,
+      "name": "QQAAZZ",
+      "named_in": [
+        {
+          "advisory_id": "ADV-2026-0007",
+          "name_as_labelled": "QQAAZZ"
+        }
+      ]
+    },
+    {
+      "actor_id": "ACT-0021",
+      "actor_type": "organisation",
+      "aliases": [
+        "ISIL"
+      ],
+      "entity_key": null,
+      "name": "Islamic State in Iraq and the Levant",
+      "named_in": [
+        {
+          "advisory_id": "ADV-2026-0008",
+          "name_as_labelled": "Islamic State in Iraq and the Levant"
+        }
+      ]
+    },
+    {
+      "actor_id": "ACT-0022",
+      "actor_type": "person",
+      "aliases": [
+        "President Putin"
+      ],
+      "entity_key": null,
+      "name": "Vladimir Putin",
+      "named_in": [
+        {
+          "advisory_id": "ADV-2026-0009",
+          "name_as_labelled": "Vladimir Putin"
+        }
+      ]
+    },
+    {
+      "actor_id": "ACT-0023",
+      "actor_type": "person",
+      "aliases": [],
+      "entity_key": null,
+      "name": "Mark Lambert",
+      "named_in": [
+        {
+          "advisory_id": "ADV-2026-0009",
+          "name_as_labelled": "Mark Lambert"
+        }
+      ]
+    },
+    {
+      "actor_id": "ACT-0024",
+      "actor_type": "organisation",
+      "aliases": [
+        "TLI"
+      ],
+      "entity_key": null,
+      "name": "Transportation Logistics Inc.",
+      "named_in": [
+        {
+          "advisory_id": "ADV-2026-0009",
+          "name_as_labelled": "Transportation Logistics Inc."
+        }
+      ]
+    },
+    {
+      "actor_id": "ACT-0025",
+      "actor_type": "person",
+      "aliases": [
+        "Mikerin"
+      ],
+      "entity_key": null,
+      "name": "Vadim Mikerin",
+      "named_in": [
+        {
+          "advisory_id": "ADV-2026-0009",
+          "name_as_labelled": "Vadim Mikerin"
+        }
+      ]
+    },
+    {
+      "actor_id": "ACT-0026",
+      "actor_type": "organisation",
+      "aliases": [
+        "TENEX"
+      ],
+      "entity_key": null,
+      "name": "JSC Techsnabexport",
+      "named_in": [
+        {
+          "advisory_id": "ADV-2026-0009",
+          "name_as_labelled": "JSC Techsnabexport"
+        }
+      ]
+    },
+    {
+      "actor_id": "ACT-0027",
+      "actor_type": "organisation",
+      "aliases": [
+        "Odebrecht"
+      ],
+      "entity_key": null,
+      "name": "Odebrecht S.A.",
+      "named_in": [
+        {
+          "advisory_id": "ADV-2026-0009",
+          "name_as_labelled": "Odebrecht S.A."
+        }
+      ]
+    },
+    {
+      "actor_id": "ACT-0028",
+      "actor_type": "organisation",
+      "aliases": [
+        "Braskem"
+      ],
+      "entity_key": null,
+      "name": "Braskem S.A.",
+      "named_in": [
+        {
+          "advisory_id": "ADV-2026-0009",
+          "name_as_labelled": "Braskem S.A."
+        }
+      ]
+    },
+    {
+      "actor_id": "ACT-0029",
+      "actor_type": "person",
+      "aliases": [
+        "Lukashenka"
+      ],
+      "entity_key": null,
+      "name": "Alyaksandr Ryhorovich Lukashenka",
+      "named_in": [
+        {
+          "advisory_id": "ADV-2026-0009",
+          "name_as_labelled": "Alyaksandr Ryhorovich Lukashenka"
+        }
+      ]
+    },
+    {
+      "actor_id": "ACT-0030",
+      "actor_type": "person",
+      "aliases": [
+        "Aleksin"
+      ],
+      "entity_key": null,
+      "name": "Aliaksei Aleksin",
+      "named_in": [
+        {
+          "advisory_id": "ADV-2026-0009",
+          "name_as_labelled": "Aliaksei Aleksin"
+        }
+      ]
+    },
+    {
+      "actor_id": "ACT-0031",
+      "actor_type": "person",
+      "aliases": [
+        "Recinos"
+      ],
+      "entity_key": null,
+      "name": "Martha Carolina Recinos De Bernal",
+      "named_in": [
+        {
+          "advisory_id": "ADV-2026-0009",
+          "name_as_labelled": "Martha Carolina Recinos De Bernal"
+        }
+      ]
+    },
+    {
+      "actor_id": "ACT-0032",
+      "actor_type": "person",
+      "aliases": [
+        "Peskov"
+      ],
+      "entity_key": null,
+      "name": "Dmitriy Sergeevich Peskov",
+      "named_in": [
+        {
+          "advisory_id": "ADV-2026-0009",
+          "name_as_labelled": "Dmitriy Sergeevich Peskov"
+        }
+      ]
+    },
+    {
+      "actor_id": "ACT-0033",
+      "actor_type": "organisation",
+      "aliases": [
+        "IRGC"
+      ],
+      "entity_key": null,
+      "name": "Islamic Revolutionary Guard Corps",
+      "named_in": [
+        {
+          "advisory_id": "ADV-2026-0010",
+          "name_as_labelled": "Islamic Revolutionary Guard Corps"
+        }
+      ]
+    },
+    {
+      "actor_id": "ACT-0034",
+      "actor_type": "organisation",
+      "aliases": [
+        "IRGC-QF",
+        "Qods Force"
+      ],
+      "entity_key": null,
+      "name": "IRGC-Qods Force",
+      "named_in": [
+        {
+          "advisory_id": "ADV-2026-0010",
+          "name_as_labelled": "IRGC-Qods Force"
+        }
+      ]
+    },
+    {
+      "actor_id": "ACT-0035",
+      "actor_type": "organisation",
+      "aliases": [
+        "MODAFL"
+      ],
+      "entity_key": null,
+      "name": "Ministry of Defense and Armed Forces Logistics",
+      "named_in": [
+        {
+          "advisory_id": "ADV-2026-0010",
+          "name_as_labelled": "Ministry of Defense and Armed Forces Logistics"
+        }
+      ]
+    },
+    {
+      "actor_id": "ACT-0036",
+      "actor_type": "organisation",
+      "aliases": [
+        "AFGS"
+      ],
+      "entity_key": null,
+      "name": "Iranian Armed Forces General Staff",
+      "named_in": [
+        {
+          "advisory_id": "ADV-2026-0010",
+          "name_as_labelled": "Iranian Armed Forces General Staff"
+        }
+      ]
+    },
+    {
+      "actor_id": "ACT-0037",
+      "actor_type": "organisation",
+      "aliases": [
+        "NIOC"
+      ],
+      "entity_key": null,
+      "name": "National Iranian Oil Company",
+      "named_in": [
+        {
+          "advisory_id": "ADV-2026-0010",
+          "name_as_labelled": "National Iranian Oil Company"
+        },
+        {
+          "advisory_id": "ADV-2026-0012",
+          "name_as_labelled": "National Iranian Oil Company"
+        }
+      ]
+    },
+    {
+      "actor_id": "ACT-0038",
+      "actor_type": "network",
+      "aliases": [
+        "Zarringhalam brothers"
+      ],
+      "entity_key": null,
+      "name": "Zarringhalam shadow banking network",
+      "named_in": [
+        {
+          "advisory_id": "ADV-2026-0010",
+          "name_as_labelled": "Zarringhalam shadow banking network"
+        }
+      ]
+    },
+    {
+      "actor_id": "ACT-0039",
+      "actor_type": "person",
+      "aliases": [],
+      "entity_key": null,
+      "name": "Mansour Zarringhalam",
+      "named_in": [
+        {
+          "advisory_id": "ADV-2026-0010",
+          "name_as_labelled": "Mansour Zarringhalam"
+        }
+      ]
+    },
+    {
+      "actor_id": "ACT-0040",
+      "actor_type": "person",
+      "aliases": [],
+      "entity_key": null,
+      "name": "Nasser Zarringhalam",
+      "named_in": [
+        {
+          "advisory_id": "ADV-2026-0010",
+          "name_as_labelled": "Nasser Zarringhalam"
+        }
+      ]
+    },
+    {
+      "actor_id": "ACT-0041",
+      "actor_type": "person",
+      "aliases": [],
+      "entity_key": null,
+      "name": "Fazlolah Zarringhalam",
+      "named_in": [
+        {
+          "advisory_id": "ADV-2026-0010",
+          "name_as_labelled": "Fazlolah Zarringhalam"
+        }
+      ]
+    },
+    {
+      "actor_id": "ACT-0042",
+      "actor_type": "organisation",
+      "aliases": [
+        "Mansour Zarrin Ghalam and Partners Company"
+      ],
+      "entity_key": null,
+      "name": "GCM Exchange",
+      "named_in": [
+        {
+          "advisory_id": "ADV-2026-0010",
+          "name_as_labelled": "GCM Exchange"
+        }
+      ]
+    },
+    {
+      "actor_id": "ACT-0043",
+      "actor_type": "organisation",
+      "aliases": [
+        "Nasser Zarrin Ghalam and Partners Company"
+      ],
+      "entity_key": null,
+      "name": "Berelian Exchange",
+      "named_in": [
+        {
+          "advisory_id": "ADV-2026-0010",
+          "name_as_labelled": "Berelian Exchange"
+        }
+      ]
+    },
+    {
+      "actor_id": "ACT-0044",
+      "actor_type": "organisation",
+      "aliases": [],
+      "entity_key": null,
+      "name": "Sahara Thunder",
+      "named_in": [
+        {
+          "advisory_id": "ADV-2026-0010",
+          "name_as_labelled": "Sahara Thunder"
+        }
+      ]
+    },
+    {
+      "actor_id": "ACT-0045",
+      "actor_type": "organisation",
+      "aliases": [
+        "Alabuga"
+      ],
+      "entity_key": null,
+      "name": "Joint Stock Company Special Economic Zone of Industrial Production Alabuga",
+      "named_in": [
+        {
+          "advisory_id": "ADV-2026-0010",
+          "name_as_labelled": "Joint Stock Company Special Economic Zone of Industrial Production Alabuga"
+        }
+      ]
+    },
+    {
+      "actor_id": "ACT-0046",
+      "actor_type": "organisation",
+      "aliases": [
+        "Ansarallah"
+      ],
+      "entity_key": null,
+      "name": "Houthis",
+      "named_in": [
+        {
+          "advisory_id": "ADV-2026-0010",
+          "name_as_labelled": "Houthis"
+        }
+      ]
+    },
+    {
+      "actor_id": "ACT-0047",
+      "actor_type": "organisation",
+      "aliases": [
+        "Lebanese Hizballah"
+      ],
+      "entity_key": null,
+      "name": "Hizballah",
+      "named_in": [
+        {
+          "advisory_id": "ADV-2026-0010",
+          "name_as_labelled": "Hizballah"
+        }
+      ]
+    },
+    {
+      "actor_id": "ACT-0048",
+      "actor_type": "organisation",
+      "aliases": [
+        "CJNG"
+      ],
+      "entity_key": null,
+      "name": "Jalisco New Generation Cartel",
+      "named_in": [
+        {
+          "advisory_id": "ADV-2026-0011",
+          "name_as_labelled": "Jalisco New Generation Cartel"
+        }
+      ]
+    },
+    {
+      "actor_id": "ACT-0049",
+      "actor_type": "organisation",
+      "aliases": [],
+      "entity_key": null,
+      "name": "Gulf Cartel",
+      "named_in": [
+        {
+          "advisory_id": "ADV-2026-0011",
+          "name_as_labelled": "Gulf Cartel"
+        }
+      ]
+    },
+    {
+      "actor_id": "ACT-0050",
+      "actor_type": "person",
+      "aliases": [],
+      "entity_key": null,
+      "name": "Edgar Joel Martinez-Reyes",
+      "named_in": [
+        {
+          "advisory_id": "ADV-2026-0011",
+          "name_as_labelled": "Edgar Joel Martinez-Reyes"
+        }
+      ]
+    },
+    {
+      "actor_id": "ACT-0051",
+      "actor_type": "network",
+      "aliases": [
+        "Chinese underground money exchange",
+        "Operation Fortune Runner remitters"
+      ],
+      "entity_key": null,
+      "name": "San Gabriel Valley money transmitting group",
+      "named_in": [
+        {
+          "advisory_id": "ADV-2026-0011",
+          "name_as_labelled": "San Gabriel Valley money transmitting group"
+        }
+      ]
+    },
+    {
+      "actor_id": "ACT-0052",
+      "actor_type": "organisation",
+      "aliases": [
+        "IRGC",
+        "IRGC-QF",
+        "Islamic Revolutionary Guard Corps"
+      ],
+      "entity_key": null,
+      "name": "IRGC-Qods Force",
+      "named_in": [
+        {
+          "advisory_id": "ADV-2026-0012",
+          "name_as_labelled": "IRGC-Qods Force"
+        }
+      ]
+    },
+    {
+      "actor_id": "ACT-0053",
+      "actor_type": "organisation",
+      "aliases": [
+        "NITC"
+      ],
+      "entity_key": null,
+      "name": "National Iranian Tanker Company",
+      "named_in": [
+        {
+          "advisory_id": "ADV-2026-0012",
+          "name_as_labelled": "National Iranian Tanker Company"
+        }
+      ]
+    },
+    {
+      "actor_id": "ACT-0054",
+      "actor_type": "organisation",
+      "aliases": [
+        "IRISL"
+      ],
+      "entity_key": null,
+      "name": "Islamic Republic of Iran Shipping Lines",
+      "named_in": [
+        {
+          "advisory_id": "ADV-2026-0012",
+          "name_as_labelled": "Islamic Republic of Iran Shipping Lines"
+        }
+      ]
+    },
+    {
+      "actor_id": "ACT-0055",
+      "actor_type": "organisation",
+      "aliases": [],
+      "entity_key": null,
+      "name": "Maritime Assistance LLC",
+      "named_in": [
+        {
+          "advisory_id": "ADV-2026-0012",
+          "name_as_labelled": "Maritime Assistance LLC"
+        }
+      ]
+    },
+    {
+      "actor_id": "ACT-0056",
+      "actor_type": "network",
+      "aliases": [],
+      "entity_key": null,
+      "name": "Iran-Syria oil procurement network",
+      "named_in": [
+        {
+          "advisory_id": "ADV-2026-0012",
+          "name_as_labelled": "Iran-Syria oil procurement network"
+        }
+      ]
+    },
+    {
+      "actor_id": "ACT-0057",
+      "actor_type": "organisation",
+      "aliases": [],
+      "entity_key": null,
+      "name": "Syrian Company for Oil Transport",
+      "named_in": [
+        {
+          "advisory_id": "ADV-2026-0012",
+          "name_as_labelled": "Syrian Company for Oil Transport"
+        }
+      ]
+    },
+    {
+      "actor_id": "ACT-0058",
+      "actor_type": "organisation",
+      "aliases": [],
+      "entity_key": null,
+      "name": "Banias Refinery Company",
+      "named_in": [
+        {
+          "advisory_id": "ADV-2026-0012",
+          "name_as_labelled": "Banias Refinery Company"
+        }
+      ]
+    },
+    {
+      "actor_id": "ACT-0059",
+      "actor_type": "organisation",
+      "aliases": [
+        "Milandr"
+      ],
+      "entity_key": null,
+      "name": "AO PKK Milandr",
+      "named_in": [
+        {
+          "advisory_id": "ADV-2026-0013",
+          "name_as_labelled": "AO PKK Milandr"
+        }
+      ]
+    },
+    {
+      "actor_id": "ACT-0060",
+      "actor_type": "organisation",
+      "aliases": [],
+      "entity_key": null,
+      "name": "Vorago Technologies",
+      "named_in": [
+        {
+          "advisory_id": "ADV-2026-0013",
+          "name_as_labelled": "Vorago Technologies"
+        }
+      ]
+    },
+    {
+      "actor_id": "ACT-0061",
+      "actor_type": "network",
+      "aliases": [
+        "United States v. Orekhov"
+      ],
+      "entity_key": null,
+      "name": "Orekhov procurement network",
+      "named_in": [
+        {
+          "advisory_id": "ADV-2026-0013",
+          "name_as_labelled": "Orekhov procurement network"
+        }
+      ]
+    },
+    {
+      "actor_id": "ACT-0062",
+      "actor_type": "network",
+      "aliases": [
+        "United States v. Grinin"
+      ],
+      "entity_key": null,
+      "name": "Grinin procurement network",
+      "named_in": [
+        {
+          "advisory_id": "ADV-2026-0013",
+          "name_as_labelled": "Grinin procurement network"
+        }
+      ]
+    },
+    {
+      "actor_id": "ACT-0063",
+      "actor_type": "network",
+      "aliases": [
+        "Russian money laundering group"
+      ],
+      "entity_key": null,
+      "name": "Russian money laundering network (Operation Destabilise)",
+      "named_in": [
+        {
+          "advisory_id": "ADV-2026-0014",
+          "name_as_labelled": "Russian money laundering network (Operation Destabilise)"
+        }
+      ]
+    },
+    {
+      "actor_id": "ACT-0064",
+      "actor_type": "organisation",
+      "aliases": [],
+      "entity_key": null,
+      "name": "Garantex",
+      "named_in": [
+        {
+          "advisory_id": "ADV-2026-0014",
+          "name_as_labelled": "Garantex"
+        }
+      ]
+    },
+    {
+      "actor_id": "ACT-0065",
+      "actor_type": "organisation",
+      "aliases": [],
+      "entity_key": null,
+      "name": "Turkik Union",
+      "named_in": [
+        {
+          "advisory_id": "ADV-2026-0016",
+          "name_as_labelled": "Turkik Union"
+        }
+      ]
+    },
+    {
+      "actor_id": "ACT-0066",
+      "actor_type": "organisation",
+      "aliases": [],
+      "entity_key": null,
+      "name": "AZU International",
+      "named_in": [
+        {
+          "advisory_id": "ADV-2026-0016",
+          "name_as_labelled": "AZU International"
+        }
+      ]
+    },
+    {
+      "actor_id": "ACT-0067",
+      "actor_type": "organisation",
+      "aliases": [
+        "Aeromotus"
+      ],
+      "entity_key": null,
+      "name": "Aeromotus Unmanned Aerial Vehicles Trading LLC",
+      "named_in": [
+        {
+          "advisory_id": "ADV-2026-0016",
+          "name_as_labelled": "Aeromotus Unmanned Aerial Vehicles Trading LLC"
+        }
+      ]
+    },
+    {
+      "actor_id": "ACT-0068",
+      "actor_type": "organisation",
+      "aliases": [
+        "Fly Bridge",
+        "LIMITED LIABILITY COMPANY TECHNOLOGICAL COMPANY FLY BRIDGE"
+      ],
+      "entity_key": null,
+      "name": "Technological Company Fly Bridge LLC",
+      "named_in": [
+        {
+          "advisory_id": "ADV-2026-0016",
+          "name_as_labelled": "Technological Company Fly Bridge LLC"
+        }
+      ]
+    },
+    {
+      "actor_id": "ACT-0069",
+      "actor_type": "organisation",
+      "aliases": [],
+      "entity_key": null,
+      "name": "NPP Istok",
+      "named_in": [
+        {
+          "advisory_id": "ADV-2026-0016",
+          "name_as_labelled": "NPP Istok"
+        }
+      ]
+    },
+    {
+      "actor_id": "ACT-0070",
+      "actor_type": "organisation",
+      "aliases": [],
+      "entity_key": null,
+      "name": "Ecitech",
+      "named_in": [
+        {
+          "advisory_id": "ADV-2026-0016",
+          "name_as_labelled": "Ecitech"
+        }
+      ]
+    },
+    {
+      "actor_id": "ACT-0071",
+      "actor_type": "person",
+      "aliases": [
+        "EYYUB"
+      ],
+      "entity_key": null,
+      "name": "Etibar Eyyub",
+      "named_in": [
+        {
+          "advisory_id": "ADV-2026-0017",
+          "name_as_labelled": "Etibar Eyyub"
+        }
+      ]
+    },
+    {
+      "actor_id": "ACT-0072",
+      "actor_type": "person",
+      "aliases": [
+        "GARAYEV"
+      ],
+      "entity_key": null,
+      "name": "Tahir Garayev",
+      "named_in": [
+        {
+          "advisory_id": "ADV-2026-0017",
+          "name_as_labelled": "Tahir Garayev"
+        }
+      ]
+    },
+    {
+      "actor_id": "ACT-0073",
+      "actor_type": "person",
+      "aliases": [
+        "SECHIN"
+      ],
+      "entity_key": null,
+      "name": "Igor Sechin",
+      "named_in": [
+        {
+          "advisory_id": "ADV-2026-0017",
+          "name_as_labelled": "Igor Sechin"
+        }
+      ]
+    },
+    {
+      "actor_id": "ACT-0074",
+      "actor_type": "organisation",
+      "aliases": [],
+      "entity_key": null,
+      "name": "Rosneft",
+      "named_in": [
+        {
+          "advisory_id": "ADV-2026-0017",
+          "name_as_labelled": "Rosneft"
+        }
+      ]
+    },
+    {
+      "actor_id": "ACT-0075",
+      "actor_type": "organisation",
+      "aliases": [],
+      "entity_key": null,
+      "name": "2Rivers DMCC",
+      "named_in": [
+        {
+          "advisory_id": "ADV-2026-0017",
+          "name_as_labelled": "2Rivers DMCC"
+        }
+      ]
+    },
+    {
+      "actor_id": "ACT-0076",
+      "actor_type": "organisation",
+      "aliases": [],
+      "entity_key": null,
+      "name": "2Rivers PTE",
+      "named_in": [
+        {
+          "advisory_id": "ADV-2026-0017",
+          "name_as_labelled": "2Rivers PTE"
+        }
+      ]
+    },
+    {
+      "actor_id": "ACT-0077",
+      "actor_type": "organisation",
+      "aliases": [],
+      "entity_key": null,
+      "name": "Nord Axis",
+      "named_in": [
+        {
+          "advisory_id": "ADV-2026-0017",
+          "name_as_labelled": "Nord Axis"
+        }
+      ]
+    },
+    {
+      "actor_id": "ACT-0078",
+      "actor_type": "network",
+      "aliases": [
+        "Eyyub-Garayev network"
+      ],
+      "entity_key": null,
+      "name": "2Rivers network",
+      "named_in": [
+        {
+          "advisory_id": "ADV-2026-0017",
+          "name_as_labelled": "2Rivers network"
+        }
+      ]
+    },
+    {
+      "actor_id": "ACT-0079",
+      "actor_type": "organisation",
+      "aliases": [],
+      "entity_key": null,
+      "name": "ChipMixer",
+      "named_in": [
+        {
+          "advisory_id": "ADV-2026-0019",
+          "name_as_labelled": "ChipMixer"
+        }
+      ]
+    },
+    {
+      "actor_id": "ACT-0080",
+      "actor_type": "network",
+      "aliases": [],
+      "entity_key": null,
+      "name": "Dutch military-goods export network",
+      "named_in": [
+        {
+          "advisory_id": "ADV-2026-0019",
+          "name_as_labelled": "Dutch military-goods export network"
+        }
+      ]
+    },
+    {
+      "actor_id": "ACT-0081",
+      "actor_type": "network",
+      "aliases": [
+        "Investigation Admiral 2.0"
+      ],
+      "entity_key": null,
+      "name": "EUR 297 million VAT fraud network",
+      "named_in": [
+        {
+          "advisory_id": "ADV-2026-0019",
+          "name_as_labelled": "EUR 297 million VAT fraud network"
+        }
+      ]
+    },
+    {
+      "actor_id": "ACT-0082",
+      "actor_type": "network",
+      "aliases": [
+        "JuicyFields"
+      ],
+      "entity_key": null,
+      "name": "JuicyFields investment fraud network",
+      "named_in": [
+        {
+          "advisory_id": "ADV-2026-0019",
+          "name_as_labelled": "JuicyFields investment fraud network"
+        }
+      ]
+    },
+    {
+      "actor_id": "ACT-0083",
+      "actor_type": "network",
+      "aliases": [
+        "Vory v Zakone"
+      ],
+      "entity_key": null,
+      "name": "Thieves in Law",
+      "named_in": [
+        {
+          "advisory_id": "ADV-2026-0019",
+          "name_as_labelled": "Thieves in Law"
+        }
+      ]
+    },
+    {
+      "actor_id": "ACT-0084",
+      "actor_type": "network",
+      "aliases": [],
+      "entity_key": null,
+      "name": "Greek counterfeit-goods network owning courier companies",
+      "named_in": [
+        {
+          "advisory_id": "ADV-2026-0019",
+          "name_as_labelled": "Greek counterfeit-goods network owning courier companies"
+        }
+      ]
+    },
+    {
+      "actor_id": "ACT-0085",
+      "actor_type": "network",
+      "aliases": [],
+      "entity_key": null,
+      "name": "Morocco–Spain cannabis helicopter network",
+      "named_in": [
+        {
+          "advisory_id": "ADV-2026-0019",
+          "name_as_labelled": "Morocco–Spain cannabis helicopter network"
+        }
+      ]
+    },
+    {
+      "actor_id": "ACT-0086",
+      "actor_type": "network",
+      "aliases": [],
+      "entity_key": null,
+      "name": "LockBit",
+      "named_in": [
+        {
+          "advisory_id": "ADV-2026-0019",
+          "name_as_labelled": "LockBit"
+        }
+      ]
+    }
+  ],
+  "note": "Built from the golden labels by tools/build_actor_register.py. Merges only on exact normalised matches across advisories; everything needing judgement is in the candidates file. entity_key is empty: the estate it would link to is synthetic."
+}
