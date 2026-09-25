@@ -182,8 +182,8 @@ labels' named actors: `organisation`, `person` and `network`, with categories ex
 **The measurement.** `evals/actor_resolution.py` resolves every actor in the **extractor's** records
 (`data/records/`), not the labels, so building the register from the labels is not circular. It reports:
 
-- named actors resolved / named actors, overall and per advisory (about 72 of 105 measured against a flat register
-  before the plan; the committed report is the number);
+- named actors resolved / named actors, overall and per advisory (measured: 68 of 102, with 4 ambiguous; a
+  pre-plan count of 105 included ADV-2026-0001's two week-1 variant files);
 - how many are `ambiguous`, each listed;
 - how many unresolved actors carry a suggestion, and each suggestion, so a reader can see what containment
   would have claimed;

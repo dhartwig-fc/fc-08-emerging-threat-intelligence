@@ -1,0 +1,17 @@
+name: checks
+on:
+  push:
+  pull_request:
+jobs:
+  cold:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.14"
+      - run: pip install -r requirements.txt
+      # The advisory PDFs are third-party publications and are not in the repository,
+      # so guards that re-find quotes on their pages cannot run here. check_all prints
+      # each one as NOT RUN; a green run is a statement about the cold guards only.
+      - run: python tools/check_all.py --cold

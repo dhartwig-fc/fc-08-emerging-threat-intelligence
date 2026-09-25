@@ -1,0 +1,9 @@
+#!/bin/bash
+# fc-08 pre-commit: every guard, on the machine that holds the PDFs.
+# Enable once per clone:  git config core.hooksPath scripts/hooks
+# Never bypass with --no-verify: if a guard is red, the commit is not ready.
+set -eu
+cd "$(git rev-parse --show-toplevel)"
+PY=.venv/bin/python
+[ -x "$PY" ] || PY=python3
+exec "$PY" tools/check_all.py
