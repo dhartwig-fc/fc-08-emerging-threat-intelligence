@@ -38,7 +38,8 @@ sys.path.insert(0, str(ROOT))
 
 from governance import card  # noqa: E402
 from governance import decisions as gd  # noqa: E402
-from governance.digest import APPROVED_NOT_IN_RECORD, DIGESTS_DIR, RECORDS_DIR, _routes  # noqa: E402
+from governance.digest import (APPROVED_NOT_IN_RECORD, DIGESTS_DIR, RECORDS_DIR, _in_scope,  # noqa: E402
+                               _routes, _visible)
 from governance.proposals import ADVISORY_LIST, LIBRARY, QUEUE_DIR, group, link_key, load_queue_files  # noqa: E402
 from governance.routing import load_routing  # noqa: E402
 
@@ -48,6 +49,7 @@ DECIDED_RUN = "adv-2026-0013-extractor-f617bd3b00"
 TELEMETRY_RUN = "adv-2026-0013-extractor-69eeab7b41"
 GOLDEN_DIR = ROOT / "evals" / "golden"
 _MUTATE = None  # set only by evals/check_walkthrough.py through --_mutate
+MUTATIONS = ("drop-citation", "unpinned-log", "wrong-page", "swap-notes", "wrong-count", "desk-scope", "two-runs")
 
 e = html.escape
 PAST = {"approve": "approved", "reject": "rejected"}
@@ -61,6 +63,8 @@ def inputs(log: Path = gd.LOG) -> dict:
     """Every input the page is built from, loaded once. Refuses inputs that disagree with each other."""
     advisories = {a["advisory_id"]: a for a in _json(ADVISORY_LIST)["advisories"]}
     advisory = advisories[ADVISORY]
+    if not advisory.get("url", "").startswith(("http://", "https://")):
+        raise ValueError("the advisory URL %r is not http(s); a public page links nothing else" % advisory.get("url"))
     record = _json(RECORDS_DIR / ("%s.json" % ADVISORY))
     library = {t["typology_id"]: t for t in _json(LIBRARY)["typologies"]}
 
@@ -129,15 +133,57 @@ def _key(t: dict) -> str:
 
 
 def _cites(citations) -> str:
+    bump = 1 if _MUTATE == "wrong-page" else 0
     return "".join('<div class="cite"><span class="pg">p%d</span><blockquote>%s</blockquote></div>'
-                   % (int(pg), e(q)) for pg, q in citations)
+                   % (int(pg) + bump, e(q)) for pg, q in citations)
 
 
 def _standing(inp: dict) -> dict:
     return gd.latest(inp["decisions"])
 
 
+def _ids(ids) -> str:
+    return ", ".join(e(i) for i in ids)
+
+
+def desk_view(inp: dict) -> list:
+    """[(desk, title, approved ids, awaiting ids)] per desk the advisory reaches, by the digest's own
+    rule: approvals in the desk's scope (governed, then emergent labels), and record typologies in scope
+    with no standing decision. Mirrors governance.digest.render_desk's selection; the guard holds it
+    against the committed desk files."""
+    library, routing, rec = inp["library"], inp["routing"], inp["record"]
+    mine = list(_standing(inp).values())
+    decided = {d.link_key for d in mine}
+    out = []
+    for desk, reasons in inp["desks"].items():
+        def scope(tid):
+            return True if _MUTATE == "desk-scope" else _in_scope(tid, desk, reasons, library, routing)
+        approved = sorted(d.typology_id for d in mine if _visible(d) and d.kind == "governed" and scope(d.typology_id))
+        approved += sorted(d.emergent_label for d in mine if _visible(d) and d.kind == "emergent")
+        awaiting = sorted({t["typology_id"] for t in rec["typologies"]
+                           if t.get("typology_id") and link_key(ADVISORY, t["typology_id"], None) not in decided
+                           and scope(t["typology_id"])})
+        out.append((desk, inp["routing"]["desk_titles"].get(desk, desk), approved, awaiting))
+    return out
+
+
+def two_extractions(inp: dict) -> dict:
+    """Set differences between the record's typologies and the decided run's proposals (governed ids)."""
+    rec = [t for t in inp["record"]["typologies"] if t.get("typology_id")]
+    ext = {t["typology_id"] for t in rec if _asserted_by(t) == "extractor"}
+    rev = {t["typology_id"] for t in rec if _asserted_by(t) == "reviewer"}
+    run = {p.typology_id for p in inp["proposals"] if p.typology_id}
+    record_only = (ext | rev) - run if _MUTATE == "two-runs" else ext - run
+    return {"record-only": sorted(record_only), "run-only": sorted(run - ext - rev),
+            "run-reviewer": sorted(run & rev), "both": sorted(run & ext)}
+
+
 # ---------------------------------------------------------------- sections
+
+def _count(name: str, n: int, word: str = "", many: str = "") -> str:
+    tail = (" " + (word if n == 1 else (many or word + "s"))) if word else ""
+    return '<span class="count" data-count="%s">%d</span>%s' % (name, n, tail)
+
 
 def section_question(inp: dict) -> str:
     a, rec = inp["advisory"], inp["record"]
@@ -147,8 +193,13 @@ def section_question(inp: dict) -> str:
     standing = _standing(inp)
     n_app = sum(1 for d in standing.values() if d.decision == "approve")
     n_rej = sum(1 for d in standing.values() if d.decision == "reject")
-    titles = inp["routing"]["desk_titles"]
-    desks = [titles.get(d, d) for d in inp["desks"]]
+    if _MUTATE == "wrong-count":
+        n_ext += 1
+    desks = desk_view(inp)
+    rows = "".join(
+        '\n        <li class="desk">%s: %d approved%s; %d awaiting review%s</li>'
+        % (e(title), len(app), (" (%s)" % _ids(app)) if app else "", len(wait), (" (%s)" % _ids(wait)) if wait else "")
+        for _, title, app, wait in desks)
     return """<section id="question">
   <h2><span class="n">01</span> The question</h2>
   <ol class="chain">
@@ -157,15 +208,17 @@ def section_question(inp: dict) -> str:
     <li><span class="step">Capability</span>
       <p>An extraction agent reads the advisory and writes a governed record: every typology it asserts carries a page number and a verbatim quote from a document pinned by its sha256. The agent's only write is <code>propose_link</code>, which will not record a proposal whose quote it cannot find on the cited page. A second, reviewer agent adds what the extractor missed, each addition with its justification; the owner decides each proposed link at a review gate; every decision is a dated line in an append-only log.</p></li>
     <li><span class="step">Intelligence produced</span>
-      <p>%s asserted in the record &mdash; %d by the extractor, %d added by the reviewer agent, %d of them emergent (not in the typology library). Run <code>%s</code> proposed %s; the owner approved %d and rejected %d.</p></li>
+      <p>%s asserted in the record &mdash; %s by the extractor, %s added by the reviewer agent, %s of them emergent (not in the typology library). Run <code>%s</code> made %s; the owner approved %s and rejected %s.</p></li>
     <li><span class="step">Investigator outcome</span>
-      <p>The advisory reached %s: %s. Each desk reads the approved links in its own family, quoted from the page they came from.</p></li>
+      <p>The advisory reached %s. What each desk's digest carries for it:</p>
+      <ul class="desks">%s
+      </ul></li>
   </ol>
 </section>
 """ % (e(a["title"]), e(a["publisher"]), e(a["published_on"]),
-       _plural(len(typs), "typology", "typologies"), n_ext, len(typs) - n_ext, n_emergent,
-       e(DECIDED_RUN), _plural(len(inp["links"]), "link"), n_app, n_rej,
-       _plural(len(desks), "desk"), e(", ".join(desks)))
+       _count("typologies", len(typs), "typology", "typologies"), _count("extractor", n_ext), _count("reviewer", len(typs) - n_ext),
+       _count("emergent", n_emergent), e(DECIDED_RUN), _count("proposals", len(inp["proposals"]), "proposal"),
+       _count("approved", n_app, "link"), _count("rejected", n_rej), _count("desks", len(desks), "desk"), rows)
 
 
 def section_source(inp: dict) -> str:
@@ -193,36 +246,39 @@ def section_extraction(inp: dict) -> str:
     for t in rec["typologies"]:
         tid, label, family = _name(t, library)
         d = standing.get(_key(t))
-        status = ("%s %s" % (PAST[d.decision], d.decided_at[:10])) if d else "not decided"
+        status = ("%s %s" % (PAST[d.decision], d.decided_at[:10])) if d else "awaiting review"
         cites = [(c["page"], c["quote"]) for c in t["citations"]]
         if _MUTATE == "drop-citation":
             cites = cites[:-1]
+        why = ""
+        if _asserted_by(t) == "reviewer" and t.get("review_justification"):
+            why = ('<details class="why"><summary>Reviewer&rsquo;s justification</summary><p>%s</p></details>'
+                   % e(t["review_justification"]))
         rows.append("""    <tr>
       <td data-h="Typology"><code>%s</code> %s</td>
       <td data-h="Family">%s</td>
       <td data-h="Asserted by">%s</td>
       <td data-h="Owner">%s</td>
-      <td data-h="Citations">%s</td>
-    </tr>""" % (e(tid), e(label), e(family), e(_asserted_by(t)), e(status), _cites(cites)))
-    in_record = {_key(t) for t in rec["typologies"]}
-    outside = [d for k, d in sorted(standing.items()) if k not in in_record]
-    note = ""
-    if outside:
-        note = "".join(
-            "\n  <p class=\"flag\"><code>%s</code> is %s but not in this record: it reached the owner as a proposal "
-            "from run %s, not through the record. Section 5 shows the decision.</p>"
-            % (e(d.typology_id or d.emergent_label), e(PAST[d.decision]), e(", ".join(d.run_ids))) for d in outside)
+      <td data-h="Citations">%s%s</td>
+    </tr>""" % (e(tid), e(label), e(family), e(_asserted_by(t)), e(status), _cites(cites), why))
+    s = two_extractions(inp)
+    dates = sorted({p.proposed_at[:10] for p in inp["proposals"]})
+
+    def span(name: str) -> str:
+        return '<span class="ids" data-set="%s">%s</span>' % (name, _ids(s[name]) or "none")
     return """<section id="extraction">
   <h2><span class="n">03</span> What the record asserts</h2>
-  <p>The merged record for %s: %s, each with the quotes that ground it. &ldquo;Owner&rdquo; is the standing decision in the pinned decision log, where there is one.</p>
+  <p>The merged record for %s: %s, each with the quotes that ground it. &ldquo;Owner&rdquo; is the standing decision in the pinned decision log; a typology with none is awaiting review.</p>
   <table class="rows">
     <thead><tr><th>Typology</th><th>Family</th><th>Asserted by</th><th>Owner</th><th>Citations</th></tr></thead>
     <tbody>
 %s
     </tbody>
-  </table>%s
+  </table>
+  <p class="flag">The record and the decided proposals come from two separate extractions of this document. Both assert %s. The record&rsquo;s extractor also asserted %s, which run <code>%s</code> (proposals written %s) did not propose; that run proposed %s, which the record lacks, and %s, which the record carries only as a reviewer addition. The owner decides links, on the quotes shown in section 5.</p>
 </section>
-""" % (e(ADVISORY), _plural(len(rec["typologies"]), "typology", "typologies"), "\n".join(rows), note)
+""" % (e(ADVISORY), _plural(len(rec["typologies"]), "typology", "typologies"), "\n".join(rows),
+       span("both"), span("record-only"), e(DECIDED_RUN), e(", ".join(dates)), span("run-only"), span("run-reviewer"))
 
 
 def section_grounding(inp: dict) -> str:
@@ -236,7 +292,7 @@ def section_grounding(inp: dict) -> str:
     </li>""" % (e(p.typology_id or "emergent"), e(label), e(p.confidence), _cites(p.citations)))
     return """<section id="grounding">
   <h2><span class="n">04</span> Grounding: the proposals</h2>
-  <p>Run <code>%s</code> proposed %s. Each quote was located on its cited page of the pinned document by <code>propose_link</code> before the proposal was written &mdash; that is the tool's contract, and a quote it cannot place is refused, never queued. This page is built without the PDF and does not re-check them.</p>
+  <p>Run <code>%s</code> made %s. Each quote was located on its cited page of the pinned document by <code>propose_link</code> before the proposal was written &mdash; that is the tool&rsquo;s contract, and a quote it cannot place is refused, never queued. This page is built without the PDF and does not re-check them.</p>
   <ol class="props">
 %s
   </ol>
@@ -244,17 +300,36 @@ def section_grounding(inp: dict) -> str:
 """ % (e(DECIDED_RUN), _plural(len(inp["proposals"]), "proposal"), "\n".join(items))
 
 
+SEPARATOR = "=" * 100
+
+
+def _card(inp: dict, link) -> str:
+    """The review gate's own card, minus its terminal separator. Raises if the card's shape moved."""
+    text = card.render(link, None, inp["advisories"], inp["library"], inp["golden_ids"])
+    first, _, rest = text.partition("\n")
+    if first != SEPARATOR:
+        raise ValueError("governance.card.render no longer opens with its separator line; re-read the card "
+                         "before trimming it")
+    return rest
+
+
+def _decision_li(d, prefix: str = "") -> str:
+    return ('\n      <li class="decision">%s<time>%s</time> <b class="%s">%s</b> <span class="note">%s</span></li>'
+            % (prefix, e(d.decided_at[:10]), e(d.decision), e(d.decision.upper()), e(d.note or "(no note)")))
+
+
 def section_review(inp: dict) -> str:
     rec_ids = {t.get("typology_id") for t in inp["record"]["typologies"] if t.get("typology_id")}
     by_link = {}
     for d in inp["decisions"]:
         by_link.setdefault(d.link_key, []).append(d)
+    keys = list(inp["links"])
+    if _MUTATE == "swap-notes":
+        by_link = {keys[i]: by_link.get(keys[(i + 1) % len(keys)], []) for i in range(len(keys))}
     blocks = []
     for key, link in inp["links"].items():
-        text = card.render(link, None, inp["advisories"], inp["library"], inp["golden_ids"])
-        lines = "".join('\n      <li class="decision"><time>%s</time> <b class="%s">%s</b> <span class="note">%s</span></li>'
-                        % (e(d.decided_at[:10]), e(d.decision), e(d.decision.upper()), e(d.note or "(no note)"))
-                        for d in by_link.get(key, []))
+        text = _card(inp, link)
+        lines = "".join(_decision_li(d) for d in by_link.get(key, []))
         flag = ""
         if link.typology_id and link.typology_id not in rec_ids:
             reached = [inp["routing"]["desk_titles"].get(desk, desk) for desk, reasons in inp["desks"].items()
@@ -262,7 +337,7 @@ def section_review(inp: dict) -> str:
             routed = (" The digest still routes it, to the %s, marked &ldquo;%s&rdquo;."
                       % (e(", ".join(reached)), e(APPROVED_NOT_IN_RECORD))) if reached else ""
             flag = ('\n    <p class="flag"><code>%s</code> is not in the merged record: it reached the owner as this '
-                    "run's proposal, not through the record.%s</p>" % (e(link.typology_id), routed))
+                    "run&rsquo;s proposal, not through the record.%s</p>" % (e(link.typology_id), routed))
         blocks.append("""  <article class="link">
     <pre>%s</pre>%s
     <ul class="decisions">%s
@@ -277,17 +352,16 @@ def section_review(inp: dict) -> str:
     <p>Decisions on %s for links this run did not propose:</p>
     <ul class="decisions">%s
     </ul>
-  </article>""" % (e(ADVISORY), "".join(
-            '\n      <li class="decision"><code>%s</code> <time>%s</time> <b class="%s">%s</b> <span class="note">%s</span></li>'
-            % (e(d.typology_id or d.emergent_label), e(d.decided_at[:10]), e(d.decision), e(d.decision.upper()),
-               e(d.note or "(no note)")) for d in others))
+  </article>""" % (e(ADVISORY), "".join(_decision_li(d, "<code>%s</code> " % e(d.typology_id or d.emergent_label))
+                                        for d in others))
     return """<section id="review">
   <h2><span class="n">05</span> Review: what the owner saw, and decided</h2>
-  <p>Each card is rendered exactly as the review gate showed it, from run <code>%s</code>'s queue, followed by the owner's decision. Built from the first %s of the decision log, the prefix digest batch <code>%s</code> pinned (sha256 <span class="hash">%s</span>); %s of them decide %s.</p>
+  <p>The decisions shown are the first %s of the owner&rsquo;s decision log &mdash; the lines digest batch <code>%s</code> was built from (sha256 <span class="hash">%s</span>); %s of them decide %s.</p>
+  <p>Each card is rendered by the review gate&rsquo;s own card renderer from run <code>%s</code>&rsquo;s queue, without the terminal&rsquo;s separator line, and followed by the owner&rsquo;s decision. &ldquo;Golden label HOLDS&rdquo; or &ldquo;LACKS&rdquo; on a card refers to a hand-written reference answer for this advisory, shown to the owner as context only, never a rule.</p>
 %s%s
 </section>
-""" % (e(DECIDED_RUN), _plural(inp["log_lines"], "line"), e(inp["batch"]), e(inp["log_sha256"]),
-       len(inp["decisions"]), e(ADVISORY), "\n".join(blocks), tail)
+""" % (_plural(inp["log_lines"], "line"), e(inp["batch"]), e(inp["log_sha256"]), len(inp["decisions"]),
+       e(ADVISORY), e(DECIDED_RUN), "\n".join(blocks), tail)
 
 
 # ---------------------------------------------------------------- the page
@@ -341,8 +415,8 @@ HEAD = """<!doctype html>
   p{margin:0 0 13px;color:var(--ink2)}
   p strong{color:var(--ink)}
   .chain{list-style:none;margin:0;padding:0}
-  .chain li{border-left:2px solid var(--edge);padding:0 0 4px 14px;margin:0 0 6px}
-  .chain li:last-child{border-left-color:var(--gold)}
+  .chain>li{border-left:2px solid var(--edge);padding:0 0 4px 14px;margin:0 0 6px}
+  .chain>li:last-child{border-left-color:var(--gold)}
   .step{display:block;font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);margin-bottom:3px}
   .facts{display:grid;grid-template-columns:max-content 1fr;gap:6px 16px;margin:0 0 14px}
   .facts dt{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink3);padding-top:3px}
@@ -370,6 +444,11 @@ HEAD = """<!doctype html>
   .approve{color:var(--good)}
   .reject{color:var(--crit)}
   .flag{border-left:2px solid var(--gold);padding-left:10px;color:var(--ink)}
+  .desks{margin:0 0 6px;padding-left:18px;color:var(--ink2)}
+  .desks li{margin:0 0 3px}
+  .why{margin:2px 0 6px;font-size:13px;color:var(--ink2)}
+  .why summary{cursor:pointer;font-family:var(--mono);font-size:11px;color:var(--ink3)}
+  .why p{margin:6px 0 0;overflow-wrap:anywhere}
   @media (max-width:640px){
     h1{font-size:23px}
     table.rows thead{display:none}
@@ -425,7 +504,7 @@ def main(argv: list) -> int:
     ap.add_argument("--check", action="store_true", help="exit 1 when the committed page differs from a fresh build")
     ap.add_argument("--stdout", action="store_true", help=argparse.SUPPRESS)
     ap.add_argument("--log", type=Path, default=gd.LOG, help=argparse.SUPPRESS)
-    ap.add_argument("--_mutate", choices=("drop-citation", "unpinned-log"), help=argparse.SUPPRESS)
+    ap.add_argument("--_mutate", choices=MUTATIONS, help=argparse.SUPPRESS)
     args = ap.parse_args(argv)
     _MUTATE = args._mutate
     page = build(inputs(args.log))

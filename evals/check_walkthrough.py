@@ -6,6 +6,11 @@ Usage:
     python evals/check_walkthrough.py
     python evals/check_walkthrough.py --mutate drop-citation   # the builder skips each typology's last citation; MUST fail
     python evals/check_walkthrough.py --mutate unpinned-log    # the builder reads the WHOLE decision log; MUST fail
+    python evals/check_walkthrough.py --mutate wrong-page      # every citation is rendered one page off; MUST fail
+    python evals/check_walkthrough.py --mutate swap-notes      # each decision lands under the next link's card; MUST fail
+    python evals/check_walkthrough.py --mutate wrong-count     # section 1 miscounts the extractor's typologies; MUST fail
+    python evals/check_walkthrough.py --mutate desk-scope      # a desk is shown every family's links; MUST fail
+    python evals/check_walkthrough.py --mutate two-runs        # the record-only set counts reviewer additions; MUST fail
 
 WHY. The page will leave this repository. A page that drifts from its inputs, differs
 between two machines, or quietly drops a citation says something the governance never
@@ -37,11 +42,13 @@ sys.path.insert(0, str(ROOT))
 from governance import decisions as gd  # noqa: E402
 from governance import publish_boundary as pb  # noqa: E402
 from governance.digest import DIGESTS_DIR, RECORDS_DIR  # noqa: E402
+from governance.proposals import QUEUE_DIR, load_queue_files  # noqa: E402
 from governance.routing import load_routing  # noqa: E402
 
 BUILDER = ROOT / "tools" / "build_walkthrough.py"
 SECTIONS = ("question", "source", "extraction", "grounding", "review")
 SEEDS = ("0", "1", "4242", "987654")
+MUTATIONS = ("drop-citation", "unpinned-log", "wrong-page", "swap-notes", "wrong-count", "desk-scope", "two-runs")
 MUTATION = None
 
 
@@ -62,6 +69,22 @@ def _cli(*args, env=None) -> subprocess.CompletedProcess:
 def section(page: str, sid: str) -> str:
     m = re.search(r'<section id="%s"[^>]*>(.*?)</section>' % re.escape(sid), page, re.S)
     return m.group(1) if m else ""
+
+
+def _desk_block(text: str, advisory: str):
+    """(approved, awaiting) ids from one desk digest's block for advisory, or None if it has none."""
+    m = re.search(r"^## %s -- .*?(?=^## |\Z)" % re.escape(advisory), text, re.S | re.M)
+    if not m:
+        return None
+    block = m.group(0)
+
+    def part(head: str) -> str:
+        p = re.search(r"^### %s\n(.*?)(?=^### |\Z)" % re.escape(head), block, re.S | re.M)
+        return p.group(1) if p else ""
+    approved = re.findall(r"^- \*\*(\S+) ", part("Approved links"), re.M)
+    approved += re.findall(r"^- \*\*(.+?)\*\*", part("Approved emergent candidates"), re.M)
+    awaiting = re.findall(r"^- (\S+) .* -- asserted by the pipeline", part("Awaiting review"), re.M)
+    return sorted(approved), sorted(awaiting)
 
 
 def _pinned_advisory_decisions(advisory: str) -> list:
@@ -114,9 +137,9 @@ def checks() -> list:
     quotes = [(t.get("typology_id") or t["label"], c["page"], c["quote"])
               for t in record["typologies"] for c in t["citations"]]
     missing_q = ["%s p%d %r" % (tid, pg, q[:40]) for tid, pg, q in quotes
-                 if "<blockquote>%s</blockquote>" % html.escape(q) not in extraction]
+                 if '<span class="pg">p%d</span><blockquote>%s</blockquote>' % (pg, html.escape(q)) not in extraction]
     out.append((bool(quotes) and not missing_q,
-                "every citation's verbatim quote (escaped) is in a blockquote in #extraction",
+                "every citation is in #extraction as its page and its verbatim quote (escaped), together",
                 "%d citations; missing: %s" % (len(quotes), missing_q)))
 
     pinned = _pinned_advisory_decisions(bw.ADVISORY)
@@ -131,19 +154,73 @@ def checks() -> list:
     out.append((bool(pinned) and not absent, "every decided link's typology appears in #review",
                 "missing: %s" % absent))
 
-    # "Desks reached" is computed by the builder through the digest's routing rule. Hold it
-    # against what the committed batch actually delivered: the desk files that carry the advisory.
+    # Section 1 says, per desk, what that desk's digest carries. Hold every line against the
+    # committed batch's desk files -- the digest the desks actually received.
     batch = (DIGESTS_DIR / "CURRENT").read_text(encoding="utf-8").strip()
     titles = load_routing()["desk_titles"]
-    delivered = [titles[f.stem] for f in sorted((DIGESTS_DIR / batch).glob("*.md"))
-                 if bw.ADVISORY in f.read_text(encoding="utf-8")]
+    delivered = {}
+    for f in sorted((DIGESTS_DIR / batch).glob("*.md")):
+        block = _desk_block(f.read_text(encoding="utf-8"), bw.ADVISORY)
+        if block is not None:
+            delivered[titles[f.stem]] = block
     question = section(page, "question")
-    said = re.search(r"reached (\d+) desks?: ([^<]*?)\. ", question)
-    named = sorted(x.strip() for x in said.group(2).split(",")) if said else None
-    out.append((bool(delivered) and said is not None and int(said.group(1)) == len(delivered)
-                and named == sorted(html.escape(t) for t in delivered),
-                "#question's desks are exactly the batch %s desk digests that carry %s" % (batch, bw.ADVISORY),
-                "delivered: %s; page says: %s" % (delivered, said.group(0) if said else "nothing")))
+    said = {}
+    for m in re.finditer(r'<li class="desk">(.+?): (\d+) approved(?: \(([^)]*)\))?; '
+                         r'(\d+) awaiting review(?: \(([^)]*)\))?</li>', question):
+        app = [x.strip() for x in (m.group(3) or "").split(",") if x.strip()]
+        wait = [x.strip() for x in (m.group(5) or "").split(",") if x.strip()]
+        ok_n = int(m.group(2)) == len(app) and int(m.group(4)) == len(wait)
+        said[html.unescape(m.group(1))] = (sorted(html.unescape(x) for x in app),
+                                           sorted(html.unescape(x) for x in wait), ok_n)
+    wrong = sorted(t for t in set(delivered) | set(said)
+                   if t not in said or t not in delivered or said[t][:2] != delivered[t] or not said[t][2])
+    out.append((bool(delivered) and not wrong,
+                "#question's per-desk approved/awaiting ids equal each batch %s desk file's %s block"
+                % (batch, bw.ADVISORY),
+                "files: %s; page: %s; wrong: %s" % (delivered, {k: v[:2] for k, v in said.items()}, wrong)))
+
+    # Section 1's counts, recomputed here from the files -- not read back from the builder.
+    proposals, _ = load_queue_files([QUEUE_DIR / ("%s.jsonl" % bw.DECIDED_RUN)])
+    standing = gd.latest(pinned)
+    n_ext = sum(1 for t in record["typologies"] if t.get("added_by") in (None, "extractor"))
+    want = {"typologies": len(record["typologies"]), "extractor": n_ext,
+            "reviewer": len(record["typologies"]) - n_ext,
+            "emergent": sum(1 for t in record["typologies"] if not t.get("typology_id")),
+            "proposals": len(proposals),
+            "approved": sum(1 for d in standing.values() if d.decision == "approve"),
+            "rejected": sum(1 for d in standing.values() if d.decision == "reject"),
+            "desks": len(delivered)}
+    got = {m.group(1): int(m.group(2)) for m in re.finditer(r'data-count="([a-z]+)">(\d+)<', question)}
+    out.append((got == want, "every count in #question equals the guard's own count from the files",
+                "want %s; page %s" % (want, got)))
+
+    # Two extractions: the record's typologies and the decided run's proposals are separate runs.
+    ext = {t["typology_id"] for t in record["typologies"]
+           if t.get("typology_id") and t.get("added_by") in (None, "extractor")}
+    rev = {t["typology_id"] for t in record["typologies"] if t.get("typology_id") and t.get("added_by") == "reviewer"}
+    run = {p.typology_id for p in proposals if p.typology_id}
+    sets = {"both": run & ext, "record-only": ext - run, "run-only": run - ext - rev, "run-reviewer": run & rev}
+    shown_sets = {m.group(1): {x.strip() for x in m.group(2).split(",") if x.strip() and x.strip() != "none"}
+                  for m in re.finditer(r'<span class="ids" data-set="([a-z-]+)">([^<]*)</span>', extraction)}
+    out.append((bool(run) and shown_sets == {k: v for k, v in sets.items()},
+                "#extraction's two-extractions paragraph names exactly the computed set differences",
+                "want %s; page %s" % ({k: sorted(v) for k, v in sets.items()},
+                                      {k: sorted(v) for k, v in shown_sets.items()})))
+
+    # Each decision sits under the card of the link it decides, verdict and note together.
+    articles = re.findall(r'<article class="link">(.*?)</article>', review, re.S)
+    misplaced = []
+    for d in pinned:
+        name = d.typology_id or d.emergent_label
+        unit = '<b class="%s">%s</b> <span class="note">%s</span>' % (
+            html.escape(d.decision), html.escape(d.decision.upper()), html.escape(d.note or "(no note)"))
+        home = [a for a in articles if ("PROPOSED LINK  %s " % name) in a
+                or ("PROPOSED EMERGENT TYPOLOGY  %s" % html.escape(repr(name))) in a]
+        if len(home) != 1 or unit not in home[0]:
+            misplaced.append("%s (%d cards name it)" % (name, len(home)))
+    out.append((bool(pinned) and not misplaced,
+                "every pinned decision's verdict and note sit in the card naming its typology",
+                "misplaced: %s" % misplaced))
 
     for sid in ("grounding", "review"):
         out.append((bw.DECIDED_RUN in section(page, sid), "#%s names the decided run %s" % (sid, bw.DECIDED_RUN),
@@ -171,7 +248,7 @@ def checks() -> list:
 def main(argv: list) -> int:
     global MUTATION
     ap = argparse.ArgumentParser(description="Pin the public walkthrough page")
-    ap.add_argument("--mutate", choices=("drop-citation", "unpinned-log"), help="break one rule; checks MUST fail")
+    ap.add_argument("--mutate", choices=MUTATIONS, help="break one rule; checks MUST fail")
     args = ap.parse_args(argv)
     MUTATION = args.mutate
     if args.mutate:

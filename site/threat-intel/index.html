@@ -47,8 +47,8 @@
   p{margin:0 0 13px;color:var(--ink2)}
   p strong{color:var(--ink)}
   .chain{list-style:none;margin:0;padding:0}
-  .chain li{border-left:2px solid var(--edge);padding:0 0 4px 14px;margin:0 0 6px}
-  .chain li:last-child{border-left-color:var(--gold)}
+  .chain>li{border-left:2px solid var(--edge);padding:0 0 4px 14px;margin:0 0 6px}
+  .chain>li:last-child{border-left-color:var(--gold)}
   .step{display:block;font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);margin-bottom:3px}
   .facts{display:grid;grid-template-columns:max-content 1fr;gap:6px 16px;margin:0 0 14px}
   .facts dt{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink3);padding-top:3px}
@@ -76,6 +76,11 @@
   .approve{color:var(--good)}
   .reject{color:var(--crit)}
   .flag{border-left:2px solid var(--gold);padding-left:10px;color:var(--ink)}
+  .desks{margin:0 0 6px;padding-left:18px;color:var(--ink2)}
+  .desks li{margin:0 0 3px}
+  .why{margin:2px 0 6px;font-size:13px;color:var(--ink2)}
+  .why summary{cursor:pointer;font-family:var(--mono);font-size:11px;color:var(--ink3)}
+  .why p{margin:6px 0 0;overflow-wrap:anywhere}
   @media (max-width:640px){
     h1{font-size:23px}
     table.rows thead{display:none}
@@ -117,9 +122,14 @@
     <li><span class="step">Capability</span>
       <p>An extraction agent reads the advisory and writes a governed record: every typology it asserts carries a page number and a verbatim quote from a document pinned by its sha256. The agent's only write is <code>propose_link</code>, which will not record a proposal whose quote it cannot find on the cited page. A second, reviewer agent adds what the extractor missed, each addition with its justification; the owner decides each proposed link at a review gate; every decision is a dated line in an append-only log.</p></li>
     <li><span class="step">Intelligence produced</span>
-      <p>9 typologies asserted in the record &mdash; 5 by the extractor, 4 added by the reviewer agent, 1 of them emergent (not in the typology library). Run <code>adv-2026-0013-extractor-f617bd3b00</code> proposed 5 links; the owner approved 5 and rejected 0.</p></li>
+      <p><span class="count" data-count="typologies">9</span> typologies asserted in the record &mdash; <span class="count" data-count="extractor">5</span> by the extractor, <span class="count" data-count="reviewer">4</span> added by the reviewer agent, <span class="count" data-count="emergent">1</span> of them emergent (not in the typology library). Run <code>adv-2026-0013-extractor-f617bd3b00</code> made <span class="count" data-count="proposals">5</span> proposals; the owner approved <span class="count" data-count="approved">5</span> links and rejected <span class="count" data-count="rejected">0</span>.</p></li>
     <li><span class="step">Investigator outcome</span>
-      <p>The advisory reached 3 desks: Trade desk, Sanctions desk, Correspondent banking desk. Each desk reads the approved links in its own family, quoted from the page they came from.</p></li>
+      <p>The advisory reached <span class="count" data-count="desks">3</span> desks. What each desk's digest carries for it:</p>
+      <ul class="desks">
+        <li class="desk">Trade desk: 0 approved; 2 awaiting review (TBML002U, TBML008)</li>
+        <li class="desk">Sanctions desk: 4 approved (SAN001, SAN003, SAN004, SAN007); 1 awaiting review (SAN005)</li>
+        <li class="desk">Correspondent banking desk: 1 approved (BA005); 1 awaiting review (BA008)</li>
+      </ul></li>
   </ol>
 </section>
 
@@ -138,7 +148,7 @@
 
 <section id="extraction">
   <h2><span class="n">03</span> What the record asserts</h2>
-  <p>The merged record for ADV-2026-0013: 9 typologies, each with the quotes that ground it. &ldquo;Owner&rdquo; is the standing decision in the pinned decision log, where there is one.</p>
+  <p>The merged record for ADV-2026-0013: 9 typologies, each with the quotes that ground it. &ldquo;Owner&rdquo; is the standing decision in the pinned decision log; a typology with none is awaiting review.</p>
   <table class="rows">
     <thead><tr><th>Typology</th><th>Family</th><th>Asserted by</th><th>Owner</th><th>Citations</th></tr></thead>
     <tbody>
@@ -167,52 +177,52 @@
       <td data-h="Typology"><code>BA008</code> Layering</td>
       <td data-h="Family">correspondent_banking</td>
       <td data-h="Asserted by">extractor</td>
-      <td data-h="Owner">not decided</td>
+      <td data-h="Owner">awaiting review</td>
       <td data-h="Citations"><div class="cite"><span class="pg">p5</span><blockquote>Transferring funds from shell companies in foreign jurisdictions into U.S. bank accounts</blockquote></div></td>
     </tr>
     <tr>
       <td data-h="Typology"><code>TBML002U</code> Under Invoicing</td>
       <td data-h="Family">tbml</td>
       <td data-h="Asserted by">extractor</td>
-      <td data-h="Owner">not decided</td>
+      <td data-h="Owner">awaiting review</td>
       <td data-h="Citations"><div class="cite"><span class="pg">p5</span><blockquote>Making false or misleading statements on shipping forms, including underestimating the</blockquote></div><div class="cite"><span class="pg">p5</span><blockquote>purchase price of merchandise by more than five times the actual amount</blockquote></div></td>
     </tr>
     <tr>
       <td data-h="Typology"><code>SAN005</code> Name Screening Evasion</td>
       <td data-h="Family">sanctions</td>
       <td data-h="Asserted by">reviewer</td>
-      <td data-h="Owner">not decided</td>
-      <td data-h="Citations"><div class="cite"><span class="pg">p5</span><blockquote>Using aliases for the identities of the intermediaries and end users21;</blockquote></div></td>
+      <td data-h="Owner">awaiting review</td>
+      <td data-h="Citations"><div class="cite"><span class="pg">p5</span><blockquote>Using aliases for the identities of the intermediaries and end users21;</blockquote></div><details class="why"><summary>Reviewer&rsquo;s justification</summary><p>Found in Criminal enforcement section, tactics bullet list, page 5. SAN005 doctrine: &#x27;Name Screening Evasion is the defeat of list-based screening through the form of the name: aliases, transliterations, suffix variants... that let a listed party transact under a name an exact-match filter never flags.&#x27; The advisory alleges defendants used aliases for the intermediaries and end users in the procurement scheme -- the same mechanism of engineering the name on transaction paperwork so it will not resolve to the true (potentially listed) party during screening.</p></details></td>
     </tr>
     <tr>
       <td data-h="Typology"><code>TBML008</code> Third Party Payment Abuse</td>
       <td data-h="Family">tbml</td>
       <td data-h="Asserted by">reviewer</td>
-      <td data-h="Owner">not decided</td>
-      <td data-h="Citations"><div class="cite"><span class="pg">p2</span><blockquote>Payment coming from a third-party country or business not listed on the End-User Statement3 or other applicable end-user form;</blockquote></div></td>
+      <td data-h="Owner">awaiting review</td>
+      <td data-h="Citations"><div class="cite"><span class="pg">p2</span><blockquote>Payment coming from a third-party country or business not listed on the End-User Statement3 or other applicable end-user form;</blockquote></div><details class="why"><summary>Reviewer&rsquo;s justification</summary><p>Found in Red flag list, page 2. TBML008 doctrine: &#x27;Third Party Payment Abuse settles a trade through a payer who is not the trade counterparty... The payment breaks the link between the trade and the funds.&#x27; This red flag names exactly that pattern -- settlement arriving from a country or business absent from the end-user paperwork governing the underlying trade -- matching the Third-Party Payer indicator directly.</p></details></td>
     </tr>
     <tr>
       <td data-h="Typology"><code>BA005</code> Rapid Movement</td>
       <td data-h="Family">correspondent_banking</td>
       <td data-h="Asserted by">reviewer</td>
       <td data-h="Owner">approved 2026-09-24</td>
-      <td data-h="Citations"><div class="cite"><span class="pg">p5</span><blockquote>Transferring funds from shell companies in foreign jurisdictions into U.S. bank accounts and quickly forwarding or distributing funds to obfuscate the audit trail or the foreign source of the money22;</blockquote></div></td>
+      <td data-h="Citations"><div class="cite"><span class="pg">p5</span><blockquote>Transferring funds from shell companies in foreign jurisdictions into U.S. bank accounts and quickly forwarding or distributing funds to obfuscate the audit trail or the foreign source of the money22;</blockquote></div><details class="why"><summary>Reviewer&rsquo;s justification</summary><p>Found in Criminal enforcement section, tactics bullet list, page 5. BA005 doctrine: Rapid Movement &#x27;is defined by HOW FAST the funds move&#x27; -- funds land and clear back out almost immediately -- as distinct from BA008 Layering&#x27;s distance/opacity axis (already claimed for this same allegation). The advisory&#x27;s own word &#x27;quickly forwarding&#x27; names the velocity element BA005 captures, over and above the multi-hop distance BA008 addresses. Single-sentence evidence limits this to low confidence.</p></details></td>
     </tr>
     <tr>
       <td data-h="Typology"><code>emergent</code> Shipment Splitting to Evade Export Control Detection</td>
       <td data-h="Family">sanctions</td>
       <td data-h="Asserted by">reviewer</td>
-      <td data-h="Owner">not decided</td>
-      <td data-h="Citations"><div class="cite"><span class="pg">p5</span><blockquote>Dividing shipments of controlled items into multiple, smaller shipments to try to avoid law enforcement detection20;</blockquote></div></td>
+      <td data-h="Owner">awaiting review</td>
+      <td data-h="Citations"><div class="cite"><span class="pg">p5</span><blockquote>Dividing shipments of controlled items into multiple, smaller shipments to try to avoid law enforcement detection20;</blockquote></div><details class="why"><summary>Reviewer&rsquo;s justification</summary><p>Found in Criminal enforcement section, tactics bullet list, page 5. No library typology covers this mechanism: BA001 Structuring addresses cash deposits kept under a CTR reporting threshold (a financial-transaction pattern), and TBML003 Multiple Invoicing addresses raising several invoices against one shipment (a documentary pattern), neither of which is dividing the physical goods movement itself into smaller consignments to stay below detection thresholds. The advisory describes a distinct physical-shipment fragmentation technique for export-control evasion that the current library does not name.</p></details></td>
     </tr>
     </tbody>
   </table>
-  <p class="flag"><code>SAN001</code> is approved but not in this record: it reached the owner as a proposal from run adv-2026-0013-extractor-f617bd3b00, not through the record. Section 5 shows the decision.</p>
+  <p class="flag">The record and the decided proposals come from two separate extractions of this document. Both assert <span class="ids" data-set="both">SAN003, SAN004, SAN007</span>. The record&rsquo;s extractor also asserted <span class="ids" data-set="record-only">BA008, TBML002U</span>, which run <code>adv-2026-0013-extractor-f617bd3b00</code> (proposals written 2026-09-24) did not propose; that run proposed <span class="ids" data-set="run-only">SAN001</span>, which the record lacks, and <span class="ids" data-set="run-reviewer">BA005</span>, which the record carries only as a reviewer addition. The owner decides links, on the quotes shown in section 5.</p>
 </section>
 
 <section id="grounding">
   <h2><span class="n">04</span> Grounding: the proposals</h2>
-  <p>Run <code>adv-2026-0013-extractor-f617bd3b00</code> proposed 5 proposals. Each quote was located on its cited page of the pinned document by <code>propose_link</code> before the proposal was written &mdash; that is the tool's contract, and a quote it cannot place is refused, never queued. This page is built without the PDF and does not re-check them.</p>
+  <p>Run <code>adv-2026-0013-extractor-f617bd3b00</code> made 5 proposals. Each quote was located on its cited page of the pinned document by <code>propose_link</code> before the proposal was written &mdash; that is the tool&rsquo;s contract, and a quote it cannot place is refused, never queued. This page is built without the PDF and does not re-check them.</p>
   <ol class="props">
     <li class="proposal">
       <div class="ph"><code>SAN003</code> Transshipment <span class="conf">confidence high</span></div>
@@ -239,10 +249,10 @@
 
 <section id="review">
   <h2><span class="n">05</span> Review: what the owner saw, and decided</h2>
-  <p>Each card is rendered exactly as the review gate showed it, from run <code>adv-2026-0013-extractor-f617bd3b00</code>'s queue, followed by the owner's decision. Built from the first 5 lines of the decision log, the prefix digest batch <code>slice1-2026-09-25</code> pinned (sha256 <span class="hash">7edd4aba25f738993abbbe2c86cfd2b554167c87e34d8a7eb1ffd32165bdb9c2</span>); 5 of them decide ADV-2026-0013.</p>
+  <p>The decisions shown are the first 5 lines of the owner&rsquo;s decision log &mdash; the lines digest batch <code>slice1-2026-09-25</code> was built from (sha256 <span class="hash">7edd4aba25f738993abbbe2c86cfd2b554167c87e34d8a7eb1ffd32165bdb9c2</span>); 5 of them decide ADV-2026-0013.</p>
+  <p>Each card is rendered by the review gate&rsquo;s own card renderer from run <code>adv-2026-0013-extractor-f617bd3b00</code>&rsquo;s queue, without the terminal&rsquo;s separator line, and followed by the owner&rsquo;s decision. &ldquo;Golden label HOLDS&rdquo; or &ldquo;LACKS&rdquo; on a card refers to a hand-written reference answer for this advisory, shown to the owner as context only, never a rule.</p>
   <article class="link">
-    <pre>====================================================================================================
-ADV-2026-0013  Tri-Seal Compliance Note: Cracking Down on Third-Party Intermediaries Used to Evade Russia-Related Sanctions and Export Controls
+    <pre>ADV-2026-0013  Tri-Seal Compliance Note: Cracking Down on Third-Party Intermediaries Used to Evade Russia-Related Sanctions and Export Controls
 PROPOSED LINK  BA005  Rapid Movement  [correspondent_banking]
     Rapid movement is the velocity / layering signal at the heart of correspondent-banking
     monitoring: funds land on an account and clear back out again almost immediately, resting
@@ -268,8 +278,7 @@ FROM  1 proposal, runs: adv-2026-0013-extractor-f617bd3b00, stages: extractor</p
     </ul>
   </article>
   <article class="link">
-    <pre>====================================================================================================
-ADV-2026-0013  Tri-Seal Compliance Note: Cracking Down on Third-Party Intermediaries Used to Evade Russia-Related Sanctions and Export Controls
+    <pre>ADV-2026-0013  Tri-Seal Compliance Note: Cracking Down on Third-Party Intermediaries Used to Evade Russia-Related Sanctions and Export Controls
 PROPOSED LINK  SAN001  Ownership Evasion  [sanctions]
     Beneficial Ownership Evasion is the use of layered holding structures, nominee arrangements
     and secrecy jurisdictions to conceal that a designated party ultimately owns or controls an
@@ -287,14 +296,13 @@ RATIONALE
     SAN001&#x27;s concealment-of-ultimate-ownership mechanism. This rests on a single red-flag bullet
     rather than a developed case narrative, so confidence is medium rather than high.
 FROM  1 proposal, runs: adv-2026-0013-extractor-f617bd3b00, stages: extractor</pre>
-    <p class="flag"><code>SAN001</code> is not in the merged record: it reached the owner as this run's proposal, not through the record. The digest still routes it, to the Sanctions desk, marked &ldquo;owner-approved, not in the record&rdquo;.</p>
+    <p class="flag"><code>SAN001</code> is not in the merged record: it reached the owner as this run&rsquo;s proposal, not through the record. The digest still routes it, to the Sanctions desk, marked &ldquo;owner-approved, not in the record&rdquo;.</p>
     <ul class="decisions">
       <li class="decision"><time>2026-09-24</time> <b class="approve">APPROVE</b> <span class="note">single red-flag bullet naming ownership concealment (p2); medium</span></li>
     </ul>
   </article>
   <article class="link">
-    <pre>====================================================================================================
-ADV-2026-0013  Tri-Seal Compliance Note: Cracking Down on Third-Party Intermediaries Used to Evade Russia-Related Sanctions and Export Controls
+    <pre>ADV-2026-0013  Tri-Seal Compliance Note: Cracking Down on Third-Party Intermediaries Used to Evade Russia-Related Sanctions and Export Controls
 PROPOSED LINK  SAN003  Transshipment  [sanctions]
     Transshipment Evasion is the routing of goods through an intermediary jurisdiction to
     disguise their true origin or destination and defeat origin-based sanctions controls. Cargo
@@ -320,8 +328,7 @@ FROM  1 proposal, runs: adv-2026-0013-extractor-f617bd3b00, stages: extractor</p
     </ul>
   </article>
   <article class="link">
-    <pre>====================================================================================================
-ADV-2026-0013  Tri-Seal Compliance Note: Cracking Down on Third-Party Intermediaries Used to Evade Russia-Related Sanctions and Export Controls
+    <pre>ADV-2026-0013  Tri-Seal Compliance Note: Cracking Down on Third-Party Intermediaries Used to Evade Russia-Related Sanctions and Export Controls
 PROPOSED LINK  SAN004  Front Companies  [sanctions]
     A front company is an entity with little or no genuine economic substance, established to
     give a sanctioned interest a clean commercial face. It exists to transact — to hold
@@ -347,8 +354,7 @@ FROM  1 proposal, runs: adv-2026-0013-extractor-f617bd3b00, stages: extractor</p
     </ul>
   </article>
   <article class="link">
-    <pre>====================================================================================================
-ADV-2026-0013  Tri-Seal Compliance Note: Cracking Down on Third-Party Intermediaries Used to Evade Russia-Related Sanctions and Export Controls
+    <pre>ADV-2026-0013  Tri-Seal Compliance Note: Cracking Down on Third-Party Intermediaries Used to Evade Russia-Related Sanctions and Export Controls
 PROPOSED LINK  SAN007  Dual Use Goods  [sanctions]
     Dual-use goods are items with a legitimate civilian use that can also serve a military or
     proliferation purpose — electronics, precision instruments, controlled technology. Sanctions
