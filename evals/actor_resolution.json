@@ -1,0 +1,201 @@
+{
+  "ambiguous": 4,
+  "ambiguous_actors": [
+    {
+      "advisory_id": "ADV-2026-0010",
+      "entries": [
+        "ACT-0033",
+        "ACT-0052"
+      ],
+      "name": "Islamic Revolutionary Guard Corps"
+    },
+    {
+      "advisory_id": "ADV-2026-0010",
+      "entries": [
+        "ACT-0034",
+        "ACT-0052"
+      ],
+      "name": "IRGC-Qods Force"
+    },
+    {
+      "advisory_id": "ADV-2026-0012",
+      "entries": [
+        "ACT-0033",
+        "ACT-0052"
+      ],
+      "name": "Islamic Revolutionary Guard Corps (IRGC)"
+    },
+    {
+      "advisory_id": "ADV-2026-0012",
+      "entries": [
+        "ACT-0034",
+        "ACT-0052"
+      ],
+      "name": "IRGC-Qods Force (IRGC-QF)"
+    }
+  ],
+  "categories": 52,
+  "named": 102,
+  "per_advisory": {
+    "ADV-2026-0001": {
+      "named": 0,
+      "resolved": 0
+    },
+    "ADV-2026-0002": {
+      "named": 0,
+      "resolved": 0
+    },
+    "ADV-2026-0003": {
+      "named": 8,
+      "resolved": 6
+    },
+    "ADV-2026-0004": {
+      "named": 6,
+      "resolved": 2
+    },
+    "ADV-2026-0005": {
+      "named": 3,
+      "resolved": 3
+    },
+    "ADV-2026-0006": {
+      "named": 7,
+      "resolved": 5
+    },
+    "ADV-2026-0007": {
+      "named": 3,
+      "resolved": 1
+    },
+    "ADV-2026-0008": {
+      "named": 2,
+      "resolved": 0
+    },
+    "ADV-2026-0009": {
+      "named": 10,
+      "resolved": 10
+    },
+    "ADV-2026-0010": {
+      "named": 17,
+      "resolved": 12
+    },
+    "ADV-2026-0011": {
+      "named": 4,
+      "resolved": 4
+    },
+    "ADV-2026-0012": {
+      "named": 14,
+      "resolved": 7
+    },
+    "ADV-2026-0013": {
+      "named": 6,
+      "resolved": 2
+    },
+    "ADV-2026-0014": {
+      "named": 3,
+      "resolved": 2
+    },
+    "ADV-2026-0015": {
+      "named": 4,
+      "resolved": 0
+    },
+    "ADV-2026-0016": {
+      "named": 6,
+      "resolved": 6
+    },
+    "ADV-2026-0017": {
+      "named": 7,
+      "resolved": 7
+    },
+    "ADV-2026-0018": {
+      "named": 1,
+      "resolved": 0
+    },
+    "ADV-2026-0019": {
+      "named": 1,
+      "resolved": 1
+    },
+    "ADV-2026-0020": {
+      "named": 0,
+      "resolved": 0
+    }
+  },
+  "resolved": 68,
+  "suggestions": [
+    {
+      "advisory_id": "ADV-2026-0003",
+      "name": "Company X",
+      "suggestions": [
+        {
+          "actor_id": "ACT-0037",
+          "name": "National Iranian Oil Company",
+          "score": 1.0
+        },
+        {
+          "actor_id": "ACT-0042",
+          "name": "GCM Exchange",
+          "score": 1.0
+        },
+        {
+          "actor_id": "ACT-0043",
+          "name": "Berelian Exchange",
+          "score": 1.0
+        }
+      ]
+    },
+    {
+      "advisory_id": "ADV-2026-0008",
+      "name": "Islamic State in Iraq and the Levant (ISIL)",
+      "suggestions": [
+        {
+          "actor_id": "ACT-0021",
+          "name": "Islamic State in Iraq and the Levant",
+          "score": 1.0
+        }
+      ]
+    },
+    {
+      "advisory_id": "ADV-2026-0010",
+      "name": "Islamic Republic of Iran",
+      "suggestions": [
+        {
+          "actor_id": "ACT-0054",
+          "name": "Islamic Republic of Iran Shipping Lines",
+          "score": 1.0
+        },
+        {
+          "actor_id": "ACT-0056",
+          "name": "Iran-Syria oil procurement network",
+          "score": 1.0
+        }
+      ]
+    },
+    {
+      "advisory_id": "ADV-2026-0012",
+      "name": "Iran",
+      "suggestions": [
+        {
+          "actor_id": "ACT-0054",
+          "name": "Islamic Republic of Iran Shipping Lines",
+          "score": 1.0
+        },
+        {
+          "actor_id": "ACT-0056",
+          "name": "Iran-Syria oil procurement network",
+          "score": 1.0
+        }
+      ]
+    },
+    {
+      "advisory_id": "ADV-2026-0012",
+      "name": "Syria",
+      "suggestions": [
+        {
+          "actor_id": "ACT-0056",
+          "name": "Iran-Syria oil procurement network",
+          "score": 1.0
+        }
+      ]
+    }
+  ],
+  "unresolved": 30,
+  "unresolved_with_suggestions": 5
+}
