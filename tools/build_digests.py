@@ -5,6 +5,11 @@ Usage:
     python tools/build_digests.py --batch-id slice1-2026-09-24            # write data/digests/<batch_id>/
     python tools/build_digests.py --batch-id slice1-2026-09-24 --check    # prove the committed batch
     python tools/build_digests.py --batch-id slice1-2026-09-24 --backfill-manifest
+    python tools/build_digests.py --current --check                        # check the batch data/digests/CURRENT names
+
+data/digests/CURRENT names the batch the guards check, one id and a newline. It is data,
+not a string in tools/check_all.py: cutting a new batch is one tracked edit beside the
+batch, and the guard list does not change.
 
 A batch is a SNAPSHOT. manifest.json pins what it was built from: the decision log's
 first N lines (count and hash), the hash of every record and queue file, and the hash of
@@ -45,6 +50,7 @@ from governance.routing import ROUTING, load_routing  # noqa: E402
 
 BATCH_ID = re.compile(r"^[a-z0-9][a-z0-9-]{0,60}$")
 MANIFEST = "manifest.json"
+CURRENT = DIGESTS_DIR / "CURRENT"
 _MUTATE = None  # set only by evals/check_digest_batch.py through --_mutate
 
 
@@ -137,7 +143,10 @@ def check(batch_id: str, out_dir: Path, records_dir: Path, queue_dir: Path, log_
 def main(argv: list) -> int:
     global _MUTATE
     ap = argparse.ArgumentParser(description="Build or check a batch of desk digests")
-    ap.add_argument("--batch-id", required=True)
+    which = ap.add_mutually_exclusive_group(required=True)
+    which.add_argument("--batch-id")
+    which.add_argument("--current", action="store_true",
+                       help="with --check: the batch named in data/digests/CURRENT")
     ap.add_argument("--records-dir", type=Path, default=RECORDS_DIR)
     ap.add_argument("--queue-dir", type=Path, default=QUEUE_DIR)
     ap.add_argument("--log", type=Path, default=gd.LOG)
@@ -149,6 +158,23 @@ def main(argv: list) -> int:
     ap.add_argument("--routing", type=Path, default=ROUTING, help=argparse.SUPPRESS)
     args = ap.parse_args(argv)
     _MUTATE = args._mutate
+    if args.current:
+        if not args.check:
+            print("--current is only for --check: a new batch is built under an id you name", file=sys.stderr)
+            return 2
+        if args.out_dir.resolve() != DIGESTS_DIR.resolve():
+            print("--current reads %s and checks that tree only; name --batch-id with --out-dir"
+                  % CURRENT.relative_to(ROOT), file=sys.stderr)
+            return 2
+        if not CURRENT.exists():
+            print("%s is missing: no current batch is named" % CURRENT.relative_to(ROOT), file=sys.stderr)
+            return 2
+        text = CURRENT.read_text(encoding="utf-8")
+        args.batch_id = text[:-1] if text.endswith("\n") else text
+        if not BATCH_ID.fullmatch(args.batch_id):
+            print("%s holds %r, which is not a batch id (must match %s)"
+                  % (CURRENT.relative_to(ROOT), text, BATCH_ID.pattern), file=sys.stderr)
+            return 2
     if not BATCH_ID.match(args.batch_id):
         print("batch id must match %s" % BATCH_ID.pattern, file=sys.stderr)
         return 2
