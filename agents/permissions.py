@@ -8,7 +8,7 @@ allowed_tools auto-approves a whole tool before the callback runs (SDK
 CanUseToolShadowedWarning). As first specified, this item would have passed while
 checking nothing.
 
-So allowed_tools pre-approves ONLY the three read-only tools, and every other
+So allowed_tools pre-approves ONLY the four read-only tools, and every other
 MCP tool -- propose_link, and anything a future server exposes -- reaches this
 callback. The CLI's own StructuredOutput tool does not: it is auto-allowed and
 never consulted here (measured in the ADV-2026-0013 run). The callback allows a
@@ -42,11 +42,12 @@ READ_ONLY_TOOLS = tuple("mcp__%s__%s" % (SERVER_KEY, t) for t in (
     "knowledge_centre_list_typologies",
     "knowledge_centre_get_typology",
     "knowledge_centre_search_typologies",
+    "knowledge_centre_resolve_actor",
 ))
 PROPOSE_TOOL = "mcp__%s__knowledge_centre_propose_link" % SERVER_KEY
 WRITE_ALLOWLIST = frozenset({PROPOSE_TOOL})
 
-# The exact start of the SDK's advisory when these three are pre-approved.
+# The exact start of the SDK's advisory when these four are pre-approved.
 SHADOWING_MESSAGE = "can_use_tool will not be invoked for: %s." % ", ".join(READ_ONLY_TOOLS)
 
 
@@ -77,7 +78,7 @@ def permission_callback(run):
 
 @contextlib.contextmanager
 def expected_shadowing():
-    """Silence ONLY the SDK advisory naming exactly the three read-only tools.
+    """Silence ONLY the SDK advisory naming exactly the four read-only tools.
 
     They are pre-approved on purpose, so the advisory is expected on every run.
     Any other shadowing -- a different tool pre-approved -- still warns.

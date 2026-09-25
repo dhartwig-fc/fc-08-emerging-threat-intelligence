@@ -171,7 +171,7 @@ def static_checks() -> list:
 
     all_kc = {"mcp__%s__%s" % (SERVER_KEY, t) for t in KC_TOOLS}
     out.append((list(o.allowed_tools) == list(READ_ONLY_TOOLS),
-                "allowed_tools pre-approves ONLY the three read-only Knowledge Centre tools",
+                "allowed_tools pre-approves ONLY the four read-only Knowledge Centre tools",
                 "allowed_tools=%r" % (o.allowed_tools,)))
     out.append((PROPOSE_TOOL not in o.allowed_tools and set(o.allowed_tools) | WRITE_ALLOWLIST == all_kc,
                 "propose_link is NOT pre-approved; read-only + allowlist cover the four tools exactly",
@@ -194,12 +194,12 @@ def static_checks() -> list:
                 "the installed callback DENIES a write tool off the allowlist and ALLOWS propose_link",
                 "write -> %s, propose_link -> %s" % (type(denied).__name__, type(allowed).__name__)))
 
-    # And the argv: the CLI must be told to pre-approve exactly the three reads,
+    # And the argv: the CLI must be told to pre-approve exactly the four reads,
     # and must not be handed a mode that skips the callback.
     allowed_arg = cmd[cmd.index("--allowedTools") + 1] if "--allowedTools" in cmd else ""
     out.append((sorted(allowed_arg.split(",")) == sorted(READ_ONLY_TOOLS)
                 and "--permission-mode" not in cmd and "--dangerously-skip-permissions" not in cmd,
-                "argv pre-approves exactly the three read-only tools, with no permission mode or skip flag",
+                "argv pre-approves exactly the four read-only tools, with no permission mode or skip flag",
                 "--allowedTools %s" % allowed_arg))
     out.append((sorted(o.hooks or {}) == ["PostToolUse", "PostToolUseFailure"],
                 "the Post hooks are installed for telemetry", str(sorted(o.hooks or {}))))
@@ -212,7 +212,7 @@ def static_checks() -> list:
         raise RuntimeError("SDK no longer exposes _get_can_use_tool_shadowed_warning; re-derive this check")
     msg = sdk_types._get_can_use_tool_shadowed_warning(o.permission_mode, list(o.allowed_tools)) or ""
     out.append((msg.startswith(SHADOWING_MESSAGE),
-                "the SDK's shadowing advisory names exactly the three read-only tools", msg[:100]))
+                "the SDK's shadowing advisory names exactly the four read-only tools", msg[:100]))
     import warnings
     with warnings.catch_warnings(record=True) as seen:
         warnings.simplefilter("always")
@@ -232,6 +232,24 @@ def static_checks() -> list:
     out.append((Path(env.get("NEXUS_PROPOSALS_PATH", "")).parent == QUEUE_DIR,
                 "proposals go to the run's own tracked file under data/proposals/",
                 env.get("NEXUS_PROPOSALS_PATH", "")))
+
+    from mcp_server import knowledge_centre_server as kc
+    listed = asyncio.run(kc.mcp.list_tools())
+    names = sorted(t.name for t in listed)
+    out.append((names == sorted(KC_TOOLS),
+                "the server's tools are exactly KC_TOOLS: a tool added to the server is added to the lists",
+                str(names)))
+    # Installed SDK (mcp 2.2.0, MCPServer/2.x): ToolAnnotations exposes the hint
+    # as the Python attribute `read_only_hint`; `readOnlyHint` is only the
+    # pydantic alias used for wire JSON, not an attribute -- getattr(...,
+    # "readOnlyHint", False) would silently read False for every tool and this
+    # check would never pass. Measured directly against kc.mcp.list_tools()
+    # before writing this; if a future SDK renames the field back to camelCase,
+    # this needs re-deriving, not silently tolerating a wrong read.
+    ro = sorted("mcp__%s__%s" % (SERVER_KEY, t.name) for t in listed
+                if t.annotations is not None and getattr(t.annotations, "read_only_hint", False))
+    out.append((ro == sorted(READ_ONLY_TOOLS), "the tools annotated readOnlyHint are exactly READ_ONLY_TOOLS",
+                str(ro)))
     return out
 
 

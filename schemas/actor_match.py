@@ -59,3 +59,37 @@ SUGGEST_MIN = 0.60
 def variants_of(actor: dict) -> List[str]:
     """Every spelling an actor answers to: its name, then its aliases, blanks dropped."""
     return [v for v in [actor.get("name", "")] + list(actor.get("aliases") or []) if v and norm(v)]
+
+
+def resolve(names, actor_type, register, allow_category: bool = False, suggestions_resolve: bool = False) -> dict:
+    """Which register entry these spellings name, decided on EXACT normalised matches only.
+
+    Two entries matching is `ambiguous`, never a guess. No exact match is `unresolved`, with
+    up to three containment suggestions a human must confirm. A category is a class of
+    actor, not a party, and never resolves.
+    """
+    if actor_type == "category" and not allow_category:
+        return {"status": "category"}
+    keys = {norm(n) for n in names if norm(n)}
+    exact = []
+    for e in register:
+        hit = next((s for s in [e["name"]] + list(e.get("aliases") or []) if norm(s) in keys), None)
+        if hit is not None:
+            exact.append((e, hit))
+    if len(exact) == 1:
+        e, hit = exact[0]
+        return {"status": "resolved", "actor_id": e["actor_id"], "name": e["name"], "matched": hit}
+    if len(exact) > 1:
+        return {"status": "ambiguous", "entries": [{"actor_id": e["actor_id"], "name": e["name"]} for e, _ in exact]}
+    scored = []
+    for e in register:
+        spellings = [e["name"]] + list(e.get("aliases") or [])
+        s = max((containment(tokens(a), tokens(b)) for a in names for b in spellings), default=0.0)
+        if s >= SUGGEST_MIN:
+            scored.append((s, e))
+    scored.sort(key=lambda p: (-p[0], p[1]["actor_id"]))
+    suggestions = [{"actor_id": e["actor_id"], "name": e["name"], "score": round(s, 2)} for s, e in scored[:3]]
+    if suggestions_resolve and suggestions:
+        top = suggestions[0]
+        return {"status": "resolved", "actor_id": top["actor_id"], "name": top["name"], "matched": None}
+    return {"status": "unresolved", "suggestions": suggestions}

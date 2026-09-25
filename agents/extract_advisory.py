@@ -62,6 +62,7 @@ KC_TOOLS = (
     "knowledge_centre_list_typologies",
     "knowledge_centre_get_typology",
     "knowledge_centre_search_typologies",
+    "knowledge_centre_resolve_actor",
     "knowledge_centre_propose_link",
 )
 
@@ -171,7 +172,7 @@ def agent_options(model: str, max_budget_usd: float, max_turns: int, run: RunIde
     its own contract whether or not it chooses to use them. Guarded by
     `evals/check_tool_surface.py`, which proves both directions.
 
-    Week 5 adds the other half. `allowed_tools` pre-approves only the three
+    Week 5 adds the other half. `allowed_tools` pre-approves only the four
     read-only Knowledge Centre tools; `can_use_tool` (agents/permissions.py)
     decides every other MCP tool against WRITE_ALLOWLIST -- the CLI's own
     StructuredOutput tool is auto-allowed and never reaches it (measured in the

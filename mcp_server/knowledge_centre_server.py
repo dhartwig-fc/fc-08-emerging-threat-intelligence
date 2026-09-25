@@ -41,6 +41,7 @@ sys.path.insert(0, str(ROOT))
 from schemas.citation_match import PageIndex, file_sha256  # noqa: E402
 # The contract the review gate re-asserts: one definition for both sides.
 from schemas.proposal_contract import QUOTE_MAX, QUOTE_MIN, SCHEMA, proposal_id  # noqa: E402
+from schemas.actor_match import resolve as resolve_names  # noqa: E402
 
 # Set by the RUNNER (agents/run_identity.py), never by the agent. Read at call
 # time, not import time, so a guard can vary them between calls.
@@ -71,6 +72,14 @@ def _typologies() -> List[dict]:
     return _load_library().get("typologies", [])
 
 
+ACTOR_REGISTER_PATH = ROOT / "data" / "actor_register.json"
+
+
+def _register() -> List[dict]:
+    with open(ACTOR_REGISTER_PATH, "r", encoding="utf-8") as fh:
+        return json.load(fh)["actors"]
+
+
 # ---------------------------------------------------------------------------
 # Input models
 # ---------------------------------------------------------------------------
@@ -96,6 +105,15 @@ class SearchTypologiesInput(BaseModel):
 
     query: str = Field(..., min_length=3, max_length=300, description="Free-text phrase from the advisory")
     limit: int = Field(5, ge=1, le=20)
+
+
+class ResolveActorInput(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    name: str = Field(..., min_length=1, max_length=200, description="The actor's name as the document gives it")
+    actor_type: Optional[str] = Field(
+        None, pattern=r"^(person|organisation|vessel|wallet|jurisdiction|network|category|unknown)$",
+        description="The ActorType you would record. A category never resolves.")
 
 
 class ProposedCitation(BaseModel):
@@ -451,6 +469,33 @@ async def search_typologies(params: SearchTypologiesInput) -> str:
         line += _twin_line(r["typology_id"])
         out.append(line)
     return "\n".join(out)
+
+
+@mcp.tool(
+    name="knowledge_centre_resolve_actor",
+    annotations={"title": "Resolve actor", "readOnlyHint": True, "destructiveHint": False, "idempotentHint": True, "openWorldHint": False},
+)
+async def resolve_actor(params: ResolveActorInput) -> str:
+    """
+    Say which party in the governed actor register a name refers to.
+
+    Resolves only on an exact match to a registered name or alias. When two parties
+    answer to the name it says so and resolves neither. When nothing matches exactly it
+    may list similar names: those are suggestions for a human, NOT a resolution -- do not
+    record a suggested actor_id as the actor's identity. A category never resolves.
+    """
+    got = resolve_names([params.name], params.actor_type, _register())
+    if got["status"] == "category":
+        return "Not resolvable: a category is a class of actor, not a named party."
+    if got["status"] == "resolved":
+        return "Resolved: %s -> %s %s (matched %r)" % (params.name, got["actor_id"], got["name"], got["matched"])
+    if got["status"] == "ambiguous":
+        return "Ambiguous: %r names more than one registered party: %s. Resolved to none." % (
+            params.name, "; ".join("%s %s" % (e["actor_id"], e["name"]) for e in got["entries"]))
+    if not got["suggestions"]:
+        return "Unresolved: %r is not in the actor register." % params.name
+    return "Unresolved: %r is not in the actor register. Similar names (suggestions only, not identity): %s" % (
+        params.name, "; ".join("%s %s (%.2f)" % (s["actor_id"], s["name"], s["score"]) for s in got["suggestions"]))
 
 
 def _run_context() -> Optional[dict]:
