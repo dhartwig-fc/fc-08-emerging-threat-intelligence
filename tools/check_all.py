@@ -62,6 +62,7 @@ GUARDS = [
     ("check_actor_resolution", ["evals/check_actor_resolution.py"], "cold"),
     ("check_telemetry", ["evals/check_telemetry.py"], "cold"),
     ("check_tool_surface", ["evals/check_tool_surface.py"], "cold"),
+    ("check_publish_boundary", ["evals/check_publish_boundary.py"], "cold"),
     # The batch is DATA (data/digests/CURRENT), so cutting a new batch never edits this list.
     ("build_digests --check (current batch)", ["tools/build_digests.py", "--current", "--check"], "cold"),
     ("build_actor_register --check", ["tools/build_actor_register.py", "--check"], "cold"),
