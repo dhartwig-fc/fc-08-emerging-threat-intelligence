@@ -518,3 +518,24 @@ Engineering journal lives in `~/fc_vision_notes_dhartwig` (2026 entries). Filena
 
 - `fc-10-repo`: governed platform, consumer of this slice's output via the MCP contract
 - `dan-hartwig-portfolio/projects/nexus/`: public NEXUS site where slice 1 is published in week 6
+
+## Slice 2: live feeds (sub-project A, built 2026-09)
+
+Spec: `docs/superpowers/specs/2026-09-26-slice2-live-intelligence-design.md`. Plan: `docs/superpowers/plans/2026-09-26-slice2-a-foundations-and-sources.md`.
+
+| File | What it holds |
+|---|---|
+| `feeds/model.py` | `FeedItem`; its `key` (`<source>:<16 hex>`) is derived, so an agent cannot mint one; `LayoutChanged` |
+| `feeds/ledger.py` | `data/feeds/seen.json`, the ONLY record of what is new. Tracked. Written only by `tools/accept_run.py` (writer scan in `evals/check_feeds_ledger.py`) |
+| `feeds/inbox.py` | `inbox/<run_id>/` (gitignored): `items.json`, `listings/`, `docs/<sha256>.<ext>`. Pinned files are immutable; paths cannot leave the run's folder |
+| `feeds/sources.py` | the OFSI (Atom), FinCEN and OFAC (HTML listing) adapters. Each raises `LayoutChanged` when its marker is gone, when nothing parses, or when an item has no date -- never "0 new items" |
+| (FinCEN rows) | an advisory row is recognised by its title cell; one that loses its link raises LayoutChanged, so a single missing advisory cannot silently shrink the list |
+| `feeds/http.py` | the one fetch: https only, exact host with no other port and no userinfo, a redirect off the list refused BEFORE the request, content types, a size cap, a 2-second gap, a descriptive user agent |
+| `mcp_server/feeds_server.py` | `feeds_list_new(source)` and `feeds_fetch(item_key)`. Run identity from `FEEDS_RUN_ID`; the agent never supplies a URL |
+| `tools/accept_run.py` | the only way live results enter tracked data. In A it records DROPS only; `accept` is refused until sub-project C builds the move |
+| `tools/feeds_probe.py` | the one tool that touches the network in A: parses each LIVE listing, by hand, never from `check_all` |
+| `schemas/html_pages.py` | the HTML pagination rule behind `PageIndex.from_html`: `<main>`, else `<article>`, else `<body>`; chrome dropped; whole paragraphs; pages of about 3000 characters. **Changing it re-pages every HTML citation**; both page digests are pinned in `evals/check_html_pages.py` |
+
+**Measured 2026-09-26: FinCEN's and OFSI's listed URLs are landing pages.** The advisory is a PDF linked from them. `feeds_fetch` pins the landing page and records its linked PDFs, but does not fetch them; following them is a sub-project C decision. OFAC's recent action is the page itself.
+
+**An OFSI item's id carries its Atom timestamp**, so a revised GOV.UK publication is a new item.

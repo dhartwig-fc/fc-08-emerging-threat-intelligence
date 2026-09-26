@@ -79,7 +79,8 @@ def load(name: str, path: Path, mutation) -> types.ModuleType:
 def writer_violations(files: dict) -> list:
     out = []
     for rel, text in sorted(files.items()):
-        if "seen.json" in text and rel not in ("feeds/ledger.py", "evals/check_feeds_ledger.py"):
+        if "seen.json" in text and rel not in ("feeds/ledger.py", "evals/check_feeds_ledger.py",
+                                               "evals/check_feeds_server.py"):
             out.append("%s names seen.json" % rel)
         if "record_decisions(" in text and rel not in ("feeds/ledger.py", "tools/accept_run.py",
                                                        "evals/check_feeds_ledger.py"):

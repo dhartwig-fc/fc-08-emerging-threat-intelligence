@@ -1,0 +1,187 @@
+"""
+The feeds MCP server: the orchestrator's only way to see and fetch new publications (slice 2).
+
+Each tool carries one invariant, whatever the agent intends (spec section 1):
+
+  feeds_list_new(source)  "new" is decided by the committed seen-items ledger, never by the agent;
+                          only the three allowlisted sources exist; a listing is fetched at most once
+                          per run; a listing whose layout no longer parses is a loud failure, never
+                          "0 new items".
+  feeds_fetch(item_key)   fetches only the URL of an item THIS RUN listed, on its source's
+                          allowlisted hosts (redirects included), within size and type limits; pins
+                          the document by sha256; a second call does not fetch again.
+
+Both write only into inbox/<run_id>/ (feeds/inbox.py). The run identity comes from the runner's
+environment (FEEDS_RUN_ID), never from a tool argument. feeds_triage and feeds_extract are
+sub-projects B and C.
+
+Works on MCP Python SDK 2.x (MCPServer) and 1.x (FastMCP).
+"""
+
+from __future__ import annotations
+
+import hashlib
+import os
+import sys
+from datetime import datetime, timezone
+from pathlib import Path
+
+try:
+    from mcp.server.mcpserver import MCPServer as FastMCP
+except ImportError:  # MCP Python SDK 1.x
+    from mcp.server.fastmcp import FastMCP
+from pydantic import BaseModel, ConfigDict, Field
+
+ROOT = Path(__file__).resolve().parent.parent
+# The server is launched as a script, so the repo root is not on sys.path.
+sys.path.insert(0, str(ROOT))
+from feeds import http as feeds_http, inbox, ledger  # noqa: E402
+from feeds.model import LayoutChanged  # noqa: E402
+from feeds.sources import DOCUMENT_TYPES, MAX_DOCUMENT_BYTES, MAX_LISTING_BYTES, SOURCES, linked_pdfs  # noqa: E402
+from schemas.citation_match import PageIndex  # noqa: E402
+
+RUN_ENV = "FEEDS_RUN_ID"
+# Module attributes, never tool arguments, so the agent cannot choose them. A guard swaps them.
+INBOX_ROOT = inbox.INBOX_ROOT
+SEEN_PATH = ledger.SEEN_PATH
+HTTP_GET = feeds_http.get
+
+mcp = FastMCP("feeds_mcp")
+
+
+class ListNewInput(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    source: str = Field(..., pattern=r"^(ofsi|fincen|ofac)$", description="ofsi, fincen or ofac")
+
+
+class FetchInput(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    item_key: str = Field(..., pattern=r"^(ofsi|fincen|ofac):[0-9a-f]{16}$",
+                          description="A key feeds_list_new returned in this run")
+
+
+def _now() -> str:
+    return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+
+def _run_id():
+    run_id = os.environ.get(RUN_ENV, "")
+    return run_id if inbox.RUN_ID.match(run_id) else None
+
+
+NO_RUN = "Refused: this server has no run identity (%s is unset or malformed); the runner sets it." % RUN_ENV
+
+
+@mcp.tool(
+    name="feeds_list_new",
+    annotations={"title": "List new items", "readOnlyHint": False, "destructiveHint": False,
+                 "idempotentHint": False, "openWorldHint": True},
+)
+async def list_new(params: ListNewInput) -> str:
+    """
+    List a source's publications that no one has decided yet.
+
+    Fetches the source's listing once per run. An item is new only if it is not in the seen-items
+    ledger; you cannot declare an item new or old. Returns one row per new item:
+    key | published | title | summary. Pass a key to feeds_fetch to download that item.
+    """
+    run_id = _run_id()
+    if run_id is None:
+        return NO_RUN
+    state = inbox.load(run_id, INBOX_ROOT)
+    if params.source in state["sources"]:
+        return "Refused: %s was already listed in this run (status %s); a listing is fetched once per run." % (
+            params.source, state["sources"][params.source]["status"])
+    src = SOURCES[params.source]
+    entry = {"listed_at": _now(), "listing_url": src.listing_url, "status": "ok", "error": None, "listing": None,
+             "listing_sha256": None, "listed": 0, "already_seen": 0, "items": []}
+    state["sources"][params.source] = entry
+    try:
+        got = HTTP_GET(src.listing_url, allowed_hosts=src.hosts, allowed_types=src.listing_types,
+                       max_bytes=MAX_LISTING_BYTES)
+    except feeds_http.FetchRefused as exc:
+        entry.update(status="unreachable", error=str(exc))
+        inbox.save(run_id, state, INBOX_ROOT)
+        return "Failed: %s is unreachable: %s. Report it; it is not retried in this run." % (params.source, exc)
+    entry["listing"] = inbox.write_file(run_id, "listings/%s.%s" % (params.source, src.listing_ext), got.body,
+                                        INBOX_ROOT)
+    entry["listing_sha256"] = hashlib.sha256(got.body).hexdigest()
+    try:
+        items = src.parse(got.body)
+    except LayoutChanged as exc:
+        entry.update(status="layout_changed", error=str(exc))
+        inbox.save(run_id, state, INBOX_ROOT)
+        return "Failed: layout changed: %s. The listing is saved in the inbox. This is not '0 new items'." % exc
+    seen = ledger.load(SEEN_PATH)
+    new = [it for it in items if (it.source, it.item_id) not in seen]
+    entry.update(listed=len(items), already_seen=len(items) - len(new),
+                 items=[dict(it.to_json(), document=None) for it in new])
+    inbox.save(run_id, state, INBOX_ROOT)
+    if not new:
+        return "No new items: %s listed %d, every one already decided." % (params.source, len(items))
+    rows = ["%s | %s | %s | %s" % (it.key, it.published, it.title, it.summary or "-") for it in new]
+    return "%d new of %d listed on %s:\nkey | published | title | summary\n%s" % (
+        len(new), len(items), params.source, "\n".join(rows))
+
+
+def _describe(doc: dict) -> str:
+    pages = ("%d page(s), %d with text" % (doc["pages"], doc["text_pages"]) if doc["page_error"] is None
+             else "NOT PAGED (%s)" % doc["page_error"])
+    links = ("; it links %d PDF(s), not fetched: %s" % (len(doc["linked_pdfs"]), ", ".join(doc["linked_pdfs"]))
+             if doc["linked_pdfs"] else "")
+    return "%s (%s, %d bytes, sha256 %s), %s%s" % (doc["path"], doc["content_type"], doc["bytes"], doc["sha256"],
+                                                    pages, links)
+
+
+@mcp.tool(
+    name="feeds_fetch",
+    annotations={"title": "Fetch an item's document", "readOnlyHint": False, "destructiveHint": False,
+                 "idempotentHint": True, "openWorldHint": True},
+)
+async def fetch(params: FetchInput) -> str:
+    """
+    Download the document of an item feeds_list_new listed in this run, and pin it by sha256.
+
+    You give the key, never a URL: the tool fetches the item's own listed URL, on its source's
+    allowlisted hosts only. Returns the pinned file, its size, its number of text pages, and any
+    PDFs the page links to (listed, not fetched). A second call for the same item returns the
+    pinned file without fetching again.
+    """
+    run_id = _run_id()
+    if run_id is None:
+        return NO_RUN
+    state = inbox.load(run_id, INBOX_ROOT)
+    item = inbox.find_item(state, params.item_key)
+    if item is None:
+        return "Refused: %s was not listed as new in this run; call feeds_list_new first." % params.item_key
+    if item.get("document"):
+        return "Already fetched: %s" % _describe(item["document"])
+    src = SOURCES[item["source"]]
+    try:
+        got = HTTP_GET(item["url"], allowed_hosts=src.hosts, allowed_types=DOCUMENT_TYPES,
+                       max_bytes=MAX_DOCUMENT_BYTES)
+    except feeds_http.FetchRefused as exc:
+        item["fetch_error"] = str(exc)
+        inbox.save(run_id, state, INBOX_ROOT)
+        return "Failed: %s could not be fetched: %s" % (params.item_key, exc)
+    sha = hashlib.sha256(got.body).hexdigest()
+    is_pdf = got.content_type == "application/pdf"
+    rel = inbox.write_file(run_id, "docs/%s.%s" % (sha, "pdf" if is_pdf else "html"), got.body, INBOX_ROOT)
+    try:
+        index = (PageIndex.from_pdf(inbox.run_dir(run_id, INBOX_ROOT) / rel) if is_pdf
+                 else PageIndex.from_html(got.body))
+        pages, text_pages, error = len(index), sum(1 for p in index.pages if p.strip()), None
+    except Exception as exc:  # the document stays pinned, and the failure is recorded and returned
+        pages, text_pages, error = 0, 0, "%s: %s" % (type(exc).__name__, exc)
+    item["document"] = {"path": rel, "sha256": sha, "content_type": got.content_type, "bytes": len(got.body),
+                        "final_url": got.final_url, "fetched_at": _now(), "pages": pages,
+                        "text_pages": text_pages, "page_error": error,
+                        "linked_pdfs": [] if is_pdf else linked_pdfs(got.body, got.final_url)}
+    inbox.save(run_id, state, INBOX_ROOT)
+    return "Fetched: %s" % _describe(item["document"])
+
+
+if __name__ == "__main__":
+    mcp.run()
