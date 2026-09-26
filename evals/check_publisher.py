@@ -8,13 +8,21 @@ Usage:
     python evals/check_publisher.py --mutate skip-boundary    # the publisher skips pb.violations; MUST fail
     python evals/check_publisher.py --mutate skip-freshness   # the publisher skips the committed-equals-fresh
                                                                 # step; MUST fail
+    python evals/check_publisher.py --mutate disk-only        # the gate reads the portfolio's on-disk file, not
+                                                                # its committed HEAD copy; MUST fail
 
 WHAT IT CHECKS:
   - a publish into a temp portfolio writes the page byte-identical to the committed
     site/threat-intel/index.html, and records its sha256 in a redirected PUBLISHED file;
-  - evals.check_published_walkthrough.gate() passes right after that publish, FAILS once
-    the temp published copy diverges by one byte, and FAILS (cold half) when the temp
-    PUBLISHED file names a different sha;
+  - the temp portfolio is a GIT REPOSITORY (git init + an initial commit of projects/nexus/),
+    because the live site serves what the portfolio COMMITS, not what sits on its disk.
+    evals.check_published_walkthrough.gate() FAILS right after that publish -- the page is on
+    disk but untracked, which is exactly the state that would push a link to a 404 -- and
+    names the portfolio add+commit step; it HOLDS once the page is added and committed in the
+    temp repository; it FAILS when the portfolio commits a copy that differs by one byte; and
+    it FAILS (cold half) when the temp PUBLISHED file names a different sha;
+  - main() reports NOT RUN (exit 2) for a portfolio directory that is not a git repository:
+    without a HEAD there is no committed copy to compare, and passing would be a guess;
   - a portfolio root with no projects/nexus/ is refused with return 2, writing nothing;
   - a page that crosses the publish boundary is refused. The plant is put through the
     ADVISORY-TITLE input field (bw.inputs()["advisory"]["title"]), not the output: a plant
@@ -42,6 +50,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import shutil
+import subprocess
 import sys
 import tempfile
 from pathlib import Path
@@ -54,7 +63,7 @@ import build_walkthrough as bw  # noqa: E402
 import publish_walkthrough as pw  # noqa: E402
 from evals import check_published_walkthrough as cpw  # noqa: E402
 
-MUTATIONS = ("skip-boundary", "skip-freshness")
+MUTATIONS = ("skip-boundary", "skip-freshness", "disk-only")
 MUTATION = None
 
 
@@ -65,17 +74,44 @@ def _temp_portfolio(with_nexus: bool = True) -> Path:
     return root
 
 
+def _git(repo: Path, *args: str) -> subprocess.CompletedProcess:
+    """git in a TEMP repository only; no hooks, no signing, a fixed identity, so the machine's own git
+    configuration cannot change the outcome."""
+    return subprocess.run(["git", "-C", str(repo), "-c", "core.hooksPath=/dev/null", "-c", "commit.gpgsign=false",
+                           "-c", "user.name=check_publisher", "-c", "user.email=check_publisher@localhost"]
+                          + list(args), capture_output=True, text=True)
+
+
+def _temp_git_portfolio() -> Path:
+    """A temp portfolio that is a git repository: projects/nexus/ holds one file, committed."""
+    root = _temp_portfolio()
+    (root / "projects" / "nexus" / "future-capabilities.html").write_text("<p>placeholder</p>\n", encoding="utf-8")
+    for args in (("init", "-q"), ("add", "projects/nexus"), ("commit", "-q", "-m", "initial")):
+        r = _git(root, *args)
+        if r.returncode != 0:
+            raise RuntimeError("could not set up a temp git portfolio: git %s: %s" % (args[0], r.stderr.strip()))
+    return root
+
+
+def _commit_page(portfolio: Path, message: str) -> None:
+    for args in (("add", pw.DEST_REL.as_posix()), ("commit", "-q", "-m", message)):
+        r = _git(portfolio, *args)
+        if r.returncode != 0:
+            raise RuntimeError("git %s failed in the temp portfolio: %s" % (args[0], r.stderr.strip()))
+
+
 def _temp_published() -> Path:
     return Path(tempfile.mkdtemp(prefix="fc08_check_publisher_site_")) / "PUBLISHED"
 
 
 def _check_publish_and_gate() -> list:
-    """A clean publish into a temp portfolio, then gate() against it three ways."""
+    """A clean publish into a temp GIT portfolio, then gate() against it: untracked, committed,
+    committed with different bytes, and the cold half."""
     out = []
     committed_page = bw.OUT.read_bytes()
     committed_sha = hashlib.sha256(committed_page).hexdigest()
 
-    portfolio = _temp_portfolio()
+    portfolio = _temp_git_portfolio()
     published = _temp_published()
     orig_published = pw.PUBLISHED
     pw.PUBLISHED = published
@@ -92,23 +128,37 @@ def _check_publish_and_gate() -> list:
                     "publish() records the page's sha256 in the redirected PUBLISHED file",
                     "want %s; got %s" % (committed_sha, recorded)))
 
+        # The defect this check exists for: the page is on the portfolio's disk, byte-identical, and
+        # NOT committed there. Pushing the portfolio now would publish a link to a page it does not hold.
+        problems = cpw.gate(bw.OUT, published, portfolio)
+        out.append((any(p.startswith(cpw.NOT_COMMITTED) and "add %s" % pw.DEST_REL.as_posix() in p
+                        and "commit" in p for p in problems),
+                    "gate() FAILS right after publish(): the page is on the temp portfolio's disk but untracked, "
+                    "and the failure names the add+commit step", str(problems)))
+
+        _commit_page(portfolio, "the walkthrough")
         problems = cpw.gate(bw.OUT, published, portfolio)
         out.append((problems == [],
-                    "gate() passes against the temp portfolio and temp PUBLISHED right after a publish",
-                    str(problems)))
+                    "gate() HOLDS once the page is added and committed in the temp portfolio", str(problems)))
 
         original_dest = dest.read_bytes()
         dest.write_bytes(original_dest[:-1] + bytes([original_dest[-1] ^ 0xFF]))
+        _commit_page(portfolio, "one byte off")
         problems = cpw.gate(bw.OUT, published, portfolio)
-        out.append(("the published copy differs from the committed page" in problems,
-                    "gate() FAILS once the temp published copy diverges by one byte", str(problems)))
+        out.append((any(p.startswith(cpw.COPY_DIFFERS) for p in problems),
+                    "gate() FAILS when the portfolio COMMITS a copy that differs by one byte", str(problems)))
+        # A republish that is not re-committed: the disk is right again, HEAD still holds the old bytes.
         dest.write_bytes(original_dest)
+        problems = cpw.gate(bw.OUT, published, portfolio)
+        out.append((any(p.startswith(cpw.NOT_COMMITTED) and "HEAD holds other bytes" in p for p in problems),
+                    "gate() FAILS when the right page is on disk but the portfolio's HEAD holds other bytes, "
+                    "naming the commit step", str(problems)))
+        _commit_page(portfolio, "restored")
 
         original_published = published.read_text(encoding="utf-8")
         published.write_text("0" * 64 + "\n", encoding="utf-8")
         problems = cpw.gate(bw.OUT, published, None)
-        out.append(("the committed page changed since it was published: republish it: "
-                    "python tools/publish_walkthrough.py, then commit site/PUBLISHED with the page" in problems,
+        out.append((any(p.startswith(cpw.PAGE_CHANGED) for p in problems),
                     "gate() FAILS (cold half) when the temp PUBLISHED holds a different sha", str(problems)))
         published.write_text(original_published, encoding="utf-8")
     finally:
@@ -116,6 +166,17 @@ def _check_publish_and_gate() -> list:
         shutil.rmtree(portfolio, ignore_errors=True)
         shutil.rmtree(published.parent, ignore_errors=True)
     return out
+
+
+def _check_not_a_git_repository() -> tuple:
+    """main() cannot compare a committed copy in a directory with no HEAD: NOT RUN, exit 2."""
+    portfolio = _temp_portfolio()
+    try:
+        rc = cpw.main(["--portfolio", str(portfolio)])
+        return (rc == 2, "the gate reports NOT RUN (exit 2) for a portfolio that is not a git repository",
+                "rc=%d" % rc)
+    finally:
+        shutil.rmtree(portfolio, ignore_errors=True)
 
 
 def _check_missing_nexus() -> tuple:
@@ -217,7 +278,16 @@ def _check_stale_page_refusal() -> tuple:
 
 def checks() -> list:
     out = []
-    out += _check_publish_and_gate()
+    orig_committed = cpw.committed_copy
+    try:
+        if MUTATION == "disk-only":
+            # The defect the review found: a gate that reads the file on the portfolio's disk.
+            cpw.committed_copy = lambda portfolio: ((portfolio / pw.DEST_REL).read_bytes()
+                                                    if (portfolio / pw.DEST_REL).exists() else None)
+        out += _check_publish_and_gate()
+    finally:
+        cpw.committed_copy = orig_committed
+    out.append(_check_not_a_git_repository())
     out.append(_check_missing_nexus())
     out.append(_check_stale_page_refusal())
 

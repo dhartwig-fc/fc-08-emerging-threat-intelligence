@@ -10,11 +10,18 @@ Each guard's CLASS was measured by running it in a fresh clone (week 6.1), not r
 from its source:
   cold             passes from a fresh clone
   needs-pdfs       re-finds quotes on data/advisories/*.pdf, which is gitignored
-  needs-portfolio  reads <portfolio>/projects/nexus/threat-intel/index.html to check the
-                   published walkthrough is not stale (check_published_walkthrough, without
-                   --cold); read-only, never writes the portfolio checkout
+  needs-portfolio  reads the portfolio's COMMITTED copy of projects/nexus/threat-intel/index.html
+                   (git show HEAD:..., never the file on disk) to check the published walkthrough
+                   is not stale (check_published_walkthrough, without --cold); read-only, never
+                   writes the portfolio checkout. The checkout is $NEXUS_PORTFOLIO, else
+                   ~/Cowork HB/dan-hartwig-portfolio (fc-10 names the same checkout
+                   NEXUS_PORTFOLIO_ROOT; this repository reads NEXUS_PORTFOLIO only)
   needs-reviewed   reads data/reviewed/, the reviewer's additions, which is gitignored
 --cold prints every other guard as NOT RUN, so a green CI run says what it did not cover.
+In FULL mode (the pre-commit hook) every guard runs and any non-zero exit is a failure --
+including a guard's own exit 2 "NOT RUN" (check_published_walkthrough with no portfolio checkout,
+or one that is not a git repository). A machine that commits here must have the portfolio
+checkout, or set NEXUS_PORTFOLIO to it; there is no silent skip in full mode.
 
 The measurement disagreed with the plan's guess for three guards -- check_telemetry,
 check_tool_surface (its default/static mode; --live is never run here) and
