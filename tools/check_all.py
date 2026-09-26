@@ -10,7 +10,9 @@ Each guard's CLASS was measured by running it in a fresh clone (week 6.1), not r
 from its source:
   cold             passes from a fresh clone
   needs-pdfs       re-finds quotes on data/advisories/*.pdf, which is gitignored
-  needs-portfolio  reads the portfolio checkout (sub-project 2)
+  needs-portfolio  reads <portfolio>/projects/nexus/threat-intel/index.html to check the
+                   published walkthrough is not stale (check_published_walkthrough, without
+                   --cold); read-only, never writes the portfolio checkout
   needs-reviewed   reads data/reviewed/, the reviewer's additions, which is gitignored
 --cold prints every other guard as NOT RUN, so a green CI run says what it did not cover.
 
@@ -65,6 +67,9 @@ GUARDS = [
     ("check_publish_boundary", ["evals/check_publish_boundary.py"], "cold"),
     ("check_walkthrough", ["evals/check_walkthrough.py"], "cold"),
     ("build_walkthrough --check", ["tools/build_walkthrough.py", "--check"], "cold"),
+    ("check_publisher", ["evals/check_publisher.py"], "cold"),
+    ("check_published_walkthrough --cold", ["evals/check_published_walkthrough.py", "--cold"], "cold"),
+    ("check_published_walkthrough", ["evals/check_published_walkthrough.py"], "needs-portfolio"),
     # The batch is DATA (data/digests/CURRENT), so cutting a new batch never edits this list.
     ("build_digests --check (current batch)", ["tools/build_digests.py", "--current", "--check"], "cold"),
     ("build_actor_register --check", ["tools/build_actor_register.py", "--check"], "cold"),
