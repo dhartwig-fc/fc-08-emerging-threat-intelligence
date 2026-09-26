@@ -82,7 +82,7 @@ SCORE_FIELDS = (("typologies", "Typologies (library)"), ("emergent", "Emergent t
 _MUTATE = None  # set only by evals/check_walkthrough.py through --_mutate
 MUTATIONS = ("drop-citation", "unpinned-log", "wrong-page", "swap-notes", "wrong-count", "desk-scope", "two-runs",
              "typed-score", "actor-id", "digest-header", "telemetry-count", "attested-count", "swap-moves",
-             "proposal-date", "desk-total")
+             "proposal-date", "desk-total", "register-unresolved", "corpus-count", "emergent-undecided")
 
 e = html.escape
 PAST = {"approve": "approved", "reject": "rejected"}
@@ -146,6 +146,21 @@ def inputs(log: Path = gd.LOG) -> dict:
     register = load_register()
     if any(a.get("entity_key") is not None for a in register):
         raise ValueError("a register entry now carries an entity_key; sections 6 and 10 say none does")
+    # Section 6's finding: parties the reference label names for this advisory -- so the register holds
+    # them -- that no row resolved. Said to be categories only where the record's category naming the
+    # same party (by the register name's first word) exists, exactly once.
+    reached = {r["actor_id"] for r in actor_rows if r["status"] == "resolved"} | {x for r in actor_rows for x in r["entries"]}
+    named_here = [a for a in register if any(n["advisory_id"] == ADVISORY for n in a.get("named_in", []))]
+    named_unresolved = [a for a in named_here if _MUTATE == "register-unresolved" or a["actor_id"] not in reached]
+    as_category = {}
+    for a in named_unresolved:
+        word = a["name"].split()[0].lower()
+        hits = [c["name"] for c in categories if word in c["name"].lower().split()]
+        if len(hits) != 1 and _MUTATE != "register-unresolved":
+            raise ValueError("register entry %s (%s) is named in %s and unresolved, but %d of the record's categories "
+                             "name it; section 6 says the extractor recorded it as one" % (a["actor_id"], a["name"],
+                                                                                         ADVISORY, len(hits)))
+        as_category[a["actor_id"]] = hits[0] if hits else ""
 
     # Section 7: the advisory's block of the desk file, cut below the file's header.
     desk_text = (DIGESTS_DIR / batch / ("%s.md" % DIGEST_DESK)).read_text(encoding="utf-8")
@@ -227,6 +242,8 @@ def inputs(log: Path = gd.LOG) -> dict:
         "suggestions": suggestions,
         "categories": categories,
         "register": register,
+        "named_unresolved": named_unresolved,
+        "as_category": as_category,
         "digest_block": digest_block,
         "events": events,
         "run_started": started[0]["payload"],
@@ -548,8 +565,20 @@ def section_actors(inp: dict) -> str:
                    (" %s %s unresolved too, with no register entry to match." % (e(", ".join(rest)),
                                                                                 "is" if len(rest) == 1 else "are"))
                    if rest else ""))
-    lis = "".join('\n    <li class="category" data-actor="%s">%s <span class="nr">not resolvable: a class of actor, '
-                  'not a named party</span></li>' % (e(a["name"]), e(a["name"])) for a in cats)
+    lis = "".join('\n    <li class="category" data-actor="%s">%s <span class="nr">recorded by the extractor as a '
+                  'category, so never looked up</span></li>' % (e(a["name"]), e(a["name"])) for a in cats)
+    missed = inp["named_unresolved"]
+    finding = ""
+    if missed:
+        finding = ("\n  <p class=\"flag\">A finding about slice 1: the register holds <span class=\"count\" "
+                   "data-count=\"named-unresolved\">%d</span> %s the reference label names for %s that no row above "
+                   "resolves &mdash; %s. The extractor recorded %s as %s, so the lookup never ran on %s.</p>"
+                   % (len(missed), "party" if len(missed) == 1 else "parties", e(ADVISORY),
+                      "; ".join('<span class="who" data-register="%s" data-category="%s"><code>%s</code> %s, '
+                                "recorded as &ldquo;%s&rdquo;</span>"
+                                % (e(a["actor_id"]), e(inp["as_category"][a["actor_id"]]), e(a["actor_id"]),
+                                   e(a["name"]), e(inp["as_category"][a["actor_id"]])) for a in missed),
+                      "it" if len(missed) == 1 else "each", "a category", "it" if len(missed) == 1 else "them"))
     empty = sum(1 for a in register if a.get("entity_key") is None)
     return """<section id="actors">
   <h2><span class="n">06</span> Actors: who the advisory names</h2>
@@ -561,16 +590,17 @@ def section_actors(inp: dict) -> str:
     </tbody>
   </table>
   %s
-  <p>The record&rsquo;s categories are classes of actor, never looked up:</p>
+  <p>The record&rsquo;s categories, which the lookup skips:</p>
   <ul class="cats">%s
-  </ul>
+  </ul>%s
   <dl class="facts">
     <dt>entity_key</dt><dd data-entity-key="empty" data-empty="%d" data-of="%d">empty, on all %d register entries</dd>
   </dl>
   <p>The <code>entity_key</code> is the seam where a register entry would link to the platform&rsquo;s resolved-entity estate. It is left empty on purpose: that estate is synthetic demonstration data, and a real designation will never name a synthetic party. A link waits for a real substrate.</p>
 </section>
 """ % (_plural(len(rec["actors"]), "actor"), _plural(len(rows), "named actor"), _plural(len(cats), "category", "categories"),
-       _plural(len(register), "entry", "entries"), "\n".join(trs), note, lis, empty, len(register), len(register))
+       _plural(len(register), "entry", "entries"), "\n".join(trs), note, lis, finding, empty, len(register),
+       len(register))
 
 
 def section_digest(inp: dict) -> str:
@@ -773,20 +803,29 @@ def section_limits(inp: dict) -> str:
     tools = ("the extraction agent&rsquo;s current instructions do not name it, though it is among the agent&rsquo;s tools"
              if inp["resolver_available"] else "the extraction agent neither has it among its tools nor is told of it")
     label_advisories = len({d["advisory_id"] for d in inp["label_pass"]})
+    n_corpus = len(inp["advisories"]) + (1 if _MUTATE == "corpus-count" else 0)
+    decided = set(_standing(inp))
+    undecided = [t["label"] for t in inp["record"]["typologies"] if not t.get("typology_id")
+                 and ((_key(t) in decided) if _MUTATE == "emergent-undecided" else (_key(t) not in decided))]
     return """<section id="limits">
   <h2><span class="n">10</span> What this slice does not do yet</h2>
   <ul class="limits">
+    <li><strong>The corpus is fixed.</strong> <span data-count="advisories">%d</span> advisories on a fixed list, each pinned by its sha256, with no live ingestion: nothing fetches a new publication.</li>
+    <li><strong>Nothing flows into detection yet.</strong> An approved link reaches a desk&rsquo;s digest; no typology link, indicator or actor is fed to the platform&rsquo;s detection.</li>
     <li><strong>Actor resolution is not part of extraction.</strong> No committed extraction had the resolver: <code>%s</code> was added to the Knowledge Centre on <span data-date="resolver-added">%s</span>, and the newest proposal in any committed queue is dated <span data-date="newest-proposal">%s</span>. Separately, %s. Section 6&rsquo;s resolution was run afterwards, over the committed records. Resolving during extraction is slice 2.</li>
     <li><strong>No actor is linked to the platform&rsquo;s entities.</strong> <span data-count="entity-keys">%d</span> of the <span data-count="register">%d</span> register entries carry an <code>entity_key</code>; section 6 says why.</li>
     <li><strong>Digests are built, not delivered.</strong> A batch is cut on demand; nothing sends it to a desk.</li>
     <li><strong>Approved emergent candidates are not doctrine.</strong> An emergent typology the owner approves is recorded as approved; it is not added to the typology library. The pinned log holds <span data-count="emergent-approved">%d</span> such approvals.</li>
+    <li><strong>Undecided emergent candidates reach no digest.</strong> A digest carries an emergent typology only once the owner approves it. %s&rsquo;s record holds <span data-count="emergent-undecided">%d</span> emergent %s with no standing decision (<span class="ids" data-set="emergent-undecided">%s</span>), and no desk&rsquo;s digest mentions %s.</li>
     <li><strong>Some citations are attested, not matched.</strong> <span data-count="attested">%d</span> citations across the merged records are true quotes the citation matcher cannot place on their page (%s), each attested by the owner. <span data-count="attested-here">%d</span> of them are on %s.</li>
     <li><strong>The reference answers are Claude&rsquo;s.</strong> Every golden label was drafted and reviewed by Claude. The owner has decided the <span data-count="label-decided">%d</span> entries disputed in the label pass, across <span data-count="label-advisories">%d</span> advisories, and not yet the rest. Section 9&rsquo;s scores are measured against these labels.</li>
     <li><strong>The scores are single runs.</strong> Section 9 shows one extraction per advisory; its figures have no bands of their own.</li>
   </ul>
 </section>
-""" % (RESOLVER, RESOLVER_ADDED, e(inp["newest_proposal"]), tools, keyed, len(register), emergent_ok, len(counted), why,
-       here, e(ADVISORY), len(inp["label_pass"]), label_advisories)
+""" % (n_corpus, RESOLVER, RESOLVER_ADDED, e(inp["newest_proposal"]), tools, keyed, len(register), emergent_ok,
+       e(ADVISORY), len(undecided), "candidate" if len(undecided) == 1 else "candidates",
+       _ids(undecided) or "none", "it" if len(undecided) == 1 else "them",
+       len(counted), why, here, e(ADVISORY), len(inp["label_pass"]), label_advisories)
 
 
 # ---------------------------------------------------------------- the page
@@ -897,6 +936,7 @@ HEAD = """<!doctype html>
     table.rows td{border:0;padding:3px 0}
     table.rows td:nth-child(2),table.rows td:nth-child(3),table.rows td:nth-child(4){display:inline-block;width:auto;margin-right:18px}
     table.two td:nth-child(2){display:block;margin-right:0}
+    table.rows caption{display:block;width:100%}
     table.rows td::before{content:attr(data-h);display:block;font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink3)}
     .facts{grid-template-columns:1fr;gap:0}
     .facts dd{margin-bottom:8px}

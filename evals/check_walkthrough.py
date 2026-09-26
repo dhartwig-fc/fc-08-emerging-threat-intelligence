@@ -19,6 +19,10 @@ Usage:
     python evals/check_walkthrough.py --mutate swap-moves      # section 9's "moves F1 x -> y" swaps x and y; MUST fail
     python evals/check_walkthrough.py --mutate proposal-date   # the newest-proposal date ignores the run queues; MUST fail
     python evals/check_walkthrough.py --mutate desk-total      # section 1's routing-table desk total is off by one; MUST fail
+    python evals/check_walkthrough.py --mutate register-unresolved  # #actors' "named but not resolved" list keeps the
+                                                                     # resolved entries too; MUST fail
+    python evals/check_walkthrough.py --mutate corpus-count    # #limits' advisory count is off by one; MUST fail
+    python evals/check_walkthrough.py --mutate emergent-undecided  # #limits counts DECIDED emergent candidates; MUST fail
 
 WHY. The page will leave this repository. A page that drifts from its inputs, differs
 between two machines, or quietly drops a citation says something the governance never
@@ -50,7 +54,7 @@ sys.path.insert(0, str(ROOT))
 from governance import decisions as gd  # noqa: E402
 from governance import publish_boundary as pb  # noqa: E402
 from governance.digest import DIGESTS_DIR, RECORDS_DIR  # noqa: E402
-from governance.proposals import ADVISORY_LIST, LEGACY_QUEUE, QUEUE_DIR, load_queue_files  # noqa: E402
+from governance.proposals import ADVISORY_LIST, LEGACY_QUEUE, QUEUE_DIR, link_key, load_queue_files  # noqa: E402
 from governance.routing import load_routing  # noqa: E402
 from agents.extract_advisory import SYSTEM_PROMPT  # noqa: E402
 from agents.telemetry import TELEMETRY_DIR  # noqa: E402
@@ -93,7 +97,7 @@ SECTIONS = ("question", "source", "extraction", "grounding", "review",
 SEEDS = ("0", "1", "4242", "987654")
 MUTATIONS = ("drop-citation", "unpinned-log", "wrong-page", "swap-notes", "wrong-count", "desk-scope", "two-runs",
              "typed-score", "actor-id", "digest-header", "telemetry-count", "attested-count", "swap-moves",
-             "proposal-date", "desk-total")
+             "proposal-date", "desk-total", "register-unresolved", "corpus-count", "emergent-undecided")
 MUTATION = None
 
 
@@ -175,10 +179,12 @@ def checks_sections_6_to_10(bw, page: str, record: dict, pinned: list) -> list:
                 % bw.ADVISORY, "want %s; page %s" % (want, shown)))
     cats = [a["name"] for a in record["actors"] if a.get("actor_type") == "category"]
     cat_shown = [html.unescape(m.group(1)) for m in
-                 re.finditer(r'<li class="category" data-actor="([^"]*)">[^<]*<span class="nr">not resolvable: '
-                             r'a class of actor, not a named party</span></li>', actors)]
-    out.append((bool(cats) and cat_shown == cats and len(rows) + len(cats) == len(record["actors"]),
-                "#actors lists every category actor in the record, in order, as not resolvable",
+                 re.finditer(r'<li class="category" data-actor="([^"]*)">[^<]*<span class="nr">recorded by the '
+                             r'extractor as a category, so never looked up</span></li>', actors)]
+    out.append((bool(cats) and cat_shown == cats and len(rows) + len(cats) == len(record["actors"])
+                and "not a named party" not in actors,
+                "#actors lists every category actor in the record, in order, as recorded by the extractor as a "
+                "category and never looked up (not as 'not a named party')",
                 "record %s; page %s; named rows %d + categories %d vs %d actors"
                 % (cats, cat_shown, len(rows), len(cats), len(record["actors"]))))
     listed = {a["advisory_id"]: a for a in json.loads(ADVISORY_LIST.read_text(encoding="utf-8"))["advisories"]}
@@ -191,6 +197,19 @@ def checks_sections_6_to_10(bw, page: str, record: dict, pinned: list) -> list:
                 "#actors names exactly the unresolved actors that are the note's own publishers",
                 "computed %s; page %s" % (own, said)))
     register = load_register()
+    # The register's OWN reading: parties the reference labels name for this advisory that no row resolved
+    # (resolved to them, or listed among an ambiguous row's entries).
+    reached = {r["actor_id"] for r in rows if r["status"] == "resolved"} | {x for r in rows for x in r["entries"]}
+    named_here = [a for a in register if any(n["advisory_id"] == bw.ADVISORY for n in a.get("named_in", []))]
+    unresolved_reg = sorted(a["actor_id"] for a in named_here if a["actor_id"] not in reached)
+    pairs = {m.group(1): html.unescape(m.group(2)) for m in
+             re.finditer(r'data-register="(ACT-[0-9a-f]+)" data-category="([^"]*)"', actors)}
+    n_named = _attrs(actors, "data-count").get("named-unresolved")
+    out.append((bool(named_here) and bool(unresolved_reg) and sorted(pairs) == unresolved_reg
+                and n_named == str(len(unresolved_reg)) and all(c in cats for c in pairs.values()),
+                "#actors names each register entry named in %s that no row resolved, each against a category "
+                "actor in the record" % bw.ADVISORY,
+                "register %s; page %s (%s)" % (unresolved_reg, pairs, n_named)))
     empty = sum(1 for a in register if a.get("entity_key") is None)
     m = re.search(r'data-entity-key="empty" data-empty="(\d+)" data-of="(\d+)"', actors)
     out.append((bool(m) and (int(m.group(1)), int(m.group(2))) == (empty, len(register)) and empty == len(register),
@@ -317,6 +336,20 @@ def checks_sections_6_to_10(bw, page: str, record: dict, pinned: list) -> list:
 
     # 10 -- limits. Every count recomputed.
     lim = section(page, "limits")
+    decided_keys = set(gd.latest(pinned))
+    undecided_emergent = sorted(t["label"] for t in record["typologies"] if not t.get("typology_id")
+                                and link_key(bw.ADVISORY, None, t["label"]) not in decided_keys)
+    in_digests = sorted(lab for lab in undecided_emergent for f in sorted((DIGESTS_DIR / batch).glob("*.md"))
+                        if lab in f.read_text(encoding="utf-8"))
+    shown_und = _attrs(lim, "data-set").get("emergent-undecided", "")
+    out.append((all(html.escape(lab) in lim for lab in undecided_emergent) and not in_digests
+                and bool(shown_und) == bool(undecided_emergent),
+                "#limits names this record's undecided emergent candidates, and no desk file of the batch carries "
+                "them, as it says", "record %s; in a desk file: %s; page %r" % (undecided_emergent, in_digests,
+                                                                             shown_und)))
+    out.append(("no live ingestion" in lim and "Nothing flows into detection yet" in lim,
+                "#limits says the corpus is a fixed list with no live ingestion, and that nothing flows into "
+                "detection yet", ""))
     attested = json.loads(ATTESTED_PATH.read_text(encoding="utf-8"))["attested"]
     emergent_ok = sum(1 for d in gd.latest(gd.log_prefix(manifest["decision_log"]["lines"])[2]).values()
                       if d.kind == "emergent" and d.decision == "approve")
@@ -325,7 +358,9 @@ def checks_sections_6_to_10(bw, page: str, record: dict, pinned: list) -> list:
                 "label-decided": str(len(label_pass)),
                 "label-advisories": str(len({d["advisory_id"] for d in label_pass})),
                 "entity-keys": str(len(register) - empty), "register": str(len(register)),
-                "emergent-approved": str(emergent_ok)}
+                "emergent-approved": str(emergent_ok),
+                "advisories": str(len(listed)),
+                "emergent-undecided": str(len(undecided_emergent))}
     got_lim = _attrs(lim, "data-count")
     out.append((got_lim == want_lim, "every count in #limits equals the guard's own count from the files",
                 "want %s; page %s" % (want_lim, got_lim)))
