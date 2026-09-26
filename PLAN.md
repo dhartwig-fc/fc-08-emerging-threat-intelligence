@@ -205,4 +205,6 @@ Ticked 2026-09-26 from the measurements in `docs/RELEASE_SLICE1.md` (box 6 holds
 
 ## 8. Slice 2 candidates (not this plan)
 
+> Slice 2 was designed on 2026-09-26 as **live intelligence**: `docs/superpowers/specs/2026-09-26-slice2-live-intelligence-design.md`. The list below is the pre-slice-1 view; the slice 3 queue is in that spec's Section 6.
+
 Live feed ingestion (RSS, OFAC/OFSI JSON, NCA alerts), embedding-based typology search, resolved-entity graph linkage to the FC10 substrate, scheduled batch runs and a Knowledge Centre UI overlay showing "advisories pinned to this typology".
