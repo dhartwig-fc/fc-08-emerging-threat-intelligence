@@ -17,7 +17,9 @@ Usage:
     python evals/check_walkthrough.py --mutate telemetry-count # FAILURE tool calls are left out of the counts; MUST fail
     python evals/check_walkthrough.py --mutate attested-count  # #limits counts only this advisory's attestations; MUST fail
     python evals/check_walkthrough.py --mutate swap-moves      # section 9's "moves F1 x -> y" swaps x and y; MUST fail
-    python evals/check_walkthrough.py --mutate proposal-date   # the newest-proposal date ignores the run queues; MUST fail
+    python evals/check_walkthrough.py --mutate resolver-runs   # #limits' resolver counts skip a committed run; MUST fail
+    python evals/check_walkthrough.py --mutate resolver-prompt # #limits misstates whether the prompt names the resolver; MUST fail
+    python evals/check_walkthrough.py --mutate feed-accepted   # #limits' accepted-feed-items count is off by one; MUST fail
     python evals/check_walkthrough.py --mutate desk-total      # section 1's routing-table desk total is off by one; MUST fail
     python evals/check_walkthrough.py --mutate register-unresolved  # #actors' "named but not resolved" list keeps the
                                                                      # resolved entries too; MUST fail
@@ -54,10 +56,11 @@ sys.path.insert(0, str(ROOT))
 from governance import decisions as gd  # noqa: E402
 from governance import publish_boundary as pb  # noqa: E402
 from governance.digest import DIGESTS_DIR, RECORDS_DIR  # noqa: E402
-from governance.proposals import ADVISORY_LIST, LEGACY_QUEUE, QUEUE_DIR, link_key, load_queue_files  # noqa: E402
+from governance.proposals import ADVISORY_LIST, QUEUE_DIR, link_key, load_queue_files  # noqa: E402
 from governance.routing import load_routing  # noqa: E402
 from agents.extract_advisory import SYSTEM_PROMPT  # noqa: E402
 from agents.telemetry import TELEMETRY_DIR  # noqa: E402
+from feeds import ledger as feeds_ledger  # noqa: E402
 from evals.actor_resolution import REPORT as ACTOR_REPORT  # noqa: E402
 from evals.check_citations import ATTESTED_PATH  # noqa: E402
 from evals.score import score_dirs  # noqa: E402
@@ -67,29 +70,9 @@ REPO_BLOB = "https://github.com/dhartwig-fc/fc-08-emerging-threat-intelligence/b
 TRACE_URL = REPO_BLOB + "evals/traces/FULL_BASELINE_2026-09-12.md"
 BANDS_URL = REPO_BLOB + "evals/traces/REVIEWER_BANDS_2026-09-13.md"
 LABEL_PASS = ROOT / "evals" / "owner_decisions" / "label_pass_2026-09-24.json"
-SERVER = "mcp_server/knowledge_centre_server.py"
 
 
 NOT_RUN = None  # a check's ok value when it cannot run here: printed as NOT RUN, never counted as a failure
-
-
-def _resolver_added():
-    """The first commit that put knowledge_centre_resolve_actor into the Knowledge Centre server, by date --
-    read from git here because the builder may not call it. None when the history is not here: no git, or
-    a shallow clone (CI checks out at depth 1), where the pickaxe would name the grafted root commit and
-    report the day of the checkout instead of the day the tool arrived."""
-    try:
-        shallow = subprocess.run(["git", "rev-parse", "--is-shallow-repository"],
-                                 capture_output=True, text=True, cwd=ROOT)
-        if shallow.returncode != 0 or shallow.stdout.strip() != "false":
-            return None
-        r = subprocess.run(["git", "log", "--reverse", "--format=%ad", "--date=short", "-S",
-                            "knowledge_centre_resolve_actor", "--", SERVER],
-                           capture_output=True, text=True, cwd=ROOT)
-    except OSError:
-        return None
-    lines = r.stdout.split()
-    return lines[0] if r.returncode == 0 and lines else None
 
 BUILDER = ROOT / "tools" / "build_walkthrough.py"
 SECTIONS = ("question", "source", "extraction", "grounding", "review",
@@ -97,7 +80,8 @@ SECTIONS = ("question", "source", "extraction", "grounding", "review",
 SEEDS = ("0", "1", "4242", "987654")
 MUTATIONS = ("drop-citation", "unpinned-log", "wrong-page", "swap-notes", "wrong-count", "desk-scope", "two-runs",
              "typed-score", "actor-id", "digest-header", "telemetry-count", "attested-count", "swap-moves",
-             "proposal-date", "desk-total", "register-unresolved", "corpus-count", "emergent-undecided")
+             "resolver-runs", "resolver-prompt", "feed-accepted", "desk-total", "register-unresolved",
+             "corpus-count", "emergent-undecided")
 MUTATION = None
 
 
@@ -159,6 +143,107 @@ def _desk_cut(text: str, advisory: str) -> str:
     start += 1
     end = text.find("\n## ", start)
     return (text[start:] if end < 0 else text[start:end]).rstrip("\n")
+
+
+def _own_resolver_counts(queue_dir: Path, telemetry_dir: Path) -> dict:
+    """The guard's OWN reading of section 10's resolver counts -- not the builder's _resolver_runs, so
+    the two can disagree. A run is COMMITTED when it has an EXTRACTOR queue file: '-extractor-' in its
+    stem, so a reviewer run's queue (propose_link names every queue file after the calling run's id, and
+    the reviewer agent calls it too) is never counted as an extraction. Returns the four counts as
+    numbers, not the run ids -- the page check only ever compares counts."""
+    runs = sorted(q.stem for q in queue_dir.glob("*.jsonl") if "-extractor-" in q.stem)
+    with_tool = no_record = resolved = 0
+    for run in runs:
+        tel = telemetry_dir / ("%s.jsonl" % run)
+        evs = ([json.loads(line) for line in tel.read_text(encoding="utf-8").splitlines() if line.strip()]
+               if tel.exists() else [])
+        start = next((ev for ev in evs if ev.get("stage") == "RUN_STARTED"), None)
+        tools = None if start is None else start["payload"].get("tools")
+        no_record += tools is None
+        with_tool += tools is not None and any(t.endswith("__knowledge_centre_resolve_actor") for t in tools)
+        resolved += any(ev.get("stage") == "FC08_TOOL_CALL"
+                        and ev["payload"].get("tool", "").endswith("__knowledge_centre_resolve_actor")
+                        and ev["payload"].get("outcome", "").startswith('{"result":"Resolved: ') for ev in evs)
+    return {"runs": len(runs), "with_tool": with_tool, "no_record": no_record, "resolved": resolved}
+
+
+def _resolver_counts_fixture_checks(bw) -> list:
+    """A synthetic fixture, written only under tempfile.TemporaryDirectory (nothing touches the
+    repository), that gives every committed count a NON-zero answer -- the real committed data has
+    every resolver count at 0, so a wrong predicate on either side would still agree with it by
+    accident. Proves both counters -- the guard's own _own_resolver_counts and the builder's
+    _resolver_runs -- discriminate: an extractor run that resolved; one with tools recorded but not the
+    resolver; one with a queue file and no telemetry at all; a REVIEWER run that lists the resolver in
+    its tools (must not be counted as an extraction); and an extractor run whose resolver call answered
+    Unresolved (has the tool, does not resolve)."""
+    resolver = "mcp__knowledge_centre__knowledge_centre_resolve_actor"
+    other = "mcp__knowledge_centre__knowledge_centre_search_typologies"
+
+    def write_run(queue_dir: Path, telemetry_dir: Path, run_id: str, tools, outcome: str = None,
+                  telemetry_file: bool = True) -> None:
+        (queue_dir / ("%s.jsonl" % run_id)).write_text("", encoding="utf-8")
+        if not telemetry_file:
+            return
+        agent = "reviewer" if "-reviewer-" in run_id else "extractor"
+        events = [{"stage": "RUN_STARTED", "status": "SUCCESS", "timestamp": "2026-10-02T00:00:00Z",
+                  "message": "%s run started" % agent,
+                  "payload": {"run_id": run_id, "agent": agent, "advisory_id": "ADV-9999",
+                              "model": "claude-sonnet-5", "max_budget_usd": 5.0, "max_turns": 60,
+                              "pdf_sha256": "fixture", "tools": list(tools)}}]
+        if outcome is not None:
+            events.append({"stage": "FC08_TOOL_CALL", "status": "SUCCESS", "timestamp": "2026-10-02T00:00:01Z",
+                           "message": "%s resolve_actor" % agent,
+                           "payload": {"run_id": run_id, "agent": agent, "advisory_id": "ADV-9999",
+                                       "tool": resolver, "tool_use_id": "t1", "latency_ms": 5,
+                                       "outcome": outcome}})
+        (telemetry_dir / ("%s.jsonl" % run_id)).write_text(
+            "\n".join(json.dumps(e) for e in events) + "\n", encoding="utf-8")
+
+    out = []
+    with tempfile.TemporaryDirectory(prefix="fc08_resolver_fixture_") as tmp:
+        queue_dir, telemetry_dir = Path(tmp) / "proposals", Path(tmp) / "telemetry"
+        queue_dir.mkdir()
+        telemetry_dir.mkdir()
+
+        write_run(queue_dir, telemetry_dir, "adv-9999-extractor-aaaaaaaaaa", [resolver],
+                  outcome='{"result":"Resolved: X -> ACT-1 X (matched \'X\')"}')
+        write_run(queue_dir, telemetry_dir, "adv-9999-extractor-bbbbbbbbbb", [other])
+        write_run(queue_dir, telemetry_dir, "adv-9999-extractor-cccccccccc", [], telemetry_file=False)
+        write_run(queue_dir, telemetry_dir, "adv-9999-reviewer-dddddddddd", [resolver],
+                  outcome='{"result":"Resolved: Y -> ACT-2 Y (matched \'Y\')"}')
+        write_run(queue_dir, telemetry_dir, "adv-9999-extractor-eeeeeeeeee", [resolver],
+                  outcome='{"result":"Unresolved: no candidate match"}')
+
+        want = {"runs": 4, "with_tool": 2, "no_record": 1, "resolved": 1}
+
+        own = _own_resolver_counts(queue_dir, telemetry_dir)
+        out.append((own == want,
+                    "the guard's own resolver counts, on a synthetic non-zero fixture, discriminate "
+                    "extractor-vs-reviewer runs, tool presence, no telemetry and Resolved-vs-Unresolved",
+                    "want %s; got %s" % (want, own)))
+
+        built = bw._resolver_runs(queue_dir, telemetry_dir)
+        built_counts = {k: len(v) for k, v in built.items()}
+        out.append((built_counts == want,
+                    "the builder's _resolver_runs gives the same counts as the guard's own, on the same "
+                    "fixture",
+                    "want %s; got %s" % (want, built_counts)))
+        # A count alone cannot tell "the right run resolved" from "some other run happened to resolve
+        # instead" when exactly one run matches each predicate -- swapping "Resolved: " for
+        # "Unresolved: " leaves the TOTAL at 1 either way. Pin the actual ids too.
+        want_ids = {
+            "runs": {"adv-9999-extractor-aaaaaaaaaa", "adv-9999-extractor-bbbbbbbbbb",
+                    "adv-9999-extractor-cccccccccc", "adv-9999-extractor-eeeeeeeeee"},
+            "with_tool": {"adv-9999-extractor-aaaaaaaaaa", "adv-9999-extractor-eeeeeeeeee"},
+            "no_record": {"adv-9999-extractor-cccccccccc"},
+            "resolved": {"adv-9999-extractor-aaaaaaaaaa"},
+        }
+        got_ids = {k: set(v) for k, v in built.items()}
+        out.append((got_ids == want_ids,
+                    "the builder's _resolver_runs names the RIGHT runs, not just the right totals -- "
+                    "specifically the Resolved run, not the Unresolved one, as resolved",
+                    "want %s; got %s" % (want_ids, got_ids)))
+    return out
 
 
 def checks_sections_6_to_10(bw, page: str, record: dict, pinned: list) -> list:
@@ -347,12 +432,15 @@ def checks_sections_6_to_10(bw, page: str, record: dict, pinned: list) -> list:
                 "#limits names this record's undecided emergent candidates, and no desk file of the batch carries "
                 "them, as it says", "record %s; in a desk file: %s; page %r" % (undecided_emergent, in_digests,
                                                                              shown_und)))
-    out.append(("no live ingestion" in lim and "Nothing flows into detection yet" in lim,
-                "#limits says the corpus is a fixed list with no live ingestion, and that nothing flows into "
-                "detection yet", ""))
+    out.append(("Live ingestion is being built" in lim and "Nothing flows into detection yet" in lim,
+                "#limits says live ingestion is still being built, and that nothing flows into detection yet", ""))
     attested = json.loads(ATTESTED_PATH.read_text(encoding="utf-8"))["attested"]
     emergent_ok = sum(1 for d in gd.latest(gd.log_prefix(manifest["decision_log"]["lines"])[2]).values()
                       if d.kind == "emergent" and d.decision == "approve")
+    counts = _own_resolver_counts(QUEUE_DIR, TELEMETRY_DIR)
+    # Read through feeds.ledger.load(), never the raw ledger path: evals/check_feeds_ledger.py's writer
+    # scan allows only that module (and itself) to name the ledger file, and this guard is neither.
+    feed_accepted = sum(1 for e in feeds_ledger.load().values() if e["decision"] == "accept")
     want_lim = {"attested": str(len(attested)),
                 "attested-here": str(sum(1 for a in attested if a["advisory_id"] == bw.ADVISORY)),
                 "label-decided": str(len(label_pass)),
@@ -360,7 +448,10 @@ def checks_sections_6_to_10(bw, page: str, record: dict, pinned: list) -> list:
                 "entity-keys": str(len(register) - empty), "register": str(len(register)),
                 "emergent-approved": str(emergent_ok),
                 "advisories": str(len(listed)),
-                "emergent-undecided": str(len(undecided_emergent))}
+                "emergent-undecided": str(len(undecided_emergent)),
+                "feed-accepted": str(feed_accepted),
+                "extraction-runs": str(counts["runs"]), "runs-with-resolver": str(counts["with_tool"]),
+                "runs-no-tool-record": str(counts["no_record"]), "runs-resolved": str(counts["resolved"])}
     got_lim = _attrs(lim, "data-count")
     out.append((got_lim == want_lim, "every count in #limits equals the guard's own count from the files",
                 "want %s; page %s" % (want_lim, got_lim)))
@@ -368,22 +459,11 @@ def checks_sections_6_to_10(bw, page: str, record: dict, pinned: list) -> list:
                 and "each attested by the owner" in lim,
                 "every attested citation was attested by the owner, as #limits says",
                 "attested_by values: %s" % sorted({a.get("attested_by") for a in attested})))
-    newest = max(json.loads(line)["proposed_at"][:10] for q in [LEGACY_QUEUE] + sorted(QUEUE_DIR.glob("*.jsonl"))
-                 for line in q.read_text(encoding="utf-8").splitlines() if line.strip())
-    dates = _attrs(lim, "data-date")
-    shown_added = dates.get("resolver-added", "")
-    out.append((dates.get("newest-proposal") == newest and bool(shown_added) and newest < shown_added
-                and "resolve_actor" not in SYSTEM_PROMPT,
-                "#limits dates the newest committed proposal before the resolver's date, and the extractor's "
-                "prompt does not name resolve_actor",
-                "newest proposal %s; page %s" % (newest, dates)))
-    added = _resolver_added()
-    if added is None:
-        out.append((NOT_RUN, "resolver-date check needs git history (shallow clone)",
-                    "page says %s; not verifiable here" % shown_added))
-    else:
-        out.append((shown_added == added, "#limits' resolver date equals the first commit adding it, by git history",
-                    "git %s; page %s" % (added, shown_added)))
+    flag = _attrs(lim, "data-flag").get("prompt-names-resolver")
+    names = "resolve_actor" in SYSTEM_PROMPT
+    out.append((flag == ("name" if names else "do not name") and not _attrs(lim, "data-date"),
+                "#limits says truly whether the extractor's prompt names resolve_actor, and carries no typed date",
+                "prompt names it: %s; page %r" % (names, flag)))
     return out
 
 
@@ -515,6 +595,7 @@ def checks() -> list:
                 "misplaced: %s" % misplaced))
 
     out += checks_sections_6_to_10(bw, page, record, pinned)
+    out += _resolver_counts_fixture_checks(bw)
 
     for sid in ("grounding", "review"):
         out.append((bw.DECIDED_RUN in section(page, sid), "#%s names the decided run %s" % (sid, bw.DECIDED_RUN),

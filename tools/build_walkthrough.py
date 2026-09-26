@@ -49,12 +49,12 @@ from governance import card  # noqa: E402
 from governance import decisions as gd  # noqa: E402
 from governance.digest import (APPROVED_NOT_IN_RECORD, DIGESTS_DIR, RECORDS_DIR, _in_scope,  # noqa: E402
                                _routes, _visible)
-from governance.proposals import (ADVISORY_LIST, LEGACY_QUEUE, LIBRARY, QUEUE_DIR, group, link_key,  # noqa: E402
-                                  load_queue_files)
+from governance.proposals import ADVISORY_LIST, LIBRARY, QUEUE_DIR, group, link_key, load_queue_files  # noqa: E402
 from governance.routing import desks_in_order, load_routing  # noqa: E402
 from agents import telemetry  # noqa: E402
-from agents.extract_advisory import KC_TOOLS, SYSTEM_PROMPT  # noqa: E402
+from agents.extract_advisory import SYSTEM_PROMPT  # noqa: E402
 from agents.permissions import PROPOSE_TOOL, READ_ONLY_TOOLS  # noqa: E402
+from feeds import ledger as feeds_ledger  # noqa: E402
 from evals.actor_resolution import RECORDS as EXTRACTOR_RECORDS, REPORT as ACTOR_REPORT  # noqa: E402
 from evals.check_citations import ATTESTED_PATH  # noqa: E402
 from evals.score import score_dirs  # noqa: E402
@@ -67,9 +67,6 @@ TELEMETRY_RUN = "adv-2026-0013-extractor-69eeab7b41"
 GOLDEN_DIR = ROOT / "evals" / "golden"
 DIGEST_DESK = "sanctions_desk"
 RESOLVER = "knowledge_centre_resolve_actor"
-# The day the resolver tool entered the Knowledge Centre (commit 891b2b0). The builder may not call git;
-# evals/check_walkthrough.py holds this date against the repository history.
-RESOLVER_ADDED = "2026-09-25"
 LABEL_PASS = ROOT / "evals" / "owner_decisions" / "label_pass_2026-09-24.json"
 LABEL_PROVENANCE = "Claude-drafted, Claude-reviewed"
 REPO_BLOB = "https://github.com/dhartwig-fc/fc-08-emerging-threat-intelligence/blob/main/"
@@ -82,7 +79,8 @@ SCORE_FIELDS = (("typologies", "Typologies (library)"), ("emergent", "Emergent t
 _MUTATE = None  # set only by evals/check_walkthrough.py through --_mutate
 MUTATIONS = ("drop-citation", "unpinned-log", "wrong-page", "swap-notes", "wrong-count", "desk-scope", "two-runs",
              "typed-score", "actor-id", "digest-header", "telemetry-count", "attested-count", "swap-moves",
-             "proposal-date", "desk-total", "register-unresolved", "corpus-count", "emergent-undecided")
+             "resolver-runs", "resolver-prompt", "feed-accepted", "desk-total", "register-unresolved",
+             "corpus-count", "emergent-undecided")
 
 e = html.escape
 PAST = {"approve": "approved", "reject": "rejected"}
@@ -96,6 +94,37 @@ class _RunId:
     """The one attribute telemetry.telemetry_path reads, so the path comes from its owner."""
     def __init__(self, run_id: str):
         self.run_id = run_id
+
+
+def _resolver_runs(queue_dir: Path = None, telemetry_dir: Path = None) -> dict:
+    """Section 10's resolver counts, from the committed EXTRACTION queues and their telemetry. A run is
+    COMMITTED when it has an extractor queue file -- '-extractor-' in its stem, so a reviewer run's
+    queue (propose_link names every queue file after the calling run's id, and the reviewer agent calls
+    it too) is never counted as an extraction; it HAD the resolver when its RUN_STARTED event lists the
+    tool; it has NO RECORD when it has no telemetry or its RUN_STARTED predates the tools field; it
+    RESOLVED when a resolver call answered "Resolved:". `queue_dir`/`telemetry_dir` default to the real
+    directories and exist so a test can point this at a synthetic fixture without touching the module's
+    globals."""
+    queue_dir = QUEUE_DIR if queue_dir is None else queue_dir
+    telemetry_dir = telemetry.TELEMETRY_DIR if telemetry_dir is None else telemetry_dir
+    runs = sorted(q.stem for q in queue_dir.glob("*.jsonl") if "-extractor-" in q.stem)
+    if _MUTATE == "resolver-runs":
+        runs = runs[1:]
+    out = {"runs": runs, "with_tool": [], "no_record": [], "resolved": []}
+    for run in runs:
+        path = telemetry_dir / ("%s.jsonl" % run)
+        events = ([json.loads(line) for line in path.read_text(encoding="utf-8").splitlines() if line.strip()]
+                  if path.exists() else [])
+        started = [ev for ev in events if ev.get("stage") == telemetry.RUN_STARTED]
+        tools = started[0]["payload"].get("tools") if started else None
+        if tools is None:
+            out["no_record"].append(run)
+        elif any(t.endswith("__" + RESOLVER) for t in tools):
+            out["with_tool"].append(run)
+        if any(ev.get("stage") == telemetry.TOOL_CALL and ev["payload"].get("tool", "").endswith("__" + RESOLVER)
+               and ev["payload"].get("outcome", "").startswith('{"result":"Resolved: ') for ev in events):
+            out["resolved"].append(run)
+    return out
 
 
 def inputs(log: Path = gd.LOG) -> dict:
@@ -193,19 +222,9 @@ def inputs(log: Path = gd.LOG) -> dict:
         raise ValueError("section 8 says %s has telemetry and the decided run has none; the directory holds %s"
                          % (TELEMETRY_RUN, tel_runs))
 
-    # Section 10: "the extractor is not asked to resolve actors" must stay true to be said -- the
-    # substring, so any spelling of the tool in the prompt counts as asking.
-    if "resolve_actor" in SYSTEM_PROMPT:
-        raise ValueError("the extractor's prompt now names resolve_actor; section 10 says it does not")
-    # "No committed extraction had the resolver": every committed queue's newest proposal predates it.
-    queues = [LEGACY_QUEUE] + sorted(QUEUE_DIR.glob("*.jsonl"))
-    if _MUTATE == "proposal-date":
-        queues = [LEGACY_QUEUE]
-    newest = max(json.loads(line)["proposed_at"][:10] for q in queues
-                 for line in q.read_text(encoding="utf-8").splitlines() if line.strip())
-    if newest >= RESOLVER_ADDED:
-        raise ValueError("a committed proposal is dated %s, on or after the resolver's %s; section 10 says no "
-                         "committed extraction had it" % (newest, RESOLVER_ADDED))
+    # Section 10's resolver sentence is COUNTED (slice 2 A). It replaced a refusal that would have fired
+    # on the first new extraction's queue file and blocked every commit.
+    resolver_runs = _resolver_runs()
 
     # Sections 5, 9, 10: the golden labels are Claude's, with the owner's decisions on the disputed entries.
     label_pass = _json(LABEL_PASS)["decisions"]
@@ -251,8 +270,9 @@ def inputs(log: Path = gd.LOG) -> dict:
         "tel_proposals": tel_proposals,
         "scores": {"extraction": score_dirs(GOLDEN_DIR, EXTRACTOR_RECORDS), "reviewer": score_dirs(GOLDEN_DIR, RECORDS_DIR)},
         "attested": attested,
-        "resolver_available": RESOLVER in KC_TOOLS,
-        "newest_proposal": newest,
+        "resolver_runs": resolver_runs,
+        "prompt_names_resolver": "resolve_actor" in SYSTEM_PROMPT,
+        "feed_accepted": sum(1 for e in feeds_ledger.load().values() if e["decision"] == "accept"),
         "tel_runs": tel_runs,
         "label_pass": label_pass,
     }
@@ -800,8 +820,14 @@ def section_limits(inp: dict) -> str:
     keyed = sum(1 for a in register if a.get("entity_key") is not None)
     emergent_ok = sum(1 for d in gd.latest(inp["all_decisions"]).values()
                       if d.kind == "emergent" and d.decision == "approve")
-    tools = ("the extraction agent&rsquo;s current instructions do not name it, though it is among the agent&rsquo;s tools"
-             if inp["resolver_available"] else "the extraction agent neither has it among its tools nor is told of it")
+    rr = inp["resolver_runs"]
+    prompt = "name" if inp["prompt_names_resolver"] else "do not name"
+    if _MUTATE == "resolver-prompt":
+        prompt = "do not name" if prompt == "name" else "name"
+    feed_accepted = inp["feed_accepted"] + (1 if _MUTATE == "feed-accepted" else 0)
+    feed_item_word = "item" if feed_accepted == 1 else "items"
+    feed_have_word = "has" if feed_accepted == 1 else "have"
+    run_word = "run" if len(rr["runs"]) == 1 else "runs"
     label_advisories = len({d["advisory_id"] for d in inp["label_pass"]})
     n_corpus = len(inp["advisories"]) + (1 if _MUTATE == "corpus-count" else 0)
     decided = set(_standing(inp))
@@ -810,9 +836,9 @@ def section_limits(inp: dict) -> str:
     return """<section id="limits">
   <h2><span class="n">10</span> What this slice does not do yet</h2>
   <ul class="limits">
-    <li><strong>The corpus is fixed.</strong> <span data-count="advisories">%d</span> advisories on a fixed list, each pinned by its sha256, with no live ingestion: nothing fetches a new publication.</li>
+    <li><strong>The corpus changes only through acceptance.</strong> <span data-count="advisories">%d</span> advisories on a fixed list, each pinned by its sha256. Live ingestion is being built: a feeds server lists and fetches new publications into a local inbox, and <span data-count="feed-accepted">%d</span> feed %s %s been accepted into the corpus.</li>
     <li><strong>Nothing flows into detection yet.</strong> An approved link reaches a desk&rsquo;s digest; no typology link, indicator or actor is fed to the platform&rsquo;s detection.</li>
-    <li><strong>Actor resolution is not part of extraction.</strong> No committed extraction had the resolver: <code>%s</code> was added to the Knowledge Centre on <span data-date="resolver-added">%s</span>, and the newest proposal in any committed queue is dated <span data-date="newest-proposal">%s</span>. Separately, %s. Section 6&rsquo;s resolution was run afterwards, over the committed records. Resolving during extraction is slice 2.</li>
+    <li><strong>Actor resolution during extraction is counted, not assumed.</strong> Of the <span data-count="extraction-runs">%d</span> committed extraction %s with a proposal queue, <span data-count="runs-with-resolver">%d</span> recorded <code>%s</code> among the agent&rsquo;s tools, <span data-count="runs-no-tool-record">%d</span> recorded no list of tools, and <span data-count="runs-resolved">%d</span> resolved an actor with it. The extraction agent&rsquo;s current instructions <span data-flag="prompt-names-resolver">%s</span> it. Section 6&rsquo;s resolution was run over the committed records, after extraction.</li>
     <li><strong>No actor is linked to the platform&rsquo;s entities.</strong> <span data-count="entity-keys">%d</span> of the <span data-count="register">%d</span> register entries carry an <code>entity_key</code>; section 6 says why.</li>
     <li><strong>Digests are built, not delivered.</strong> A batch is cut on demand; nothing sends it to a desk.</li>
     <li><strong>Approved emergent candidates are not doctrine.</strong> An emergent typology the owner approves is recorded as approved; it is not added to the typology library. The pinned log holds <span data-count="emergent-approved">%d</span> such approvals.</li>
@@ -822,7 +848,9 @@ def section_limits(inp: dict) -> str:
     <li><strong>The scores are single runs.</strong> Section 9 shows one extraction per advisory; its figures have no bands of their own.</li>
   </ul>
 </section>
-""" % (n_corpus, RESOLVER, RESOLVER_ADDED, e(inp["newest_proposal"]), tools, keyed, len(register), emergent_ok,
+""" % (n_corpus, feed_accepted, feed_item_word, feed_have_word, len(rr["runs"]), run_word,
+       len(rr["with_tool"]), RESOLVER, len(rr["no_record"]), len(rr["resolved"]), prompt, keyed,
+       len(register), emergent_ok,
        e(ADVISORY), len(undecided), "candidate" if len(undecided) == 1 else "candidates",
        _ids(undecided) or "none", "it" if len(undecided) == 1 else "them",
        len(counted), why, here, e(ADVISORY), len(inp["label_pass"]), label_advisories)

@@ -70,7 +70,7 @@ ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
 from schemas.advisory import Citation, Confidence, TypologyFamily  # noqa: E402
-from agents.extract_advisory import agent_options, library_ids, pdf_to_pages  # noqa: E402
+from agents.extract_advisory import AGENT_TOOLS, agent_options, library_ids, pdf_to_pages  # noqa: E402
 from agents.run_identity import RunIdentity  # noqa: E402
 from agents import telemetry as run_telemetry  # noqa: E402
 from agents.permissions import expected_shadowing  # noqa: E402
@@ -162,7 +162,7 @@ async def review(pdf: Path, record: dict, model: str, max_budget_usd: float, max
         output_format={"type": "json_schema", "schema": ReviewAdditions.model_json_schema()},
     )
 
-    run_telemetry.run_started(run, model, max_budget_usd, max_turns)
+    run_telemetry.run_started(run, model, max_budget_usd, max_turns, AGENT_TOOLS)
     structured = None
     failure: str | None = None
     tool_calls: Counter = Counter()

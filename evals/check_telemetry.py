@@ -180,13 +180,15 @@ def hook_checks() -> list:
                     and ev["payload"]["advisory_id"] == RUN.advisory_id for ev in events()),
                 "every event names its run, agent and advisory", ""))
 
-    started = telemetry.run_started(RUN, "claude-sonnet-5", 5.0, 60)
+    started = telemetry.run_started(RUN, "claude-sonnet-5", 5.0, 60,
+                                    ("mcp__knowledge_centre__knowledge_centre_resolve_actor",))
     done = telemetry.run_completed(RUN, telemetry.SUCCESS, "record validated", result=None, validated=True,
                                    terminal_check={"calls": 0, "unterminated": [], "duplicated": []})
     out.append((started["stage"] == telemetry.RUN_STARTED and done["stage"] == telemetry.RUN_COMPLETED
                 and done["payload"]["validated"] is True and started["payload"]["model"] == "claude-sonnet-5"
+                and started["payload"]["tools"] == ["mcp__knowledge_centre__knowledge_centre_resolve_actor"]
                 and done["payload"].get("terminal_check") == {"calls": 0, "unterminated": [], "duplicated": []},
-                "run_started and run_completed are recorded, the latter with its validated flag and terminal_check",
+                "run_started records the agent's tools; run_completed its validated flag and terminal_check",
                 "%s / %s" % (started["stage"], done["stage"])))
     return out
 

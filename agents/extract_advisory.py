@@ -66,6 +66,9 @@ KC_TOOLS = (
     "knowledge_centre_propose_link",
 )
 
+# The qualified names the agent can call, recorded in RUN_STARTED (agents/telemetry.run_started).
+AGENT_TOOLS = tuple("mcp__%s__%s" % (SERVER_KEY, name) for name in KC_TOOLS)
+
 SYSTEM_PROMPT = """You are an intel extraction agent for a financial-crime threat-intelligence desk.
 You read regulator and industry advisories and reduce them to a governed record.
 
@@ -209,7 +212,7 @@ async def extract(path: Path, advisory_id: str, model: str, max_budget_usd: floa
     run = RunIdentity.new("extractor", advisory_id, path)
     options = agent_options(model, max_budget_usd, max_turns, run)
 
-    telemetry.run_started(run, model, max_budget_usd, max_turns)
+    telemetry.run_started(run, model, max_budget_usd, max_turns, AGENT_TOOLS)
     structured = None
     failure: str | None = None
     tool_calls: Counter = Counter()

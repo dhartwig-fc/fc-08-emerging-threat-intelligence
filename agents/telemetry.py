@@ -169,9 +169,12 @@ def reconcile(run, tool_use_ids) -> dict:
             "duplicated": [i for i in ids if counts[i] > 1]}
 
 
-def run_started(run, model: str, max_budget_usd: float, max_turns: int) -> dict:
+def run_started(run, model: str, max_budget_usd: float, max_turns: int, tools) -> dict:
+    """`tools` is every qualified tool name the agent can call. It is recorded so what a run HAD is
+    measured, not inferred from its date (the walkthrough's section 10 counts it)."""
     return emit(run, RUN_STARTED, SUCCESS, "%s run started" % run.stage, model=model,
-                max_budget_usd=max_budget_usd, max_turns=max_turns, pdf_sha256=run.pdf_sha256)
+                max_budget_usd=max_budget_usd, max_turns=max_turns, pdf_sha256=run.pdf_sha256,
+                tools=list(tools))
 
 
 def run_completed(run, status: str, message: str, *, result=None, validated: bool = False, **extra) -> dict:
