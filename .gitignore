@@ -13,3 +13,7 @@ data/records_extraction_only/
 data/proposals.jsonl
 .venv/
 __pycache__/
+
+# Slice 2: a feeds run's working folder (listings, fetched documents, items.json). Never tracked;
+# a run's results enter tracked data only through tools/accept_run.py.
+inbox/
