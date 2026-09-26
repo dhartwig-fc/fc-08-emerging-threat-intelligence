@@ -75,12 +75,12 @@ At the end of the run, **in code, after the agent stops**, the runner reconciles
 Whatever the agent skipped is reported as **unfinished**, never as success.
 
 Budget and blast radius:
-- **a hard cost ceiling of US$4 for the whole run** (owner decision, 2026-09-26). Measured: an
+- **a hard cost ceiling of US$5 for the whole run** (owner decision, 2026-09-26, raised from US$5 the same day). Measured: an
   extraction averages US$0.73 (14 runs), and the one telemetry run cost US$0.50. On the subscription
   token this is the SDK's notional price, not a bill, but it is capped all the same;
 - **caps: at most 10 listed items triaged and at most 3 extracted per run**, each extraction with its
   own `max_budget_usd` of US$1.00. The runner starts an extraction only if the spend so far plus
-  US$1.00 stays within US$4; otherwise the item is deferred. Deferred items stay unseen and come back
+  US$1.00 stays within US$5; otherwise the item is deferred. Deferred items stay unseen and come back
   next Friday, and the report lists them as deferred for budget;
 - no write tools other than `feeds_*` into the inbox and `propose_link` into the run's queue;
 - the seen-items ledger is updated only by `accept_run`.
@@ -100,7 +100,7 @@ Each run writes one gitignored folder, `inbox/<run_id>/`, and nothing else:
 - dropped items listed with their reasons;
 - extractions and proposal counts;
 - the reconciliation result, including unfinished items;
-- cost against the US$4 ceiling, and any items deferred for budget;
+- cost against the US$5 ceiling, and any items deferred for budget;
 - any failure stated loudly: auth expired, a source down, or a listing whose layout no longer parses.
 
 launchd posts one macOS notification at the end of the run.
@@ -256,7 +256,7 @@ reconciliation fails is marked unfinished and cannot be accepted without an expl
 5. `accept_run` as the only way live results enter tracked data, validating everything, and updating
    the ledger only on acceptance.
 6. launchd running weekly on Fridays, with an auth preflight, a notification, back-pressure, and no
-   run exceeding US$4.
+   run exceeding US$5.
 7. At least one accepted live run whose proposals went through `tools/review.py`.
 8. The walkthrough still building and current, with the resolver sentence computed.
 
