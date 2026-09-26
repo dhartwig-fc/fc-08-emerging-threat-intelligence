@@ -49,7 +49,8 @@ from governance import card  # noqa: E402
 from governance import decisions as gd  # noqa: E402
 from governance.digest import (APPROVED_NOT_IN_RECORD, DIGESTS_DIR, RECORDS_DIR, _in_scope,  # noqa: E402
                                _routes, _visible)
-from governance.proposals import ADVISORY_LIST, LIBRARY, QUEUE_DIR, group, link_key, load_queue_files  # noqa: E402
+from governance.proposals import (ADVISORY_LIST, LEGACY_QUEUE, LIBRARY, QUEUE_DIR, group, link_key,  # noqa: E402
+                                  load_queue_files)
 from governance.routing import load_routing  # noqa: E402
 from agents import telemetry  # noqa: E402
 from agents.extract_advisory import KC_TOOLS, SYSTEM_PROMPT  # noqa: E402
@@ -66,13 +67,22 @@ TELEMETRY_RUN = "adv-2026-0013-extractor-69eeab7b41"
 GOLDEN_DIR = ROOT / "evals" / "golden"
 DIGEST_DESK = "sanctions_desk"
 RESOLVER = "knowledge_centre_resolve_actor"
+# The day the resolver tool entered the Knowledge Centre (commit 891b2b0). The builder may not call git;
+# evals/check_walkthrough.py holds this date against the repository history.
+RESOLVER_ADDED = "2026-09-25"
+LABEL_PASS = ROOT / "evals" / "owner_decisions" / "label_pass_2026-09-24.json"
+LABEL_PROVENANCE = "Claude-drafted, Claude-reviewed"
+REPO_BLOB = "https://github.com/dhartwig-fc/fc-08-emerging-threat-intelligence/blob/main/"
 TRACE = "evals/traces/FULL_BASELINE_2026-09-12.md"
-TRACE_URL = "https://github.com/dhartwig-fc/fc-08-emerging-threat-intelligence/blob/main/" + TRACE
+TRACE_URL = REPO_BLOB + TRACE
+BANDS_TRACE = "evals/traces/REVIEWER_BANDS_2026-09-13.md"
+BANDS_URL = REPO_BLOB + BANDS_TRACE
 SCORE_FIELDS = (("typologies", "Typologies (library)"), ("emergent", "Emergent typologies"),
                 ("actors", "Actors"), ("jurisdictions", "Jurisdictions"))
 _MUTATE = None  # set only by evals/check_walkthrough.py through --_mutate
 MUTATIONS = ("drop-citation", "unpinned-log", "wrong-page", "swap-notes", "wrong-count", "desk-scope", "two-runs",
-             "typed-score", "actor-id", "digest-header", "telemetry-count", "attested-count")
+             "typed-score", "actor-id", "digest-header", "telemetry-count", "attested-count", "swap-moves",
+             "proposal-date")
 
 e = html.escape
 PAST = {"approve": "approved", "reject": "rejected"}
@@ -156,10 +166,47 @@ def inputs(log: Path = gd.LOG) -> dict:
     tel_proposals, skipped = load_queue_files([QUEUE_DIR / ("%s.jsonl" % TELEMETRY_RUN)])
     if skipped or any(p.document_sha256 != doc or p.advisory_id != ADVISORY for p in tel_proposals):
         raise ValueError("run %s's queue is unreadable or not about this document" % TELEMETRY_RUN)
+    # "Neither the decided run nor the record's extraction: three extractions" -- true only while the
+    # telemetry run proposed a different typology set from the one the record's extractor asserted.
+    record_ext = {t["typology_id"] for t in record["typologies"]
+                  if t.get("typology_id") and t.get("added_by") in (None, "extractor")}
+    if {p.typology_id for p in tel_proposals if p.typology_id} == record_ext:
+        raise ValueError("run %s proposed exactly the record's extractor typologies; section 8 says it is a "
+                         "different extraction" % TELEMETRY_RUN)
+    tel_runs = sorted(f.stem for f in telemetry.TELEMETRY_DIR.glob("%s-*.jsonl" % ADVISORY.lower()))
+    if TELEMETRY_RUN not in tel_runs or DECIDED_RUN in tel_runs:
+        raise ValueError("section 8 says %s has telemetry and the decided run has none; the directory holds %s"
+                         % (TELEMETRY_RUN, tel_runs))
 
-    # Section 10: "the extractor is not asked to resolve actors" must stay true to be said.
-    if RESOLVER in SYSTEM_PROMPT:
-        raise ValueError("the extractor's prompt now names %s; section 10 says it is not asked to" % RESOLVER)
+    # Section 10: "the extractor is not asked to resolve actors" must stay true to be said -- the
+    # substring, so any spelling of the tool in the prompt counts as asking.
+    if "resolve_actor" in SYSTEM_PROMPT:
+        raise ValueError("the extractor's prompt now names resolve_actor; section 10 says it does not")
+    # "No committed extraction had the resolver": every committed queue's newest proposal predates it.
+    queues = [LEGACY_QUEUE] + sorted(QUEUE_DIR.glob("*.jsonl"))
+    if _MUTATE == "proposal-date":
+        queues = [LEGACY_QUEUE]
+    newest = max(json.loads(line)["proposed_at"][:10] for q in queues
+                 for line in q.read_text(encoding="utf-8").splitlines() if line.strip())
+    if newest >= RESOLVER_ADDED:
+        raise ValueError("a committed proposal is dated %s, on or after the resolver's %s; section 10 says no "
+                         "committed extraction had it" % (newest, RESOLVER_ADDED))
+
+    # Sections 5, 9, 10: the golden labels are Claude's, with the owner's decisions on the disputed entries.
+    label_pass = _json(LABEL_PASS)["decisions"]
+    unlabelled = sorted(a["advisory_id"] for a in advisories.values()
+                        if LABEL_PROVENANCE not in a.get("label_status", ""))
+    if unlabelled:
+        raise ValueError("label_status does not say %r for %s" % (LABEL_PROVENANCE, ", ".join(unlabelled)))
+    listed = sum(int(m.group(1)) for a in advisories.values()
+                 for m in [re.search(r"on (\d+) disputed entr", a.get("label_status", ""))] if m)
+    if listed != len(label_pass):
+        raise ValueError("the advisory list counts %d owner-decided disputed entries; the label pass holds %d"
+                         % (listed, len(label_pass)))
+
+    attested = _json(ATTESTED_PATH)["attested"]
+    if any(a.get("attested_by") != "owner" for a in attested):
+        raise ValueError("an attested citation was not attested by the owner; section 10 says each was")
 
     return {
         "advisory": advisory,
@@ -186,8 +233,11 @@ def inputs(log: Path = gd.LOG) -> dict:
         "run_completed": completed[0]["payload"],
         "tel_proposals": tel_proposals,
         "scores": {"extraction": score_dirs(GOLDEN_DIR, EXTRACTOR_RECORDS), "reviewer": score_dirs(GOLDEN_DIR, RECORDS_DIR)},
-        "attested": _json(ATTESTED_PATH)["attested"],
+        "attested": attested,
         "resolver_available": RESOLVER in KC_TOOLS,
+        "newest_proposal": newest,
+        "tel_runs": tel_runs,
+        "label_pass": label_pass,
     }
 
 
@@ -400,6 +450,15 @@ def _decision_li(d, prefix: str = "") -> str:
             % (prefix, e(d.decided_at[:10]), e(d.decision), e(d.decision.upper()), e(d.note or "(no note)")))
 
 
+def _label_here(inp: dict) -> str:
+    n = sum(1 for d in inp["label_pass"] if d["advisory_id"] == ADVISORY)
+    if not n:
+        if "awaiting owner review" not in inp["advisory"].get("label_status", ""):
+            raise ValueError("%s's label_status no longer says it awaits owner review" % ADVISORY)
+        return "the owner has not yet reviewed it"
+    return "the owner has decided its %s, not yet the rest" % _plural(n, "disputed entry", "disputed entries")
+
+
 def section_review(inp: dict) -> str:
     rec_ids = {t.get("typology_id") for t in inp["record"]["typologies"] if t.get("typology_id")}
     by_link = {}
@@ -439,11 +498,11 @@ def section_review(inp: dict) -> str:
     return """<section id="review">
   <h2><span class="n">05</span> Review: what the owner saw, and decided</h2>
   <p>The decisions shown are the first %s of the owner&rsquo;s decision log &mdash; the lines digest batch <code>%s</code> was built from (sha256 <span class="hash">%s</span>); %s of them decide %s.</p>
-  <p>Each card is rendered by the review gate&rsquo;s own card renderer from run <code>%s</code>&rsquo;s queue, without the terminal&rsquo;s separator line, and followed by the owner&rsquo;s decision. &ldquo;Golden label HOLDS&rdquo; or &ldquo;LACKS&rdquo; on a card refers to a hand-written reference answer for this advisory, shown to the owner as context only, never a rule.</p>
+  <p>Each card is rendered by the review gate&rsquo;s own card renderer from run <code>%s</code>&rsquo;s queue, without the terminal&rsquo;s separator line, and followed by the owner&rsquo;s decision. &ldquo;Golden label HOLDS&rdquo; or &ldquo;LACKS&rdquo; on a card refers to this advisory&rsquo;s reference answer (its golden label), drafted and reviewed by Claude; %s. It was shown to the owner as context only, never a rule.</p>
 %s%s
 </section>
 """ % (_plural(inp["log_lines"], "line"), e(inp["batch"]), e(inp["log_sha256"]), len(inp["decisions"]),
-       e(ADVISORY), e(DECIDED_RUN), "\n".join(blocks), tail)
+       e(ADVISORY), e(DECIDED_RUN), _label_here(inp), "\n".join(blocks), tail)
 
 
 def section_actors(inp: dict) -> str:
@@ -515,7 +574,7 @@ def section_digest(inp: dict) -> str:
     if DIGEST_DESK not in inp["desks"]:
         raise ValueError("%s does not reach the %s; section 7 shows its entry there" % (ADVISORY, title))
     return """<section id="digest">
-  <h2><span class="n">07</span> What a desk receives</h2>
+  <h2><span class="n">07</span> What a desk&rsquo;s digest carries</h2>
   <p>The advisory reached %s (section 1). This is the %s&rsquo;s entry for it, exactly as written in digest batch <code data-batch="%s">%s</code>, which was built from the first <span data-count="digest-log-lines">%d</span> lines of the decision log &mdash; the same lines section 5 reads. It is markdown, shown as written; &ldquo;asserted by the pipeline&rdquo; means in the record, awaiting the owner.</p>
   <pre class="digest">%s</pre>
 </section>
@@ -575,9 +634,9 @@ def section_telemetry(inp: dict) -> str:
     facts = "\n    ".join([
         "<dt>Turns</dt>" + rc("turns", "%d of at most %d" % (done["turns"], s0["max_turns"])),
         "<dt>Duration</dt>" + rc("duration_ms", "%.1f seconds" % (done["duration_ms"] / 1000)),
-        "<dt>Cost</dt>" + rc("cost_usd", "US$%.2f, as reported by the agent SDK (budget US$%.2f)"
-                             % (done["cost_usd"], s0["max_budget_usd"])),
-        "<dt>Record validated</dt>" + rc("validated", "yes" if done["validated"] else "no")])
+        "<dt>SDK cost estimate</dt>" + rc("cost_usd", "US$%.2f at API prices, as computed by the agent SDK; "
+                                           "not a bill" % done["cost_usd"]),
+        "<dt>The run&rsquo;s own record validated</dt>" + rc("validated", "yes" if done["validated"] else "no")])
 
     # Its proposals: separate from the decided run's. Say, per link, what the pinned log decided.
     tel = inp["tel_proposals"]
@@ -612,7 +671,7 @@ def section_telemetry(inp: dict) -> str:
                % e(_short(PROPOSE_TOOL)))
     return """<section id="telemetry">
   <h2><span class="n">08</span> Telemetry: what the agent did</h2>
-  <p>Every tool call and permission decision in an extraction run is logged as it happens. The run with telemetry for this advisory is <code>%s</code> (%s, started %s): <span class="count" data-count="events">%d</span> events.</p>
+  <p>Every tool call and permission decision in an extraction run has been logged since telemetry was added. <span class="count" data-count="tel-runs">%d</span> %s of this advisory %s telemetry: <code>%s</code> (%s, started %s), with <span class="count" data-count="events">%d</span> events. The decided run, <code>%s</code>, has none.</p>
   <table class="rows tel">
     <thead><tr><th>Tool call</th>%s</tr></thead>
     <tbody>
@@ -624,12 +683,14 @@ def section_telemetry(inp: dict) -> str:
   <dl class="facts">
     %s
   </dl>
-  <p class="flag">This run is not the one the owner decided (<code>%s</code>, sections 4 and 5). %s: <span class="ids" data-set="tel-proposed">%s</span>. They are separate from the decided run&rsquo;s proposals: <span data-count="tel-cited">%d</span> of them %s cited by any decision in the pinned log, so as proposals they remain undecided. %s%s</p>
+  <p class="flag">Run <code>%s</code> is neither the run the owner decided (<code>%s</code>, sections 4 and 5) nor the extraction the record carries (section 3): this advisory has three extractions. %s: <span class="ids" data-set="tel-proposed">%s</span>. They are separate from the decided run&rsquo;s proposals: <span data-count="tel-cited">%d</span> of them %s cited by any decision in the pinned log, so as proposals they remain undecided. %s%s</p>
 </section>
-""" % (e(TELEMETRY_RUN), e(s0.get("model", "?")), e(events[0]["timestamp"][:10]), len(events), head, body,
+""" % (len(inp["tel_runs"]), "run" if len(inp["tel_runs"]) == 1 else "runs", "has" if len(inp["tel_runs"]) == 1 else "have",
+       ", ".join(e(r) for r in inp["tel_runs"]), e(s0.get("model", "?")), e(events[0]["timestamp"][:10]), len(events),
+       e(DECIDED_RUN), head, body,
        sdk.strip(), fails,
        telemetry.PERMISSION_ALLOWED, len(perm[telemetry.PERMISSION_ALLOWED]), telemetry.PERMISSION_DENIED,
-       len(perm[telemetry.PERMISSION_DENIED]), about, pre, facts, e(DECIDED_RUN), match,
+       len(perm[telemetry.PERMISSION_DENIED]), about, pre, facts, e(TELEMETRY_RUN), e(DECIDED_RUN), match,
        _ids(sorted(name(p) for p in tel)), n_cited, "is" if n_cited == 1 else "are", decided_line,
        ('<span class="ids" data-set="tel-no-decision">%s</span> %s no decision.'
         % (_ids(undecided) or "none", "has" if len(undecided) == 1 else "have")))
@@ -660,24 +721,32 @@ def section_score(inp: dict) -> str:
     if ext["scored"] != rev["scored"]:
         raise ValueError("the two record sets score different advisories; the tables would not compare")
     same = [label.lower() for field, label in SCORE_FIELDS if ext["totals"][field] == rev["totals"][field]]
-    moved = ["%s F1 %.3f &rarr; %.3f" % (e(label.lower()), ext["totals"][f]["f1"], rev["totals"][f]["f1"])
-             for f, label in SCORE_FIELDS if ext["totals"][f] != rev["totals"][f]]
+    moved = []
+    for f, label in SCORE_FIELDS:
+        if ext["totals"][f] == rev["totals"][f]:
+            continue
+        a, b = "%.3f" % ext["totals"][f]["f1"], "%.3f" % rev["totals"][f]["f1"]
+        if _MUTATE == "swap-moves":
+            a, b = b, a
+        moved.append('<span class="move" data-move="%s" data-from="%s" data-to="%s">%s F1 %s &rarr; %s</span>'
+                     % (f, a, b, e(label.lower()), a, b))
     diff = ""
     if moved:
         diff = "<p>Adding the reviewer moves %s.%s</p>" % ("; ".join(moved), (
             " %s score the same in both tables." % e(" and ".join(same)).capitalize()) if same else "")
     return """<section id="score">
   <h2><span class="n">09</span> How well the extraction scores</h2>
-  <p>Across the <span class="count" data-count="scored">%d</span> advisories with a hand-written reference answer (a golden label), %s among them, each record is scored against its label. Precision: of what the pipeline asserted, the share the label holds. Recall: of what the label holds, the share the pipeline asserted. F1 balances the two. Computed when this page was built.</p>
+  <p>Across the <span class="count" data-count="scored">%d</span> advisories scored, %s among them, each record is scored against a reference answer (its golden label), drafted and reviewed by Claude; the owner has decided the set&rsquo;s <span class="count" data-count="label-decided">%d</span> disputed entries, not yet the rest. Precision: of what the pipeline asserted, the share the label holds. Recall: of what the label holds, the share the pipeline asserted. F1 balances the two. Computed when this page was built.</p>
 %s
 %s
   %s
-  <p class="flag">Each table is a single full-set run: one extraction of each advisory, scored once. Repeat runs, which measure how much a figure moves from run to run, are not committed, so no bands are shown. The committed trace of the <a href="%s" rel="noopener">first full-set run, 2026-09-12</a>, describes what limits typology recall; its figures are that day&rsquo;s, not these.</p>
+  <p class="flag">Each table is a single full-set run: one extraction of each advisory, scored once. The repeat records are not committed and these figures have no bands of their own. Two committed traces give context. <a href="%s" rel="noopener">The reviewer&rsquo;s acceptance bands, 2026-09-13</a>: typology precision, recall and F1 over three repeats of the reviewer on four advisories, before the owner&rsquo;s label pass &mdash; bands for that experiment, not for these figures. <a href="%s" rel="noopener">The first full-set run, 2026-09-12</a>: what limits typology recall; its figures are that day&rsquo;s, not these.</p>
 </section>
-""" % (len(ext["scored"]), ("ADV-2026-0013" if ADVISORY in ext["scored"] else "not including " + e(ADVISORY)),
+""" % (len(ext["scored"]), (e(ADVISORY) if ADVISORY in ext["scored"] else "not including " + e(ADVISORY)),
+       len(inp["label_pass"]),
        _score_table("extraction", "Extraction only: the extractor&rsquo;s committed records", ext),
        _score_table("reviewer", "Extraction + reviewer: the merged records, with the reviewer agent&rsquo;s additions",
-                    rev), diff, e(TRACE_URL, quote=True))
+                    rev), diff, e(BANDS_URL, quote=True), e(TRACE_URL, quote=True))
 
 
 ATTEST_REASONS = {"page_break": "across a page break", "bullet_glyph": "with a list bullet extracted as a letter",
@@ -693,26 +762,27 @@ def section_limits(inp: dict) -> str:
     why = ", ".join("%d %s" % (n, e(ATTEST_REASONS.get(r, r)))
                     for r, n in sorted(reasons.items(), key=lambda kv: (-kv[1], kv[0])))
     here = sum(1 for a in attested if a["advisory_id"] == ADVISORY)
-    calls = sum(1 for ev in inp["events"] if ev["stage"] == telemetry.TOOL_CALL
-                and _short(ev["payload"]["tool"]) == RESOLVER)
     register = inp["register"]
     keyed = sum(1 for a in register if a.get("entity_key") is not None)
     emergent_ok = sum(1 for d in gd.latest(inp["all_decisions"]).values()
                       if d.kind == "emergent" and d.decision == "approve")
-    tools = ("The extraction agent has the resolver among its tools, but its instructions do not ask it to use it"
-             if inp["resolver_available"] else "The extraction agent does not have the resolver among its tools")
+    tools = ("the extraction agent&rsquo;s current instructions do not name it, though it is among the agent&rsquo;s tools"
+             if inp["resolver_available"] else "the extraction agent neither has it among its tools nor is told of it")
+    label_advisories = len({d["advisory_id"] for d in inp["label_pass"]})
     return """<section id="limits">
   <h2><span class="n">10</span> What this slice does not do yet</h2>
   <ul class="limits">
-    <li><strong>Actor resolution is not part of extraction.</strong> %s: run <code>%s</code> made <span data-count="resolver-calls">%d</span> calls to <code>%s</code>. Section 6&rsquo;s resolution was run afterwards, over the committed records. Resolving during extraction is slice 2.</li>
+    <li><strong>Actor resolution is not part of extraction.</strong> No committed extraction had the resolver: <code>%s</code> was added to the Knowledge Centre on <span data-date="resolver-added">%s</span>, and the newest proposal in any committed queue is dated <span data-date="newest-proposal">%s</span>. Separately, %s. Section 6&rsquo;s resolution was run afterwards, over the committed records. Resolving during extraction is slice 2.</li>
     <li><strong>No actor is linked to the platform&rsquo;s entities.</strong> <span data-count="entity-keys">%d</span> of the <span data-count="register">%d</span> register entries carry an <code>entity_key</code>; section 6 says why.</li>
     <li><strong>Digests are built, not delivered.</strong> A batch is cut on demand; nothing sends it to a desk.</li>
     <li><strong>Approved emergent candidates are not doctrine.</strong> An emergent typology the owner approves is recorded as approved; it is not added to the typology library. The pinned log holds <span data-count="emergent-approved">%d</span> such approvals.</li>
-    <li><strong>Some citations are attested, not matched.</strong> <span data-count="attested">%d</span> citations across the merged records are true quotes the citation matcher cannot place on their page (%s); the owner checked each by hand. <span data-count="attested-here">%d</span> of them are on %s.</li>
-    <li><strong>The scores are single runs.</strong> Section 9 shows one extraction per advisory, without bands.</li>
+    <li><strong>Some citations are attested, not matched.</strong> <span data-count="attested">%d</span> citations across the merged records are true quotes the citation matcher cannot place on their page (%s), each attested by the owner. <span data-count="attested-here">%d</span> of them are on %s.</li>
+    <li><strong>The reference answers are Claude&rsquo;s.</strong> Every golden label was drafted and reviewed by Claude. The owner has decided the <span data-count="label-decided">%d</span> entries disputed in the label pass, across <span data-count="label-advisories">%d</span> advisories, and not yet the rest. Section 9&rsquo;s scores are measured against these labels.</li>
+    <li><strong>The scores are single runs.</strong> Section 9 shows one extraction per advisory; its figures have no bands of their own.</li>
   </ul>
 </section>
-""" % (tools, e(TELEMETRY_RUN), calls, RESOLVER, keyed, len(register), emergent_ok, len(counted), why, here, e(ADVISORY))
+""" % (RESOLVER, RESOLVER_ADDED, e(inp["newest_proposal"]), tools, keyed, len(register), emergent_ok, len(counted), why,
+       here, e(ADVISORY), len(inp["label_pass"]), label_advisories)
 
 
 # ---------------------------------------------------------------- the page

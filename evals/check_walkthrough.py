@@ -16,6 +16,8 @@ Usage:
     python evals/check_walkthrough.py --mutate digest-header   # the digest cut starts at the desk file's header; MUST fail
     python evals/check_walkthrough.py --mutate telemetry-count # FAILURE tool calls are left out of the counts; MUST fail
     python evals/check_walkthrough.py --mutate attested-count  # #limits counts only this advisory's attestations; MUST fail
+    python evals/check_walkthrough.py --mutate swap-moves      # section 9's "moves F1 x -> y" swaps x and y; MUST fail
+    python evals/check_walkthrough.py --mutate proposal-date   # the newest-proposal date ignores the run queues; MUST fail
 
 WHY. The page will leave this repository. A page that drifts from its inputs, differs
 between two machines, or quietly drops a citation says something the governance never
@@ -47,23 +49,38 @@ sys.path.insert(0, str(ROOT))
 from governance import decisions as gd  # noqa: E402
 from governance import publish_boundary as pb  # noqa: E402
 from governance.digest import DIGESTS_DIR, RECORDS_DIR  # noqa: E402
-from governance.proposals import QUEUE_DIR, load_queue_files  # noqa: E402
+from governance.proposals import ADVISORY_LIST, LEGACY_QUEUE, QUEUE_DIR, load_queue_files  # noqa: E402
 from governance.routing import load_routing  # noqa: E402
+from agents.extract_advisory import SYSTEM_PROMPT  # noqa: E402
 from agents.telemetry import TELEMETRY_DIR  # noqa: E402
 from evals.actor_resolution import REPORT as ACTOR_REPORT  # noqa: E402
 from evals.check_citations import ATTESTED_PATH  # noqa: E402
 from evals.score import score_dirs  # noqa: E402
 from tools.build_actor_register import load_register  # noqa: E402
 
-TRACE_URL = ("https://github.com/dhartwig-fc/fc-08-emerging-threat-intelligence/blob/main/"
-             "evals/traces/FULL_BASELINE_2026-09-12.md")
+REPO_BLOB = "https://github.com/dhartwig-fc/fc-08-emerging-threat-intelligence/blob/main/"
+TRACE_URL = REPO_BLOB + "evals/traces/FULL_BASELINE_2026-09-12.md"
+BANDS_URL = REPO_BLOB + "evals/traces/REVIEWER_BANDS_2026-09-13.md"
+LABEL_PASS = ROOT / "evals" / "owner_decisions" / "label_pass_2026-09-24.json"
+SERVER = "mcp_server/knowledge_centre_server.py"
+
+
+def _resolver_added() -> str:
+    """The first commit that put knowledge_centre_resolve_actor into the Knowledge Centre server, by date --
+    read from git here because the builder may not call it."""
+    r = subprocess.run(["git", "log", "--reverse", "--format=%ad", "--date=short", "-S",
+                        "knowledge_centre_resolve_actor", "--", SERVER],
+                       capture_output=True, text=True, cwd=ROOT)
+    lines = r.stdout.split()
+    return lines[0] if r.returncode == 0 and lines else "git history unavailable (%s)" % r.stderr.strip()[:80]
 
 BUILDER = ROOT / "tools" / "build_walkthrough.py"
 SECTIONS = ("question", "source", "extraction", "grounding", "review",
             "actors", "digest", "telemetry", "score", "limits")
 SEEDS = ("0", "1", "4242", "987654")
 MUTATIONS = ("drop-citation", "unpinned-log", "wrong-page", "swap-notes", "wrong-count", "desk-scope", "two-runs",
-             "typed-score", "actor-id", "digest-header", "telemetry-count", "attested-count")
+             "typed-score", "actor-id", "digest-header", "telemetry-count", "attested-count", "swap-moves",
+             "proposal-date")
 MUTATION = None
 
 
@@ -151,7 +168,8 @@ def checks_sections_6_to_10(bw, page: str, record: dict, pinned: list) -> list:
                 "#actors lists every category actor in the record, in order, as not resolvable",
                 "record %s; page %s; named rows %d + categories %d vs %d actors"
                 % (cats, cat_shown, len(rows), len(cats), len(record["actors"]))))
-    publishers = {t.strip() for t in bw.inputs()["advisory"]["publisher"].split("/")}
+    listed = {a["advisory_id"]: a for a in json.loads(ADVISORY_LIST.read_text(encoding="utf-8"))["advisories"]}
+    publishers = {t.strip() for t in listed[bw.ADVISORY]["publisher"].split("/")}
     by_name = {a["name"]: a for a in record["actors"]}
     own = sorted(r["name"] for r in rows if r["status"] == "unresolved"
                  and ({r["name"]} | set(by_name.get(r["name"], {}).get("aliases", []))) & publishers)
@@ -211,8 +229,8 @@ def checks_sections_6_to_10(bw, page: str, record: dict, pinned: list) -> list:
         p, s0 = done[0]["payload"], started[0]["payload"]
         expect = {"turns": (p["turns"], "%d of at most %d" % (p["turns"], s0["max_turns"])),
                   "duration_ms": (p["duration_ms"], "%.1f seconds" % (p["duration_ms"] / 1000)),
-                  "cost_usd": (p["cost_usd"], "US$%.2f, as reported by the agent SDK (budget US$%.2f)"
-                               % (p["cost_usd"], s0["max_budget_usd"])),
+                  "cost_usd": (p["cost_usd"], "US$%.2f at API prices, as computed by the agent SDK; not a bill"
+                               % p["cost_usd"]),
                   "validated": (p["validated"], "yes" if p["validated"] else "no")}
         ok_rc = raw == expect
         why = [expect, raw]
@@ -229,18 +247,31 @@ def checks_sections_6_to_10(bw, page: str, record: dict, pinned: list) -> list:
     shown_sets = {k: sorted(x.strip() for x in v.split(",") if x.strip() and x.strip() != "none")
                   for k, v in _attrs(tel, "data-set").items()}
     n_cited = _attrs(tel, "data-count").get("tel-cited")
+    rec_ext = {t["typology_id"] for t in record["typologies"]
+               if t.get("typology_id") and t.get("added_by") in (None, "extractor")}
     out.append((bool(queued) and bw.TELEMETRY_RUN in tel and shown_sets == sets
+                and {q.typology_id for q in queued if q.typology_id} != rec_ext
+                and "neither the run the owner decided" in tel
                 and n_cited == str(sum(1 for q in queued if q.proposal_id in cited)),
                 "#telemetry names its run, its proposals, and which of their links the pinned log decided",
                 "want %s cited %d; page %s cited %s" % (sets, sum(1 for q in queued if q.proposal_id in cited),
                                                         shown_sets, n_cited)))
 
+    tel_runs = sorted(f.stem for f in TELEMETRY_DIR.glob("%s-*.jsonl" % bw.ADVISORY.lower()))
+    shown_runs = _attrs(tel, "data-count").get("tel-runs")
+    out.append((shown_runs == str(len(tel_runs)) and bw.TELEMETRY_RUN in tel_runs and bw.DECIDED_RUN not in tel_runs
+                and ("The decided run, <code>%s</code>, has none." % bw.DECIDED_RUN) in tel,
+                "#telemetry's count of this advisory's telemetry runs equals the telemetry directory's, and the "
+                "decided run has none there", "directory %s; page %s" % (tel_runs, shown_runs)))
+
     # 9 -- score. All 24 values recomputed with the scorer at check time.
     sc = section(page, "score")
     wrong = []
     n = 0
+    reports = {}
     for run, pred in (("extraction", ROOT / "data" / "records"), ("reviewer", RECORDS_DIR)):
-        totals = score_dirs(ROOT / "evals" / "golden", pred)["totals"]
+        reports[run] = score_dirs(ROOT / "evals" / "golden", pred)
+        totals = reports[run]["totals"]
         for field in ("typologies", "emergent", "actors", "jurisdictions"):
             for metric in ("precision", "recall", "f1"):
                 n += 1
@@ -251,24 +282,53 @@ def checks_sections_6_to_10(bw, page: str, record: dict, pinned: list) -> list:
                                                               cell.group(1) if cell else None))
     out.append((n == 24 and not wrong, "#score's 24 precision/recall/F1 values equal score_dirs recomputed now",
                 "; ".join(wrong) or "all 24 equal"))
-    out.append(('href="%s"' % html.escape(TRACE_URL) in sc and "single" in sc,
-                "#score says the figures are single runs and links the committed full-set trace", ""))
+    out.append(('href="%s"' % html.escape(TRACE_URL) in sc and 'href="%s"' % html.escape(BANDS_URL) in sc
+                and "single full-set run" in sc and "no bands of their own" in sc,
+                "#score says the figures are single runs without bands and links both committed traces", ""))
+    ext_t, rev_t = reports["extraction"]["totals"], reports["reviewer"]["totals"]
+    want_moves = {f: ("%.3f" % ext_t[f]["f1"], "%.3f" % rev_t[f]["f1"]) for f in ext_t if ext_t[f] != rev_t[f]}
+    got_moves = {m.group(1): (m.group(2), m.group(3)) for m in
+                 re.finditer(r'data-move="([a-z]+)" data-from="([0-9.]+)" data-to="([0-9.]+)">[^<]* F1 \2 &rarr; \3<',
+                             sc)}
+    out.append((bool(want_moves) and got_moves == want_moves,
+                "#score's 'adding the reviewer moves F1 x -> y' names each moved field with its own two F1 values",
+                "want %s; page %s" % (want_moves, got_moves)))
+    label_pass = json.loads(LABEL_PASS.read_text(encoding="utf-8"))["decisions"]
+    sc_counts = _attrs(sc, "data-count")
+    out.append((sc_counts.get("scored") == str(len(reports["extraction"]["scored"]))
+                and sc_counts.get("label-decided") == str(len(label_pass))
+                and "drafted and reviewed by Claude" in sc and "hand-written" not in page,
+                "#score names the advisories scored and the owner-decided label entries, and says the labels are "
+                "Claude's", "page %s; scored %d, label pass %d" % (sc_counts, len(reports["extraction"]["scored"]),
+                                                                  len(label_pass))))
 
     # 10 -- limits. Every count recomputed.
     lim = section(page, "limits")
     attested = json.loads(ATTESTED_PATH.read_text(encoding="utf-8"))["attested"]
-    tel_calls = sum(1 for ev in events if ev["stage"] == "FC08_TOOL_CALL"
-                    and ev["payload"]["tool"].endswith("knowledge_centre_resolve_actor"))
     emergent_ok = sum(1 for d in gd.latest(gd.log_prefix(manifest["decision_log"]["lines"])[2]).values()
                       if d.kind == "emergent" and d.decision == "approve")
     want_lim = {"attested": str(len(attested)),
                 "attested-here": str(sum(1 for a in attested if a["advisory_id"] == bw.ADVISORY)),
-                "resolver-calls": str(tel_calls),
+                "label-decided": str(len(label_pass)),
+                "label-advisories": str(len({d["advisory_id"] for d in label_pass})),
                 "entity-keys": str(len(register) - empty), "register": str(len(register)),
                 "emergent-approved": str(emergent_ok)}
     got_lim = _attrs(lim, "data-count")
     out.append((got_lim == want_lim, "every count in #limits equals the guard's own count from the files",
                 "want %s; page %s" % (want_lim, got_lim)))
+    out.append((bool(attested) and all(a.get("attested_by") == "owner" for a in attested)
+                and "each attested by the owner" in lim,
+                "every attested citation was attested by the owner, as #limits says",
+                "attested_by values: %s" % sorted({a.get("attested_by") for a in attested})))
+    newest = max(json.loads(line)["proposed_at"][:10] for q in [LEGACY_QUEUE] + sorted(QUEUE_DIR.glob("*.jsonl"))
+                 for line in q.read_text(encoding="utf-8").splitlines() if line.strip())
+    added = _resolver_added()
+    dates = _attrs(lim, "data-date")
+    out.append((dates == {"resolver-added": added, "newest-proposal": newest} and newest < added
+                and "resolve_actor" not in SYSTEM_PROMPT,
+                "#limits dates the resolver by git history and the newest committed proposal before it, and the "
+                "extractor's prompt does not name resolve_actor",
+                "git %s, newest proposal %s; page %s" % (added, newest, dates)))
     return out
 
 

@@ -266,7 +266,7 @@
 <section id="review">
   <h2><span class="n">05</span> Review: what the owner saw, and decided</h2>
   <p>The decisions shown are the first 5 lines of the owner&rsquo;s decision log &mdash; the lines digest batch <code>slice1-2026-09-25</code> was built from (sha256 <span class="hash">7edd4aba25f738993abbbe2c86cfd2b554167c87e34d8a7eb1ffd32165bdb9c2</span>); 5 of them decide ADV-2026-0013.</p>
-  <p>Each card is rendered by the review gate&rsquo;s own card renderer from run <code>adv-2026-0013-extractor-f617bd3b00</code>&rsquo;s queue, without the terminal&rsquo;s separator line, and followed by the owner&rsquo;s decision. &ldquo;Golden label HOLDS&rdquo; or &ldquo;LACKS&rdquo; on a card refers to a hand-written reference answer for this advisory, shown to the owner as context only, never a rule.</p>
+  <p>Each card is rendered by the review gate&rsquo;s own card renderer from run <code>adv-2026-0013-extractor-f617bd3b00</code>&rsquo;s queue, without the terminal&rsquo;s separator line, and followed by the owner&rsquo;s decision. &ldquo;Golden label HOLDS&rdquo; or &ldquo;LACKS&rdquo; on a card refers to this advisory&rsquo;s reference answer (its golden label), drafted and reviewed by Claude; the owner has not yet reviewed it. It was shown to the owner as context only, never a rule.</p>
   <article class="link">
     <pre>ADV-2026-0013  Tri-Seal Compliance Note: Cracking Down on Third-Party Intermediaries Used to Evade Russia-Related Sanctions and Export Controls
 PROPOSED LINK  BA005  Rapid Movement  [correspondent_banking]
@@ -446,7 +446,7 @@ FROM  1 proposal, runs: adv-2026-0013-extractor-f617bd3b00, stages: extractor</p
 </section>
 
 <section id="digest">
-  <h2><span class="n">07</span> What a desk receives</h2>
+  <h2><span class="n">07</span> What a desk&rsquo;s digest carries</h2>
   <p>The advisory reached 3 desks (section 1). This is the Sanctions desk&rsquo;s entry for it, exactly as written in digest batch <code data-batch="slice1-2026-09-25">slice1-2026-09-25</code>, which was built from the first <span data-count="digest-log-lines">5</span> lines of the decision log &mdash; the same lines section 5 reads. It is markdown, shown as written; &ldquo;asserted by the pipeline&rdquo; means in the record, awaiting the owner.</p>
   <pre class="digest">## ADV-2026-0013 -- Tri-Seal Compliance Note: Cracking Down on Third-Party Intermediaries Used to Evade Russia-Related Sanctions and Export Controls
 
@@ -469,7 +469,7 @@ Routed here because: SAN001 Ownership Evasion (sanctions; owner-approved, not in
 
 <section id="telemetry">
   <h2><span class="n">08</span> Telemetry: what the agent did</h2>
-  <p>Every tool call and permission decision in an extraction run is logged as it happens. The run with telemetry for this advisory is <code>adv-2026-0013-extractor-69eeab7b41</code> (claude-sonnet-5, started 2026-09-24): <span class="count" data-count="events">37</span> events.</p>
+  <p>Every tool call and permission decision in an extraction run has been logged since telemetry was added. <span class="count" data-count="tel-runs">1</span> run of this advisory has telemetry: <code>adv-2026-0013-extractor-69eeab7b41</code> (claude-sonnet-5, started 2026-09-24), with <span class="count" data-count="events">37</span> events. The decided run, <code>adv-2026-0013-extractor-f617bd3b00</code>, has none.</p>
   <table class="rows tel">
     <thead><tr><th>Tool call</th><th>Succeeded</th><th>Refused</th><th>Failed</th></tr></thead>
     <tbody>
@@ -490,15 +490,15 @@ Routed here because: SAN001 Ownership Evasion (sanctions; owner-approved, not in
   <dl class="facts">
     <dt>Turns</dt><dd data-rc="turns" data-raw="29">29 of at most 60</dd>
     <dt>Duration</dt><dd data-rc="duration_ms" data-raw="250345">250.3 seconds</dd>
-    <dt>Cost</dt><dd data-rc="cost_usd" data-raw="0.4985208">US$0.50, as reported by the agent SDK (budget US$5.00)</dd>
-    <dt>Record validated</dt><dd data-rc="validated" data-raw="true">yes</dd>
+    <dt>SDK cost estimate</dt><dd data-rc="cost_usd" data-raw="0.4985208">US$0.50 at API prices, as computed by the agent SDK; not a bill</dd>
+    <dt>The run&rsquo;s own record validated</dt><dd data-rc="validated" data-raw="true">yes</dd>
   </dl>
-  <p class="flag">This run is not the one the owner decided (<code>adv-2026-0013-extractor-f617bd3b00</code>, sections 4 and 5). Its 7 successful <code>knowledge_centre_propose_link</code> calls match the 7 proposals in its queue: <span class="ids" data-set="tel-proposed">BA008, SAN003, SAN004, SAN005, SAN006, SAN007, SAN009</span>. They are separate from the decided run&rsquo;s proposals: <span data-count="tel-cited">0</span> of them are cited by any decision in the pinned log, so as proposals they remain undecided. Of the links they name, <span class="ids" data-set="tel-decided-elsewhere">SAN003, SAN004, SAN007</span> were decided on proposals from run <code>adv-2026-0013-extractor-f617bd3b00</code> (all approved); <span class="ids" data-set="tel-no-decision">BA008, SAN005, SAN006, SAN009</span> have no decision.</p>
+  <p class="flag">Run <code>adv-2026-0013-extractor-69eeab7b41</code> is neither the run the owner decided (<code>adv-2026-0013-extractor-f617bd3b00</code>, sections 4 and 5) nor the extraction the record carries (section 3): this advisory has three extractions. Its 7 successful <code>knowledge_centre_propose_link</code> calls match the 7 proposals in its queue: <span class="ids" data-set="tel-proposed">BA008, SAN003, SAN004, SAN005, SAN006, SAN007, SAN009</span>. They are separate from the decided run&rsquo;s proposals: <span data-count="tel-cited">0</span> of them are cited by any decision in the pinned log, so as proposals they remain undecided. Of the links they name, <span class="ids" data-set="tel-decided-elsewhere">SAN003, SAN004, SAN007</span> were decided on proposals from run <code>adv-2026-0013-extractor-f617bd3b00</code> (all approved); <span class="ids" data-set="tel-no-decision">BA008, SAN005, SAN006, SAN009</span> have no decision.</p>
 </section>
 
 <section id="score">
   <h2><span class="n">09</span> How well the extraction scores</h2>
-  <p>Across the <span class="count" data-count="scored">20</span> advisories with a hand-written reference answer (a golden label), ADV-2026-0013 among them, each record is scored against its label. Precision: of what the pipeline asserted, the share the label holds. Recall: of what the label holds, the share the pipeline asserted. F1 balances the two. Computed when this page was built.</p>
+  <p>Across the <span class="count" data-count="scored">20</span> advisories scored, ADV-2026-0013 among them, each record is scored against a reference answer (its golden label), drafted and reviewed by Claude; the owner has decided the set&rsquo;s <span class="count" data-count="label-decided">15</span> disputed entries, not yet the rest. Precision: of what the pipeline asserted, the share the label holds. Recall: of what the label holds, the share the pipeline asserted. F1 balances the two. Computed when this page was built.</p>
   <table class="rows score">
     <caption>Extraction only: the extractor&rsquo;s committed records</caption>
     <thead><tr><th>Field</th><th>Precision</th><th>Recall</th><th>F1</th></tr></thead>
@@ -519,19 +519,20 @@ Routed here because: SAN001 Ownership Evasion (sanctions; owner-approved, not in
       <tr><td data-h="Field">Jurisdictions</td><td data-h="Precision" data-score="reviewer" data-field="jurisdictions" data-m="precision">0.843</td><td data-h="Recall" data-score="reviewer" data-field="jurisdictions" data-m="recall">0.644</td><td data-h="F1" data-score="reviewer" data-field="jurisdictions" data-m="f1">0.730</td></tr>
     </tbody>
   </table>
-  <p>Adding the reviewer moves typologies (library) F1 0.492 &rarr; 0.704; emergent typologies F1 0.306 &rarr; 0.352. Actors and jurisdictions score the same in both tables.</p>
-  <p class="flag">Each table is a single full-set run: one extraction of each advisory, scored once. Repeat runs, which measure how much a figure moves from run to run, are not committed, so no bands are shown. The committed trace of the <a href="https://github.com/dhartwig-fc/fc-08-emerging-threat-intelligence/blob/main/evals/traces/FULL_BASELINE_2026-09-12.md" rel="noopener">first full-set run, 2026-09-12</a>, describes what limits typology recall; its figures are that day&rsquo;s, not these.</p>
+  <p>Adding the reviewer moves <span class="move" data-move="typologies" data-from="0.492" data-to="0.704">typologies (library) F1 0.492 &rarr; 0.704</span>; <span class="move" data-move="emergent" data-from="0.306" data-to="0.352">emergent typologies F1 0.306 &rarr; 0.352</span>. Actors and jurisdictions score the same in both tables.</p>
+  <p class="flag">Each table is a single full-set run: one extraction of each advisory, scored once. The repeat records are not committed and these figures have no bands of their own. Two committed traces give context. <a href="https://github.com/dhartwig-fc/fc-08-emerging-threat-intelligence/blob/main/evals/traces/REVIEWER_BANDS_2026-09-13.md" rel="noopener">The reviewer&rsquo;s acceptance bands, 2026-09-13</a>: typology precision, recall and F1 over three repeats of the reviewer on four advisories, before the owner&rsquo;s label pass &mdash; bands for that experiment, not for these figures. <a href="https://github.com/dhartwig-fc/fc-08-emerging-threat-intelligence/blob/main/evals/traces/FULL_BASELINE_2026-09-12.md" rel="noopener">The first full-set run, 2026-09-12</a>: what limits typology recall; its figures are that day&rsquo;s, not these.</p>
 </section>
 
 <section id="limits">
   <h2><span class="n">10</span> What this slice does not do yet</h2>
   <ul class="limits">
-    <li><strong>Actor resolution is not part of extraction.</strong> The extraction agent has the resolver among its tools, but its instructions do not ask it to use it: run <code>adv-2026-0013-extractor-69eeab7b41</code> made <span data-count="resolver-calls">0</span> calls to <code>knowledge_centre_resolve_actor</code>. Section 6&rsquo;s resolution was run afterwards, over the committed records. Resolving during extraction is slice 2.</li>
+    <li><strong>Actor resolution is not part of extraction.</strong> No committed extraction had the resolver: <code>knowledge_centre_resolve_actor</code> was added to the Knowledge Centre on <span data-date="resolver-added">2026-09-25</span>, and the newest proposal in any committed queue is dated <span data-date="newest-proposal">2026-09-24</span>. Separately, the extraction agent&rsquo;s current instructions do not name it, though it is among the agent&rsquo;s tools. Section 6&rsquo;s resolution was run afterwards, over the committed records. Resolving during extraction is slice 2.</li>
     <li><strong>No actor is linked to the platform&rsquo;s entities.</strong> <span data-count="entity-keys">0</span> of the <span data-count="register">86</span> register entries carry an <code>entity_key</code>; section 6 says why.</li>
     <li><strong>Digests are built, not delivered.</strong> A batch is cut on demand; nothing sends it to a desk.</li>
     <li><strong>Approved emergent candidates are not doctrine.</strong> An emergent typology the owner approves is recorded as approved; it is not added to the typology library. The pinned log holds <span data-count="emergent-approved">0</span> such approvals.</li>
-    <li><strong>Some citations are attested, not matched.</strong> <span data-count="attested">12</span> citations across the merged records are true quotes the citation matcher cannot place on their page (8 across a page break, 2 with a list bullet extracted as a letter, 1 with an accent dropped, 1 with an ellipsis spanning pages); the owner checked each by hand. <span data-count="attested-here">0</span> of them are on ADV-2026-0013.</li>
-    <li><strong>The scores are single runs.</strong> Section 9 shows one extraction per advisory, without bands.</li>
+    <li><strong>Some citations are attested, not matched.</strong> <span data-count="attested">12</span> citations across the merged records are true quotes the citation matcher cannot place on their page (8 across a page break, 2 with a list bullet extracted as a letter, 1 with an accent dropped, 1 with an ellipsis spanning pages), each attested by the owner. <span data-count="attested-here">0</span> of them are on ADV-2026-0013.</li>
+    <li><strong>The reference answers are Claude&rsquo;s.</strong> Every golden label was drafted and reviewed by Claude. The owner has decided the <span data-count="label-decided">15</span> entries disputed in the label pass, across <span data-count="label-advisories">7</span> advisories, and not yet the rest. Section 9&rsquo;s scores are measured against these labels.</li>
+    <li><strong>The scores are single runs.</strong> Section 9 shows one extraction per advisory; its figures have no bands of their own.</li>
   </ul>
 </section>
 </div>
