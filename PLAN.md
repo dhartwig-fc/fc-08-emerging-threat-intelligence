@@ -167,14 +167,16 @@ nexus-intel-extraction/
 
 ## 5. Definition of done for slice 1
 
-- [ ] `AdvisoryRecord` schema versioned at 1.x and used unchanged by all agents and tools
-- [ ] Knowledge Centre MCP server with list, get, search, propose and resolve tools
-- [ ] 20-advisory golden set with published precision and recall
-- [ ] Reviewer agent rejects uncited facts; zero uncited facts in the final batch
-- [ ] Human review gate is the only write path to the library
-- [ ] Telemetry emitted for every tool call
-- [ ] Desk digests generated for at least three desks
-- [ ] `future-capabilities.html` updated and release tagged
+Ticked 2026-09-26 from the measurements in `docs/RELEASE_SLICE1.md` (box 6 holds with a stated measurement gap).
+
+- [x] `AdvisoryRecord` schema versioned at 1.x and used unchanged by all agents and tools
+- [x] Knowledge Centre MCP server with list, get, search, propose and resolve tools
+- [x] 20-advisory golden set with published precision and recall
+- [x] Reviewer agent rejects uncited facts; zero uncited facts in the final batch
+- [x] Human review gate is the only write path to the library
+- [x] Telemetry emitted for every tool call
+- [x] Desk digests generated for at least three desks
+- [x] `future-capabilities.html` updated and release tagged
 
 ---
 
