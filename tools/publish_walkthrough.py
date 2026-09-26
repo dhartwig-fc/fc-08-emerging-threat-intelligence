@@ -4,6 +4,14 @@ Publish the threat-intelligence walkthrough to the portfolio working tree.
 Usage:
     python tools/publish_walkthrough.py --portfolio <path>
 
+OBLIGATION, once site/PUBLISHED exists (i.e. after the first publish): a page
+rebuilt by tools/build_walkthrough.py must be republished, and site/PUBLISHED
+committed TOGETHER WITH the rebuilt page, BEFORE the next commit.
+evals/check_published_walkthrough.py runs inside tools/check_all.py, which the
+pre-commit hook runs on every commit -- not only ones touching the walkthrough
+-- so a rebuilt, unrepublished page refuses ALL of them until this script is
+run and site/PUBLISHED is committed with the page.
+
 Steps, and each one refuses rather than guessing:
   1. rebuild the page in memory and require it to equal the committed
      site/threat-intel/index.html (commit first; never publish an uncommitted page);

@@ -1,6 +1,14 @@
 """
 The staleness gate: is the committed walkthrough page ahead of what was published?
 
+OBLIGATION, once site/PUBLISHED exists (i.e. after the first publish): a page
+rebuilt by tools/build_walkthrough.py must be republished with
+tools/publish_walkthrough.py, and site/PUBLISHED committed TOGETHER WITH the
+rebuilt page, BEFORE the next commit. This gate runs inside tools/check_all.py,
+which the pre-commit hook runs on every commit -- not only ones touching the
+walkthrough -- so a rebuilt, unrepublished page refuses ALL of them until the
+published copy matches again.
+
 Usage:
     python evals/check_published_walkthrough.py --cold          # cold half only (site/PUBLISHED vs the page)
     python evals/check_published_walkthrough.py                 # also compares against the portfolio checkout
@@ -33,10 +41,11 @@ from typing import List, Optional
 
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
+sys.path.insert(0, str(ROOT / "tools"))
+
+from publish_walkthrough import DEST_REL, PUBLISHED as PUBLISHED_PATH  # noqa: E402 -- the source of truth
 
 PAGE_PATH = ROOT / "site" / "threat-intel" / "index.html"
-PUBLISHED_PATH = ROOT / "site" / "PUBLISHED"
-DEST_REL = Path("projects") / "nexus" / "threat-intel" / "index.html"
 DEFAULT_PORTFOLIO = os.environ.get("NEXUS_PORTFOLIO", "~/Cowork HB/dan-hartwig-portfolio")
 
 
@@ -50,7 +59,8 @@ def gate(page_path: Path, published_path: Path, portfolio: Optional[Path]) -> Li
     published_sha = published_path.read_text(encoding="utf-8").strip()
     committed_sha = hashlib.sha256(page_bytes).hexdigest()
     if published_sha != committed_sha:
-        problems.append("the committed page changed since it was published: republish it")
+        problems.append("the committed page changed since it was published: republish it: "
+                         "python tools/publish_walkthrough.py, then commit site/PUBLISHED with the page")
 
     if portfolio is not None:
         dest = portfolio / DEST_REL

@@ -5,7 +5,9 @@ real site/PUBLISHED.
 
 Usage:
     python evals/check_publisher.py
-    python evals/check_publisher.py --mutate skip-boundary   # the publisher skips pb.violations; MUST fail
+    python evals/check_publisher.py --mutate skip-boundary    # the publisher skips pb.violations; MUST fail
+    python evals/check_publisher.py --mutate skip-freshness   # the publisher skips the committed-equals-fresh
+                                                                # step; MUST fail
 
 WHAT IT CHECKS:
   - a publish into a temp portfolio writes the page byte-identical to the committed
@@ -20,7 +22,13 @@ WHAT IT CHECKS:
     already learned -- see fc-10's CLAUDE.md on mutation harnesses). inputs() validates
     several other fields (the advisory URL, document hashes, label_status, ...) but never
     the title, so prefixing it with "/Users/x " reaches the rendered page (sections 1 and
-    2 both show it) without tripping any of inputs()'s own refusals.
+    2 both show it) without tripping any of inputs()'s own refusals;
+  - a STALE committed page is refused. bw.OUT is redirected to a temp file holding a fresh
+    build PLUS one extra HTML comment, so it differs from what bw.build(bw.inputs()) produces
+    at publish() time: publish() must return 1 and write nothing, to either the temp portfolio
+    or the temp PUBLISHED file. --mutate skip-freshness makes bw.build always return whatever
+    bw.OUT currently holds, which trivially satisfies publish()'s own equality check without
+    touching its source -- proving that check is load-bearing.
 
 Every portfolio and PUBLISHED path used here is created under tempfile.mkdtemp() and torn
 down afterward. tools/publish_walkthrough.PUBLISHED is monkeypatched to a temp file for the
@@ -46,7 +54,7 @@ import build_walkthrough as bw  # noqa: E402
 import publish_walkthrough as pw  # noqa: E402
 from evals import check_published_walkthrough as cpw  # noqa: E402
 
-MUTATIONS = ("skip-boundary",)
+MUTATIONS = ("skip-boundary", "skip-freshness")
 MUTATION = None
 
 
@@ -99,7 +107,8 @@ def _check_publish_and_gate() -> list:
         original_published = published.read_text(encoding="utf-8")
         published.write_text("0" * 64 + "\n", encoding="utf-8")
         problems = cpw.gate(bw.OUT, published, None)
-        out.append(("the committed page changed since it was published: republish it" in problems,
+        out.append(("the committed page changed since it was published: republish it: "
+                    "python tools/publish_walkthrough.py, then commit site/PUBLISHED with the page" in problems,
                     "gate() FAILS (cold half) when the temp PUBLISHED holds a different sha", str(problems)))
         published.write_text(original_published, encoding="utf-8")
     finally:
@@ -166,10 +175,51 @@ def _check_boundary_refusal() -> tuple:
         shutil.rmtree(published.parent, ignore_errors=True)
 
 
+def _check_stale_page_refusal() -> tuple:
+    """publish() must refuse (return 1) when the committed page is not a fresh build, writing
+    nothing to either the portfolio or PUBLISHED. bw.OUT is redirected to a temp file holding
+    a fresh build plus one extra marker, computed BEFORE bw.OUT or bw.build is touched, so the
+    baseline itself is an honest fresh build. Honors MUTATION == "skip-freshness" by making
+    bw.build always return whatever bw.OUT holds -- which makes publish()'s own
+    `bw.OUT.read_text() != page` check vacuously false, without editing publish()'s source."""
+    orig_out = bw.OUT
+    orig_build = bw.build
+
+    fresh_page = bw.build(bw.inputs())
+    stale_page = fresh_page + "\n<!-- stale marker: not a fresh build -->\n"
+
+    tmp_dir = Path(tempfile.mkdtemp(prefix="fc08_check_publisher_stale_"))
+    tmp_out = tmp_dir / "index.html"
+    tmp_out.write_text(stale_page, encoding="utf-8")
+    portfolio = _temp_portfolio()
+    published = _temp_published()
+    orig_published = pw.PUBLISHED
+    try:
+        bw.OUT = tmp_out
+        if MUTATION == "skip-freshness":
+            bw.build = lambda inp: bw.OUT.read_text(encoding="utf-8")
+        pw.PUBLISHED = published
+
+        rc = pw.publish(portfolio)
+        dest = portfolio / pw.DEST_REL
+        ok = rc == 1 and not dest.exists() and not published.exists()
+        return (ok, "publish() refuses (return 1) a stale committed page (OUT differs from a fresh "
+                "build), writing nothing", "rc=%d dest_exists=%s published_exists=%s"
+                % (rc, dest.exists(), published.exists()))
+    finally:
+        bw.OUT = orig_out
+        bw.build = orig_build
+        pw.PUBLISHED = orig_published
+        shutil.rmtree(tmp_dir, ignore_errors=True)
+        shutil.rmtree(portfolio, ignore_errors=True)
+        shutil.rmtree(published.parent, ignore_errors=True)
+
+
 def checks() -> list:
     out = []
     out += _check_publish_and_gate()
     out.append(_check_missing_nexus())
+    out.append(_check_stale_page_refusal())
 
     orig_violations = pw.pb.violations
     try:
@@ -184,7 +234,7 @@ def checks() -> list:
 def main(argv: list) -> int:
     global MUTATION
     ap = argparse.ArgumentParser(description="Mutation-verify the publisher against temporary portfolios only")
-    ap.add_argument("--mutate", choices=MUTATIONS, help="break one rule; the boundary-refusal check MUST fail")
+    ap.add_argument("--mutate", choices=MUTATIONS, help="break one rule; the matching refusal check MUST fail")
     args = ap.parse_args(argv)
     MUTATION = args.mutate
     if args.mutate:
