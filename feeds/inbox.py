@@ -22,7 +22,9 @@ from typing import List, Optional
 ROOT = Path(__file__).resolve().parent.parent
 INBOX_ROOT = ROOT / "inbox"
 ITEMS = "items.json"
-RUN_ID = re.compile(r"^feeds-\d{4}-\d{2}-\d{2}-[0-9a-f]{6}$")
+# Callers use fullmatch, and the pattern is anchored with \Z, not "$": "$" also matches before a
+# trailing newline, so "feeds-...-abc123\n" passed. A run id must be exact.
+RUN_ID = re.compile(r"\Afeeds-\d{4}-\d{2}-\d{2}-[0-9a-f]{6}\Z")
 
 
 def mint_run_id(day: date) -> str:
@@ -30,7 +32,7 @@ def mint_run_id(day: date) -> str:
 
 
 def run_dir(run_id: str, root: Path = INBOX_ROOT) -> Path:
-    if not RUN_ID.match(run_id or ""):
+    if not RUN_ID.fullmatch(run_id or ""):
         raise ValueError("run id %r is not feeds-YYYY-MM-DD-xxxxxx" % run_id)
     return Path(root) / run_id
 

@@ -49,7 +49,8 @@ from governance import card  # noqa: E402
 from governance import decisions as gd  # noqa: E402
 from governance.digest import (APPROVED_NOT_IN_RECORD, DIGESTS_DIR, RECORDS_DIR, _in_scope,  # noqa: E402
                                _routes, _visible)
-from governance.proposals import ADVISORY_LIST, LIBRARY, QUEUE_DIR, group, link_key, load_queue_files  # noqa: E402
+from governance.proposals import (ADVISORY_LIST, LEGACY_QUEUE, LIBRARY, QUEUE_DIR, group, link_key,  # noqa: E402
+                                  load_queue_files)
 from governance.routing import desks_in_order, load_routing  # noqa: E402
 from agents import telemetry  # noqa: E402
 from agents.extract_advisory import SYSTEM_PROMPT  # noqa: E402
@@ -80,7 +81,7 @@ _MUTATE = None  # set only by evals/check_walkthrough.py through --_mutate
 MUTATIONS = ("drop-citation", "unpinned-log", "wrong-page", "swap-notes", "wrong-count", "desk-scope", "two-runs",
              "typed-score", "actor-id", "digest-header", "telemetry-count", "attested-count", "swap-moves",
              "resolver-runs", "resolver-prompt", "feed-accepted", "desk-total", "register-unresolved",
-             "corpus-count", "emergent-undecided")
+             "corpus-count", "emergent-undecided", "legacy-count")
 
 e = html.escape
 PAST = {"approve": "approved", "reject": "rejected"}
@@ -125,6 +126,18 @@ def _resolver_runs(queue_dir: Path = None, telemetry_dir: Path = None) -> dict:
                and ev["payload"].get("outcome", "").startswith('{"result":"Resolved: ') for ev in events):
             out["resolved"].append(run)
     return out
+
+
+def _legacy_queue(path: Path = LEGACY_QUEUE) -> dict:
+    """Section 10's legacy-queue clause: the frozen pre-week-5 queue's proposal count and the date range
+    of its proposed_at stamps. Refuses a row carrying a run id, since the page says they have none."""
+    rows = [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines() if line.strip()]
+    if not rows:
+        raise ValueError("%s holds no proposals; section 10 describes it" % path.name)
+    if any(r.get("run_id") for r in rows):
+        raise ValueError("%s has a row with a run id; section 10 says its proposals have none" % path.name)
+    days = sorted(r["proposed_at"][:10] for r in rows)
+    return {"count": len(rows) + (1 if _MUTATE == "legacy-count" else 0), "first": days[0], "last": days[-1]}
 
 
 def inputs(log: Path = gd.LOG) -> dict:
@@ -271,6 +284,7 @@ def inputs(log: Path = gd.LOG) -> dict:
         "scores": {"extraction": score_dirs(GOLDEN_DIR, EXTRACTOR_RECORDS), "reviewer": score_dirs(GOLDEN_DIR, RECORDS_DIR)},
         "attested": attested,
         "resolver_runs": resolver_runs,
+        "legacy_queue": _legacy_queue(),
         "prompt_names_resolver": "resolve_actor" in SYSTEM_PROMPT,
         "feed_accepted": sum(1 for e in feeds_ledger.load().values() if e["decision"] == "accept"),
         "tel_runs": tel_runs,
@@ -821,6 +835,7 @@ def section_limits(inp: dict) -> str:
     emergent_ok = sum(1 for d in gd.latest(inp["all_decisions"]).values()
                       if d.kind == "emergent" and d.decision == "approve")
     rr = inp["resolver_runs"]
+    lq = inp["legacy_queue"]
     prompt = "name" if inp["prompt_names_resolver"] else "do not name"
     if _MUTATE == "resolver-prompt":
         prompt = "do not name" if prompt == "name" else "name"
@@ -836,9 +851,9 @@ def section_limits(inp: dict) -> str:
     return """<section id="limits">
   <h2><span class="n">10</span> What this slice does not do yet</h2>
   <ul class="limits">
-    <li><strong>The corpus changes only through acceptance.</strong> <span data-count="advisories">%d</span> advisories on a fixed list, each pinned by its sha256. Live ingestion is being built: a feeds server lists and fetches new publications into a local inbox, and <span data-count="feed-accepted">%d</span> feed %s %s been accepted into the corpus.</li>
+    <li><strong>Nothing enters the corpus without a person.</strong> <span data-count="advisories">%d</span> advisories, each pinned by its sha256; every one was added by a person. Live ingestion is being built: a feeds server lists and fetches new publications into a local inbox, and <span data-count="feed-accepted">%d</span> feed %s %s been accepted into the corpus.</li>
     <li><strong>Nothing flows into detection yet.</strong> An approved link reaches a desk&rsquo;s digest; no typology link, indicator or actor is fed to the platform&rsquo;s detection.</li>
-    <li><strong>Actor resolution during extraction is counted, not assumed.</strong> Of the <span data-count="extraction-runs">%d</span> committed extraction %s with a proposal queue, <span data-count="runs-with-resolver">%d</span> recorded <code>%s</code> among the agent&rsquo;s tools, <span data-count="runs-no-tool-record">%d</span> recorded no list of tools, and <span data-count="runs-resolved">%d</span> resolved an actor with it. The extraction agent&rsquo;s current instructions <span data-flag="prompt-names-resolver">%s</span> it. Section 6&rsquo;s resolution was run over the committed records, after extraction.</li>
+    <li><strong>Actor resolution during extraction is counted, not assumed.</strong> Of the <span data-count="extraction-runs">%d</span> committed extraction %s with a proposal queue, <span data-count="runs-with-resolver">%d</span> recorded <code>%s</code> among the agent&rsquo;s tools, <span data-count="runs-no-tool-record">%d</span> recorded no list of tools, and <span data-count="runs-resolved">%d</span> resolved an actor with it. The extraction agent&rsquo;s current instructions <span data-flag="prompt-names-resolver">%s</span> it. The <span data-count="legacy-proposals">%d</span> earlier %s in one legacy queue without run ids, dated <span data-date="legacy-first">%s</span> to <span data-date="legacy-last">%s</span>. Section 6&rsquo;s resolution was run over the committed records, after extraction.</li>
     <li><strong>No actor is linked to the platform&rsquo;s entities.</strong> <span data-count="entity-keys">%d</span> of the <span data-count="register">%d</span> register entries carry an <code>entity_key</code>; section 6 says why.</li>
     <li><strong>Digests are built, not delivered.</strong> A batch is cut on demand; nothing sends it to a desk.</li>
     <li><strong>Approved emergent candidates are not doctrine.</strong> An emergent typology the owner approves is recorded as approved; it is not added to the typology library. The pinned log holds <span data-count="emergent-approved">%d</span> such approvals.</li>
@@ -849,7 +864,8 @@ def section_limits(inp: dict) -> str:
   </ul>
 </section>
 """ % (n_corpus, feed_accepted, feed_item_word, feed_have_word, len(rr["runs"]), run_word,
-       len(rr["with_tool"]), RESOLVER, len(rr["no_record"]), len(rr["resolved"]), prompt, keyed,
+       len(rr["with_tool"]), RESOLVER, len(rr["no_record"]), len(rr["resolved"]), prompt, lq["count"],
+       "proposal sits" if lq["count"] == 1 else "proposals sit", lq["first"], lq["last"], keyed,
        len(register), emergent_ok,
        e(ADVISORY), len(undecided), "candidate" if len(undecided) == 1 else "candidates",
        _ids(undecided) or "none", "it" if len(undecided) == 1 else "them",

@@ -13,12 +13,16 @@ Usage:
     python evals/check_feed_adapters.py --mutate skip-linkless-row  # a FinCEN advisory row without its link is skipped
     python evals/check_feed_adapters.py --mutate http-allowed       # plain http passes the allowlist
     python evals/check_feed_adapters.py --mutate any-port           # an allowed host on another port passes
+    python evals/check_feed_adapters.py --mutate untitled-ok        # an item with an empty title is accepted
+    python evals/check_feed_adapters.py --mutate ofac-truncated-ok  # an OFAC body ending inside a row drops the row
+    python evals/check_feed_adapters.py --mutate narrow-except      # only URLError becomes FetchRefused
 
 CONTRACT. Each adapter, run on the committed snapshot of its listing (tests/fixtures/feeds/, fetched
 2026-09-26, public government pages), must return the pinned items: count, the digest of their ids in
 order, and the first and last item field by field. Each must raise LayoutChanged, never return an
-empty list, when its marker is gone, when the marker is there but nothing parses, and when an item
-has no date. OFSI keys an item by its Atom <id>, which carries a timestamp, so a revised publication
+empty list, when its marker is gone, when the marker is there but nothing parses, when an item
+has no date, and when an item's title is empty; OFAC also raises when the body ends inside an open
+views-row (a truncated body under the size cap). OFSI keys an item by its Atom <id>, which carries a timestamp, so a revised publication
 is a NEW item (a ruling of the sub-project A plan).
 
 TRANSPORT. The allowlist is exact on scheme and netloc: https only, the host with no other port and
@@ -26,7 +30,11 @@ no userinfo, so "http://allowed/", "https://allowed:8443/" and "https://allowed@
 (checked on the rule itself, under its real https-only setting). feeds.http.get refuses a URL off
 the allowlist, a redirect off the allowlist BEFORE any request reaches the other host, a body over
 the size cap, and a content type not allowed -- checked against a local HTTP server on 127.0.0.1,
-for which the guard alone widens the scheme to http, so it stays cold.
+for which the guard alone widens the scheme to http, so it stays cold. Every transport failure is a
+FetchRefused, not only urllib's URLError: a server that stalls before its headers, one that stalls
+mid-body, and one that closes without answering must each come back REFUSED (the guard alone
+lowers the timeout, as it widens the scheme). Before 2026-09-26 the last three escaped as
+TimeoutError and RemoteDisconnected (final review of slice 2 A, Important 1).
 
 FinCEN's rows are told apart from the page's other tables by the listing's title cell: a row that
 has the cell but lost its advisory link raises, so one missing advisory cannot silently shrink the
@@ -101,6 +109,14 @@ BREAKS = [
     ("an item without a date", "ofac", r"September 24, 2026 -", "24 Sep -"),
     ("one advisory row without its link", "fincen", r'href="/resources/advisories/fincen-advisory-fin-2026-a002"',
      'href="/elsewhere/fin-2026-a002"'),
+    ("an item with an empty title", "ofsi", r"<title>Guidance: UK Financial Sanctions FAQs</title>", "<title> </title>"),
+    ("an item with an empty title", "fincen", r'hreflang="en">FinCEN Advisory FIN-2026-A002</a>', 'hreflang="en"></a>'),
+    ("an item with an empty title", "ofac", r'hreflang="en">Democratic Republic of the Congo-related Designations '
+     r'Removals</a>', 'hreflang="en"></a>'),
+    # A body cut off inside the last row (the size cap, a dropped connection): nine rows parse, the
+    # tenth is open when the input ends.
+    ("a body ending inside an open views-row", "ofac", r'(?s)(<a href="/recent-actions/20260904" hreflang="en">).*',
+     r"\1Iran-related Designations"),
 ]
 
 MUTATIONS = {
@@ -115,6 +131,11 @@ MUTATIONS = {
     "skip-linkless-row": (SOURCES_PY, '            if row["title_cell"] and not row["href"]:\n', "            if False:\n"),
     "http-allowed": (HTTP_PY, 'ALLOWED_SCHEMES = ("https",)', 'ALLOWED_SCHEMES = ("https", "http")'),
     "any-port": (HTTP_PY, '(parts.netloc or "").lower() not in allowed_hosts', '(parts.hostname or "") not in allowed_hosts'),
+    "untitled-ok": (SOURCES_PY, '        raise LayoutChanged("%s: the item %s has an empty title" % (source, where))\n',
+                    "        pass\n"),
+    "ofac-truncated-ok": (SOURCES_PY, '        raise LayoutChanged("ofac: the listing ends inside an open views-row (a '
+                          'truncated body)")\n', "        pass\n"),
+    "narrow-except": (HTTP_PY, "    except (OSError, http.client.HTTPException) as exc:\n", "    except () as exc:\n"),
 }
 
 
@@ -195,9 +216,11 @@ def boundary_checks(fh) -> list:
 
 
 def transport_checks(fh) -> list:
-    # The local test server speaks http on its own port: widen the scheme for these checks only.
-    fh.REQUEST_GAP_SECONDS, fh.ALLOWED_SCHEMES = 0, ("http",)
+    # The local test server speaks http on its own port: widen the scheme for these checks only, and
+    # lower the timeout so the stalling handlers below cost well under a second each.
+    fh.REQUEST_GAP_SECONDS, fh.ALLOWED_SCHEMES, fh.TIMEOUT_SECONDS = 0, ("http",), 0.5
     hosts_seen = []
+    release = threading.Event()  # set on shutdown, so a stalled handler thread ends at once
 
     class Handler(http.server.BaseHTTPRequestHandler):
         def log_message(self, *args):
@@ -206,6 +229,21 @@ def transport_checks(fh) -> list:
         def do_GET(self):
             hosts_seen.append(self.headers.get("Host", "").split(":")[0])
             port = self.server.server_address[1]
+            if self.path == "/stall-headers":  # accepts the request, never answers
+                release.wait(10)
+                return
+            if self.path == "/stall-body":  # headers and part of the body, then nothing
+                self.send_response(200)
+                self.send_header("Content-Type", "text/html")
+                self.send_header("Content-Length", "100")
+                self.end_headers()
+                self.wfile.write(b"<p>partial")
+                self.wfile.flush()
+                release.wait(10)
+                return
+            if self.path == "/close":  # closes the connection without a response
+                self.close_connection = True
+                return
             if self.path == "/away":
                 self.send_response(302)
                 self.send_header("Location", "http://localhost:%d/doc" % port)
@@ -223,7 +261,10 @@ def transport_checks(fh) -> list:
             self.end_headers()
             self.wfile.write(body)
 
-    server = socketserver.TCPServer(("127.0.0.1", 0), Handler)
+    class Server(socketserver.ThreadingTCPServer):
+        daemon_threads, block_on_close = True, False
+
+    server = Server(("127.0.0.1", 0), Handler)
     port = server.server_address[1]
     threading.Thread(target=server.serve_forever, daemon=True).start()
     allowed, types_ = frozenset({"127.0.0.1:%d" % port}), frozenset({"text/html", "application/pdf"})
@@ -254,7 +295,17 @@ def transport_checks(fh) -> list:
         out.append((s == "REFUSED" and "larger" in str(why), "a body over the size cap is refused", str(why)[-60:]))
         s, why = get("/zip")
         out.append((s == "REFUSED" and "application/zip" in str(why), "a content type not allowed is refused", str(why)[-60:]))
+        for path, label in (("/stall-headers", "a server that stalls before its headers"),
+                            ("/stall-body", "a server that stalls mid-body"),
+                            ("/close", "a server that closes the connection without a response")):
+            try:
+                s, why = get(path)
+            except Exception as exc:  # an escaping failure is the defect: the check fails, not the guard
+                s, why = "ESCAPED", "%s: %s" % (type(exc).__name__, exc)
+            out.append((s == "REFUSED", "%s is REFUSED (a FetchRefused), never a raw exception" % label,
+                        "%s: %s" % (s, str(why)[-80:])))
     finally:
+        release.set()
         server.shutdown()
         server.server_close()
     return out

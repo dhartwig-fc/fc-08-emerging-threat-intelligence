@@ -20,6 +20,7 @@ Works on MCP Python SDK 2.x (MCPServer) and 1.x (FastMCP).
 
 from __future__ import annotations
 
+import asyncio
 import hashlib
 import os
 import sys
@@ -47,6 +48,11 @@ SEEN_PATH = ledger.SEEN_PATH
 HTTP_GET = feeds_http.get
 
 mcp = FastMCP("feeds_mcp")
+# Each tool loads, changes and saves items.json. The MCP server may run parallel tool calls
+# concurrently, so without this lock any await inside a body (e.g. HTTP moved to a thread) would let
+# two calls save stale states and lose one source's entry.
+_STATE_LOCK = asyncio.Lock()
+NO_TEXT = "no text; not citable"
 
 
 class ListNewInput(BaseModel):
@@ -68,7 +74,7 @@ def _now() -> str:
 
 def _run_id():
     run_id = os.environ.get(RUN_ENV, "")
-    return run_id if inbox.RUN_ID.match(run_id) else None
+    return run_id if inbox.RUN_ID.fullmatch(run_id) else None
 
 
 NO_RUN = "Refused: this server has no run identity (%s is unset or malformed); the runner sets it." % RUN_ENV
@@ -90,22 +96,27 @@ async def list_new(params: ListNewInput) -> str:
     run_id = _run_id()
     if run_id is None:
         return NO_RUN
+    async with _STATE_LOCK:
+        return _list_new(run_id, params.source)
+
+
+def _list_new(run_id: str, source: str) -> str:
     state = inbox.load(run_id, INBOX_ROOT)
-    if params.source in state["sources"]:
+    if source in state["sources"]:
         return "Refused: %s was already listed in this run (status %s); a listing is fetched once per run." % (
-            params.source, state["sources"][params.source]["status"])
-    src = SOURCES[params.source]
+            source, state["sources"][source]["status"])
+    src = SOURCES[source]
     entry = {"listed_at": _now(), "listing_url": src.listing_url, "status": "ok", "error": None, "listing": None,
              "listing_sha256": None, "listed": 0, "already_seen": 0, "items": []}
-    state["sources"][params.source] = entry
+    state["sources"][source] = entry
     try:
         got = HTTP_GET(src.listing_url, allowed_hosts=src.hosts, allowed_types=src.listing_types,
                        max_bytes=MAX_LISTING_BYTES)
     except feeds_http.FetchRefused as exc:
         entry.update(status="unreachable", error=str(exc))
         inbox.save(run_id, state, INBOX_ROOT)
-        return "Failed: %s is unreachable: %s. Report it; it is not retried in this run." % (params.source, exc)
-    entry["listing"] = inbox.write_file(run_id, "listings/%s.%s" % (params.source, src.listing_ext), got.body,
+        return "Failed: %s is unreachable: %s. Report it; it is not retried in this run." % (source, exc)
+    entry["listing"] = inbox.write_file(run_id, "listings/%s.%s" % (source, src.listing_ext), got.body,
                                         INBOX_ROOT)
     entry["listing_sha256"] = hashlib.sha256(got.body).hexdigest()
     try:
@@ -120,15 +131,19 @@ async def list_new(params: ListNewInput) -> str:
                  items=[dict(it.to_json(), document=None) for it in new])
     inbox.save(run_id, state, INBOX_ROOT)
     if not new:
-        return "No new items: %s listed %d, every one already decided." % (params.source, len(items))
+        return "No new items: %s listed %d, every one already decided." % (source, len(items))
     rows = ["%s | %s | %s | %s" % (it.key, it.published, it.title, it.summary or "-") for it in new]
     return "%d new of %d listed on %s:\nkey | published | title | summary\n%s" % (
-        len(new), len(items), params.source, "\n".join(rows))
+        len(new), len(items), source, "\n".join(rows))
 
 
 def _describe(doc: dict) -> str:
-    pages = ("%d page(s), %d with text" % (doc["pages"], doc["text_pages"]) if doc["page_error"] is None
-             else "NOT PAGED (%s)" % doc["page_error"])
+    if doc["page_error"] is None:
+        pages = "%d page(s), %d with text" % (doc["pages"], doc["text_pages"])
+    elif doc["page_error"] == NO_TEXT:
+        pages = "%d page(s), 0 with text: %s" % (doc["pages"], NO_TEXT)
+    else:
+        pages = "NOT PAGED (%s)" % doc["page_error"]
     links = ("; it links %d PDF(s), not fetched: %s" % (len(doc["linked_pdfs"]), ", ".join(doc["linked_pdfs"]))
              if doc["linked_pdfs"] else "")
     return "%s (%s, %d bytes, sha256 %s), %s%s" % (doc["path"], doc["content_type"], doc["bytes"], doc["sha256"],
@@ -152,10 +167,15 @@ async def fetch(params: FetchInput) -> str:
     run_id = _run_id()
     if run_id is None:
         return NO_RUN
+    async with _STATE_LOCK:
+        return _fetch(run_id, params.item_key)
+
+
+def _fetch(run_id: str, item_key: str) -> str:
     state = inbox.load(run_id, INBOX_ROOT)
-    item = inbox.find_item(state, params.item_key)
+    item = inbox.find_item(state, item_key)
     if item is None:
-        return "Refused: %s was not listed as new in this run; call feeds_list_new first." % params.item_key
+        return "Refused: %s was not listed as new in this run; call feeds_list_new first." % item_key
     if item.get("document"):
         return "Already fetched: %s" % _describe(item["document"])
     src = SOURCES[item["source"]]
@@ -165,7 +185,7 @@ async def fetch(params: FetchInput) -> str:
     except feeds_http.FetchRefused as exc:
         item["fetch_error"] = str(exc)
         inbox.save(run_id, state, INBOX_ROOT)
-        return "Failed: %s could not be fetched: %s" % (params.item_key, exc)
+        return "Failed: %s could not be fetched: %s" % (item_key, exc)
     sha = hashlib.sha256(got.body).hexdigest()
     is_pdf = got.content_type == "application/pdf"
     rel = inbox.write_file(run_id, "docs/%s.%s" % (sha, "pdf" if is_pdf else "html"), got.body, INBOX_ROOT)
@@ -173,6 +193,8 @@ async def fetch(params: FetchInput) -> str:
         index = (PageIndex.from_pdf(inbox.run_dir(run_id, INBOX_ROOT) / rel) if is_pdf
                  else PageIndex.from_html(got.body))
         pages, text_pages, error = len(index), sum(1 for p in index.pages if p.strip()), None
+        if text_pages == 0:  # pinned, but a document with no text cannot carry a citation: say so
+            error = NO_TEXT
     except Exception as exc:  # the document stays pinned, and the failure is recorded and returned
         pages, text_pages, error = 0, 0, "%s: %s" % (type(exc).__name__, exc)
     item["document"] = {"path": rel, "sha256": sha, "content_type": got.content_type, "bytes": len(got.body),

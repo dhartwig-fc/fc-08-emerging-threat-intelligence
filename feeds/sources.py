@@ -2,7 +2,9 @@
 The three automated sources and their adapters: raw listing bytes in, FeedItems out.
 
 Each adapter checks the structural MARKER it depends on and raises LayoutChanged when it is
-missing, when the marker is present but no item parses, or when an item lacks its link or date.
+missing, when the marker is present but no item parses, or when an item lacks its link, its date or
+its title (the field the agent actually reads). OFAC also raises when the body ends inside an open
+row, which is what a truncated body looks like.
 An empty result is never returned: each of these listings always shows its latest entries
 (measured 2026-09-26: OFSI 20, FinCEN 15, OFAC 10), so "nothing parsed" means the page changed.
 
@@ -28,6 +30,14 @@ MAX_DOCUMENT_BYTES = 20_000_000
 DOCUMENT_TYPES = frozenset({"text/html", "application/pdf"})
 ISO_DATE = re.compile(r"^\d{4}-\d{2}-\d{2}T")
 
+
+def _title(source: str, parts: List[str], where: str) -> str:
+    """An item's title, whitespace-normalised. An empty one is a layout change, never an untitled item."""
+    title = " ".join("".join(parts).split())
+    if not title:
+        raise LayoutChanged("%s: the item %s has an empty title" % (source, where))
+    return title
+
 # ---------------------------------------------------------------------------- OFSI: GOV.UK Atom
 
 ATOM = "{http://www.w3.org/2005/Atom}"
@@ -48,7 +58,7 @@ def parse_ofsi(raw: bytes) -> List[FeedItem]:
             raise LayoutChanged("ofsi: an entry lacks its id, updated, title or alternate link")
         if not ISO_DATE.match(updated):
             raise LayoutChanged("ofsi: updated %r is not an ISO timestamp" % updated)
-        items.append(FeedItem("ofsi", eid.strip(), " ".join(title.split()), link.get("href"), updated[:10],
+        items.append(FeedItem("ofsi", eid.strip(), _title("ofsi", [title], eid.strip()), link.get("href"), updated[:10],
                               " ".join((entry.findtext(ATOM + "summary") or "").split())))
     if not items:
         raise LayoutChanged("ofsi: the feed parsed but holds no entries")
@@ -129,7 +139,7 @@ def parse_fincen(raw: bytes) -> List[FeedItem]:
                 if not (row["date"] and ISO_DATE.match(row["date"])):
                     raise LayoutChanged("fincen: the row for %s has no <time datetime>" % row["href"])
                 items.append(FeedItem("fincen", row["href"].rstrip("/").rsplit("/", 1)[1],
-                                      " ".join("".join(row["title"]).split()),
+                                      _title("fincen", row["title"], row["href"]),
                                       urljoin(FINCEN_BASE, row["href"]), row["date"][:10],
                                       " ".join("".join(row["subject"]).split())))
             row = None
@@ -163,7 +173,7 @@ def parse_ofac(raw: bytes) -> List[FeedItem]:
                 if not row["href"] or not row["date"]:
                     raise LayoutChanged("ofac: a views-row lacks its link or its 'Month DD, YYYY -' date line")
                 items.append(FeedItem("ofac", row["href"].rstrip("/").rsplit("/", 1)[1],
-                                      " ".join("".join(row["title"]).split()),
+                                      _title("ofac", row["title"], row["href"]),
                                       urljoin(OFAC_BASE, row["href"]), row["date"]))
                 row = None
         elif kind == "start" and tag == "a" and row["href"] is None \
@@ -177,6 +187,8 @@ def parse_ofac(raw: bytes) -> List[FeedItem]:
             m = OFAC_DATE.match(tag)
             if m and m.group(1) in MONTHS:
                 row["date"] = "%s-%02d-%s" % (m.group(3), MONTHS[m.group(1)], m.group(2))
+    if row is not None:  # the body ended inside a views-row: truncated, never a row to drop
+        raise LayoutChanged("ofac: the listing ends inside an open views-row (a truncated body)")
     if not items:
         raise LayoutChanged("ofac: the view is present but no views-row parsed")
     return items

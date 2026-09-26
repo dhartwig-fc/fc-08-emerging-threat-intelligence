@@ -25,6 +25,7 @@ Usage:
                                                                      # resolved entries too; MUST fail
     python evals/check_walkthrough.py --mutate corpus-count    # #limits' advisory count is off by one; MUST fail
     python evals/check_walkthrough.py --mutate emergent-undecided  # #limits counts DECIDED emergent candidates; MUST fail
+    python evals/check_walkthrough.py --mutate legacy-count    # #limits' legacy-queue proposal count is off by one; MUST fail
 
 WHY. The page will leave this repository. A page that drifts from its inputs, differs
 between two machines, or quietly drops a citation says something the governance never
@@ -56,7 +57,7 @@ sys.path.insert(0, str(ROOT))
 from governance import decisions as gd  # noqa: E402
 from governance import publish_boundary as pb  # noqa: E402
 from governance.digest import DIGESTS_DIR, RECORDS_DIR  # noqa: E402
-from governance.proposals import ADVISORY_LIST, QUEUE_DIR, link_key, load_queue_files  # noqa: E402
+from governance.proposals import ADVISORY_LIST, LEGACY_QUEUE, QUEUE_DIR, link_key, load_queue_files  # noqa: E402
 from governance.routing import load_routing  # noqa: E402
 from agents.extract_advisory import SYSTEM_PROMPT  # noqa: E402
 from agents.telemetry import TELEMETRY_DIR  # noqa: E402
@@ -81,7 +82,7 @@ SEEDS = ("0", "1", "4242", "987654")
 MUTATIONS = ("drop-citation", "unpinned-log", "wrong-page", "swap-notes", "wrong-count", "desk-scope", "two-runs",
              "typed-score", "actor-id", "digest-header", "telemetry-count", "attested-count", "swap-moves",
              "resolver-runs", "resolver-prompt", "feed-accepted", "desk-total", "register-unresolved",
-             "corpus-count", "emergent-undecided")
+             "corpus-count", "emergent-undecided", "legacy-count")
 MUTATION = None
 
 
@@ -438,6 +439,15 @@ def checks_sections_6_to_10(bw, page: str, record: dict, pinned: list) -> list:
     emergent_ok = sum(1 for d in gd.latest(gd.log_prefix(manifest["decision_log"]["lines"])[2]).values()
                       if d.kind == "emergent" and d.decision == "approve")
     counts = _own_resolver_counts(QUEUE_DIR, TELEMETRY_DIR)
+    # The frozen pre-week-5 queue, read here line by line -- not through the builder's _legacy_queue.
+    legacy = [json.loads(line) for line in LEGACY_QUEUE.read_text(encoding="utf-8").splitlines() if line.strip()]
+    legacy_days = sorted(r["proposed_at"][:10] for r in legacy)
+    out.append((bool(legacy) and not any("run_id" in r for r in legacy)
+                and "Nothing enters the corpus without a person." in lim and "every one was added by a person" in lim
+                and "legacy queue without run ids" in lim,
+                "#limits' first heading is 'Nothing enters the corpus without a person.', and its legacy queue truly "
+                "has no run ids", "%d legacy proposals, %d with a run id" % (len(legacy),
+                                                                        sum(1 for r in legacy if "run_id" in r))))
     # Read through feeds.ledger.load(), never the raw ledger path: evals/check_feeds_ledger.py's writer
     # scan allows only that module (and itself) to name the ledger file, and this guard is neither.
     feed_accepted = sum(1 for e in feeds_ledger.load().values() if e["decision"] == "accept")
@@ -450,6 +460,7 @@ def checks_sections_6_to_10(bw, page: str, record: dict, pinned: list) -> list:
                 "advisories": str(len(listed)),
                 "emergent-undecided": str(len(undecided_emergent)),
                 "feed-accepted": str(feed_accepted),
+                "legacy-proposals": str(len(legacy)),
                 "extraction-runs": str(counts["runs"]), "runs-with-resolver": str(counts["with_tool"]),
                 "runs-no-tool-record": str(counts["no_record"]), "runs-resolved": str(counts["resolved"])}
     got_lim = _attrs(lim, "data-count")
@@ -461,9 +472,14 @@ def checks_sections_6_to_10(bw, page: str, record: dict, pinned: list) -> list:
                 "attested_by values: %s" % sorted({a.get("attested_by") for a in attested})))
     flag = _attrs(lim, "data-flag").get("prompt-names-resolver")
     names = "resolve_actor" in SYSTEM_PROMPT
-    out.append((flag == ("name" if names else "do not name") and not _attrs(lim, "data-date"),
-                "#limits says truly whether the extractor's prompt names resolve_actor, and carries no typed date",
-                "prompt names it: %s; page %r" % (names, flag)))
+    # The only dates #limits may carry are the legacy queue's two, each equal to the guard's own reading.
+    # Any other data-date -- the old typed "resolver-added" / "newest-proposal" among them -- fails.
+    dates = _attrs(lim, "data-date")
+    want_dates = {"legacy-first": legacy_days[0], "legacy-last": legacy_days[-1]} if legacy_days else {}
+    out.append((flag == ("name" if names else "do not name") and dates == want_dates,
+                "#limits says truly whether the extractor's prompt names resolve_actor, and carries no typed date: "
+                "its only dates are the legacy queue's first and last, computed",
+                "prompt names it: %s; page %r; dates want %s, page %s" % (names, flag, want_dates, dates)))
     return out
 
 

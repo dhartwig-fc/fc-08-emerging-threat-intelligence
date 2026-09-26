@@ -1,5 +1,5 @@
 from __future__ import annotations
-import time, urllib.request, urllib.error
+import http.client, time, urllib.request, urllib.error
 from dataclasses import dataclass
 from typing import FrozenSet
 from urllib.parse import urlsplit
@@ -54,6 +54,11 @@ def get(url: str, *, allowed_hosts: FrozenSet[str], allowed_types: FrozenSet[str
             final = resp.geturl()
     except urllib.error.URLError as exc:
         raise FetchRefused("%s could not be fetched: %s" % (url, getattr(exc, "reason", exc)))
+    except (OSError, http.client.HTTPException) as exc:
+        # urllib wraps only connect-time errors in URLError. A timeout or a dropped connection while the
+        # headers or the body are read (TimeoutError, RemoteDisconnected, IncompleteRead, ...) arrives
+        # raw, and must still be a FetchRefused so the caller records the source as unreachable.
+        raise FetchRefused("%s could not be fetched: %s: %s" % (url, type(exc).__name__, exc))
     finally:
         _last_request[0] = time.monotonic()
     if len(body) > max_bytes:

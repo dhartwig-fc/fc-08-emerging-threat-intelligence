@@ -8,6 +8,9 @@ Usage:
     python evals/check_feeds_server.py --mutate refetch           # a pinned document fetched again
     python evals/check_feeds_server.py --mutate unlisted-fetch    # fetch reaches an item another run listed
     python evals/check_feeds_server.py --mutate quiet-layout      # a layout change reported as "0 new items"
+    python evals/check_feeds_server.py --mutate swap-http-get     # the server's fetch is not feeds.http.get
+    python evals/check_feeds_server.py --mutate narrow-transport  # feeds.http.get turns only URLError into FetchRefused
+    python evals/check_feeds_server.py --mutate quiet-no-text     # a document with no text is reported as paged
 
 WHAT IT HOLDS (spec section 1, and definition-of-done box 2 for the two tools A builds):
   newness      an item in the seen-items ledger is never reported new;
@@ -18,14 +21,21 @@ WHAT IT HOLDS (spec section 1, and definition-of-done box 2 for the two tools A 
   inbox only   every file the tools write is inside inbox/<run_id>/, and the repository's git status
                is the same before and after;
   loud         a layout change or an unreachable source is a "Failed:" line and a status in
-               items.json, never "no new items".
+               items.json, never "no new items" -- including a source that drops the connection,
+               proved END TO END through the real feeds.http.get against a local socket (no network);
+  real fetch   an unmutated server's HTTP_GET IS feeds.http.get, so the allowlisted fetch the other
+               checks' stub stands in for is the one the server really calls;
+  citable      a fetched document with no text is pinned but recorded as "no text; not citable", and
+               one that cannot be paged at all (bytes labelled PDF that are not a PDF) is pinned and
+               reported NOT PAGED, with its page_error recorded.
 
 HOW. The server's module attributes HTTP_GET, INBOX_ROOT and SEEN_PATH are swapped for a stub that
 serves the committed listing snapshots and a temporary inbox and ledger; the tool functions are
 called directly. Cold: no network. The redirect and size rules of the real fetch are feeds/http.py's,
 pinned by evals/check_feed_adapters.py.
 
-NOT A VACUOUS PASS. Each --mutate rewrites the server's SOURCE in memory; at least one check must fail.
+NOT A VACUOUS PASS. Each --mutate rewrites the server's SOURCE in memory (narrow-transport rewrites
+feeds/http.py's instead); at least one check must fail.
 """
 
 from __future__ import annotations
@@ -33,11 +43,14 @@ from __future__ import annotations
 import argparse
 import asyncio
 import hashlib
+import importlib
 import json
 import os
+import socketserver
 import subprocess
 import sys
 import tempfile
+import threading
 import types
 from pathlib import Path
 
@@ -47,6 +60,7 @@ from feeds import http as fh, ledger  # noqa: E402
 from feeds.sources import DOCUMENT_TYPES, SOURCES  # noqa: E402
 
 SERVER = ROOT / "mcp_server" / "feeds_server.py"
+HTTP_PY = ROOT / "feeds" / "http.py"
 FIX = ROOT / "tests" / "fixtures"
 RUN = "feeds-2026-10-02-abc123"
 OTHER_RUN = "feeds-2026-10-02-def456"
@@ -58,19 +72,39 @@ FINCEN_DOC = (b"<html><body><main><h1>FinCEN Advisory FIN-2026-A002</h1><p>Joint
 MUTATIONS = {
     "no-ledger-filter": ("    new = [it for it in items if (it.source, it.item_id) not in seen]\n",
                          "    new = list(items)\n"),
-    "relist": ("    if params.source in state[\"sources\"]:\n", "    if False:\n"),
+    "relist": ("    if source in state[\"sources\"]:\n", "    if False:\n"),
     "refetch": ("    if item.get(\"document\"):\n", "    if False:\n"),
-    "unlisted-fetch": ("    state = inbox.load(run_id, INBOX_ROOT)\n    item = inbox.find_item(state, params.item_key)\n",
-                       "    state = inbox.load(run_id, INBOX_ROOT)\n    item = inbox.find_item(state, params.item_key) or "
-                       "inbox.find_item(inbox.load(%r, INBOX_ROOT), params.item_key)\n" % OTHER_RUN),
+    "unlisted-fetch": ("    state = inbox.load(run_id, INBOX_ROOT)\n    item = inbox.find_item(state, item_key)\n",
+                       "    state = inbox.load(run_id, INBOX_ROOT)\n    item = inbox.find_item(state, item_key) or "
+                       "inbox.find_item(inbox.load(%r, INBOX_ROOT), item_key)\n" % OTHER_RUN),
     "quiet-layout": ('        return "Failed: layout changed: %s. The listing is saved in the inbox. This is not \'0 new '
                      'items\'." % exc\n', '        return "No new items."\n'),
+    "swap-http-get": ("HTTP_GET = feeds_http.get\n", "HTTP_GET = __import__('urllib.request').request.urlopen\n"),
+    "quiet-no-text": ("        if text_pages == 0:", "        if False:"),
 }
+# Mutations of feeds/http.py, installed as feeds.http before the server is loaded.
+HTTP_MUTATIONS = {
+    "narrow-transport": ("    except (OSError, http.client.HTTPException) as exc:\n", "    except () as exc:\n"),
+}
+
+
+def _install_http(mutation) -> None:
+    source = HTTP_PY.read_text(encoding="utf-8")
+    old, new = HTTP_MUTATIONS[mutation]
+    if source.count(old) != 1:
+        raise SystemExit("MUTATION TARGET MISSING: %r is not in %s exactly once" % (old, HTTP_PY))
+    module = types.ModuleType("feeds.http")
+    module.__file__ = str(HTTP_PY)
+    sys.modules["feeds.http"] = module
+    exec(compile(source.replace(old, new), str(HTTP_PY), "exec"), module.__dict__)
+    importlib.import_module("feeds").http = module
 
 
 def load_server(mutation) -> types.ModuleType:
     source = SERVER.read_text(encoding="utf-8")
-    if mutation:
+    if mutation in HTTP_MUTATIONS:
+        _install_http(mutation)
+    elif mutation:
         old, new = MUTATIONS[mutation]
         if source.count(old) != 1:
             raise SystemExit("MUTATION TARGET MISSING: %r is not in %s exactly once" % (old, SERVER))
@@ -102,8 +136,64 @@ def git_status() -> str:
                           capture_output=True, text=True).stdout
 
 
+def _closing_server():
+    """A local socket server that accepts a connection and closes it without a response: the
+    RemoteDisconnected a government site gives when it drops us, with no network involved."""
+    class Handler(socketserver.BaseRequestHandler):
+        def handle(self):
+            self.request.recv(65536)
+
+    class Server(socketserver.ThreadingTCPServer):
+        daemon_threads, block_on_close = True, False
+
+    server = Server(("127.0.0.1", 0), Handler)
+    threading.Thread(target=server.serve_forever, daemon=True).start()
+    return server
+
+
+def dropped_connection_check(fs, real_get, tmp: Path) -> tuple:
+    """list_new over the REAL feeds.http.get, pointed at a local server that drops the connection."""
+    http_mod = importlib.import_module("feeds.http")
+    saved = (http_mod.ALLOWED_SCHEMES, http_mod.REQUEST_GAP_SECONDS, http_mod.TIMEOUT_SECONDS, fs.HTTP_GET)
+    server = _closing_server()
+    netloc = "127.0.0.1:%d" % server.server_address[1]
+    requested = []
+
+    def via_local(url, *, allowed_hosts, allowed_types, max_bytes):
+        # The server chose `url` and its hosts; only the address changes, to the local socket.
+        requested.append(url)
+        return real_get("http://%s/listing" % netloc, allowed_hosts=frozenset({netloc}),
+                        allowed_types=allowed_types, max_bytes=max_bytes)
+
+    run = "feeds-2026-10-04-cccccc"
+    try:
+        http_mod.ALLOWED_SCHEMES, http_mod.REQUEST_GAP_SECONDS, http_mod.TIMEOUT_SECONDS = ("http",), 0, 2
+        fs.HTTP_GET = via_local
+        os.environ[fs.RUN_ENV] = run
+        try:
+            said = asyncio.run(fs.list_new(fs.ListNewInput(source="ofac")))
+        except Exception as exc:  # an escaping failure is the defect: the check fails, not the guard
+            said = "ESCAPED %s: %s" % (type(exc).__name__, exc)
+        path = tmp / "inbox" / run / "items.json"
+        st = json.loads(path.read_text(encoding="utf-8"))["sources"].get("ofac", {}) if path.exists() else {}
+        again = said.startswith("ESCAPED") or asyncio.run(fs.list_new(fs.ListNewInput(source="ofac")))
+    finally:
+        http_mod.ALLOWED_SCHEMES, http_mod.REQUEST_GAP_SECONDS, http_mod.TIMEOUT_SECONDS, fs.HTTP_GET = saved
+        server.shutdown()
+        server.server_close()
+    ok = (said.startswith("Failed:") and "RemoteDisconnected" in said and st.get("status") == "unreachable"
+          and "RemoteDisconnected" in (st.get("error") or "") and requested == [SOURCES["ofac"].listing_url]
+          and isinstance(again, str) and again.startswith("Refused") and len(requested) == 1)
+    return (ok, "a dropped connection (RemoteDisconnected, not a URLError) through the REAL feeds.http.get is "
+            "recorded as unreachable, and the source is not listed again in the run", said[:120])
+
+
 def checks(fs) -> list:
     out = []
+    real_get = fs.HTTP_GET
+    out.append((real_get is importlib.import_module("feeds.http").get,
+                "the unmutated server's HTTP_GET is feeds.http.get, the allowlisted fetch",
+                getattr(real_get, "__module__", "?") + "." + getattr(real_get, "__name__", "?")))
     snap = lambda f: (FIX / "feeds" / f).read_bytes()  # noqa: E731
     broken_ofac = snap("ofac_recent_actions.html").replace(b"view-recent-actions-search", b"view-renamed")
     stub = Stub({SOURCES["ofsi"].listing_url: ("application/atom+xml", snap("ofsi.atom")),
@@ -127,6 +217,11 @@ def checks(fs) -> list:
         said = list_new("ofsi")
         out.append((said.startswith("Refused") and not stub.calls and not (tmp / "inbox").exists(),
                     "with no run identity nothing is requested or written", said[:90]))
+        os.environ[fs.RUN_ENV] = RUN + "\n"
+        said = list_new("ofsi")
+        out.append((said.startswith("Refused") and not stub.calls and not (tmp / "inbox").exists(),
+                    "a run identity with a trailing newline is malformed: nothing is requested or written",
+                    said[:90]))
 
         # A ledger that has already decided the first five OFSI items.
         ofsi_items = SOURCES["ofsi"].parse(snap("ofsi.atom"))
@@ -202,12 +297,35 @@ def checks(fs) -> list:
         out.append(("advisory.pdf" in said and "https://www.fincen.gov/system/files/2026-06/advisory.pdf" in said,
                     "a landing page's linked PDFs are reported (absolute), not fetched", said[-110:]))
 
+        fins = SOURCES["fincen"].parse(snap("fincen_advisories.html"))
+        fin_state = lambda: {it["key"]: it for it in json.loads(  # noqa: E731
+            (tmp / "inbox" / "feeds-2026-10-03-aaaaaa" / "items.json").read_text(encoding="utf-8"))["sources"]["fincen"]["items"]}
+        stub.routes[fins[1].url] = ("text/html", b"<html><body><nav><a href='/'>Home</a> <a href='/a'>Advisories</a>"
+                                                 b"</nav></body></html>")
+        said = fetch(fins[1].key)
+        doc = fin_state()[fins[1].key]["document"]
+        out.append((said.startswith("Fetched") and "no text; not citable" in said and "NOT PAGED" not in said
+                    and doc["page_error"] == "no text; not citable" and doc["text_pages"] == 0
+                    and (tmp / "inbox" / "feeds-2026-10-03-aaaaaa" / doc["path"]).exists(),
+                    "a page whose only content is navigation is pinned, recorded and reported as no text; not citable",
+                    said[-80:]))
+        stub.routes[fins[2].url] = ("application/pdf", b"%PDF-not really a PDF, only labelled as one")
+        said = fetch(fins[2].key)
+        doc = fin_state()[fins[2].key]["document"]
+        out.append((said.startswith("Fetched") and "NOT PAGED" in said and bool(doc["page_error"])
+                    and doc["page_error"] != "no text; not citable" and doc["path"] == "docs/%s.pdf" % doc["sha256"]
+                    and (tmp / "inbox" / "feeds-2026-10-03-aaaaaa" / doc["path"]).exists(),
+                    "bytes labelled application/pdf that are not a PDF are pinned, page_error is recorded, and the "
+                    "reply says NOT PAGED", said[-100:]))
+
         try:
             fs.FetchInput(item_key=fin.key, url="https://evil.invalid/x")
             refused = False
         except Exception:
             refused = True
         out.append((refused, "a url argument is refused by the input model: the agent never supplies a URL", ""))
+
+        out.append(dropped_connection_check(fs, real_get, tmp))
 
         written = [str(p.relative_to(tmp)) for p in tmp.rglob("*") if p.is_file()]
         out.append((all(w == "seen.json" or w.startswith("inbox/feeds-") for w in written),
@@ -226,10 +344,12 @@ def checks(fs) -> list:
 
 
 def main(argv: list) -> int:
+    global fh
     ap = argparse.ArgumentParser(description="Pin the feeds MCP server's invariants")
-    ap.add_argument("--mutate", choices=sorted(MUTATIONS), help="break one rule; a check MUST fail")
+    ap.add_argument("--mutate", choices=sorted(set(MUTATIONS) | set(HTTP_MUTATIONS)), help="break one rule; a check MUST fail")
     args = ap.parse_args(argv)
     fs = load_server(args.mutate)
+    fh = sys.modules["feeds.http"]  # the module the server holds (a mutated one under narrow-transport)
     if args.mutate:
         print("MUTATED: %s\n" % args.mutate)
     failures = 0

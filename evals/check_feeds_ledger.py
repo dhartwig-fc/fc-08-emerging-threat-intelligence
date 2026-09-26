@@ -9,6 +9,7 @@ Usage:
     python evals/check_feeds_ledger.py --mutate overwrite-pin   # a pinned file is overwritten with other bytes
     python evals/check_feeds_ledger.py --mutate skip-coverage   # accept_run takes decisions that miss an item
     python evals/check_feeds_ledger.py --mutate accept-allowed  # accept_run records an accept it cannot carry out
+    python evals/check_feeds_ledger.py --mutate newline-run-id  # a run id with a trailing newline is accepted
 
 WHAT IT HOLDS. "New" is decided by data/feeds/seen.json and nothing else, so that file must be
 canonical (the same decisions give the same bytes), must never decide an item twice, and must be
@@ -18,9 +19,13 @@ document into tracked data, which is sub-project C, and a ledger saying "accepte
 moved would be false. A run's inbox is written only inside inbox/<run_id>/, and a pinned file there
 is immutable.
 
-WRITER SCAN. Only feeds/ledger.py names seen.json and only tools/accept_run.py calls
-record_decisions(), among the repository's Python files. The scanner is itself checked on a planted
-rogue writer, so an empty scan cannot pass by matching nothing.
+WRITER SCAN. Among the repository's Python files, only feeds/ledger.py names seen.json, only
+tools/accept_run.py calls record_decisions(), and only those two (and the guards, which write
+temporary ledgers) call ledger.dump( -- the canonical bytes a direct write of SEEN_PATH would need.
+It is a scan for NAMES and calls, not a proof about every possible write: a module that built the
+JSON itself and wrote it through a path it assembled would pass. The scanner is itself checked on a
+planted rogue writer, one line per rule, each required to be caught, so an empty scan cannot pass by
+matching nothing.
 
 COLD. Temporary folders only; the tracked ledger is read, never written.
 """
@@ -55,6 +60,8 @@ MUTATIONS = {
     "overwrite-pin": (INBOX, "        if target.read_bytes() != data:\n", "        if False:\n"),
     "skip-coverage": (ACCEPT, "    if missing or extra:\n", "    if False:\n"),
     "accept-allowed": (ACCEPT, "    if accepted:\n", "    if False:\n"),
+    "newline-run-id": (INBOX, '    if not RUN_ID.fullmatch(run_id or ""):\n',
+                       '    if not re.match(r"^feeds-\\d{4}-\\d{2}-\\d{2}-[0-9a-f]{6}$", run_id or ""):\n'),
 }
 
 
@@ -85,6 +92,9 @@ def writer_violations(files: dict) -> list:
         if "record_decisions(" in text and rel not in ("feeds/ledger.py", "tools/accept_run.py",
                                                        "evals/check_feeds_ledger.py"):
             out.append("%s calls record_decisions()" % rel)
+        if "ledger.dump(" in text and rel not in ("feeds/ledger.py", "tools/accept_run.py",
+                                                  "evals/check_feeds_ledger.py", "evals/check_feeds_server.py"):
+            out.append("%s calls ledger.dump()" % rel)
     return out
 
 
@@ -158,6 +168,14 @@ def checks(ledger, inbox, accept) -> list:
         except ValueError:
             refused = True
         out.append((refused, "a malformed run id is refused", ""))
+        try:
+            inbox.run_dir(RUN + "\n", root)
+            refused = False
+        except ValueError:
+            refused = True
+        out.append((refused and inbox.run_dir(RUN, root) == root / RUN,
+                    "a run id with a trailing newline is refused (exact match), and the same id without it is not",
+                    repr(RUN + "\n")))
 
         seen = tmp / "seen.json"
         seen.write_text(ledger.dump([]), encoding="utf-8")
@@ -204,9 +222,13 @@ def checks(ledger, inbox, accept) -> list:
     scanned = repo_python()
     real = writer_violations(scanned)
     has_writers = "feeds/ledger.py" in scanned and "tools/accept_run.py" in scanned and len(scanned) >= 20
-    planted = writer_violations(dict(scanned, **{"tools/rogue.py": "ledger.record_decisions(r, d, x)\nopen('data/feeds/seen.json')"}))
-    out.append((has_writers and not real and len(planted) == 2, "only feeds/ledger.py names seen.json and only tools/accept_run.py "
-                "records decisions (and a planted rogue writer is caught twice)",
+    planted = writer_violations(dict(scanned, **{"tools/rogue.py": "ledger.record_decisions(r, d, x)\n"
+                                                                   "open('data/feeds/seen.json')\n"
+                                                                   "ledger.SEEN_PATH.write_text(ledger.dump(entries))\n"}))
+    want = ["tools/rogue.py names seen.json", "tools/rogue.py calls record_decisions()", "tools/rogue.py calls ledger.dump()"]
+    out.append((has_writers and not real and sorted(planted) == sorted(want),
+                "only feeds/ledger.py names seen.json, only tools/accept_run.py records decisions, and no other module "
+                "calls ledger.dump( (a planted rogue writer is caught on each of the three)",
                 "violations %s; planted %s; scanned %d files" % (real, planted, len(scanned))))
     return out
 
