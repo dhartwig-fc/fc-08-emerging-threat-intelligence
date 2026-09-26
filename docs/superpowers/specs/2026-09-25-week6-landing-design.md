@@ -323,6 +323,8 @@ It is written on a branch and merged into `main`, which is protected. It is push
 
 ### Section 14: the LinkedIn draft
 
+> **Dropped 2026-09-26, owner decision:** no LinkedIn draft. Sub-project 3 is the audit, the tag and the journal entry.
+
 About 1,300 characters in the Question ↓ Capability ↓ Intelligence Produced ↓ Investigator Outcome structure,
 linking the live walkthrough. Every number in it must appear in `RELEASE_SLICE1.md`.
 
@@ -340,7 +342,7 @@ draft committed there is already published. It is also given in chat to paste. I
 - The walkthrough is live on the portfolio, byte-identical to fc-08's committed build, and its staleness gate passes.
 - `future-capabilities.html` shows Threat Intelligence `Built · slice 1`.
 - `RELEASE_SLICE1.md` shows every definition-of-done box with its evidence, and the tag exists.
-- The journal entry is merged, and the LinkedIn draft is in the vault.
+- The journal entry is merged. (The LinkedIn draft was dropped by the owner on 2026-09-26.)
 
 ## Out of scope
 
