@@ -264,6 +264,10 @@ exist. The publisher creates only `projects/nexus/threat-intel/`. It never commi
 build. It is class `needs-portfolio` in `check_all`. It must be watched failing against a published copy with
 one byte changed.
 
+Amended 2026-09-25 (plan ruling): the gate compares the committed page with a tracked site/PUBLISHED hash written by the publisher; before the first publish it passes with 'never published'. Section 6 item 9 is amended too: the scores are single full-set runs computed at build time, labelled so, with the committed trace linked for run-to-run variation -- the repeat records behind the bands are gitignored.
+
+Section 9's trace link was ruled to name two traces: REVIEWER_BANDS_2026-09-13 (measured run-to-run variation for that experiment) and FULL_BASELINE_2026-09-12 (the first full-set run).
+
 ### Section 10: `future-capabilities.html`
 
 It is hand-edited prose, with no generated content:
