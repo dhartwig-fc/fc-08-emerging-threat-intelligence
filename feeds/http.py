@@ -1,7 +1,7 @@
 from __future__ import annotations
 import time, urllib.request, urllib.error
 from dataclasses import dataclass
-from typing import FrozenSet, Optional
+from typing import FrozenSet
 from urllib.parse import urlsplit
 
 USER_AGENT = "NEXUS-FC08-threat-intel/2.0 (+https://github.com/dhartwig-fc/fc-08-emerging-threat-intelligence)"
@@ -19,9 +19,15 @@ class Fetched:
     content_type: str
     body: bytes
 
+# Every source is https. A guard's local test server widens this to http; nothing else does.
+ALLOWED_SCHEMES = ("https",)
+
+
 def _check_host(url: str, allowed_hosts: FrozenSet[str]) -> None:
+    """The allowlist is exact on scheme and netloc: an allowed host on another port, over plain http,
+    or behind userinfo ("https://allowed@evil/", "https://evil@allowed/") is refused."""
     parts = urlsplit(url)
-    if parts.scheme not in ("https", "http") or parts.hostname not in allowed_hosts:
+    if parts.scheme not in ALLOWED_SCHEMES or (parts.netloc or "").lower() not in allowed_hosts:
         raise FetchRefused("%s is not on the allowlist %s" % (url, sorted(allowed_hosts)))
 
 class _Redirects(urllib.request.HTTPRedirectHandler):

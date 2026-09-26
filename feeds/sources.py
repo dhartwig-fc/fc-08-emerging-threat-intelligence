@@ -99,7 +99,8 @@ def parse_fincen(raw: bytes) -> List[FeedItem]:
     items, row = [], None
     for kind, tag, attrs in events:
         if kind == "start" and tag == "tr":
-            row = {"href": None, "title": [], "date": None, "subject": [], "in_a": False, "in_subject": False}
+            row = {"href": None, "title": [], "date": None, "subject": [], "in_a": False, "in_subject": False,
+                   "title_cell": False}
         elif row is None:
             continue
         elif kind == "start" and tag == "a" and row["href"] is None \
@@ -109,6 +110,8 @@ def parse_fincen(raw: bytes) -> List[FeedItem]:
             row["in_a"] = False
         elif kind == "start" and tag == "time" and row["date"] is None:
             row["date"] = attrs.get("datetime")
+        elif kind == "start" and tag == "td" and attrs.get("headers") == "view-title-table-column":
+            row["title_cell"] = True
         elif kind == "start" and tag == "td" and attrs.get("headers") == "view-field-advisory-subject-table-column":
             row["in_subject"] = True
         elif kind == "end" and tag == "td":
@@ -118,6 +121,10 @@ def parse_fincen(raw: bytes) -> List[FeedItem]:
         elif kind == "text" and row["in_subject"]:
             row["subject"].append(tag)
         elif kind == "end" and tag == "tr":
+            # A row with the listing's title cell IS an advisory row: losing its link is a layout
+            # change, never a row to skip (rows without the cell are the page's other tables).
+            if row["title_cell"] and not row["href"]:
+                raise LayoutChanged("fincen: an advisory row has its title cell but no /resources/advisories/ link")
             if row["href"]:
                 if not (row["date"] and ISO_DATE.match(row["date"])):
                     raise LayoutChanged("fincen: the row for %s has no <time datetime>" % row["href"])

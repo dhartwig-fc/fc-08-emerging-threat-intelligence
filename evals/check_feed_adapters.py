@@ -10,6 +10,9 @@ Usage:
     python evals/check_feed_adapters.py --mutate ofac-date-optional # an OFAC row without a date is accepted
     python evals/check_feed_adapters.py --mutate follow-redirects   # a redirect off the allowlist is followed
     python evals/check_feed_adapters.py --mutate no-size-cap        # an oversized body is accepted
+    python evals/check_feed_adapters.py --mutate skip-linkless-row  # a FinCEN advisory row without its link is skipped
+    python evals/check_feed_adapters.py --mutate http-allowed       # plain http passes the allowlist
+    python evals/check_feed_adapters.py --mutate any-port           # an allowed host on another port passes
 
 CONTRACT. Each adapter, run on the committed snapshot of its listing (tests/fixtures/feeds/, fetched
 2026-09-26, public government pages), must return the pinned items: count, the digest of their ids in
@@ -18,9 +21,16 @@ empty list, when its marker is gone, when the marker is there but nothing parses
 has no date. OFSI keys an item by its Atom <id>, which carries a timestamp, so a revised publication
 is a NEW item (a ruling of the sub-project A plan).
 
-TRANSPORT. feeds.http.get refuses a URL off the allowlist, a redirect off the allowlist BEFORE any
-request reaches the other host, a body over the size cap, and a content type not allowed. Checked
-against a local HTTP server on 127.0.0.1, so it stays cold.
+TRANSPORT. The allowlist is exact on scheme and netloc: https only, the host with no other port and
+no userinfo, so "http://allowed/", "https://allowed:8443/" and "https://allowed@evil/" are refused
+(checked on the rule itself, under its real https-only setting). feeds.http.get refuses a URL off
+the allowlist, a redirect off the allowlist BEFORE any request reaches the other host, a body over
+the size cap, and a content type not allowed -- checked against a local HTTP server on 127.0.0.1,
+for which the guard alone widens the scheme to http, so it stays cold.
+
+FinCEN's rows are told apart from the page's other tables by the listing's title cell: a row that
+has the cell but lost its advisory link raises, so one missing advisory cannot silently shrink the
+list (review of Task 3, 2026-09-26).
 
 NOT A VACUOUS PASS. Each --mutate rewrites one module's SOURCE in memory; at least one check must fail.
 """
@@ -89,6 +99,8 @@ BREAKS = [
     ("an item without a date", "ofsi", r"<updated>2026-09-24T08:49:08Z</updated>\s*<link", "<updated>yesterday</updated><link"),
     ("an item without a date", "fincen", r'datetime="2026-06-05T12:00:00Z"', ""),
     ("an item without a date", "ofac", r"September 24, 2026 -", "24 Sep -"),
+    ("one advisory row without its link", "fincen", r'href="/resources/advisories/fincen-advisory-fin-2026-a002"',
+     'href="/elsewhere/fin-2026-a002"'),
 ]
 
 MUTATIONS = {
@@ -100,6 +112,9 @@ MUTATIONS = {
     "ofac-date-optional": (SOURCES_PY, 'if not row["href"] or not row["date"]:', 'if not row["href"]:'),
     "follow-redirects": (HTTP_PY, "        _check_host(newurl, self.allowed_hosts)\n", ""),
     "no-size-cap": (HTTP_PY, "    if len(body) > max_bytes:\n", "    if False:\n"),
+    "skip-linkless-row": (SOURCES_PY, '            if row["title_cell"] and not row["href"]:\n', "            if False:\n"),
+    "http-allowed": (HTTP_PY, 'ALLOWED_SCHEMES = ("https",)', 'ALLOWED_SCHEMES = ("https", "http")'),
+    "any-port": (HTTP_PY, '(parts.netloc or "").lower() not in allowed_hosts', '(parts.hostname or "") not in allowed_hosts'),
 }
 
 
@@ -163,8 +178,25 @@ def adapter_checks(sources) -> list:
     return out
 
 
+def boundary_checks(fh) -> list:
+    """The allowlist rule itself, under its real (https-only) setting, before transport_checks widens it."""
+    hosts, out = frozenset({"www.fincen.gov"}), []
+    for url, admitted in (("https://www.fincen.gov/x", True), ("https://WWW.FINCEN.GOV/x", True),
+                          ("http://www.fincen.gov/x", False), ("https://www.fincen.gov:8443/x", False),
+                          ("https://www.fincen.gov@evil.invalid/x", False),
+                          ("https://evil.invalid@www.fincen.gov/x", False)):
+        try:
+            fh._check_host(url, hosts)
+            got = True
+        except fh.FetchRefused:
+            got = False
+        out.append((got == admitted, "the allowlist %s %s" % ("admits" if admitted else "refuses", url), ""))
+    return out
+
+
 def transport_checks(fh) -> list:
-    fh.REQUEST_GAP_SECONDS = 0
+    # The local test server speaks http on its own port: widen the scheme for these checks only.
+    fh.REQUEST_GAP_SECONDS, fh.ALLOWED_SCHEMES = 0, ("http",)
     hosts_seen = []
 
     class Handler(http.server.BaseHTTPRequestHandler):
@@ -194,7 +226,7 @@ def transport_checks(fh) -> list:
     server = socketserver.TCPServer(("127.0.0.1", 0), Handler)
     port = server.server_address[1]
     threading.Thread(target=server.serve_forever, daemon=True).start()
-    allowed, types_ = frozenset({"127.0.0.1"}), frozenset({"text/html", "application/pdf"})
+    allowed, types_ = frozenset({"127.0.0.1:%d" % port}), frozenset({"text/html", "application/pdf"})
 
     def get(path: str, host: str = "127.0.0.1"):
         try:
@@ -237,7 +269,7 @@ def main(argv: list) -> int:
     if args.mutate:
         print("MUTATED: %s\n" % args.mutate)
     failures = 0
-    for ok, label, detail in adapter_checks(sources) + transport_checks(fh):
+    for ok, label, detail in adapter_checks(sources) + boundary_checks(fh) + transport_checks(fh):
         print("  %-4s %s\n         %s" % ("PASS" if ok else "FAIL", label, detail))
         failures += 0 if ok else 1
     if args.mutate:
