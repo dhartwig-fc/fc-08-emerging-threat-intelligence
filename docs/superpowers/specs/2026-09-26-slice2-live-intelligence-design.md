@@ -75,7 +75,7 @@ At the end of the run, **in code, after the agent stops**, the runner reconciles
 Whatever the agent skipped is reported as **unfinished**, never as success.
 
 Budget and blast radius:
-- **a hard cost ceiling of US$5 for the whole run** (owner decision, 2026-09-26, raised from US$5 the same day). Measured: an
+- **a hard cost ceiling of US$5 for the whole run** (owner decision, 2026-09-26, raised from US$4 the same day). Measured: an
   extraction averages US$0.73 (14 runs), and the one telemetry run cost US$0.50. On the subscription
   token this is the SDK's notional price, not a bill, but it is capped all the same;
 - **caps: at most 10 listed items triaged and at most 3 extracted per run**, each extraction with its
