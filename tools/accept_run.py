@@ -71,7 +71,11 @@ def main(argv: list, *, inbox_root: Path = inbox.INBOX_ROOT, seen_path: Path = l
     if args.dry_run:
         print("DRY RUN: would record %d decision(s) for run %s" % (len(entries), args.run_id))
         return 0
-    ledger.record_decisions(args.run_id, (today or date.today()).isoformat(), entries, path=seen_path)
+    try:
+        ledger.record_decisions(args.run_id, (today or date.today()).isoformat(), entries, path=seen_path)
+    except ValueError as exc:
+        print("REFUSED: %s" % exc)
+        return 1
     print("RECORDED: %d decision(s) for run %s in %s" % (len(entries), args.run_id, seen_path))
     return 0
 

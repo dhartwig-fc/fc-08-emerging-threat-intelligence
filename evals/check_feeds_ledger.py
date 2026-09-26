@@ -45,7 +45,6 @@ from feeds.model import FeedItem  # noqa: E402
 LEDGER = ROOT / "feeds" / "ledger.py"
 INBOX = ROOT / "feeds" / "inbox.py"
 ACCEPT = ROOT / "tools" / "accept_run.py"
-SELF = Path(__file__).resolve()
 RUN = "feeds-2026-10-02-abc123"
 TODAY = date(2026, 10, 2)
 
@@ -201,11 +200,13 @@ def checks(ledger, inbox, accept) -> list:
             code = accept.main(["feeds-2026-10-02-000000", "--decisions", str(f)], inbox_root=root, seen_path=seen)
         out.append((code == 1 and "no items.json" in buf.getvalue(), "a run with no inbox is refused", ""))
 
-    real = writer_violations(repo_python())
-    planted = writer_violations({"tools/rogue.py": "ledger.record_decisions(r, d, x)\nopen('data/feeds/seen.json')"})
-    out.append((not real and len(planted) == 2, "only feeds/ledger.py names seen.json and only tools/accept_run.py "
+    scanned = repo_python()
+    real = writer_violations(scanned)
+    has_writers = "feeds/ledger.py" in scanned and "tools/accept_run.py" in scanned and len(scanned) >= 20
+    planted = writer_violations(dict(scanned, **{"tools/rogue.py": "ledger.record_decisions(r, d, x)\nopen('data/feeds/seen.json')"}))
+    out.append((has_writers and not real and len(planted) == 2, "only feeds/ledger.py names seen.json and only tools/accept_run.py "
                 "records decisions (and a planted rogue writer is caught twice)",
-                "violations %s; planted %s" % (real, planted)))
+                "violations %s; planted %s; scanned %d files" % (real, planted, len(scanned))))
     return out
 
 
