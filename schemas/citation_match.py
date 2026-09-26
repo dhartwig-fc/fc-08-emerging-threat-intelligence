@@ -214,6 +214,12 @@ class PageIndex:
         from pypdf import PdfReader
         return cls([p.extract_text() or "" for p in PdfReader(str(path)).pages])
 
+    @classmethod
+    def from_html(cls, raw: bytes) -> "PageIndex":
+        """Pages of a pinned HTML document, by schemas/html_pages.py's fixed rule (slice 2)."""
+        from schemas.html_pages import html_pages
+        return cls(html_pages(raw))
+
     def __len__(self) -> int:
         return len(self.pages)
 
