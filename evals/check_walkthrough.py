@@ -18,6 +18,7 @@ Usage:
     python evals/check_walkthrough.py --mutate attested-count  # #limits counts only this advisory's attestations; MUST fail
     python evals/check_walkthrough.py --mutate swap-moves      # section 9's "moves F1 x -> y" swaps x and y; MUST fail
     python evals/check_walkthrough.py --mutate proposal-date   # the newest-proposal date ignores the run queues; MUST fail
+    python evals/check_walkthrough.py --mutate desk-total      # section 1's routing-table desk total is off by one; MUST fail
 
 WHY. The page will leave this repository. A page that drifts from its inputs, differs
 between two machines, or quietly drops a citation says something the governance never
@@ -92,7 +93,7 @@ SECTIONS = ("question", "source", "extraction", "grounding", "review",
 SEEDS = ("0", "1", "4242", "987654")
 MUTATIONS = ("drop-citation", "unpinned-log", "wrong-page", "swap-notes", "wrong-count", "desk-scope", "two-runs",
              "typed-score", "actor-id", "digest-header", "telemetry-count", "attested-count", "swap-moves",
-             "proposal-date")
+             "proposal-date", "desk-total")
 MUTATION = None
 
 
@@ -445,8 +446,8 @@ def checks() -> list:
             "proposals": len(proposals),
             "approved": sum(1 for d in standing.values() if d.decision == "approve"),
             "rejected": sum(1 for d in standing.values() if d.decision == "reject"),
-            "desks": len(delivered)}
-    got = {m.group(1): int(m.group(2)) for m in re.finditer(r'data-count="([a-z]+)">(\d+)<', question)}
+            "desks": len(delivered), "desk-total": len(titles)}
+    got = {m.group(1): int(m.group(2)) for m in re.finditer(r'data-count="([a-z-]+)">(\d+)<', question)}
     out.append((got == want, "every count in #question equals the guard's own count from the files",
                 "want %s; page %s" % (want, got)))
 

@@ -14,7 +14,7 @@ WHAT IT READS (inputs(), once each; paths through the owning modules' constants)
   data/digests/CURRENT + manifest  -> how many decision-log lines the page may read
   the decision log, THAT prefix    -> section 5 (the owner's decisions), via log_prefix only
   the golden label                 -> the review card's context line, as the owner saw it
-  the desk routing table           -> "desks reached", through the digest's own routing rule
+  the desk routing table           -> "desks reached" and the routing table's own desk total, section 1
   the actor-resolution report      -> section 6 (each named actor's resolution), over the extractor's records
   the actor register               -> section 6 (the entity_key seam) and section 10
   the Sanctions desk digest file   -> section 7 (the advisory's block only; never the file's header)
@@ -51,7 +51,7 @@ from governance.digest import (APPROVED_NOT_IN_RECORD, DIGESTS_DIR, RECORDS_DIR,
                                _routes, _visible)
 from governance.proposals import (ADVISORY_LIST, LEGACY_QUEUE, LIBRARY, QUEUE_DIR, group, link_key,  # noqa: E402
                                   load_queue_files)
-from governance.routing import load_routing  # noqa: E402
+from governance.routing import desks_in_order, load_routing  # noqa: E402
 from agents import telemetry  # noqa: E402
 from agents.extract_advisory import KC_TOOLS, SYSTEM_PROMPT  # noqa: E402
 from agents.permissions import PROPOSE_TOOL, READ_ONLY_TOOLS  # noqa: E402
@@ -82,7 +82,7 @@ SCORE_FIELDS = (("typologies", "Typologies (library)"), ("emergent", "Emergent t
 _MUTATE = None  # set only by evals/check_walkthrough.py through --_mutate
 MUTATIONS = ("drop-citation", "unpinned-log", "wrong-page", "swap-notes", "wrong-count", "desk-scope", "two-runs",
              "typed-score", "actor-id", "digest-header", "telemetry-count", "attested-count", "swap-moves",
-             "proposal-date")
+             "proposal-date", "desk-total")
 
 e = html.escape
 PAST = {"approve": "approved", "reject": "rejected"}
@@ -328,6 +328,9 @@ def section_question(inp: dict) -> str:
     if _MUTATE == "wrong-count":
         n_ext += 1
     desks = desk_view(inp)
+    n_desks_total = len(desks_in_order(inp["routing"]))
+    if _MUTATE == "desk-total":
+        n_desks_total += 1
     rows = "".join(
         '\n        <li class="desk">%s: %d approved%s; %d awaiting review%s</li>'
         % (e(title), len(app), (" (%s)" % _ids(app)) if app else "", len(wait), (" (%s)" % _ids(wait)) if wait else "")
@@ -342,7 +345,7 @@ def section_question(inp: dict) -> str:
     <li><span class="step">Intelligence produced</span>
       <p>%s asserted in the record &mdash; %s by the extractor, %s added by the reviewer agent, %s of them emergent (not in the typology library). Run <code>%s</code> made %s; the owner approved %s and rejected %s.</p></li>
     <li><span class="step">Investigator outcome</span>
-      <p>The advisory reached %s. What each desk's digest carries for it:</p>
+      <p>The routing table has %s; this advisory reached %s. What each desk's digest carries for it:</p>
       <ul class="desks">%s
       </ul></li>
   </ol>
@@ -350,7 +353,8 @@ def section_question(inp: dict) -> str:
 """ % (e(a["title"]), e(a["publisher"]), e(a["published_on"]),
        _count("typologies", len(typs), "typology", "typologies"), _count("extractor", n_ext), _count("reviewer", len(typs) - n_ext),
        _count("emergent", n_emergent), e(DECIDED_RUN), _count("proposals", len(inp["proposals"]), "proposal"),
-       _count("approved", n_app, "link"), _count("rejected", n_rej), _count("desks", len(desks), "desk"), rows)
+       _count("approved", n_app, "link"), _count("rejected", n_rej), _count("desk-total", n_desks_total, "desk"),
+       _count("desks", len(desks), "desk"), rows)
 
 
 def section_source(inp: dict) -> str:
