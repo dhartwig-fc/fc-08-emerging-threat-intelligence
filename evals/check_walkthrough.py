@@ -65,14 +65,26 @@ LABEL_PASS = ROOT / "evals" / "owner_decisions" / "label_pass_2026-09-24.json"
 SERVER = "mcp_server/knowledge_centre_server.py"
 
 
-def _resolver_added() -> str:
+NOT_RUN = None  # a check's ok value when it cannot run here: printed as NOT RUN, never counted as a failure
+
+
+def _resolver_added():
     """The first commit that put knowledge_centre_resolve_actor into the Knowledge Centre server, by date --
-    read from git here because the builder may not call it."""
-    r = subprocess.run(["git", "log", "--reverse", "--format=%ad", "--date=short", "-S",
-                        "knowledge_centre_resolve_actor", "--", SERVER],
-                       capture_output=True, text=True, cwd=ROOT)
+    read from git here because the builder may not call it. None when the history is not here: no git, or
+    a shallow clone (CI checks out at depth 1), where the pickaxe would name the grafted root commit and
+    report the day of the checkout instead of the day the tool arrived."""
+    try:
+        shallow = subprocess.run(["git", "rev-parse", "--is-shallow-repository"],
+                                 capture_output=True, text=True, cwd=ROOT)
+        if shallow.returncode != 0 or shallow.stdout.strip() != "false":
+            return None
+        r = subprocess.run(["git", "log", "--reverse", "--format=%ad", "--date=short", "-S",
+                            "knowledge_centre_resolve_actor", "--", SERVER],
+                           capture_output=True, text=True, cwd=ROOT)
+    except OSError:
+        return None
     lines = r.stdout.split()
-    return lines[0] if r.returncode == 0 and lines else "git history unavailable (%s)" % r.stderr.strip()[:80]
+    return lines[0] if r.returncode == 0 and lines else None
 
 BUILDER = ROOT / "tools" / "build_walkthrough.py"
 SECTIONS = ("question", "source", "extraction", "grounding", "review",
@@ -322,13 +334,20 @@ def checks_sections_6_to_10(bw, page: str, record: dict, pinned: list) -> list:
                 "attested_by values: %s" % sorted({a.get("attested_by") for a in attested})))
     newest = max(json.loads(line)["proposed_at"][:10] for q in [LEGACY_QUEUE] + sorted(QUEUE_DIR.glob("*.jsonl"))
                  for line in q.read_text(encoding="utf-8").splitlines() if line.strip())
-    added = _resolver_added()
     dates = _attrs(lim, "data-date")
-    out.append((dates == {"resolver-added": added, "newest-proposal": newest} and newest < added
+    shown_added = dates.get("resolver-added", "")
+    out.append((dates.get("newest-proposal") == newest and bool(shown_added) and newest < shown_added
                 and "resolve_actor" not in SYSTEM_PROMPT,
-                "#limits dates the resolver by git history and the newest committed proposal before it, and the "
-                "extractor's prompt does not name resolve_actor",
-                "git %s, newest proposal %s; page %s" % (added, newest, dates)))
+                "#limits dates the newest committed proposal before the resolver's date, and the extractor's "
+                "prompt does not name resolve_actor",
+                "newest proposal %s; page %s" % (newest, dates)))
+    added = _resolver_added()
+    if added is None:
+        out.append((NOT_RUN, "resolver-date check needs git history (shallow clone)",
+                    "page says %s; not verifiable here" % shown_added))
+    else:
+        out.append((shown_added == added, "#limits' resolver date equals the first commit adding it, by git history",
+                    "git %s; page %s" % (added, shown_added)))
     return out
 
 
@@ -494,6 +513,9 @@ def main(argv: list) -> int:
         print("MUTATED: %s\n" % args.mutate)
     failures = 0
     for ok, label, detail in checks():
+        if ok is NOT_RUN:
+            print("  NOT RUN: %s\n         %s" % (label, detail))
+            continue
         print("  %-4s %s\n         %s" % ("PASS" if ok else "FAIL", label, detail))
         failures += 0 if ok else 1
     if args.mutate:
