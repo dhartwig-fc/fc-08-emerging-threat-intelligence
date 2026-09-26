@@ -88,14 +88,14 @@ def next_steps(portfolio: Path, sha: str) -> str:
     """What is still to do: nothing is live, and nothing is committed, when publish() returns."""
     q, dest = shlex.quote(str(portfolio)), DEST_REL.as_posix()
     return "\n".join([
-        "NOT FINISHED: nothing is committed in either repository. Next, in this order (CLAUDE.md, the publish procedure):",
-        "  1. open %s at 375px and at desktop width; follow the back link and the trace links" % dest,
-        "  2. first publish only: git -C %s merge --ff-only fc08-slice1-publish" % q,
-        "  3. git -C %s add %s && git -C %s commit" % (q, dest, q),
-        "  4. git -C %s show HEAD:%s | shasum -a 256    # must print %s" % (q, dest, sha),
-        "  5. here: git add site/PUBLISHED (and the rebuilt page, on a republish) && git commit",
-        "     -- the pre-commit hook refuses this commit until step 3 is done",
-        "  6. push this repository, then the portfolio; follow the live link",
+        "NOT FINISHED: nothing is committed in either repository. Steps 2-7 of CLAUDE.md's publish procedure, in order:",
+        "  2. open %s at 375px and at desktop width; follow the back link and the trace links" % dest,
+        "  3. first publish only: git -C %s merge --ff-only fc08-slice1-publish" % q,
+        "  4. git -C %s add %s && git -C %s commit" % (q, dest, q),
+        "  5. git -C %s show HEAD:%s | shasum -a 256    # must print %s" % (q, dest, sha),
+        "  6. here: git add site/PUBLISHED (and the rebuilt page, on a republish) && git commit",
+        "     -- the pre-commit hook refuses this commit until step 4 is done",
+        "  7. push this repository, then the portfolio; follow the live link",
     ])
 
 
