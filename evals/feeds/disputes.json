@@ -1,0 +1,439 @@
+{
+  "cards": [
+    {
+      "draft": {
+        "label": "relevant",
+        "reason": "FIN-2020-A009, a FinCEN advisory on FATF-identified jurisdictions with AML, CFT and proliferation deficiencies. Jurisdictional risk an analyst can screen for; the pinned page does not say whether the PDF adds red flags, so in doubt: relevant."
+      },
+      "key": "fincen:55d42ff2380766c9",
+      "kind": "dispute",
+      "published": "2020-11-06",
+      "repeats": {
+        "rep1": {
+          "decided_at": "2026-09-27T14:37:44Z",
+          "found_on": [
+            1
+          ],
+          "match": "exact",
+          "quote": "Advisory on the Financial Action Task Force-Identified Jurisdictions with Anti-Money Laundering, Combating the Financing of Terrorism, and Proliferation Deficiencies",
+          "reason": "Restates FATF's list of jurisdictions with AML/CFT/PF deficiencies and related due-diligence obligations; no specific method, red flag, or case described.",
+          "run_id": "feeds-2026-09-27-f628bc",
+          "verdict": "not_relevant"
+        },
+        "rep2": {
+          "decided_at": "2026-09-27T14:48:00Z",
+          "found_on": [
+            1
+          ],
+          "match": "exact",
+          "quote": "Subject\n\nAdvisory on the Financial Action Task Force-Identified Jurisdictions with Anti-Money Laundering, Combating the Financing of Terrorism, and Proliferation Deficiencies",
+          "reason": "Advisory on FATF-identified jurisdictions with AML/CFT/proliferation financing deficiencies, informing jurisdictional risk indicators for screening.",
+          "run_id": "feeds-2026-09-27-d46a21",
+          "verdict": "relevant"
+        },
+        "rep3": {
+          "decided_at": "2026-09-27T14:59:15Z",
+          "found_on": [
+            1
+          ],
+          "match": "exact",
+          "quote": "Advisory on the Financial Action Task Force-Identified Jurisdictions with Anti-Money Laundering, Combating the Financing of Terrorism, and Proliferation Deficiencies",
+          "reason": "Advisory identifying jurisdictions with AML/CFT/proliferation-financing deficiencies, informing risk-based screening of jurisdictional exposure.",
+          "run_id": "feeds-2026-09-27-9cd5cc",
+          "verdict": "relevant"
+        }
+      },
+      "source": "fincen",
+      "title": "FinCEN Advisory FIN-2020-A009",
+      "url": "https://www.fincen.gov/resources/advisories/fincen-advisory-fin-2020-a009"
+    },
+    {
+      "draft": {
+        "label": "not_relevant",
+        "reason": "TCO and counter-terrorism designations (Xinbi Guarantee with crypto addresses, Los Tiguerones) plus amended and new FAQs. A designation list; the scam-operation link is a press-release title only, no enforcement or advisory."
+      },
+      "key": "ofac:4824e552f9bcc834",
+      "kind": "dispute",
+      "published": "2026-09-09",
+      "repeats": {
+        "rep1": {
+          "decided_at": "2026-09-27T14:34:59Z",
+          "found_on": [
+            2
+          ],
+          "match": "exact",
+          "quote": "XINBI GUARANTEE (Chinese Simplified: 新币担保) (a.k.a. \"XINBI\"), Burma; Thailand; Laos; Website https://xinbi.com; Target Type Criminal Organization; Digital Currency Address - TRX TW5tokvhEfrb77z98Rc8HqbkzQJ6sxYtGX",
+          "reason": "Designates Xinbi Guarantee crypto-laundering network behind cyber scam operations targeting Americans, listing screenable TRX addresses as laundering indicators.",
+          "run_id": "feeds-2026-09-27-621e41",
+          "verdict": "relevant"
+        },
+        "rep2": {
+          "decided_at": "2026-09-27T14:45:04Z",
+          "found_on": [
+            1
+          ],
+          "match": "artefact",
+          "quote": "OFAC is amending several Frequently Asked Questions (FAQs) today (5, 13, 51, 58, 59, 74, 75, 76, 77, and 78) as part of its ongoing process of reviewing published guidance to ensure information remains current.",
+          "reason": "Consists of SDN designation list additions/administrative corrections and FAQ updates only; no narrative of methods, red flags or case facts is given.",
+          "run_id": "feeds-2026-09-27-3501a6",
+          "verdict": "not_relevant"
+        },
+        "rep3": {
+          "decided_at": "2026-09-27T14:56:42Z",
+          "found_on": [
+            3
+          ],
+          "match": "exact",
+          "quote": "Unrelated Administrative List Changes - These administrative corrections fix errors in existing listings only. No new listings have been added. No new sanctions apply to these names.",
+          "reason": "Consists of bare SDN designation entries, administrative name corrections, and a list of amended FAQ numbers; no narrative describing methods, red flags or case facts.",
+          "run_id": "feeds-2026-09-27-0df276",
+          "verdict": "not_relevant"
+        }
+      },
+      "source": "ofac",
+      "title": "Transnational Criminal Organizations Designations; Counter Terrorism Designation; Issuance of New and Amended Frequently Asked Questions",
+      "url": "https://ofac.treasury.gov/recent-actions/20260909"
+    },
+    {
+      "draft": {
+        "label": "relevant",
+        "reason": "Combines designations with an advisory and an alert: an updated Iran-related alert on sanctions risks of Iranian demands for Strait of Hormuz passage and an updated Tri-Seal advisory, beside Syria delistings and Iran designations."
+      },
+      "key": "ofac:eca80d2c229c876e",
+      "kind": "dispute",
+      "published": "2026-08-24",
+      "repeats": {
+        "rep1": {
+          "decided_at": "2026-09-27T14:37:50Z",
+          "found_on": [
+            2
+          ],
+          "match": "exact",
+          "quote": "The following individuals have been added to OFAC's SDN List:",
+          "reason": "51-page notice consisting of Syria delisting and a bulk SDN designation list for Iran-related individuals/entities; no narrative method or red flag content.",
+          "run_id": "feeds-2026-09-27-f628bc",
+          "verdict": "not_relevant"
+        },
+        "rep2": {
+          "decided_at": "2026-09-27T14:48:07Z",
+          "found_on": [
+            51
+          ],
+          "match": "exact",
+          "quote": "AL-SHEIKH, Jihad Issa (a.k.a. ALSHEAK, Omar; a.k.a. \"ZAKKUR, Abu-Ahmad\"; a.k.a. \"ZAKOUR, Abu Ahmed\"), Kilis Province, Turkey; DOB 05 Jan 1979; POB Aleppo, Syria; nationality Syria; Gender Male; Secondary sanctions risk: section 1(b) of Executive Order 13224, as amended by Executive Order 13886; Passport 011965412 (Syria) (individual) [SDGT] (Linked To: AL-NUSRAH FRONT).",
+          "reason": "Entire 51-page document is bare SDN list additions (Iran/Syria) plus GL/FAQ housekeeping; no financial crime method, red flag or case narrative described.",
+          "run_id": "feeds-2026-09-27-d46a21",
+          "verdict": "not_relevant"
+        },
+        "rep3": {
+          "decided_at": "2026-09-27T14:59:22Z",
+          "found_on": [
+            51
+          ],
+          "match": "exact",
+          "quote": "Unrelated Administrative List Changes:\n\nNone",
+          "reason": "Consists of Syria SSOT delisting/GL updates and a long bare SDN list of Iran-related designations across 51 pages; no described methods, red flags or case facts.",
+          "run_id": "feeds-2026-09-27-9cd5cc",
+          "verdict": "not_relevant"
+        }
+      },
+      "source": "ofac",
+      "title": "Removal of Syria's designation as a State Sponsor of Terrorism and Associated Sanctions List Updates; Iran-related Designations; Updates to Iran-related General Licenses",
+      "url": "https://ofac.treasury.gov/recent-actions/20260824"
+    },
+    {
+      "draft": {
+        "label": "not_relevant",
+        "reason": "Expiry of the Ethiopia emergency with its delistings, an amended Russia-related general licence (GL 131J, Lukoil sale) and amended FAQs. Delistings and a licence; no method, red flag or case."
+      },
+      "key": "ofac:18de8d6afad03d2a",
+      "kind": "spot_check",
+      "published": "2026-09-18",
+      "repeats": {
+        "rep1": {
+          "decided_at": "2026-09-27T13:35:52Z",
+          "found_on": [
+            1
+          ],
+          "match": "exact",
+          "quote": "The national emergency declared in Executive Order (E.O.) 14046 of September 17, 2021, \"Imposing Sanctions on Certain Persons With Respect to the Humanitarian and Human Rights Crisis in Ethiopia,\" has expired.",
+          "reason": "Notice of expired Ethiopia sanctions program with resulting SDN delistings and an amended Russia-related general licence/FAQs; procedural, no crime method or red flag described.",
+          "run_id": "feeds-2026-09-27-d9b86e",
+          "verdict": "not_relevant"
+        },
+        "rep2": {
+          "decided_at": "2026-09-27T14:42:39Z",
+          "found_on": [
+            1
+          ],
+          "match": "exact",
+          "quote": "The national emergency declared in Executive Order (E.O.) 14046 of September 17, 2021, \"Imposing Sanctions on Certain Persons With Respect to the Humanitarian and Human Rights Crisis in Ethiopia,\" has expired.",
+          "reason": "Notice of expired national emergency, resulting SDN delistings, and issuance of an amended Russia general license/FAQs; procedural sanctions administration, no typology.",
+          "run_id": "feeds-2026-09-27-7f7f44",
+          "verdict": "not_relevant"
+        },
+        "rep3": {
+          "decided_at": "2026-09-27T14:54:00Z",
+          "found_on": [
+            1
+          ],
+          "match": "exact",
+          "quote": "The national emergency declared in Executive Order (E.O.) 14046 of September 17, 2021, \"Imposing Sanctions on Certain Persons With Respect to the Humanitarian and Human Rights Crisis in Ethiopia,\" has expired.",
+          "reason": "Expiration of Ethiopia emergency with bare delisting of designated persons/entities and issuance of an amended general license; no method/red flag/case.",
+          "run_id": "feeds-2026-09-27-817de4",
+          "verdict": "not_relevant"
+        }
+      },
+      "source": "ofac",
+      "title": "Expiration of Emergency With Respect to the Situation in Ethiopia; Ethiopia-related Designations Removals; Issuance of Amended Russia-related General License and Associated Frequently Asked Questions",
+      "url": "https://ofac.treasury.gov/recent-actions/20260918"
+    },
+    {
+      "draft": {
+        "label": "not_relevant",
+        "reason": "An Iran-related designation (VTB Bank) and an amended Venezuela general licence (GL 52C) with one FAQ. A designation and a licence; the press-release title aside, the page describes no method or case."
+      },
+      "key": "ofac:1b5cb42bd23a2458",
+      "kind": "spot_check",
+      "published": "2026-09-14",
+      "repeats": {
+        "rep1": {
+          "decided_at": "2026-09-27T14:33:10Z",
+          "found_on": [
+            1
+          ],
+          "match": "exact",
+          "quote": "Additionally, OFAC has updated the Specially Designated Nationals and Blocked Persons List and the Sectoral Sanctions Identifications List.",
+          "reason": "Body is a bare SDN/SSI list update (entity identifiers) plus a general licence/FAQ issuance; no method or case narrative in the fetched document.",
+          "run_id": "feeds-2026-09-27-90e535",
+          "verdict": "not_relevant"
+        },
+        "rep2": {
+          "decided_at": "2026-09-27T14:43:45Z",
+          "found_on": [
+            1
+          ],
+          "match": "exact",
+          "quote": "The following changes have been made to OFAC's SDN List:",
+          "reason": "Bare SDN/SSI list update (VTB Bank entry change) plus a Venezuela general licence/FAQ issuance; no method or case narrative in the document itself.",
+          "run_id": "feeds-2026-09-27-e6f76f",
+          "verdict": "not_relevant"
+        },
+        "rep3": {
+          "decided_at": "2026-09-27T14:55:21Z",
+          "found_on": [
+            3
+          ],
+          "match": "exact",
+          "quote": "Sectoral Sanctions Identifications List Updates\n\nThe following changes have been made to OFAC's Sectoral Sanctions Identifications List:",
+          "reason": "Content is a bare SDN/SSI list update (VTB Bank entry amended) plus a general licence/FAQ notice; no narrative describing the sanctions-evasion method.",
+          "run_id": "feeds-2026-09-27-f3f48f",
+          "verdict": "not_relevant"
+        }
+      },
+      "source": "ofac",
+      "title": "Iran-related Designation; Issuance of Amended Venezuela-related General License and Frequently Asked Question",
+      "url": "https://ofac.treasury.gov/recent-actions/20260914"
+    },
+    {
+      "draft": {
+        "label": "not_relevant",
+        "reason": "Designation removals: DRC-related delistings of Francois Olenga and a linked club, and an administrative character fix to one Cuba listing. A bare delisting list."
+      },
+      "key": "ofac:eceb1d4b8bded27d",
+      "kind": "spot_check",
+      "published": "2026-09-23",
+      "repeats": {
+        "rep1": {
+          "decided_at": "2026-09-27T13:35:51Z",
+          "found_on": [
+            1
+          ],
+          "match": "exact",
+          "quote": "The following deletions have been made to OFAC's SDN List:",
+          "reason": "Bare SDN list delisting of an individual and linked entities following DRC-related designation removals; no method, red flag or case narrative.",
+          "run_id": "feeds-2026-09-27-d9b86e",
+          "verdict": "not_relevant"
+        },
+        "rep2": {
+          "decided_at": "2026-09-27T14:42:37Z",
+          "found_on": [
+            1
+          ],
+          "match": "exact",
+          "quote": "The following deletions have been made to OFAC's SDN List:",
+          "reason": "Bare list of SDN designation removals for DRC-related individuals/entities; no methods, red flags or case narrative.",
+          "run_id": "feeds-2026-09-27-7f7f44",
+          "verdict": "not_relevant"
+        },
+        "rep3": {
+          "decided_at": "2026-09-27T14:53:59Z",
+          "found_on": [
+            1
+          ],
+          "match": "exact",
+          "quote": "The following deletions have been made to OFAC's SDN List:",
+          "reason": "Bare SDN list delisting of an individual and linked entities in DRC, plus an unrelated address formatting fix; no method/red flag/case described.",
+          "run_id": "feeds-2026-09-27-817de4",
+          "verdict": "not_relevant"
+        }
+      },
+      "source": "ofac",
+      "title": "Democratic Republic of the Congo-related Designations Removals",
+      "url": "https://ofac.treasury.gov/recent-actions/20260923"
+    },
+    {
+      "draft": {
+        "label": "not_relevant",
+        "reason": "A general licence: INT/2025/5635700 permits business with named Russian-oil subsidiaries for listed exempt projects; the updates add projects. A licence notice."
+      },
+      "key": "ofsi:5f612a010e455824",
+      "kind": "spot_check",
+      "published": "2026-08-06",
+      "repeats": {
+        "rep1": {
+          "decided_at": "2026-09-27T14:34:32Z",
+          "found_on": [
+            1
+          ],
+          "match": "exact",
+          "quote": "On 10 January 2025, OFSI issued General Licence INT/2025/5635700 under regulation 64 of the Russia (Sanctions) (EU Exit) Regulations 2019",
+          "reason": "General licence detail page listing exempt projects and amendments; no financial-crime method, red flag or case described.",
+          "run_id": "feeds-2026-09-27-621e41",
+          "verdict": "not_relevant"
+        },
+        "rep2": {
+          "decided_at": "2026-09-27T14:44:41Z",
+          "found_on": [
+            1
+          ],
+          "match": "exact",
+          "quote": "OFSI issued General Licence INT/2025/5635700 under regulation 64 of the Russia (Sanctions) (EU Exit) Regulations 2019",
+          "reason": "General licence detail/amendment notice for Russian Oil Exempt Projects; purely licensing scope changes, no typology content.",
+          "run_id": "feeds-2026-09-27-3501a6",
+          "verdict": "not_relevant"
+        },
+        "rep3": {
+          "decided_at": "2026-09-27T14:56:31Z",
+          "found_on": [
+            1
+          ],
+          "match": "exact",
+          "quote": "On 10 January 2025, OFSI issued General Licence INT/2025/5635700 under regulation 64 of the Russia (Sanctions) (EU Exit) Regulations 2019",
+          "reason": "General licence for Russian oil exempt projects; describes licence scope/amendments only, no financial crime method or case.",
+          "run_id": "feeds-2026-09-27-0df276",
+          "verdict": "not_relevant"
+        }
+      },
+      "source": "ofsi",
+      "title": "Guidance: OFSI General licence INT/2025/5635700",
+      "url": "https://www.gov.uk/government/publications/ofsi-general-licence-int20255635700"
+    },
+    {
+      "draft": {
+        "label": "not_relevant",
+        "reason": "A general licence: INT/2026/9491628 permits insolvency-related payments connected with the Prince Group under the Global Human Rights regime. A licence notice; the page describes no conduct."
+      },
+      "key": "ofsi:f06784dfe467ed6b",
+      "kind": "spot_check",
+      "published": "2026-06-24",
+      "repeats": {
+        "rep1": {
+          "decided_at": "2026-09-27T14:35:58Z",
+          "found_on": [
+            1
+          ],
+          "match": "exact",
+          "quote": "This General Licence allows for insolvency-related payments and activities connected with the Prince Group and their Subsidiaries, subject to conditions.",
+          "reason": "General licence allowing insolvency-related payments for a designated group; administrative licensing notice, no method or red flag described.",
+          "run_id": "feeds-2026-09-27-62e0a7",
+          "verdict": "not_relevant"
+        },
+        "rep2": {
+          "decided_at": "2026-09-27T14:46:01Z",
+          "found_on": [
+            1
+          ],
+          "match": "exact",
+          "quote": "This General Licence allows for insolvency-related payments and activities connected with the Prince Group and their Subsidiaries, subject to conditions.",
+          "reason": "General licence authorising insolvency-related payments for a designated group; administrative licence text only, no typology or case detail described.",
+          "run_id": "feeds-2026-09-27-0306c7",
+          "verdict": "not_relevant"
+        },
+        "rep3": {
+          "decided_at": "2026-09-27T14:57:39Z",
+          "found_on": [
+            1
+          ],
+          "match": "exact",
+          "quote": "This General Licence allows for insolvency-related payments and activities connected with the Prince Group and their Subsidiaries, subject to conditions.",
+          "reason": "General licence permitting insolvency-related payments for a designated group; procedural licensing notice, not a method/case description.",
+          "run_id": "feeds-2026-09-27-d834b5",
+          "verdict": "not_relevant"
+        }
+      },
+      "source": "ofsi",
+      "title": "Guidance: OFSI General Licence INT/2026/9491628",
+      "url": "https://www.gov.uk/government/publications/ofsi-general-licence-int20269491628"
+    },
+    {
+      "draft": {
+        "label": "not_relevant",
+        "reason": "A general licence: INT/2025/7895596 permits continued business with Lukoil Bulgaria entities; the update amends definitions, adds a notification requirement and extends the term. A licence notice."
+      },
+      "key": "ofsi:fbb78f67e95a6f31",
+      "kind": "spot_check",
+      "published": "2026-08-12",
+      "repeats": {
+        "rep1": {
+          "decided_at": "2026-09-27T14:32:59Z",
+          "found_on": [
+            1
+          ],
+          "match": "exact",
+          "quote": "On 14 November 2025, OFSI issued General Licence INT/2025/7895596 under regulation 64 of the Russia (Sanctions) (EU Exit) Regulations 2019",
+          "reason": "General licence guidance detailing scope/amendments for continuation of business with Lukoil Bulgaria entities; no financial crime method or case described.",
+          "run_id": "feeds-2026-09-27-90e535",
+          "verdict": "not_relevant"
+        },
+        "rep2": {
+          "decided_at": "2026-09-27T14:43:34Z",
+          "found_on": [
+            1
+          ],
+          "match": "exact",
+          "quote": "OFSI issued General Licence INT/2025/7895596 under regulation 64 of the Russia (Sanctions) (EU Exit) Regulations 2019 (“the Russia Regulations”) which allows for the continuation of business operations with the Lukoil Bulgaria Entities.",
+          "reason": "This is a general licence notice permitting continuation of business with Lukoil Bulgaria entities, not a description of a crime typology or case.",
+          "run_id": "feeds-2026-09-27-e6f76f",
+          "verdict": "not_relevant"
+        },
+        "rep3": {
+          "decided_at": "2026-09-27T14:55:10Z",
+          "found_on": [
+            1
+          ],
+          "match": "exact",
+          "quote": "On 14 November 2025, OFSI issued General Licence INT/2025/7895596 under regulation 64 of the Russia (Sanctions) (EU Exit) Regulations 2019 (“the Russia Regulations”) which allows for the continuation of business operations with the Lukoil Bulgaria Entities.",
+          "reason": "General licence guidance permitting continuation of business with named entities; no financial crime method, red flag or case described.",
+          "run_id": "feeds-2026-09-27-f3f48f",
+          "verdict": "not_relevant"
+        }
+      },
+      "source": "ofsi",
+      "title": "Guidance: OFSI General Licence INT/2025/7895596",
+      "url": "https://www.gov.uk/government/publications/ofsi-general-licence-int20257895596"
+    }
+  ],
+  "labels_sha256": "922d9e151d043c20c6f73363191481a5f1465c1e7689d4e3021089f0f5fcdd45",
+  "repeats": [
+    "rep1",
+    "rep2",
+    "rep3"
+  ],
+  "schema": "fc08-triage-disputes/1",
+  "spot_check": {
+    "drawn": 6,
+    "n": 6,
+    "seed": "fc08-slice2-triage-spot-check"
+  }
+}
