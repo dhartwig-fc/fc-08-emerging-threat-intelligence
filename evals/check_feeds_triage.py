@@ -17,6 +17,8 @@ Usage:
     python evals/check_feeds_triage.py --mutate catalogue-all      # eval mode lists the whole catalogue, not the batch
     python evals/check_feeds_triage.py --mutate catalogue-unverified  # a catalogue copy is served without its sha256 check
     python evals/check_feeds_triage.py --mutate minted-key         # a catalogue key not derived from its item is accepted
+    python evals/check_feeds_triage.py --mutate empty-batch        # an empty batch is treated as "nothing new" instead of refused
+    python evals/check_feeds_triage.py --mutate catalogue-missing-copy  # a deleted pinned copy crashes instead of failing
 
 WHAT IT HOLDS:
   quoted        a verdict is recorded only when its quote is found, by the shared matcher, in the item's
@@ -39,8 +41,11 @@ WHAT IT HOLDS:
   eval mode     with FEEDS_CATALOGUE and FEEDS_CATALOGUE_BATCH set (only evals/run_feeds_triage.py sets
                 them), feeds_list_new lists exactly the batch's catalogue items, whatever the ledger
                 holds, and feeds_fetch serves the catalogue's pinned copy after checking its sha256 --
-                with no request at all; a catalogue whose key is not derived from its item, or a batch
-                naming an unknown key, is refused.
+                with no request at all; a catalogue whose key is not derived from its item, an item with
+                no document, an empty batch, or a batch naming an unknown key, is refused; a catalogue
+                entry that vanishes between listing and fetching, or a pinned copy deleted from disk,
+                fails gracefully rather than crashing; the live-mode checks below clear both variables
+                first, so an exported one cannot turn them into an eval run silently.
 
 HOW. As evals/check_feeds_server.py: the server's HTTP_GET, INBOX_ROOT and SEEN_PATH are swapped for a
 stub serving the committed OFSI snapshot -- every item's URL answers with the committed OFSI FAQ page,
@@ -107,6 +112,8 @@ MUTATIONS = {
                       '             if it["source"] == source]\n'),
     "catalogue-unverified": (SERVER, '    if hashlib.sha256(body).hexdigest() != doc["sha256"]:\n', "    if False:\n"),
     "minted-key": (SERVER, '        if FeedItem(**{k: it[k] for k in ITEM_FIELDS}).key != it["key"]:\n', "        if False:\n"),
+    "empty-batch": (SERVER, "    if not batch or unknown:\n", "    if unknown:\n"),
+    "catalogue-missing-copy": (SERVER, "    if not path.exists():\n", "    if False:\n"),
 }
 
 
@@ -169,6 +176,9 @@ def git_status() -> str:
 
 def checks(tri, fs) -> list:
     out = []
+    # An exported FEEDS_CATALOGUE/FEEDS_CATALOGUE_BATCH must not turn these live-mode checks into an eval run.
+    os.environ.pop(fs.CATALOGUE_ENV, None)
+    os.environ.pop(fs.BATCH_ENV, None)
     stub = Stub()
     before = git_status()
     with tempfile.TemporaryDirectory() as tmp:
@@ -368,48 +378,97 @@ def catalogue_checks(tri, fs, stub) -> list:
             except Exception as exc:
                 return "RAISED %s: %s" % (type(exc).__name__, exc)
 
-        n = len(stub.calls)
-        said = call(fs.list_new(fs.ListNewInput(source="ofsi")))
-        state = inbox_state(tmp, run)
-        listed = [it["key"] for it in state["sources"].get("ofsi", {}).get("items", [])]
-        out.append((listed == [it.key for it in items[:2]] and len(stub.calls) == n,
-                    "eval mode lists exactly the batch's items, with no request", said.splitlines()[0][:80]))
-        out.append((items[0].key in listed, "eval mode lists an item the ledger already holds: the catalogue decides",
-                    ""))
-        said = call(fs.list_new(fs.ListNewInput(source="fincen")))
-        out.append((said.startswith("No new items") and len(stub.calls) == n,
-                    "a source with nothing in the batch lists nothing, with no request", said[:70]))
+        try:
+            n = len(stub.calls)
+            said = call(fs.list_new(fs.ListNewInput(source="ofsi")))
+            state = inbox_state(tmp, run)
+            listed = [it["key"] for it in state["sources"].get("ofsi", {}).get("items", [])]
+            out.append((listed == [it.key for it in items[:2]] and len(stub.calls) == n,
+                        "eval mode lists exactly the batch's items, with no request", said.splitlines()[0][:80]))
+            out.append((items[0].key in listed,
+                        "eval mode lists an item the ledger already holds: the catalogue decides", ""))
+            said = call(fs.list_new(fs.ListNewInput(source="fincen")))
+            out.append((said.startswith("No new items") and len(stub.calls) == n,
+                        "a source with nothing in the batch lists nothing, with no request", said[:70]))
 
-        said = call(fs.fetch(fs.FetchInput(item_key=items[0].key)))
-        got = item_of(inbox_state(tmp, run), items[0].key).get("document") or {}
-        out.append((said.startswith("Fetched") and len(stub.calls) == n and got.get("sha256") == sha,
-                    "eval mode fetches the catalogue's pinned copy, with no request", said[:70]))
-        said = call(fs.triage(fs.TriageInput(item_key=items[0].key, verdict="not_relevant",
-                                             reason="An FAQ index; no method, red flag or case.", quote=PAGE1_QUOTE)))
-        out.append((said.startswith("Recorded"), "triage works on a catalogue document exactly as on a live one",
-                    said[:70]))
+            said = call(fs.fetch(fs.FetchInput(item_key=items[0].key)))
+            got = item_of(inbox_state(tmp, run), items[0].key).get("document") or {}
+            out.append((said.startswith("Fetched") and len(stub.calls) == n and got.get("sha256") == sha,
+                        "eval mode fetches the catalogue's pinned copy, with no request", said[:70]))
+            said = call(fs.triage(fs.TriageInput(item_key=items[0].key, verdict="not_relevant",
+                                                 reason="An FAQ index; no method, red flag or case.",
+                                                 quote=PAGE1_QUOTE)))
+            out.append((said.startswith("Recorded"), "triage works on a catalogue document exactly as on a live one",
+                        said[:70]))
 
-        (tmp / "docs" / ("%s.html" % sha)).write_bytes(doc + b"<!-- changed -->")
-        said = call(fs.fetch(fs.FetchInput(item_key=items[1].key)))
-        got = item_of(inbox_state(tmp, run), items[1].key)
-        out.append((said.startswith("Failed") and not got.get("document") and len(stub.calls) == n,
-                    "a catalogue copy whose bytes changed is refused, and no document is recorded", said[:90]))
-        (tmp / "docs" / ("%s.html" % sha)).write_bytes(doc)
+            doc_path = tmp / "docs" / ("%s.html" % sha)
+            doc_path.write_bytes(doc + b"<!-- changed -->")
+            said = call(fs.fetch(fs.FetchInput(item_key=items[1].key)))
+            got = item_of(inbox_state(tmp, run), items[1].key)
+            out.append((said.startswith("Failed") and not got.get("document") and len(stub.calls) == n,
+                        "a catalogue copy whose bytes changed is refused, and no document is recorded", said[:90]))
+            doc_path.write_bytes(doc)
 
-        os.environ[fs.RUN_ENV] = "feeds-2026-10-02-ddd333"
-        os.environ[fs.BATCH_ENV] = items[0].key + ",ofsi:ffffffffffffffff"
-        said = call(fs.list_new(fs.ListNewInput(source="ofsi")))
-        out.append((said.startswith("Rejected"), "a batch naming a key the catalogue does not hold is refused",
-                    said[:90]))
-        os.environ[fs.RUN_ENV] = "feeds-2026-10-02-eee444"
-        os.environ[fs.BATCH_ENV] = "ofsi:0123456789abcdef"
-        catalogue["items"][0]["key"] = "ofsi:0123456789abcdef"  # a key the agent could have minted
-        cat_path.write_text(json.dumps(catalogue), encoding="utf-8")
-        said = call(fs.list_new(fs.ListNewInput(source="ofsi")))
-        out.append((said.startswith("Rejected") and "derived" in said,
-                    "a catalogue key that is not derived from its item is refused", said[:90]))
-    for k in (fs.RUN_ENV, fs.CATALOGUE_ENV, fs.BATCH_ENV):
-        os.environ.pop(k, None)
+            # A pinned copy deleted from disk (not merely changed) must fail gracefully, not crash.
+            doc_path.unlink()
+            said = call(fs.fetch(fs.FetchInput(item_key=items[1].key)))
+            got = item_of(inbox_state(tmp, run), items[1].key)
+            out.append((said.startswith("Failed") and "missing" in said and not got.get("document")
+                        and len(stub.calls) == n,
+                        "a pinned copy deleted from disk is refused, not a crash", said[:90]))
+            doc_path.write_bytes(doc)
+
+            # A catalogue item whose document is missing or None is refused when the catalogue is loaded,
+            # not when next() runs out of items to search.
+            original_items = [dict(x) for x in catalogue["items"]]
+            catalogue["items"][2]["document"] = None
+            cat_path.write_text(json.dumps(catalogue), encoding="utf-8")
+            os.environ[fs.RUN_ENV] = "feeds-2026-10-02-fff555"
+            os.environ[fs.BATCH_ENV] = items[2].key
+            said = call(fs.list_new(fs.ListNewInput(source="ofsi")))
+            out.append((said.startswith("Rejected") and "document" in said,
+                        "a catalogue item with no document is refused, not a crash", said[:90]))
+            catalogue["items"] = [dict(x) for x in original_items]
+            cat_path.write_text(json.dumps(catalogue), encoding="utf-8")
+
+            # A catalogue entry that vanishes between listing and fetching (e.g. a run id reused across
+            # servers with different catalogues) must be refused, not a StopIteration out of next().
+            run9 = "feeds-2026-10-02-000abc"
+            os.environ[fs.RUN_ENV] = run9
+            os.environ[fs.BATCH_ENV] = items[2].key
+            call(fs.list_new(fs.ListNewInput(source="ofsi")))
+            os.environ[fs.BATCH_ENV] = items[0].key
+            catalogue["items"] = [it for it in catalogue["items"] if it["key"] != items[2].key]
+            cat_path.write_text(json.dumps(catalogue), encoding="utf-8")
+            said = call(fs.fetch(fs.FetchInput(item_key=items[2].key)))
+            got = item_of(inbox_state(tmp, run9), items[2].key)
+            out.append((said.startswith("Failed") and "no entry" in said and not got.get("document"),
+                        "a catalogue entry that vanished since it was listed is refused, not a crash", said[:90]))
+            catalogue["items"] = [dict(x) for x in original_items]
+            cat_path.write_text(json.dumps(catalogue), encoding="utf-8")
+
+            os.environ[fs.RUN_ENV] = "feeds-2026-10-02-ddd333"
+            os.environ[fs.BATCH_ENV] = items[0].key + ",ofsi:ffffffffffffffff"
+            said = call(fs.list_new(fs.ListNewInput(source="ofsi")))
+            out.append((said.startswith("Rejected") and "does not hold" in said,
+                        "a batch naming a key the catalogue does not hold is refused", said[:90]))
+
+            os.environ[fs.RUN_ENV] = "feeds-2026-10-02-111abc"
+            os.environ[fs.BATCH_ENV] = ""
+            said = call(fs.list_new(fs.ListNewInput(source="ofsi")))
+            out.append((said.startswith("Rejected"), "an empty batch is refused, not silently 'no new items'",
+                        said[:90]))
+
+            os.environ[fs.RUN_ENV] = "feeds-2026-10-02-eee444"
+            os.environ[fs.BATCH_ENV] = "ofsi:0123456789abcdef"
+            catalogue["items"][0]["key"] = "ofsi:0123456789abcdef"  # a key the agent could have minted
+            cat_path.write_text(json.dumps(catalogue), encoding="utf-8")
+            said = call(fs.list_new(fs.ListNewInput(source="ofsi")))
+            out.append((said.startswith("Rejected") and "derived" in said,
+                        "a catalogue key that is not derived from its item is refused", said[:90]))
+        finally:
+            for k in (fs.RUN_ENV, fs.CATALOGUE_ENV, fs.BATCH_ENV):
+                os.environ.pop(k, None)
     return out
 
 

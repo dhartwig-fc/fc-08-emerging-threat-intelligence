@@ -112,7 +112,8 @@ def _catalogue():
     path is the production one, unchanged. The agent cannot set either variable.
 
     Returns None when FEEDS_CATALOGUE is unset (a live run). Raises ValueError on a catalogue whose key
-    is not derived from its item, or a batch that is empty or names a key the catalogue does not hold.
+    is not derived from its item, an item with no document, or a batch that is empty or names a key the
+    catalogue does not hold.
     """
     path = os.environ.get(CATALOGUE_ENV)
     if not path:
@@ -122,6 +123,8 @@ def _catalogue():
     for it in catalogue["items"]:
         if FeedItem(**{k: it[k] for k in ITEM_FIELDS}).key != it["key"]:
             raise ValueError("catalogue key %s is not derived from its item" % it["key"])
+        if not it.get("document"):
+            raise ValueError("catalogue item %s has no document" % it["key"])
     batch = [k for k in os.environ.get(BATCH_ENV, "").split(",") if k]
     unknown = sorted(set(batch) - {it["key"] for it in catalogue["items"]})
     if not batch or unknown:
@@ -148,6 +151,7 @@ def _list_catalogue(run_id: str, state: dict, source: str, cat) -> str:
     items = [FeedItem(**{k: it[k] for k in ITEM_FIELDS}) for it in catalogue["items"]
              if it["source"] == source and it["key"] in batch]
     new = list(items)  # the tracked catalogue decides, never the ledger
+    state["eval"] = True  # tools/accept_run.py refuses a run carrying this: an eval run never reaches the ledger
     state["sources"][source] = {"listed_at": _now(), "listing_url": "catalogue", "status": "ok", "error": None,
                                 "listing": None, "listing_sha256": sha, "listed": len(items), "already_seen": 0,
                                 "items": [dict(it.to_json(), document=None) for it in new]}
@@ -159,7 +163,10 @@ def _list_catalogue(run_id: str, state: dict, source: str, cat) -> str:
 
 def _catalogue_document(cat, item: dict) -> feeds_http.Fetched:
     """The catalogue's pinned copy of an item's document, from CATALOGUE_DOCS; never the network."""
-    doc = next(it for it in cat[0]["items"] if it["key"] == item["key"])["document"]
+    entry = next((it for it in cat[0]["items"] if it["key"] == item["key"]), None)
+    if entry is None:
+        raise feeds_http.FetchRefused("the catalogue has no entry for %s" % item["key"])
+    doc = entry["document"]
     path = Path(CATALOGUE_DOCS) / ("%s.%s" % (doc["sha256"], doc["ext"]))
     if not path.exists():
         raise feeds_http.FetchRefused("the catalogue copy %s is missing; see tools/build_feeds_catalogue.py" % path.name)

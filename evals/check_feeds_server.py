@@ -190,6 +190,9 @@ def dropped_connection_check(fs, real_get, tmp: Path) -> tuple:
 
 def checks(fs) -> list:
     out = []
+    # An exported FEEDS_CATALOGUE/FEEDS_CATALOGUE_BATCH must not turn these live-mode checks into an eval run.
+    os.environ.pop(fs.CATALOGUE_ENV, None)
+    os.environ.pop(fs.BATCH_ENV, None)
     real_get = fs.HTTP_GET
     out.append((real_get is importlib.import_module("feeds.http").get,
                 "the unmutated server's HTTP_GET is feeds.http.get, the allowlisted fetch",

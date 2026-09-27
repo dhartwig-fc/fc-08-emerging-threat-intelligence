@@ -34,9 +34,12 @@ def plan(run_id: str, decisions: dict, *, inbox_root: Path = inbox.INBOX_ROOT,
     """Validate everything and return the ledger entries to write. Raises ValueError on any problem."""
     if not (inbox.run_dir(run_id, inbox_root) / inbox.ITEMS).exists():
         raise ValueError("run %s has no %s in the inbox" % (run_id, inbox.ITEMS))
+    state = inbox.load(run_id, inbox_root)
+    if state.get("eval"):
+        raise ValueError("run %s is an eval run; eval runs never reach the ledger" % run_id)
     if not isinstance(decisions, dict):
         raise ValueError("the decisions file must be a JSON object of item key -> decision")
-    listed = {it["key"]: it for it in inbox.items(inbox.load(run_id, inbox_root))}
+    listed = {it["key"]: it for it in inbox.items(state)}
     missing, extra = sorted(set(listed) - set(decisions)), sorted(set(decisions) - set(listed))
     if missing or extra:
         raise ValueError("the decisions must cover every listed item exactly: missing %s, not listed %s"

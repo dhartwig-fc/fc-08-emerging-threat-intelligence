@@ -10,6 +10,7 @@ Usage:
     python evals/check_feeds_ledger.py --mutate skip-coverage   # accept_run takes decisions that miss an item
     python evals/check_feeds_ledger.py --mutate accept-allowed  # accept_run records an accept it cannot carry out
     python evals/check_feeds_ledger.py --mutate newline-run-id  # a run id with a trailing newline is accepted
+    python evals/check_feeds_ledger.py --mutate accept-eval-run # accept_run lets an eval run reach the ledger
 
 WHAT IT HOLDS. "New" is decided by data/feeds/seen.json and nothing else, so that file must be
 canonical (the same decisions give the same bytes), must never decide an item twice, and must be
@@ -17,7 +18,9 @@ written only by tools/accept_run.py, which refuses the whole run unless every li
 exactly once. In sub-project A an "accept" is refused: accepting also moves the item's record and
 document into tracked data, which is sub-project C, and a ledger saying "accepted" over nothing
 moved would be false. A run's inbox is written only inside inbox/<run_id>/, and a pinned file there
-is immutable.
+is immutable. A run sub-project B's eval mode marked ("eval": true in items.json) is refused
+outright: an eval run's items are the tracked back-catalogue's, replayed, and must never reach the
+tracked ledger by a mix-up.
 
 WRITER SCAN. Among the repository's Python files, only feeds/ledger.py names seen.json, only
 tools/accept_run.py calls record_decisions(), and only those two (and the guards, which write
@@ -62,6 +65,8 @@ MUTATIONS = {
     "accept-allowed": (ACCEPT, "    if accepted:\n", "    if False:\n"),
     "newline-run-id": (INBOX, '    if not RUN_ID.fullmatch(run_id or ""):\n',
                        '    if not re.match(r"^feeds-\\d{4}-\\d{2}-\\d{2}-[0-9a-f]{6}$", run_id or ""):\n'),
+    "accept-eval-run": (ACCEPT, '    if state.get("eval"):\n        raise ValueError("run %s is an eval run; '
+                                'eval runs never reach the ledger" % run_id)\n', ""),
 }
 
 
@@ -185,13 +190,13 @@ def checks(ledger, inbox, accept) -> list:
                    root)
         keys = sorted(it["key"] for it in listed)
 
-        def run(decisions: dict, *extra) -> tuple:
+        def run(decisions: dict, *extra, run_id: str = RUN) -> tuple:
             f = tmp / "decisions.json"
             f.write_text(json.dumps(decisions), encoding="utf-8")
             buf = io.StringIO()
             try:
                 with contextlib.redirect_stdout(buf):
-                    code = accept.main([RUN, "--decisions", str(f), *extra], inbox_root=root, seen_path=seen,
+                    code = accept.main([run_id, "--decisions", str(f), *extra], inbox_root=root, seen_path=seen,
                                        today=TODAY)
             except Exception as exc:  # a crash is not a refusal: the check must fail, not the guard
                 return None, "CRASHED: %s: %s" % (type(exc).__name__, exc)
@@ -219,6 +224,14 @@ def checks(ledger, inbox, accept) -> list:
         with contextlib.redirect_stdout(io.StringIO()) as buf:
             code = accept.main(["feeds-2026-10-02-000000", "--decisions", str(f)], inbox_root=root, seen_path=seen)
         out.append((code == 1 and "no items.json" in buf.getvalue(), "a run with no inbox is refused", ""))
+
+        eval_run = "feeds-2026-10-05-facade"
+        eval_item = item("ofsi", "e1")
+        inbox.save(eval_run, {"run_id": eval_run, "eval": True, "sources": {"ofsi": {"items": [eval_item]}}}, root)
+        before_eval = seen.read_bytes()
+        code, said = run({eval_item["key"]: "drop"}, run_id=eval_run)
+        out.append((code == 1 and "eval run" in said and seen.read_bytes() == before_eval,
+                    "accept_run refuses a run marked eval, and writes nothing", said.strip()[:160]))
 
     scanned = repo_python()
     real = writer_violations(scanned)
