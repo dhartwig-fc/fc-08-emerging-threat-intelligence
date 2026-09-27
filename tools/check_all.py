@@ -82,6 +82,7 @@ GUARDS = [
     ("check_feeds_triage", ["evals/check_feeds_triage.py"], "cold"),
     ("check_feeds_catalogue", ["evals/check_feeds_catalogue.py"], "cold"),
     ("check_feeds_orchestrator", ["evals/check_feeds_orchestrator.py"], "cold"),
+    ("check_feeds_runner", ["evals/check_feeds_runner.py"], "cold"),
     ("check_feeds_score", ["evals/check_feeds_score.py"], "cold"),
     ("check_published_walkthrough --cold", ["evals/check_published_walkthrough.py", "--cold"], "cold"),
     ("check_published_walkthrough", ["evals/check_published_walkthrough.py"], "needs-portfolio"),

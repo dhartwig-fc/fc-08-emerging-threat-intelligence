@@ -28,15 +28,24 @@ A session whose agent FAILED (is_error, or the SDK raised) does not advance the 
 under failed_attempts and the command is simply run again. A session that ran and left items
 unfinished DID complete: skipping is triage behaviour, and it is measured, never retried away.
 
-A FAILURE NAMES ITS ERROR, AND A REPEATED BUG STOPS THE RUNNER (Task 4 review ruling). Each failed
-attempt records `error` -- "<Type>: <message>", as run_triage returns it, or as the runner caught it
-with its traceback when the session itself raised -- and `error_kind`: "sdk" for the SDK's own errors
-and an agent error result (auth, credit, the CLI: fix the machine, run again), "code" for anything
-else. A batch whose last two attempts failed with the SAME "code" error (the run id normalised out)
-is a bug in the runner, the orchestrator or the tools, not a flake, and re-running it would spend
-again for the same result: the runner prints STOPPED and refuses that batch until the bug is fixed
-and it is run once with --after-fix, which permits exactly one more attempt. Guarded by
-evals/check_feeds_orchestrator.py (error-recorded, stops-on-repeat).
+A FAILURE NAMES ITS ERROR AND ITS COST, AND A REPEATED FAILURE STOPS THE RUNNER (Task 4 review
+ruling; Task 7 review, fix round 1). Each failed attempt records `error` -- "<Type>: <message>", as
+run_triage returns it, or as the runner caught it with its traceback when the session itself raised --
+`error_kind` ("sdk" for the SDK's own errors and an agent error result, "code" otherwise; recorded for
+the reader, it decides nothing) and `cost_usd` where it is known. The FAILED line prints that cost. A
+batch whose last two attempts failed with the SAME error, of ANY kind, is STOPPED: an agent error
+result arrives after paid turns and its prefix cannot tell a machine problem from a bug, so neither
+class may be re-spent without a decision. "The same" compares the error after normalise() strips run
+ids, tool-use ids, addresses, paths and numbers. A STOPPED batch is refused until the cause is fixed
+and the command is run once with --after-fix, which permits exactly one more attempt.
+
+AND IT NEVER RUNS A BATCH TWICE BY ACCIDENT:
+  - one invocation per repeat at a time: an exclusive lock on .progress/<rep>.lock, released on exit;
+  - a session's telemetry the progress file does not account for -- the progress file was lost, or a
+    run died before saving -- REFUSES the run: those batches were done or attempted and are never
+    re-run blind; the message names the batch and the run id;
+  - a second --pilot refuses rather than silently becoming batch-2's session.
+Guarded by evals/check_feeds_runner.py, which drives this file with stub sessions and never a model.
 
 MODEL RUNS. The only file in sub-project B that starts agent sessions. check_all never runs it.
 """
@@ -45,10 +54,13 @@ from __future__ import annotations
 
 import argparse
 import asyncio
+import contextlib
+import fcntl
 import hashlib
 import itertools
 import json
 import os
+import re
 import subprocess
 import sys
 import traceback
@@ -124,19 +136,39 @@ def _save(path: Path, obj: dict) -> None:
 
 
 def error_kind(error: str) -> str:
-    """"sdk" when the SDK or the agent's own result failed (fix the machine, run again); "code" otherwise."""
+    """"sdk" when the SDK or the agent's own result failed, "code" otherwise. Recorded for the reader of
+    failed_attempts; the stop rule does not consult it (an agent error result can be either)."""
     if error.startswith(AGENT_FAILED):
         return "sdk"
     return "sdk" if error.split(":", 1)[0].strip() in SDK_ERRORS else "code"
 
 
+_VARYING = (
+    (re.compile(r"feeds-\d{4}-\d{2}-\d{2}-[0-9a-f]{6}"), "<run>"),
+    (re.compile(r"toolu_[A-Za-z0-9]+"), "<tool_use>"),
+    (re.compile(r"0x[0-9a-fA-F]+"), "<addr>"),
+    (re.compile(r"(?:[A-Za-z]:)?(?:[\w.~-]*/)+[\w.~-]*"), "<path>"),
+    (re.compile(r"\b[0-9a-f]{16,}\b"), "<hex>"),
+    (re.compile(r"\d+(?:\.\d+)?"), "<n>"),
+)
+
+
+def normalise(error: str) -> str:
+    """The error with what varies between two attempts of one bug stripped: run ids, tool-use ids,
+    addresses, paths, long hex and numbers. The type and the words are what must repeat."""
+    for pattern, token in _VARYING:
+        error = pattern.sub(token, error)
+    return error
+
+
 def attempt(session, run: of.FeedsRun) -> dict:
     """One session. run_triage records its own failures; if the session RAISES instead (a bug before or
     after the agent loop), the runner records it the same way, with the traceback, rather than dying
-    with nothing written -- an unrecorded failure could be re-run without limit."""
+    with nothing written -- an unrecorded failure could be re-run without limit. Its cost is unknown:
+    the result that carried it did not reach the runner."""
     try:
         return dict(asyncio.run(session(run)))
-    except Exception as exc:  # noqa: BLE001 -- recorded, then counted by repeated_code_error
+    except Exception as exc:  # noqa: BLE001 -- recorded, then counted by repeated_failure
         return {"run_id": run.run_id, "failure": "%s: %s" % (type(exc).__name__, exc), "raised_in": "runner",
                 "traceback": traceback.format_exc(), "cost_usd": None, "turns": None, "limit": None}
 
@@ -147,33 +179,69 @@ def failure_record(summary: dict) -> dict:
     return dict(summary, error=error, error_kind=error_kind(error))
 
 
-def repeated_code_error(failed_attempts: list, batch: str) -> Optional[str]:
-    """The error, when this batch's last two attempts failed with the same non-SDK error; else None."""
+def repeated_failure(failed_attempts: list, batch: str) -> Optional[str]:
+    """The error, when this batch's last two attempts failed with the same error, of any kind; else None."""
     tail = [a for a in failed_attempts if a.get("batch") == batch][-2:]
-    if len(tail) < 2 or any(a.get("error_kind") != "code" for a in tail):
+    if len(tail) < 2:
         return None
-    same = [str(a.get("error", "")).replace(str(a.get("run_id")), "<run_id>") for a in tail]
-    return same[1] if same[0] == same[1] else None
+    same = [normalise(str(a.get("error", ""))) for a in tail]
+    return tail[1].get("error") if same[0] == same[1] and same[0] else None
 
 
-def _stopped(name: str, error: str) -> None:
-    print("STOPPED %s failed twice in a row with the same non-SDK error:\n  %s\n"
-          "  That is a bug in the runner, the orchestrator or the tools, not a flake: another attempt would\n"
-          "  spend again for the same result. Fix the bug, then run once with --after-fix." % (name, error[:500]))
+def spend(attempts: list) -> tuple:
+    """(known US$, how many attempts' cost is unknown)."""
+    return (sum(a.get("cost_usd") or 0 for a in attempts), sum(1 for a in attempts if a.get("cost_usd") is None))
+
+
+def _usd(cost) -> str:
+    return "unknown (no result reached the runner)" if cost is None else "US$%.4f" % cost
+
+
+def _rel(path: Path) -> str:
+    try:
+        return str(Path(path).relative_to(ROOT))
+    except ValueError:
+        return str(path)
+
+
+def done_line(name: str, run_id: str, summary: dict, keys: list) -> str:
+    return "done    %-9s %s  %d/%d triaged, %d unfinished, %d unterminated, %s turns, US$%s" % (
+        name, run_id, len(summary["triaged"]), len(keys), len(summary["unfinished"]),
+        len((summary.get("terminal_check") or {}).get("unterminated") or []), summary["turns"], summary["cost_usd"])
+
+
+def _stopped(name: str, error: str, progress: dict) -> None:
+    known, unknown = spend([a for a in progress["failed_attempts"] if a.get("batch") == name])
+    print("STOPPED %s failed twice in a row with the same error:\n  %s\n"
+          "  Its failed attempts have cost US$%.4f%s. Another attempt would spend again for the same result.\n"
+          "  Fix the cause (a bug, or the machine: auth, credit, the CLI), then run once with --after-fix."
+          % (name, str(error)[:500], known, " (and %d of unknown cost)" % unknown if unknown else ""))
+
+
+def failed_line(name: str, run_id: str, summary: dict, progress: dict) -> str:
+    known, unknown = spend(progress["failed_attempts"])
+    return ("FAILED  %s %s: %s\n  This attempt cost %s. Failed attempts on this repeat so far: US$%.4f%s.\n"
+            "  The batch is not done; run the same command again to retry it. The same failure twice STOPS."
+            % (name, run_id, summary["failure"], _usd(summary.get("cost_usd")), known,
+               " (and %d of unknown cost)" % unknown if unknown else ""))
+
+
+def pilot_done(plan: list, progress: dict) -> bool:
+    """The pilot IS the first batch; run again, it would silently become batch-2's session."""
+    return plan[0][0] in progress["sessions"]
 
 
 def run_plan(rep: str, plan: list, progress: dict, progress_path: Path, session, today: Optional[date],
              pilot: bool, after_fix: bool = False) -> int:
-    if pilot and plan[0][0] in progress["sessions"]:
-        # The pilot IS the first batch; run again, it would silently become batch-2's session.
+    if pilot and pilot_done(plan, progress):
         print("PILOT: %s already has a completed session; nothing run" % plan[0][0])
         return 0
     for name, keys in plan:
         if name in progress["sessions"]:
             continue
-        stuck = repeated_code_error(progress["failed_attempts"], name)
+        stuck = repeated_failure(progress["failed_attempts"], name)
         if stuck and not after_fix:
-            _stopped(name, stuck)
+            _stopped(name, stuck, progress)
             return 1
         after_fix = False  # --after-fix buys exactly one attempt
         run = of.FeedsRun(inbox.mint_run_id(today or date.today()), catalogue=CATALOGUE, batch=tuple(keys))
@@ -181,19 +249,17 @@ def run_plan(rep: str, plan: list, progress: dict, progress_path: Path, session,
         if summary["failure"]:
             progress["failed_attempts"].append(failure_record(summary))
             _save(progress_path, progress)
-            stuck = repeated_code_error(progress["failed_attempts"], name)
+            stuck = repeated_failure(progress["failed_attempts"], name)
             if stuck:
-                _stopped(name, stuck)
+                print("FAILED  %s %s: this attempt cost %s." % (name, run.run_id, _usd(summary.get("cost_usd"))))
+                _stopped(name, stuck, progress)
                 return 1
-            print("FAILED  %s %s: %s\n  Nothing is lost; run the same command again to retry this batch."
-                  % (name, run.run_id, summary["failure"]))
+            print(failed_line(name, run.run_id, summary, progress))
             return 1
         summary["verdicts"] = feeds_triage.load(run.run_id)
         progress["sessions"][name] = summary
         _save(progress_path, progress)
-        print("done    %-9s %s  %d/%d triaged, %d unfinished, %s turns, US$%s" % (
-            name, run.run_id, len(summary["triaged"]), len(keys), len(summary["unfinished"]), summary["turns"],
-            summary["cost_usd"]))
+        print(done_line(name, run.run_id, summary, keys))
         if pilot:
             print("PILOT: stopped after one session. Projected for three repeats of %d sessions: US$%.2f"
                   % (len(plan), (summary["cost_usd"] or 0) * len(plan) * len(REPEATS)))
@@ -205,9 +271,53 @@ def run_plan(rep: str, plan: list, progress: dict, progress_path: Path, session,
                   failed_attempts=progress["failed_attempts"],
                   sessions=[{f: s[f] for f in s if f != "verdicts"} for s in sessions])
     _save(REPEATS_DIR / ("%s.json" % rep), record)
-    print("WROTE evals/feeds/repeats/%s.json: %d sessions, %d verdicts, US$%.2f" % (
-        rep, len(sessions), len(verdicts), sum(s["cost_usd"] or 0 for s in sessions)))
+    done_usd = sum(s["cost_usd"] or 0 for s in sessions)
+    failed_usd, unknown = spend(progress["failed_attempts"])
+    print("WROTE evals/feeds/repeats/%s.json: %d sessions, %d verdicts, US$%.2f in total: US$%.2f in sessions, "
+          "US$%.2f in %d failed attempt%s%s" % (
+              rep, len(sessions), len(verdicts), done_usd + failed_usd, done_usd, failed_usd,
+              len(progress["failed_attempts"]), "" if len(progress["failed_attempts"]) == 1 else "s",
+              " (%d of unknown cost)" % unknown if unknown else ""))
     return 0
+
+
+def unaccounted(rep: str, progress: Optional[dict], plan: list) -> list:
+    """Session telemetry under the repeat that the progress file does not name: evidence of a session
+    this runner cannot account for. Each is named with the batch its item keys belong to."""
+    folder = REPEATS_DIR / rep / "telemetry"
+    known = set()
+    if progress is not None:
+        known = ({s.get("run_id") for s in progress["sessions"].values()}
+                 | {a.get("run_id") for a in progress["failed_attempts"]})
+    batch_of = {k: name for name, keys in plan for k in keys}
+    out = []
+    for path in sorted(folder.glob("*.jsonl")) if folder.is_dir() else ():
+        if path.stem in known:
+            continue
+        keys = set(re.findall(r"(?:ofsi|fincen|ofac):[0-9a-f]{16}", path.read_text(encoding="utf-8")))
+        out.append("%s (%s)" % (path.stem, ", ".join(sorted({batch_of[k] for k in keys if k in batch_of}))
+                                or "no batch named"))
+    return out
+
+
+@contextlib.contextmanager
+def repeat_lock(rep: str):
+    """One invocation per repeat at a time. flock is released by the kernel when the process exits, so
+    a crash cannot leave a stale lock. Yields False when another invocation holds it."""
+    PROGRESS_DIR.mkdir(parents=True, exist_ok=True)
+    fd = os.open(str(PROGRESS_DIR / ("%s.lock" % rep)), os.O_CREAT | os.O_RDWR, 0o644)
+    try:
+        try:
+            fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except BlockingIOError:
+            yield False
+            return
+        try:
+            yield True
+        finally:
+            fcntl.flock(fd, fcntl.LOCK_UN)
+    finally:
+        os.close(fd)
 
 
 def run(rep: str, pilot: bool, session=of.run_triage, today: date = None, after_fix: bool = False) -> int:
@@ -216,16 +326,30 @@ def run(rep: str, pilot: bool, session=of.run_triage, today: date = None, after_
     if problems:
         print("REFUSED:\n  " + "\n  ".join(problems))
         return 1
-    progress_path = PROGRESS_DIR / ("%s.json" % rep)
-    progress = (json.loads(progress_path.read_text(encoding="utf-8")) if progress_path.exists()
-                else dict(identity(), repeat=rep, sessions={}, failed_attempts=[]))
-    moved = sorted(k for k, v in identity().items() if progress.get(k) != v)
-    if moved:
-        print("REFUSED: %s was started under a different %s; see the plan (Task 7) for a changed arm"
-              % (progress_path.relative_to(ROOT), ", ".join(moved)))
-        return 1
-    telemetry.TELEMETRY_DIR = REPEATS_DIR / rep / "telemetry"
-    return run_plan(rep, batches(catalogue), progress, progress_path, session, today, pilot, after_fix)
+    with repeat_lock(rep) as held:
+        if not held:
+            print("REFUSED: another invocation is running %s (%s is locked); two would run the same batch twice"
+                  % (rep, _rel(PROGRESS_DIR / ("%s.lock" % rep))))
+            return 1
+        plan = batches(catalogue)
+        progress_path = PROGRESS_DIR / ("%s.json" % rep)
+        existing = json.loads(progress_path.read_text(encoding="utf-8")) if progress_path.exists() else None
+        orphans = unaccounted(rep, existing, plan)
+        if orphans:
+            print("REFUSED: %s's telemetry holds session%s %s that %s does not account for.\n"
+                  "  Those batches were done or attempted and are never re-run blind. Restore the progress\n"
+                  "  file, or, having read the telemetry, move it aside (mv, never delete) and run again."
+                  % (rep, "" if len(orphans) == 1 else "s", "; ".join(orphans),
+                     _rel(progress_path) if existing is not None else "no progress file (it is missing)"))
+            return 1
+        progress = existing if existing is not None else dict(identity(), repeat=rep, sessions={}, failed_attempts=[])
+        moved = sorted(k for k, v in identity().items() if progress.get(k) != v)
+        if moved:
+            print("REFUSED: %s was started under a different %s; see the plan (Task 7) for a changed arm"
+                  % (_rel(progress_path), ", ".join(moved)))
+            return 1
+        telemetry.TELEMETRY_DIR = REPEATS_DIR / rep / "telemetry"
+        return run_plan(rep, plan, progress, progress_path, session, today, pilot, after_fix)
 
 
 def main(argv: list) -> int:
@@ -234,7 +358,7 @@ def main(argv: list) -> int:
     ap.add_argument("--pilot", action="store_true", help="one session, then stop and project the cost")
     ap.add_argument("--plan", action="store_true", help="print the batches; start nothing")
     ap.add_argument("--after-fix", action="store_true",
-                    help="one more attempt at a batch STOPPED for a repeated non-SDK error, once its bug is fixed")
+                    help="one more attempt at a batch STOPPED for a repeated failure, once its cause is fixed")
     args = ap.parse_args(argv)
     if args.plan:
         for name, keys in batches(json.loads(CATALOGUE.read_text(encoding="utf-8"))):

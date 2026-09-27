@@ -9,9 +9,6 @@ Usage:
     python evals/check_feeds_orchestrator.py --mutate allow-propose     # the callback allows propose_link
     python evals/check_feeds_orchestrator.py --mutate extract-tool      # an extraction tool reaches triage-only mode
     python evals/check_feeds_orchestrator.py --mutate no-asymmetry      # the prompt loses "when in doubt, keep it"
-    python evals/check_feeds_orchestrator.py --mutate error-dropped     # a failed attempt's record loses its error
-    python evals/check_feeds_orchestrator.py --mutate unrecorded-raise  # a session that raises kills the runner unrecorded
-    python evals/check_feeds_orchestrator.py --mutate retry-forever     # a repeated bug is re-run, and re-spent, again
 
 WHAT IT HOLDS (spec sections 1 and 4; the same questions evals/check_tool_surface.py asks of the
 extraction agent, asked of this one):
@@ -27,17 +24,6 @@ extraction agent, asked of this one):
   telemetry      the Post hooks are installed; the SDK's shadowing advisory names only feeds_read_page
                  and expected_shadowing() silences that one and no other;
   the prompt     states the spec's asymmetry ("When in doubt, keep it") and PROMPT_SHA256 is its hash.
-
-AND THE RUNNER'S FAILURES (evals/run_feeds_triage.py; the Task 4 review ruling). run_triage records an
-unexpected exception as a failure and the runner re-runs failed batches, so a bug could be re-run and
-re-spent without limit. Driven through run_plan with sessions that fail, never a model:
-  error recorded   a failed attempt keeps `error` "<Type>: <message>" and its kind: through the REAL
-                   run_triage (its SDK loop patched to raise KeyError), through a session that raises
-                   itself (recorded with its traceback, not a dead runner), and "sdk" for the SDK's
-                   own errors and an agent error result;
-  stops on repeat  the same non-SDK error twice in a row (run id normalised out) prints STOPPED and a
-                   third invocation starts NO session; --after-fix buys exactly one more; the same SDK
-                   error, or two different bugs, do not stop it.
 
 STATIC. No model, no network: the options object, the argv the SDK would build, and the installed
 callback asked directly. Each --mutate changes the options or a module constant in memory.
@@ -64,8 +50,7 @@ from agents import orchestrate_feeds as of  # noqa: E402
 from agents.permissions import FEEDS_READ_ONLY_TOOLS, PROPOSE_TOOL, expected_shadowing  # noqa: E402
 from check_tool_surface import built_command  # noqa: E402
 
-MUTATIONS = ("builtin-tools", "settings", "preapprove-triage", "allow-propose", "extract-tool", "no-asymmetry",
-             "error-dropped", "unrecorded-raise", "retry-forever")
+MUTATIONS = ("builtin-tools", "settings", "preapprove-triage", "allow-propose", "extract-tool", "no-asymmetry")
 RUN = of.FeedsRun("feeds-2026-10-02-fff555")
 EVAL_RUN = of.FeedsRun("feeds-2026-10-02-fff666", catalogue=ROOT / "evals" / "feeds" / "catalogue.json",
                        batch=("ofsi:0123456789abcdef",))
@@ -164,104 +149,6 @@ def checks(mutation) -> list:
     return out
 
 
-def runner_checks(mutation) -> list:
-    import contextlib
-    import io
-    from datetime import date
-
-    import run_feeds_triage as rf
-
-    if mutation == "error-dropped":
-        rf.failure_record = lambda summary: dict(summary, error_kind=rf.error_kind(str(summary["failure"])))
-    if mutation == "unrecorded-raise":
-        rf.attempt = lambda session, run: dict(asyncio.run(session(run)))  # the runner as first drafted
-    if mutation == "retry-forever":
-        rf.repeated_code_error = lambda failed_attempts, batch: None
-    tmp = Path(tempfile.mkdtemp(prefix="fc08_runner_"))
-    plan = [("batch-1", ["ofsi:0123456789abcdef"])]
-
-    def counted(fn):
-        async def session(run):
-            session.calls += 1
-            return await fn(run)
-        session.calls = 0
-        return session
-
-    def invoke(session, progress, after_fix=False):
-        out = io.StringIO()
-        with contextlib.redirect_stdout(out):
-            try:
-                code = rf.run_plan("rep1", plan, progress, tmp / "progress.json", session, date(2026, 10, 2),
-                                   pilot=True, after_fix=after_fix)
-            except Exception as exc:  # the runner died: nothing was recorded for this attempt
-                code = "died: %s: %s" % (type(exc).__name__, exc)
-        return code, out.getvalue()
-
-    async def broken_query(**kwargs):  # the SDK loop raising a bug, not an SDK error
-        raise KeyError("page")
-        yield  # noqa: unreachable -- makes this an async generator, as query() is
-
-    async def real_triage(run):
-        return await of.run_triage(run, inbox_root=tmp / "inbox")
-
-    async def raises(run):
-        raise ValueError("boom in the runner's session")
-
-    async def raises_with_run_id(run):
-        raise FileNotFoundError("inbox/%s/items.json" % run.run_id)
-
-    def returns(failure):
-        async def session(run):
-            return {"run_id": run.run_id, "failure": failure, "limit": None, "cost_usd": 0.01, "turns": 1}
-        return session
-
-    real_query = of.query
-    of.query = broken_query
-    try:
-        out = []
-        # error recorded
-        seen = {}
-        for label, session in (("run_triage", real_triage), ("raised", raises),
-                               ("sdk", returns("CLIConnectionError: not logged in")),
-                               ("agent", returns("agent run failed: ['credit balance too low']"))):
-            progress = {"sessions": {}, "failed_attempts": []}
-            code, _ = invoke(session, progress)
-            a = progress["failed_attempts"][-1] if progress["failed_attempts"] else {}
-            seen[label] = (code, a.get("error"), a.get("error_kind"), "traceback" in a
-                           and "ValueError: boom" in a.get("traceback", ""))
-        out.append((seen["run_triage"][:3] == (1, "KeyError: 'page'", "code")
-                    and seen["raised"][:3] == (1, "ValueError: boom in the runner's session", "code") and seen["raised"][3]
-                    and seen["sdk"][1:3] == ("CLIConnectionError: not logged in", "sdk")
-                    and seen["agent"][2] == "sdk",
-                    "a failed attempt records its error's type and message (run_triage's and a raised session's, "
-                    "with its traceback) and whether the SDK raised it", seen))
-
-        # stops on repeat
-        calls = {}
-        for label, fn in (("bug", real_triage), ("bug-with-run-id", raises_with_run_id),
-                          ("sdk", returns("CLIConnectionError: not logged in"))):
-            progress, session = {"sessions": {}, "failed_attempts": []}, counted(fn)
-            outs = [invoke(session, progress)[1] for _ in range(3)]
-            calls[label] = (session.calls, "STOPPED" in outs[1] and "STOPPED" in outs[2])
-            if label == "bug":
-                after = invoke(session, progress, after_fix=True)[1]
-                again = invoke(session, progress)[1]
-                calls["after-fix"] = (session.calls, "STOPPED" in after and "STOPPED" in again)
-        two_bugs = {"sessions": {}, "failed_attempts": []}
-        differ = counted(returns("KeyError: 'a'"))
-        invoke(differ, two_bugs)
-        invoke(counted(returns("TypeError: b")), two_bugs)
-        invoke(differ, two_bugs)
-        calls["two-bugs"] = (differ.calls, False)
-        out.append((calls == {"bug": (2, True), "bug-with-run-id": (2, True), "sdk": (3, False),
-                              "after-fix": (3, True), "two-bugs": (2, False)},
-                    "the same non-SDK error twice in a row STOPS the runner: a third invocation starts no session, "
-                    "--after-fix buys one; SDK errors and different bugs do not stop it", calls))
-        return out
-    finally:
-        of.query = real_query
-
-
 def main(argv: list) -> int:
     ap = argparse.ArgumentParser(description="Prove the triage-only orchestrator's tool surface")
     ap.add_argument("--mutate", choices=MUTATIONS, help="break one rule in memory; a check MUST fail")
@@ -269,7 +156,7 @@ def main(argv: list) -> int:
     if args.mutate:
         print("MUTATED: %s\n" % args.mutate)
     failures = 0
-    for ok, label, detail in checks(args.mutate) + runner_checks(args.mutate):
+    for ok, label, detail in checks(args.mutate):
         print("  %-4s %s\n         %s" % ("PASS" if ok else "FAIL", label, detail))
         failures += 0 if ok else 1
     if args.mutate:
