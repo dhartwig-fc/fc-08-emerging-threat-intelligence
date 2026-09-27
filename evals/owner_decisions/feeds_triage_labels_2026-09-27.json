@@ -1,0 +1,15 @@
+{
+  "date": "2026-09-27",
+  "what": "Owner decisions on the triage disputes and spot-check sample (evals/feeds/disputes.json). Covers those items only; every other label is Claude's draft, unchallenged, not confirmed. The owner also declined a class ruling on OFAC designation pages whose headlines name a method; those items keep the draft's not_relevant.",
+  "decisions": [
+    {"key": "fincen:55d42ff2380766c9", "kind": "dispute", "decision": "relevant", "note": "accepted Claude's recommendation", "decided_at": "2026-09-27T15:24:19Z"},
+    {"key": "ofac:4824e552f9bcc834", "kind": "dispute", "decision": "not_relevant", "note": "accepted Claude's recommendation", "decided_at": "2026-09-27T15:24:19Z"},
+    {"key": "ofac:eca80d2c229c876e", "kind": "dispute", "decision": "relevant", "note": "accepted Claude's recommendation", "decided_at": "2026-09-27T15:24:19Z"},
+    {"key": "ofac:18de8d6afad03d2a", "kind": "spot_check", "decision": "not_relevant", "note": "accepted Claude's recommendation", "decided_at": "2026-09-27T15:24:19Z"},
+    {"key": "ofac:1b5cb42bd23a2458", "kind": "spot_check", "decision": "not_relevant", "note": "accepted Claude's recommendation", "decided_at": "2026-09-27T15:24:19Z"},
+    {"key": "ofac:eceb1d4b8bded27d", "kind": "spot_check", "decision": "not_relevant", "note": "accepted Claude's recommendation", "decided_at": "2026-09-27T15:24:19Z"},
+    {"key": "ofsi:5f612a010e455824", "kind": "spot_check", "decision": "not_relevant", "note": "accepted Claude's recommendation", "decided_at": "2026-09-27T15:24:19Z"},
+    {"key": "ofsi:f06784dfe467ed6b", "kind": "spot_check", "decision": "not_relevant", "note": "accepted Claude's recommendation", "decided_at": "2026-09-27T15:24:19Z"},
+    {"key": "ofsi:fbb78f67e95a6f31", "kind": "spot_check", "decision": "not_relevant", "note": "accepted Claude's recommendation", "decided_at": "2026-09-27T15:24:19Z"}
+  ]
+}
