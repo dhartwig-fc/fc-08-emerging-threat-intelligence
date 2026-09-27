@@ -1,0 +1,1332 @@
+{
+  "built_on": "2026-09-27",
+  "excluded": [],
+  "items": [
+    {
+      "document": {
+        "bytes": 88875,
+        "content_type": "text/html",
+        "ext": "html",
+        "fetched_at": "2026-09-27T12:02:16Z",
+        "final_url": "https://www.gov.uk/government/publications/uk-financial-sanctions-faqs",
+        "linked_pdfs": [],
+        "pages": 2,
+        "sha256": "4bec7ee9c7733422cd52cbba331d90dace8b249ab968dce788889f1eb787ea7c",
+        "text_pages": 2
+      },
+      "item_id": "https://www.gov.uk/government/publications/uk-financial-sanctions-faqs#2026-09-24T08:49:08Z",
+      "key": "ofsi:8efd8527f7bad32b",
+      "published": "2026-09-24",
+      "source": "ofsi",
+      "summary": "OFSI publishes FAQs providing short-form guidance and technical information on financial sanctions.",
+      "title": "Guidance: UK Financial Sanctions FAQs",
+      "url": "https://www.gov.uk/government/publications/uk-financial-sanctions-faqs"
+    },
+    {
+      "document": {
+        "bytes": 66688,
+        "content_type": "text/html",
+        "ext": "html",
+        "fetched_at": "2026-09-27T12:02:19Z",
+        "final_url": "https://www.gov.uk/government/publications/hmt-licensing-guidance-presumption-of-denial-of-licence-applications-for-designated-iranian-banks",
+        "linked_pdfs": [],
+        "pages": 1,
+        "sha256": "0a1e35fbd455fad0c87b088c13b623ce0f8fb64aaf1a372a5fbafc1055c3cc10",
+        "text_pages": 1
+      },
+      "item_id": "https://www.gov.uk/government/publications/hmt-licensing-guidance-presumption-of-denial-of-licence-applications-for-designated-iranian-banks#2026-09-23T16:20:37Z",
+      "key": "ofsi:80fbd7a8282fd570",
+      "published": "2026-09-23",
+      "source": "ofsi",
+      "summary": "Guidance on HM Treasury's licensing approach to applications submitted by certain designated Iranian banks operating in the UK.",
+      "title": "Guidance: HMT Licensing Guidance –Presumption of Denial of Licence Applications for Designated Iranian banks",
+      "url": "https://www.gov.uk/government/publications/hmt-licensing-guidance-presumption-of-denial-of-licence-applications-for-designated-iranian-banks"
+    },
+    {
+      "document": {
+        "bytes": 83879,
+        "content_type": "text/html",
+        "ext": "html",
+        "fetched_at": "2026-09-27T12:02:21Z",
+        "final_url": "https://www.gov.uk/government/publications/iran-sanctions-guidance",
+        "linked_pdfs": [],
+        "pages": 2,
+        "sha256": "3d184504a0852462bf568eb3f04b5552a244ed09f9090cce756c945e52eaf752",
+        "text_pages": 2
+      },
+      "item_id": "https://www.gov.uk/government/publications/iran-sanctions-guidance#2026-09-09T14:51:49Z",
+      "key": "ofsi:61c8638c25f2614f",
+      "published": "2026-09-09",
+      "source": "ofsi",
+      "summary": "Statutory guidance for the Iran sanctions regime, plus a summary of its purposes, scope and prohibitions.",
+      "title": "Statutory guidance: Iran sanctions: guidance",
+      "url": "https://www.gov.uk/government/publications/iran-sanctions-guidance"
+    },
+    {
+      "document": {
+        "bytes": 84432,
+        "content_type": "text/html",
+        "ext": "html",
+        "fetched_at": "2026-09-27T12:02:23Z",
+        "final_url": "https://www.gov.uk/government/publications/iran-nuclear-sanctions-guidance",
+        "linked_pdfs": [],
+        "pages": 2,
+        "sha256": "3cd819ad51cd5aa4c9deaa020dcf6a079b4b39120935c1426ebf570fd06bc5dc",
+        "text_pages": 2
+      },
+      "item_id": "https://www.gov.uk/government/publications/iran-nuclear-sanctions-guidance#2026-09-09T14:50:49Z",
+      "key": "ofsi:ab72e782b16cbf9e",
+      "published": "2026-09-09",
+      "source": "ofsi",
+      "summary": "Statutory guidance for the Iran nuclear sanctions regime, plus a summary of its purposes, scope and prohibitions.",
+      "title": "Statutory guidance: Iran nuclear sanctions: guidance",
+      "url": "https://www.gov.uk/government/publications/iran-nuclear-sanctions-guidance"
+    },
+    {
+      "document": {
+        "bytes": 68151,
+        "content_type": "text/html",
+        "ext": "html",
+        "fetched_at": "2026-09-27T12:02:25Z",
+        "final_url": "https://www.gov.uk/government/publications/imposition-of-monetary-penalty-citibank-na-london-branch",
+        "linked_pdfs": [
+          "https://assets.publishing.service.gov.uk/media/6a97e3ba5a0c25165ae46760/CBNA_London_Public_Penalty_Notice.pdf"
+        ],
+        "pages": 1,
+        "sha256": "dd1ab52c3a793f129ac7c6fc5f764092b88c754decb63c87a2b66f6b5f542311",
+        "text_pages": 1
+      },
+      "item_id": "https://www.gov.uk/government/publications/imposition-of-monetary-penalty-citibank-na-london-branch#2026-09-02T09:22:20Z",
+      "key": "ofsi:133b8886c3322de0",
+      "published": "2026-09-02",
+      "source": "ofsi",
+      "summary": "OFSI reports a breach of financial sanctions",
+      "title": "Notice: Imposition of Monetary Penalty – Citibank, N.A., London Branch",
+      "url": "https://www.gov.uk/government/publications/imposition-of-monetary-penalty-citibank-na-london-branch"
+    },
+    {
+      "document": {
+        "bytes": 82362,
+        "content_type": "text/html",
+        "ext": "html",
+        "fetched_at": "2026-09-27T12:02:27Z",
+        "final_url": "https://www.gov.uk/guidance/financial-sanctions-webinars-and-events",
+        "linked_pdfs": [],
+        "pages": 1,
+        "sha256": "00b5f8c80227a5aaa3f1105ae7cd2a37208b28a4008e939e0e1530f387281672",
+        "text_pages": 1
+      },
+      "item_id": "https://www.gov.uk/guidance/financial-sanctions-webinars-and-events#2026-08-17T10:27:43Z",
+      "key": "ofsi:9973fe4c6bbf905c",
+      "published": "2026-08-17",
+      "source": "ofsi",
+      "summary": "The Office of Financial Sanctions Implementation runs webinars and attends events to provide guidance on financial sanctions.",
+      "title": "Financial sanctions webinars and events",
+      "url": "https://www.gov.uk/guidance/financial-sanctions-webinars-and-events"
+    },
+    {
+      "document": {
+        "bytes": 75686,
+        "content_type": "text/html",
+        "ext": "html",
+        "fetched_at": "2026-09-27T12:02:30Z",
+        "final_url": "https://www.gov.uk/government/publications/ofsi-general-licence-int20257895596",
+        "linked_pdfs": [
+          "https://assets.publishing.service.gov.uk/media/6a7c7f6e24cc3b8ca3fd986e/General_Licence_Lukoil_Bulgaria_INT.2025.7895596_August__2026_amendment.pdf",
+          "https://assets.publishing.service.gov.uk/media/6a7c8b6f24cc3b8ca3fd9895/Publication_Notice_Lukoil_Bulgaria_INT.2025.7895596_August_2026_amendment.pdf"
+        ],
+        "pages": 1,
+        "sha256": "38bb108e3961b2a824afc5c2054093229de9a21d302b9be502bed988048a3ab8",
+        "text_pages": 1
+      },
+      "item_id": "https://www.gov.uk/government/publications/ofsi-general-licence-int20257895596#2026-08-12T15:09:20Z",
+      "key": "ofsi:fbb78f67e95a6f31",
+      "published": "2026-08-12",
+      "source": "ofsi",
+      "summary": "Details for OFSI General Licence INT/2025/7895596, Continuation of Business of Lukoil Bulgaria Entities",
+      "title": "Guidance: OFSI General Licence INT/2025/7895596",
+      "url": "https://www.gov.uk/government/publications/ofsi-general-licence-int20257895596"
+    },
+    {
+      "document": {
+        "bytes": 76029,
+        "content_type": "text/html",
+        "ext": "html",
+        "fetched_at": "2026-09-27T12:02:32Z",
+        "final_url": "https://www.gov.uk/government/publications/ofsi-general-licence-int20258031092",
+        "linked_pdfs": [
+          "https://assets.publishing.service.gov.uk/media/6a7c7ef2d86bc8e18264d090/General_Licence_-_Continuation_of_Business_Lukoil_International-12_August_2026.pdf",
+          "https://assets.publishing.service.gov.uk/media/6a7c8ba9764399f224d83236/Publication_Notice_-_Continuation_of_Business_Lukoil_International--12_Aug_2026.pdf"
+        ],
+        "pages": 1,
+        "sha256": "2c9cd64f39accd41e0223693ff14a02bc4cf5594f73e5edfd44d1aba98dc4b88",
+        "text_pages": 1
+      },
+      "item_id": "https://www.gov.uk/government/publications/ofsi-general-licence-int20258031092#2026-08-12T15:09:02Z",
+      "key": "ofsi:f827b3b4bed13815",
+      "published": "2026-08-12",
+      "source": "ofsi",
+      "summary": "Details for OFSI General Licence INT/2025/8031092, Continuation of Business of Lukoil International Entities",
+      "title": "Guidance: OFSI General Licence INT/2025/8031092",
+      "url": "https://www.gov.uk/government/publications/ofsi-general-licence-int20258031092"
+    },
+    {
+      "document": {
+        "bytes": 80807,
+        "content_type": "text/html",
+        "ext": "html",
+        "fetched_at": "2026-09-27T12:02:34Z",
+        "final_url": "https://www.gov.uk/government/publications/ofsi-general-licence-int20255635700",
+        "linked_pdfs": [
+          "https://assets.publishing.service.gov.uk/media/6a745d82b5e7ebeb99366206/GL_August_2026_INT.2025.5635700.pdf",
+          "https://assets.publishing.service.gov.uk/media/6a745d8cff25cc81486b2445/PN_August_2026_for_INT.2025.5635700.pdf"
+        ],
+        "pages": 1,
+        "sha256": "05513b33d0599d82413458672624325548541c8caf1254db354811dfbe3b2fb9",
+        "text_pages": 1
+      },
+      "item_id": "https://www.gov.uk/government/publications/ofsi-general-licence-int20255635700#2026-08-06T13:08:25Z",
+      "key": "ofsi:5f612a010e455824",
+      "published": "2026-08-06",
+      "source": "ofsi",
+      "summary": "Details for OFSI General licence INT/2025/5635700, Russian Oil Exempt Projects",
+      "title": "Guidance: OFSI General licence INT/2025/5635700",
+      "url": "https://www.gov.uk/government/publications/ofsi-general-licence-int20255635700"
+    },
+    {
+      "document": {
+        "bytes": 67068,
+        "content_type": "text/html",
+        "ext": "html",
+        "fetched_at": "2026-09-27T12:02:36Z",
+        "final_url": "https://www.gov.uk/government/publications/check-if-an-email-or-communication-claiming-to-be-from-ofsi-is-genuine",
+        "linked_pdfs": [],
+        "pages": 1,
+        "sha256": "51a8163d9aa4f16542c0188ff27c3ffa8536931bf28bb788d7cc7945545bb7ae",
+        "text_pages": 1
+      },
+      "item_id": "https://www.gov.uk/government/publications/check-if-an-email-or-communication-claiming-to-be-from-ofsi-is-genuine#2026-07-24T09:32:01Z",
+      "key": "ofsi:7662f16b47fe6676",
+      "published": "2026-07-24",
+      "source": "ofsi",
+      "summary": "If you’ve received an email, letter or other communications claiming to be from the Office of Financial Sanctions (OFSI), this guidance explains how to check whether it is genuine, recognise common scams and know what to do if you’re unsure.",
+      "title": "Guidance: Check if an email or communication claiming to be from OFSI is genuine",
+      "url": "https://www.gov.uk/government/publications/check-if-an-email-or-communication-claiming-to-be-from-ofsi-is-genuine"
+    },
+    {
+      "document": {
+        "bytes": 80469,
+        "content_type": "text/html",
+        "ext": "html",
+        "fetched_at": "2026-09-27T12:02:38Z",
+        "final_url": "https://www.gov.uk/government/publications/ofsi-general-licence-int20255787748",
+        "linked_pdfs": [
+          "https://assets.publishing.service.gov.uk/media/6a58d67b908b618a53702f03/Arbitration_Costs_GL_INT-2025-5787748_16_July_2026.pdf",
+          "https://assets.publishing.service.gov.uk/media/6a58d68824d4d0ad06d945c9/Arbitration_Costs-INT-2025-5787748-PN-16_July_2026.pdf"
+        ],
+        "pages": 1,
+        "sha256": "38e47b67a3c7134107366c9da847af919028e42aebf1222748e0466284096033",
+        "text_pages": 1
+      },
+      "item_id": "https://www.gov.uk/government/publications/ofsi-general-licence-int20255787748#2026-07-16T15:03:10Z",
+      "key": "ofsi:5ea94ded0f8ff6e0",
+      "published": "2026-07-16",
+      "source": "ofsi",
+      "summary": "Details for OFSI General licence INT/2025/5787748, Arbitration Costs",
+      "title": "Guidance: OFSI General licence INT/2025/5787748",
+      "url": "https://www.gov.uk/government/publications/ofsi-general-licence-int20255787748"
+    },
+    {
+      "document": {
+        "bytes": 75131,
+        "content_type": "text/html",
+        "ext": "html",
+        "fetched_at": "2026-09-27T12:02:41Z",
+        "final_url": "https://www.gov.uk/government/publications/ofsi-general-licence-int20256641960",
+        "linked_pdfs": [
+          "https://assets.publishing.service.gov.uk/media/6a54c3c72467584757371deb/Brokerage_General_Licence_INT_2025_6641960.pdf",
+          "https://assets.publishing.service.gov.uk/media/6a54c3d29e9c95844ae64d88/Brokerage_GL_INT_2025_6641960_Publication_Notice.pdf"
+        ],
+        "pages": 1,
+        "sha256": "7387e8abcb4035c4f351ca3dfea2207111b6915388a7afae03ce99c0d2cfb7ef",
+        "text_pages": 1
+      },
+      "item_id": "https://www.gov.uk/government/publications/ofsi-general-licence-int20256641960#2026-07-13T15:06:07Z",
+      "key": "ofsi:ce89f34afbcfd6b7",
+      "published": "2026-07-13",
+      "source": "ofsi",
+      "summary": "Details for OFSI General Licence - INT/2025/6641960, non-designated third-party brokerage accounts held at designated brokerage firms (“Brokerage Accounts”)",
+      "title": "Guidance: OFSI General Licence - INT/2025/6641960",
+      "url": "https://www.gov.uk/government/publications/ofsi-general-licence-int20256641960"
+    },
+    {
+      "document": {
+        "bytes": 75448,
+        "content_type": "text/html",
+        "ext": "html",
+        "fetched_at": "2026-09-27T12:02:43Z",
+        "final_url": "https://www.gov.uk/government/publications/ofsi-general-licence-int20268893924",
+        "linked_pdfs": [
+          "https://assets.publishing.service.gov.uk/media/6a4b78d3d200ca05e289e592/Maritime_Mutual_-_INT-2026-8893924_GL.pdf",
+          "https://assets.publishing.service.gov.uk/media/6a4b78dc732d8e7ce5f53d33/Maritime_Mutual_INT-2026-8893924_PN.pdf"
+        ],
+        "pages": 1,
+        "sha256": "08afbb0eb228c92913312217f79b6ba1fbafc013cab18e1d90e01de1ec44eb4f",
+        "text_pages": 1
+      },
+      "item_id": "https://www.gov.uk/government/publications/ofsi-general-licence-int20268893924#2026-07-06T11:21:19Z",
+      "key": "ofsi:cb517770dd3b7fc0",
+      "published": "2026-07-06",
+      "source": "ofsi",
+      "summary": "Details for OFSI General Licence INT/2026/8893924, Maritime Mutual Re-Insurance Wind Down General Licence",
+      "title": "Guidance: OFSI General Licence INT/2026/8893924",
+      "url": "https://www.gov.uk/government/publications/ofsi-general-licence-int20268893924"
+    },
+    {
+      "document": {
+        "bytes": 73614,
+        "content_type": "text/html",
+        "ext": "html",
+        "fetched_at": "2026-09-27T12:02:45Z",
+        "final_url": "https://www.gov.uk/government/publications/ofsi-general-licence-int20269491628",
+        "linked_pdfs": [
+          "https://assets.publishing.service.gov.uk/media/6a3be4ffeaee00074150f3ad/Prince_Group_Insolvency_-_INT-2026-9491628_GL.pdf",
+          "https://assets.publishing.service.gov.uk/media/6a3b98444c7605ab567238af/Prince_Group_Insolvency_INT-2026-9491628_PN.pdf"
+        ],
+        "pages": 1,
+        "sha256": "e4b94d2b5b1216d7a0ff63452d3097c3d90ec826d8f6483149ab274dcbbe01a8",
+        "text_pages": 1
+      },
+      "item_id": "https://www.gov.uk/government/publications/ofsi-general-licence-int20269491628#2026-06-24T14:31:48Z",
+      "key": "ofsi:f06784dfe467ed6b",
+      "published": "2026-06-24",
+      "source": "ofsi",
+      "summary": "Details for OFSI General Licence INT/2026/9491628",
+      "title": "Guidance: OFSI General Licence INT/2026/9491628",
+      "url": "https://www.gov.uk/government/publications/ofsi-general-licence-int20269491628"
+    },
+    {
+      "document": {
+        "bytes": 69609,
+        "content_type": "text/html",
+        "ext": "html",
+        "fetched_at": "2026-09-27T12:02:47Z",
+        "final_url": "https://www.gov.uk/government/publications/the-us-and-uk-economic-sanctions-authorities-a-comparative-overview",
+        "linked_pdfs": [
+          "https://assets.publishing.service.gov.uk/media/6a3a4c4f00ff27f06e3efc8b/OFAC-OFSI_Comparison_Guide.pdf"
+        ],
+        "pages": 1,
+        "sha256": "03b91e0d161e6f8a6c6dbb0a304dd369db30a3a87d083d16d80aca86713044a3",
+        "text_pages": 1
+      },
+      "item_id": "https://www.gov.uk/government/publications/the-us-and-uk-economic-sanctions-authorities-a-comparative-overview#2026-06-23T14:34:02Z",
+      "key": "ofsi:81d3e9aaac362e6c",
+      "published": "2026-06-23",
+      "source": "ofsi",
+      "summary": "This guidance compares key aspects of U.S. and UK sanctions regimes.",
+      "title": "Guidance: The U.S. and UK Economic Sanctions Authorities: A Comparative Overview",
+      "url": "https://www.gov.uk/government/publications/the-us-and-uk-economic-sanctions-authorities-a-comparative-overview"
+    },
+    {
+      "document": {
+        "bytes": 74367,
+        "content_type": "text/html",
+        "ext": "html",
+        "fetched_at": "2026-09-27T12:02:49Z",
+        "final_url": "https://www.gov.uk/government/news/uk-issues-largest-penalty-for-financial-sanctions-breaches-since-russias-2022-illegal-invasion-of-ukraine",
+        "linked_pdfs": [],
+        "pages": 2,
+        "sha256": "3840f45b0c604e50812da2dba7e73c85187db8544d8e18b3f0e51679699db515",
+        "text_pages": 2
+      },
+      "item_id": "https://www.gov.uk/government/news/uk-issues-largest-penalty-for-financial-sanctions-breaches-since-russias-2022-illegal-invasion-of-ukraine#2026-06-17T11:04:35Z",
+      "key": "ofsi:5f0e977e08c83696",
+      "published": "2026-06-17",
+      "source": "ofsi",
+      "summary": "The United Kingdom has imposed its largest ever penalty for a breach of Russian financial sanctions since the 2022 invasion of Ukraine.",
+      "title": "UK issues largest penalty for financial sanctions breaches since Russia’s 2022 illegal invasion of Ukraine",
+      "url": "https://www.gov.uk/government/news/uk-issues-largest-penalty-for-financial-sanctions-breaches-since-russias-2022-illegal-invasion-of-ukraine"
+    },
+    {
+      "document": {
+        "bytes": 69146,
+        "content_type": "text/html",
+        "ext": "html",
+        "fetched_at": "2026-09-27T12:02:51Z",
+        "final_url": "https://www.gov.uk/government/publications/imposition-of-monetary-penalty-sabre-global-technologies-limited-sgtl",
+        "linked_pdfs": [
+          "https://assets.publishing.service.gov.uk/media/6a3162f63d2655c2bf5fa436/SGTL_-_Public_Penalty_Notice.pdf"
+        ],
+        "pages": 1,
+        "sha256": "71f455f2379560a1b67bb7316cdeb2eab694c1bed799828ad9a320e60e90d827",
+        "text_pages": 1
+      },
+      "item_id": "https://www.gov.uk/government/publications/imposition-of-monetary-penalty-sabre-global-technologies-limited-sgtl#2026-06-17T10:44:07Z",
+      "key": "ofsi:3ba99d4c4434cc1a",
+      "published": "2026-06-17",
+      "source": "ofsi",
+      "summary": "Imposition of Monetary Penalty - Sabre Global Technologies Limited (SGTL)",
+      "title": "Notice: Imposition of Monetary Penalty - Sabre Global Technologies Limited (SGTL)",
+      "url": "https://www.gov.uk/government/publications/imposition-of-monetary-penalty-sabre-global-technologies-limited-sgtl"
+    },
+    {
+      "document": {
+        "bytes": 70926,
+        "content_type": "text/html",
+        "ext": "html",
+        "fetched_at": "2026-09-27T12:02:54Z",
+        "final_url": "https://www.gov.uk/government/publications/ofsi-general-licence-int20269559192",
+        "linked_pdfs": [
+          "https://assets.publishing.service.gov.uk/media/6a302795c39255c595b508ce/INT_2026_9559192.pdf",
+          "https://assets.publishing.service.gov.uk/media/6a3035aac39255c595b508e5/INT-2026-9559192_PN.pdf"
+        ],
+        "pages": 1,
+        "sha256": "c50fc3fec21d77c10cebeae92ec1fd2209c1722fbc8c84503163813b59a5b5d0",
+        "text_pages": 1
+      },
+      "item_id": "https://www.gov.uk/government/publications/ofsi-general-licence-int20269559192#2026-06-15T17:27:00Z",
+      "key": "ofsi:36ee3f45f848ec24",
+      "published": "2026-06-15",
+      "source": "ofsi",
+      "summary": "Details for OFSI General Licence INT/2026/9559192, UK Interdiction.",
+      "title": "Guidance: OFSI General Licence - INT/2026/9559192",
+      "url": "https://www.gov.uk/government/publications/ofsi-general-licence-int20269559192"
+    },
+    {
+      "document": {
+        "bytes": 78228,
+        "content_type": "text/html",
+        "ext": "html",
+        "fetched_at": "2026-09-27T12:02:56Z",
+        "final_url": "https://www.gov.uk/government/publications/ofsi-general-licence-int20244761108",
+        "linked_pdfs": [
+          "https://assets.publishing.service.gov.uk/media/6a15541e0026f30a6d421ce1/INT.2024.4761108_GL_2026.05.26_amendment.pdf",
+          "https://assets.publishing.service.gov.uk/media/6a15542e29bb11891b1cf0c1/INT.2024.4761108_PN_26_may_amendment.pdf"
+        ],
+        "pages": 1,
+        "sha256": "677546ecccb09cd56a8d6f5a169d87a7bd771f28b8db382e9aeb8b3ba4d280f7",
+        "text_pages": 1
+      },
+      "item_id": "https://www.gov.uk/government/publications/ofsi-general-licence-int20244761108#2026-05-26T12:48:47Z",
+      "key": "ofsi:dc8248173b455050",
+      "published": "2026-05-26",
+      "source": "ofsi",
+      "summary": "Details for OFSI General licence INT/2024/4761108 - Funds of non-designated third parties involving designated credit or financial institutions (“Personal Remittances”)",
+      "title": "Guidance: OFSI General licence INT/2024/4761108",
+      "url": "https://www.gov.uk/government/publications/ofsi-general-licence-int20244761108"
+    },
+    {
+      "document": {
+        "bytes": 111115,
+        "content_type": "text/html",
+        "ext": "html",
+        "fetched_at": "2026-09-27T12:02:58Z",
+        "final_url": "https://www.gov.uk/government/publications/russia-sanctions-guidance",
+        "linked_pdfs": [],
+        "pages": 5,
+        "sha256": "598650a2655a020a59f1eeab7e3b204b6481e32498af37e8f0d0aaf3e56dde74",
+        "text_pages": 5
+      },
+      "item_id": "https://www.gov.uk/government/publications/russia-sanctions-guidance#2026-05-19T23:01:01Z",
+      "key": "ofsi:7216fd70bf119c57",
+      "published": "2026-05-19",
+      "source": "ofsi",
+      "summary": "Statutory guidance for the Russia sanctions regime, plus a summary of its purposes, scope and prohibitions.",
+      "title": "Statutory guidance: Russia sanctions: guidance",
+      "url": "https://www.gov.uk/government/publications/russia-sanctions-guidance"
+    },
+    {
+      "document": {
+        "bytes": 31362,
+        "content_type": "text/html",
+        "ext": "html",
+        "fetched_at": "2026-09-27T12:03:32Z",
+        "final_url": "https://www.fincen.gov/resources/advisories/fincen-advisory-fin-2026-a002",
+        "linked_pdfs": [
+          "https://www.fincen.gov/system/files/2026-06/FinCEN-Advisory-Non-Work-Authorized-Populations.pdf"
+        ],
+        "pages": 1,
+        "sha256": "eb38cf06c3b869a0dc4f97d76aa25b07834b2cd1b7941c08a7ad80bd9ba9b7ab",
+        "text_pages": 1
+      },
+      "item_id": "fincen-advisory-fin-2026-a002",
+      "key": "fincen:06d25c9680e16a19",
+      "published": "2026-06-05",
+      "source": "fincen",
+      "summary": "Joint Advisory on Non-Work Authorized Populations and Their Employers and Risks to the Integrity of the U.S. Financial System",
+      "title": "FinCEN Advisory FIN-2026-A002",
+      "url": "https://www.fincen.gov/resources/advisories/fincen-advisory-fin-2026-a002"
+    },
+    {
+      "document": {
+        "bytes": 31324,
+        "content_type": "text/html",
+        "ext": "html",
+        "fetched_at": "2026-09-27T12:03:43Z",
+        "final_url": "https://www.fincen.gov/resources/advisories/fincen-advisory-fin-2026-a001",
+        "linked_pdfs": [
+          "https://www.fincen.gov/system/files/2026-03/FinCEN-Advisory-Health-Care-Fraud.pdf"
+        ],
+        "pages": 1,
+        "sha256": "4eb556a075af03a01f9ebda35b9150991fc0ddfa2ab8ccdd21c1829bc0655ba4",
+        "text_pages": 1
+      },
+      "item_id": "fincen-advisory-fin-2026-a001",
+      "key": "fincen:51d0f90922d44e64",
+      "published": "2026-03-30",
+      "source": "fincen",
+      "summary": "FinCEN Advisory on Health Care Fraud Schemes Targeting Medicare, Medicaid, and Other Federal and State Health Care Benefit Programs",
+      "title": "FinCEN Advisory FIN-2026-A001",
+      "url": "https://www.fincen.gov/resources/advisories/fincen-advisory-fin-2026-a001"
+    },
+    {
+      "document": {
+        "bytes": 31339,
+        "content_type": "text/html",
+        "ext": "html",
+        "fetched_at": "2026-09-27T12:03:54Z",
+        "final_url": "https://www.fincen.gov/resources/advisories/aviso-de-fincen-fin-2025-a003",
+        "linked_pdfs": [
+          "https://www.fincen.gov/system/files/2026-01/FinCEN-Advisory-CMLN-Spanish.pdf"
+        ],
+        "pages": 1,
+        "sha256": "c6864c1df12033427c1d14c74c5723dbf9d92e81bac9a9c9eef169888ec4d4cc",
+        "text_pages": 1
+      },
+      "item_id": "aviso-de-fincen-fin-2025-a003",
+      "key": "fincen:a40b52749daa1a4f",
+      "published": "2026-01-13",
+      "source": "fincen",
+      "summary": "Aviso de FinCEN: Uso de Redes Chinas de Lavado de Dinero por Organizaciones Criminales Transnacionales con Base en México para Lavar Ganancias Ilícitas",
+      "title": "Aviso de FinCEN FIN-2025-A003",
+      "url": "https://www.fincen.gov/resources/advisories/aviso-de-fincen-fin-2025-a003"
+    },
+    {
+      "document": {
+        "bytes": 31317,
+        "content_type": "text/html",
+        "ext": "html",
+        "fetched_at": "2026-09-27T12:04:06Z",
+        "final_url": "https://www.fincen.gov/resources/advisories/fincen-advisory-fin-2025-a003",
+        "linked_pdfs": [
+          "https://www.fincen.gov/system/files/2025-08/FinCEN-Advisory-CMLN-508.pdf"
+        ],
+        "pages": 1,
+        "sha256": "b1c71182bf79c6f3f12576a04b1e1e27fcb3529c659781e3a064ab298320c12d",
+        "text_pages": 1
+      },
+      "item_id": "fincen-advisory-fin-2025-a003",
+      "key": "fincen:a9d9f63c3d3746e7",
+      "published": "2025-08-28",
+      "source": "fincen",
+      "summary": "FinCEN Advisory on the Use of Chinese Money Laundering Networks by Mexico-Based Transnational Criminal Organizations to Launder Illicit Proceeds",
+      "title": "FinCEN Advisory FIN-2025-A003",
+      "url": "https://www.fincen.gov/resources/advisories/fincen-advisory-fin-2025-a003"
+    },
+    {
+      "document": {
+        "bytes": 31295,
+        "content_type": "text/html",
+        "ext": "html",
+        "fetched_at": "2026-09-27T12:04:17Z",
+        "final_url": "https://www.fincen.gov/resources/advisories/fincen-advisory-fin-2025-a002",
+        "linked_pdfs": [
+          "https://www.fincen.gov/system/files/FinCEN-Advisory-Illicit-Oil-Smuggling-508.pdf"
+        ],
+        "pages": 1,
+        "sha256": "22d4026f68de2b319e0c8ddec948801acb246f208b848f4ffcdf1df7e59c4d59",
+        "text_pages": 1
+      },
+      "item_id": "fincen-advisory-fin-2025-a002",
+      "key": "fincen:01177938beff95a6",
+      "published": "2025-06-06",
+      "source": "fincen",
+      "summary": "FinCEN Advisory on the Iranian Regime’s Illicit Oil Smuggling Activities, Shadow Banking Networks, and Weapons Procurement Efforts",
+      "title": "FinCEN Advisory FIN-2025-A002",
+      "url": "https://www.fincen.gov/resources/advisories/fincen-advisory-fin-2025-a002"
+    },
+    {
+      "document": {
+        "bytes": 31308,
+        "content_type": "text/html",
+        "ext": "html",
+        "fetched_at": "2026-09-27T12:04:30Z",
+        "final_url": "https://www.fincen.gov/resources/advisories/fincen-advisory-fin-2025-a001",
+        "linked_pdfs": [
+          "https://www.fincen.gov/system/files/advisory/2025-04-01/FinCEN-Advisory-ISIS-508C.pdf"
+        ],
+        "pages": 1,
+        "sha256": "d19b5908f2d837893b65bb8957954bb448342e2a49747ce41393141bcd7fd98d",
+        "text_pages": 1
+      },
+      "item_id": "fincen-advisory-fin-2025-a001",
+      "key": "fincen:90c24bacf423901f",
+      "published": "2025-04-01",
+      "source": "fincen",
+      "summary": "FinCEN Advisory on the Financing of the Islamic State of Iraq and Syria (ISIS) and its Global Affiliates",
+      "title": "FinCEN Advisory FIN-2025-A001",
+      "url": "https://www.fincen.gov/resources/advisories/fincen-advisory-fin-2025-a001"
+    },
+    {
+      "document": {
+        "bytes": 31425,
+        "content_type": "text/html",
+        "ext": "html",
+        "fetched_at": "2026-09-27T12:04:42Z",
+        "final_url": "https://www.fincen.gov/resources/advisories/fincen-advisory-fin-2024-a002",
+        "linked_pdfs": [
+          "https://www.fincen.gov/system/files/advisory/2024-06-20/FinCEN-Supplemental-Advisory-on-Fentanyl-508C.pdf"
+        ],
+        "pages": 1,
+        "sha256": "358c97dcc0f166e78e574e3cf2cf60930af8fc99510984a2854f9377d0dfbc40",
+        "text_pages": 1
+      },
+      "item_id": "fincen-advisory-fin-2024-a002",
+      "key": "fincen:84fbd9dff69c0f71",
+      "published": "2024-06-20",
+      "source": "fincen",
+      "summary": "Supplemental Advisory on the Procurement of Precursor Chemicals and Manufacturing Equipment Used for the Synthesis of Illicit Fentanyl and Other Synthetic Opioids",
+      "title": "FinCEN Advisory FIN-2024-A002",
+      "url": "https://www.fincen.gov/resources/advisories/fincen-advisory-fin-2024-a002"
+    },
+    {
+      "document": {
+        "bytes": 31288,
+        "content_type": "text/html",
+        "ext": "html",
+        "fetched_at": "2026-09-27T12:04:53Z",
+        "final_url": "https://www.fincen.gov/resources/advisories/fincen-advisory-fin-2024-a001",
+        "linked_pdfs": [
+          "https://www.fincen.gov/system/files/advisory/2024-05-07/FinCEN-Advisory-Iran-Backed-TF-508C.pdf"
+        ],
+        "pages": 1,
+        "sha256": "85bfd1f8e3fae67cc830018745465a636ada26b8aa874c8048379c18e80b8708",
+        "text_pages": 1
+      },
+      "item_id": "fincen-advisory-fin-2024-a001",
+      "key": "fincen:b0e8e12db376c4f0",
+      "published": "2024-05-08",
+      "source": "fincen",
+      "summary": "Advisory to Counter the Financing of Iran-Backed Terrorist Organizations",
+      "title": "FinCEN Advisory FIN-2024-A001",
+      "url": "https://www.fincen.gov/resources/advisories/fincen-advisory-fin-2024-a001"
+    },
+    {
+      "document": {
+        "bytes": 31325,
+        "content_type": "text/html",
+        "ext": "html",
+        "fetched_at": "2026-09-27T12:05:05Z",
+        "final_url": "https://www.fincen.gov/resources/advisories/fincen-advisory-fin-2022-a002",
+        "linked_pdfs": [
+          "https://www.fincen.gov/system/files/advisory/2022-06-15/FinCEN%20Advisory%20Elder%20Financial%20Exploitation%20FINAL%20508.pdf"
+        ],
+        "pages": 1,
+        "sha256": "cbd264c11b097edb1d70b69d67ac4d1061a63f1c611567ba09986df08ff7307d",
+        "text_pages": 1
+      },
+      "item_id": "fincen-advisory-fin-2022-a002",
+      "key": "fincen:e69c3b416d591504",
+      "published": "2022-06-15",
+      "source": "fincen",
+      "summary": "Advisory on Elder Financial Exploitation",
+      "title": "FinCEN Advisory FIN-2022-A002",
+      "url": "https://www.fincen.gov/resources/advisories/fincen-advisory-fin-2022-a002"
+    },
+    {
+      "document": {
+        "bytes": 31280,
+        "content_type": "text/html",
+        "ext": "html",
+        "fetched_at": "2026-09-27T12:05:15Z",
+        "final_url": "https://www.fincen.gov/resources/advisories/fincen-advisory-fin-2022-a001",
+        "linked_pdfs": [
+          "https://www.fincen.gov/system/files/advisory/2022-04-14/FinCEN%20Advisory%20Corruption%20FINAL%20508.pdf"
+        ],
+        "pages": 1,
+        "sha256": "e80cf53a8fa32be5665af56f07ef8e72987849988b496c83f0908cbe00c4da47",
+        "text_pages": 1
+      },
+      "item_id": "fincen-advisory-fin-2022-a001",
+      "key": "fincen:002eaf94471d7dc6",
+      "published": "2022-04-14",
+      "source": "fincen",
+      "summary": "Advisory on Kleptocracy and Foreign Public Corruption",
+      "title": "FinCEN Advisory FIN-2022-A001",
+      "url": "https://www.fincen.gov/resources/advisories/fincen-advisory-fin-2022-a001"
+    },
+    {
+      "document": {
+        "bytes": 31320,
+        "content_type": "text/html",
+        "ext": "html",
+        "fetched_at": "2026-09-27T12:05:26Z",
+        "final_url": "https://www.fincen.gov/resources/advisories/fincen-advisory-fin-2021-a004",
+        "linked_pdfs": [
+          "https://www.fincen.gov/system/files/advisory/2021-11-08/FinCEN%20Ransomware%20Advisory_FINAL_508_.pdf"
+        ],
+        "pages": 1,
+        "sha256": "1b8f28643a4c5bcba2435864818cfb62c5e68480adf5b308f4526babcc5c3a74",
+        "text_pages": 1
+      },
+      "item_id": "fincen-advisory-fin-2021-a004",
+      "key": "fincen:cffcc94fd7798325",
+      "published": "2021-11-08",
+      "source": "fincen",
+      "summary": "Advisory on Ransomware and the Use of the Financial System to Facilitate Ransom Payments",
+      "title": "FinCEN Advisory FIN-2021-A004",
+      "url": "https://www.fincen.gov/resources/advisories/fincen-advisory-fin-2021-a004"
+    },
+    {
+      "document": {
+        "bytes": 31409,
+        "content_type": "text/html",
+        "ext": "html",
+        "fetched_at": "2026-09-27T12:05:37Z",
+        "final_url": "https://www.fincen.gov/resources/advisories/fincen-advisory-fin-2021-a003",
+        "linked_pdfs": [
+          "https://www.fincen.gov/system/files/advisory/2021-03-11/FATF%20February%202021%20Advisory%20FINAL%20508.pdf"
+        ],
+        "pages": 1,
+        "sha256": "486baade7c47879727356168c39d282c349ea7e7be6a726c69dd3a436a100bce",
+        "text_pages": 1
+      },
+      "item_id": "fincen-advisory-fin-2021-a003",
+      "key": "fincen:9b9e9ea425676d60",
+      "published": "2021-03-11",
+      "source": "fincen",
+      "summary": "Advisory on the Financial Action Task Force-Identified Jurisdictions with Anti-Money Laundering and Combating the Financing of Terrorism and Counter-Proliferation Deficiencies",
+      "title": "FinCEN Advisory FIN-2021-A003",
+      "url": "https://www.fincen.gov/resources/advisories/fincen-advisory-fin-2021-a003"
+    },
+    {
+      "document": {
+        "bytes": 31260,
+        "content_type": "text/html",
+        "ext": "html",
+        "fetched_at": "2026-09-27T12:05:49Z",
+        "final_url": "https://www.fincen.gov/resources/advisories/fincen-advisory-fin-2021-a002",
+        "linked_pdfs": [
+          "https://www.fincen.gov/system/files/advisory/2021-02-25/Advisory%20EIP%20FINAL%20508.pdf"
+        ],
+        "pages": 1,
+        "sha256": "c401fbedad9414e07e1ee7ad9473e57fffb98b051e1eaf42f01adaa9e34a2806",
+        "text_pages": 1
+      },
+      "item_id": "fincen-advisory-fin-2021-a002",
+      "key": "fincen:7bc4d47a84ac6ecb",
+      "published": "2021-02-24",
+      "source": "fincen",
+      "summary": "Advisory on Financial Crimes Targeting COVID-19 Economic Impact Payments",
+      "title": "FinCEN Advisory FIN-2021-A002",
+      "url": "https://www.fincen.gov/resources/advisories/fincen-advisory-fin-2021-a002"
+    },
+    {
+      "document": {
+        "bytes": 31282,
+        "content_type": "text/html",
+        "ext": "html",
+        "fetched_at": "2026-09-27T12:06:01Z",
+        "final_url": "https://www.fincen.gov/resources/advisories/fincen-advisory-fin-2021-a001",
+        "linked_pdfs": [
+          "https://www.fincen.gov/system/files/advisory/2021-02-02/COVID-19%20Health%20Care%20508%20Final.pdf"
+        ],
+        "pages": 1,
+        "sha256": "56a60a66a563b30c192e95f0842c987f5ff680cb97a0d1e29be198353232344f",
+        "text_pages": 1
+      },
+      "item_id": "fincen-advisory-fin-2021-a001",
+      "key": "fincen:61b09a5263888b86",
+      "published": "2021-02-02",
+      "source": "fincen",
+      "summary": "Advisory on COVID-19 Health Insurance- and Health Care-Related Fraud",
+      "title": "FinCEN Advisory FIN-2021-A001",
+      "url": "https://www.fincen.gov/resources/advisories/fincen-advisory-fin-2021-a001"
+    },
+    {
+      "document": {
+        "bytes": 31399,
+        "content_type": "text/html",
+        "ext": "html",
+        "fetched_at": "2026-09-27T12:06:12Z",
+        "final_url": "https://www.fincen.gov/resources/advisories/fincen-advisory-fin-2020-a009",
+        "linked_pdfs": [
+          "https://www.fincen.gov/system/files/advisory/2020-11-06/FATF%20October%202020%20Advisory%20FINAL%20508.pdf"
+        ],
+        "pages": 1,
+        "sha256": "fa89818f099c7c7d8008e7bf2d8dd21856cf036c30886becb771a56eb22f6d04",
+        "text_pages": 1
+      },
+      "item_id": "fincen-advisory-fin-2020-a009",
+      "key": "fincen:55d42ff2380766c9",
+      "published": "2020-11-06",
+      "source": "fincen",
+      "summary": "Advisory on the Financial Action Task Force-Identified Jurisdictions with Anti-Money Laundering, Combating the Financing of Terrorism, and Proliferation Deficiencies",
+      "title": "FinCEN Advisory FIN-2020-A009",
+      "url": "https://www.fincen.gov/resources/advisories/fincen-advisory-fin-2020-a009"
+    },
+    {
+      "document": {
+        "bytes": 31327,
+        "content_type": "text/html",
+        "ext": "html",
+        "fetched_at": "2026-09-27T12:06:23Z",
+        "final_url": "https://www.fincen.gov/resources/advisories/fincen-advisory-fin-2020-a008",
+        "linked_pdfs": [
+          "https://www.fincen.gov/system/files/advisory/2020-10-15/Advisory%20Human%20Trafficking%20508%20FINAL_0.pdf"
+        ],
+        "pages": 1,
+        "sha256": "b3dcf3bde43d1b0ff274d857c5bd12ab33b629afda49a2f26f8b1ae498e5a4b1",
+        "text_pages": 1
+      },
+      "item_id": "fincen-advisory-fin-2020-a008",
+      "key": "fincen:68161f9a7cea89b0",
+      "published": "2020-10-15",
+      "source": "fincen",
+      "summary": "Supplemental Advisory on Identifying and Reporting Human Trafficking and Related Activity",
+      "title": "FinCEN Advisory FIN-2020-A008",
+      "url": "https://www.fincen.gov/resources/advisories/fincen-advisory-fin-2020-a008"
+    },
+    {
+      "document": {
+        "bytes": 31340,
+        "content_type": "text/html",
+        "ext": "html",
+        "fetched_at": "2026-09-27T12:06:34Z",
+        "final_url": "https://www.fincen.gov/resources/advisories/fincen-advisory-fin-2020-a007",
+        "linked_pdfs": [
+          "https://www.fincen.gov/system/files/advisory/2020-10-13/Advisory%20Unemployment%20Insurance%20COVID%2019%20508%20Final.pdf"
+        ],
+        "pages": 1,
+        "sha256": "4e210943c04828e61620ecb8a9db5b84ce51b9285a6728bdd9759a36bdfcde6c",
+        "text_pages": 1
+      },
+      "item_id": "fincen-advisory-fin-2020-a007",
+      "key": "fincen:e86139aaed9c9cd6",
+      "published": "2020-10-13",
+      "source": "fincen",
+      "summary": "Advisory on Unemployment Insurance Fraud During Covid 19 Pandemic",
+      "title": "FinCEN Advisory FIN-2020-A007",
+      "url": "https://www.fincen.gov/resources/advisories/fincen-advisory-fin-2020-a007"
+    },
+    {
+      "document": {
+        "bytes": 31413,
+        "content_type": "text/html",
+        "ext": "html",
+        "fetched_at": "2026-09-27T12:06:47Z",
+        "final_url": "https://www.fincen.gov/resources/advisories/fincen-advisory-fin-2020-a006",
+        "linked_pdfs": [
+          "https://www.fincen.gov/system/files/advisory/2021-11-08/Advisory%20Ransomware%20FINAL%20508_2020%20rescinded.pdf"
+        ],
+        "pages": 1,
+        "sha256": "5546e4ec68285d244881011d44f5c4d078881332db68bdfc1c1f99933a152e53",
+        "text_pages": 1
+      },
+      "item_id": "fincen-advisory-fin-2020-a006",
+      "key": "fincen:3119924e34b20c0c",
+      "published": "2020-10-01",
+      "source": "fincen",
+      "summary": "(Rescinded as of November 8, 2021) Advisory on Ransomware and the Use of the Financial System to Facilitate Ransom Payments",
+      "title": "FinCEN Advisory FIN-2020-A006",
+      "url": "https://www.fincen.gov/resources/advisories/fincen-advisory-fin-2020-a006"
+    },
+    {
+      "document": {
+        "bytes": 31487,
+        "content_type": "text/html",
+        "ext": "html",
+        "fetched_at": "2026-09-27T12:06:59Z",
+        "final_url": "https://www.fincen.gov/resources/advisories/fincen-advisory-fin-2020-a005-spanish",
+        "linked_pdfs": [
+          "https://www.fincen.gov/system/files/advisory/2020-09-28/FinCEN%20Advisory%20Covid%20Cybercrime%20Spanish%20508.pdf"
+        ],
+        "pages": 1,
+        "sha256": "cafa70c88542c0c7d83656a32a35272225d3c5fae3f9f40846c6c0379462c4a9",
+        "text_pages": 1
+      },
+      "item_id": "fincen-advisory-fin-2020-a005-spanish",
+      "key": "fincen:e16e04e5f79a6a46",
+      "published": "2020-09-28",
+      "source": "fincen",
+      "summary": "Aviso sobre delitos cibernéticos y delitos perpetrados mediante tecnologías cibernéticas que explotan la pandemia de la enfermedad del coronavirus 2019 (COVID-19)",
+      "title": "FinCEN Advisory FIN-2020-A005 Spanish",
+      "url": "https://www.fincen.gov/resources/advisories/fincen-advisory-fin-2020-a005-spanish"
+    },
+    {
+      "document": {
+        "bytes": 31414,
+        "content_type": "text/html",
+        "ext": "html",
+        "fetched_at": "2026-09-27T12:07:12Z",
+        "final_url": "https://www.fincen.gov/resources/advisories/fincen-advisory-fin-2020-a003-spanish",
+        "linked_pdfs": [
+          "https://www.fincen.gov/system/files/advisory/2020-08-18/Advisory%20Covid%2019%20Imposter%20Spanish_508.pdf"
+        ],
+        "pages": 1,
+        "sha256": "2a198019066fda0d3673d0ab4074bfb381b7b7c9f0731715610f8237fc80a4d2",
+        "text_pages": 1
+      },
+      "item_id": "fincen-advisory-fin-2020-a003-spanish",
+      "key": "fincen:eb1c0a36c4fc2e95",
+      "published": "2020-08-18",
+      "source": "fincen",
+      "summary": "Aviso sobre estafas de impostores y esquemas de “mulas de dinero” relacionados con la enfermedad por coronavirus 2019 (COVID-19)",
+      "title": "FinCEN Advisory FIN-2020-A003 Spanish",
+      "url": "https://www.fincen.gov/resources/advisories/fincen-advisory-fin-2020-a003-spanish"
+    },
+    {
+      "document": {
+        "bytes": 41383,
+        "content_type": "text/html",
+        "ext": "html",
+        "fetched_at": "2026-09-27T12:07:45Z",
+        "final_url": "https://ofac.treasury.gov/recent-actions/20260924",
+        "linked_pdfs": [],
+        "pages": 1,
+        "sha256": "df1be4601000dd87b7366768adcd49a97c735f0ff0dc054dd3b6630592ab9b6e",
+        "text_pages": 1
+      },
+      "item_id": "20260924",
+      "key": "ofac:fa70f45496658b8c",
+      "published": "2026-09-24",
+      "source": "ofac",
+      "summary": "",
+      "title": "Publication of Regulatory Amendments; Publication of Report for Licensing Activities Undertaken Pursuant to the Trade Sanctions Reform and Export Enhancement Act (TSRA)",
+      "url": "https://ofac.treasury.gov/recent-actions/20260924"
+    },
+    {
+      "document": {
+        "bytes": 43873,
+        "content_type": "text/html",
+        "ext": "html",
+        "fetched_at": "2026-09-27T12:07:56Z",
+        "final_url": "https://ofac.treasury.gov/recent-actions/20260923",
+        "linked_pdfs": [],
+        "pages": 2,
+        "sha256": "fa8dd6d0ba02b8eed73bf51f32f6a6b7fc6d680558c684ff3d8239bde5b746eb",
+        "text_pages": 2
+      },
+      "item_id": "20260923",
+      "key": "ofac:eceb1d4b8bded27d",
+      "published": "2026-09-23",
+      "source": "ofac",
+      "summary": "",
+      "title": "Democratic Republic of the Congo-related Designations Removals",
+      "url": "https://ofac.treasury.gov/recent-actions/20260923"
+    },
+    {
+      "document": {
+        "bytes": 43223,
+        "content_type": "text/html",
+        "ext": "html",
+        "fetched_at": "2026-09-27T12:08:07Z",
+        "final_url": "https://ofac.treasury.gov/recent-actions/20260918",
+        "linked_pdfs": [],
+        "pages": 2,
+        "sha256": "b8f141475ccc26b871028cb3beb6baa34755e744a1fafccd96544364c3ef7550",
+        "text_pages": 2
+      },
+      "item_id": "20260918",
+      "key": "ofac:18de8d6afad03d2a",
+      "published": "2026-09-18",
+      "source": "ofac",
+      "summary": "",
+      "title": "Expiration of Emergency With Respect to the Situation in Ethiopia; Ethiopia-related Designations Removals; Issuance of Amended Russia-related General License and Associated Frequently Asked Questions",
+      "url": "https://ofac.treasury.gov/recent-actions/20260918"
+    },
+    {
+      "document": {
+        "bytes": 49582,
+        "content_type": "text/html",
+        "ext": "html",
+        "fetched_at": "2026-09-27T12:08:18Z",
+        "final_url": "https://ofac.treasury.gov/recent-actions/20260917",
+        "linked_pdfs": [],
+        "pages": 4,
+        "sha256": "a8ad5b92edd02b66a4200561005f6c7616b5fd3e40dddc64218614dbb790f422",
+        "text_pages": 4
+      },
+      "item_id": "20260917",
+      "key": "ofac:cf5e3876f995fb4b",
+      "published": "2026-09-17",
+      "source": "ofac",
+      "summary": "",
+      "title": "Iran-related Designations; Cuba Designations; Belarus-related Designations Removals",
+      "url": "https://ofac.treasury.gov/recent-actions/20260917"
+    },
+    {
+      "document": {
+        "bytes": 41274,
+        "content_type": "text/html",
+        "ext": "html",
+        "fetched_at": "2026-09-27T12:08:28Z",
+        "final_url": "https://ofac.treasury.gov/recent-actions/20260916",
+        "linked_pdfs": [],
+        "pages": 1,
+        "sha256": "c59016a61b2ee12e4a89a4420044b78487bdbb17b28eb2eaccdea428032faed1",
+        "text_pages": 1
+      },
+      "item_id": "20260916",
+      "key": "ofac:70885818a6f29dc0",
+      "published": "2026-09-16",
+      "source": "ofac",
+      "summary": "",
+      "title": "Russia-related Designations Removals; Counter Narcotics Designation Removal; Issuance of Amended Venezuela General License and Frequently Asked Question",
+      "url": "https://ofac.treasury.gov/recent-actions/20260916"
+    },
+    {
+      "document": {
+        "bytes": 52467,
+        "content_type": "text/html",
+        "ext": "html",
+        "fetched_at": "2026-09-27T12:08:40Z",
+        "final_url": "https://ofac.treasury.gov/recent-actions/20260914",
+        "linked_pdfs": [],
+        "pages": 5,
+        "sha256": "6b6d5a820c7713dcefcd6304deda6cc674f66c4b274650fd354437918a10b8d1",
+        "text_pages": 5
+      },
+      "item_id": "20260914",
+      "key": "ofac:1b5cb42bd23a2458",
+      "published": "2026-09-14",
+      "source": "ofac",
+      "summary": "",
+      "title": "Iran-related Designation; Issuance of Amended Venezuela-related General License and Frequently Asked Question",
+      "url": "https://ofac.treasury.gov/recent-actions/20260914"
+    },
+    {
+      "document": {
+        "bytes": 50958,
+        "content_type": "text/html",
+        "ext": "html",
+        "fetched_at": "2026-09-27T12:08:50Z",
+        "final_url": "https://ofac.treasury.gov/recent-actions/20260910",
+        "linked_pdfs": [],
+        "pages": 4,
+        "sha256": "c393a4f20965327f030853cb4859601fa1fd7c0a2f8cd1680bc83fd60c90f76d",
+        "text_pages": 4
+      },
+      "item_id": "20260910",
+      "key": "ofac:1a5ec8639bc971e3",
+      "published": "2026-09-10",
+      "source": "ofac",
+      "summary": "",
+      "title": "Iran-related and Counter Terrorism Designations; Licensing Policy Update under Operation Economic Outcast; Settlement Agreement between OFAC and an Individual",
+      "url": "https://ofac.treasury.gov/recent-actions/20260910"
+    },
+    {
+      "document": {
+        "bytes": 76371,
+        "content_type": "text/html",
+        "ext": "html",
+        "fetched_at": "2026-09-27T12:09:03Z",
+        "final_url": "https://ofac.treasury.gov/recent-actions/20260909",
+        "linked_pdfs": [],
+        "pages": 7,
+        "sha256": "8c3fd35254bbb1afb856227277a9e9d16ba2b678433354019c2ff74a1a2a7604",
+        "text_pages": 7
+      },
+      "item_id": "20260909",
+      "key": "ofac:4824e552f9bcc834",
+      "published": "2026-09-09",
+      "source": "ofac",
+      "summary": "",
+      "title": "Transnational Criminal Organizations Designations; Counter Terrorism Designation; Issuance of New and Amended Frequently Asked Questions",
+      "url": "https://ofac.treasury.gov/recent-actions/20260909"
+    },
+    {
+      "document": {
+        "bytes": 56729,
+        "content_type": "text/html",
+        "ext": "html",
+        "fetched_at": "2026-09-27T12:09:14Z",
+        "final_url": "https://ofac.treasury.gov/recent-actions/20260908",
+        "linked_pdfs": [],
+        "pages": 6,
+        "sha256": "f4777be79bd8bcffa9379af68f20d340729578e1f7637a6f2180d198053feedd",
+        "text_pages": 6
+      },
+      "item_id": "20260908",
+      "key": "ofac:d553c4458a7fd0c7",
+      "published": "2026-09-08",
+      "source": "ofac",
+      "summary": "",
+      "title": "Iran-related Designations; Counter Terrorism Designations; Updates to Iran-related General Licenses; Issuance of Counter Terrorism General License",
+      "url": "https://ofac.treasury.gov/recent-actions/20260908"
+    },
+    {
+      "document": {
+        "bytes": 41528,
+        "content_type": "text/html",
+        "ext": "html",
+        "fetched_at": "2026-09-27T12:09:24Z",
+        "final_url": "https://ofac.treasury.gov/recent-actions/20260904",
+        "linked_pdfs": [],
+        "pages": 1,
+        "sha256": "61fcf218c3633c74a7dd3d595de93802ff6ffaed7268462c165862cfec6d81b3",
+        "text_pages": 1
+      },
+      "item_id": "20260904",
+      "key": "ofac:614ba309e00d7c15",
+      "published": "2026-09-04",
+      "source": "ofac",
+      "summary": "",
+      "title": "Iran-related Designations; Issuance of Iran-related General License",
+      "url": "https://ofac.treasury.gov/recent-actions/20260904"
+    },
+    {
+      "document": {
+        "bytes": 44839,
+        "content_type": "text/html",
+        "ext": "html",
+        "fetched_at": "2026-09-27T12:09:35Z",
+        "final_url": "https://ofac.treasury.gov/recent-actions/20260903",
+        "linked_pdfs": [],
+        "pages": 2,
+        "sha256": "37402ca74193345be87d582ac7c8c3b6d93b0923ca4b2310b664b1cea30a463b",
+        "text_pages": 2
+      },
+      "item_id": "20260903",
+      "key": "ofac:9c9d46b02fb99ebf",
+      "published": "2026-09-03",
+      "source": "ofac",
+      "summary": "",
+      "title": "Cuba Designations; Russia-related Designation Removal; Issuance of Amended Cuba General License",
+      "url": "https://ofac.treasury.gov/recent-actions/20260903"
+    },
+    {
+      "document": {
+        "bytes": 41200,
+        "content_type": "text/html",
+        "ext": "html",
+        "fetched_at": "2026-09-27T12:09:47Z",
+        "final_url": "https://ofac.treasury.gov/recent-actions/20260902",
+        "linked_pdfs": [],
+        "pages": 1,
+        "sha256": "8b46ca30c954635160175cd354f7eb4c3d7a9a83d6be5888f48b2bcebd48f999",
+        "text_pages": 1
+      },
+      "item_id": "20260902",
+      "key": "ofac:cb4def806f2d2cb7",
+      "published": "2026-09-02",
+      "source": "ofac",
+      "summary": "",
+      "title": "Reminder to file the 2026 Annual Report of Blocked Property; Issuance of Amended Venezuela-related General Licenses and Frequently Asked Question",
+      "url": "https://ofac.treasury.gov/recent-actions/20260902"
+    },
+    {
+      "document": {
+        "bytes": 39968,
+        "content_type": "text/html",
+        "ext": "html",
+        "fetched_at": "2026-09-27T12:10:00Z",
+        "final_url": "https://ofac.treasury.gov/recent-actions/20260828",
+        "linked_pdfs": [],
+        "pages": 1,
+        "sha256": "a518b3b53fc652eb20ebe3d00eada6ffdbe7c75c257d6da1da950c89084b70ce",
+        "text_pages": 1
+      },
+      "item_id": "20260828",
+      "key": "ofac:8fac15ddd13a8c7d",
+      "published": "2026-08-28",
+      "source": "ofac",
+      "summary": "",
+      "title": "Iran-related and Counter Terrorism Designations",
+      "url": "https://ofac.treasury.gov/recent-actions/20260828"
+    },
+    {
+      "document": {
+        "bytes": 41875,
+        "content_type": "text/html",
+        "ext": "html",
+        "fetched_at": "2026-09-27T12:10:11Z",
+        "final_url": "https://ofac.treasury.gov/recent-actions/20260827",
+        "linked_pdfs": [],
+        "pages": 1,
+        "sha256": "0ecbbdece18792a79e7f81f485a92f2ea3231efb46434d86c7064abbeea50ac8",
+        "text_pages": 1
+      },
+      "item_id": "20260827",
+      "key": "ofac:5b5ed8933b153378",
+      "published": "2026-08-27",
+      "source": "ofac",
+      "summary": "",
+      "title": "Issuance of Amended Venezuela-related General Licenses and Associated Frequently Asked Questions",
+      "url": "https://ofac.treasury.gov/recent-actions/20260827"
+    },
+    {
+      "document": {
+        "bytes": 42183,
+        "content_type": "text/html",
+        "ext": "html",
+        "fetched_at": "2026-09-27T12:10:21Z",
+        "final_url": "https://ofac.treasury.gov/recent-actions/20260826",
+        "linked_pdfs": [],
+        "pages": 1,
+        "sha256": "bd3e155a5b890a95204389363d01907fbe02ddb04f7c2d3040174ea402583611",
+        "text_pages": 1
+      },
+      "item_id": "20260826",
+      "key": "ofac:484a015aed069a81",
+      "published": "2026-08-26",
+      "source": "ofac",
+      "summary": "",
+      "title": "Counter Terrorism Designations; Issuance of Counter Terrorism General License; Issuance of Amended Russia-related General License",
+      "url": "https://ofac.treasury.gov/recent-actions/20260826"
+    },
+    {
+      "document": {
+        "bytes": 178514,
+        "content_type": "text/html",
+        "ext": "html",
+        "fetched_at": "2026-09-27T12:10:32Z",
+        "final_url": "https://ofac.treasury.gov/recent-actions/20260824",
+        "linked_pdfs": [],
+        "pages": 51,
+        "sha256": "a800c2ae85066525a91e980d4a9e1ab5c0bd15d9900196078afa22e49c9e2388",
+        "text_pages": 51
+      },
+      "item_id": "20260824",
+      "key": "ofac:eca80d2c229c876e",
+      "published": "2026-08-24",
+      "source": "ofac",
+      "summary": "",
+      "title": "Removal of Syria's designation as a State Sponsor of Terrorism and Associated Sanctions List Updates; Iran-related Designations; Updates to Iran-related General Licenses",
+      "url": "https://ofac.treasury.gov/recent-actions/20260824"
+    },
+    {
+      "document": {
+        "bytes": 39888,
+        "content_type": "text/html",
+        "ext": "html",
+        "fetched_at": "2026-09-27T12:10:44Z",
+        "final_url": "https://ofac.treasury.gov/recent-actions/20260821",
+        "linked_pdfs": [],
+        "pages": 1,
+        "sha256": "98884b31d19651736b2b02a9af9f81e7189cb2f04b0d336fde19f3c06e3e2e2e",
+        "text_pages": 1
+      },
+      "item_id": "20260821",
+      "key": "ofac:b14d332441652225",
+      "published": "2026-08-21",
+      "source": "ofac",
+      "summary": "",
+      "title": "Issuance of Venezuela-related General Licenses and Associated Frequently Asked Question",
+      "url": "https://ofac.treasury.gov/recent-actions/20260821"
+    },
+    {
+      "document": {
+        "bytes": 58705,
+        "content_type": "text/html",
+        "ext": "html",
+        "fetched_at": "2026-09-27T12:10:56Z",
+        "final_url": "https://ofac.treasury.gov/recent-actions/20260820",
+        "linked_pdfs": [],
+        "pages": 6,
+        "sha256": "c93dceb671d44058becfde7ea13ef3247150a244ed9b436d29fe3f6892b15833",
+        "text_pages": 6
+      },
+      "item_id": "20260820",
+      "key": "ofac:54f1e27eb0dda299",
+      "published": "2026-08-20",
+      "source": "ofac",
+      "summary": "",
+      "title": "Counter Narcotics, Counter Terrorism, Cuba-related, and Iran-related Designations; Issuance of Russia-related General License; Issuance of Associated Frequently Asked Questions",
+      "url": "https://ofac.treasury.gov/recent-actions/20260820"
+    },
+    {
+      "document": {
+        "bytes": 42099,
+        "content_type": "text/html",
+        "ext": "html",
+        "fetched_at": "2026-09-27T12:11:07Z",
+        "final_url": "https://ofac.treasury.gov/recent-actions/20260818",
+        "linked_pdfs": [],
+        "pages": 1,
+        "sha256": "2a74315ba599f3664019d62fd0ce8775449a3019ba7c415e5d8e1a80f3f1c7b2",
+        "text_pages": 1
+      },
+      "item_id": "20260818",
+      "key": "ofac:8083cc7f3ee04250",
+      "published": "2026-08-18",
+      "source": "ofac",
+      "summary": "",
+      "title": "International Criminal Court-related Designations; Venezuela-related Designation; Issuance of International Criminal Court-related General License",
+      "url": "https://ofac.treasury.gov/recent-actions/20260818"
+    },
+    {
+      "document": {
+        "bytes": 40259,
+        "content_type": "text/html",
+        "ext": "html",
+        "fetched_at": "2026-09-27T12:11:18Z",
+        "final_url": "https://ofac.treasury.gov/recent-actions/20260812",
+        "linked_pdfs": [],
+        "pages": 1,
+        "sha256": "46e54020617968c14f56e621196a470fdf68f57810d6d34dd0eee13c832d7599",
+        "text_pages": 1
+      },
+      "item_id": "20260812",
+      "key": "ofac:841771b6194a21e4",
+      "published": "2026-08-12",
+      "source": "ofac",
+      "summary": "",
+      "title": "Settlement Agreement between the U.S. Department of the Treasury's Office of Foreign Assets Control and Rice Lake Weighing Systems, Inc.",
+      "url": "https://ofac.treasury.gov/recent-actions/20260812"
+    }
+  ],
+  "listing_pages": {
+    "fincen": [
+      "",
+      "?page=1"
+    ],
+    "ofac": [
+      "",
+      "?page=1"
+    ],
+    "ofsi": [
+      ""
+    ]
+  },
+  "listings": {
+    "fincen": [
+      {
+        "fetched_at": "2026-09-27T12:03:10Z",
+        "path": "listings/fincen-p0.html",
+        "sha256": "61f896105400080fcc47315ec484dc53ee8fec6f10108d7cd6d6eedfaf088031",
+        "url": "https://www.fincen.gov/resources/advisoriesbulletinsfact-sheets/advisories"
+      },
+      {
+        "fetched_at": "2026-09-27T12:03:20Z",
+        "path": "listings/fincen-p1.html",
+        "sha256": "d0625f25aed5fc01ae46fc8ff0b9a3078f11faadfd070cb8033bcb587a848ac0",
+        "url": "https://www.fincen.gov/resources/advisoriesbulletinsfact-sheets/advisories?page=1"
+      }
+    ],
+    "ofac": [
+      {
+        "fetched_at": "2026-09-27T12:07:22Z",
+        "path": "listings/ofac-p0.html",
+        "sha256": "52b0a1963ac1c8a0acf93e1e8bfc3c556968425251e54f511f225cb9f8539570",
+        "url": "https://ofac.treasury.gov/recent-actions"
+      },
+      {
+        "fetched_at": "2026-09-27T12:07:34Z",
+        "path": "listings/ofac-p1.html",
+        "sha256": "0d24f975c50135bb3b567eb12669ba5914bb5f97f8a1cadaae78d577c3994607",
+        "url": "https://ofac.treasury.gov/recent-actions?page=1"
+      }
+    ],
+    "ofsi": [
+      {
+        "fetched_at": "2026-09-27T12:02:14Z",
+        "path": "listings/ofsi-p0.atom",
+        "sha256": "b63d891e06aceaaf42021a4637573ad16cedc7c6b84ab7082332903b4b6d31c9",
+        "url": "https://www.gov.uk/government/organisations/office-of-financial-sanctions-implementation.atom"
+      }
+    ]
+  },
+  "per_source": 20,
+  "schema": "fc08-triage-catalogue/1"
+}

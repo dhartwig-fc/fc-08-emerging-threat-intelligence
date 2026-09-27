@@ -17,3 +17,8 @@ __pycache__/
 # Slice 2: a feeds run's working folder (listings, fetched documents, items.json). Never tracked;
 # a run's results enter tracked data only through tools/accept_run.py.
 inbox/
+
+# Slice 2 B: the triage back-catalogue's pinned documents and listings (hashes in evals/feeds/catalogue.json),
+# and the eval runner's resume state. Never tracked.
+evals/feeds/docs/
+evals/feeds/repeats/.progress/
