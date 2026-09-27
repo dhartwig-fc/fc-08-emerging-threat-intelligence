@@ -134,7 +134,7 @@ def _load_catalogue():
     try:
         return _catalogue(), None
     except (OSError, ValueError, KeyError, TypeError) as exc:
-        return None, "Rejected: the eval catalogue is unusable: %s" % exc
+        return None, "%s the eval catalogue is unusable: %s" % (feeds_triage.REJECTED, exc)
 
 
 def _new_items_reply(source: str, new: list, listed: int) -> str:
