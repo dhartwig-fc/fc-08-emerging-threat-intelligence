@@ -319,7 +319,6 @@ def checks(sc) -> list:
 
 def committed_checks(sc, mutation) -> list:
     """The committed evidence: the band and the disputes rebuild, and the repeats are one arm."""
-    import hashlib
     import json
     import re
     out = []
