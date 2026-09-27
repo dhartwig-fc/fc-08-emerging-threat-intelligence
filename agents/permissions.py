@@ -47,6 +47,15 @@ READ_ONLY_TOOLS = tuple("mcp__%s__%s" % (SERVER_KEY, t) for t in (
 PROPOSE_TOOL = "mcp__%s__knowledge_centre_propose_link" % SERVER_KEY
 WRITE_ALLOWLIST = frozenset({PROPOSE_TOOL})
 
+# Slice 2 B: the feeds orchestrator (agents/orchestrate_feeds.py), declared HERE because this is the
+# one place a tool that changes anything may be permitted. Triage-only mode: read_page is the only
+# read, pre-approved; list, fetch and triage each write into the run's inbox and reach the callback.
+# feeds_extract joins the allowlist in sub-project C, not before -- a triage-only run cannot extract.
+FEEDS_SERVER_KEY = "feeds"
+FEEDS_READ_ONLY_TOOLS = ("mcp__%s__feeds_read_page" % FEEDS_SERVER_KEY,)
+FEEDS_WRITE_ALLOWLIST = frozenset("mcp__%s__%s" % (FEEDS_SERVER_KEY, t)
+                                  for t in ("feeds_list_new", "feeds_fetch", "feeds_triage"))
+
 # The exact start of the SDK's advisory when these four are pre-approved.
 SHADOWING_MESSAGE = "can_use_tool will not be invoked for: %s." % ", ".join(READ_ONLY_TOOLS)
 
@@ -57,33 +66,41 @@ def _record_denial(run, tool: str, tool_use_id, reason: str) -> dict:
                           tool=tool, tool_use_id=tool_use_id, latency_ms=None, outcome=reason)
 
 
-def permission_callback(run):
-    """The can_use_tool callback for one run."""
+def permission_callback(run, allowlist=None, may="propose links"):
+    """The can_use_tool callback for one run.
+
+    `allowlist` defaults to WRITE_ALLOWLIST, read at CALL time (a guard swaps the module global);
+    the feeds orchestrator passes FEEDS_WRITE_ALLOWLIST. `may` completes the denial message.
+    """
 
     async def can_use_tool(tool_name, tool_input, context):
         tool_use_id = getattr(context, "tool_use_id", None)
-        if tool_name in WRITE_ALLOWLIST and all(run.env().values()):
+        allowed = WRITE_ALLOWLIST if allowlist is None else allowlist
+        if tool_name in allowed and all(run.env().values()):
             telemetry.emit(run, telemetry.PERMISSION_ALLOWED, telemetry.ALLOWED,
                            "%s allowed: on the write allowlist" % tool_name,
                            tool=tool_name, tool_use_id=tool_use_id, latency_ms=None, outcome="on the write allowlist")
             return PermissionResultAllow()
-        reason = ("%s is not on the write allowlist" % tool_name if tool_name not in WRITE_ALLOWLIST
+        reason = ("%s is not on the write allowlist" % tool_name if tool_name not in allowed
                   else "the run identity is incomplete")
         _record_denial(run, tool_name, tool_use_id, reason)
-        return PermissionResultDeny(message="Denied: %s. This agent may only propose links; "
-                                            "it writes nothing else." % reason)
+        return PermissionResultDeny(message="Denied: %s. This agent may only %s; "
+                                            "it writes nothing else." % (reason, may))
 
     return can_use_tool
 
 
 @contextlib.contextmanager
-def expected_shadowing():
-    """Silence ONLY the SDK advisory naming exactly the four read-only tools.
+def expected_shadowing(read_only=None):
+    """Silence ONLY the SDK advisory naming exactly the pre-approved read-only tools.
 
     They are pre-approved on purpose, so the advisory is expected on every run.
-    Any other shadowing -- a different tool pre-approved -- still warns.
+    Any other shadowing -- a different tool pre-approved -- still warns. `read_only`
+    defaults to the four Knowledge Centre reads; the feeds orchestrator passes its own.
     """
+    message = SHADOWING_MESSAGE if read_only is None else \
+        "can_use_tool will not be invoked for: %s." % ", ".join(read_only)
     with warnings.catch_warnings():
         warnings.filterwarnings("ignore", category=CanUseToolShadowedWarning,
-                                message=re.escape(SHADOWING_MESSAGE))
+                                message=re.escape(message))
         yield
