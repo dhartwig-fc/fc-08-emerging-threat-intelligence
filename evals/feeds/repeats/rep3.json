@@ -1,0 +1,1031 @@
+{
+  "catalogue_sha256": "90b57e8ba0224c49506ac8070b731e637d9bfde497b6c0aebdf6fe41f9ed3819",
+  "failed_attempts": [],
+  "labels_draft_sha256": "922d9e151d043c20c6f73363191481a5f1465c1e7689d4e3021089f0f5fcdd45",
+  "max_budget_usd": 1.5,
+  "max_turns": 80,
+  "model": "claude-sonnet-5",
+  "prompt_sha256": "58333bd271470b94dc3ecd686c6a9e11938c515a3b33187be359eb47e1480378",
+  "repeat": "rep3",
+  "schema": "fc08-triage-repeat/1",
+  "sessions": [
+    {
+      "batch": "batch-1",
+      "cost_usd": 0.1617862,
+      "duration_ms": 46817,
+      "failure": null,
+      "keys": [
+        "ofsi:8efd8527f7bad32b",
+        "fincen:06d25c9680e16a19",
+        "ofac:fa70f45496658b8c",
+        "ofsi:80fbd7a8282fd570",
+        "fincen:51d0f90922d44e64",
+        "ofac:eceb1d4b8bded27d",
+        "ofsi:61c8638c25f2614f",
+        "fincen:a40b52749daa1a4f",
+        "ofac:18de8d6afad03d2a",
+        "ofsi:ab72e782b16cbf9e"
+      ],
+      "limit": null,
+      "listed": [
+        "fincen:06d25c9680e16a19",
+        "fincen:51d0f90922d44e64",
+        "fincen:a40b52749daa1a4f",
+        "ofac:18de8d6afad03d2a",
+        "ofac:eceb1d4b8bded27d",
+        "ofac:fa70f45496658b8c",
+        "ofsi:61c8638c25f2614f",
+        "ofsi:80fbd7a8282fd570",
+        "ofsi:8efd8527f7bad32b",
+        "ofsi:ab72e782b16cbf9e"
+      ],
+      "never_listed": [],
+      "run_id": "feeds-2026-09-27-817de4",
+      "stop_reason": "end_turn",
+      "terminal_check": {
+        "calls": 39,
+        "duplicated": [],
+        "unterminated": []
+      },
+      "tool_calls": {
+        "mcp__feeds__feeds_fetch": 10,
+        "mcp__feeds__feeds_list_new": 3,
+        "mcp__feeds__feeds_read_page": 16,
+        "mcp__feeds__feeds_triage": 10
+      },
+      "triaged": [
+        "fincen:06d25c9680e16a19",
+        "fincen:51d0f90922d44e64",
+        "fincen:a40b52749daa1a4f",
+        "ofac:18de8d6afad03d2a",
+        "ofac:eceb1d4b8bded27d",
+        "ofac:fa70f45496658b8c",
+        "ofsi:61c8638c25f2614f",
+        "ofsi:80fbd7a8282fd570",
+        "ofsi:8efd8527f7bad32b",
+        "ofsi:ab72e782b16cbf9e"
+      ],
+      "turns": 40,
+      "unfinished": []
+    },
+    {
+      "batch": "batch-2",
+      "cost_usd": 0.2184658,
+      "duration_ms": 79432,
+      "failure": null,
+      "keys": [
+        "fincen:a9d9f63c3d3746e7",
+        "ofac:cf5e3876f995fb4b",
+        "ofsi:133b8886c3322de0",
+        "fincen:01177938beff95a6",
+        "ofac:70885818a6f29dc0",
+        "ofsi:9973fe4c6bbf905c",
+        "fincen:90c24bacf423901f",
+        "ofac:1b5cb42bd23a2458",
+        "ofsi:fbb78f67e95a6f31",
+        "fincen:84fbd9dff69c0f71"
+      ],
+      "limit": null,
+      "listed": [
+        "fincen:01177938beff95a6",
+        "fincen:84fbd9dff69c0f71",
+        "fincen:90c24bacf423901f",
+        "fincen:a9d9f63c3d3746e7",
+        "ofac:1b5cb42bd23a2458",
+        "ofac:70885818a6f29dc0",
+        "ofac:cf5e3876f995fb4b",
+        "ofsi:133b8886c3322de0",
+        "ofsi:9973fe4c6bbf905c",
+        "ofsi:fbb78f67e95a6f31"
+      ],
+      "never_listed": [],
+      "run_id": "feeds-2026-09-27-f3f48f",
+      "stop_reason": "end_turn",
+      "terminal_check": {
+        "calls": 40,
+        "duplicated": [],
+        "unterminated": []
+      },
+      "tool_calls": {
+        "mcp__feeds__feeds_fetch": 10,
+        "mcp__feeds__feeds_list_new": 3,
+        "mcp__feeds__feeds_read_page": 17,
+        "mcp__feeds__feeds_triage": 10
+      },
+      "triaged": [
+        "fincen:01177938beff95a6",
+        "fincen:84fbd9dff69c0f71",
+        "fincen:90c24bacf423901f",
+        "fincen:a9d9f63c3d3746e7",
+        "ofac:1b5cb42bd23a2458",
+        "ofac:70885818a6f29dc0",
+        "ofac:cf5e3876f995fb4b",
+        "ofsi:133b8886c3322de0",
+        "ofsi:9973fe4c6bbf905c",
+        "ofsi:fbb78f67e95a6f31"
+      ],
+      "turns": 41,
+      "unfinished": []
+    },
+    {
+      "batch": "batch-3",
+      "cost_usd": 0.2605574,
+      "duration_ms": 79734,
+      "failure": null,
+      "keys": [
+        "ofac:1a5ec8639bc971e3",
+        "ofsi:f827b3b4bed13815",
+        "fincen:b0e8e12db376c4f0",
+        "ofac:4824e552f9bcc834",
+        "ofsi:5f612a010e455824",
+        "fincen:e69c3b416d591504",
+        "ofac:d553c4458a7fd0c7",
+        "ofsi:7662f16b47fe6676",
+        "fincen:002eaf94471d7dc6",
+        "ofac:614ba309e00d7c15"
+      ],
+      "limit": null,
+      "listed": [
+        "fincen:002eaf94471d7dc6",
+        "fincen:b0e8e12db376c4f0",
+        "fincen:e69c3b416d591504",
+        "ofac:1a5ec8639bc971e3",
+        "ofac:4824e552f9bcc834",
+        "ofac:614ba309e00d7c15",
+        "ofac:d553c4458a7fd0c7",
+        "ofsi:5f612a010e455824",
+        "ofsi:7662f16b47fe6676",
+        "ofsi:f827b3b4bed13815"
+      ],
+      "never_listed": [],
+      "run_id": "feeds-2026-09-27-0df276",
+      "stop_reason": "end_turn",
+      "terminal_check": {
+        "calls": 43,
+        "duplicated": [],
+        "unterminated": [
+          "toolu_01U8cjAf27hQYKmaYNG4g9WU"
+        ]
+      },
+      "tool_calls": {
+        "mcp__feeds__feeds_fetch": 10,
+        "mcp__feeds__feeds_list_new": 3,
+        "mcp__feeds__feeds_read_page": 19,
+        "mcp__feeds__feeds_triage": 11
+      },
+      "triaged": [
+        "fincen:002eaf94471d7dc6",
+        "fincen:b0e8e12db376c4f0",
+        "fincen:e69c3b416d591504",
+        "ofac:1a5ec8639bc971e3",
+        "ofac:4824e552f9bcc834",
+        "ofac:614ba309e00d7c15",
+        "ofac:d553c4458a7fd0c7",
+        "ofsi:5f612a010e455824",
+        "ofsi:7662f16b47fe6676",
+        "ofsi:f827b3b4bed13815"
+      ],
+      "turns": 44,
+      "unfinished": []
+    },
+    {
+      "batch": "batch-4",
+      "cost_usd": 0.1466424,
+      "duration_ms": 59973,
+      "failure": null,
+      "keys": [
+        "ofsi:5ea94ded0f8ff6e0",
+        "fincen:cffcc94fd7798325",
+        "ofac:9c9d46b02fb99ebf",
+        "ofsi:ce89f34afbcfd6b7",
+        "fincen:9b9e9ea425676d60",
+        "ofac:cb4def806f2d2cb7",
+        "ofsi:cb517770dd3b7fc0",
+        "fincen:7bc4d47a84ac6ecb",
+        "ofac:8fac15ddd13a8c7d",
+        "ofsi:f06784dfe467ed6b"
+      ],
+      "limit": null,
+      "listed": [
+        "fincen:7bc4d47a84ac6ecb",
+        "fincen:9b9e9ea425676d60",
+        "fincen:cffcc94fd7798325",
+        "ofac:8fac15ddd13a8c7d",
+        "ofac:9c9d46b02fb99ebf",
+        "ofac:cb4def806f2d2cb7",
+        "ofsi:5ea94ded0f8ff6e0",
+        "ofsi:cb517770dd3b7fc0",
+        "ofsi:ce89f34afbcfd6b7",
+        "ofsi:f06784dfe467ed6b"
+      ],
+      "never_listed": [],
+      "run_id": "feeds-2026-09-27-d834b5",
+      "stop_reason": "end_turn",
+      "terminal_check": {
+        "calls": 34,
+        "duplicated": [],
+        "unterminated": []
+      },
+      "tool_calls": {
+        "mcp__feeds__feeds_fetch": 10,
+        "mcp__feeds__feeds_list_new": 3,
+        "mcp__feeds__feeds_read_page": 11,
+        "mcp__feeds__feeds_triage": 10
+      },
+      "triaged": [
+        "fincen:7bc4d47a84ac6ecb",
+        "fincen:9b9e9ea425676d60",
+        "fincen:cffcc94fd7798325",
+        "ofac:8fac15ddd13a8c7d",
+        "ofac:9c9d46b02fb99ebf",
+        "ofac:cb4def806f2d2cb7",
+        "ofsi:5ea94ded0f8ff6e0",
+        "ofsi:cb517770dd3b7fc0",
+        "ofsi:ce89f34afbcfd6b7",
+        "ofsi:f06784dfe467ed6b"
+      ],
+      "turns": 35,
+      "unfinished": []
+    },
+    {
+      "batch": "batch-5",
+      "cost_usd": 0.193606,
+      "duration_ms": 88140,
+      "failure": null,
+      "keys": [
+        "fincen:61b09a5263888b86",
+        "ofac:5b5ed8933b153378",
+        "ofsi:81d3e9aaac362e6c",
+        "fincen:55d42ff2380766c9",
+        "ofac:484a015aed069a81",
+        "ofsi:5f0e977e08c83696",
+        "fincen:68161f9a7cea89b0",
+        "ofac:eca80d2c229c876e",
+        "ofsi:3ba99d4c4434cc1a",
+        "fincen:e86139aaed9c9cd6"
+      ],
+      "limit": null,
+      "listed": [
+        "fincen:55d42ff2380766c9",
+        "fincen:61b09a5263888b86",
+        "fincen:68161f9a7cea89b0",
+        "fincen:e86139aaed9c9cd6",
+        "ofac:484a015aed069a81",
+        "ofac:5b5ed8933b153378",
+        "ofac:eca80d2c229c876e",
+        "ofsi:3ba99d4c4434cc1a",
+        "ofsi:5f0e977e08c83696",
+        "ofsi:81d3e9aaac362e6c"
+      ],
+      "never_listed": [],
+      "run_id": "feeds-2026-09-27-9cd5cc",
+      "stop_reason": "end_turn",
+      "terminal_check": {
+        "calls": 37,
+        "duplicated": [],
+        "unterminated": []
+      },
+      "tool_calls": {
+        "mcp__feeds__feeds_fetch": 10,
+        "mcp__feeds__feeds_list_new": 3,
+        "mcp__feeds__feeds_read_page": 14,
+        "mcp__feeds__feeds_triage": 10
+      },
+      "triaged": [
+        "fincen:55d42ff2380766c9",
+        "fincen:61b09a5263888b86",
+        "fincen:68161f9a7cea89b0",
+        "fincen:e86139aaed9c9cd6",
+        "ofac:484a015aed069a81",
+        "ofac:5b5ed8933b153378",
+        "ofac:eca80d2c229c876e",
+        "ofsi:3ba99d4c4434cc1a",
+        "ofsi:5f0e977e08c83696",
+        "ofsi:81d3e9aaac362e6c"
+      ],
+      "turns": 38,
+      "unfinished": []
+    },
+    {
+      "batch": "batch-6",
+      "cost_usd": 0.2061262,
+      "duration_ms": 74470,
+      "failure": null,
+      "keys": [
+        "ofac:b14d332441652225",
+        "ofsi:36ee3f45f848ec24",
+        "fincen:3119924e34b20c0c",
+        "ofac:54f1e27eb0dda299",
+        "ofsi:dc8248173b455050",
+        "fincen:e16e04e5f79a6a46",
+        "ofac:8083cc7f3ee04250",
+        "ofsi:7216fd70bf119c57",
+        "fincen:eb1c0a36c4fc2e95",
+        "ofac:841771b6194a21e4"
+      ],
+      "limit": null,
+      "listed": [
+        "fincen:3119924e34b20c0c",
+        "fincen:e16e04e5f79a6a46",
+        "fincen:eb1c0a36c4fc2e95",
+        "ofac:54f1e27eb0dda299",
+        "ofac:8083cc7f3ee04250",
+        "ofac:841771b6194a21e4",
+        "ofac:b14d332441652225",
+        "ofsi:36ee3f45f848ec24",
+        "ofsi:7216fd70bf119c57",
+        "ofsi:dc8248173b455050"
+      ],
+      "never_listed": [],
+      "run_id": "feeds-2026-09-27-658a4f",
+      "stop_reason": "end_turn",
+      "terminal_check": {
+        "calls": 39,
+        "duplicated": [],
+        "unterminated": []
+      },
+      "tool_calls": {
+        "mcp__feeds__feeds_fetch": 10,
+        "mcp__feeds__feeds_list_new": 3,
+        "mcp__feeds__feeds_read_page": 16,
+        "mcp__feeds__feeds_triage": 10
+      },
+      "triaged": [
+        "fincen:3119924e34b20c0c",
+        "fincen:e16e04e5f79a6a46",
+        "fincen:eb1c0a36c4fc2e95",
+        "ofac:54f1e27eb0dda299",
+        "ofac:8083cc7f3ee04250",
+        "ofac:841771b6194a21e4",
+        "ofac:b14d332441652225",
+        "ofsi:36ee3f45f848ec24",
+        "ofsi:7216fd70bf119c57",
+        "ofsi:dc8248173b455050"
+      ],
+      "turns": 40,
+      "unfinished": []
+    }
+  ],
+  "verdicts": {
+    "fincen:002eaf94471d7dc6": {
+      "decided_at": "2026-09-27T14:56:38Z",
+      "found_on": [
+        1
+      ],
+      "match": "exact",
+      "quote": "Advisory on Kleptocracy and Foreign Public Corruption",
+      "reason": "FinCEN advisory on kleptocracy and foreign public corruption, describing corruption typologies and red flags for financial institutions.",
+      "run_id": "feeds-2026-09-27-0df276",
+      "verdict": "relevant"
+    },
+    "fincen:01177938beff95a6": {
+      "decided_at": "2026-09-27T14:55:13Z",
+      "found_on": [
+        1
+      ],
+      "match": "exact",
+      "quote": "FinCEN Advisory on the Iranian Regime’s Illicit Oil Smuggling Activities, Shadow Banking Networks, and Weapons Procurement Efforts",
+      "reason": "Advisory on Iranian oil smuggling, shadow banking networks and weapons procurement financing methods, describing sanctions-evasion typologies.",
+      "run_id": "feeds-2026-09-27-f3f48f",
+      "verdict": "relevant"
+    },
+    "fincen:06d25c9680e16a19": {
+      "decided_at": "2026-09-27T14:53:52Z",
+      "found_on": [
+        1
+      ],
+      "match": "exact",
+      "quote": "Joint Advisory on Non-Work Authorized Populations and Their Employers and Risks to the Integrity of the U.S. Financial System",
+      "reason": "Joint advisory on non-work authorized populations and their employers describes risks/typologies to financial system integrity that a typology could hold.",
+      "run_id": "feeds-2026-09-27-817de4",
+      "verdict": "relevant"
+    },
+    "fincen:3119924e34b20c0c": {
+      "decided_at": "2026-09-27T15:00:28Z",
+      "found_on": [
+        1
+      ],
+      "match": "exact",
+      "quote": "Advisory on Ransomware and the Use of the Financial System to Facilitate Ransom Payments",
+      "reason": "Advisory on ransomware and use of the financial system to facilitate ransom payments describes a financial-crime typology (ransomware payment facilitation) that could inform red flags, despite later rescission.",
+      "run_id": "feeds-2026-09-27-658a4f",
+      "verdict": "relevant"
+    },
+    "fincen:51d0f90922d44e64": {
+      "decided_at": "2026-09-27T14:53:53Z",
+      "found_on": [
+        1
+      ],
+      "match": "exact",
+      "quote": "FinCEN Advisory on Health Care Fraud Schemes Targeting Medicare, Medicaid, and Other Federal and State Health Care Benefit Programs",
+      "reason": "FinCEN advisory on health care fraud schemes targeting Medicare/Medicaid; describes fraud schemes/typologies for analyst screening.",
+      "run_id": "feeds-2026-09-27-817de4",
+      "verdict": "relevant"
+    },
+    "fincen:55d42ff2380766c9": {
+      "decided_at": "2026-09-27T14:59:15Z",
+      "found_on": [
+        1
+      ],
+      "match": "exact",
+      "quote": "Advisory on the Financial Action Task Force-Identified Jurisdictions with Anti-Money Laundering, Combating the Financing of Terrorism, and Proliferation Deficiencies",
+      "reason": "Advisory identifying jurisdictions with AML/CFT/proliferation-financing deficiencies, informing risk-based screening of jurisdictional exposure.",
+      "run_id": "feeds-2026-09-27-9cd5cc",
+      "verdict": "relevant"
+    },
+    "fincen:61b09a5263888b86": {
+      "decided_at": "2026-09-27T14:59:14Z",
+      "found_on": [
+        1
+      ],
+      "match": "exact",
+      "quote": "Advisory on COVID-19 Health Insurance- and Health Care-Related Fraud",
+      "reason": "FinCEN advisory on COVID-19 health insurance and health care fraud typologies for financial institutions to screen for.",
+      "run_id": "feeds-2026-09-27-9cd5cc",
+      "verdict": "relevant"
+    },
+    "fincen:68161f9a7cea89b0": {
+      "decided_at": "2026-09-27T14:59:16Z",
+      "found_on": [
+        1
+      ],
+      "match": "exact",
+      "quote": "Supplemental Advisory on Identifying and Reporting Human Trafficking and Related Activity",
+      "reason": "Supplemental advisory on identifying and reporting human trafficking, a typology advisory providing red flags/indicators for financial institutions.",
+      "run_id": "feeds-2026-09-27-9cd5cc",
+      "verdict": "relevant"
+    },
+    "fincen:7bc4d47a84ac6ecb": {
+      "decided_at": "2026-09-27T14:57:44Z",
+      "found_on": [
+        1
+      ],
+      "match": "exact",
+      "quote": "Advisory on Financial Crimes Targeting COVID-19 Economic Impact Payments",
+      "reason": "Advisory describing fraud schemes targeting COVID-19 Economic Impact Payments, a financial crime typology with methods/red flags.",
+      "run_id": "feeds-2026-09-27-d834b5",
+      "verdict": "relevant"
+    },
+    "fincen:84fbd9dff69c0f71": {
+      "decided_at": "2026-09-27T14:55:16Z",
+      "found_on": [
+        1
+      ],
+      "match": "exact",
+      "quote": "Supplemental Advisory on the Procurement of Precursor Chemicals and Manufacturing Equipment Used for the Synthesis of Illicit Fentanyl and Other Synthetic Opioids",
+      "reason": "Supplemental advisory on procurement methods for fentanyl precursor chemicals and manufacturing equipment, a financial-crime typology with red flags for analysts.",
+      "run_id": "feeds-2026-09-27-f3f48f",
+      "verdict": "relevant"
+    },
+    "fincen:90c24bacf423901f": {
+      "decided_at": "2026-09-27T14:55:15Z",
+      "found_on": [
+        1
+      ],
+      "match": "exact",
+      "quote": "FinCEN Advisory on the Financing of the Islamic State of Iraq and Syria (ISIS) and its Global Affiliates",
+      "reason": "Advisory describing methods used to finance ISIS and its global affiliates, a terrorist-financing typology.",
+      "run_id": "feeds-2026-09-27-f3f48f",
+      "verdict": "relevant"
+    },
+    "fincen:9b9e9ea425676d60": {
+      "decided_at": "2026-09-27T14:57:42Z",
+      "found_on": [
+        1
+      ],
+      "match": "exact",
+      "quote": "Advisory on the Financial Action Task Force-Identified Jurisdictions with Anti-Money Laundering and Combating the Financing of Terrorism and Counter-Proliferation Deficiencies",
+      "reason": "Advisory on FATF-identified high-risk jurisdictions with AML/CFT/CPF deficiencies provides red-flag jurisdictions for sanctions/AML screening.",
+      "run_id": "feeds-2026-09-27-d834b5",
+      "verdict": "relevant"
+    },
+    "fincen:a40b52749daa1a4f": {
+      "decided_at": "2026-09-27T14:53:55Z",
+      "found_on": [
+        1
+      ],
+      "match": "exact",
+      "quote": "Aviso de FinCEN: Uso de Redes Chinas de Lavado de Dinero por Organizaciones Criminales Transnacionales con Base en México para Lavar Ganancias Ilícitas",
+      "reason": "Advisory on Chinese money laundering networks used by Mexico-based TCOs to launder illicit proceeds; describes a laundering method/typology.",
+      "run_id": "feeds-2026-09-27-817de4",
+      "verdict": "relevant"
+    },
+    "fincen:a9d9f63c3d3746e7": {
+      "decided_at": "2026-09-27T14:55:11Z",
+      "found_on": [
+        1
+      ],
+      "match": "exact",
+      "quote": "FinCEN Advisory on the Use of Chinese Money Laundering Networks by Mexico-Based Transnational Criminal Organizations to Launder Illicit Proceeds",
+      "reason": "Advisory specifically on the methods used by Chinese money laundering networks to launder illicit proceeds for Mexico-based TCOs, a core ML typology topic.",
+      "run_id": "feeds-2026-09-27-f3f48f",
+      "verdict": "relevant"
+    },
+    "fincen:b0e8e12db376c4f0": {
+      "decided_at": "2026-09-27T14:56:35Z",
+      "found_on": [
+        1
+      ],
+      "match": "exact",
+      "quote": "Advisory to Counter the Financing of Iran-Backed Terrorist Organizations",
+      "reason": "FinCEN advisory on financing of Iran-backed terrorist organizations, a substantive typology advisory describing TF methods and red flags for financial institutions.",
+      "run_id": "feeds-2026-09-27-0df276",
+      "verdict": "relevant"
+    },
+    "fincen:cffcc94fd7798325": {
+      "decided_at": "2026-09-27T14:57:40Z",
+      "found_on": [
+        1
+      ],
+      "match": "exact",
+      "quote": "Advisory on Ransomware and the Use of the Financial System to Facilitate Ransom Payments",
+      "reason": "FinCEN advisory on ransomware describes methods and red flags used to facilitate ransom payments through the financial system, a typology topic.",
+      "run_id": "feeds-2026-09-27-d834b5",
+      "verdict": "relevant"
+    },
+    "fincen:e16e04e5f79a6a46": {
+      "decided_at": "2026-09-27T15:00:30Z",
+      "found_on": [
+        1
+      ],
+      "match": "exact",
+      "quote": "Aviso sobre delitos cibernéticos y delitos perpetrados mediante tecnologías cibernéticas que explotan la pandemia de la enfermedad del coronavirus 2019 (COVID-19)",
+      "reason": "Advisory on cybercrime exploiting the COVID-19 pandemic describes fraud/cybercrime methods that a typology could hold.",
+      "run_id": "feeds-2026-09-27-658a4f",
+      "verdict": "relevant"
+    },
+    "fincen:e69c3b416d591504": {
+      "decided_at": "2026-09-27T14:56:37Z",
+      "found_on": [
+        1
+      ],
+      "match": "exact",
+      "quote": "Advisory on Elder Financial Exploitation",
+      "reason": "FinCEN advisory on elder financial exploitation, a typology advisory that describes methods and red flags used against elderly victims.",
+      "run_id": "feeds-2026-09-27-0df276",
+      "verdict": "relevant"
+    },
+    "fincen:e86139aaed9c9cd6": {
+      "decided_at": "2026-09-27T14:59:17Z",
+      "found_on": [
+        1
+      ],
+      "match": "exact",
+      "quote": "Advisory on Unemployment Insurance Fraud During Covid 19 Pandemic",
+      "reason": "Advisory on unemployment insurance fraud during COVID-19, describing a fraud typology relevant to financial institution screening.",
+      "run_id": "feeds-2026-09-27-9cd5cc",
+      "verdict": "relevant"
+    },
+    "fincen:eb1c0a36c4fc2e95": {
+      "decided_at": "2026-09-27T15:00:31Z",
+      "found_on": [
+        1
+      ],
+      "match": "exact",
+      "quote": "Aviso sobre estafas de impostores y esquemas de \"mulas de dinero\" relacionados con la enfermedad por coronavirus 2019 (COVID-19)",
+      "reason": "Advisory on COVID-19-related imposter scams and money mule schemes describes fraud/money-laundering methods and red flags.",
+      "run_id": "feeds-2026-09-27-658a4f",
+      "verdict": "relevant"
+    },
+    "ofac:18de8d6afad03d2a": {
+      "decided_at": "2026-09-27T14:54:00Z",
+      "found_on": [
+        1
+      ],
+      "match": "exact",
+      "quote": "The national emergency declared in Executive Order (E.O.) 14046 of September 17, 2021, \"Imposing Sanctions on Certain Persons With Respect to the Humanitarian and Human Rights Crisis in Ethiopia,\" has expired.",
+      "reason": "Expiration of Ethiopia emergency with bare delisting of designated persons/entities and issuance of an amended general license; no method/red flag/case.",
+      "run_id": "feeds-2026-09-27-817de4",
+      "verdict": "not_relevant"
+    },
+    "ofac:1a5ec8639bc971e3": {
+      "decided_at": "2026-09-27T14:56:47Z",
+      "found_on": [
+        1
+      ],
+      "match": "exact",
+      "quote": "an individual has agreed to pay $1,427,230 to settle their potential civil liability for providing management consulting and advisory services to one of Iran's leading software solutions companies.",
+      "reason": "Describes an enforcement settlement case detailing what was done: individual provided consulting services to an Iranian software firm and received Iranian dividends and real property.",
+      "run_id": "feeds-2026-09-27-0df276",
+      "verdict": "relevant"
+    },
+    "ofac:1b5cb42bd23a2458": {
+      "decided_at": "2026-09-27T14:55:21Z",
+      "found_on": [
+        3
+      ],
+      "match": "exact",
+      "quote": "Sectoral Sanctions Identifications List Updates\n\nThe following changes have been made to OFAC's Sectoral Sanctions Identifications List:",
+      "reason": "Content is a bare SDN/SSI list update (VTB Bank entry amended) plus a general licence/FAQ notice; no narrative describing the sanctions-evasion method.",
+      "run_id": "feeds-2026-09-27-f3f48f",
+      "verdict": "not_relevant"
+    },
+    "ofac:4824e552f9bcc834": {
+      "decided_at": "2026-09-27T14:56:42Z",
+      "found_on": [
+        3
+      ],
+      "match": "exact",
+      "quote": "Unrelated Administrative List Changes - These administrative corrections fix errors in existing listings only. No new listings have been added. No new sanctions apply to these names.",
+      "reason": "Consists of bare SDN designation entries, administrative name corrections, and a list of amended FAQ numbers; no narrative describing methods, red flags or case facts.",
+      "run_id": "feeds-2026-09-27-0df276",
+      "verdict": "not_relevant"
+    },
+    "ofac:484a015aed069a81": {
+      "decided_at": "2026-09-27T14:59:21Z",
+      "found_on": [
+        1
+      ],
+      "match": "exact",
+      "quote": "The following entities have been added to OFAC's SDN List:\n\nAUTISTICI INVENTATI, Strada Statale Abetone e del Brennero 253, San Giuliano Terme, Province of Pisa 56017, Italy",
+      "reason": "Bare SDN designation additions and a general license issuance; only names/identifiers listed, no methods, red flags or case narrative.",
+      "run_id": "feeds-2026-09-27-9cd5cc",
+      "verdict": "not_relevant"
+    },
+    "ofac:54f1e27eb0dda299": {
+      "decided_at": "2026-09-27T15:00:34Z",
+      "found_on": [
+        1
+      ],
+      "match": "exact",
+      "quote": "The following individuals have been added to OFAC's SDN List:",
+      "reason": "Bare SDN list additions/amendments (names, IDs, addresses) plus a general license and FAQ updates; no narrative describing methods or red flags beyond entity linkages.",
+      "run_id": "feeds-2026-09-27-658a4f",
+      "verdict": "not_relevant"
+    },
+    "ofac:5b5ed8933b153378": {
+      "decided_at": "2026-09-27T14:59:19Z",
+      "found_on": [
+        1
+      ],
+      "match": "exact",
+      "quote": "The Department of the Treasury's Office of Foreign Assets Control (OFAC) is issuing Venezuela-related General License 46D, \"Authorizing Certain Activities Involving Venezuelan-Origin Oil or Petrochemical Products;\"",
+      "reason": "Administrative issuance of amended Venezuela general licenses and FAQs; no fraud/ML method or case described.",
+      "run_id": "feeds-2026-09-27-9cd5cc",
+      "verdict": "not_relevant"
+    },
+    "ofac:614ba309e00d7c15": {
+      "decided_at": "2026-09-27T14:56:45Z",
+      "found_on": [
+        1
+      ],
+      "match": "exact",
+      "quote": "The Department of the Treasury's Office of Foreign Assets Control (OFAC) is issuing Iran General License CC, \"Authorizing the Wind Down of Transactions Involving Certain Persons Blocked on September 4, 2026.\"",
+      "reason": "Bare SDN designation list of Turkish financial entities linked to Iran plus a general licence issuance; no method, red flag or case narrative provided.",
+      "run_id": "feeds-2026-09-27-0df276",
+      "verdict": "not_relevant"
+    },
+    "ofac:70885818a6f29dc0": {
+      "decided_at": "2026-09-27T14:55:21Z",
+      "found_on": [
+        1
+      ],
+      "match": "exact",
+      "quote": "The following deletions have been made to OFAC's SDN List:",
+      "reason": "Bare SDN list deletions and a general licence/FAQ issuance notice; no method, red flag or case detail.",
+      "run_id": "feeds-2026-09-27-f3f48f",
+      "verdict": "not_relevant"
+    },
+    "ofac:8083cc7f3ee04250": {
+      "decided_at": "2026-09-27T15:00:35Z",
+      "found_on": [
+        1
+      ],
+      "match": "exact",
+      "quote": "The following individuals have been added to OFAC's SDN List:",
+      "reason": "Bare designation list (ICC officials, one Venezuela-linked entity) plus a wind-down general license; no financial-crime method or red flag described.",
+      "run_id": "feeds-2026-09-27-658a4f",
+      "verdict": "not_relevant"
+    },
+    "ofac:841771b6194a21e4": {
+      "decided_at": "2026-09-27T15:00:37Z",
+      "found_on": [
+        1
+      ],
+      "match": "exact",
+      "quote": "Dini exported weighing equipment to a distributor located in the UAE with the knowledge that those goods would be reexported to an end-user in Iran.",
+      "reason": "Enforcement settlement describing the evasion method: an Italian subsidiary exported goods to a UAE distributor knowing they would be re-exported to Iran, evading US sanctions via a third-country transshipment.",
+      "run_id": "feeds-2026-09-27-658a4f",
+      "verdict": "relevant"
+    },
+    "ofac:8fac15ddd13a8c7d": {
+      "decided_at": "2026-09-27T14:57:50Z",
+      "found_on": [
+        1
+      ],
+      "match": "exact",
+      "quote": "KAMENG TRADING LIMITED, Room 701, Unit 108,7/F, Tower B, New Mandarin Plaza, 14 Science Museum Road, Tsim Sha Tsui, Kowloon, Hong Kong, China",
+      "reason": "Bare SDN list addition linking individual/entity to Bank Melli Iran; no method or red-flag narrative accompanies the designation.",
+      "run_id": "feeds-2026-09-27-d834b5",
+      "verdict": "not_relevant"
+    },
+    "ofac:9c9d46b02fb99ebf": {
+      "decided_at": "2026-09-27T14:57:46Z",
+      "found_on": [
+        1
+      ],
+      "match": "exact",
+      "quote": "The following individual has been added to OFAC's SDN List:\n\nCASTRO CALIS, Fidel Ernesto, Cuba; DOB 16 May 1995; nationality Cuba; Gender Male (individual) [CUBA-EO14404] (Linked To: CASTRO ESPIN, Alejandro).",
+      "reason": "Bare SDN list additions/deletions and a general licence issuance for Cuba/Russia; no method, red flag, or case narrative provided.",
+      "run_id": "feeds-2026-09-27-d834b5",
+      "verdict": "not_relevant"
+    },
+    "ofac:b14d332441652225": {
+      "decided_at": "2026-09-27T15:00:33Z",
+      "found_on": [
+        1
+      ],
+      "match": "exact",
+      "quote": "The Department of the Treasury's Office of Foreign Assets Control (OFAC) is issuing Venezuela General License 61 - Authorizing the Supply of Certain Items and Services to Venezuela Related to Telecommunications, and Venezuela General License 62 - Authorizing Negotiations of and Entry Into Contingent Contracts for Investment in the Telecommunications Sector of Venezuela.",
+      "reason": "Issuance of Venezuela-related general licenses authorizing telecom-sector transactions and an associated FAQ; no method, red flag, or case described.",
+      "run_id": "feeds-2026-09-27-658a4f",
+      "verdict": "not_relevant"
+    },
+    "ofac:cb4def806f2d2cb7": {
+      "decided_at": "2026-09-27T14:57:48Z",
+      "found_on": [
+        1
+      ],
+      "match": "exact",
+      "quote": "reminding U.S. persons holding blocked property as of June 30, 2026, to file an Annual Report of Blocked Property (ARBP) no later than September 30, 2026",
+      "reason": "Procedural reminder to file Annual Report of Blocked Property plus amended Venezuela general licences/FAQ; no method or case described.",
+      "run_id": "feeds-2026-09-27-d834b5",
+      "verdict": "not_relevant"
+    },
+    "ofac:cf5e3876f995fb4b": {
+      "decided_at": "2026-09-27T14:55:18Z",
+      "found_on": [
+        1
+      ],
+      "match": "exact",
+      "quote": "The following individuals have been added to OFAC's SDN List:",
+      "reason": "Content is a bare SDN list addition/deletion notice (names, addresses, IDs) with no description of methods or red flags beyond designation details.",
+      "run_id": "feeds-2026-09-27-f3f48f",
+      "verdict": "not_relevant"
+    },
+    "ofac:d553c4458a7fd0c7": {
+      "decided_at": "2026-09-27T14:56:43Z",
+      "found_on": [
+        1
+      ],
+      "match": "exact",
+      "quote": "Additionally, OFAC has updated the Specially Designated Nationals and Blocked Persons List.",
+      "reason": "Bare SDN designation list of Iranian airlines and linked entities plus general licence issuance/suspension notices; no described method or case narrative.",
+      "run_id": "feeds-2026-09-27-0df276",
+      "verdict": "not_relevant"
+    },
+    "ofac:eca80d2c229c876e": {
+      "decided_at": "2026-09-27T14:59:22Z",
+      "found_on": [
+        51
+      ],
+      "match": "exact",
+      "quote": "Unrelated Administrative List Changes:\n\nNone",
+      "reason": "Consists of Syria SSOT delisting/GL updates and a long bare SDN list of Iran-related designations across 51 pages; no described methods, red flags or case facts.",
+      "run_id": "feeds-2026-09-27-9cd5cc",
+      "verdict": "not_relevant"
+    },
+    "ofac:eceb1d4b8bded27d": {
+      "decided_at": "2026-09-27T14:53:59Z",
+      "found_on": [
+        1
+      ],
+      "match": "exact",
+      "quote": "The following deletions have been made to OFAC's SDN List:",
+      "reason": "Bare SDN list delisting of an individual and linked entities in DRC, plus an unrelated address formatting fix; no method/red flag/case described.",
+      "run_id": "feeds-2026-09-27-817de4",
+      "verdict": "not_relevant"
+    },
+    "ofac:fa70f45496658b8c": {
+      "decided_at": "2026-09-27T14:53:57Z",
+      "found_on": [
+        1
+      ],
+      "match": "artefact",
+      "quote": "OFAC is consolidating previously existing information regarding enforcement procedures and penalties, including the rights of U.S. persons being investigated for violations, that are currently located in individual parts of 31 CFR chapter V into a new part, the Sanctions Penalties Regulations.",
+      "reason": "Regulatory consolidation of penalty provisions into new CFR part and routine TSRA quarterly licensing report; procedural, no methods/red flags/case.",
+      "run_id": "feeds-2026-09-27-817de4",
+      "verdict": "not_relevant"
+    },
+    "ofsi:133b8886c3322de0": {
+      "decided_at": "2026-09-27T14:55:05Z",
+      "found_on": [
+        1
+      ],
+      "match": "exact",
+      "quote": "On 11 August 2026, the Office of Financial Sanctions Implementation (“OFSI”), part of HM Treasury, imposed a penalty of £4,732,830.58 on CBNA London, in accordance with section 146 of the Policing and Crime Act 2017 (“PACA”).",
+      "reason": "Enforcement notice describing an actual monetary penalty imposed on a bank for breach of financial sanctions; enforcement cases are within scope even if narrative detail is in linked PDF.",
+      "run_id": "feeds-2026-09-27-f3f48f",
+      "verdict": "relevant"
+    },
+    "ofsi:36ee3f45f848ec24": {
+      "decided_at": "2026-09-27T15:00:23Z",
+      "found_on": [
+        1
+      ],
+      "match": "exact",
+      "quote": "This General Licence allows Person(s) to take any necessary steps to enable and enact an Interdiction, and also permits certain related payments and payment processing, subject to the conditions set out in the licence.",
+      "reason": "This is a general licence notice permitting specific transactions under the Russia regime; it does not describe a financial-crime method, red flag, or case.",
+      "run_id": "feeds-2026-09-27-658a4f",
+      "verdict": "not_relevant"
+    },
+    "ofsi:3ba99d4c4434cc1a": {
+      "decided_at": "2026-09-27T14:59:12Z",
+      "found_on": [
+        1
+      ],
+      "match": "exact",
+      "quote": "On 26 May 2026, the Office of Financial Sanctions Implementation (OFSI), part of HM Treasury, imposed a penalty of £1,000,920.59 on the UK-registered company Sabre Global Technologies Limited (SGTL), in accordance with section 146 of the Policing and Crime Act 2017 (PACA).",
+      "reason": "Formal enforcement notice of monetary penalty tied to the same sanctions-circumvention case, stating what penalty was imposed and under what legal basis.",
+      "run_id": "feeds-2026-09-27-9cd5cc",
+      "verdict": "relevant"
+    },
+    "ofsi:5ea94ded0f8ff6e0": {
+      "decided_at": "2026-09-27T14:57:34Z",
+      "found_on": [
+        1
+      ],
+      "match": "exact",
+      "quote": "This General Licence allows persons to make payments to Arbitration Associations and Arbitrators to cover fees and expenses for their arbitration services.",
+      "reason": "General licence permitting arbitration cost payments; procedural/licensing notice, no method or red flag described.",
+      "run_id": "feeds-2026-09-27-d834b5",
+      "verdict": "not_relevant"
+    },
+    "ofsi:5f0e977e08c83696": {
+      "decided_at": "2026-09-27T14:59:10Z",
+      "found_on": [
+        1
+      ],
+      "match": "exact",
+      "quote": "This included asking Ural Airlines to send a test payment to a non-UK SGTL bank account, intending for future settlements to be routed through this account. This amounted to circumvention of UK sanctions.",
+      "reason": "Enforcement case describing sanctions circumvention method: continuing to service a designated Russian airline and testing alternate non-UK bank accounts to evade blocked payments.",
+      "run_id": "feeds-2026-09-27-9cd5cc",
+      "verdict": "relevant"
+    },
+    "ofsi:5f612a010e455824": {
+      "decided_at": "2026-09-27T14:56:31Z",
+      "found_on": [
+        1
+      ],
+      "match": "exact",
+      "quote": "On 10 January 2025, OFSI issued General Licence INT/2025/5635700 under regulation 64 of the Russia (Sanctions) (EU Exit) Regulations 2019",
+      "reason": "General licence for Russian oil exempt projects; describes licence scope/amendments only, no financial crime method or case.",
+      "run_id": "feeds-2026-09-27-0df276",
+      "verdict": "not_relevant"
+    },
+    "ofsi:61c8638c25f2614f": {
+      "decided_at": "2026-09-27T14:53:49Z",
+      "found_on": [
+        1
+      ],
+      "match": "exact",
+      "quote": "This summary gives a quick overview of the sanctions in place under the regime. It is not comprehensive and is not a replacement for the statutory guidance or the regulations themselves.",
+      "reason": "Statutory guidance summarizing Iran sanctions regime scope and prohibitions; restates obligations, no typology/red flags/case.",
+      "run_id": "feeds-2026-09-27-817de4",
+      "verdict": "not_relevant"
+    },
+    "ofsi:7216fd70bf119c57": {
+      "decided_at": "2026-09-27T15:00:27Z",
+      "found_on": [
+        1
+      ],
+      "match": "exact",
+      "quote": "This summary gives a quick overview of the sanctions in place under the regime. It is not comprehensive and is not a replacement for the statutory guidance or the regulations themselves.",
+      "reason": "Statutory guidance summarizing the scope and prohibitions of the Russia sanctions regime; restates obligations without describing a financial-crime method, red flag, or case.",
+      "run_id": "feeds-2026-09-27-658a4f",
+      "verdict": "not_relevant"
+    },
+    "ofsi:7662f16b47fe6676": {
+      "decided_at": "2026-09-27T14:56:34Z",
+      "found_on": [
+        1
+      ],
+      "match": "exact",
+      "quote": "Criminals may send fake emails, letters or other communications pretending to be from the Office of Financial Sanctions Implementation (OFSI). These scam or phishing communications may ask you to make a payment, provide financial information or take urgent action.",
+      "reason": "Describes an impersonation/phishing fraud method targeting the public (fake OFSI comms demanding payment/crypto) and gives red flags to detect it.",
+      "run_id": "feeds-2026-09-27-0df276",
+      "verdict": "relevant"
+    },
+    "ofsi:80fbd7a8282fd570": {
+      "decided_at": "2026-09-27T14:53:47Z",
+      "found_on": [
+        1
+      ],
+      "match": "exact",
+      "quote": "Guidance on HM Treasury’s presumption of denial approach to licence applications from designated Iranian banks, including:",
+      "reason": "Licensing guidance on presumption of denial for designated Iranian banks; procedural, no methods/red flags/case described.",
+      "run_id": "feeds-2026-09-27-817de4",
+      "verdict": "not_relevant"
+    },
+    "ofsi:81d3e9aaac362e6c": {
+      "decided_at": "2026-09-27T14:59:09Z",
+      "found_on": [
+        1
+      ],
+      "match": "exact",
+      "quote": "The guidance compares key aspects of U.S. and UK sanctions regimes, identifying similarities and differences on topics such as sanctions lists, licenses, as well as recordkeeping and reporting requirements.",
+      "reason": "Comparative guidance on US/UK sanctions authorities' structures, lists and licensing regimes; no fraud/ML methods, red flags or case facts.",
+      "run_id": "feeds-2026-09-27-9cd5cc",
+      "verdict": "not_relevant"
+    },
+    "ofsi:8efd8527f7bad32b": {
+      "decided_at": "2026-09-27T14:53:46Z",
+      "found_on": [
+        1
+      ],
+      "match": "exact",
+      "quote": "OFSI publishes FAQs providing short-form guidance and technical information on financial sanctions.",
+      "reason": "General FAQ guidance page restating licensing/regime rules, no methods, red flags or cases.",
+      "run_id": "feeds-2026-09-27-817de4",
+      "verdict": "not_relevant"
+    },
+    "ofsi:9973fe4c6bbf905c": {
+      "decided_at": "2026-09-27T14:55:07Z",
+      "found_on": [
+        1
+      ],
+      "match": "exact",
+      "quote": "The Office of Financial Sanctions Implementation runs webinars and attends events to provide guidance on financial sanctions.",
+      "reason": "Event/webinar listing page describing OFSI's outreach activities; no method, red flag or case content.",
+      "run_id": "feeds-2026-09-27-f3f48f",
+      "verdict": "not_relevant"
+    },
+    "ofsi:ab72e782b16cbf9e": {
+      "decided_at": "2026-09-27T14:53:50Z",
+      "found_on": [
+        1
+      ],
+      "match": "exact",
+      "quote": "This summary gives a quick overview of the sanctions in place under the regime. It is not comprehensive and is not a replacement for the statutory guidance or the regulations themselves.",
+      "reason": "Statutory guidance summarizing Iran nuclear sanctions regime scope; restates obligations, no methods/red flags/case.",
+      "run_id": "feeds-2026-09-27-817de4",
+      "verdict": "not_relevant"
+    },
+    "ofsi:cb517770dd3b7fc0": {
+      "decided_at": "2026-09-27T14:57:37Z",
+      "found_on": [
+        1
+      ],
+      "match": "exact",
+      "quote": "allows for the winding down of insurance policies written by Maritime Mutual entities and their subsidiaries before their designation",
+      "reason": "General licence permitting wind-down of insurance policies; procedural licensing notice with no typology content.",
+      "run_id": "feeds-2026-09-27-d834b5",
+      "verdict": "not_relevant"
+    },
+    "ofsi:ce89f34afbcfd6b7": {
+      "decided_at": "2026-09-27T14:57:36Z",
+      "found_on": [
+        1
+      ],
+      "match": "exact",
+      "quote": "allows non-designated persons who have made investments through designated brokers to transfer their funds to a non-designated broker",
+      "reason": "General licence for transferring funds between brokers; a licensing notice with no financial crime method or case described.",
+      "run_id": "feeds-2026-09-27-d834b5",
+      "verdict": "not_relevant"
+    },
+    "ofsi:dc8248173b455050": {
+      "decided_at": "2026-09-27T15:00:25Z",
+      "found_on": [
+        1
+      ],
+      "match": "exact",
+      "quote": "which, subject to certain conditions, allows a Person to make use of the retail banking services of a designated Credit or Financial Institution provided that the payments made or received are intended for the personal use of a Person.",
+      "reason": "General licence guidance for personal remittances via designated institutions, with an update on cryptoasset reporting requirements; no method, red flag, or case described.",
+      "run_id": "feeds-2026-09-27-658a4f",
+      "verdict": "not_relevant"
+    },
+    "ofsi:f06784dfe467ed6b": {
+      "decided_at": "2026-09-27T14:57:39Z",
+      "found_on": [
+        1
+      ],
+      "match": "exact",
+      "quote": "This General Licence allows for insolvency-related payments and activities connected with the Prince Group and their Subsidiaries, subject to conditions.",
+      "reason": "General licence permitting insolvency-related payments for a designated group; procedural licensing notice, not a method/case description.",
+      "run_id": "feeds-2026-09-27-d834b5",
+      "verdict": "not_relevant"
+    },
+    "ofsi:f827b3b4bed13815": {
+      "decided_at": "2026-09-27T14:56:30Z",
+      "found_on": [
+        1
+      ],
+      "match": "exact",
+      "quote": "On 27 November 2025, OFSI issued General Licence INT/2025/8031092 under regulation 64 of the Russia (Sanctions) (EU Exit) Regulations 2019",
+      "reason": "This is a general licence permitting continuation of business with Lukoil entities; describes licence terms/amendments, not a crime method or case.",
+      "run_id": "feeds-2026-09-27-0df276",
+      "verdict": "not_relevant"
+    },
+    "ofsi:fbb78f67e95a6f31": {
+      "decided_at": "2026-09-27T14:55:10Z",
+      "found_on": [
+        1
+      ],
+      "match": "exact",
+      "quote": "On 14 November 2025, OFSI issued General Licence INT/2025/7895596 under regulation 64 of the Russia (Sanctions) (EU Exit) Regulations 2019 (“the Russia Regulations”) which allows for the continuation of business operations with the Lukoil Bulgaria Entities.",
+      "reason": "General licence guidance permitting continuation of business with named entities; no financial crime method, red flag or case described.",
+      "run_id": "feeds-2026-09-27-f3f48f",
+      "verdict": "not_relevant"
+    }
+  }
+}
