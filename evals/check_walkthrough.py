@@ -17,7 +17,9 @@ Usage:
     python evals/check_walkthrough.py --mutate telemetry-count # FAILURE tool calls are left out of the counts; MUST fail
     python evals/check_walkthrough.py --mutate attested-count  # #limits counts only this advisory's attestations; MUST fail
     python evals/check_walkthrough.py --mutate swap-moves      # section 9's "moves F1 x -> y" swaps x and y; MUST fail
-    python evals/check_walkthrough.py --mutate resolver-runs   # #limits' resolver counts skip a committed run; MUST fail
+    python evals/check_walkthrough.py --mutate resolver-runs   # the builder's _resolver_runs -- what --repin classifies
+                                                               # with; the page reads the snapshot -- skips a committed
+                                                               # run; caught by (b) and the fixture; MUST fail
     python evals/check_walkthrough.py --mutate resolver-prompt # #limits misstates whether the prompt names the resolver; MUST fail
     python evals/check_walkthrough.py --mutate feed-accepted   # #limits' accepted-feed-items count is off by one; MUST fail
     python evals/check_walkthrough.py --mutate desk-total      # section 1's routing-table desk total is off by one; MUST fail
@@ -26,6 +28,35 @@ Usage:
     python evals/check_walkthrough.py --mutate corpus-count    # #limits' advisory count is off by one; MUST fail
     python evals/check_walkthrough.py --mutate emergent-undecided  # #limits counts DECIDED emergent candidates; MUST fail
     python evals/check_walkthrough.py --mutate legacy-count    # #limits' legacy-queue proposal count is off by one; MUST fail
+    python evals/check_walkthrough.py --mutate snapshot-count  # #limits reads the snapshot's null had_resolver as False, so
+                                                               # its no-tool-record count disagrees with the snapshot; MUST fail
+    python evals/check_walkthrough.py --mutate snapshot-evidence  # a pinned run's files now say it had and used the
+                                                                  # resolver (a temporary copy; nothing tracked is
+                                                                  # written); MUST fail
+    python evals/check_walkthrough.py --mutate unpinned-advisory  # the builder does not filter the advisory list to the
+                                                                  # snapshot's corpus; MUST fail
+    python evals/check_walkthrough.py --mutate unpinned-golden    # section 9 scores every golden label, not only the
+                                                                  # pinned corpus's; MUST fail
+    python evals/check_walkthrough.py --mutate snapshot-undercount  # the ledger (read in memory) holds one more accept
+                                                                    # decided by taken_on than the snapshot counts; MUST fail
+
+SECTION 10 IS PINNED TO site/walkthrough_snapshot.json. Three of its inputs move every Friday once
+live runs are accepted: extraction queue files, accepted feed items in the seen-items ledger, and
+new advisory-list entries. The page renders the committed snapshot of them, never the live files,
+so an accepted run does not change the page. This guard holds three things apart:
+  (a) the page renders the snapshot exactly -- its counts (computed here by the guard's own
+      classifier over the PINNED runs' files), its dated span, and a corpus of exactly the pinned
+      advisories, which a build over PLANTED live data must leave byte-identical;
+  (b) the snapshot still agrees with the evidence it names -- every pinned run's queue file exists
+      and its telemetry classifies it as the snapshot says, every pinned advisory is still listed,
+      and feed_accepted EQUALS the ledger's accepts decided on or before taken_on. Evidence is
+      immutable, so (b) stays green however much new data arrives;
+  Section 9 scores ONLY the pinned corpus (owner decision 2026-09-27): the guard rescores it over a
+  temporary copy holding only the pinned advisories' golden labels, and the plant adds a golden label
+  and records for an unpinned advisory, which must leave the page byte-identical. A malformed snapshot
+  is a labelled FAIL, never a traceback.
+  (c) an INFO line, never a failure, saying when live data has moved past the snapshot. Re-pinning
+      is deliberate: tools/build_walkthrough.py --repin, then rebuild and republish on the owner's go.
 
 WHY. The page will leave this repository. A page that drifts from its inputs, differs
 between two machines, or quietly drops a citation says something the governance never
@@ -74,15 +105,22 @@ LABEL_PASS = ROOT / "evals" / "owner_decisions" / "label_pass_2026-09-24.json"
 
 
 NOT_RUN = None  # a check's ok value when it cannot run here: printed as NOT RUN, never counted as a failure
+INFO = "info"   # a check's ok value for a line that informs and never fails: printed as INFO, never counted
 
 BUILDER = ROOT / "tools" / "build_walkthrough.py"
+SNAPSHOT = ROOT / "site" / "walkthrough_snapshot.json"
+RESOLVER_SUFFIX = "__knowledge_centre_resolve_actor"
 SECTIONS = ("question", "source", "extraction", "grounding", "review",
             "actors", "digest", "telemetry", "score", "limits")
 SEEDS = ("0", "1", "4242", "987654")
 MUTATIONS = ("drop-citation", "unpinned-log", "wrong-page", "swap-notes", "wrong-count", "desk-scope", "two-runs",
              "typed-score", "actor-id", "digest-header", "telemetry-count", "attested-count", "swap-moves",
              "resolver-runs", "resolver-prompt", "feed-accepted", "desk-total", "register-unresolved",
-             "corpus-count", "emergent-undecided", "legacy-count")
+             "corpus-count", "emergent-undecided", "legacy-count", "snapshot-count", "snapshot-evidence",
+             "unpinned-advisory", "unpinned-golden", "snapshot-undercount")
+# The guard-side mutations: they change what THIS guard reads, not the builder. Every other mutation
+# is the builder's own, passed through --_mutate.
+GUARD_MUTATIONS = ("snapshot-evidence", "snapshot-undercount")
 MUTATION = None
 
 
@@ -90,12 +128,12 @@ def _load_builder():
     spec = importlib.util.spec_from_file_location("build_walkthrough", BUILDER)
     mod = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(mod)
-    mod._MUTATE = MUTATION
+    mod._MUTATE = None if MUTATION in GUARD_MUTATIONS else MUTATION
     return mod
 
 
 def _cli(*args, env=None) -> subprocess.CompletedProcess:
-    extra = ["--_mutate", MUTATION] if MUTATION else []
+    extra = ["--_mutate", MUTATION] if MUTATION and MUTATION not in GUARD_MUTATIONS else []
     return subprocess.run([sys.executable, str(BUILDER)] + list(args) + extra,
                           capture_output=True, text=True, encoding="utf-8", cwd=ROOT, env=env)
 
@@ -146,26 +184,148 @@ def _desk_cut(text: str, advisory: str) -> str:
     return (text[start:] if end < 0 else text[start:end]).rstrip("\n")
 
 
+def _own_classify(run: str, queue_dir: Path, telemetry_dir: Path) -> dict:
+    """The guard's OWN classification of one extraction run from its files -- not the builder's
+    _resolver_runs, so the two can disagree. queue: the run's queue file exists. had_resolver: None when
+    it has no telemetry or its RUN_STARTED carries no tools list (no record), else whether the list names
+    the resolver. resolved: whether a resolver call answered "Resolved:"."""
+    tel = telemetry_dir / ("%s.jsonl" % run)
+    evs = ([json.loads(line) for line in tel.read_text(encoding="utf-8").splitlines() if line.strip()]
+           if tel.exists() else [])
+    start = next((ev for ev in evs if ev.get("stage") == "RUN_STARTED"), None)
+    tools = None if start is None else start["payload"].get("tools")
+    return {"queue": (queue_dir / ("%s.jsonl" % run)).exists(),
+            "had_resolver": None if tools is None else any(t.endswith(RESOLVER_SUFFIX) for t in tools),
+            "resolved": any(ev.get("stage") == "FC08_TOOL_CALL"
+                            and ev["payload"].get("tool", "").endswith(RESOLVER_SUFFIX)
+                            and ev["payload"].get("outcome", "").startswith('{"result":"Resolved: ') for ev in evs)}
+
+
+def _own_counts_of(classified: list) -> dict:
+    """Section 10's four resolver counts from a list of _own_classify results."""
+    return {"runs": len(classified), "with_tool": sum(1 for c in classified if c["had_resolver"] is True),
+            "no_record": sum(1 for c in classified if c["had_resolver"] is None),
+            "resolved": sum(1 for c in classified if c["resolved"])}
+
+
 def _own_resolver_counts(queue_dir: Path, telemetry_dir: Path) -> dict:
-    """The guard's OWN reading of section 10's resolver counts -- not the builder's _resolver_runs, so
-    the two can disagree. A run is COMMITTED when it has an EXTRACTOR queue file: '-extractor-' in its
-    stem, so a reviewer run's queue (propose_link names every queue file after the calling run's id, and
-    the reviewer agent calls it too) is never counted as an extraction. Returns the four counts as
-    numbers, not the run ids -- the page check only ever compares counts."""
+    """The guard's OWN reading of the resolver counts over EVERY committed extraction queue in queue_dir.
+    A run is COMMITTED when it has an EXTRACTOR queue file: '-extractor-' in its stem, so a reviewer run's
+    queue (propose_link names every queue file after the calling run's id, and the reviewer agent calls it
+    too) is never counted as an extraction. Returns the four counts as numbers, not the run ids."""
     runs = sorted(q.stem for q in queue_dir.glob("*.jsonl") if "-extractor-" in q.stem)
-    with_tool = no_record = resolved = 0
-    for run in runs:
-        tel = telemetry_dir / ("%s.jsonl" % run)
-        evs = ([json.loads(line) for line in tel.read_text(encoding="utf-8").splitlines() if line.strip()]
-               if tel.exists() else [])
-        start = next((ev for ev in evs if ev.get("stage") == "RUN_STARTED"), None)
-        tools = None if start is None else start["payload"].get("tools")
-        no_record += tools is None
-        with_tool += tools is not None and any(t.endswith("__knowledge_centre_resolve_actor") for t in tools)
-        resolved += any(ev.get("stage") == "FC08_TOOL_CALL"
-                        and ev["payload"].get("tool", "").endswith("__knowledge_centre_resolve_actor")
-                        and ev["payload"].get("outcome", "").startswith('{"result":"Resolved: ') for ev in evs)
-    return {"runs": len(runs), "with_tool": with_tool, "no_record": no_record, "resolved": resolved}
+    return _own_counts_of([_own_classify(r, queue_dir, telemetry_dir) for r in runs])
+
+
+def _read_snapshot() -> dict:
+    """The committed snapshot, read here -- not through the builder's load_snapshot."""
+    return json.loads(SNAPSHOT.read_text(encoding="utf-8"))
+
+
+def _snapshot_problems(snap) -> list:
+    """The guard's OWN shape check of a snapshot, as readable problems -- so a malformed file is a
+    labelled FAIL, never a KeyError or TypeError traceback. Empty means well-formed."""
+    if not isinstance(snap, dict):
+        return ["not a JSON object"]
+    out = []
+    want = ["advisories", "extraction_runs", "feed_accepted", "taken_on"]
+    if sorted(snap) != want:
+        out.append("fields %s, want exactly %s" % (sorted(snap), want))
+    t = snap.get("taken_on")
+    if not (isinstance(t, str) and re.fullmatch(r"\d{4}-\d{2}-\d{2}", t)):
+        out.append("taken_on %r is not YYYY-MM-DD" % (t,))
+    adv = snap.get("advisories")
+    if not (isinstance(adv, list) and all(isinstance(a, str) for a in adv) and adv == sorted(set(adv))):
+        out.append("advisories is not a sorted list of distinct ids")
+    runs = snap.get("extraction_runs")
+    if not (isinstance(runs, list) and all(
+            isinstance(r, dict) and sorted(r) == ["had_resolver", "resolved", "run_id"]
+            and isinstance(r["run_id"], str) and (r["had_resolver"] is None or isinstance(r["had_resolver"], bool))
+            and isinstance(r["resolved"], bool) for r in runs)
+            and [r["run_id"] for r in runs] == sorted({r["run_id"] for r in runs})):
+        out.append("extraction_runs is not a run_id-sorted list of distinct {run_id, had_resolver (bool or null), "
+                   "resolved (bool)}")
+    fa = snap.get("feed_accepted")
+    if not (isinstance(fa, int) and not isinstance(fa, bool) and fa >= 0):
+        out.append("feed_accepted %r is not a count" % (fa,))
+    return out
+
+
+def _accepts_by(entries, taken_on: str) -> int:
+    """The ledger's accepts decided on or before taken_on: what "by that date K had been accepted" means."""
+    return sum(1 for x in entries if x["decision"] == "accept" and x["decided_on"] <= taken_on)
+
+
+def _pinned_scores(snapshot: dict) -> dict:
+    """Section 9 over the PINNED corpus, computed the guard's own way: score_dirs, unfiltered, over a
+    temporary golden directory holding only the pinned advisories' labels -- not the builder's
+    advisory_ids filter, so the two can disagree."""
+    keep = set(snapshot["advisories"])
+    with tempfile.TemporaryDirectory(prefix="fc08_pinned_golden_") as tmp:
+        for f in sorted((ROOT / "evals" / "golden").glob("ADV-*.json")):
+            if json.loads(f.read_text(encoding="utf-8")).get("advisory_id") in keep:
+                shutil.copy(f, Path(tmp) / f.name)
+        return {run: score_dirs(Path(tmp), pred) for run, pred in (("extraction", ROOT / "data" / "records"),
+                                                                    ("reviewer", RECORDS_DIR))}
+
+
+def _snapshot_self_checks(bw) -> list:
+    """Standing proofs, on synthetic data only, that (b)'s exact accepted-count reading discriminates by
+    date, and that a malformed snapshot is refused READABLY by both sides: the guard's own validator
+    names a problem, and the builder's load_snapshot raises a ValueError naming the file."""
+    out = []
+    taken = "2026-10-02"
+    ledger = [{"decision": "accept", "decided_on": taken}, {"decision": "accept", "decided_on": "2026-10-03"},
+              {"decision": "drop", "decided_on": "2026-10-01"}]
+    out.append((_accepts_by(ledger, taken) == 1 and _accepts_by(ledger, "2026-10-03") == 2
+                and _accepts_by(ledger, "2026-10-01") == 0,
+                "(b)'s exact accepted-count reading counts accepts decided ON or BEFORE taken_on and nothing else "
+                "(a snapshot counting 0 against an accept on its own date is an under-count)",
+                "by %s: %d; by 2026-10-03: %d; by 2026-10-01: %d" % (taken, _accepts_by(ledger, taken),
+                                                                  _accepts_by(ledger, "2026-10-03"),
+                                                                  _accepts_by(ledger, "2026-10-01"))))
+    good = {"taken_on": taken, "advisories": ["ADV-9999-0001"], "feed_accepted": 0,
+            "extraction_runs": [{"run_id": "r", "had_resolver": None, "resolved": False}]}
+    bad = {"missing feed_accepted": {k: v for k, v in good.items() if k != "feed_accepted"},
+           "feed_accepted a string": dict(good, feed_accepted="0"),
+           "feed_accepted a bool": dict(good, feed_accepted=False),
+           "taken_on not a date": dict(good, taken_on="27 Sep"),
+           "advisories not a list": dict(good, advisories="ADV-9999-0001"),
+           "had_resolver an int": dict(good, extraction_runs=[{"run_id": "r", "had_resolver": 1, "resolved": False}]),
+           "a run missing resolved": dict(good, extraction_runs=[{"run_id": "r", "had_resolver": None}]),
+           "run_ids of mixed types": dict(good, extraction_runs=[{"run_id": "r", "had_resolver": None, "resolved": False},
+                                                                 {"run_id": 7, "had_resolver": None, "resolved": False}]),
+           "a list, not an object": [good]}
+    wrong = []
+    with tempfile.TemporaryDirectory(prefix="fc08_bad_snapshot_") as tmp:
+        path = Path(tmp) / "walkthrough_snapshot.json"
+        cases = [(name, json.dumps(snap)) for name, snap in bad.items()] + [("not JSON", "{\"taken_on\": ")]
+        for name, text in cases:
+            path.write_text(text, encoding="utf-8")
+            try:
+                own = _snapshot_problems(json.loads(text))
+            except json.JSONDecodeError:
+                own = ["not JSON"]
+            try:
+                bw.load_snapshot(path)
+                built = "ACCEPTED"
+            except ValueError as exc:
+                built = "" if path.name in str(exc) else "ValueError not naming the file: %s" % exc
+            except Exception as exc:  # anything but a ValueError is a crash, not a refusal
+                built = "%s: %s" % (type(exc).__name__, exc)
+            if not own or built:
+                wrong.append("%s: guard %s; builder %s" % (name, own or "found nothing", built or "refused"))
+        path.write_text(json.dumps(good), encoding="utf-8")
+        try:
+            bw.load_snapshot(path)
+            ok_good = not _snapshot_problems(good)
+        except Exception as exc:
+            ok_good, wrong = False, wrong + ["the well-formed control was refused: %s" % exc]
+    out.append((ok_good and not wrong,
+                "a malformed snapshot (%d shapes) is refused readably: the guard's validator names a problem and "
+                "the builder raises a ValueError naming the snapshot; a well-formed control is accepted" % len(cases),
+                "; ".join(wrong) or "all %d refused, control accepted" % len(cases)))
+    return out
 
 
 def _resolver_counts_fixture_checks(bw) -> list:
@@ -244,10 +404,116 @@ def _resolver_counts_fixture_checks(bw) -> list:
                     "the builder's _resolver_runs names the RIGHT runs, not just the right totals -- "
                     "specifically the Resolved run, not the Unresolved one, as resolved",
                     "want %s; got %s" % (want_ids, got_ids)))
+
+        # --repin writes what compute_snapshot returns. On the same fixture, plus a ledger with one
+        # accept and one drop and a two-entry advisory list, it must classify each run as the guard's
+        # own classifier does -- null had_resolver for no record, never False -- and count one accept.
+        ledger_path, adv_path = Path(tmp) / "ledger.json", Path(tmp) / "advisories.json"
+        ledger_path.write_text(json.dumps({"schema": feeds_ledger.SCHEMA, "items": [
+            {"source": "ofsi", "item_id": "a", "decision": "accept", "first_seen_run": "r", "decided_on": "2026-10-02"},
+            {"source": "ofsi", "item_id": "b", "decision": "drop", "first_seen_run": "r", "decided_on": "2026-10-02"}]}),
+            encoding="utf-8")
+        adv_path.write_text(json.dumps({"advisories": [{"advisory_id": "ADV-9999-0002"},
+                                                       {"advisory_id": "ADV-9999-0001"}]}), encoding="utf-8")
+        try:
+            snap = bw.compute_snapshot("2026-10-02", queue_dir=queue_dir, telemetry_dir=telemetry_dir,
+                                       ledger_path=ledger_path, advisory_list=adv_path)
+        except Exception as exc:  # a missing or broken --repin is a failure to report, not a crash
+            snap = "%s: %s" % (type(exc).__name__, exc)
+        want_snap = {"taken_on": "2026-10-02", "feed_accepted": 1, "advisories": ["ADV-9999-0001", "ADV-9999-0002"],
+                     "extraction_runs": [
+                         dict(run_id=r, **{k: v for k, v in _own_classify(r, queue_dir, telemetry_dir).items()
+                                           if k != "queue"})
+                         for r in sorted(want_ids["runs"])]}
+        out.append((snap == want_snap
+                    and [r["had_resolver"] for r in want_snap["extraction_runs"]] == [True, False, None, True],
+                    "--repin's compute_snapshot, on the same non-zero fixture, classifies every extraction run as "
+                    "the guard's own classifier does (null for no record), counts one accepted item and sorts the "
+                    "advisory ids", "want %s; got %s" % (want_snap, snap)))
     return out
 
 
-def checks_sections_6_to_10(bw, page: str, record: dict, pinned: list) -> list:
+def _plant_checks(bw, page: str, snapshot: dict) -> list:
+    """(a)'s strongest clause: live data moving past the snapshot must leave the page BYTE-IDENTICAL.
+    Builds the page in process over TEMPORARY copies with each of the three weekly-moving inputs planted
+    -- a new extractor queue file WITH telemetry that had and used the resolver, an accepted item in the
+    ledger, a new advisory-list entry, and a golden label with extractor and merged records for that
+    unpinned advisory (section 9 scores only the pinned corpus) -- and compares it with the committed
+    page. The advisory is
+    planted twice: once as a live acceptance would add it (no label_status, which the builder refuses
+    for a PINNED advisory), once fully labelled (so a leak shows as a count, not only as a refusal).
+    Nothing under the repository is written; every redirected global is restored."""
+    out = []
+    listed = json.loads(ADVISORY_LIST.read_text(encoding="utf-8"))
+    base = dict(listed["advisories"][0])
+    unlabelled = {k: v for k, v in base.items() if k != "label_status"}
+    unlabelled.update(advisory_id="ADV-2099-0001", title="Planted live advisory")
+    labelled = dict(base, advisory_id="ADV-2099-0002", title="Planted labelled advisory",
+                    label_status=bw.LABEL_PROVENANCE)  # labelled, and naming no disputed entries of its own
+    run = "adv-2099-0001-extractor-planted000"
+    saved = (bw.QUEUE_DIR, bw.ADVISORY_LIST, bw.feeds_ledger, bw.telemetry.TELEMETRY_DIR,
+             bw.GOLDEN_DIR, bw.EXTRACTOR_RECORDS, bw.RECORDS_DIR)
+    with tempfile.TemporaryDirectory(prefix="fc08_walkthrough_plant_") as tmp:
+        tmp = Path(tmp)
+        queue_dir, telemetry_dir = tmp / "proposals", tmp / "telemetry"
+        shutil.copytree(QUEUE_DIR, queue_dir)
+        shutil.copytree(TELEMETRY_DIR, telemetry_dir)
+        (queue_dir / ("%s.jsonl" % run)).write_text("", encoding="utf-8")
+        (telemetry_dir / ("%s.jsonl" % run)).write_text("\n".join(json.dumps(ev) for ev in [
+            {"stage": "RUN_STARTED", "status": "SUCCESS", "timestamp": "2099-01-01T00:00:00Z", "message": "planted",
+             "payload": {"run_id": run, "tools": ["mcp__knowledge_centre" + RESOLVER_SUFFIX]}},
+            {"stage": "FC08_TOOL_CALL", "status": "SUCCESS", "timestamp": "2099-01-01T00:00:01Z", "message": "planted",
+             "payload": {"run_id": run, "tool": "mcp__knowledge_centre" + RESOLVER_SUFFIX,
+                         "outcome": '{"result":"Resolved: X -> ACT-1 X"}'}}]) + "\n", encoding="utf-8")
+        # A golden label and both records for the unpinned ADV-2099-0002, each a copy of a pinned
+        # advisory's with the id changed -- a pair score_dirs WOULD score if it were not filtered.
+        planted_dirs = {}
+        for key, src in (("golden", bw.GOLDEN_DIR), ("records", bw.EXTRACTOR_RECORDS), ("merged", bw.RECORDS_DIR)):
+            planted_dirs[key] = tmp / key
+            shutil.copytree(src, planted_dirs[key])
+            doc = json.loads((src / "ADV-2026-0001.json").read_text(encoding="utf-8"))
+            doc["advisory_id"] = labelled["advisory_id"]
+            (planted_dirs[key] / ("%s.json" % labelled["advisory_id"])).write_text(json.dumps(doc), encoding="utf-8")
+        ledger_path = tmp / "ledger.json"
+        entries = list(feeds_ledger.load().values()) + [
+            {"source": "ofsi", "item_id": "planted", "decision": "accept", "first_seen_run": run,
+             "decided_on": "2099-01-01"}]
+        ledger_path.write_text(json.dumps({"schema": feeds_ledger.SCHEMA, "items": entries}), encoding="utf-8")
+
+        class _Ledger:
+            """The ledger module as the builder sees it, loading the planted copy whatever path it asks."""
+            SCHEMA, SEEN_PATH = feeds_ledger.SCHEMA, ledger_path
+
+            @staticmethod
+            def load(path=None):
+                return feeds_ledger.load(ledger_path)
+
+        for name, planted in (("unlabelled", unlabelled), ("labelled", labelled)):
+            adv_path = tmp / ("advisories_%s.json" % name)
+            adv_path.write_text(json.dumps(dict(listed, advisories=listed["advisories"] + [planted])), encoding="utf-8")
+            try:
+                bw.QUEUE_DIR, bw.ADVISORY_LIST, bw.feeds_ledger = queue_dir, adv_path, _Ledger
+                bw.telemetry.TELEMETRY_DIR = telemetry_dir
+                bw.GOLDEN_DIR, bw.EXTRACTOR_RECORDS, bw.RECORDS_DIR = (planted_dirs["golden"], planted_dirs["records"],
+                                                                       planted_dirs["merged"])
+                try:
+                    inp = bw.inputs()
+                    built, corpus = bw.build(inp), sorted(inp["advisories"])
+                except Exception as exc:  # a leak that makes the builder refuse is still a leak
+                    built, corpus = "%s: %s" % (type(exc).__name__, exc), None
+            finally:
+                (bw.QUEUE_DIR, bw.ADVISORY_LIST, bw.feeds_ledger, bw.telemetry.TELEMETRY_DIR,
+                 bw.GOLDEN_DIR, bw.EXTRACTOR_RECORDS, bw.RECORDS_DIR) = saved
+            out.append((built == page and corpus == snapshot["advisories"],
+                        "a build over planted live data (a new extraction queue that resolved an actor, an accepted "
+                        "ledger item, a new %s advisory-list entry, a golden label and records for an unpinned "
+                        "advisory) is byte-identical to the committed page, and its corpus is exactly the "
+                        "snapshot's" % name,
+                        "identical" if built == page else ("the page CHANGED" if corpus is not None else built)[:300]))
+    return out
+
+
+def checks_sections_6_to_10(bw, page: str, record: dict, pinned: list, snapshot: dict) -> list:
     out = []
 
     # 6 -- actors. Every resolution row for the advisory, with its ACT- id when resolved, its
@@ -386,9 +652,8 @@ def checks_sections_6_to_10(bw, page: str, record: dict, pinned: list) -> list:
     sc = section(page, "score")
     wrong = []
     n = 0
-    reports = {}
-    for run, pred in (("extraction", ROOT / "data" / "records"), ("reviewer", RECORDS_DIR)):
-        reports[run] = score_dirs(ROOT / "evals" / "golden", pred)
+    reports = _pinned_scores(snapshot)
+    for run in ("extraction", "reviewer"):
         totals = reports[run]["totals"]
         for field in ("typologies", "emergent", "actors", "jurisdictions"):
             for metric in ("precision", "recall", "f1"):
@@ -398,7 +663,9 @@ def checks_sections_6_to_10(bw, page: str, record: dict, pinned: list) -> list:
                 if not cell or cell.group(1) != want_v:
                     wrong.append("%s/%s/%s want %s page %s" % (run, field, metric, want_v,
                                                               cell.group(1) if cell else None))
-    out.append((n == 24 and not wrong, "#score's 24 precision/recall/F1 values equal score_dirs recomputed now",
+    out.append((n == 24 and not wrong and set(reports["extraction"]["scored"]) <= set(snapshot["advisories"]),
+                "#score's 24 precision/recall/F1 values equal score_dirs recomputed now over the PINNED corpus's "
+                "golden labels only",
                 "; ".join(wrong) or "all 24 equal"))
     out.append(('href="%s"' % html.escape(TRACE_URL) in sc and 'href="%s"' % html.escape(BANDS_URL) in sc
                 and "single full-set run" in sc and "no bands of their own" in sc,
@@ -411,7 +678,8 @@ def checks_sections_6_to_10(bw, page: str, record: dict, pinned: list) -> list:
     out.append((bool(want_moves) and got_moves == want_moves,
                 "#score's 'adding the reviewer moves F1 x -> y' names each moved field with its own two F1 values",
                 "want %s; page %s" % (want_moves, got_moves)))
-    label_pass = json.loads(LABEL_PASS.read_text(encoding="utf-8"))["decisions"]
+    label_pass = [d for d in json.loads(LABEL_PASS.read_text(encoding="utf-8"))["decisions"]
+                  if d["advisory_id"] in set(snapshot["advisories"])]
     sc_counts = _attrs(sc, "data-count")
     out.append((sc_counts.get("scored") == str(len(reports["extraction"]["scored"]))
                 and sc_counts.get("label-decided") == str(len(label_pass))
@@ -438,7 +706,33 @@ def checks_sections_6_to_10(bw, page: str, record: dict, pinned: list) -> list:
     attested = json.loads(ATTESTED_PATH.read_text(encoding="utf-8"))["attested"]
     emergent_ok = sum(1 for d in gd.latest(gd.log_prefix(manifest["decision_log"]["lines"])[2]).values()
                       if d.kind == "emergent" and d.decision == "approve")
-    counts = _own_resolver_counts(QUEUE_DIR, TELEMETRY_DIR)
+    # Section 10's resolver counts are the SNAPSHOT's runs, each classified here from its own files by the
+    # guard's own classifier. (b) below holds the snapshot's recorded classification to the same reading.
+    queue_dir, telemetry_dir = QUEUE_DIR, TELEMETRY_DIR
+    tmp_evidence = None
+    if MUTATION == "snapshot-evidence":
+        # A pinned run's files now say otherwise: in a TEMPORARY copy, the first pinned run's telemetry
+        # records the resolver among its tools and a Resolved call. Nothing tracked is written.
+        tmp_evidence = Path(tempfile.mkdtemp(prefix="fc08_snapshot_evidence_"))
+        queue_dir, telemetry_dir = tmp_evidence / "proposals", tmp_evidence / "telemetry"
+        shutil.copytree(QUEUE_DIR, queue_dir)
+        shutil.copytree(TELEMETRY_DIR, telemetry_dir)
+        first = snapshot["extraction_runs"][0]["run_id"]
+        (telemetry_dir / ("%s.jsonl" % first)).write_text("\n".join(json.dumps(ev) for ev in [
+            {"stage": "RUN_STARTED", "payload": {"run_id": first, "tools": ["mcp__knowledge_centre" + RESOLVER_SUFFIX]}},
+            {"stage": "FC08_TOOL_CALL", "payload": {"run_id": first, "tool": "mcp__knowledge_centre" + RESOLVER_SUFFIX,
+                                                    "outcome": '{"result":"Resolved: X -> ACT-1 X"}'}}]) + "\n",
+            encoding="utf-8")
+    try:
+        pinned_runs = [r["run_id"] for r in snapshot["extraction_runs"]]
+        own = {r: _own_classify(r, queue_dir, telemetry_dir) for r in pinned_runs}
+        counts = _own_counts_of(list(own.values()))
+        live = _own_resolver_counts(queue_dir, telemetry_dir)
+        live_runs = sorted(q.stem for q in queue_dir.glob("*.jsonl") if "-extractor-" in q.stem)
+        built_live = bw._resolver_runs(queue_dir, telemetry_dir)
+    finally:
+        if tmp_evidence is not None:
+            shutil.rmtree(tmp_evidence, ignore_errors=True)
     # The frozen pre-week-5 queue, read here line by line -- not through the builder's _legacy_queue.
     legacy = [json.loads(line) for line in LEGACY_QUEUE.read_text(encoding="utf-8").splitlines() if line.strip()]
     legacy_days = sorted(r["proposed_at"][:10] for r in legacy)
@@ -450,21 +744,81 @@ def checks_sections_6_to_10(bw, page: str, record: dict, pinned: list) -> list:
                                                                         sum(1 for r in legacy if "run_id" in r))))
     # Read through feeds.ledger.load(), never the raw ledger path: evals/check_feeds_ledger.py's writer
     # scan allows only that module (and itself) to name the ledger file, and this guard is neither.
-    feed_accepted = sum(1 for e in feeds_ledger.load().values() if e["decision"] == "accept")
+    ledger_entries = list(feeds_ledger.load().values())
+    if MUTATION == "snapshot-undercount":
+        # In memory only: the ledger holds one more accept, decided ON taken_on, than the snapshot counts.
+        ledger_entries.append({"source": "ofsi", "item_id": "undercount", "decision": "accept",
+                               "first_seen_run": "mutation", "decided_on": snapshot["taken_on"]})
+    feed_accepted = sum(1 for e in ledger_entries if e["decision"] == "accept")
+    accepted_by = _accepts_by(ledger_entries, snapshot["taken_on"])
+
+    # (b) The snapshot still agrees with the evidence it names. Evidence is immutable, so this holds
+    # however much new data arrives after the snapshot was taken.
+    wrong_runs = sorted("%s: snapshot %s, files %s" % (r["run_id"], {k: r[k] for k in ("had_resolver", "resolved")},
+                                                       own[r["run_id"]])
+                        for r in snapshot["extraction_runs"]
+                        if not own[r["run_id"]]["queue"] or own[r["run_id"]]["had_resolver"] != r["had_resolver"]
+                        or own[r["run_id"]]["resolved"] != r["resolved"])
+    out.append((bool(snapshot["extraction_runs"]) and not wrong_runs,
+                "(b) every extraction run the snapshot pins still has its queue file, and its own telemetry classifies "
+                "it as the snapshot says (had_resolver, resolved)", "; ".join(wrong_runs) or
+                "%d pinned runs agree with their files" % len(snapshot["extraction_runs"])))
+    # --repin classifies through the builder's _resolver_runs: over the pinned runs it must agree too.
+    by_builder = {r: (None if r in built_live["no_record"] else r in built_live["with_tool"], r in built_live["resolved"])
+                  for r in built_live["runs"]}
+    disagree = sorted(r["run_id"] for r in snapshot["extraction_runs"]
+                      if by_builder.get(r["run_id"]) != (r["had_resolver"], r["resolved"]))
+    out.append((not disagree, "(b) the builder's _resolver_runs, which --repin uses, classifies every pinned run as the "
+                "snapshot does", "disagree: %s" % (disagree or "none")))
+    missing_adv = sorted(set(snapshot["advisories"]) - set(listed))
+    out.append((bool(snapshot["advisories"]) and not missing_adv and snapshot["advisories"] == sorted(set(snapshot["advisories"]))
+                and bw.ADVISORY in snapshot["advisories"],
+                "(b) every advisory the snapshot pins is still in the advisory list, sorted once each, %s among them"
+                % bw.ADVISORY, "missing: %s" % (missing_adv or "none")))
+    out.append((snapshot["feed_accepted"] == accepted_by,
+                "(b) the snapshot's accepted feed items EQUAL the ledger's accepts decided on or before its taken_on",
+                "snapshot %r; ledger accepts by %s: %d (all accepts: %d)" % (snapshot["feed_accepted"],
+                                                                          snapshot["taken_on"], accepted_by,
+                                                                          feed_accepted)))
+    out.append((SNAPSHOT.read_text(encoding="utf-8")
+                == json.dumps(snapshot, indent=2, sort_keys=True, ensure_ascii=False) + "\n"
+                and sorted(snapshot) == ["advisories", "extraction_runs", "feed_accepted", "taken_on"]
+                and bool(re.fullmatch(r"\d{4}-\d{2}-\d{2}", snapshot["taken_on"]))
+                and [r["run_id"] for r in snapshot["extraction_runs"]]
+                == sorted({r["run_id"] for r in snapshot["extraction_runs"]}),
+                "the snapshot file is canonical JSON (sorted keys, indent 2, trailing newline) with exactly its four "
+                "fields, a YYYY-MM-DD taken_on and its runs sorted once each", "taken_on %r" % snapshot.get("taken_on")))
+
+    # (c) Live data moving past the snapshot is INFORMATION, not a failure: the page stays the snapshot's
+    # until the owner re-pins, rebuilds and republishes.
+    new_runs = sorted(set(live_runs) - set(pinned_runs))
+    new_adv = sorted(set(listed) - set(snapshot["advisories"]))
+    new_acc = feed_accepted - snapshot["feed_accepted"]
+    moved = bool(new_runs or new_adv or new_acc)
+    out.append((INFO, ("live: %s, %s, %s since the snapshot of %s; re-pin with --repin when you choose to republish"
+                       % (_n(len(new_runs), "new extraction run"), _n(new_acc, "accepted item"),
+                          _n(len(new_adv), "new advisory", "new advisories"), snapshot["taken_on"])) if moved
+                else "live data has not moved past the snapshot of %s" % snapshot["taken_on"],
+                "live %s (%s), %s, %s; snapshot %d, %d, %d"
+                % (_n(live["runs"], "extraction run"), ", ".join(new_runs) or "none new",
+                   _n(feed_accepted, "accepted item"), _n(len(listed), "advisory", "advisories"), len(pinned_runs),
+                   snapshot["feed_accepted"], len(snapshot["advisories"]))))
+
     want_lim = {"attested": str(len(attested)),
                 "attested-here": str(sum(1 for a in attested if a["advisory_id"] == bw.ADVISORY)),
                 "label-decided": str(len(label_pass)),
                 "label-advisories": str(len({d["advisory_id"] for d in label_pass})),
                 "entity-keys": str(len(register) - empty), "register": str(len(register)),
                 "emergent-approved": str(emergent_ok),
-                "advisories": str(len(listed)),
+                "advisories": str(len(snapshot["advisories"])),
                 "emergent-undecided": str(len(undecided_emergent)),
-                "feed-accepted": str(feed_accepted),
+                "feed-accepted": str(snapshot["feed_accepted"]),
                 "legacy-proposals": str(len(legacy)),
                 "extraction-runs": str(counts["runs"]), "runs-with-resolver": str(counts["with_tool"]),
                 "runs-no-tool-record": str(counts["no_record"]), "runs-resolved": str(counts["resolved"])}
     got_lim = _attrs(lim, "data-count")
-    out.append((got_lim == want_lim, "every count in #limits equals the guard's own count from the files",
+    out.append((got_lim == want_lim, "(a) every count in #limits equals the guard's own count: the resolver counts "
+                "classified from the pinned runs' own files, the corpus and accepted items from the snapshot",
                 "want %s; page %s" % (want_lim, got_lim)))
     out.append((bool(attested) and all(a.get("attested_by") == "owner" for a in attested)
                 and "each attested by the owner" in lim,
@@ -472,15 +826,25 @@ def checks_sections_6_to_10(bw, page: str, record: dict, pinned: list) -> list:
                 "attested_by values: %s" % sorted({a.get("attested_by") for a in attested})))
     flag = _attrs(lim, "data-flag").get("prompt-names-resolver")
     names = "resolve_actor" in SYSTEM_PROMPT
-    # The only dates #limits may carry are the legacy queue's two, each equal to the guard's own reading.
-    # Any other data-date -- the old typed "resolver-added" / "newest-proposal" among them -- fails.
-    dates = _attrs(lim, "data-date")
-    want_dates = {"legacy-first": legacy_days[0], "legacy-last": legacy_days[-1]} if legacy_days else {}
-    out.append((flag == ("name" if names else "do not name") and dates == want_dates,
+    # The only dates #limits may carry are the snapshot's taken_on -- once in the corpus clause and once in
+    # the resolver clause, since both describe the snapshot -- and the legacy queue's two, each equal to the
+    # guard's own reading. Any other data-date -- the old typed "resolver-added" / "newest-proposal" among
+    # them -- fails. Read as a LIST, so a duplicated or missing span cannot hide in a dict.
+    dates = [(html.unescape(m.group(1)), html.unescape(m.group(2)))
+             for m in re.finditer(r'<[a-z]+[^>]*? data-date="([^"]*)"[^>]*>([^<]*)<', lim)]
+    want_dates = [("snapshot", snapshot["taken_on"]), ("snapshot", snapshot["taken_on"])]
+    want_dates += [("legacy-first", legacy_days[0]), ("legacy-last", legacy_days[-1])] if legacy_days else []
+    out.append((flag == ("name" if names else "do not name") and dates == want_dates
+                and "At the snapshot of" in lim and "by that date" in lim,
                 "#limits says truly whether the extractor's prompt names resolve_actor, and carries no typed date: "
-                "its only dates are the legacy queue's first and last, computed",
+                "its dates are the snapshot's taken_on, in the corpus and resolver clauses, and the legacy queue's "
+                "first and last, computed",
                 "prompt names it: %s; page %r; dates want %s, page %s" % (names, flag, want_dates, dates)))
     return out
+
+
+def _n(n: int, word: str, many: str = "") -> str:
+    return "%d %s" % (n, word if n == 1 else (many or word + "s"))
 
 
 def checks() -> list:
@@ -494,7 +858,21 @@ def checks() -> list:
     out.append((r.returncode == 0, "build_walkthrough --check passes (the committed page is a fresh build)",
                 (r.stdout + r.stderr).strip()[-200:]))
 
-    page = bw.build(bw.inputs())
+    # A malformed snapshot is a LABELLED failure: every later check reads it.
+    try:
+        snapshot = _read_snapshot()
+        problems = _snapshot_problems(snapshot)
+    except (OSError, json.JSONDecodeError) as exc:
+        problems = ["%s: %s" % (type(exc).__name__, exc)]
+    out.append((not problems, "the committed snapshot %s exists, parses and is well-formed" % SNAPSHOT.name,
+                "; ".join(problems) or "four fields, all well-typed"))
+    if problems:
+        return out
+    try:
+        page = bw.build(bw.inputs())
+    except ValueError as exc:
+        out.append((False, "the builder builds from the committed inputs", "ValueError: %s" % exc))
+        return out
     again = bw.build(bw.inputs())
     out.append((page == again, "two consecutive builds are byte-identical", "%d bytes" % len(page.encode("utf-8"))))
 
@@ -610,8 +988,10 @@ def checks() -> list:
                 "every pinned decision's verdict and note sit in the card naming its typology",
                 "misplaced: %s" % misplaced))
 
-    out += checks_sections_6_to_10(bw, page, record, pinned)
+    out += checks_sections_6_to_10(bw, page, record, pinned, snapshot)
+    out += _plant_checks(bw, page, snapshot)
     out += _resolver_counts_fixture_checks(bw)
+    out += _snapshot_self_checks(bw)
 
     for sid in ("grounding", "review"):
         out.append((bw.DECIDED_RUN in section(page, sid), "#%s names the decided run %s" % (sid, bw.DECIDED_RUN),
@@ -648,6 +1028,9 @@ def main(argv: list) -> int:
     for ok, label, detail in checks():
         if ok is NOT_RUN:
             print("  NOT RUN: %s\n         %s" % (label, detail))
+            continue
+        if ok == INFO:
+            print("  INFO %s\n         %s" % (label, detail))
             continue
         print("  %-4s %s\n         %s" % ("PASS" if ok else "FAIL", label, detail))
         failures += 0 if ok else 1

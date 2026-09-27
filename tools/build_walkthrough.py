@@ -5,6 +5,8 @@ typology links, rendered from the governed files and nothing else.
 Usage:
     python tools/build_walkthrough.py            # write site/threat-intel/index.html
     python tools/build_walkthrough.py --check    # exit 1 when the committed page differs from a fresh build
+    python tools/build_walkthrough.py --repin    # re-take site/walkthrough_snapshot.json from the live files;
+                                                 # rebuilds nothing, publishes nothing
 
 WHAT IT READS (inputs(), once each; paths through the owning modules' constants):
   the advisory list entry          -> section 2 (title, publisher, date, URL, pages, sha256)
@@ -23,6 +25,17 @@ WHAT IT READS (inputs(), once each; paths through the owning modules' constants)
   evals/golden vs both record sets -> section 9, scored by evals.score.score_dirs at build time
   the owner-attested citations     -> section 10 (how many the matcher cannot place)
   the extractor's tools and prompt -> section 10 (whether it is asked to resolve actors)
+  site/walkthrough_snapshot.json   -> the corpus (the advisory ids the page describes; the advisory list is
+                                      filtered to them) and section 10's extraction runs and accepted feed items
+
+THE SNAPSHOT. Three inputs move every Friday once live runs are accepted: a new extraction queue in
+data/proposals/, an accepted item in the feeds ledger, and that item's new advisory-list entry. The
+page reads none of them live. It renders the committed snapshot, dated by its taken_on, so an accepted
+run leaves the page byte-identical and the public site stays out of the weekly loop. Re-pinning is a
+deliberate act: --repin recomputes the snapshot from the live files (through _resolver_runs, the
+ledger's load() and the advisory list), prints what changed, and writes it; the owner then rebuilds
+and republishes on a go. --repin is the one place a clock is read (today's date, only when the pinned
+data changed), and it reaches the page only through the committed file.
 
 DETERMINISTIC. No clock, no git, no PDF, no gitignored file: the same inputs give the same
 bytes. A decision appended to the log after the batch was cut does not reach the page --
@@ -40,6 +53,7 @@ import html
 import json
 import re
 import sys
+from datetime import date
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -62,6 +76,9 @@ from evals.score import score_dirs  # noqa: E402
 from tools.build_actor_register import load_register  # noqa: E402
 
 OUT = ROOT / "site" / "threat-intel" / "index.html"
+SNAPSHOT = ROOT / "site" / "walkthrough_snapshot.json"
+SNAPSHOT_FIELDS = ("advisories", "extraction_runs", "feed_accepted", "taken_on")
+RUN_FIELDS = ("had_resolver", "resolved", "run_id")
 ADVISORY = "ADV-2026-0013"
 DECIDED_RUN = "adv-2026-0013-extractor-f617bd3b00"
 TELEMETRY_RUN = "adv-2026-0013-extractor-69eeab7b41"
@@ -81,7 +98,8 @@ _MUTATE = None  # set only by evals/check_walkthrough.py through --_mutate
 MUTATIONS = ("drop-citation", "unpinned-log", "wrong-page", "swap-notes", "wrong-count", "desk-scope", "two-runs",
              "typed-score", "actor-id", "digest-header", "telemetry-count", "attested-count", "swap-moves",
              "resolver-runs", "resolver-prompt", "feed-accepted", "desk-total", "register-unresolved",
-             "corpus-count", "emergent-undecided", "legacy-count")
+             "corpus-count", "emergent-undecided", "legacy-count", "snapshot-count", "unpinned-advisory",
+             "unpinned-golden")
 
 e = html.escape
 PAST = {"approve": "approved", "reject": "rejected"}
@@ -140,9 +158,123 @@ def _legacy_queue(path: Path = LEGACY_QUEUE) -> dict:
     return {"count": len(rows) + (1 if _MUTATE == "legacy-count" else 0), "first": days[0], "last": days[-1]}
 
 
+def snapshot_text(snap: dict) -> str:
+    """The canonical bytes of a snapshot: sorted keys, indent 2, trailing newline, so a re-pin of
+    unchanged data writes the same bytes."""
+    return json.dumps(snap, indent=2, sort_keys=True, ensure_ascii=False) + "\n"
+
+
+def load_snapshot(path: Path = None) -> dict:
+    """The committed snapshot, refused unless it is exactly the shape --repin writes."""
+    path = SNAPSHOT if path is None else path
+    try:
+        snap = _json(path)
+    except (OSError, json.JSONDecodeError) as exc:
+        raise ValueError("the walkthrough snapshot %s cannot be read: %s (re-take it with --repin)"
+                         % (path.name, exc)) from exc
+    if not isinstance(snap, dict) or tuple(sorted(snap)) != SNAPSHOT_FIELDS:
+        raise ValueError("%s must hold exactly %s" % (path.name, ", ".join(SNAPSHOT_FIELDS)))
+    if not isinstance(snap["taken_on"], str) or not re.fullmatch(r"\d{4}-\d{2}-\d{2}", snap["taken_on"]):
+        raise ValueError("%s: taken_on %r is not YYYY-MM-DD" % (path.name, snap["taken_on"]))
+    if (not isinstance(snap["advisories"], list) or not all(isinstance(a, str) for a in snap["advisories"])
+            or snap["advisories"] != sorted(set(snap["advisories"]))):
+        raise ValueError("%s: advisories must be a sorted list of distinct ids" % path.name)
+    runs = snap["extraction_runs"]
+    if (not isinstance(runs, list)
+            or not all(isinstance(r, dict) and tuple(sorted(r)) == RUN_FIELDS and isinstance(r["run_id"], str)
+                       for r in runs)
+            or [r["run_id"] for r in runs] != sorted({r["run_id"] for r in runs})):
+        raise ValueError("%s: extraction_runs must be distinct {%s} entries, sorted by run_id"
+                         % (path.name, ", ".join(RUN_FIELDS)))
+    # `is None or isinstance bool`, not `in (True, False, None)`: 1 == True, and a 1 is not a classification.
+    if not all(isinstance(r["run_id"], str) and (r["had_resolver"] is None or isinstance(r["had_resolver"], bool))
+               and isinstance(r["resolved"], bool) for r in runs):
+        raise ValueError("%s: a run's run_id must be a string, had_resolver true, false or null, and resolved a bool"
+                         % path.name)
+    fa = snap["feed_accepted"]
+    if not isinstance(fa, int) or isinstance(fa, bool) or fa < 0:
+        raise ValueError("%s: feed_accepted %r is not a count" % (path.name, fa))
+    return snap
+
+
+def compute_snapshot(taken_on: str, queue_dir: Path = None, telemetry_dir: Path = None, ledger_path: Path = None,
+                     advisory_list: Path = None) -> dict:
+    """What --repin writes: the live files' corpus, extraction runs and accepted feed items. Each run is
+    classified by _resolver_runs -- had_resolver null when the run has no tool record, else whether its
+    tools named the resolver. The paths default to the real ones and exist so a guard can run this on a
+    synthetic fixture."""
+    rr = _resolver_runs(queue_dir, telemetry_dir)
+    runs = [{"run_id": r, "had_resolver": None if r in rr["no_record"] else r in rr["with_tool"],
+             "resolved": r in rr["resolved"]} for r in rr["runs"]]
+    entries = feeds_ledger.load() if ledger_path is None else feeds_ledger.load(ledger_path)
+    # Accepted BY taken_on, so the page's "by that date K had been accepted" is exactly checkable
+    # against the ledger's decided_on later, however many items are accepted after.
+    listed = _json(ADVISORY_LIST if advisory_list is None else advisory_list)["advisories"]
+    return {"taken_on": taken_on, "advisories": sorted({a["advisory_id"] for a in listed}),
+            "extraction_runs": runs, "feed_accepted": sum(1 for x in entries.values()
+                                 if x["decision"] == "accept" and x["decided_on"] <= taken_on)}
+
+
+def _snapshot_changes(old: dict, new: dict) -> list:
+    """What a re-pin changes, one line per difference, for the owner to read before rebuilding."""
+    out = []
+    for word, key in (("advisory", "advisories"),):
+        gone, came = sorted(set(old[key]) - set(new[key])), sorted(set(new[key]) - set(old[key]))
+        out += ["%s added: %s" % (word, a) for a in came] + ["%s REMOVED: %s" % (word, a) for a in gone]
+    before = {r["run_id"]: r for r in old["extraction_runs"]}
+    after = {r["run_id"]: r for r in new["extraction_runs"]}
+    for run in sorted(set(before) | set(after)):
+        if run not in before:
+            out.append("extraction run added: %s (had_resolver %s, resolved %s)"
+                       % (run, json.dumps(after[run]["had_resolver"]), json.dumps(after[run]["resolved"])))
+        elif run not in after:
+            out.append("extraction run REMOVED: %s" % run)
+        elif before[run] != after[run]:
+            out.append("extraction run RECLASSIFIED: %s %s -> %s" % (run, before[run], after[run]))
+    if old["feed_accepted"] != new["feed_accepted"]:
+        out.append("accepted feed items: %d -> %d" % (old["feed_accepted"], new["feed_accepted"]))
+    if old["taken_on"] != new["taken_on"]:
+        out.append("taken_on: %s -> %s" % (old["taken_on"], new["taken_on"]))
+    return out
+
+
+def repin(path: Path = None, today: str = None) -> int:
+    """Re-take the snapshot from the live files and write it. When the pinned data is unchanged, the
+    old taken_on stands and nothing is written, so re-pinning never moves the page by date alone.
+    Rebuilds nothing and publishes nothing."""
+    path = SNAPSHOT if path is None else path
+    new = compute_snapshot(today or date.today().isoformat())
+    old = load_snapshot(path) if path.exists() else None
+    if old is not None and {k: v for k, v in old.items() if k != "taken_on"} == \
+            {k: v for k, v in new.items() if k != "taken_on"}:
+        print("unchanged since the snapshot of %s; nothing written" % old["taken_on"])
+        return 0
+    if ADVISORY not in new["advisories"]:
+        raise ValueError("the live advisory list no longer holds %s, the advisory the page follows" % ADVISORY)
+    changes = _snapshot_changes(old, new) if old is not None else [
+        "new snapshot: %d advisories, %d extraction runs, %d accepted feed items"
+        % (len(new["advisories"]), len(new["extraction_runs"]), new["feed_accepted"])]
+    path.write_text(snapshot_text(new), encoding="utf-8")
+    print("wrote %s (taken_on %s)" % (path.relative_to(ROOT), new["taken_on"]))
+    for line in changes:
+        print("  " + line)
+    print("the page is not rebuilt: run tools/build_walkthrough.py, then republish on the owner's go")
+    return 0
+
+
 def inputs(log: Path = gd.LOG) -> dict:
     """Every input the page is built from, loaded once. Refuses inputs that disagree with each other."""
-    advisories = {a["advisory_id"]: a for a in _json(ADVISORY_LIST)["advisories"]}
+    snapshot = load_snapshot()
+    on_list = {a["advisory_id"]: a for a in _json(ADVISORY_LIST)["advisories"]}
+    unlisted = sorted(set(snapshot["advisories"]) - set(on_list))
+    if unlisted:
+        raise ValueError("the snapshot pins advisories the advisory list no longer holds: %s" % ", ".join(unlisted))
+    # The corpus is the SNAPSHOT's: an advisory accepted after it -- which has no label_status yet, and
+    # would make the label check below refuse -- never reaches the page until the owner re-pins.
+    advisories = (on_list if _MUTATE == "unpinned-advisory"
+                  else {a: on_list[a] for a in snapshot["advisories"]})
+    if ADVISORY not in advisories:
+        raise ValueError("the snapshot's corpus does not hold %s, the advisory the page follows" % ADVISORY)
     advisory = advisories[ADVISORY]
     if not advisory.get("url", "").startswith(("http://", "https://")):
         raise ValueError("the advisory URL %r is not http(s); a public page links nothing else" % advisory.get("url"))
@@ -235,12 +367,20 @@ def inputs(log: Path = gd.LOG) -> dict:
         raise ValueError("section 8 says %s has telemetry and the decided run has none; the directory holds %s"
                          % (TELEMETRY_RUN, tel_runs))
 
-    # Section 10's resolver sentence is COUNTED (slice 2 A). It replaced a refusal that would have fired
-    # on the first new extraction's queue file and blocked every commit.
-    resolver_runs = _resolver_runs()
+    # Section 10's resolver sentence is COUNTED (slice 2 A) over the SNAPSHOT's extraction runs, each
+    # classified when --repin took it: a new extraction's queue file leaves the page unchanged until the
+    # owner re-pins. evals/check_walkthrough.py holds each pinned run's classification to its own files.
+    runs = snapshot["extraction_runs"]
+    no_record = [r["run_id"] for r in runs if (r["had_resolver"] is False if _MUTATE == "snapshot-count"
+                                                else r["had_resolver"] is None)]
+    resolver_runs = {"runs": [r["run_id"] for r in runs],
+                     "with_tool": [r["run_id"] for r in runs if r["had_resolver"] is True],
+                     "no_record": no_record,
+                     "resolved": [r["run_id"] for r in runs if r["resolved"]]}
 
     # Sections 5, 9, 10: the golden labels are Claude's, with the owner's decisions on the disputed entries.
-    label_pass = _json(LABEL_PASS)["decisions"]
+    # Only the pinned corpus's entries: section 9 and 10 describe the snapshot's advisories and no others.
+    label_pass = [d for d in _json(LABEL_PASS)["decisions"] if d["advisory_id"] in advisories]
     unlabelled = sorted(a["advisory_id"] for a in advisories.values()
                         if LABEL_PROVENANCE not in a.get("label_status", ""))
     if unlabelled:
@@ -250,6 +390,8 @@ def inputs(log: Path = gd.LOG) -> dict:
     if listed != len(label_pass):
         raise ValueError("the advisory list counts %d owner-decided disputed entries; the label pass holds %d"
                          % (listed, len(label_pass)))
+
+    scored_ids = None if _MUTATE == "unpinned-golden" else sorted(snapshot["advisories"])
 
     attested = _json(ATTESTED_PATH)["attested"]
     if any(a.get("attested_by") != "owner" for a in attested):
@@ -281,12 +423,16 @@ def inputs(log: Path = gd.LOG) -> dict:
         "run_started": started[0]["payload"],
         "run_completed": completed[0]["payload"],
         "tel_proposals": tel_proposals,
-        "scores": {"extraction": score_dirs(GOLDEN_DIR, EXTRACTOR_RECORDS), "reviewer": score_dirs(GOLDEN_DIR, RECORDS_DIR)},
+        # Section 9 scores ONLY the pinned corpus (owner decision 2026-09-27): a golden label or record for
+        # an advisory accepted after the snapshot leaves the page byte-identical until the owner re-pins.
+        "scores": {"extraction": score_dirs(GOLDEN_DIR, EXTRACTOR_RECORDS, advisory_ids=scored_ids),
+                   "reviewer": score_dirs(GOLDEN_DIR, RECORDS_DIR, advisory_ids=scored_ids)},
         "attested": attested,
         "resolver_runs": resolver_runs,
         "legacy_queue": _legacy_queue(),
         "prompt_names_resolver": "resolve_actor" in SYSTEM_PROMPT,
-        "feed_accepted": sum(1 for e in feeds_ledger.load().values() if e["decision"] == "accept"),
+        "feed_accepted": snapshot["feed_accepted"],
+        "snapshot": snapshot,
         "tel_runs": tel_runs,
         "label_pass": label_pass,
     }
@@ -841,7 +987,7 @@ def section_limits(inp: dict) -> str:
         prompt = "do not name" if prompt == "name" else "name"
     feed_accepted = inp["feed_accepted"] + (1 if _MUTATE == "feed-accepted" else 0)
     feed_item_word = "item" if feed_accepted == 1 else "items"
-    feed_have_word = "has" if feed_accepted == 1 else "have"
+    taken_on = e(inp["snapshot"]["taken_on"])
     run_word = "run" if len(rr["runs"]) == 1 else "runs"
     label_advisories = len({d["advisory_id"] for d in inp["label_pass"]})
     n_corpus = len(inp["advisories"]) + (1 if _MUTATE == "corpus-count" else 0)
@@ -851,9 +997,9 @@ def section_limits(inp: dict) -> str:
     return """<section id="limits">
   <h2><span class="n">10</span> What this slice does not do yet</h2>
   <ul class="limits">
-    <li><strong>Nothing enters the corpus without a person.</strong> <span data-count="advisories">%d</span> advisories, each pinned by its sha256; every one was added by a person. Live ingestion is being built: a feeds server lists and fetches new publications into a local inbox, and <span data-count="feed-accepted">%d</span> feed %s %s been accepted into the corpus.</li>
+    <li><strong>Nothing enters the corpus without a person.</strong> At the snapshot of <span data-date="snapshot">%s</span>, the corpus held <span data-count="advisories">%d</span> advisories, each pinned by its sha256; every one was added by a person. Live ingestion is being built: a feeds server lists and fetches new publications into a local inbox, and by that date <span data-count="feed-accepted">%d</span> feed %s had been accepted into the corpus.</li>
     <li><strong>Nothing flows into detection yet.</strong> An approved link reaches a desk&rsquo;s digest; no typology link, indicator or actor is fed to the platform&rsquo;s detection.</li>
-    <li><strong>Actor resolution during extraction is counted, not assumed.</strong> Of the <span data-count="extraction-runs">%d</span> committed extraction %s with a proposal queue, <span data-count="runs-with-resolver">%d</span> recorded <code>%s</code> among the agent&rsquo;s tools, <span data-count="runs-no-tool-record">%d</span> recorded no list of tools, and <span data-count="runs-resolved">%d</span> resolved an actor with it. The extraction agent&rsquo;s current instructions <span data-flag="prompt-names-resolver">%s</span> it. The <span data-count="legacy-proposals">%d</span> earlier %s in one legacy queue without run ids, dated <span data-date="legacy-first">%s</span> to <span data-date="legacy-last">%s</span>. Section 6&rsquo;s resolution was run over the committed records, after extraction.</li>
+    <li><strong>Actor resolution during extraction is counted, not assumed.</strong> At the snapshot of <span data-date="snapshot">%s</span>, of the <span data-count="extraction-runs">%d</span> committed extraction %s with a proposal queue, <span data-count="runs-with-resolver">%d</span> recorded <code>%s</code> among the agent&rsquo;s tools, <span data-count="runs-no-tool-record">%d</span> recorded no list of tools, and <span data-count="runs-resolved">%d</span> resolved an actor with it. The extraction agent&rsquo;s current instructions <span data-flag="prompt-names-resolver">%s</span> it. The <span data-count="legacy-proposals">%d</span> earlier %s in one legacy queue without run ids, dated <span data-date="legacy-first">%s</span> to <span data-date="legacy-last">%s</span>. Section 6&rsquo;s resolution was run over the committed records, after extraction.</li>
     <li><strong>No actor is linked to the platform&rsquo;s entities.</strong> <span data-count="entity-keys">%d</span> of the <span data-count="register">%d</span> register entries carry an <code>entity_key</code>; section 6 says why.</li>
     <li><strong>Digests are built, not delivered.</strong> A batch is cut on demand; nothing sends it to a desk.</li>
     <li><strong>Approved emergent candidates are not doctrine.</strong> An emergent typology the owner approves is recorded as approved; it is not added to the typology library. The pinned log holds <span data-count="emergent-approved">%d</span> such approvals.</li>
@@ -863,7 +1009,7 @@ def section_limits(inp: dict) -> str:
     <li><strong>The scores are single runs.</strong> Section 9 shows one extraction per advisory; its figures have no bands of their own.</li>
   </ul>
 </section>
-""" % (n_corpus, feed_accepted, feed_item_word, feed_have_word, len(rr["runs"]), run_word,
+""" % (taken_on, n_corpus, feed_accepted, feed_item_word, taken_on, len(rr["runs"]), run_word,
        len(rr["with_tool"]), RESOLVER, len(rr["no_record"]), len(rr["resolved"]), prompt, lq["count"],
        "proposal sits" if lq["count"] == 1 else "proposals sit", lq["first"], lq["last"], keyed,
        len(register), emergent_ok,
@@ -1028,11 +1174,18 @@ def main(argv: list) -> int:
     global _MUTATE
     ap = argparse.ArgumentParser(description="Build the public threat-intelligence walkthrough")
     ap.add_argument("--check", action="store_true", help="exit 1 when the committed page differs from a fresh build")
+    ap.add_argument("--repin", action="store_true",
+                    help="re-take site/walkthrough_snapshot.json from the live files; rebuilds and publishes nothing")
     ap.add_argument("--stdout", action="store_true", help=argparse.SUPPRESS)
     ap.add_argument("--log", type=Path, default=gd.LOG, help=argparse.SUPPRESS)
     ap.add_argument("--_mutate", choices=MUTATIONS, help=argparse.SUPPRESS)
     args = ap.parse_args(argv)
     _MUTATE = args._mutate
+    if args.repin:
+        if _MUTATE or args.check or args.stdout:
+            print("REFUSED: --repin runs alone, and a mutated builder never writes the snapshot", file=sys.stderr)
+            return 2
+        return repin()
     page = build(inputs(args.log))
     if args.stdout:
         sys.stdout.buffer.write(page.encode("utf-8"))

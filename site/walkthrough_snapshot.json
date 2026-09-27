@@ -1,0 +1,38 @@
+{
+  "advisories": [
+    "ADV-2026-0001",
+    "ADV-2026-0002",
+    "ADV-2026-0003",
+    "ADV-2026-0004",
+    "ADV-2026-0005",
+    "ADV-2026-0006",
+    "ADV-2026-0007",
+    "ADV-2026-0008",
+    "ADV-2026-0009",
+    "ADV-2026-0010",
+    "ADV-2026-0011",
+    "ADV-2026-0012",
+    "ADV-2026-0013",
+    "ADV-2026-0014",
+    "ADV-2026-0015",
+    "ADV-2026-0016",
+    "ADV-2026-0017",
+    "ADV-2026-0018",
+    "ADV-2026-0019",
+    "ADV-2026-0020"
+  ],
+  "extraction_runs": [
+    {
+      "had_resolver": null,
+      "resolved": false,
+      "run_id": "adv-2026-0013-extractor-69eeab7b41"
+    },
+    {
+      "had_resolver": null,
+      "resolved": false,
+      "run_id": "adv-2026-0013-extractor-f617bd3b00"
+    }
+  ],
+  "feed_accepted": 0,
+  "taken_on": "2026-09-27"
+}

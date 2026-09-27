@@ -262,7 +262,7 @@ class NothingToScoreError(Exception):
 
 def score_dirs(golden_dir: Path, predicted_dir: Path,
                emergent_threshold: float = DEFAULT_EMERGENT_THRESHOLD,
-               actor_threshold: float = DEFAULT_ACTOR_THRESHOLD) -> dict:
+               actor_threshold: float = DEFAULT_ACTOR_THRESHOLD, advisory_ids=None) -> dict:
     """Load golden/predicted AdvisoryRecords under the two directories and score
     every matched pair. Returns exactly the dict `main` writes with --json:
     golden_dir, predicted_dir, emergent_threshold, actor_threshold, scored,
@@ -271,6 +271,10 @@ def score_dirs(golden_dir: Path, predicted_dir: Path,
     Raises NothingToScoreError -- carrying whatever `main` needs to reproduce
     its old stdout/stderr exactly -- when there are no golden labels, or no
     advisory id present in both directories.
+
+    advisory_ids, when given, restricts BOTH sides to those ids before anything
+    is paired or counted, as if no other file were in either directory (the
+    walkthrough scores only its pinned corpus). None, the default, changes nothing.
     """
     golden = {}
     for p in sorted(golden_dir.glob("ADV-*.json")):
@@ -294,6 +298,13 @@ def score_dirs(golden_dir: Path, predicted_dir: Path,
             except (KeyError, json.JSONDecodeError) as exc:
                 print("skipping unreadable predicted record %s: %s" % (p.name, exc), file=sys.stderr)
 
+    if advisory_ids is not None:
+        keep = set(advisory_ids)
+        golden = {k: v for k, v in golden.items() if k in keep}
+        predicted = {k: v for k, v in predicted.items() if k in keep}
+        if not golden:
+            raise NothingToScoreError("No golden labels in %s for the %d advisory ids given. Nothing to score against."
+                                      % (golden_dir, len(keep)))
     scored_ids = sorted(set(golden) & set(predicted))
     unpredicted = sorted(set(golden) - set(predicted))
     unlabelled = sorted(set(predicted) - set(golden))
