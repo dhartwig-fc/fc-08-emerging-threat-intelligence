@@ -23,9 +23,10 @@ Sub-project B adds two tools (feeds/triage.py holds their rules):
                                     NOT_RELEVANT verdict stored and reported like any other, a cap of
                                     10 per run. feeds_extract is sub-project C.
 
-Every governed refusal starts "Rejected:", the prefix agents/telemetry.py counts as REFUSED. (Until
-slice 2 B these read "Refused:", which telemetry recorded as SUCCESS.) Both new tools run under
-_STATE_LOCK, like A's two.
+Every governed refusal starts with feeds_triage.REJECTED ("Rejected:"), the one prefix
+agents/telemetry.REFUSAL_PREFIX counts as REFUSED -- the server never spells the prefix itself as a
+literal (fix round 1). (Until slice 2 B these read "Refused:", which telemetry recorded as SUCCESS.)
+Both new tools run under _STATE_LOCK, like A's two.
 
 Works on MCP Python SDK 2.x (MCPServer) and 1.x (FastMCP).
 """
@@ -89,7 +90,8 @@ def _run_id():
     return run_id if inbox.RUN_ID.fullmatch(run_id) else None
 
 
-NO_RUN = "Rejected: this server has no run identity (%s is unset or malformed); the runner sets it." % RUN_ENV
+NO_RUN = "%s this server has no run identity (%s is unset or malformed); the runner sets it." % (
+    feeds_triage.REJECTED, RUN_ENV)
 
 
 @mcp.tool(
@@ -115,8 +117,8 @@ async def list_new(params: ListNewInput) -> str:
 def _list_new(run_id: str, source: str) -> str:
     state = inbox.load(run_id, INBOX_ROOT)
     if source in state["sources"]:
-        return "Rejected: %s was already listed in this run (status %s); a listing is fetched once per run." % (
-            source, state["sources"][source]["status"])
+        return "%s %s was already listed in this run (status %s); a listing is fetched once per run." % (
+            feeds_triage.REJECTED, source, state["sources"][source]["status"])
     src = SOURCES[source]
     entry = {"listed_at": _now(), "listing_url": src.listing_url, "status": "ok", "error": None, "listing": None,
              "listing_sha256": None, "listed": 0, "already_seen": 0, "items": []}
@@ -187,7 +189,8 @@ def _fetch(run_id: str, item_key: str) -> str:
     state = inbox.load(run_id, INBOX_ROOT)
     item = inbox.find_item(state, item_key)
     if item is None:
-        return "Rejected: %s was not listed as new in this run; call feeds_list_new first." % item_key
+        return "%s %s was not listed as new in this run; call feeds_list_new first." % (feeds_triage.REJECTED,
+                                                                                        item_key)
     if item.get("document"):
         return "Already fetched: %s" % _describe(item["document"])
     src = SOURCES[item["source"]]
@@ -247,14 +250,17 @@ async def read_page(params: ReadPageInput) -> str:
 def _read_page(run_id: str, item_key: str, page: int) -> str:
     item = inbox.find_item(inbox.load(run_id, INBOX_ROOT), item_key)
     if item is None:
-        return "Rejected: %s was not listed as new in this run; call feeds_list_new first." % item_key
+        return "%s %s was not listed as new in this run; call feeds_list_new first." % (feeds_triage.REJECTED,
+                                                                                        item_key)
     path, refusal = feeds_triage.pinned_document(run_id, item, INBOX_ROOT)
     if path is None:
         return refusal
     pages = feeds_triage.page_texts(path)
     if not 1 <= page <= len(pages):
-        return "Rejected: %s's document has %d page(s); there is no page %d." % (item_key, len(pages), page)
-    return "=== PAGE %d of %d === %s | %s\n%s" % (page, len(pages), item_key, item["title"], pages[page - 1].strip())
+        return "%s %s's document has %d page(s); there is no page %d." % (feeds_triage.REJECTED, item_key,
+                                                                          len(pages), page)
+    return "=== PAGE %d of %d === %s | listing title (not quotable): %s\n%s" % (
+        page, len(pages), item_key, item["title"], pages[page - 1].strip())
 
 
 class TriageInput(BaseModel):

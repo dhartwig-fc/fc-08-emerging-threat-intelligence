@@ -11,23 +11,32 @@ Usage:
     python evals/check_feeds_triage.py --mutate no-cap             # more than 10 verdicts in one run
     python evals/check_feeds_triage.py --mutate no-pin-check       # a changed pinned document is still quoted
     python evals/check_feeds_triage.py --mutate refused-prefix     # refusals read "Refused:", which telemetry calls SUCCESS
+    python evals/check_feeds_triage.py --mutate wrong-document     # a quote is checked against another item's document
 
 WHAT IT HOLDS:
   quoted        a verdict is recorded only when its quote is found, by the shared matcher, in the item's
-                pinned document; a fabricated quote is refused and nothing is written;
+                OWN pinned document; a fabricated quote is refused and nothing is written; a quote true
+                only of a DIFFERENT item's document is refused for this one (fix round 1: the stub now
+                serves a second, distinct document, so this binding is not vacuously true);
   one verdict   a second call for the same item is refused, and the first verdict stands on disk;
   kept          a not_relevant verdict is written like a relevant one and stays in triage.jsonl;
-  bounded       reason 1..300 characters, quote 10..600 after strip, verdict relevant|not_relevant,
-                at most 10 verdicts per run (the 11th refused: that item stays unfinished);
+  bounded       reason 1..300 characters (including the empty-or-whitespace case), quote 10..600 after
+                strip, verdict relevant|not_relevant, at most 10 verdicts per run (the 11th refused:
+                that item stays unfinished);
   pinned        read and triage refuse an item not fetched, and a pinned file whose bytes changed;
-  counted       every refusal starts "Rejected:" and agents/telemetry classifies it REFUSED;
+  no run        feeds_triage AND feeds_read_page both refuse, and write nothing, with no run identity;
+  counted       every refusal starts "Rejected:" -- the one prefix agents.telemetry.REFUSAL_PREFIX
+                classifies REFUSED, which is also feeds.triage.REJECTED (fix round 1: the server now
+                builds its own refusals from that constant instead of a second literal);
   reconciled    feeds.triage.reconcile lists every listed-or-expected item without a verdict as
                 unfinished, including a whole source the agent never listed;
   inbox only    every file written is inside the temporary inbox; the repository's git status is unchanged.
 
 HOW. As evals/check_feeds_server.py: the server's HTTP_GET, INBOX_ROOT and SEEN_PATH are swapped for a
-stub serving the committed OFSI snapshot (every item's URL answers with the committed OFSI FAQ page) and
-a temporary inbox and ledger. Cold: no network, no model.
+stub serving the committed OFSI snapshot -- every item's URL answers with the committed OFSI FAQ page,
+except the last of the twelve fetched items, which gets a byte-variant of it with its own sha256 and a
+sentence the other document never holds, so the quote-to-its-own-document binding is checkable -- and a
+temporary inbox and ledger. Cold: no network, no model.
 
 NOT A VACUOUS PASS. Each --mutate rewrites feeds/triage.py or the server in memory and loads the pair
 as modules; at least one check must fail. A mutation whose target text is missing is a failure.
@@ -60,6 +69,8 @@ PAGE1_QUOTE = "OFSI publishes FAQs providing short-form guidance and technical i
 PAGE2_QUOTE = "20 questions added to the Russia section"
 FABRICATED = "OFSI publishes a red-flag list of shell companies used to evade sanctions."
 PADDED = "   FAQ 204   "  # 7 characters once stripped; on page 1 as "FAQ 204 added."
+# On the SECOND, distinct document only (Stub.doc2) -- never on the shared one every other item pins.
+ITEM_B_QUOTE = "This second fixture belongs to item B alone; it is never served for item A."
 
 MUTATIONS = {
     "no-quote-check": (TRIAGE_SRC, "    if not pages:\n        return False, (", "    if False:\n        return False, ("),
@@ -73,6 +84,9 @@ MUTATIONS = {
     "no-pin-check": (TRIAGE_SRC, '    if not path.exists() or file_sha256(path) != doc["sha256"]:\n',
                      "    if not path.exists():\n"),
     "refused-prefix": (TRIAGE_SRC, 'REJECTED = "Rejected:"\n', 'REJECTED = "Refused:"\n'),
+    "wrong-document": (TRIAGE_SRC, "    path, refusal = pinned_document(run_id, item, root)\n",
+                       "    path, refusal = pinned_document(run_id, inbox.items(inbox.load(run_id, root))[0], "
+                       "root)\n"),
 }
 
 
@@ -98,17 +112,31 @@ def load_pair(mutation):
 
 
 class Stub:
-    """Stands in for feeds.http.get: the OFSI listing, and the FAQ page for every www.gov.uk document URL."""
+    """Stands in for feeds.http.get: the OFSI listing, the FAQ page for every www.gov.uk document URL --
+    except the LAST of the twelve fetched items, which gets a distinct, byte-variant second document
+    (its own sha256, and ITEM_B_QUOTE, a sentence the shared document never holds), so a quote checked
+    against the wrong item's pinned document is something the guard can actually catch (fix round 1)."""
 
     def __init__(self) -> None:
         self.listing = (FIX / "feeds" / "ofsi.atom").read_bytes()
         self.doc = (FIX / "html" / "ofsi_uk_financial_sanctions_faqs.html").read_bytes()
+        self.doc2 = self.doc.replace(
+            b"OFSI publishes FAQs providing short-form guidance and technical information on "
+            b"financial sanctions.",
+            ITEM_B_QUOTE.encode("utf-8"),
+        )
+        if self.doc2 == self.doc:
+            raise SystemExit("fixture swap matched nothing: the guard's premise of two distinct "
+                             "documents is false")
+        self.distinct_url = SOURCES["ofsi"].parse(self.listing)[11].url  # keys[11]: the last of the 12 fetched
         self.calls = []
 
     def __call__(self, url, *, allowed_hosts, allowed_types, max_bytes):
         self.calls.append(url)
         if url == SOURCES["ofsi"].listing_url:
             return fh.Fetched(url, url, "application/atom+xml", self.listing)
+        if url == self.distinct_url:
+            return fh.Fetched(url, url, "text/html", self.doc2)
         if url.startswith("https://www.gov.uk/"):
             return fh.Fetched(url, url, "text/html", self.doc)
         raise fh.FetchRefused("no route for %s" % url)
@@ -147,6 +175,9 @@ def checks(tri, fs) -> list:
         said = triage("ofsi:0000000000000000", "relevant", "r", PAGE1_QUOTE)
         out.append((said.startswith("Rejected") and not (tmp / "inbox").exists(),
                     "with no run identity triage is refused and nothing is written", said[:80]))
+        said = read("ofsi:0000000000000000", 1)
+        out.append((said.startswith("Rejected") and not (tmp / "inbox").exists(),
+                    "with no run identity feeds_read_page is refused and nothing is written", said[:80]))
 
         os.environ[fs.RUN_ENV] = RUN
         call(fs.list_new(fs.ListNewInput(source="ofsi")))
@@ -176,6 +207,12 @@ def checks(tri, fs) -> list:
         out.append((said.startswith("Rejected") and not lines(),
                     "a quote that is not in the pinned document is refused and nothing is written", said[:90]))
 
+        said = triage(keys[0], "relevant", "Wrong item's document.", ITEM_B_QUOTE)
+        refusals.append(said)
+        out.append((said.startswith("Rejected") and not lines(),
+                    "a quote true only of item B's pinned document is refused when given for item A",
+                    said[:90]))
+
         said = triage(keys[0], "not_relevant", "FAQ index page; no method, red flag or case.", PAGE1_QUOTE)
         got = lines()
         out.append((said.startswith("Recorded") and len(got) == 1 and got[0]["verdict"] == "not_relevant"
@@ -199,6 +236,11 @@ def checks(tri, fs) -> list:
         out.append((ok301 and said.startswith("Recorded"), "a 301-character reason is refused; 300 is accepted",
                     said[:60]))
 
+        said = triage(keys[10], "relevant", "   ", PAGE1_QUOTE)
+        refusals.append(said)
+        out.append((said.startswith("Rejected") and len(lines()) == 3,
+                    "an empty or whitespace-only reason is refused and nothing is written", said[:80]))
+
         said = triage(keys[3], "relevant", "Short quote.", PADDED)
         refusals.append(said)
         out.append((said.startswith("Rejected"), "a quote under 10 characters once stripped is refused, padding "
@@ -221,22 +263,29 @@ def checks(tri, fs) -> list:
         out.append((said.startswith("Rejected") and said_read.startswith("Rejected"),
                     "a pinned document whose bytes changed is refused by triage and by read", said[:90]))
 
-        for k in keys[3:10]:
+        said = triage(keys[11], "relevant", "Distinct fixture, correctly bound.", ITEM_B_QUOTE)
+        got = lines()
+        out.append((said.startswith("Recorded") and len(got) == 4 and got[-1]["key"] == keys[11]
+                    and got[-1]["found_on"] == [1],
+                    "the same quote is accepted when given for the item it actually belongs to (item B)",
+                    said[:90]))
+
+        for k in keys[3:9]:
             triage(k, "not_relevant", "General licence; no method, red flag or case.", PAGE1_QUOTE)
-        said = triage(keys[10], "relevant", "Eleventh.", PAGE1_QUOTE)
+        said = triage(keys[9], "relevant", "Eleventh.", PAGE1_QUOTE)
         refusals.append(said)
         got = lines()
         out.append((len(got) == 10 and said.startswith("Rejected") and "cap" in said,
                     "the 11th verdict in one run is refused: the cap is 10", "%d verdicts; %s" % (len(got), said[:60])))
-        out.append((sum(1 for g in got if g["verdict"] == "not_relevant") == 8,
-                    "every not_relevant verdict stays in triage.jsonl (8 of the 10)",
+        out.append((sum(1 for g in got if g["verdict"] == "not_relevant") == 7,
+                    "every not_relevant verdict stays in triage.jsonl (7 of the 10)",
                     "%d not_relevant" % sum(1 for g in got if g["verdict"] == "not_relevant")))
 
         try:
             rec = tri.reconcile(RUN, expected=keys[:12] + ["fincen:0123456789abcdef"], root=tmp / "inbox")
         except ValueError as exc:  # a second line for one item makes load() refuse the file
             rec = {"unfinished": None, "never_listed": None, "triaged": [], "error": str(exc)}
-        out.append((rec["unfinished"] == sorted(keys[10:] + ["fincen:0123456789abcdef"])
+        out.append((rec["unfinished"] == sorted(keys[9:11] + keys[12:] + ["fincen:0123456789abcdef"])
                     and rec["never_listed"] == ["fincen:0123456789abcdef"] and len(rec["triaged"]) == 10,
                     "reconcile lists every untriaged item, and an expected item never listed, as unfinished",
                     "%d unfinished" % len(rec["unfinished"] or [])))
@@ -247,6 +296,10 @@ def checks(tri, fs) -> list:
                     and telemetry.classify_response("Recorded: x")[0] == telemetry.SUCCESS,
                     "every refusal starts 'Rejected:' and telemetry counts it REFUSED (%d refusals)" % len(refusals),
                     sorted(set(classified))))
+        out.append((tri.REJECTED == telemetry.REFUSAL_PREFIX == "Rejected:" and fs.feeds_triage is tri,
+                    "feeds.triage.REJECTED is the one prefix constant, equal to what "
+                    "agents.telemetry.classify_response counts REFUSED, and the server's own refusals are "
+                    "built from it rather than a second literal", tri.REJECTED))
 
         try:
             fs.TriageInput(item_key=keys[0], verdict="relevant", reason="r", quote=PAGE1_QUOTE, url="https://x")
