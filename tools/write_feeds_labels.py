@@ -1,5 +1,5 @@
 """
-Write the draft triage labels once: evals/feeds/labels.json, from the drafter's notes (slice 2 B, Task 5).
+Write the draft triage labels once: evals/feeds/labels.json, from the drafter's notes (slice 2 B, Task 6).
 
 Usage:
     python tools/write_feeds_labels.py --show KEY                      # print an item and its pinned pages
@@ -68,9 +68,19 @@ def write(drafts: Path, drafted_on: str) -> int:
     for n, line in enumerate(drafts.read_text(encoding="utf-8").splitlines(), 1):
         if not line.strip():
             continue
-        d = json.loads(line)
-        reason = (d.get("reason") or "").strip()
-        if d.get("key") not in keys:
+        try:
+            d = json.loads(line)
+        except ValueError as exc:
+            problems.append("line %d: not JSON (%s)" % (n, exc))
+            continue
+        if not isinstance(d, dict):
+            problems.append("line %d: not a JSON object" % n)
+            continue
+        if not isinstance(d.get("reason"), str):
+            problems.append("line %d: %r needs a reason that is a string" % (n, d.get("key")))
+            continue
+        reason = d["reason"].strip()
+        if not isinstance(d.get("key"), str) or d["key"] not in keys:
             problems.append("line %d: %r is not a scored catalogue item" % (n, d.get("key")))
         elif d["key"] in labels:
             problems.append("line %d: %s is labelled twice" % (n, d["key"]))

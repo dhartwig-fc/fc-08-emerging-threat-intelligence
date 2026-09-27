@@ -11,6 +11,7 @@ Usage:
     python evals/check_feeds_catalogue.py --mutate bad-label      # a label other than relevant | not_relevant
     python evals/check_feeds_catalogue.py --mutate long-reason    # a draft reason over 300 characters
     python evals/check_feeds_catalogue.py --mutate rubric-edited  # the rubric changed after its hash was taken
+    python evals/check_feeds_catalogue.py --mutate label-edited   # one frozen label's verdict flipped
 
 WHAT IT HOLDS:
   fixed once    the catalogue's bytes are its canonical form and hash to CATALOGUE_SHA256, pinned the day
@@ -21,7 +22,11 @@ WHAT IT HOLDS:
   where         the catalogue and labels are tracked; evals/feeds/docs/ is gitignored and holds nothing tracked;
   labels        (once labels.json exists) one draft label per catalogue item and no other, each relevant |
                 not_relevant with a reason of 1..300 characters, drafted before any repeat, under a rubric
-                whose sha256 is recorded beside it.
+                whose sha256 is recorded beside it;
+  frozen        (once labels.json exists) the labels' canonical bytes hash to LABELS_SHA256, pinned in the
+                commit that wrote them: a label, reason or the rubric cannot be edited, even with its own
+                recorded hashes recomputed, without this guard saying so. "Never edited" is checked here,
+                not left to git history.
 
 The documents themselves are gitignored, so this guard never opens them: evals/run_feeds_triage.py
 refuses to start on a missing or changed copy, and the server refuses to serve one.
@@ -54,7 +59,10 @@ LABELS = ROOT / "evals" / "feeds" / "labels.json"
 # Pinned the day the catalogue was built (Task 3). Moving it is a new back-catalogue: an owner decision.
 CATALOGUE_SHA256 = "90b57e8ba0224c49506ac8070b731e637d9bfde497b6c0aebdf6fe41f9ed3819"
 LABELS_SCHEMA = "fc08-triage-labels/1"
-# False until Task 5 writes labels.json; flipped to True in that commit, after which a missing or
+# Pinned the day the draft labels were written (Task 6, commit f3b78f8). The labels are frozen: moving this
+# is an edit to the drafts, which the plan forbids; the owner's later decisions live in evals/owner_decisions/.
+LABELS_SHA256 = "922d9e151d043c20c6f73363191481a5f1465c1e7689d4e3021089f0f5fcdd45"
+# False until Task 6 writes labels.json; flipped to True in that commit, after which a missing or
 # partial labels file FAILS rather than being skipped.
 LABELS_DRAFTED = True
 FIELDS = ("source", "item_id", "title", "url", "published", "summary")
@@ -118,6 +126,9 @@ def label_checks(cat: dict, labels: dict) -> list:
     out.append((_git("ls-files", "evals/feeds/labels.json").strip() == "evals/feeds/labels.json"
                 and on_disk == bfc.dump(json.loads(on_disk or "{}")),
                 "the labels are tracked, in canonical form (their sha256 is what every repeat records)", ""))
+    digest = hashlib.sha256(bfc.dump(labels).encode("utf-8")).hexdigest()
+    out.append((digest == LABELS_SHA256, "the labels hash to the sha256 pinned when they were drafted (frozen)",
+                digest[:16]))
     return out
 
 
@@ -142,11 +153,14 @@ def mutate(name: str, cat: dict, labels):
         labels["labels"][first]["reason"] = "x" * (REASON_MAX + 1)
     elif name == "rubric-edited":
         labels["rubric"] += " Edited later."
+    elif name == "label-edited":
+        entry = labels["labels"][first]
+        entry["label"] = next(v for v in VERDICTS if v != entry["label"])
     return cat, labels
 
 
 MUTATIONS = ("drop-item", "minted-key", "dup-key", "no-text", "unlabelled", "bad-label", "long-reason",
-             "rubric-edited")
+             "rubric-edited", "label-edited")
 
 
 def main(argv: list) -> int:
@@ -165,7 +179,7 @@ def main(argv: list) -> int:
     if labels is not None:
         results += label_checks(cat, labels)
     else:
-        print("  NOTE LABELS_DRAFTED is False: the draft labels are Task 5's, and their checks did not run\n")
+        print("  NOTE LABELS_DRAFTED is False: the draft labels are Task 6's, and their checks did not run\n")
     failures = 0
     for ok, label, detail in results:
         print("  %-4s %s\n         %s" % ("PASS" if ok else "FAIL", label, detail))
