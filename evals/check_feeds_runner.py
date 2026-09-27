@@ -15,22 +15,29 @@ Usage:
     python evals/check_feeds_runner.py --mutate pilot-reruns         # a second --pilot silently runs batch-2
     python evals/check_feeds_runner.py --mutate labels-unchecked     # the run starts on uncommitted labels
     python evals/check_feeds_runner.py --mutate unterminated-hidden  # the done line hides unterminated calls
+    python evals/check_feeds_runner.py --mutate only-consecutive     # A, B, A never stops: only the last two compared
+    python evals/check_feeds_runner.py --mutate no-cap               # three different failures, and a fourth starts
+    python evals/check_feeds_runner.py --mutate record-unchecked     # the record is not re-checked inside the lock
 
 WHAT IT HOLDS (evals/run_feeds_triage.py; the Task 4 review ruling and the Task 7 review):
   error recorded   a failed attempt keeps `error` "<Type>: <message>" and its kind: through the REAL
                    run_triage (its SDK loop patched to raise KeyError), through a session that raises
                    itself (recorded with its traceback, not a dead runner), and "sdk" for the SDK's
                    own errors and an agent error result;
-  stops on repeat  the same failure twice in a row, OF ANY KIND -- a bug, an SDK error, a PAID agent
-                   error result -- prints STOPPED and the next invocation starts NO session;
-                   --after-fix buys exactly one more; two different failures do not stop it;
+  stops on repeat  a failure matching ANY earlier failure of the batch since the last --after-fix, OF
+                   ANY KIND -- a bug, an SDK error, a PAID agent error result -- prints STOPPED and the
+                   next invocation starts NO session; so does alternating A, B, A (at the third), and
+                   a third failure of any errors (the cap); --after-fix buys exactly one more, which
+                   stops at once if it fails the old way and opens a fresh window of 3 if it fails a
+                   new way; two different failures alone do not stop it;
   normalised       a bug whose message varies by run id, tool-use id, path or number is still "the same";
   spend shown      the FAILED line prints the attempt's cost ("unknown" for a raise the runner caught),
                    and the WROTE total includes the failed attempts' spend;
   never twice      a lost progress file with the repeat's telemetry present REFUSES (the batch is named,
                    no session starts), while telemetry the progress file accounts for does not; a second
-                   concurrent invocation is refused by the lock, which a finished one releases; a second
-                   --pilot starts nothing;
+                   concurrent invocation is refused by the lock, which a finished one releases; the
+                   record is re-checked INSIDE the lock, so one written meanwhile is never re-written; a
+                   second --pilot starts nothing;
   frozen inputs    preflight refuses labels.json or catalogue.json that is untracked or differs from HEAD
                    (asked of a throwaway git repository), and accepts them committed and unchanged;
   the done line    names the session's unterminated calls.
@@ -63,7 +70,8 @@ from agents import orchestrate_feeds as of  # noqa: E402
 import run_feeds_triage as rf  # noqa: E402
 
 MUTATIONS = ("error-dropped", "unrecorded-raise", "retry-forever", "sdk-exempt", "exact-match", "cost-hidden",
-             "spend-hidden", "forget-evidence", "no-lock", "pilot-reruns", "labels-unchecked", "unterminated-hidden")
+             "spend-hidden", "forget-evidence", "no-lock", "pilot-reruns", "labels-unchecked", "unterminated-hidden",
+             "only-consecutive", "no-cap", "record-unchecked")
 TODAY = date(2026, 10, 2)
 KEY = "ofsi:0123456789abcdef"
 
@@ -74,12 +82,22 @@ def mutate(mutation) -> None:
     if mutation == "unrecorded-raise":
         rf.attempt = lambda session, run: dict(asyncio.run(session(run)))  # the runner as first drafted
     if mutation == "retry-forever":
-        rf.repeated_failure = lambda failed_attempts, batch: None
+        rf.stop_reason = lambda failed_attempts, batch: None
     if mutation == "sdk-exempt":  # the rule as first built: only a "code" error stops
-        real = rf.repeated_failure
-        rf.repeated_failure = lambda fa, batch: (None if any(a.get("error_kind") != "code"
-                                                             for a in [a for a in fa if a.get("batch") == batch][-2:])
-                                                 else real(fa, batch))
+        real = rf.stop_reason
+        rf.stop_reason = lambda fa, batch: (None if any(a.get("error_kind") != "code"
+                                                        for a in [a for a in fa if a.get("batch") == batch][-1:])
+                                            else real(fa, batch))
+    if mutation == "only-consecutive":  # the rule of fix round 1: the last two only
+        def last_two(fa, batch):
+            tail = [a for a in fa if a.get("batch") == batch][-2:]
+            same = [rf.normalise(str(a.get("error", ""))) for a in tail]
+            return tail[1].get("error") if len(tail) == 2 and same[0] == same[1] and same[0] else None
+        rf.repeated_failure = last_two
+    if mutation == "no-cap":
+        rf.at_cap = lambda fa, batch: False
+    if mutation == "record-unchecked":
+        rf.record_written = lambda rep: False
     if mutation == "exact-match":
         rf.normalise = lambda error: error
     if mutation == "cost-hidden":
@@ -143,8 +161,8 @@ def checks(mutation) -> list:
     plan = [("batch-1", [KEY])]
     fresh = lambda: {"sessions": {}, "failed_attempts": []}  # noqa: E731
 
-    def invoke(session, progress, after_fix=False, pilot=True, the_plan=None):
-        return _quiet(rf.run_plan, "rep1", the_plan or plan, progress, tmp / "progress.json", session, TODAY,
+    def invoke(session, progress, after_fix=False, pilot=True, the_plan=None, rep="rep1"):
+        return _quiet(rf.run_plan, rep, the_plan or plan, progress, tmp / "progress.json", session, TODAY,
                       pilot=pilot, after_fix=after_fix)
 
     async def broken_query(**kwargs):  # the SDK loop raising a bug, not an SDK error
@@ -192,16 +210,32 @@ def checks(mutation) -> list:
                 after = invoke(session, progress, after_fix=True)[1]
                 again = invoke(session, progress)[1]
                 calls["after-fix"] = (session.calls, "STOPPED" in after and "STOPPED" in again)
-        two_bugs = fresh()
-        differ = counted(returns("KeyError: 'a'"))
-        invoke(differ, two_bugs)
-        invoke(counted(returns("TypeError: b")), two_bugs)
-        invoke(differ, two_bugs)
-        calls["two-different"] = (differ.calls, False)
+        A, B, C, D = returns("KeyError: 'a'"), returns("TypeError: b"), returns("OSError: c"), returns("ValueError: d")
+
+        def sequence(fns, after_fix_at=()):
+            """Invoke each in turn; (outputs, sessions started by a final extra invocation)."""
+            progress, outs = fresh(), []
+            for n, fn in enumerate(fns):
+                outs.append(invoke(counted(fn), progress, after_fix=n in after_fix_at)[1])
+            tail = counted(succeeds())
+            outs.append(invoke(tail, progress)[1])
+            return outs, tail.calls
+
+        outs, started = sequence([A, B])
+        calls["two-different"] = ("STOPPED" in "".join(outs[:2]), started)
+        outs, started = sequence([A, B, A])
+        calls["A,B,A"] = ("STOPPED" not in "".join(outs[:2]) and "failed with before" in outs[2], started)
+        outs, started = sequence([A, B, C])
+        calls["A,B,C: the cap"] = ("STOPPED" not in "".join(outs[:2]) and "has failed 3 times" in outs[2], started)
+        outs, started = sequence([A, A, B, C, D], after_fix_at=(2,))  # after the fix: new ways, a fresh window
+        calls["after-fix, new way: fresh window"] = ("STOPPED" not in outs[2] + outs[3] and "has failed 3 times"
+                                                     in outs[4], started)
         out.append((calls == {"bug": (2, True), "after-fix": (3, True), "sdk": (2, True), "paid-agent-error": (2, True),
-                              "two-different": (2, False)},
-                    "the same failure twice in a row, of any kind (a bug, an SDK error, a paid agent error result), "
-                    "STOPS: the next invocation starts no session; --after-fix buys one; different failures do not",
+                              "two-different": (False, 1), "A,B,A": (True, 0), "A,B,C: the cap": (True, 0),
+                              "after-fix, new way: fresh window": (True, 0)},
+                    "a failure seen before in the batch, of any kind (a bug, an SDK error, a paid agent error result), "
+                    "STOPS, not only twice in a row (A,B,A); so does a 3rd failure of any errors (the cap); the next "
+                    "invocation starts no session; --after-fix buys one; two different failures alone do not stop",
                     calls))
 
         # 3. normalised
@@ -214,10 +248,10 @@ def checks(mutation) -> list:
 
         # 4. spend shown
         progress = fresh()
-        failed_paid = invoke(returns("agent run failed: ['error_during_execution']", cost=0.40), progress)[1]
-        failed_raise = invoke(raises, progress)[1]
-        wrote = invoke(succeeds(cost=0.20), progress, pilot=False)[1]
-        record = json.loads((rf.REPEATS_DIR / "rep1.json").read_text()) if (rf.REPEATS_DIR / "rep1.json").exists() else {}
+        failed_paid = invoke(returns("agent run failed: ['error_during_execution']", cost=0.40), progress, rep="rep2")[1]
+        failed_raise = invoke(raises, progress, rep="rep2")[1]
+        wrote = invoke(succeeds(cost=0.20), progress, pilot=False, rep="rep2")[1]
+        record = json.loads((rf.REPEATS_DIR / "rep2.json").read_text()) if (rf.REPEATS_DIR / "rep2.json").exists() else {}
         shown = {"paid FAILED names US$0.4000": "US$0.4000" in failed_paid.split("STOPPED")[0],
                  "raise FAILED says unknown": "cost unknown" in failed_raise,
                  "WROTE total US$0.60": "US$0.60 in total" in wrote,
@@ -269,6 +303,15 @@ def checks(mutation) -> list:
         out.append((lock == {"holder": "held", "second invocation": (1, True, 0), "released on exit": True},
                     "a second concurrent invocation of a repeat is refused by the lock, and the lock is released "
                     "when its holder exits", lock))
+
+        # the record, re-checked inside the lock: rep2's was written in section 4, and run() is driven past
+        # the preflight (as a second invocation that passed it before the first wrote the record would be)
+        late = counted(succeeds())
+        code_late, text_late = _quiet(rf.run, "rep2", True, session=late, today=TODAY)
+        rewrite = (code_late, "never overwritten" in text_late, late.calls)
+        out.append((rewrite == (1, True, 0),
+                    "the repeat's record is re-checked inside the lock: one written meanwhile refuses the run, "
+                    "no session starts", rewrite))
 
         # 6. the done line
         line = invoke(succeeds(unterminated=3), fresh(), the_plan=[("batch-9", [KEY])])[1]

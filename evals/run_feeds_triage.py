@@ -32,12 +32,17 @@ A FAILURE NAMES ITS ERROR AND ITS COST, AND A REPEATED FAILURE STOPS THE RUNNER 
 ruling; Task 7 review, fix round 1). Each failed attempt records `error` -- "<Type>: <message>", as
 run_triage returns it, or as the runner caught it with its traceback when the session itself raised --
 `error_kind` ("sdk" for the SDK's own errors and an agent error result, "code" otherwise; recorded for
-the reader, it decides nothing) and `cost_usd` where it is known. The FAILED line prints that cost. A
-batch whose last two attempts failed with the SAME error, of ANY kind, is STOPPED: an agent error
-result arrives after paid turns and its prefix cannot tell a machine problem from a bug, so neither
-class may be re-spent without a decision. "The same" compares the error after normalise() strips run
-ids, tool-use ids, addresses, paths and numbers. A STOPPED batch is refused until the cause is fixed
-and the command is run once with --after-fix, which permits exactly one more attempt.
+the reader, it decides nothing) and `cost_usd` where it is known. The FAILED line prints that cost.
+A batch is STOPPED (Task 7 review, fix round 2) when
+  - its newest failure matches ANY earlier failure of the batch since the last --after-fix -- not only
+    the one before it, so alternating failures A, B, A stop at the third -- of ANY kind: an agent error
+    result arrives after paid turns and its prefix cannot tell a machine problem from a bug; or
+  - it has failed MAX_FAILED_ATTEMPTS (3) times since the last --after-fix, whatever the errors.
+"Matches" compares errors after normalise() strips run ids, tool-use ids, addresses, paths and numbers.
+A STOPPED batch is refused until the cause is fixed and the command is run once with --after-fix,
+which permits exactly one more attempt. That attempt tests the fix, so it is compared with every
+earlier failure of the batch: failing the old way stops it again at once; failing a new way opens a
+fresh window, capped at 3 like the first.
 
 AND IT NEVER RUNS A BATCH TWICE BY ACCIDENT:
   - one invocation per repeat at a time: an exclusive lock on .progress/<rep>.lock, released on exit;
@@ -87,6 +92,7 @@ SOURCES = ("ofsi", "fincen", "ofac")
 SDK_ERRORS = frozenset(n for n in dir(claude_agent_sdk) if isinstance(getattr(claude_agent_sdk, n), type)
                        and issubclass(getattr(claude_agent_sdk, n), claude_agent_sdk.ClaudeSDKError))
 AGENT_FAILED = "agent run failed:"  # run_triage's prefix for an error ResultMessage from the agent
+MAX_FAILED_ATTEMPTS = 3  # per batch, since the last --after-fix, whatever the errors
 
 
 def _sha(path: Path) -> str:
@@ -112,9 +118,14 @@ def _committed(path: Path) -> bool:
     return tracked and clean
 
 
+def record_written(rep: str) -> bool:
+    """The repeat's record exists: it is written once and never overwritten."""
+    return (REPEATS_DIR / ("%s.json" % rep)).exists()
+
+
 def preflight(rep: str, catalogue: dict) -> list:
     problems = []
-    if (REPEATS_DIR / ("%s.json" % rep)).exists():
+    if record_written(rep):
         problems.append("%s.json exists; a repeat is never overwritten" % rep)
     if os.environ.get("ANTHROPIC_API_KEY"):
         problems.append("ANTHROPIC_API_KEY is set; unset it so the run uses the subscription token")
@@ -168,7 +179,7 @@ def attempt(session, run: of.FeedsRun) -> dict:
     the result that carried it did not reach the runner."""
     try:
         return dict(asyncio.run(session(run)))
-    except Exception as exc:  # noqa: BLE001 -- recorded, then counted by repeated_failure
+    except Exception as exc:  # noqa: BLE001 -- recorded, then counted by stop_reason
         return {"run_id": run.run_id, "failure": "%s: %s" % (type(exc).__name__, exc), "raised_in": "runner",
                 "traceback": traceback.format_exc(), "cost_usd": None, "turns": None, "limit": None}
 
@@ -179,13 +190,38 @@ def failure_record(summary: dict) -> dict:
     return dict(summary, error=error, error_kind=error_kind(error))
 
 
+def _window(failed_attempts: list, batch: str) -> tuple:
+    """(this batch's failed attempts, the ones since the last --after-fix, inclusive of that attempt)."""
+    mine = [a for a in failed_attempts if a.get("batch") == batch]
+    fixes = [i for i, a in enumerate(mine) if a.get("after_fix")]
+    return mine, mine[fixes[-1]:] if fixes else mine
+
+
 def repeated_failure(failed_attempts: list, batch: str) -> Optional[str]:
-    """The error, when this batch's last two attempts failed with the same error, of any kind; else None."""
-    tail = [a for a in failed_attempts if a.get("batch") == batch][-2:]
-    if len(tail) < 2:
+    """The newest error, when it matches ANY earlier failure of this batch since the last --after-fix (an
+    --after-fix attempt is compared with every earlier failure: it tests the fix); else None."""
+    mine, window = _window(failed_attempts, batch)
+    if not mine:
         return None
-    same = [normalise(str(a.get("error", ""))) for a in tail]
-    return tail[1].get("error") if same[0] == same[1] and same[0] else None
+    newest = mine[-1]
+    earlier = mine[:-1] if newest.get("after_fix") else window[:-1]
+    key = normalise(str(newest.get("error", "")))
+    return newest.get("error") if key and any(normalise(str(a.get("error", ""))) == key for a in earlier) else None
+
+
+def at_cap(failed_attempts: list, batch: str) -> bool:
+    """MAX_FAILED_ATTEMPTS failures of this batch since the last --after-fix, whatever the errors."""
+    return len(_window(failed_attempts, batch)[1]) >= MAX_FAILED_ATTEMPTS
+
+
+def stop_reason(failed_attempts: list, batch: str) -> Optional[str]:
+    same = repeated_failure(failed_attempts, batch)
+    if same:
+        return "failed again with an error it has failed with before:\n  %s" % str(same)[:500]
+    if at_cap(failed_attempts, batch):
+        return ("has failed %d times since the last --after-fix, with different errors (the newest: %s)"
+                % (MAX_FAILED_ATTEMPTS, str(_window(failed_attempts, batch)[1][-1].get("error"))[:300]))
+    return None
 
 
 def spend(attempts: list) -> tuple:
@@ -210,18 +246,19 @@ def done_line(name: str, run_id: str, summary: dict, keys: list) -> str:
         len((summary.get("terminal_check") or {}).get("unterminated") or []), summary["turns"], summary["cost_usd"])
 
 
-def _stopped(name: str, error: str, progress: dict) -> None:
+def _stopped(name: str, reason: str, progress: dict) -> None:
     known, unknown = spend([a for a in progress["failed_attempts"] if a.get("batch") == name])
-    print("STOPPED %s failed twice in a row with the same error:\n  %s\n"
-          "  Its failed attempts have cost US$%.4f%s. Another attempt would spend again for the same result.\n"
+    print("STOPPED %s %s\n"
+          "  Its failed attempts have cost US$%.4f%s. Another attempt would spend again without a decision.\n"
           "  Fix the cause (a bug, or the machine: auth, credit, the CLI), then run once with --after-fix."
-          % (name, str(error)[:500], known, " (and %d of unknown cost)" % unknown if unknown else ""))
+          % (name, reason, known, " (and %d of unknown cost)" % unknown if unknown else ""))
 
 
 def failed_line(name: str, run_id: str, summary: dict, progress: dict) -> str:
     known, unknown = spend(progress["failed_attempts"])
     return ("FAILED  %s %s: %s\n  This attempt cost %s. Failed attempts on this repeat so far: US$%.4f%s.\n"
-            "  The batch is not done; run the same command again to retry it. The same failure twice STOPS."
+            "  The batch is not done; run the same command again to retry it. A failure seen before, or a\n"
+            "  third failure of this batch, STOPS."
             % (name, run_id, summary["failure"], _usd(summary.get("cost_usd")), known,
                " (and %d of unknown cost)" % unknown if unknown else ""))
 
@@ -239,17 +276,18 @@ def run_plan(rep: str, plan: list, progress: dict, progress_path: Path, session,
     for name, keys in plan:
         if name in progress["sessions"]:
             continue
-        stuck = repeated_failure(progress["failed_attempts"], name)
+        stuck = stop_reason(progress["failed_attempts"], name)
         if stuck and not after_fix:
             _stopped(name, stuck, progress)
             return 1
+        fixing = bool(stuck)  # the flag was spent on a STOPPED batch: this attempt opens a new window
         after_fix = False  # --after-fix buys exactly one attempt
         run = of.FeedsRun(inbox.mint_run_id(today or date.today()), catalogue=CATALOGUE, batch=tuple(keys))
         summary = dict(attempt(session, run), batch=name, keys=keys)
         if summary["failure"]:
-            progress["failed_attempts"].append(failure_record(summary))
+            progress["failed_attempts"].append(dict(failure_record(summary), after_fix=fixing))
             _save(progress_path, progress)
-            stuck = repeated_failure(progress["failed_attempts"], name)
+            stuck = stop_reason(progress["failed_attempts"], name)
             if stuck:
                 print("FAILED  %s %s: this attempt cost %s." % (name, run.run_id, _usd(summary.get("cost_usd"))))
                 _stopped(name, stuck, progress)
@@ -330,6 +368,9 @@ def run(rep: str, pilot: bool, session=of.run_triage, today: date = None, after_
         if not held:
             print("REFUSED: another invocation is running %s (%s is locked); two would run the same batch twice"
                   % (rep, _rel(PROGRESS_DIR / ("%s.lock" % rep))))
+            return 1
+        if record_written(rep):  # again, inside the lock: an invocation that held it may have just written it
+            print("REFUSED: %s exists; a repeat is never overwritten" % _rel(REPEATS_DIR / ("%s.json" % rep)))
             return 1
         plan = batches(catalogue)
         progress_path = PROGRESS_DIR / ("%s.json" % rep)
