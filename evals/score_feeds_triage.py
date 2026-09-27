@@ -75,15 +75,22 @@ def disputed(draft: Dict[str, str], runs: Sequence[Dict[str, str]]) -> List[str]
 
 def spot_sample(agreed: Sequence[str], n: int, seed: str = SPOT_SEED) -> List[str]:
     """n agreed items, chosen by hash rather than by a random generator, so the sample re-derives."""
+    if n < 0:
+        raise ValueError("--spot-check must be >= 0, got %d" % n)
     ranked = sorted(agreed, key=lambda k: hashlib.sha256((seed + k).encode("utf-8")).hexdigest())
     return sorted(ranked[:n])
 
 
-def disputes_doc(catalogue: dict, labels: dict, repeats: Dict[str, dict], spot_check: int = 0) -> dict:
+def disputes_doc(catalogue: dict, labels: dict, repeats: Dict[str, dict], spot_check: int = 0,
+                  labels_sha256: str = "") -> dict:
     draft = {k: v["label"] for k, v in labels["labels"].items()}
     runs = [verdicts_of(repeats[r]) for r in REPEATS]
     keys = disputed(draft, runs)
-    agreed_not_relevant = sorted(k for k in draft if k not in keys and draft[k] == NOT_RELEVANT)
+    # Ruling 10: the stratum is items the draft AND EVERY repeat called not_relevant. A repeat that
+    # dropped or left the item unfinished does not count as agreement -- `disputed()` already ignores
+    # a missing verdict, so the `all(...)` clause is what actually excludes it here.
+    agreed_not_relevant = sorted(k for k in draft if k not in keys and draft[k] == NOT_RELEVANT
+                                  and all(r.get(k) == NOT_RELEVANT for r in runs))
     by_key = {it["key"]: it for it in catalogue["items"]}
 
     def card(k: str, kind: str) -> dict:
@@ -92,10 +99,10 @@ def disputes_doc(catalogue: dict, labels: dict, repeats: Dict[str, dict], spot_c
                 "published": it["published"], "draft": labels["labels"][k],
                 "repeats": {r: repeats[r]["verdicts"].get(k) for r in REPEATS}}
 
-    return {"schema": "fc08-triage-disputes/1", "labels_sha256": hashlib.sha256(render(labels).encode()).hexdigest(),
-            "repeats": list(REPEATS), "spot_check": {"n": spot_check, "seed": SPOT_SEED},
-            "cards": [card(k, "dispute") for k in keys] + [card(k, "spot_check")
-                                                          for k in spot_sample(agreed_not_relevant, spot_check)]}
+    sampled = spot_sample(agreed_not_relevant, spot_check)
+    return {"schema": "fc08-triage-disputes/1", "labels_sha256": labels_sha256, "repeats": list(REPEATS),
+            "spot_check": {"n": spot_check, "drawn": len(sampled), "seed": SPOT_SEED},
+            "cards": [card(k, "dispute") for k in keys] + [card(k, "spot_check") for k in sampled]}
 
 
 def final_labels(labels: dict, disputes: dict, decisions: Sequence[dict]) -> Dict[str, str]:
@@ -104,13 +111,16 @@ def final_labels(labels: dict, disputes: dict, decisions: Sequence[dict]) -> Dic
     asked = {c["key"]: c["kind"] for c in disputes["cards"]}
     decided: Dict[str, dict] = {}
     for d in decisions:
-        if d["key"] not in asked or d.get("kind") != asked[d["key"]]:
-            raise ValueError("%s was not put to the owner as a %s" % (d["key"], d.get("kind")))
-        if d["key"] in decided:
-            raise ValueError("%s is decided twice" % d["key"])
+        if "key" not in d or "decision" not in d:
+            raise ValueError("a decision is missing 'key' or 'decision': %r" % (d,))
+        key = d["key"]
+        if key not in asked or d.get("kind") != asked[key]:
+            raise ValueError("%s was not put to the owner as a %s" % (key, d.get("kind")))
+        if key in decided:
+            raise ValueError("%s is decided twice" % key)
         if d["decision"] not in VERDICTS:
-            raise ValueError("%s: decision %r is not one of %s" % (d["key"], d["decision"], VERDICTS))
-        decided[d["key"]] = d
+            raise ValueError("%s: decision %r is not one of %s" % (key, d["decision"], VERDICTS))
+        decided[key] = d
     undecided = sorted(set(asked) - set(decided))
     if undecided:
         raise ValueError("undecided: %s" % ", ".join(undecided))
@@ -139,10 +149,16 @@ def band(values: Sequence[Optional[float]]) -> Optional[dict]:
 
 
 def build(catalogue: dict, labels: dict, disputes: dict, decisions: Sequence[dict], repeats: Dict[str, dict],
-          decision_files: Sequence[str] = ()) -> dict:
+          decision_files: Sequence[str] = (), catalogue_sha256: str = "", labels_sha256: str = "") -> dict:
     final = final_labels(labels, disputes, decisions)
     keys = sorted(it["key"] for it in catalogue["items"])
+    missing = sorted(k for k in keys if k not in final)
+    if missing:
+        raise ValueError("catalogue item(s) with no label: %s" % ", ".join(missing))
     src = {it["key"]: it["source"] for it in catalogue["items"]}
+    bad_sources = sorted(set(src.values()) - set(SOURCES))
+    if bad_sources:
+        raise ValueError("catalogue source(s) not in %s: %s" % (SOURCES, ", ".join(bad_sources)))
     runs = {r: verdicts_of(repeats[r]) for r in REPEATS}
 
     def section(ks: List[str]) -> dict:
@@ -153,19 +169,19 @@ def build(catalogue: dict, labels: dict, disputes: dict, decisions: Sequence[dic
     sessions = [s for r in REPEATS for s in repeats[r]["sessions"]]
     return {
         "schema": "fc08-triage-score/1",
-        "inputs": {"catalogue_sha256": hashlib.sha256(render(catalogue).encode()).hexdigest(),
-                   "labels_sha256": hashlib.sha256(render(labels).encode()).hexdigest(),
+        "inputs": {"catalogue_sha256": catalogue_sha256, "labels_sha256": labels_sha256,
                    "decision_files": sorted(decision_files), "repeats": list(REPEATS)},
         "labels": {"items": len(keys), "relevant": sum(1 for k in keys if final[k] == RELEVANT),
                    "not_relevant": sum(1 for k in keys if final[k] == NOT_RELEVANT),
                    "owner_decided": len(decisions), "unchallenged": len(keys) - len(disputes["cards"]),
                    "changed_by_owner": sorted(d["key"] for d in decisions
-                                              if d["decision"] != labels["labels"][d["key"]]["label"])},
+                                              if d["decision"] != (labels["labels"].get(d["key"]) or {}).get("label"))},
         "overall": section(keys),
         "per_source": {s: section([k for k in keys if src[k] == s]) for s in SOURCES},
         "false_negatives": {k: [r for r in REPEATS if runs[r].get(k) != RELEVANT]
                             for k in keys if final[k] == RELEVANT and any(runs[r].get(k) != RELEVANT for r in REPEATS)},
-        "unanimous": sum(1 for k in keys if len({runs[r].get(k) for r in REPEATS}) == 1),
+        "unanimous": sum(1 for k in keys if all(k in runs[r] for r in REPEATS)
+                         and len({runs[r][k] for r in REPEATS}) == 1),
         "sessions": {"count": len(sessions),
                      "terminal_check_clean": sum(1 for s in sessions if not s["terminal_check"]["unterminated"]
                                                  and not s["terminal_check"]["duplicated"]),
@@ -189,10 +205,18 @@ def main(argv: list) -> int:
         mode.add_argument(flag, action="store_true")
     ap.add_argument("--spot-check", type=int, default=0, help="with --write-disputes: sample N agreed items")
     args = ap.parse_args(argv)
+    if args.spot_check < 0:
+        print("REFUSED: --spot-check must be >= 0")
+        return 1
     catalogue, labels, disputes, decisions, repeats, files = load_inputs()
+    labels_hash, catalogue_hash = sha256_file(LABELS), sha256_file(CATALOGUE)
     if args.write_disputes or args.check_disputes:
         n = args.spot_check if args.write_disputes else (disputes or {}).get("spot_check", {}).get("n", 0)
-        text = render(disputes_doc(catalogue, labels, repeats, n))
+        try:
+            text = render(disputes_doc(catalogue, labels, repeats, n, labels_sha256=labels_hash))
+        except (ValueError, KeyError) as exc:
+            print("REFUSED: %s" % exc)
+            return 1
         if args.check_disputes:
             ok = DISPUTES.exists() and DISPUTES.read_text(encoding="utf-8") == text
             print("HOLDS: disputes.json rebuilds" if ok else "REFUSED: disputes.json does not rebuild")
@@ -207,8 +231,9 @@ def main(argv: list) -> int:
         print("REFUSED: no disputes.json yet; run --write-disputes after the repeats")
         return 1
     try:
-        text = render(build(catalogue, labels, disputes, decisions, repeats, files))
-    except ValueError as exc:
+        text = render(build(catalogue, labels, disputes, decisions, repeats, files,
+                             catalogue_sha256=catalogue_hash, labels_sha256=labels_hash))
+    except (ValueError, KeyError) as exc:
         print("REFUSED: %s" % exc)
         return 1
     if args.check:
@@ -220,8 +245,9 @@ def main(argv: list) -> int:
         print("WROTE %s" % SCORE.relative_to(ROOT))
     s = json.loads(text)
     for name, sec in [("overall", s["overall"])] + sorted(s["per_source"].items()):
-        fmt = lambda b: "n/a" if b is None else "%.3f-%.3f (mean %.3f)" % (b["min"], b["max"], b["mean"])  # noqa: E731
-        print("  %-8s recall %-26s precision %s" % (name, fmt(sec["recall"]), fmt(sec["precision"])))
+        fmt = lambda b: ("n/a" if b is None else  # noqa: E731
+                          "%.3f-%.3f (mean %.3f, n=%d)" % (b["min"], b["max"], b["mean"], b["n"]))
+        print("  %-8s recall %-32s precision %s" % (name, fmt(sec["recall"]), fmt(sec["precision"])))
     return 0
 
 

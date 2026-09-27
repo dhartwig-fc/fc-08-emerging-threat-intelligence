@@ -12,20 +12,30 @@ Usage:
     python evals/check_feeds_score.py --mutate unfinished-dispute  # a missing verdict counts as a dispute
     python evals/check_feeds_score.py --mutate decide-anything     # a decision on an undisputed item is accepted
     python evals/check_feeds_score.py --mutate spot-any-agreed     # the spot check samples agreed relevant items too
+    python evals/check_feeds_score.py --mutate unfinished-in-stratum  # an item a repeat left unfinished re-enters the stratum
+    python evals/check_feeds_score.py --mutate sample-sorted       # the spot sample is sorted(agreed), not hash-ranked
 
 WHAT IT HOLDS, on a synthetic set whose every figure was computed by hand (ten items, three sources,
 three repeats, four disputes, four owner decisions):
   the counts    tp, fn, fp, tn and the unfinished list of one repeat, and its recall and precision;
-  unfinished    a relevant item with no verdict is a miss: it stays in recall's denominator;
+  unfinished    a relevant item with no verdict is a miss: it stays in recall's denominator; an item
+                every repeat left unfinished is not "unanimous" either;
   the band      min, max and mean over all three repeats, for recall and for precision;
   n/a           a ratio over an empty denominator is null, never 0 or 1;
   disputes      an item is disputed when ANY repeat's verdict differs from the draft, one of three is
                 enough, and an item with no verdict is not disputed;
   decisions     the owner's decision replaces the draft; a decision on an undisputed item, a second
-                decision, and an undecided dispute are each refused;
-  spot check    the sample is drawn by hash, re-derivably, only from items the draft and every repeat
-                called not_relevant (where an agreed error would cost recall), and must then be decided;
-  determinism   the same inputs give the same bytes, whatever order the repeats arrive in.
+                decision, an undecided dispute, and a decision missing its own 'decision' key are each
+                refused with REFUSED text, never a bare traceback;
+  spot check    the sample is drawn by hash, re-derivably, only from items the draft AND EVERY repeat
+                explicitly called not_relevant -- a repeat that dropped or left the item unfinished is
+                excluded, not counted as agreement (ruling 10) -- and must then be decided; the CONCRETE
+                sample is pinned here against an independently re-derived hash ranking, not just its size;
+  provenance    the *_sha256 fields carry whatever the caller passes in (the real file hash, in the CLI);
+                nothing here silently re-derives its own hash from the parsed object;
+  sources       a catalogue item whose source is not in SOURCES is refused, so a per-source sum can
+                never silently fall short of the overall figure;
+  determinism   the same inputs give the same bytes on a second call.
 
 COLD. No repeat, label or catalogue file is read: every input is built below.
 
@@ -35,6 +45,7 @@ NOT A VACUOUS PASS. Each --mutate rewrites the scorer's SOURCE in memory; at lea
 from __future__ import annotations
 
 import argparse
+import hashlib
 import sys
 import types
 from pathlib import Path
@@ -44,6 +55,9 @@ sys.path.insert(0, str(ROOT))
 
 SCORER = ROOT / "evals" / "score_feeds_triage.py"
 R, N = "relevant", "not_relevant"
+# Independently derived, not imported from the scorer under test: the guard must pin the concrete
+# spot-check sample against its OWN hash ranking, not the module's.
+SPOT_SEED = "fc08-slice2-triage-spot-check"
 
 MUTATIONS = {
     "missing-excluded": ("    rel = {k for k in keys if labels[k] == RELEVANT}\n",
@@ -58,9 +72,15 @@ MUTATIONS = {
                          "> len(runs))\n"),
     "unfinished-dispute": ("    return sorted(k for k in draft if any(k in r and r[k] != draft[k] for r in runs))\n",
                            "    return sorted(k for k in draft if any(r.get(k) != draft[k] for r in runs))\n"),
-    "decide-anything": ('        if d["key"] not in asked or d.get("kind") != asked[d["key"]]:\n', "        if False:\n"),
-    "spot-any-agreed": ('    agreed_not_relevant = sorted(k for k in draft if k not in keys and draft[k] == NOT_RELEVANT)\n',
+    "decide-anything": ('        if key not in asked or d.get("kind") != asked[key]:\n', "        if False:\n"),
+    "spot-any-agreed": ('    agreed_not_relevant = sorted(k for k in draft if k not in keys and draft[k] == NOT_RELEVANT\n'
+                        '                                  and all(r.get(k) == NOT_RELEVANT for r in runs))\n',
                         '    agreed_not_relevant = sorted(k for k in draft if k not in keys)\n'),
+    "unfinished-in-stratum": ('    agreed_not_relevant = sorted(k for k in draft if k not in keys and draft[k] == NOT_RELEVANT\n'
+                              '                                  and all(r.get(k) == NOT_RELEVANT for r in runs))\n',
+                              '    agreed_not_relevant = sorted(k for k in draft if k not in keys and draft[k] == NOT_RELEVANT)\n'),
+    "sample-sorted": ('    ranked = sorted(agreed, key=lambda k: hashlib.sha256((seed + k).encode("utf-8")).hexdigest())\n',
+                      "    ranked = sorted(agreed)\n"),
 }
 
 
@@ -97,6 +117,44 @@ def fixtures():
                    "sessions": [{"terminal_check": {"calls": 3, "unterminated": [], "duplicated": []},
                                  "cost_usd": 0.5}]} for r, vs in REP.items()}
     return catalogue, labels, repeats
+
+
+def _one_item_fixture(key: str, source: str, label: str, repeat_verdicts: dict) -> tuple:
+    """A single catalogue item, its label, and named repeats' verdicts for it (a repeat absent from
+    repeat_verdicts left it unfinished). No sessions, since sessions play no part in these checks."""
+    catalogue = {"items": [{"key": key, "source": source, "title": key, "url": "https://x/%s" % key,
+                            "published": "2026-09-01"}]}
+    labels = {"labels": {key: {"label": label, "reason": "draft"}}}
+    repeats = {r: {"verdicts": ({key: {"verdict": repeat_verdicts[r]}} if r in repeat_verdicts else {}),
+                   "sessions": []} for r in ("rep1", "rep2", "rep3")}
+    return catalogue, labels, repeats
+
+
+def unfinished_stratum_fixture() -> tuple:
+    """u1: draft not_relevant, rep1 and rep3 agree, rep2 never triaged it (dropped/unfinished)."""
+    return _one_item_fixture("u1", "ofsi", N, {"rep1": N, "rep3": N})
+
+
+def unanimous_unfinished_fixture() -> tuple:
+    """z1: draft not_relevant, no repeat gave it any verdict at all."""
+    return _one_item_fixture("z1", "ofsi", N, {})
+
+
+def bad_source_fixture() -> tuple:
+    """q1: a catalogue source outside SOURCES."""
+    return _one_item_fixture("q1", "unknownsrc", N, {})
+
+
+def hash_sample_fixture() -> tuple:
+    """Four agreed not_relevant items across two sources, chosen so hash order and sorted(agreed) diverge
+    (checked below), for pinning the spot sample against an independently re-derived hash ranking."""
+    keys = ["ofsi:z9", "ofsi:z1", "fincen:m5", "fincen:m2"]
+    catalogue = {"items": [{"key": k, "source": k.split(":")[0], "title": k, "url": "https://x/%s" % k,
+                            "published": "2026-09-01"} for k in keys]}
+    labels = {"labels": {k: {"label": N, "reason": "draft"} for k in keys}}
+    repeats = {r: {"verdicts": {k: {"verdict": N} for k in keys}, "sessions": []}
+               for r in ("rep1", "rep2", "rep3")}
+    return catalogue, labels, repeats, keys
 
 
 def checks(sc) -> list:
@@ -163,13 +221,85 @@ def checks(sc) -> list:
     spot_cards = sorted(c["key"] for c in with_spot["cards"] if c["kind"] == "spot_check")
     need = attempt(lambda: sc.final_labels(labels, with_spot, DECISIONS))[1]
     out.append((len(spot) == 3 and set(spot) <= set(pool) and spot == sc.spot_sample(list(reversed(pool)), 3)
-                and spot_cards == ["o2"] and need is not None,
+                and spot_cards == ["o2"] and with_spot["spot_check"]["n"] == 2
+                and with_spot["spot_check"]["drawn"] == 1 and need is not None,
                 "the spot check samples by hash, re-derivably, only items all four called not_relevant (here o2 "
-                "alone), and a sampled item must then be decided", {"pool sample": spot, "cards": spot_cards}))
+                "alone), and a sampled item must then be decided; drawn (1) differs from requested n (2)",
+                {"pool sample": spot, "cards": spot_cards, "spot_check": with_spot["spot_check"]}))
 
-    shuffled = {r: repeats[r] for r in ("rep3", "rep1", "rep2")}
-    again, _ = attempt(lambda: sc.render(sc.build(catalogue, labels, disputes, DECISIONS, shuffled)))
-    out.append((score is not None and again == sc.render(score), "the same inputs give the same bytes", ""))
+    # Ruling 10: an item a repeat left unfinished is excluded from the stratum even when the draft and
+    # every OTHER repeat call it not_relevant, and the drawn count reflects what the stratum actually held.
+    u_cat, u_labels, u_repeats = unfinished_stratum_fixture()
+    u_disputes = sc.disputes_doc(u_cat, u_labels, u_repeats, spot_check=1)
+    u_spot = sorted(c["key"] for c in u_disputes["cards"] if c["kind"] == "spot_check")
+    out.append((u_spot == [] and u_disputes["spot_check"]["n"] == 1 and u_disputes["spot_check"]["drawn"] == 0,
+                "an item a repeat left unfinished is excluded from the spot-check stratum, even though the "
+                "draft and every OTHER repeat call it not_relevant; drawn (0) differs from requested n (1)",
+                {"cards": u_spot, "spot_check": u_disputes["spot_check"]}))
+
+    # The concrete sample is pinned against a hash ranking computed independently here, not just its size.
+    h_cat, h_labels, h_repeats, h_keys = hash_sample_fixture()
+    h_disputes = sc.disputes_doc(h_cat, h_labels, h_repeats, spot_check=2)
+    h_spot = sorted(c["key"] for c in h_disputes["cards"] if c["kind"] == "spot_check")
+    hash_ranked = sorted(h_keys, key=lambda k: hashlib.sha256((SPOT_SEED + k).encode("utf-8")).hexdigest())
+    expected_sample, sorted_would_give = sorted(hash_ranked[:2]), sorted(h_keys)[:2]
+    out.append((h_spot == expected_sample and expected_sample != sorted_would_give,
+                "the spot check draws the CONCRETE hash-ranked sample -- re-derived independently here, not "
+                "copied from the scorer -- and for these four keys across two sources that differs from "
+                "sorted(agreed), which would draw the whole sample from one source",
+                {"got": h_spot, "expected (hash)": expected_sample, "sorted(agreed) would give": sorted_would_give}))
+
+    neg_err = attempt(lambda: sc.spot_sample(["x"], -1))[1]
+    out.append((neg_err is not None, "a negative spot-check sample size is refused", neg_err))
+
+    # An item every repeat left unfinished is not unanimous: {None} is not agreement.
+    uni_cat, uni_labels, uni_repeats = unanimous_unfinished_fixture()
+    uni_disputes = sc.disputes_doc(uni_cat, uni_labels, uni_repeats)
+    uni_score, uni_err = attempt(lambda: sc.build(uni_cat, uni_labels, uni_disputes, [], uni_repeats))
+    out.append((uni_err is None and (uni_score or {}).get("unanimous") == 0,
+                "an item every repeat left unfinished is not counted as unanimous",
+                uni_err or (uni_score or {}).get("unanimous")))
+
+    # A catalogue source outside SOURCES is refused, so per-source sums can never silently fall short.
+    bad_cat, bad_labels, bad_repeats = bad_source_fixture()
+    bad_disputes = sc.disputes_doc(bad_cat, bad_labels, bad_repeats)
+    bad_source_err = attempt(lambda: sc.build(bad_cat, bad_labels, bad_disputes, [], bad_repeats))[1]
+    out.append((bad_source_err is not None,
+                "a catalogue item whose source is not in SOURCES is refused", bad_source_err))
+
+    # *_sha256 fields carry exactly what the caller passes (the real file hash, in the CLI) -- nothing
+    # here silently re-derives its own hash from the parsed object, so there is one rule and no dead helper.
+    prov_score, prov_err = attempt(lambda: sc.build(catalogue, labels, disputes, DECISIONS, repeats,
+                                                     catalogue_sha256="cafebabe", labels_sha256="deadbeef"))
+    prov_inputs = (prov_score or {}).get("inputs", {})
+    out.append((prov_err is None and prov_inputs.get("catalogue_sha256") == "cafebabe"
+                and prov_inputs.get("labels_sha256") == "deadbeef",
+                "the score's *_sha256 fields carry exactly what the caller passes, never a re-derived hash",
+                prov_inputs))
+    disp_with_hash = sc.disputes_doc(catalogue, labels, repeats, labels_sha256="feedface")
+    out.append((disp_with_hash.get("labels_sha256") == "feedface",
+                "disputes_doc's labels_sha256 also carries exactly what the caller passes", disp_with_hash.get("labels_sha256")))
+
+    # A decision missing its own 'decision' key, or a catalogue item with no matching label, is refused
+    # with REFUSED text -- never a bare KeyError traceback.
+    missing_field_err = attempt(lambda: sc.final_labels(labels, disputes, [{"key": "o3", "kind": "dispute"}]))[1]
+    out.append((missing_field_err is not None and not missing_field_err.startswith("KeyError"),
+                "a decision missing its own 'decision' key is refused with a clear message, not a bare KeyError",
+                missing_field_err))
+    orphan_cat = {"items": catalogue["items"] + [{"key": "zzz9", "source": "ofsi", "title": "zzz9",
+                                                  "url": "https://x/zzz9", "published": "2026-09-01"}]}
+    mismatch_err = attempt(lambda: sc.build(orphan_cat, labels, disputes, DECISIONS, repeats))[1]
+    out.append((mismatch_err is not None and not mismatch_err.startswith("KeyError"),
+                "a catalogue item with no matching label is refused with a clear message, not a bare KeyError",
+                mismatch_err))
+
+    # Determinism: render(build(...)) reproduces byte for byte on a second call with identical inputs.
+    # An input-reordering variant of this check (shuffling the `repeats` dict's key order) was removed:
+    # build() reads repeats only through the fixed REPEATS tuple, and every list-derived key is sorted()
+    # before use, so no caller-supplied ordering can ever reach the output -- reordering inputs here could
+    # never fail. A genuine loss of a sorted() call would already break one of the numeric checks above.
+    again, _ = attempt(lambda: sc.render(sc.build(catalogue, labels, disputes, DECISIONS, repeats)))
+    out.append((score is not None and again == sc.render(score), "the same inputs give the same bytes on a second call", ""))
     return out
 
 
