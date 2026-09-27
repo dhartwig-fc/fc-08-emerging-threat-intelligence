@@ -12,8 +12,20 @@ Each tool carries one invariant, whatever the agent intends (spec section 1):
                           the document by sha256; a second call does not fetch again.
 
 Both write only into inbox/<run_id>/ (feeds/inbox.py). The run identity comes from the runner's
-environment (FEEDS_RUN_ID), never from a tool argument. feeds_triage and feeds_extract are
-sub-projects B and C.
+environment (FEEDS_RUN_ID), never from a tool argument.
+
+Sub-project B adds two tools (feeds/triage.py holds their rules):
+
+  feeds_read_page(item_key, page)   one page of an item's PINNED document, the pages a triage quote
+                                    is checked against; read-only, and refused before a fetch.
+  feeds_triage(item_key, verdict, reason, quote)
+                                    one verdict per item, the quote found in the pinned document, a
+                                    NOT_RELEVANT verdict stored and reported like any other, a cap of
+                                    10 per run. feeds_extract is sub-project C.
+
+Every governed refusal starts "Rejected:", the prefix agents/telemetry.py counts as REFUSED. (Until
+slice 2 B these read "Refused:", which telemetry recorded as SUCCESS.) Both new tools run under
+_STATE_LOCK, like A's two.
 
 Works on MCP Python SDK 2.x (MCPServer) and 1.x (FastMCP).
 """
@@ -36,7 +48,7 @@ from pydantic import BaseModel, ConfigDict, Field
 ROOT = Path(__file__).resolve().parent.parent
 # The server is launched as a script, so the repo root is not on sys.path.
 sys.path.insert(0, str(ROOT))
-from feeds import http as feeds_http, inbox, ledger  # noqa: E402
+from feeds import http as feeds_http, inbox, ledger, triage as feeds_triage  # noqa: E402
 from feeds.model import LayoutChanged  # noqa: E402
 from feeds.sources import DOCUMENT_TYPES, MAX_DOCUMENT_BYTES, MAX_LISTING_BYTES, SOURCES, linked_pdfs  # noqa: E402
 from schemas.citation_match import PageIndex  # noqa: E402
@@ -77,7 +89,7 @@ def _run_id():
     return run_id if inbox.RUN_ID.fullmatch(run_id) else None
 
 
-NO_RUN = "Refused: this server has no run identity (%s is unset or malformed); the runner sets it." % RUN_ENV
+NO_RUN = "Rejected: this server has no run identity (%s is unset or malformed); the runner sets it." % RUN_ENV
 
 
 @mcp.tool(
@@ -103,7 +115,7 @@ async def list_new(params: ListNewInput) -> str:
 def _list_new(run_id: str, source: str) -> str:
     state = inbox.load(run_id, INBOX_ROOT)
     if source in state["sources"]:
-        return "Refused: %s was already listed in this run (status %s); a listing is fetched once per run." % (
+        return "Rejected: %s was already listed in this run (status %s); a listing is fetched once per run." % (
             source, state["sources"][source]["status"])
     src = SOURCES[source]
     entry = {"listed_at": _now(), "listing_url": src.listing_url, "status": "ok", "error": None, "listing": None,
@@ -175,7 +187,7 @@ def _fetch(run_id: str, item_key: str) -> str:
     state = inbox.load(run_id, INBOX_ROOT)
     item = inbox.find_item(state, item_key)
     if item is None:
-        return "Refused: %s was not listed as new in this run; call feeds_list_new first." % item_key
+        return "Rejected: %s was not listed as new in this run; call feeds_list_new first." % item_key
     if item.get("document"):
         return "Already fetched: %s" % _describe(item["document"])
     src = SOURCES[item["source"]]
@@ -203,6 +215,79 @@ def _fetch(run_id: str, item_key: str) -> str:
                         "linked_pdfs": [] if is_pdf else linked_pdfs(got.body, got.final_url)}
     inbox.save(run_id, state, INBOX_ROOT)
     return "Fetched: %s" % _describe(item["document"])
+
+
+class ReadPageInput(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    item_key: str = Field(..., pattern=r"^(ofsi|fincen|ofac):[0-9a-f]{16}$",
+                          description="A key feeds_list_new returned in this run, already fetched")
+    page: int = Field(..., ge=1, description="1-based page number")
+
+
+@mcp.tool(
+    name="feeds_read_page",
+    annotations={"title": "Read a page of a fetched document", "readOnlyHint": True, "destructiveHint": False,
+                 "idempotentHint": True, "openWorldHint": False},
+)
+async def read_page(params: ReadPageInput) -> str:
+    """
+    Read one page of the document feeds_fetch pinned for an item in this run.
+
+    These are the pages feeds_triage checks your quote against. The reply starts
+    "=== PAGE n of N ===". Read page 1 first; read more when it does not settle the question.
+    """
+    run_id = _run_id()
+    if run_id is None:
+        return NO_RUN
+    async with _STATE_LOCK:
+        return _read_page(run_id, params.item_key, params.page)
+
+
+def _read_page(run_id: str, item_key: str, page: int) -> str:
+    item = inbox.find_item(inbox.load(run_id, INBOX_ROOT), item_key)
+    if item is None:
+        return "Rejected: %s was not listed as new in this run; call feeds_list_new first." % item_key
+    path, refusal = feeds_triage.pinned_document(run_id, item, INBOX_ROOT)
+    if path is None:
+        return refusal
+    pages = feeds_triage.page_texts(path)
+    if not 1 <= page <= len(pages):
+        return "Rejected: %s's document has %d page(s); there is no page %d." % (item_key, len(pages), page)
+    return "=== PAGE %d of %d === %s | %s\n%s" % (page, len(pages), item_key, item["title"], pages[page - 1].strip())
+
+
+class TriageInput(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    item_key: str = Field(..., pattern=r"^(ofsi|fincen|ofac):[0-9a-f]{16}$",
+                          description="A key feeds_list_new returned in this run, already fetched")
+    verdict: str = Field(..., description="relevant or not_relevant")
+    reason: str = Field(..., description="Why, in at most 300 characters")
+    quote: str = Field(..., description="One verbatim quote of 10 to 600 characters, copied from the item's "
+                                        "pages as feeds_read_page returned them, that supports the verdict")
+
+
+@mcp.tool(
+    name="feeds_triage",
+    annotations={"title": "Record a triage verdict", "readOnlyHint": False, "destructiveHint": False,
+                 "idempotentHint": False, "openWorldHint": False},
+)
+async def triage(params: TriageInput) -> str:
+    """
+    Record whether an item is relevant: it describes methods, red flags or cases of financial crime
+    that a typology could hold. When in doubt, keep it (relevant).
+
+    One verdict per item, final. The quote must be found in the item's pinned document. A
+    not_relevant verdict is stored and reported, never deleted. Lengths and bounds are checked by
+    the tool, which replies "Rejected: ..." with the reason when it refuses.
+    """
+    run_id = _run_id()
+    if run_id is None:
+        return NO_RUN
+    async with _STATE_LOCK:
+        return feeds_triage.decide(run_id, params.item_key, params.verdict, params.reason, params.quote,
+                                   INBOX_ROOT)[1]
 
 
 if __name__ == "__main__":

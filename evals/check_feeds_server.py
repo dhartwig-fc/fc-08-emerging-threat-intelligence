@@ -183,7 +183,7 @@ def dropped_connection_check(fs, real_get, tmp: Path) -> tuple:
         server.server_close()
     ok = (said.startswith("Failed:") and "RemoteDisconnected" in said and st.get("status") == "unreachable"
           and "RemoteDisconnected" in (st.get("error") or "") and requested == [SOURCES["ofac"].listing_url]
-          and isinstance(again, str) and again.startswith("Refused") and len(requested) == 1)
+          and isinstance(again, str) and again.startswith("Rejected") and len(requested) == 1)
     return (ok, "a dropped connection (RemoteDisconnected, not a URLError) through the REAL feeds.http.get is "
             "recorded as unreachable, and the source is not listed again in the run", said[:120])
 
@@ -215,11 +215,11 @@ def checks(fs) -> list:
 
         os.environ.pop(fs.RUN_ENV, None)
         said = list_new("ofsi")
-        out.append((said.startswith("Refused") and not stub.calls and not (tmp / "inbox").exists(),
+        out.append((said.startswith("Rejected") and not stub.calls and not (tmp / "inbox").exists(),
                     "with no run identity nothing is requested or written", said[:90]))
         os.environ[fs.RUN_ENV] = RUN + "\n"
         said = list_new("ofsi")
-        out.append((said.startswith("Refused") and not stub.calls and not (tmp / "inbox").exists(),
+        out.append((said.startswith("Rejected") and not stub.calls and not (tmp / "inbox").exists(),
                     "a run identity with a trailing newline is malformed: nothing is requested or written",
                     said[:90]))
 
@@ -241,7 +241,7 @@ def checks(fs) -> list:
                     and len(entry["listing_sha256"]) == 64, "the raw listing is pinned in the inbox", ""))
         n = len(stub.calls)
         said = list_new("ofsi")
-        out.append((said.startswith("Refused") and len(stub.calls) == n,
+        out.append((said.startswith("Rejected") and len(stub.calls) == n,
                     "a second listing of the same source in one run is refused without a request", said[:90]))
 
         said = list_new("ofac")
@@ -256,7 +256,7 @@ def checks(fs) -> list:
                     "failure with its status recorded", said[:90]))
 
         said = fetch("ofsi:0000000000000000")
-        out.append((said.startswith("Refused") and len(stub.calls) == n + 2,
+        out.append((said.startswith("Rejected") and len(stub.calls) == n + 2,
                     "fetching a key this run did not list is refused without a request", said[:90]))
 
         # The FAQ page is the feed's FIRST item, which the ledger above decided; list it in a fresh run.
@@ -286,7 +286,7 @@ def checks(fs) -> list:
         other_key = faq.key  # listed in OTHER_RUN only: in RUN it was withheld as already decided
         n = len(stub.calls)
         said = fetch(other_key)
-        out.append((said.startswith("Refused") and len(stub.calls) == n,
+        out.append((said.startswith("Rejected") and len(stub.calls) == n,
                     "an item another run listed cannot be fetched in this run", said[:90]))
 
         stub.routes[SOURCES["fincen"].listing_url] = ("text/html", snap("fincen_advisories.html"))
@@ -335,11 +335,14 @@ def checks(fs) -> list:
 
     tools = {t.name: t for t in asyncio.run(fs.mcp.list_tools())}
     hint = lambda t, a, b: getattr(t.annotations, a, getattr(t.annotations, b, None))  # noqa: E731
-    out.append((sorted(tools) == ["feeds_fetch", "feeds_list_new"]
-                and all(hint(t, "readOnlyHint", "read_only_hint") is False
-                        and hint(t, "openWorldHint", "open_world_hint") is True for t in tools.values()),
-                "the server exposes exactly feeds_list_new and feeds_fetch, both annotated as writing, open-world",
-                sorted(tools)))
+    ro = {n: hint(t, "readOnlyHint", "read_only_hint") for n, t in tools.items()}
+    ow = {n: hint(t, "openWorldHint", "open_world_hint") for n, t in tools.items()}
+    out.append((sorted(tools) == ["feeds_fetch", "feeds_list_new", "feeds_read_page", "feeds_triage"]
+                and ro == {"feeds_fetch": False, "feeds_list_new": False, "feeds_read_page": True,
+                           "feeds_triage": False}
+                and ow["feeds_fetch"] is True and ow["feeds_list_new"] is True,
+                "the server exposes exactly its four tools; only feeds_read_page is annotated read-only, and the "
+                "two that reach the network are open-world", sorted(tools)))
     return out
 
 

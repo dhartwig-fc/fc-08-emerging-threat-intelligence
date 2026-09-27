@@ -93,7 +93,8 @@ def writer_violations(files: dict) -> list:
                                                        "evals/check_feeds_ledger.py"):
             out.append("%s calls record_decisions()" % rel)
         if "ledger.dump(" in text and rel not in ("feeds/ledger.py", "tools/accept_run.py",
-                                                  "evals/check_feeds_ledger.py", "evals/check_feeds_server.py"):
+                                                  "evals/check_feeds_ledger.py", "evals/check_feeds_server.py",
+                                                  "evals/check_feeds_triage.py"):
             out.append("%s calls ledger.dump()" % rel)
     return out
 
