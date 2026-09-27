@@ -35,6 +35,7 @@ from __future__ import annotations
 
 import asyncio
 import hashlib
+import json
 import os
 import sys
 from datetime import datetime, timezone
@@ -50,7 +51,7 @@ ROOT = Path(__file__).resolve().parent.parent
 # The server is launched as a script, so the repo root is not on sys.path.
 sys.path.insert(0, str(ROOT))
 from feeds import http as feeds_http, inbox, ledger, triage as feeds_triage  # noqa: E402
-from feeds.model import LayoutChanged  # noqa: E402
+from feeds.model import FeedItem, LayoutChanged  # noqa: E402
 from feeds.sources import DOCUMENT_TYPES, MAX_DOCUMENT_BYTES, MAX_LISTING_BYTES, SOURCES, linked_pdfs  # noqa: E402
 from schemas.citation_match import PageIndex  # noqa: E402
 
@@ -59,6 +60,10 @@ RUN_ENV = "FEEDS_RUN_ID"
 INBOX_ROOT = inbox.INBOX_ROOT
 SEEN_PATH = ledger.SEEN_PATH
 HTTP_GET = feeds_http.get
+# EVAL MODE (slice 2 B): the back-catalogue's pinned documents, gitignored. See _catalogue().
+CATALOGUE_DOCS = ROOT / "evals" / "feeds" / "docs"
+CATALOGUE_ENV = "FEEDS_CATALOGUE"
+BATCH_ENV = "FEEDS_CATALOGUE_BATCH"
 
 mcp = FastMCP("feeds_mcp")
 # Each tool loads, changes and saves items.json. The MCP server may run parallel tool calls
@@ -92,6 +97,76 @@ def _run_id():
 
 NO_RUN = "%s this server has no run identity (%s is unset or malformed); the runner sets it." % (
     feeds_triage.REJECTED, RUN_ENV)
+ITEM_FIELDS = ("source", "item_id", "title", "url", "published", "summary")
+
+
+def _catalogue():
+    """(catalogue, its sha256, the batch keys) when the runner started this server on the back-catalogue.
+
+    EVAL MODE. evals/run_feeds_triage.py sets FEEDS_CATALOGUE (evals/feeds/catalogue.json) and
+    FEEDS_CATALOGUE_BATCH (the keys one session triages), so the SAME tools triage the fixed, tracked
+    back-catalogue: feeds_list_new returns the batch's items -- never the live page, and never filtered
+    by the ledger, so three repeats months apart see the same items -- and feeds_fetch returns the
+    catalogue's pinned copy from CATALOGUE_DOCS, refused unless it hashes to the sha256 the catalogue
+    records, never the network. From there on (the inbox, the pages, feeds_read_page, feeds_triage) the
+    path is the production one, unchanged. The agent cannot set either variable.
+
+    Returns None when FEEDS_CATALOGUE is unset (a live run). Raises ValueError on a catalogue whose key
+    is not derived from its item, or a batch that is empty or names a key the catalogue does not hold.
+    """
+    path = os.environ.get(CATALOGUE_ENV)
+    if not path:
+        return None
+    raw = Path(path).read_bytes()
+    catalogue = json.loads(raw)
+    for it in catalogue["items"]:
+        if FeedItem(**{k: it[k] for k in ITEM_FIELDS}).key != it["key"]:
+            raise ValueError("catalogue key %s is not derived from its item" % it["key"])
+    batch = [k for k in os.environ.get(BATCH_ENV, "").split(",") if k]
+    unknown = sorted(set(batch) - {it["key"] for it in catalogue["items"]})
+    if not batch or unknown:
+        raise ValueError("the batch is empty or names keys the catalogue does not hold: %s" % unknown)
+    return catalogue, hashlib.sha256(raw).hexdigest(), batch
+
+
+def _load_catalogue():
+    """(_catalogue() or None, refusal or None)."""
+    try:
+        return _catalogue(), None
+    except (OSError, ValueError, KeyError, TypeError) as exc:
+        return None, "Rejected: the eval catalogue is unusable: %s" % exc
+
+
+def _new_items_reply(source: str, new: list, listed: int) -> str:
+    rows = ["%s | %s | %s | %s" % (it.key, it.published, it.title, it.summary or "-") for it in new]
+    return "%d new of %d listed on %s:\nkey | published | title | summary\n%s" % (
+        len(new), listed, source, "\n".join(rows))
+
+
+def _list_catalogue(run_id: str, state: dict, source: str, cat) -> str:
+    catalogue, sha, batch = cat
+    items = [FeedItem(**{k: it[k] for k in ITEM_FIELDS}) for it in catalogue["items"]
+             if it["source"] == source and it["key"] in batch]
+    new = list(items)  # the tracked catalogue decides, never the ledger
+    state["sources"][source] = {"listed_at": _now(), "listing_url": "catalogue", "status": "ok", "error": None,
+                                "listing": None, "listing_sha256": sha, "listed": len(items), "already_seen": 0,
+                                "items": [dict(it.to_json(), document=None) for it in new]}
+    inbox.save(run_id, state, INBOX_ROOT)
+    if not new:
+        return "No new items: %s has none in this catalogue batch." % source
+    return _new_items_reply(source, new, len(items))
+
+
+def _catalogue_document(cat, item: dict) -> feeds_http.Fetched:
+    """The catalogue's pinned copy of an item's document, from CATALOGUE_DOCS; never the network."""
+    doc = next(it for it in cat[0]["items"] if it["key"] == item["key"])["document"]
+    path = Path(CATALOGUE_DOCS) / ("%s.%s" % (doc["sha256"], doc["ext"]))
+    if not path.exists():
+        raise feeds_http.FetchRefused("the catalogue copy %s is missing; see tools/build_feeds_catalogue.py" % path.name)
+    body = path.read_bytes()
+    if hashlib.sha256(body).hexdigest() != doc["sha256"]:
+        raise feeds_http.FetchRefused("the catalogue copy %s no longer matches its sha256" % path.name)
+    return feeds_http.Fetched(item["url"], doc["final_url"], doc["content_type"], body)
 
 
 @mcp.tool(
@@ -119,6 +194,11 @@ def _list_new(run_id: str, source: str) -> str:
     if source in state["sources"]:
         return "%s %s was already listed in this run (status %s); a listing is fetched once per run." % (
             feeds_triage.REJECTED, source, state["sources"][source]["status"])
+    cat, refusal = _load_catalogue()
+    if refusal:
+        return refusal
+    if cat is not None:
+        return _list_catalogue(run_id, state, source, cat)
     src = SOURCES[source]
     entry = {"listed_at": _now(), "listing_url": src.listing_url, "status": "ok", "error": None, "listing": None,
              "listing_sha256": None, "listed": 0, "already_seen": 0, "items": []}
@@ -146,9 +226,7 @@ def _list_new(run_id: str, source: str) -> str:
     inbox.save(run_id, state, INBOX_ROOT)
     if not new:
         return "No new items: %s listed %d, every one already decided." % (source, len(items))
-    rows = ["%s | %s | %s | %s" % (it.key, it.published, it.title, it.summary or "-") for it in new]
-    return "%d new of %d listed on %s:\nkey | published | title | summary\n%s" % (
-        len(new), len(items), source, "\n".join(rows))
+    return _new_items_reply(source, new, len(items))
 
 
 def _describe(doc: dict) -> str:
@@ -193,10 +271,14 @@ def _fetch(run_id: str, item_key: str) -> str:
                                                                                         item_key)
     if item.get("document"):
         return "Already fetched: %s" % _describe(item["document"])
+    cat, refusal = _load_catalogue()
+    if refusal:
+        return refusal
     src = SOURCES[item["source"]]
     try:
-        got = HTTP_GET(item["url"], allowed_hosts=src.hosts, allowed_types=DOCUMENT_TYPES,
-                       max_bytes=MAX_DOCUMENT_BYTES)
+        got = (_catalogue_document(cat, item) if cat is not None else
+               HTTP_GET(item["url"], allowed_hosts=src.hosts, allowed_types=DOCUMENT_TYPES,
+                        max_bytes=MAX_DOCUMENT_BYTES))
     except feeds_http.FetchRefused as exc:
         item["fetch_error"] = str(exc)
         inbox.save(run_id, state, INBOX_ROOT)
