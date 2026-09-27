@@ -16,6 +16,8 @@ Usage:
     python evals/check_feeds_score.py --mutate edited-labels       # a draft label edited after the repeats ran
     python evals/check_feeds_score.py --mutate unfinished-in-stratum  # an item a repeat left unfinished re-enters the stratum
     python evals/check_feeds_score.py --mutate sample-sorted       # the spot sample is sorted(agreed), not hash-ranked
+    python evals/check_feeds_score.py --mutate forged-verdict      # a repeat's verdict edited, score/disputes rebuilt to match
+    python evals/check_feeds_score.py --mutate forged-cost         # a session's cost edited by US$0.001 (score.json rounds it away)
 
 WHAT IT HOLDS, on a synthetic set whose every figure was computed by hand (ten items, three sources,
 three repeats, four disputes, four owner decisions):
@@ -50,6 +52,24 @@ AND ON THE COMMITTED EVIDENCE (added in Task 9, with the files it reads):
                 its verified quote and the pages it was found on;
   decisions     each decision file is dated in its name and its body, each decision timestamped.
 
+AND AGAINST THE PRIMARY EVIDENCE (final review, Important 1): each repeat record is the runner's
+SUMMARY of the telemetry committed beside it, and nothing re-read that telemetry. Now, per repeat:
+  run ids       the sessions' run ids are exactly the telemetry file names under
+                evals/feeds/repeats/<rep>/telemetry/, and every event in a file names that file's run;
+  verdicts      every recorded verdict, key for key, is the one the triage tool REPORTED recording in
+                that session: a SUCCESS feeds_triage FC08_TOOL_CALL whose outcome begins
+                "Recorded: <key> is <verdict> (quote found on page " (feeds/triage.py:decide's reply,
+                which telemetry keeps to 200 characters), in the telemetry of the verdict's own run_id,
+                once; and no session's telemetry records a verdict the record does not carry;
+  cost          each session's cost_usd is its RUN_COMPLETED event's payload cost_usd, exactly.
+Without this, a hand edit of a verdict in rep1.json followed by --write (and a rewritten disputes.json)
+passed every check here: `edited-repeat` proves only that score.json must follow rep*.json.
+`forged-verdict` is that forgery, whole; `forged-cost` is an edit score.json cannot see (it rounds the
+total to cents), so only the telemetry clause can catch either.
+
+THE LABELS' SHA256 is taken from the FILE'S BYTES (as the scorer's CLI takes it with sha256_file),
+never from a re-rendered form, so the "one arm" check does not lean on labels.json being in canonical form.
+
 COLD. The synthetic checks read nothing; the committed checks read tracked files only.
 
 NOT A VACUOUS PASS. Each --mutate rewrites the scorer's SOURCE in memory; at least one check must fail.
@@ -59,6 +79,8 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import json
+import re
 import sys
 import types
 from pathlib import Path
@@ -95,7 +117,12 @@ MUTATIONS = {
     "sample-sorted": ('    ranked = sorted(agreed, key=lambda k: hashlib.sha256((seed + k).encode("utf-8")).hexdigest())\n',
                       "    ranked = sorted(agreed)\n"),
 }
-DATA_MUTATIONS = ("edited-repeat", "edited-labels")  # applied to the loaded evidence, not to the scorer
+DATA_MUTATIONS = ("edited-repeat", "edited-labels", "forged-verdict", "forged-cost")  # applied to the loaded
+# evidence, in memory, never to the scorer and never on disk
+
+TRIAGE_TOOL = "mcp__feeds__feeds_triage"
+# feeds/triage.py:decide's success reply, as telemetry logs it (its first 200 characters, from the start).
+RECORDED = re.compile(r"Recorded: (\S+) is (relevant|not_relevant) \(quote found on page ")
 
 
 def load_scorer(mutation) -> types.ModuleType:
@@ -318,32 +345,55 @@ def checks(sc) -> list:
 
 
 def committed_checks(sc, mutation) -> list:
-    """The committed evidence: the band and the disputes rebuild, and the repeats are one arm."""
-    import json
-    import re
+    """The committed evidence: the band and the disputes rebuild, the repeats are one arm, and each
+    repeat record agrees with the telemetry committed beside it."""
     out = []
     catalogue, labels, disputes, decisions, repeats, files = sc.load_inputs()
+    # The labels' hash is taken from the FILE'S BYTES, as the scorer's CLI takes it (sha256_file), so it
+    # does not depend on labels.json being in canonical form. `edited-labels` stands for an edit OF THE
+    # FILE: it edits the parsed labels and derives the edited file's bytes from them, in memory.
+    labels_bytes = sc.LABELS.read_bytes()
+    committed_score = sc.SCORE.read_text(encoding="utf-8")
+    committed_disputes = sc.DISPUTES.read_text(encoding="utf-8")
     if mutation == "edited-repeat":
         key = sorted(repeats["rep1"]["verdicts"])[0]
         v = repeats["rep1"]["verdicts"][key]
         v["verdict"] = sc.NOT_RELEVANT if v["verdict"] == sc.RELEVANT else sc.RELEVANT
     if mutation == "edited-labels":
         labels["labels"][sorted(labels["labels"])[0]]["reason"] += " (edited after the repeats)"
+        labels_bytes = sc.render(labels).encode("utf-8")
+    if mutation == "forged-cost":
+        repeats["rep2"]["sessions"][0]["cost_usd"] += 0.001
     # score.json and disputes.json each carry the real file hashes (as the CLI computes them with
     # sha256_file); the rebuild must supply the same hashes or a byte-for-byte comparison could never
-    # hold even on unmutated evidence. Computed here, once, from the (possibly mutated) loaded objects.
+    # hold even on unmutated evidence.
     cat_sha = hashlib.sha256(sc.CATALOGUE.read_bytes()).hexdigest()
-    lab_sha = hashlib.sha256(sc.render(labels).encode("utf-8")).hexdigest()
+    lab_sha = hashlib.sha256(labels_bytes).hexdigest()
+    if mutation == "forged-verdict":
+        # The whole forgery: flip rep1's verdict on an item rep2 and rep3 BOTH dispute (so the dispute set,
+        # and so the owner's decisions, still fit), then rewrite score.json and disputes.json to match, as
+        # --write would. Every check but the telemetry clause is then satisfied.
+        draft = {k: v["label"] for k, v in labels["labels"].items()}
+        both = sorted(k for k in draft if all(repeats[r]["verdicts"].get(k, {}).get("verdict") not in (None, draft[k])
+                                              for r in ("rep2", "rep3")))
+        if not both:
+            raise SystemExit("MUTATION TARGET MISSING: no item that rep2 and rep3 both dispute")
+        v = repeats["rep1"]["verdicts"][both[0]]
+        v["verdict"] = sc.NOT_RELEVANT if v["verdict"] == sc.RELEVANT else sc.RELEVANT
+        committed_disputes = sc.render(sc.disputes_doc(catalogue, labels, repeats, disputes["spot_check"]["n"],
+                                                       labels_sha256=lab_sha))
+        committed_score = sc.render(sc.build(catalogue, labels, disputes, decisions, repeats, files,
+                                             catalogue_sha256=cat_sha, labels_sha256=lab_sha))
     try:
         text, err = sc.render(sc.build(catalogue, labels, disputes, decisions, repeats, files,
                                        catalogue_sha256=cat_sha, labels_sha256=lab_sha)), None
     except Exception as exc:
         text, err = None, "%s: %s" % (type(exc).__name__, exc)
-    out.append((text is not None and sc.SCORE.read_text(encoding="utf-8") == text,
+    out.append((text is not None and committed_score == text,
                 "the committed score.json is exactly what the scorer builds from the committed evidence",
-                err or "score.json %s" % ("matches" if text == sc.SCORE.read_text(encoding="utf-8") else "DIFFERS")))
+                err or "score.json %s" % ("matches" if text == committed_score else "DIFFERS")))
     rebuilt = sc.render(sc.disputes_doc(catalogue, labels, repeats, disputes["spot_check"]["n"], labels_sha256=lab_sha))
-    out.append((sc.DISPUTES.read_text(encoding="utf-8") == rebuilt,
+    out.append((committed_disputes == rebuilt,
                 "disputes.json is exactly the question the evidence poses (%d cards)" % len(disputes["cards"]), ""))
     arm = {r: tuple(repeats[r].get(k) for k in ("prompt_sha256", "model", "max_budget_usd", "max_turns"))
            for r in sc.REPEATS}
@@ -365,6 +415,50 @@ def committed_checks(sc, mutation) -> list:
                 and json.loads((sc.ROOT / f).read_text(encoding="utf-8"))["date"] == f[-15:-5] for f in files)
     out.append((files and dated and all(d.get("decided_at") for d in decisions),
                 "each owner decision file is dated in its name and body, and each decision is timestamped", files))
+    return out + telemetry_checks(sc, repeats)
+
+
+def telemetry_events(folder: Path) -> dict:
+    """{run id (the file's stem): [its events]} for every committed telemetry file of one repeat."""
+    return {p.stem: [json.loads(line) for line in p.read_text(encoding="utf-8").splitlines() if line.strip()]
+            for p in sorted(folder.glob("*.jsonl"))}
+
+
+def telemetry_checks(sc, repeats) -> list:
+    """Each repeat record against the telemetry committed beside it: run ids, verdicts, costs."""
+    out = []
+    for r in sc.REPEATS:
+        rec = repeats[r]
+        events = telemetry_events(sc.REPEATS_DIR / r / "telemetry")
+        run_ids = [s["run_id"] for s in rec["sessions"]]
+        strays = sorted(run for run, evs in events.items() if any(e.get("payload", {}).get("run_id") != run for e in evs))
+        out.append((bool(events) and len(run_ids) == len(set(run_ids)) and sorted(run_ids) == sorted(events) and not strays,
+                    "%s: the sessions' run ids are exactly its telemetry files, and every event names its file's run" % r,
+                    {"sessions": len(run_ids), "telemetry files": len(events), "only in the record":
+                     sorted(set(run_ids) - set(events)), "only in telemetry": sorted(set(events) - set(run_ids)),
+                     "files with a foreign run id": strays}))
+        logged, twice = {}, []
+        for run, evs in events.items():
+            for e in evs:
+                pl = e.get("payload", {})
+                m = RECORDED.match(pl.get("outcome") or "")
+                if (e.get("stage") == "FC08_TOOL_CALL" and e.get("status") == "SUCCESS"
+                        and pl.get("tool") == TRIAGE_TOOL and m):
+                    if m.group(1) in logged:
+                        twice.append(m.group(1))
+                    logged[m.group(1)] = (m.group(2), run)
+        recorded = {k: (v["verdict"], v["run_id"]) for k, v in rec["verdicts"].items()}
+        differ = sorted(k for k in set(logged) | set(recorded) if logged.get(k) != recorded.get(k))
+        out.append((bool(recorded) and logged == recorded and not twice,
+                    "%s: every recorded verdict is the one its session's telemetry logged as Recorded, key for key "
+                    "and run for run (%d compared)" % (r, len(recorded)),
+                    {"differ": differ[:5], "recorded twice in telemetry": twice}))
+        completed = {run: [e["payload"].get("cost_usd") for e in evs if e.get("stage") == "RUN_COMPLETED"]
+                     for run, evs in events.items()}
+        wrong = sorted(s["run_id"] for s in rec["sessions"] if completed.get(s["run_id"]) != [s["cost_usd"]])
+        out.append((bool(rec["sessions"]) and not wrong,
+                    "%s: each session's cost_usd is its one RUN_COMPLETED event's cost_usd" % r,
+                    {"sessions whose cost differs": wrong}))
     return out
 
 
