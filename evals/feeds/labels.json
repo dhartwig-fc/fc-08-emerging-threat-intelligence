@@ -1,0 +1,250 @@
+{
+  "catalogue_sha256": "90b57e8ba0224c49506ac8070b731e637d9bfde497b6c0aebdf6fe41f9ed3819",
+  "drafted_by": "claude-in-session",
+  "drafted_on": "2026-09-27",
+  "labels": {
+    "fincen:002eaf94471d7dc6": {
+      "label": "relevant",
+      "reason": "FIN-2022-A001, a FinCEN advisory on kleptocracy and foreign public corruption. A FinCEN advisory naming a corruption subject."
+    },
+    "fincen:01177938beff95a6": {
+      "label": "relevant",
+      "reason": "FIN-2025-A002, a FinCEN advisory on the Iranian regime's illicit oil smuggling, shadow banking networks and weapons procurement. A FinCEN advisory naming sanctions-evasion and proliferation-financing methods."
+    },
+    "fincen:06d25c9680e16a19": {
+      "label": "relevant",
+      "reason": "FIN-2026-A002, a joint FinCEN advisory on non-work-authorized populations, their employers and the risks to the US financial system. A FinCEN advisory naming a financial-crime subject; the advisory itself is a linked PDF, not pinned."
+    },
+    "fincen:3119924e34b20c0c": {
+      "label": "relevant",
+      "reason": "FIN-2020-A006 on ransomware and the use of the financial system to facilitate ransom payments, rescinded as of 8 November 2021. Labelled by its content: a financial-crime method. The rescission is noted, not scored."
+    },
+    "fincen:51d0f90922d44e64": {
+      "label": "relevant",
+      "reason": "FIN-2026-A001, a FinCEN advisory on health care fraud schemes targeting Medicare, Medicaid and other benefit programmes. A FinCEN advisory naming a fraud subject."
+    },
+    "fincen:55d42ff2380766c9": {
+      "label": "relevant",
+      "reason": "FIN-2020-A009, a FinCEN advisory on FATF-identified jurisdictions with AML, CFT and proliferation deficiencies. Jurisdictional risk an analyst can screen for; the pinned page does not say whether the PDF adds red flags, so in doubt: relevant."
+    },
+    "fincen:61b09a5263888b86": {
+      "label": "relevant",
+      "reason": "FIN-2021-A001, a FinCEN advisory on COVID-19 health insurance and health care related fraud. A FinCEN advisory naming a fraud subject."
+    },
+    "fincen:68161f9a7cea89b0": {
+      "label": "relevant",
+      "reason": "FIN-2020-A008, a supplemental FinCEN advisory on identifying and reporting human trafficking and related activity. A FinCEN advisory naming a financial-crime subject."
+    },
+    "fincen:7bc4d47a84ac6ecb": {
+      "label": "relevant",
+      "reason": "FIN-2021-A002, a FinCEN advisory on financial crimes targeting COVID-19 economic impact payments. A FinCEN advisory naming a fraud subject."
+    },
+    "fincen:84fbd9dff69c0f71": {
+      "label": "relevant",
+      "reason": "FIN-2024-A002, a supplemental FinCEN advisory on procurement of precursor chemicals and equipment for illicit fentanyl and synthetic opioids. A FinCEN advisory naming a financial-crime subject."
+    },
+    "fincen:90c24bacf423901f": {
+      "label": "relevant",
+      "reason": "FIN-2025-A001, a FinCEN advisory on the financing of ISIS and its global affiliates. A FinCEN advisory naming a terrorist-financing subject."
+    },
+    "fincen:9b9e9ea425676d60": {
+      "label": "relevant",
+      "reason": "FIN-2021-A003, a FinCEN advisory on FATF-identified jurisdictions with AML, CFT and counter-proliferation deficiencies. Jurisdictional risk an analyst can screen for; the pinned page does not say whether the PDF adds red flags, so in doubt: relevant."
+    },
+    "fincen:a40b52749daa1a4f": {
+      "label": "relevant",
+      "reason": "The Spanish translation (Aviso) of FIN-2025-A003, on Mexico-based transnational criminal organizations using Chinese money laundering networks. A translation of a relevant advisory is relevant."
+    },
+    "fincen:a9d9f63c3d3746e7": {
+      "label": "relevant",
+      "reason": "FIN-2025-A003, a FinCEN advisory on Mexico-based transnational criminal organizations using Chinese money laundering networks to launder illicit proceeds. A FinCEN advisory naming a money-laundering method."
+    },
+    "fincen:b0e8e12db376c4f0": {
+      "label": "relevant",
+      "reason": "FIN-2024-A001, a FinCEN advisory to counter the financing of Iran-backed terrorist organizations. A FinCEN advisory naming a terrorist-financing subject."
+    },
+    "fincen:cffcc94fd7798325": {
+      "label": "relevant",
+      "reason": "FIN-2021-A004, a FinCEN advisory on ransomware and the use of the financial system to facilitate ransom payments. A FinCEN advisory naming a financial-crime subject."
+    },
+    "fincen:e16e04e5f79a6a46": {
+      "label": "relevant",
+      "reason": "The Spanish translation of FIN-2020-A005, on cybercrime and cyber-enabled crime exploiting the COVID-19 pandemic. A translation of a relevant advisory is relevant."
+    },
+    "fincen:e69c3b416d591504": {
+      "label": "relevant",
+      "reason": "FIN-2022-A002, a FinCEN advisory on elder financial exploitation. A FinCEN advisory naming a fraud subject."
+    },
+    "fincen:e86139aaed9c9cd6": {
+      "label": "relevant",
+      "reason": "FIN-2020-A007, a FinCEN advisory on unemployment insurance fraud during the COVID-19 pandemic. A FinCEN advisory naming a fraud subject."
+    },
+    "fincen:eb1c0a36c4fc2e95": {
+      "label": "relevant",
+      "reason": "The Spanish translation of FIN-2020-A003, on COVID-19 impostor scams and money mule schemes. A translation of a relevant advisory is relevant."
+    },
+    "ofac:18de8d6afad03d2a": {
+      "label": "not_relevant",
+      "reason": "Expiry of the Ethiopia emergency with its delistings, an amended Russia-related general licence (GL 131J, Lukoil sale) and amended FAQs. Delistings and a licence; no method, red flag or case."
+    },
+    "ofac:1a5ec8639bc971e3": {
+      "label": "relevant",
+      "reason": "Combines designations with an enforcement action: an individual pays $1,427,230 to settle liability for consulting to an Iranian software firm, taking Iranian-origin dividends into US accounts and buying Iranian property."
+    },
+    "ofac:1b5cb42bd23a2458": {
+      "label": "not_relevant",
+      "reason": "An Iran-related designation (VTB Bank) and an amended Venezuela general licence (GL 52C) with one FAQ. A designation and a licence; the press-release title aside, the page describes no method or case."
+    },
+    "ofac:4824e552f9bcc834": {
+      "label": "not_relevant",
+      "reason": "TCO and counter-terrorism designations (Xinbi Guarantee with crypto addresses, Los Tiguerones) plus amended and new FAQs. A designation list; the scam-operation link is a press-release title only, no enforcement or advisory."
+    },
+    "ofac:484a015aed069a81": {
+      "label": "not_relevant",
+      "reason": "Counter-terrorism designations (Masar Badil, Palestine Action, Autistici Inventati and two individuals), a wind-down licence and an amended Russia diamonds licence. Designations and licences; no method or case."
+    },
+    "ofac:54f1e27eb0dda299": {
+      "label": "not_relevant",
+      "reason": "Counter-narcotics, counter-terrorism, Cuba and Iran designations, a Russia-related licence and FAQs. A designation list; the cocaine and cash-smuggling networks appear only in press-release titles, with no enforcement or advisory."
+    },
+    "ofac:5b5ed8933b153378": {
+      "label": "not_relevant",
+      "reason": "Eight amended Venezuela-related general licences and new, amended and archived FAQs. A licence notice."
+    },
+    "ofac:614ba309e00d7c15": {
+      "label": "not_relevant",
+      "reason": "Iran-related designations of three Golden Global entities in Turkey and a wind-down general licence (GL CC). Designations and a licence; no enforcement action, settlement, advisory or alert."
+    },
+    "ofac:70885818a6f29dc0": {
+      "label": "not_relevant",
+      "reason": "Russia-related and counter-narcotics delistings and an amended Venezuela general licence (GL 5Z) with one FAQ. Delistings and a licence; no method, red flag or case."
+    },
+    "ofac:8083cc7f3ee04250": {
+      "label": "not_relevant",
+      "reason": "ICC-related designations of two individuals, a Venezuela-related entity designation, and a wind-down general licence. Designations and a licence; no method, red flag or case."
+    },
+    "ofac:841771b6194a21e4": {
+      "label": "relevant",
+      "reason": "A settlement: Rice Lake Weighing Systems pays $60,764 because its Italian subsidiary exported weighing equipment to a UAE distributor knowing it would be re-exported to Iran. A sanctions-evasion case via a third-country distributor."
+    },
+    "ofac:8fac15ddd13a8c7d": {
+      "label": "not_relevant",
+      "reason": "Iran-related and counter-terrorism designations of one individual and one Hong Kong trading company. A bare designation list; the only other text is a press-release title."
+    },
+    "ofac:9c9d46b02fb99ebf": {
+      "label": "not_relevant",
+      "reason": "Cuba designations (Banco Exterior de Cuba and state enterprises), a Russia-related delisting and an amended Cuba general licence. Designations and a licence; no method, red flag or case."
+    },
+    "ofac:b14d332441652225": {
+      "label": "not_relevant",
+      "reason": "Two Venezuela-related general licences for telecommunications and one new FAQ. A licence notice."
+    },
+    "ofac:cb4def806f2d2cb7": {
+      "label": "not_relevant",
+      "reason": "A reminder to file the 2026 Annual Report of Blocked Property by 30 September, and amended Venezuela general licences and one FAQ. Restates an obligation and issues licences; no method, red flag or case."
+    },
+    "ofac:cf5e3876f995fb4b": {
+      "label": "not_relevant",
+      "reason": "Iran-related and Cuba designations and Belarus-related removals. The page is SDN entries plus press-release titles (one on a digital asset exchange enabling Iran); no enforcement action, settlement, advisory or alert."
+    },
+    "ofac:d553c4458a7fd0c7": {
+      "label": "not_relevant",
+      "reason": "Iran-related and counter-terrorism designations of Iranian airlines and aviation suppliers, with suspended and new wind-down general licences. Designations and licences; no enforcement action, settlement, advisory or alert."
+    },
+    "ofac:eca80d2c229c876e": {
+      "label": "relevant",
+      "reason": "Combines designations with an advisory and an alert: an updated Iran-related alert on sanctions risks of Iranian demands for Strait of Hormuz passage and an updated Tri-Seal advisory, beside Syria delistings and Iran designations."
+    },
+    "ofac:eceb1d4b8bded27d": {
+      "label": "not_relevant",
+      "reason": "Designation removals: DRC-related delistings of Francois Olenga and a linked club, and an administrative character fix to one Cuba listing. A bare delisting list."
+    },
+    "ofac:fa70f45496658b8c": {
+      "label": "not_relevant",
+      "reason": "Regulatory amendments: penalty procedures consolidated into new Sanctions Penalties Regulations, a Syria licence removed, and a TSRA licensing report. Regulatory and procedural changes; no method, red flag or case."
+    },
+    "ofsi:133b8886c3322de0": {
+      "label": "relevant",
+      "reason": "An OFSI monetary-penalty notice: a GBP 4,732,830.58 penalty on Citibank N.A. London Branch for a breach of financial sanctions. An enforcement case; the landing page gives the penalty, the 16-page notice is a linked PDF."
+    },
+    "ofsi:36ee3f45f848ec24": {
+      "label": "not_relevant",
+      "reason": "A general licence: INT/2026/9559192 permits steps and payments needed to enact a UK interdiction under the Russia regulations. A licence notice."
+    },
+    "ofsi:3ba99d4c4434cc1a": {
+      "label": "relevant",
+      "reason": "An OFSI monetary-penalty notice: a GBP 1,000,920.59 penalty on Sabre Global Technologies Limited under section 146 PACA. An enforcement case; the landing page gives the penalty, the notice is a linked PDF."
+    },
+    "ofsi:5ea94ded0f8ff6e0": {
+      "label": "not_relevant",
+      "reason": "A general licence: INT/2025/5787748 permits payment of arbitration costs involving designated persons; the update adds a monthly reporting requirement. A licence notice."
+    },
+    "ofsi:5f0e977e08c83696": {
+      "label": "relevant",
+      "reason": "A penalty press release: Sabre Global Technologies fined GBP 1,000,920.59 for serving designated Ural Airlines for seven months and testing a payment via a non-UK account to route around blocks. A sanctions-circumvention case."
+    },
+    "ofsi:5f612a010e455824": {
+      "label": "not_relevant",
+      "reason": "A general licence: INT/2025/5635700 permits business with named Russian-oil subsidiaries for listed exempt projects; the updates add projects. A licence notice."
+    },
+    "ofsi:61c8638c25f2614f": {
+      "label": "not_relevant",
+      "reason": "Statutory guidance restating the Iran regime's scope and prohibitions (asset freeze, restricted goods, interception services) and an amendment log. Restates obligations; describes no method, red flag or case."
+    },
+    "ofsi:7216fd70bf119c57": {
+      "label": "not_relevant",
+      "reason": "Statutory guidance restating the Russia regime's scope and prohibitions (asset freezes, trade, oil price cap, transport) and a long amendment log. Restates obligations; describes no method, red flag or case."
+    },
+    "ofsi:7662f16b47fe6676": {
+      "label": "relevant",
+      "reason": "Describes a fraud method: criminals impersonate OFSI by email or letter to demand payment, crypto transfers, a fee for a licence or to release frozen funds. An impersonation scam an analyst could screen for."
+    },
+    "ofsi:80fbd7a8282fd570": {
+      "label": "not_relevant",
+      "reason": "Licensing guidance: HM Treasury's presumption of denial for licence applications from designated Iranian banks, the scope, exceptions and conditions. A licensing policy, with no method, red flag or case."
+    },
+    "ofsi:81d3e9aaac362e6c": {
+      "label": "not_relevant",
+      "reason": "Guidance comparing US and UK sanctions regimes on lists, licences, recordkeeping and reporting, to help firms comply. Restates obligations; describes no method, red flag or case."
+    },
+    "ofsi:8efd8527f7bad32b": {
+      "label": "not_relevant",
+      "reason": "An FAQ index page: lists FAQ topics (regimes, licensing, oil services ban, definitions) and a log of FAQs added or amended. Describes no method, red flag or case."
+    },
+    "ofsi:9973fe4c6bbf905c": {
+      "label": "not_relevant",
+      "reason": "A webinar and event listing: how to invite OFSI to speak, register for webinars, and recordings of past sessions. An event listing, not a method, red flag or case."
+    },
+    "ofsi:ab72e782b16cbf9e": {
+      "label": "not_relevant",
+      "reason": "Statutory guidance restating the Iran nuclear regime's prohibitions (military, missile, nuclear goods; bunkering for ships carrying restricted items) and an amendment log. Restates obligations; no method, red flag or case."
+    },
+    "ofsi:cb517770dd3b7fc0": {
+      "label": "not_relevant",
+      "reason": "A general licence: INT/2026/8893924 permits winding down Maritime Mutual insurance policies; the update extends it and adds monthly reporting. A licence notice."
+    },
+    "ofsi:ce89f34afbcfd6b7": {
+      "label": "not_relevant",
+      "reason": "A general licence: INT/2025/6641960 lets non-designated investors move funds from designated brokers to non-designated ones. A licence notice."
+    },
+    "ofsi:dc8248173b455050": {
+      "label": "not_relevant",
+      "reason": "A general licence: INT/2024/4761108 permits personal-use retail banking with designated institutions; the update adds a cryptoasset definition and reporting. A licence notice."
+    },
+    "ofsi:f06784dfe467ed6b": {
+      "label": "not_relevant",
+      "reason": "A general licence: INT/2026/9491628 permits insolvency-related payments connected with the Prince Group under the Global Human Rights regime. A licence notice; the page describes no conduct."
+    },
+    "ofsi:f827b3b4bed13815": {
+      "label": "not_relevant",
+      "reason": "A general licence: INT/2025/8031092 permits continued business with Lukoil International entities; the updates amend definitions and extend the term. A licence notice."
+    },
+    "ofsi:fbb78f67e95a6f31": {
+      "label": "not_relevant",
+      "reason": "A general licence: INT/2025/7895596 permits continued business with Lukoil Bulgaria entities; the update amends definitions, adds a notification requirement and extends the term. A licence notice."
+    }
+  },
+  "rubric": "Label the publication as pinned: the page feeds_fetch pinned for the item, which for FinCEN and OFSI is the landing page (the advisory itself is a linked PDF that is not fetched), read together with the item's title and summary.\nrelevant: the publication describes methods, red flags or cases of financial crime that a typology could hold -- a money-laundering, fraud, sanctions-evasion, terrorist-financing, proliferation-financing or corruption technique; indicators an analyst could screen for; or an enforcement, penalty or settlement case that says what was done. A FinCEN advisory is relevant when its landing page names such a subject. A translation of a relevant advisory is relevant (whether to accept a duplicate is accept_run's question, not triage's). A rescinded advisory is labelled by its content, and the reason says it was rescinded.\nnot_relevant: a bare designation or delisting list, a licence or general licence, a notice of a regulatory, procedural or website change, an event or webinar listing, or guidance that restates obligations without describing a method, red flag or case.\nAn OFAC recent action that combines designations with anything relevant (an enforcement action, a settlement, an advisory or alert) is relevant.\nWhen the pinned text leaves the question open, the label is relevant, and the reason says what was missing (the spec's asymmetry: when in doubt, keep it).",
+  "rubric_sha256": "fb40af6b954c96967868bc8d26ef787b2f3a443554097ff06ccc2c5ea25ed0e9",
+  "schema": "fc08-triage-labels/1"
+}

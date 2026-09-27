@@ -56,7 +56,7 @@ CATALOGUE_SHA256 = "90b57e8ba0224c49506ac8070b731e637d9bfde497b6c0aebdf6fe41f9ed
 LABELS_SCHEMA = "fc08-triage-labels/1"
 # False until Task 5 writes labels.json; flipped to True in that commit, after which a missing or
 # partial labels file FAILS rather than being skipped.
-LABELS_DRAFTED = False
+LABELS_DRAFTED = True
 FIELDS = ("source", "item_id", "title", "url", "published", "summary")
 
 
