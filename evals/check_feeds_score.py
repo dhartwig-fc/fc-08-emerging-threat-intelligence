@@ -12,6 +12,8 @@ Usage:
     python evals/check_feeds_score.py --mutate unfinished-dispute  # a missing verdict counts as a dispute
     python evals/check_feeds_score.py --mutate decide-anything     # a decision on an undisputed item is accepted
     python evals/check_feeds_score.py --mutate spot-any-agreed     # the spot check samples agreed relevant items too
+    python evals/check_feeds_score.py --mutate edited-repeat       # a committed repeat's verdict edited in memory
+    python evals/check_feeds_score.py --mutate edited-labels       # a draft label edited after the repeats ran
     python evals/check_feeds_score.py --mutate unfinished-in-stratum  # an item a repeat left unfinished re-enters the stratum
     python evals/check_feeds_score.py --mutate sample-sorted       # the spot sample is sorted(agreed), not hash-ranked
 
@@ -37,7 +39,18 @@ three repeats, four disputes, four owner decisions):
                 never silently fall short of the overall figure;
   determinism   the same inputs give the same bytes on a second call.
 
-COLD. No repeat, label or catalogue file is read: every input is built below.
+AND ON THE COMMITTED EVIDENCE (added in Task 9, with the files it reads):
+  reproducible  evals/feeds/score.json is exactly what the scorer builds from the committed catalogue,
+                draft labels, three repeats and owner decisions, and disputes.json exactly what was put
+                to the owner -- so the committed band cannot drift from the records behind it;
+  one arm       the three repeats share one prompt, model, budget and turn cap, name the committed
+                catalogue by sha256, and name the draft labels as they are NOW (drafted before the
+                repeats and unchanged since);
+  coverage      each repeat's sessions cover every scored item exactly once, and every verdict carries
+                its verified quote and the pages it was found on;
+  decisions     each decision file is dated in its name and its body, each decision timestamped.
+
+COLD. The synthetic checks read nothing; the committed checks read tracked files only.
 
 NOT A VACUOUS PASS. Each --mutate rewrites the scorer's SOURCE in memory; at least one check must fail.
 """
@@ -82,6 +95,7 @@ MUTATIONS = {
     "sample-sorted": ('    ranked = sorted(agreed, key=lambda k: hashlib.sha256((seed + k).encode("utf-8")).hexdigest())\n',
                       "    ranked = sorted(agreed)\n"),
 }
+DATA_MUTATIONS = ("edited-repeat", "edited-labels")  # applied to the loaded evidence, not to the scorer
 
 
 def load_scorer(mutation) -> types.ModuleType:
@@ -303,15 +317,68 @@ def checks(sc) -> list:
     return out
 
 
+def committed_checks(sc, mutation) -> list:
+    """The committed evidence: the band and the disputes rebuild, and the repeats are one arm."""
+    import hashlib
+    import json
+    import re
+    out = []
+    catalogue, labels, disputes, decisions, repeats, files = sc.load_inputs()
+    if mutation == "edited-repeat":
+        key = sorted(repeats["rep1"]["verdicts"])[0]
+        v = repeats["rep1"]["verdicts"][key]
+        v["verdict"] = sc.NOT_RELEVANT if v["verdict"] == sc.RELEVANT else sc.RELEVANT
+    if mutation == "edited-labels":
+        labels["labels"][sorted(labels["labels"])[0]]["reason"] += " (edited after the repeats)"
+    # score.json and disputes.json each carry the real file hashes (as the CLI computes them with
+    # sha256_file); the rebuild must supply the same hashes or a byte-for-byte comparison could never
+    # hold even on unmutated evidence. Computed here, once, from the (possibly mutated) loaded objects.
+    cat_sha = hashlib.sha256(sc.CATALOGUE.read_bytes()).hexdigest()
+    lab_sha = hashlib.sha256(sc.render(labels).encode("utf-8")).hexdigest()
+    try:
+        text, err = sc.render(sc.build(catalogue, labels, disputes, decisions, repeats, files,
+                                       catalogue_sha256=cat_sha, labels_sha256=lab_sha)), None
+    except Exception as exc:
+        text, err = None, "%s: %s" % (type(exc).__name__, exc)
+    out.append((text is not None and sc.SCORE.read_text(encoding="utf-8") == text,
+                "the committed score.json is exactly what the scorer builds from the committed evidence",
+                err or "score.json %s" % ("matches" if text == sc.SCORE.read_text(encoding="utf-8") else "DIFFERS")))
+    rebuilt = sc.render(sc.disputes_doc(catalogue, labels, repeats, disputes["spot_check"]["n"], labels_sha256=lab_sha))
+    out.append((sc.DISPUTES.read_text(encoding="utf-8") == rebuilt,
+                "disputes.json is exactly the question the evidence poses (%d cards)" % len(disputes["cards"]), ""))
+    arm = {r: tuple(repeats[r].get(k) for k in ("prompt_sha256", "model", "max_budget_usd", "max_turns"))
+           for r in sc.REPEATS}
+    out.append((len(set(arm.values())) == 1 and all(repeats[r].get("schema") == "fc08-triage-repeat/1"
+                                                    and repeats[r].get("repeat") == r
+                                                    and repeats[r].get("catalogue_sha256") == cat_sha
+                                                    and repeats[r].get("labels_draft_sha256") == lab_sha
+                                                    for r in sc.REPEATS),
+                "the three repeats are one arm over the committed catalogue and the unchanged draft labels",
+                {r: repeats[r].get("labels_draft_sha256", "")[:12] for r in sc.REPEATS}))
+    keys = sorted(it["key"] for it in catalogue["items"])
+    covered = {r: sorted(k for s in repeats[r]["sessions"] for k in s["keys"]) for r in sc.REPEATS}
+    quoted = all(v.get("quote") and v.get("found_on") and set(v) >= {"verdict", "reason", "run_id"}
+                 and k in keys for r in sc.REPEATS for k, v in repeats[r]["verdicts"].items())
+    out.append((all(c == keys for c in covered.values()) and quoted,
+                "each repeat's sessions cover every scored item exactly once; every verdict carries its quote",
+                {r: len(c) for r, c in covered.items()}))
+    dated = all(re.fullmatch(r"evals/owner_decisions/feeds_triage_labels_(\d{4}-\d{2}-\d{2})\.json", f)
+                and json.loads((sc.ROOT / f).read_text(encoding="utf-8"))["date"] == f[-15:-5] for f in files)
+    out.append((files and dated and all(d.get("decided_at") for d in decisions),
+                "each owner decision file is dated in its name and body, and each decision is timestamped", files))
+    return out
+
+
 def main(argv: list) -> int:
     ap = argparse.ArgumentParser(description="Pin the triage scorer")
-    ap.add_argument("--mutate", choices=sorted(MUTATIONS), help="break one rule; a check MUST fail")
+    ap.add_argument("--mutate", choices=sorted(MUTATIONS) + list(DATA_MUTATIONS),
+                    help="break one rule; a check MUST fail")
     args = ap.parse_args(argv)
-    sc = load_scorer(args.mutate)
+    sc = load_scorer(args.mutate if args.mutate in MUTATIONS else None)
     if args.mutate:
         print("MUTATED: %s\n" % args.mutate)
     failures = 0
-    for ok, label, detail in checks(sc):
+    for ok, label, detail in checks(sc) + committed_checks(sc, args.mutate):
         print("  %-4s %s\n         %s" % ("PASS" if ok else "FAIL", label, detail))
         failures += 0 if ok else 1
     if args.mutate:

@@ -540,3 +540,28 @@ Spec: `docs/superpowers/specs/2026-09-26-slice2-live-intelligence-design.md`. Pl
 **Measured 2026-09-26: FinCEN's and OFSI's listed URLs are landing pages.** The advisory is a PDF linked from them. `feeds_fetch` pins the landing page and records its linked PDFs, but does not fetch them; following them is a sub-project C decision. OFAC's recent action is the page itself.
 
 **An OFSI item's id carries its Atom timestamp**, so a revised GOV.UK publication is a new item.
+
+## Slice 2: triage and its eval (sub-project B, built 2026-09-27)
+
+Plan: `docs/superpowers/plans/2026-09-27-slice2-b-triage-and-its-eval.md`.
+
+| File | What it holds |
+|---|---|
+| `feeds/triage.py` | THE triage rules: `inbox/<run_id>/triage.jsonl`, one verdict per item, appended only; the quote found in the PINNED document by the shared matcher, every page it holds on recorded; reason 1..300; at most 10 verdicts per run; every refusal starts `Rejected:` (REFUSED in telemetry) |
+| `mcp_server/feeds_server.py` (B) | adds `feeds_read_page` (the only read, pre-approved) and `feeds_triage`. EVAL MODE, set only by `evals/run_feeds_triage.py` (`FEEDS_CATALOGUE` + `FEEDS_CATALOGUE_BATCH`): lists a catalogue batch and serves its pinned copies, never the live page, the network or the ledger. A's refusals now read `Rejected:` too |
+| `agents/orchestrate_feeds.py` | the orchestrator, triage-only in B: four feeds tools, `tools=[]`, `setting_sources=[]`, the writes through `FEEDS_WRITE_ALLOWLIST` in `agents/permissions.py`. A session stopped by its own turn or budget cap COMPLETED (its leftovers are unfinished); only other errors are failures |
+| `evals/feeds/catalogue.json` | the back-catalogue: 20 listed per source, built ONCE by `tools/build_feeds_catalogue.py`, sha256 pinned in `evals/check_feeds_catalogue.py`; its documents are in `evals/feeds/docs/` (gitignored) |
+| `evals/feeds/labels.json` | Claude's draft labels and rubric, frozen before the first repeat. The owner's decisions are in `evals/owner_decisions/feeds_triage_labels_<date>.json`, NEVER in this file |
+| `evals/feeds/repeats/rep{1,2,3}.json`, `rep*/telemetry/` | the three committed triage repeats (6 sessions of at most 10 items each) and every session's telemetry |
+| `evals/score_feeds_triage.py` | disputes (ANY repeat differing from the draft) and the band (recall first, precision beside it, min/max/mean over three repeats, per source); `--check` rebuilds `evals/feeds/score.json`, and so does `evals/check_feeds_score.py` in `check_all` |
+
+**The triage band, measured 2026-09-27: recall 0.926-0.963 (mean 0.951), precision 0.962-1.000 (mean 0.987) over 60 items and three repeats.** Per source, recall: OFSI 1.000-1.000 (mean 1.000), FinCEN 0.950-1.000 (mean 0.983), OFAC 0.667-0.667 (mean 0.667). 3 disputes and 6 spot-checked items went to the owner, who changed 0 labels; the other 51 labels are Claude's drafts, UNCHALLENGED, not confirmed. 18 sessions, US$3.61, 14 of 18 `terminal_check`s clean.
+
+**Read it per source.** FinCEN's listing is its advisories page, so its 20 items are advisories by construction and dominate the overall recall; the discriminating items are the few OFSI and OFAC cases. **Triage read landing pages** (FinCEN, OFSI) and action pages (OFAC), as A pins them: if sub-project C changes what triage reads, this band describes a different input and the repeats must be re-run.
+
+**Findings measured 2026-09-27, not yet acted on:**
+- **`terminal_check`: 14 of 18 sessions clean.** All four unclean sessions show unterminated tool calls only (`duplicated` is empty in every one of the 18), and all four are EXCESS `feeds_triage` calls that recur in batch-3 of every repeat -- batch-3 is not clean in any of the three. This is evidence toward sub-project C's definition-of-done box 4, not proof of it: nobody has yet ruled on what an unterminated call there means.
+- **OFAC recall is 0.667 flat, not a range.** All three repeats missed the same OFAC item: a 51-page notice that is mostly a bare Syria-delisting-and-Iran-SDN list, whose relevance rests on one line inside it -- an Iran-related alert on sanctions risk from threats to Strait of Hormuz passage. All three repeats' reasons name the SDN list and miss the alert line.
+- **The owner declined a class ruling on the OFAC headline pattern.** OFAC designation pages whose headline names a method were not resolved as a class; each stays `not_relevant` on its own drafted reason, decided only where it was disputed or sampled.
+- **FinCEN's figures rest on subject lines.** Under the owner's decision to keep triage reading landing pages, not the linked PDFs, FinCEN's one miss (rep1 only) turned on whether a subject line ("FATF-identified jurisdictions with AML/CFT/PF deficiencies") read as a jurisdictional risk indicator or as a bare list; rep1 read it as the latter, rep2 and rep3 as the former.
+- **Cost: 18 sessions for US$3.61 in total**, against Task 8's US$5-14 estimate for the 17 sessions it ran (the pilot was already spent under Task 7).

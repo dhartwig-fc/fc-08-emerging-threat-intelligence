@@ -1,0 +1,249 @@
+{
+  "false_negatives": {
+    "fincen:55d42ff2380766c9": [
+      "rep1"
+    ],
+    "ofac:eca80d2c229c876e": [
+      "rep1",
+      "rep2",
+      "rep3"
+    ]
+  },
+  "inputs": {
+    "catalogue_sha256": "90b57e8ba0224c49506ac8070b731e637d9bfde497b6c0aebdf6fe41f9ed3819",
+    "decision_files": [
+      "evals/owner_decisions/feeds_triage_labels_2026-09-27.json"
+    ],
+    "labels_sha256": "922d9e151d043c20c6f73363191481a5f1465c1e7689d4e3021089f0f5fcdd45",
+    "repeats": [
+      "rep1",
+      "rep2",
+      "rep3"
+    ]
+  },
+  "labels": {
+    "changed_by_owner": [],
+    "items": 60,
+    "not_relevant": 33,
+    "owner_decided": 9,
+    "relevant": 27,
+    "unchallenged": 51
+  },
+  "overall": {
+    "per_repeat": {
+      "rep1": {
+        "fn": 2,
+        "fp": 1,
+        "items": 60,
+        "kept": 26,
+        "precision": 0.962,
+        "recall": 0.926,
+        "relevant": 27,
+        "tn": 32,
+        "tp": 25,
+        "unfinished": []
+      },
+      "rep2": {
+        "fn": 1,
+        "fp": 0,
+        "items": 60,
+        "kept": 26,
+        "precision": 1.0,
+        "recall": 0.963,
+        "relevant": 27,
+        "tn": 33,
+        "tp": 26,
+        "unfinished": []
+      },
+      "rep3": {
+        "fn": 1,
+        "fp": 0,
+        "items": 60,
+        "kept": 26,
+        "precision": 1.0,
+        "recall": 0.963,
+        "relevant": 27,
+        "tn": 33,
+        "tp": 26,
+        "unfinished": []
+      }
+    },
+    "precision": {
+      "max": 1.0,
+      "mean": 0.987,
+      "min": 0.962,
+      "n": 3
+    },
+    "recall": {
+      "max": 0.963,
+      "mean": 0.951,
+      "min": 0.926,
+      "n": 3
+    }
+  },
+  "per_source": {
+    "fincen": {
+      "per_repeat": {
+        "rep1": {
+          "fn": 1,
+          "fp": 0,
+          "items": 20,
+          "kept": 19,
+          "precision": 1.0,
+          "recall": 0.95,
+          "relevant": 20,
+          "tn": 0,
+          "tp": 19,
+          "unfinished": []
+        },
+        "rep2": {
+          "fn": 0,
+          "fp": 0,
+          "items": 20,
+          "kept": 20,
+          "precision": 1.0,
+          "recall": 1.0,
+          "relevant": 20,
+          "tn": 0,
+          "tp": 20,
+          "unfinished": []
+        },
+        "rep3": {
+          "fn": 0,
+          "fp": 0,
+          "items": 20,
+          "kept": 20,
+          "precision": 1.0,
+          "recall": 1.0,
+          "relevant": 20,
+          "tn": 0,
+          "tp": 20,
+          "unfinished": []
+        }
+      },
+      "precision": {
+        "max": 1.0,
+        "mean": 1.0,
+        "min": 1.0,
+        "n": 3
+      },
+      "recall": {
+        "max": 1.0,
+        "mean": 0.983,
+        "min": 0.95,
+        "n": 3
+      }
+    },
+    "ofac": {
+      "per_repeat": {
+        "rep1": {
+          "fn": 1,
+          "fp": 1,
+          "items": 20,
+          "kept": 3,
+          "precision": 0.667,
+          "recall": 0.667,
+          "relevant": 3,
+          "tn": 16,
+          "tp": 2,
+          "unfinished": []
+        },
+        "rep2": {
+          "fn": 1,
+          "fp": 0,
+          "items": 20,
+          "kept": 2,
+          "precision": 1.0,
+          "recall": 0.667,
+          "relevant": 3,
+          "tn": 17,
+          "tp": 2,
+          "unfinished": []
+        },
+        "rep3": {
+          "fn": 1,
+          "fp": 0,
+          "items": 20,
+          "kept": 2,
+          "precision": 1.0,
+          "recall": 0.667,
+          "relevant": 3,
+          "tn": 17,
+          "tp": 2,
+          "unfinished": []
+        }
+      },
+      "precision": {
+        "max": 1.0,
+        "mean": 0.889,
+        "min": 0.667,
+        "n": 3
+      },
+      "recall": {
+        "max": 0.667,
+        "mean": 0.667,
+        "min": 0.667,
+        "n": 3
+      }
+    },
+    "ofsi": {
+      "per_repeat": {
+        "rep1": {
+          "fn": 0,
+          "fp": 0,
+          "items": 20,
+          "kept": 4,
+          "precision": 1.0,
+          "recall": 1.0,
+          "relevant": 4,
+          "tn": 16,
+          "tp": 4,
+          "unfinished": []
+        },
+        "rep2": {
+          "fn": 0,
+          "fp": 0,
+          "items": 20,
+          "kept": 4,
+          "precision": 1.0,
+          "recall": 1.0,
+          "relevant": 4,
+          "tn": 16,
+          "tp": 4,
+          "unfinished": []
+        },
+        "rep3": {
+          "fn": 0,
+          "fp": 0,
+          "items": 20,
+          "kept": 4,
+          "precision": 1.0,
+          "recall": 1.0,
+          "relevant": 4,
+          "tn": 16,
+          "tp": 4,
+          "unfinished": []
+        }
+      },
+      "precision": {
+        "max": 1.0,
+        "mean": 1.0,
+        "min": 1.0,
+        "n": 3
+      },
+      "recall": {
+        "max": 1.0,
+        "mean": 1.0,
+        "min": 1.0,
+        "n": 3
+      }
+    }
+  },
+  "schema": "fc08-triage-score/1",
+  "sessions": {
+    "cost_usd": 3.61,
+    "count": 18,
+    "terminal_check_clean": 14
+  },
+  "unanimous": 58
+}
