@@ -87,6 +87,7 @@ GUARDS = [
     ("check_document_pages", ["evals/check_document_pages.py"], "cold"),
     ("check_feeds_extract", ["evals/check_feeds_extract.py"], "cold"),
     ("check_friday_run", ["evals/check_friday_run.py"], "cold"),
+    ("check_accept_run", ["evals/check_accept_run.py"], "cold"),
     ("check_published_walkthrough --cold", ["evals/check_published_walkthrough.py", "--cold"], "cold"),
     ("check_published_walkthrough", ["evals/check_published_walkthrough.py"], "needs-portfolio"),
     # The batch is DATA (data/digests/CURRENT), so cutting a new batch never edits this list.

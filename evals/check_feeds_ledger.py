@@ -8,19 +8,20 @@ Usage:
     python evals/check_feeds_ledger.py --mutate escape-inbox    # a path outside the run's folder is written
     python evals/check_feeds_ledger.py --mutate overwrite-pin   # a pinned file is overwritten with other bytes
     python evals/check_feeds_ledger.py --mutate skip-coverage   # accept_run takes decisions that miss an item
-    python evals/check_feeds_ledger.py --mutate accept-allowed  # accept_run records an accept it cannot carry out
+    python evals/check_feeds_ledger.py --mutate accept-allowed  # accept_run accepts an item that was never extracted
     python evals/check_feeds_ledger.py --mutate newline-run-id  # a run id with a trailing newline is accepted
     python evals/check_feeds_ledger.py --mutate accept-eval-run # accept_run lets an eval run reach the ledger
 
 WHAT IT HOLDS. "New" is decided by data/feeds/seen.json and nothing else, so that file must be
 canonical (the same decisions give the same bytes), must never decide an item twice, and must be
 written only by tools/accept_run.py, which refuses the whole run unless every listed item is decided
-exactly once. In sub-project A an "accept" is refused: accepting also moves the item's record and
-document into tracked data, which is sub-project C, and a ledger saying "accepted" over nothing
-moved would be false. A run's inbox is written only inside inbox/<run_id>/, and a pinned file there
-is immutable. A run sub-project B's eval mode marked ("eval": true in items.json) is refused
-outright: an eval run's items are the tracked back-catalogue's, replayed, and must never reach the
-tracked ledger by a mix-up.
+exactly once. An "accept" of an item the run never extracted is refused (sub-project C built the
+accept path, pinned end to end by evals/check_accept_run.py): a ledger saying "accepted" over
+nothing moved would be false. The fixture runs here have no session, so reconciliation calls them
+FAILED and each decision passes --override-reconciliation, as a person would have to. A run's
+inbox is written only inside inbox/<run_id>/, and a pinned file there is immutable. A run
+sub-project B's eval mode marked ("eval": true in items.json) is refused outright: an eval run's
+items are the tracked back-catalogue's, replayed, and must never reach the tracked ledger by a mix-up.
 
 WRITER SCAN. Among the repository's Python files, only feeds/ledger.py names seen.json, only
 tools/accept_run.py calls record_decisions(), and only those two (and the guards, which write
@@ -30,7 +31,9 @@ JSON itself and wrote it through a path it assembled would pass. The scanner is 
 planted rogue writer, one line per rule, each required to be caught, so an empty scan cannot pass by
 matching nothing.
 
-COLD. Temporary folders only; the tracked ledger is read, never written.
+COLD. Temporary folders only; the tracked ledger is read, never written. Every accept_run call names a
+temporary inbox, ledger, data folder and advisory list, and the repository's git status is asserted
+unchanged (accept_run copies a run's evidence into data/, which git status sees).
 """
 
 from __future__ import annotations
@@ -40,6 +43,7 @@ import contextlib
 import importlib
 import io
 import json
+import subprocess
 import sys
 import tempfile
 import types
@@ -62,7 +66,7 @@ MUTATIONS = {
     "escape-inbox": (INBOX, "    if folder not in target.parents:\n", "    if False:\n"),
     "overwrite-pin": (INBOX, "        if target.read_bytes() != data:\n", "        if False:\n"),
     "skip-coverage": (ACCEPT, "    if missing or extra:\n", "    if False:\n"),
-    "accept-allowed": (ACCEPT, "    if accepted:\n", "    if False:\n"),
+    "accept-allowed": (ACCEPT, '    if not outcome or outcome.get("status") != "extracted":\n', "    if False:\n"),
     "newline-run-id": (INBOX, '    if not RUN_ID.fullmatch(run_id or ""):\n',
                        '    if not re.match(r"^feeds-\\d{4}-\\d{2}-\\d{2}-[0-9a-f]{6}$", run_id or ""):\n'),
     "accept-eval-run": (ACCEPT, '    if state.get("eval"):\n        raise ValueError("run %s is an eval run; '
@@ -99,7 +103,7 @@ def writer_violations(files: dict) -> list:
             out.append("%s calls record_decisions()" % rel)
         if "ledger.dump(" in text and rel not in ("feeds/ledger.py", "tools/accept_run.py",
                                                   "evals/check_feeds_ledger.py", "evals/check_feeds_server.py",
-                                                  "evals/check_feeds_triage.py"):
+                                                  "evals/check_feeds_triage.py", "evals/check_accept_run.py"):
             out.append("%s calls ledger.dump()" % rel)
     return out
 
@@ -115,8 +119,13 @@ def item(source: str, item_id: str) -> dict:
                          "2026-10-01").to_json(), document=None)
 
 
+def git_status() -> str:
+    return subprocess.run(["git", "status", "--porcelain", "--untracked-files=all"], cwd=ROOT,
+                          capture_output=True, text=True).stdout
+
+
 def checks(ledger, inbox, accept) -> list:
-    out = []
+    out, status_before = [], git_status()
     tracked = ledger.SEEN_PATH.read_text(encoding="utf-8")
     out.append((tracked == ledger.dump(ledger.load().values()), "the tracked ledger loads and is in canonical form",
                 "%d entries" % len(ledger.load())))
@@ -185,6 +194,10 @@ def checks(ledger, inbox, accept) -> list:
 
         seen = tmp / "seen.json"
         seen.write_text(ledger.dump([]), encoding="utf-8")
+        # accept_run now copies a run's evidence into data/feeds/runs/: every call here names TEMPORARY data
+        # and advisory-list paths. Measured while drafting C: without them this guard wrote into the checkout.
+        alist = tmp / "advisory_list.json"
+        alist.write_text(json.dumps({"advisories": []}), encoding="utf-8")
         listed = [item("ofsi", "o1"), item("ofsi", "o2"), item("fincen", "f1")]
         inbox.save(RUN, {"run_id": RUN, "sources": {"ofsi": {"items": listed[:2]}, "fincen": {"items": listed[2:]}}},
                    root)
@@ -196,8 +209,9 @@ def checks(ledger, inbox, accept) -> list:
             buf = io.StringIO()
             try:
                 with contextlib.redirect_stdout(buf):
-                    code = accept.main([run_id, "--decisions", str(f), *extra], inbox_root=root, seen_path=seen,
-                                       today=TODAY)
+                    code = accept.main([run_id, "--decisions", str(f), "--override-reconciliation",
+                                        "ledger guard fixture: no session ran", *extra], inbox_root=root,
+                                       seen_path=seen, today=TODAY, data=tmp / "data", advisory_list=alist)
             except Exception as exc:  # a crash is not a refusal: the check must fail, not the guard
                 return None, "CRASHED: %s: %s" % (type(exc).__name__, exc)
             return code, buf.getvalue()
@@ -218,11 +232,14 @@ def checks(ledger, inbox, accept) -> list:
                                                          and e["decided_on"] == "2026-10-02" for e in got.values()),
                     "an all-drop run records every listed item, with its run and date", said.strip()))
         code, said = run({k: "drop" for k in keys})
-        out.append((code == 1 and "already decided" in said, "the same run cannot be decided twice", said.strip()[:160]))
+        out.append((code == 1 and "already accepted" in said and ledger.load(seen) == got,
+                    "the same run cannot be decided twice (accept_run marks it accepted), and the ledger is unchanged",
+                    said.strip()[:160]))
         f = tmp / "none.json"
         f.write_text("{}", encoding="utf-8")
         with contextlib.redirect_stdout(io.StringIO()) as buf:
-            code = accept.main(["feeds-2026-10-02-000000", "--decisions", str(f)], inbox_root=root, seen_path=seen)
+            code = accept.main(["feeds-2026-10-02-000000", "--decisions", str(f)], inbox_root=root, seen_path=seen,
+                               data=tmp / "data", advisory_list=alist)
         out.append((code == 1 and "no items.json" in buf.getvalue(), "a run with no inbox is refused", ""))
 
         eval_run = "feeds-2026-10-05-facade"
@@ -233,6 +250,8 @@ def checks(ledger, inbox, accept) -> list:
         out.append((code == 1 and "eval run" in said and seen.read_bytes() == before_eval,
                     "accept_run refuses a run marked eval, and writes nothing", said.strip()[:160]))
 
+    out.append((git_status() == status_before, "the repository's git status is unchanged (every accept_run call wrote to "
+                "temporary paths)", ""))
     scanned = repo_python()
     real = writer_violations(scanned)
     has_writers = "feeds/ledger.py" in scanned and "tools/accept_run.py" in scanned and len(scanned) >= 20

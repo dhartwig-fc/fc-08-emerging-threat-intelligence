@@ -38,6 +38,9 @@ from schemas.proposal_contract import QUOTE_MAX, QUOTE_MIN, SCHEMA, STAGES, prop
 QUEUE_DIR = ROOT / "data" / "proposals"
 LEGACY_QUEUE = ROOT / "data" / "proposals_legacy_2026-09-10_to_13.jsonl"
 ADVISORY_LIST = ROOT / "evals" / "golden" / "advisory_list.json"
+# Slice 2 C: advisories accepted from the live feeds (tools/accept_run.py is the only writer). Kept apart from
+# the golden list, which is the labelled corpus and a pinned input of every digest batch.
+FEED_ADVISORY_LIST = ROOT / "data" / "feeds" / "advisory_list.json"
 ADVISORIES_DIR = ROOT / "data" / "advisories"
 LIBRARY = ROOT / "data" / "typologies.json"
 
@@ -170,8 +173,16 @@ def load_queue(queue_dir: Path = QUEUE_DIR) -> Tuple[List[Proposal], List[str]]:
     return load_queue_files(sorted(queue_dir.glob("*.jsonl")) if queue_dir.exists() else [])
 
 
-def _advisories(path: Path) -> Dict[str, dict]:
-    return {a["advisory_id"]: a for a in json.loads(path.read_text(encoding="utf-8"))["advisories"]}
+def _advisories(path: Path, feed_list: Optional[Path] = None) -> Dict[str, dict]:
+    """The golden list, plus the live-feed list when it exists. An id in both is refused, never shadowed."""
+    out = {a["advisory_id"]: a for a in json.loads(path.read_text(encoding="utf-8"))["advisories"]}
+    if feed_list is not None and Path(feed_list).exists():
+        feed = {a["advisory_id"]: a for a in json.loads(Path(feed_list).read_text(encoding="utf-8"))["advisories"]}
+        both = sorted(set(out) & set(feed))
+        if both:
+            raise ValueError("advisory ids in both the golden and the live-feed list: %s" % both)
+        out.update(feed)
+    return out
 
 
 def _library_ids(path: Path) -> frozenset:
@@ -202,9 +213,10 @@ def _contract_problem(p: Proposal) -> Optional[str]:
 
 
 def recheck(proposals, advisory_list: Path = ADVISORY_LIST, advisories_dir: Path = ADVISORIES_DIR,
-            library: Path = LIBRARY) -> Tuple[List[Proposal], List[Quarantined]]:
-    """Split proposals into clean and quarantined. A quarantined proposal can never be approved."""
-    advisories = _advisories(advisory_list)
+            library: Path = LIBRARY, feed_list: Optional[Path] = FEED_ADVISORY_LIST) -> Tuple[List[Proposal], List[Quarantined]]:
+    """Split proposals into clean and quarantined. A quarantined proposal can never be approved.
+    `feed_list` is the live-feed advisory list (slice 2 C); None leaves it out."""
+    advisories = _advisories(advisory_list, feed_list)
     known = _library_ids(library)
     indexes: Dict[str, Optional[PageIndex]] = {}
     clean: List[Proposal] = []
