@@ -37,6 +37,15 @@ def run_dir(run_id: str, root: Path = INBOX_ROOT) -> Path:
     return Path(root) / run_id
 
 
+# Slice 2 C: what an extraction the run starts writes, inside the run's own folder.
+PROPOSALS, RECORDS, TELEMETRY = "proposals", "records", "telemetry"
+
+
+def proposals_dir(run_id: str, root: Path = INBOX_ROOT) -> Path:
+    """The ONE definition of where a feeds run's extraction queues go; the runner and the server both call it."""
+    return run_dir(run_id, root) / PROPOSALS
+
+
 def load(run_id: str, root: Path = INBOX_ROOT) -> dict:
     path = run_dir(run_id, root) / ITEMS
     if not path.exists():

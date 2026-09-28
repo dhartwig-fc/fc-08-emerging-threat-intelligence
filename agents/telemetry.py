@@ -142,6 +142,43 @@ def tool_hooks(run) -> dict:
             "PostToolUseFailure": [HookMatcher(matcher=None, hooks=[post_failure])]}
 
 
+def terminated(run) -> set:
+    """The tool_use ids this run's telemetry already holds a terminal event for."""
+    path = telemetry_path(run)
+    out = set()
+    if path.exists():
+        for line in path.read_text(encoding="utf-8").splitlines():
+            if line.strip():
+                event = json.loads(line)
+                if event.get("stage") in (TOOL_CALL, PERMISSION_DENIED):
+                    out.add(event.get("payload", {}).get("tool_use_id"))
+    return out
+
+
+def record_unhooked(run, calls: dict, results: dict) -> list:
+    """The ONE terminal event for each call the CLI answered before any hook ran (slice 2 C).
+
+    Measured in B's pilot transcript (2026-09-27): three feeds_triage calls whose input "could not be
+    parsed as JSON" were each answered by a tool_result with is_error -- and fired no hook and no
+    permission callback, so the run's telemetry held nothing for them and terminal_check called them
+    unterminated. The runner saw both halves in the message stream. `calls` is tool_use_id -> tool name,
+    `results` tool_use_id -> (is_error, text); a call with a result and no terminal event gets one here,
+    marked source "transcript" so the evidence says where it came from. A call with NEITHER stays
+    unterminated: nothing is invented.
+    """
+    done = terminated(run)
+    out = []
+    for tool_use_id, tool in calls.items():
+        if tool_use_id in done or tool_use_id not in results:
+            continue
+        is_error, text = results[tool_use_id]
+        status = FAILURE if is_error else SUCCESS
+        out.append(emit(run, TOOL_CALL, status, "%s %s (answered by the CLI; no hook fired)" % (tool, status.lower()),
+                        tool=tool, tool_use_id=tool_use_id, latency_ms=None, outcome=(text or "")[:200],
+                        source="transcript"))
+    return out
+
+
 def reconcile(run, tool_use_ids) -> dict:
     """Did THIS run leave exactly one terminal event per tool call? Read, not assumed.
 

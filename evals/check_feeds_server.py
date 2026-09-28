@@ -340,12 +340,21 @@ def checks(fs) -> list:
     hint = lambda t, a, b: getattr(t.annotations, a, getattr(t.annotations, b, None))  # noqa: E731
     ro = {n: hint(t, "readOnlyHint", "read_only_hint") for n, t in tools.items()}
     ow = {n: hint(t, "openWorldHint", "open_world_hint") for n, t in tools.items()}
-    out.append((sorted(tools) == ["feeds_fetch", "feeds_list_new", "feeds_read_page", "feeds_triage"]
-                and ro == {"feeds_fetch": False, "feeds_list_new": False, "feeds_read_page": True,
-                           "feeds_triage": False}
-                and ow["feeds_fetch"] is True and ow["feeds_list_new"] is True,
-                "the server exposes exactly its four tools; only feeds_read_page is annotated read-only, and the "
-                "two that reach the network are open-world", sorted(tools)))
+    out.append((sorted(tools) == ["feeds_extract", "feeds_fetch", "feeds_list_new", "feeds_read_page", "feeds_triage"]
+                and ro == {"feeds_extract": False, "feeds_fetch": False, "feeds_list_new": False,
+                           "feeds_read_page": True, "feeds_triage": False}
+                and ow["feeds_fetch"] is True and ow["feeds_list_new"] is True and ow["feeds_extract"] is True,
+                "a live server exposes exactly its five tools; only feeds_read_page is annotated read-only, and the "
+                "three that reach the network are open-world", sorted(tools)))
+    # Slice 2 C: a server the eval runner starts (FEEDS_CATALOGUE set) must not even LIST feeds_extract, so
+    # B's triage-only sessions keep the four tools they were measured with.
+    os.environ[fs.CATALOGUE_ENV] = str(ROOT / "evals" / "feeds" / "catalogue.json")
+    try:
+        eval_tools = sorted(t.name for t in asyncio.run(load_server(None).mcp.list_tools()))
+    finally:
+        os.environ.pop(fs.CATALOGUE_ENV, None)
+    out.append((eval_tools == ["feeds_fetch", "feeds_list_new", "feeds_read_page", "feeds_triage"],
+                "a server started in eval mode lists the four triage tools and not feeds_extract", eval_tools))
     return out
 
 

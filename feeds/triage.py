@@ -15,8 +15,10 @@ Each rule is carried here, in code, whatever the agent intends (spec section 4 a
 Every refusal starts "Rejected:", the prefix agents/telemetry.py classifies as REFUSED, so a refused
 triage call is counted as the governance working, never as a success.
 
-The pages a quote is checked against are the pages the agent reads (page_texts): schemas/html_pages
-for HTML, pypdf for PDF -- the same lists PageIndex.from_html and PageIndex.from_pdf build.
+The pages a quote is checked against are the pages the agent reads (page_texts), and page_texts IS
+schemas.citation_match.document_texts: one page rule for triage, extraction, the review gate and the
+citation audit (slice 2 C), pinned by evals/check_document_pages.py. Measured before delegating: all
+263 local documents (243 pinned HTML pages, 20 golden PDFs) paged byte-identically either way.
 """
 
 from __future__ import annotations
@@ -27,7 +29,7 @@ from pathlib import Path
 from typing import Dict, List, Optional, Sequence, Tuple
 
 from feeds import inbox
-from schemas.citation_match import PageIndex, file_sha256
+from schemas.citation_match import PageIndex, document_texts, file_sha256
 from schemas.proposal_contract import QUOTE_MAX, QUOTE_MIN
 
 TRIAGE = "triage.jsonl"
@@ -43,12 +45,10 @@ def _now() -> str:
 
 
 def page_texts(path: Path) -> List[str]:
-    """The pinned document's pages, as the agent reads them and as the quote is checked against them."""
-    if Path(path).suffix == ".pdf":
-        from pypdf import PdfReader
-        return [p.extract_text() or "" for p in PdfReader(str(path)).pages]
-    from schemas.html_pages import html_pages
-    return html_pages(Path(path).read_bytes())
+    """The pinned document's pages, as the agent reads them and as the quote is checked against them.
+    schemas.citation_match's one loader, never a second copy of its rule: a .pdf by pypdf, a .html by
+    schemas/html_pages, anything else refused."""
+    return document_texts(path)
 
 
 def pinned_document(run_id: str, item: dict, root: Path = inbox.INBOX_ROOT) -> Tuple[Optional[Path], str]:

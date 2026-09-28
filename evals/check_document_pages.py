@@ -7,12 +7,18 @@ Usage:
     python evals/check_document_pages.py --mutate server-pdf     # propose_link's index is PDF-only again
     python evals/check_document_pages.py --mutate gate-pdf       # the review gate's re-check is PDF-only again
     python evals/check_document_pages.py --mutate extractor-pdf  # the extractor's prompt pages are PDF-only again
+    python evals/check_document_pages.py --mutate triage-pdf     # triage's pages are PDF-only again
+    python evals/check_document_pages.py --mutate triage-own-loader  # triage keeps B's second copy of the rule
 
 WHAT IT HOLDS. A live feed item may be an HTML page (every OFAC action; OFSI notices with no PDF). Its
 quotes must be found, and a fabricated one refused, by every caller that re-finds a quote:
   loader      schemas.citation_match.document_texts / PageIndex.from_document give a PDF exactly
               from_pdf's pages and an HTML page exactly from_html's; any other suffix is refused;
   extractor   agents/extract_advisory.document_pages numbers those same pages "=== PAGE n ===";
+  triage      feeds.triage.page_texts -- what feeds_read_page shows, what a triage quote is checked
+              against, and what feeds_extract pages a linked PDF with -- IS the loader: the same pages
+              for a PDF and an HTML page, and the same refusal of any other suffix (B's own copy of the
+              rule paged a .txt as HTML, to no pages, rather than refusing it);
   server      knowledge_centre_server._page_index finds a true quote on an HTML document's page and
               not a fabricated one;
   gate        governance.proposals.recheck passes a proposal quoting the HTML page and quarantines
@@ -49,6 +55,7 @@ CM = ROOT / "schemas" / "citation_match.py"
 KC = ROOT / "mcp_server" / "knowledge_centre_server.py"
 GATE = ROOT / "governance" / "proposals.py"
 EXTRACTOR = ROOT / "agents" / "extract_advisory.py"
+TRIAGE = ROOT / "feeds" / "triage.py"
 MUTATIONS = {
     "pdf-only": (CM, '    if suffix in (".html", ".htm"):\n        from schemas.html_pages import html_pages\n'
                      '        return html_pages(Path(path).read_bytes())\n', ""),
@@ -56,6 +63,14 @@ MUTATIONS = {
     "gate-pdf": (GATE, "PageIndex.from_document(pdf) if ok", "PageIndex.from_pdf(pdf) if ok"),
     "extractor-pdf": (EXTRACTOR, "enumerate(document_texts(path), start=1)",
                       "enumerate([p.extract_text() for p in __import__('pypdf').PdfReader(str(path)).pages], start=1)"),
+    "triage-pdf": (TRIAGE, "    return document_texts(path)\n",
+                   "    return [p.extract_text() or '' for p in __import__('pypdf').PdfReader(str(path)).pages]\n"),
+    "triage-own-loader": (TRIAGE, "    return document_texts(path)\n",  # B's page_texts, verbatim, before C
+                          '    if Path(path).suffix == ".pdf":\n'
+                          "        from pypdf import PdfReader\n"
+                          '        return [p.extract_text() or "" for p in PdfReader(str(path)).pages]\n'
+                          "    from schemas.html_pages import html_pages\n"
+                          "    return html_pages(Path(path).read_bytes())\n"),
 }
 
 
@@ -100,6 +115,7 @@ def checks(mutation) -> list:
     kc = load("kc_under_test", KC, mutation)
     gate = load("governance.proposals", GATE, mutation)
     ex = load("extractor_under_test", EXTRACTOR, mutation)
+    tri = load("triage_under_test", TRIAGE, mutation)
     import check_citations
     check_citations.PageIndex = cm.PageIndex
     out = []
@@ -136,6 +152,15 @@ def checks(mutation) -> list:
         out.append((got == ["=== PAGE %d ===\n%s" % (n, t.strip()) for n, t in enumerate(raw, 1)],
                     "the extractor's prompt pages of an HTML document are its html_pages, numbered",
                     str(got)[:80]))
+
+        from pypdf import PdfReader
+        pdf_raw = [p.extract_text() or "" for p in PdfReader(str(pdf)).pages]
+        got = (attempt(lambda: tri.page_texts(pdf)), attempt(lambda: tri.page_texts(html)))
+        out.append((got == (pdf_raw, raw), "triage's page_texts gives a PDF and an HTML page exactly the loader's pages",
+                    str(got)[:80]))
+        got = attempt(lambda: tri.page_texts(txt))
+        out.append((isinstance(got, str) and "ValueError" in got and "neither a PDF nor an HTML" in got,
+                    "triage's page_texts refuses any other suffix, as the loader does", str(got)[:80]))
 
         sha = hashlib.sha256(html.read_bytes()).hexdigest()
         kc._page_index.cache_clear()

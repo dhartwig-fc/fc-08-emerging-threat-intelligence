@@ -204,15 +204,22 @@ class Source:
     listing_types: FrozenSet[str]
     hosts: FrozenSet[str]  # the listing's host and every item URL's host
     parse: Callable[[bytes], List[FeedItem]]
+    # Slice 2 C: hosts a PDF LINKED from an item's pinned page may be fetched from, for extraction only
+    # (feeds/extraction.py). Measured 2026-09-26/28: FinCEN links its advisory PDF on www.fincen.gov, OFSI
+    # on assets.publishing.service.gov.uk; OFAC's action IS the page, and its /media/ downloads are not
+    # followed (every OFAC page links /media/935656, so "the" document is not identifiable by rule).
+    document_hosts: FrozenSet[str] = frozenset()
 
 
 SOURCES = {
     "fincen": Source("fincen", "https://www.fincen.gov/resources/advisoriesbulletinsfact-sheets/advisories", "html",
-                     frozenset({"text/html"}), frozenset({"www.fincen.gov"}), parse_fincen),
+                     frozenset({"text/html"}), frozenset({"www.fincen.gov"}), parse_fincen,
+                     frozenset({"www.fincen.gov"})),
     "ofac": Source("ofac", "https://ofac.treasury.gov/recent-actions", "html",
                    frozenset({"text/html"}), frozenset({"ofac.treasury.gov"}), parse_ofac),
     "ofsi": Source("ofsi", "https://www.gov.uk/government/organisations/office-of-financial-sanctions-implementation.atom",
-                   "atom", frozenset({"application/atom+xml"}), frozenset({"www.gov.uk"}), parse_ofsi),
+                   "atom", frozenset({"application/atom+xml"}), frozenset({"www.gov.uk"}), parse_ofsi,
+                   frozenset({"assets.publishing.service.gov.uk"})),
 }
 
 

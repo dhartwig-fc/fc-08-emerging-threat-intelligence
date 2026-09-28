@@ -48,7 +48,9 @@ from schemas.advisory import AdvisoryRecord  # noqa: E402
 from agents.run_identity import RunIdentity  # noqa: E402
 from schemas.citation_match import document_texts, file_sha256  # noqa: E402
 
-from claude_agent_sdk import AssistantMessage, ClaudeAgentOptions, ResultMessage, ToolUseBlock, query  # noqa: E402
+from claude_agent_sdk import (  # noqa: E402
+    AssistantMessage, ClaudeAgentOptions, ResultMessage, ToolResultBlock, ToolUseBlock, UserMessage, query,
+)
 from claude_agent_sdk import ClaudeSDKError  # noqa: E402
 
 # One definition, shared with the permission callback's tool names.
@@ -207,10 +209,13 @@ def agent_options(model: str, max_budget_usd: float, max_turns: int, run: RunIde
     )
 
 
-async def extract(path: Path, advisory_id: str, model: str, max_budget_usd: float, max_turns: int) -> tuple:
+async def extract(path: Path, advisory_id: str, model: str, max_budget_usd: float, max_turns: int,
+                  run: RunIdentity = None) -> tuple:
+    """`run` is passed by a feeds run (tools/friday_run.py), whose identity names the feeds run so the
+    queue goes to its inbox; slice 1's command line leaves it None and gets a fresh identity as before."""
     pages = document_pages(path)
 
-    run = RunIdentity.new("extractor", advisory_id, path)
+    run = run or RunIdentity.new("extractor", advisory_id, path)
     options = agent_options(model, max_budget_usd, max_turns, run)
 
     telemetry.run_started(run, model, max_budget_usd, max_turns, AGENT_TOOLS)
@@ -220,6 +225,9 @@ async def extract(path: Path, advisory_id: str, model: str, max_budget_usd: floa
     # Every call's id, so RUN_COMPLETED can record whether each one got exactly
     # one terminal event (telemetry.reconcile) rather than assume it.
     tool_use_ids: list = []
+    # Slice 2 C: a call the CLI answered with no hook gets its terminal event from the transcript.
+    names: dict = {}
+    results: dict = {}
     result: ResultMessage | None = None
     try:
         with expected_shadowing():
@@ -229,6 +237,13 @@ async def extract(path: Path, advisory_id: str, model: str, max_budget_usd: floa
                         if isinstance(block, ToolUseBlock):
                             tool_calls[block.name] += 1
                             tool_use_ids.append(block.id)
+                            names[block.id] = block.name
+                elif isinstance(message, UserMessage) and isinstance(message.content, list):
+                    for block in message.content:
+                        if isinstance(block, ToolResultBlock):
+                            text = block.content if isinstance(block.content, str) else " ".join(
+                                str(c.get("text", "")) for c in block.content or [] if isinstance(c, dict))
+                            results[block.tool_use_id] = (bool(block.is_error), text)
                 elif isinstance(message, ResultMessage):
                     result = message
                     if message.is_error:
@@ -247,9 +262,11 @@ async def extract(path: Path, advisory_id: str, model: str, max_budget_usd: floa
         record = AdvisoryRecord.model_validate(structured)
         _refuse_unknown_ids(record)
     except Exception as exc:
+        telemetry.record_unhooked(run, names, results)
         telemetry.run_completed(run, telemetry.FAILURE, str(exc)[:300], result=result, validated=False,
                                 terminal_check=telemetry.reconcile(run, tool_use_ids))
         raise
+    telemetry.record_unhooked(run, names, results)
     terminal_check = telemetry.reconcile(run, tool_use_ids)
     telemetry.run_completed(run, telemetry.SUCCESS, "record validated", result=result, validated=True,
                             terminal_check=terminal_check)

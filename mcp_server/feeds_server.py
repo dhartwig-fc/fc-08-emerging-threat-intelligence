@@ -50,7 +50,7 @@ from pydantic import BaseModel, ConfigDict, Field
 ROOT = Path(__file__).resolve().parent.parent
 # The server is launched as a script, so the repo root is not on sys.path.
 sys.path.insert(0, str(ROOT))
-from feeds import http as feeds_http, inbox, ledger, triage as feeds_triage  # noqa: E402
+from feeds import extraction as feeds_extraction, http as feeds_http, inbox, ledger, triage as feeds_triage  # noqa: E402
 from feeds.model import FeedItem, LayoutChanged  # noqa: E402
 from feeds.sources import DOCUMENT_TYPES, MAX_DOCUMENT_BYTES, MAX_LISTING_BYTES, SOURCES, linked_pdfs  # noqa: E402
 from schemas.citation_match import PageIndex  # noqa: E402
@@ -383,6 +383,39 @@ async def triage(params: TriageInput) -> str:
     async with _STATE_LOCK:
         return feeds_triage.decide(run_id, params.item_key, params.verdict, params.reason, params.quote,
                                    INBOX_ROOT)[1]
+
+
+class ExtractInput(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    item_key: str = Field(..., pattern=r"^(ofsi|fincen|ofac):[0-9a-f]{16}$",
+                          description="A key triaged relevant in this run")
+
+
+async def extract(params: ExtractInput) -> str:
+    """
+    Queue a relevant item for extraction after this session. You do not extract, and you do not see
+    the result: the run extracts in code once you finish, within its budget.
+
+    Refused unless the item is triaged relevant in this run; one request per item; at most 3 per run.
+    The tool chooses what is extracted: the publication's own PDF when the page you read links exactly
+    one on the source's document hosts (it fetches and pins it now), otherwise the page itself.
+    """
+    run_id = _run_id()
+    if run_id is None:
+        return NO_RUN
+    async with _STATE_LOCK:
+        return feeds_extraction.request(run_id, params.item_key, HTTP_GET, INBOX_ROOT)[1]
+
+
+# EVAL MODE never sees extraction (slice 2 C): the tool is not even listed to a session the eval runner
+# starts, so B's triage-only measurement keeps exactly the four tools it was measured with.
+if not os.environ.get(CATALOGUE_ENV):
+    mcp.tool(
+        name="feeds_extract",
+        annotations={"title": "Queue an item for extraction", "readOnlyHint": False, "destructiveHint": False,
+                     "idempotentHint": False, "openWorldHint": True},
+    )(extract)
 
 
 if __name__ == "__main__":

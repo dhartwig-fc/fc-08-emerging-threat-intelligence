@@ -42,6 +42,7 @@ from schemas.citation_match import PageIndex, file_sha256  # noqa: E402
 # The contract the review gate re-asserts: one definition for both sides.
 from schemas.proposal_contract import QUOTE_MAX, QUOTE_MIN, SCHEMA, proposal_id  # noqa: E402
 from schemas.actor_match import resolve as resolve_names  # noqa: E402
+from feeds import inbox as feeds_inbox  # noqa: E402
 
 # Set by the RUNNER (agents/run_identity.py), never by the agent. Read at call
 # time, not import time, so a guard can vary them between calls.
@@ -54,6 +55,12 @@ RUN_ENV = ("NEXUS_RUN_ID", "NEXUS_STAGE", "NEXUS_ADVISORY_ID", "NEXUS_PDF_PATH",
 # so the environment cannot redirect a governed write.
 QUEUE_ENV = "NEXUS_PROPOSALS_PATH"
 QUEUE_DIR = ROOT / "data" / "proposals"
+# Slice 2 C: an extraction a feeds run starts writes its queue into THAT run's inbox,
+# inbox/<feeds run>/proposals/<run_id>.jsonl, gitignored until tools/accept_run.py moves it to QUEUE_DIR.
+# The runner names the feeds run (never a path); the server derives the folder through
+# feeds.inbox.proposals_dir, the one definition the runner uses too, and refuses a malformed run id.
+FEEDS_RUN_ENV = "NEXUS_FEEDS_RUN"
+FEEDS_INBOX_ROOT = feeds_inbox.INBOX_ROOT
 RUN_ID_PATTERN = re.compile(r"^[a-z0-9][a-z0-9-]{0,80}$")
 
 mcp = FastMCP("knowledge_centre_mcp")
@@ -504,13 +511,18 @@ def _run_context() -> Optional[dict]:
 
 
 def _proposals_path(run: dict) -> Path:
-    return QUEUE_DIR / ("%s.jsonl" % run["NEXUS_RUN_ID"])
+    feeds_run = os.environ.get(FEEDS_RUN_ENV, "")
+    folder = feeds_inbox.proposals_dir(feeds_run, FEEDS_INBOX_ROOT) if feeds_run else QUEUE_DIR
+    return folder / ("%s.jsonl" % run["NEXUS_RUN_ID"])
 
 
 def _refuse_queue(run: dict) -> Optional[str]:
     if not RUN_ID_PATTERN.match(run["NEXUS_RUN_ID"]):
         return "Rejected: run id %r is not a safe file name." % run["NEXUS_RUN_ID"]
-    want = _proposals_path(run)
+    try:
+        want = _proposals_path(run)
+    except ValueError as exc:  # a malformed feeds run id: no folder is derived from it
+        return "Rejected: %s." % exc
     if Path(run[QUEUE_ENV]).resolve() != want.resolve():
         return ("Rejected: this run's queue is %s, but the runner named %s. A proposal is written only to "
                 "its own run's queue." % (want.name, Path(run[QUEUE_ENV]).name))

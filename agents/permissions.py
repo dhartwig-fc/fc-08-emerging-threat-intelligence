@@ -55,6 +55,9 @@ FEEDS_SERVER_KEY = "feeds"
 FEEDS_READ_ONLY_TOOLS = ("mcp__%s__feeds_read_page" % FEEDS_SERVER_KEY,)
 FEEDS_WRITE_ALLOWLIST = frozenset("mcp__%s__%s" % (FEEDS_SERVER_KEY, t)
                                   for t in ("feeds_list_new", "feeds_fetch", "feeds_triage"))
+# Slice 2 C: a LIVE (full-mode) run may also queue a relevant item for extraction. An eval run may not:
+# its allowlist above is unchanged, and its server does not list the tool.
+FEEDS_FULL_WRITE_ALLOWLIST = FEEDS_WRITE_ALLOWLIST | {"mcp__%s__feeds_extract" % FEEDS_SERVER_KEY}
 
 # The exact start of the SDK's advisory when these four are pre-approved.
 SHADOWING_MESSAGE = "can_use_tool will not be invoked for: %s." % ", ".join(READ_ONLY_TOOLS)
