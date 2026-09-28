@@ -1,0 +1,203 @@
+"""
+One Friday run (spec sections 1 and 2): the orchestrator session, then extraction IN CODE within the budget,
+then reconciliation in code, then inbox/<run_id>/report.md -- on every run, refused and failed included.
+
+Usage:
+    python tools/friday_run.py           # one live run now (sub-project C1: the manual dry runs)
+    python tools/friday_run.py --plan    # print the budget and the caps; start nothing, spend nothing
+
+THE BUDGET (agents/orchestrate_feeds.py, pinned by evals/check_feeds_orchestrator.py). The orchestrator
+session is capped at MAX_BUDGET_USD. Then each queued item, in the order the agent queued it: an extraction
+starts only if the spend so far plus EXTRACTION_BUDGET_USD stays within RUN_CEILING_USD; otherwise the item
+is DEFERRED FOR BUDGET (no advisory id is allocated, and accept_run defers it to next Friday). Each
+extraction is slice 1's agents/extract_advisory.extract, unchanged in its gate, propose_link, citations and
+telemetry, with its OWN run identity naming this feeds run, so its queue and telemetry land in this run's
+inbox. A cost that never arrived (the SDK raised before its result) is counted at the session's cap.
+
+WRITES only inbox/<run_id>/ (gitignored): run.json, advisory_ids.jsonl, extraction_runs.jsonl, records/,
+proposals/, telemetry/, report.md. Nothing tracked changes; tools/accept_run.py is the only way in.
+
+REFUSES before any agent runs, with a refusal report (refusal.json + report.md) and exit 1, when:
+  ANTHROPIC_API_KEY is set (it takes precedence over the subscription token: CLAUDE.md, Auth);
+  FEEDS_CATALOGUE or FEEDS_CATALOGUE_BATCH is set (an eval catalogue in the shell; B carry-forward);
+  another Friday run holds the inbox's lock (inbox/.friday.lock).
+
+ONE FRIDAY RUN AT A TIME. friday() holds an exclusive flock on <inbox root>/.friday.lock across the session,
+every advisory-id allocation and every extraction, and refuses when it cannot take it. Allocation
+(feeds/extraction.py) reads every run's ids and then appends; its re-check narrows that window but cannot
+close it, and back-pressure (feeds.runs.blocking) cannot either -- two runs started together both see no
+pending run. The lock closes it, and it is taken in friday() rather than main() so every caller passes
+through it. flock is released by the kernel when the process exits: a crash leaves no stale lock.
+Sub-project C2 adds the scheduled preflight (on main, back-pressure, auth) through the same refusal path.
+
+EXIT 0 for COMPLETE, NOTHING_NEW and UNFINISHED (a person decides the rest); 1 for REFUSED, FAILED and
+RECONCILIATION_FAILED.
+"""
+
+from __future__ import annotations
+
+import argparse
+import asyncio
+import contextlib
+import fcntl
+import json
+import os
+import sys
+from datetime import date, datetime, timezone
+from pathlib import Path
+from typing import Optional
+
+ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(ROOT))
+from agents import orchestrate_feeds as of, telemetry  # noqa: E402
+from feeds import extraction, inbox, reconcile, report  # noqa: E402
+from feeds.runs import run_date  # noqa: E402
+
+# Every list an advisory id may already be in: the golden corpus and the accepted live-feed advisories.
+ADVISORY_LISTS = (ROOT / "evals" / "golden" / "advisory_list.json", ROOT / "data" / "feeds" / "advisory_list.json")
+EVAL_VARIABLES = ("FEEDS_CATALOGUE", "FEEDS_CATALOGUE_BATCH")
+LOCK = ".friday.lock"
+LOCKED = ("another Friday run holds %s; two runs at once could allocate the same advisory id -- wait for it "
+          "to finish")
+
+
+def _now() -> str:
+    return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+
+def counted(cost: Optional[float], cap: float) -> float:
+    """What a session counts against the ceiling: its reported cost, or its cap when none arrived."""
+    return cap if cost is None else cost
+
+
+def may_start(spent: float) -> bool:
+    """Spec section 1: an extraction starts only if the spend so far plus its budget stays within the ceiling."""
+    return spent + of.EXTRACTION_BUDGET_USD <= of.RUN_CEILING_USD + 1e-9
+
+
+def _save(path: Path, obj: dict) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    tmp = path.with_name("." + path.name + ".tmp")
+    tmp.write_text(json.dumps(obj, indent=2, ensure_ascii=False, sort_keys=True) + "\n", encoding="utf-8")
+    os.replace(tmp, path)
+
+
+async def extract_one(run: of.FeedsRun, request: dict, advisory_id: str, root: Path) -> dict:
+    """Slice 1's extraction on the pinned document, with its own identity; the outcome, never an exception."""
+    from agents import extract_advisory
+    from agents.run_identity import RunIdentity
+    folder = inbox.run_dir(run.run_id, root)
+    doc = folder / request["document"]["path"]
+    ident = RunIdentity.new("extractor", advisory_id, doc, feeds_run=run.run_id, inbox_root=root)
+    out = {"key": request["key"], "advisory_id": advisory_id, "extraction_run_id": ident.run_id,
+           "document_sha256": ident.pdf_sha256, "started_at": _now(), "status": None, "error": None, "record": None}
+    try:
+        record, _ = await extract_advisory.extract(doc, advisory_id, of.MODEL, of.EXTRACTION_BUDGET_USD,
+                                                   of.EXTRACTION_MAX_TURNS, run=ident)
+        rel = "%s/%s.json" % (inbox.RECORDS, advisory_id)
+        inbox.write_file(run.run_id, rel, record.model_dump_json(indent=2).encode("utf-8"), root)
+        out.update(status="extracted", record=rel)
+    except Exception as exc:  # recorded: an extraction that fails is reported, never raised past the run
+        out.update(status="failed", error=("%s: %s" % (type(exc).__name__, exc))[:500])
+    out["cost_usd"] = reconcile.session_cost(telemetry.telemetry_path(ident))
+    return out
+
+
+@contextlib.contextmanager
+def run_lock(root: Path = inbox.INBOX_ROOT):
+    """The inbox's exclusive Friday lock, never waited for: yields True when held, False when another
+    process (or another open of it in this one) holds it. Released on exit, and by the kernel on a crash."""
+    root = Path(root)
+    root.mkdir(parents=True, exist_ok=True)
+    fd = os.open(str(root / LOCK), os.O_CREAT | os.O_RDWR, 0o644)
+    try:
+        try:
+            fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except BlockingIOError:
+            yield False
+            return
+        try:
+            yield True
+        finally:
+            fcntl.flock(fd, fcntl.LOCK_UN)
+    finally:
+        os.close(fd)
+
+
+async def friday(run: of.FeedsRun, session=None, extractor=None, root: Path = inbox.INBOX_ROOT,
+                 advisory_list=ADVISORY_LISTS) -> dict:
+    """The whole run under the inbox's lock; a run that cannot take it is REFUSED before its session."""
+    if session is None and Path(root).resolve() != Path(inbox.INBOX_ROOT).resolve():
+        # The live feeds server writes inbox.INBOX_ROOT and nothing else: a session there, read from here,
+        # would reconcile a folder the agent never wrote. Another root is for stub sessions only.
+        raise ValueError("the live session writes %s; a run over %s needs its own session" % (inbox.INBOX_ROOT, root))
+    with run_lock(root) as held:
+        if not held:
+            return write_refusal(run.run_id, [LOCKED % (Path(root) / LOCK)], root)
+        return await _locked_friday(run, session or of.run_session, extractor or extract_one, root, advisory_list)
+
+
+async def _locked_friday(run: of.FeedsRun, session, extractor, root: Path, advisory_list) -> dict:
+    started = _now()
+    summary = await session(run)
+    spent = counted(summary.get("cost_usd"), of.MAX_BUDGET_USD)
+    if summary.get("failure") is None:
+        for req in extraction.load_requests(run.run_id, root):
+            if req.get("error") or not req.get("document"):
+                outcome = {"key": req["key"], "status": "failed", "error": req.get("error") or "no document",
+                           "cost_usd": 0.0}
+            elif not may_start(spent):
+                outcome = {"key": req["key"], "status": "deferred_budget", "cost_usd": 0.0,
+                           "error": "US$%.2f spent; US$%.2f more would pass the US$%.2f ceiling" % (
+                               spent, of.EXTRACTION_BUDGET_USD, of.RUN_CEILING_USD)}
+            else:
+                advisory_id = extraction.allocate_advisory_id(run.run_id, req["key"], run_date(run.run_id).year,
+                                                              advisory_list, root)
+                outcome = await extractor(run, req, advisory_id, root)
+                spent += counted(outcome.get("cost_usd"), of.EXTRACTION_BUDGET_USD)
+            extraction.append_outcome(run.run_id, outcome, root)
+    _save(inbox.run_dir(run.run_id, root) / reconcile.RUN_JSON,
+          {"run_id": run.run_id, "started_at": started, "ended_at": _now(), "failure": summary.get("failure"),
+           "limit": summary.get("limit"), "orchestrator_cost_usd": summary.get("cost_usd"), "spent_usd": round(spent, 6),
+           "ceiling_usd": of.RUN_CEILING_USD, "prompt_sha256": of.FULL_PROMPT_SHA256, "model": of.MODEL})
+    report.write(run.run_id, root)
+    return reconcile.reconcile_run(run.run_id, root)
+
+
+def write_refusal(run_id: str, reasons: list, root: Path = inbox.INBOX_ROOT) -> dict:
+    """A refused run still gets a folder, refusal.json and report.md -- and never lists, fetches or spends."""
+    _save(inbox.run_dir(run_id, root) / reconcile.REFUSAL, {"run_id": run_id, "refused_at": _now(), "reasons": reasons})
+    report.write(run_id, root)
+    return reconcile.reconcile_run(run_id, root)
+
+
+def refusals(env=None) -> list:
+    env = os.environ if env is None else env
+    out = []
+    if env.get("ANTHROPIC_API_KEY"):
+        out.append("ANTHROPIC_API_KEY is set; it takes precedence over the subscription token -- unset it")
+    for name in EVAL_VARIABLES:
+        if env.get(name):
+            out.append("%s is set in the environment; a Friday run is never an eval run -- unset it" % name)
+    return out
+
+
+def main(argv: list, root: Path = inbox.INBOX_ROOT, today: date = None, extra_refusals=None) -> int:
+    ap = argparse.ArgumentParser(description="One Friday feeds run")
+    ap.add_argument("--plan", action="store_true", help="print the budget and caps; start nothing")
+    args = ap.parse_args(argv)
+    if args.plan:
+        print("orchestrator: US$%.2f, %d turns; extraction: US$%.2f, %d turns each, at most %d; ceiling US$%.2f"
+              % (of.MAX_BUDGET_USD, of.MAX_TURNS, of.EXTRACTION_BUDGET_USD, of.EXTRACTION_MAX_TURNS,
+                 extraction.MAX_PER_RUN, of.RUN_CEILING_USD))
+        return 0
+    run = of.FeedsRun(inbox.mint_run_id(today or date.today()))
+    telemetry.TELEMETRY_DIR = inbox.run_dir(run.run_id, root) / inbox.TELEMETRY
+    reasons = refusals() + list(extra_refusals or [])
+    rec = write_refusal(run.run_id, reasons, root) if reasons else asyncio.run(friday(run, root=root))
+    print("%s: %s -- %s" % (run.run_id, rec["status"], inbox.run_dir(run.run_id, root) / report.REPORT))
+    return 0 if rec["status"] in reconcile.ACCEPTABLE else 1
+
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv[1:]))
