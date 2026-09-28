@@ -15,6 +15,10 @@ EXACTLY ONE TERMINAL EVENT PER TOOL CALL, from one of three places. Probed
     duration_ms -> FAILURE.
   - A call the permission callback DENIED fires neither. agents/permissions.py
     records that call's PERMISSION_DENIED event; it is the terminal one.
+  - A call the CLI REFUSED before any hook ran (input that "could not be parsed as
+    JSON", measured 2026-09-27) fires neither and reaches no callback. Its is_error
+    tool_result in the transcript is the terminal event: record_unhooked (slice 2 C).
+    A SUCCESS result never qualifies -- see record_unhooked.
   - A structured-output MCP tool's reply reaches PostToolUse as a JSON-encoded
     STRING, not a dict -- measured live 2026-09-24 on knowledge_centre_propose_link:
     the reply arrives as '{"result": "Rejected: ..."}', so _texts() must decode a
@@ -162,9 +166,14 @@ def record_unhooked(run, calls: dict, results: dict) -> list:
     parsed as JSON" were each answered by a tool_result with is_error -- and fired no hook and no
     permission callback, so the run's telemetry held nothing for them and terminal_check called them
     unterminated. The runner saw both halves in the message stream. `calls` is tool_use_id -> tool name,
-    `results` tool_use_id -> (is_error, text); a call with a result and no terminal event gets one here,
-    marked source "transcript" so the evidence says where it came from. A call with NEITHER stays
-    unterminated: nothing is invented.
+    `results` tool_use_id -> (is_error, text); a call with an is_error result and no terminal event gets
+    one FAILURE event here, marked source "transcript" so the evidence says where it came from.
+
+    ONLY an is_error result, the class that was measured. A call that ran and succeeded ALWAYS fires
+    PostToolUse, so a SUCCESS result with no event means the hook failed to record -- an emit that raised,
+    a hook dropped at runtime -- which is exactly what terminal_check exists to catch. Backfilling it would
+    report `unterminated: []` over that defect (Task 3 review, Important 1). It stays unterminated. A call
+    with NEITHER a result nor an event stays unterminated too: nothing is invented.
     """
     done = terminated(run)
     out = []
@@ -172,8 +181,9 @@ def record_unhooked(run, calls: dict, results: dict) -> list:
         if tool_use_id in done or tool_use_id not in results:
             continue
         is_error, text = results[tool_use_id]
-        status = FAILURE if is_error else SUCCESS
-        out.append(emit(run, TOOL_CALL, status, "%s %s (answered by the CLI; no hook fired)" % (tool, status.lower()),
+        if not is_error:
+            continue  # a success with no hook event is a hook that failed: leave it for terminal_check
+        out.append(emit(run, TOOL_CALL, FAILURE, "%s failure (answered by the CLI; no hook fired)" % tool,
                         tool=tool, tool_use_id=tool_use_id, latency_ms=None, outcome=(text or "")[:200],
                         source="transcript"))
     return out

@@ -6,6 +6,8 @@ Usage:
     python evals/check_telemetry.py --mutate refusal     # refusals classified as success; checks MUST fail
     python evals/check_telemetry.py --mutate allowlist   # the allowlist admits a write and a read; MUST fail
     python evals/check_telemetry.py --mutate terminal    # a denial leaves no event; MUST fail
+    python evals/check_telemetry.py --mutate unhooked-success  # the transcript backfills a SUCCESS too; MUST fail
+    python evals/check_telemetry.py --mutate unhooked-none     # the transcript backfills nothing at all; MUST fail
 
 WHY. PLAN.md week 5: "telemetry for every decision". Probed 2026-09-24 (spec,
 Section 3): PostToolUse carries duration_ms and the tool's reply; PostToolUseFailure
@@ -14,6 +16,12 @@ one source of terminal events and the permission callback (agents/permissions.py
 is the other. A governed refusal ("Rejected: ...") is the governance working and
 must never read as SUCCESS -- today a refusal and a success look the same from
 outside.
+
+THE TRANSCRIPT'S TERMINAL EVENT (slice 2 C). A call the CLI refused before any hook
+ran -- an is_error tool_result, measured in B's pilot -- gets its one event from
+telemetry.record_unhooked. A SUCCESS result with no hook event does NOT: a call that
+ran always fires PostToolUse, so that is a hook that failed to record, and it must
+stay unterminated for terminal_check to see (Task 3 review, Important 1).
 
 OFFLINE. Drives the real hook callbacks with inputs in the shapes the SDK was
 measured to deliver. No model, no quota, no PDF. Writes only to a temp dir.
@@ -26,6 +34,7 @@ import asyncio
 import json
 import sys
 import tempfile
+import types
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -270,13 +279,79 @@ def permission_checks() -> list:
     return out
 
 
+def unhooked_checks() -> list:
+    """telemetry.record_unhooked over a synthetic transcript: its own run, so the invariant above is untouched.
+
+    Five calls, as the runner would collect them from the message stream:
+      u_err     the CLI refused it (is_error), no hook fired        -> ONE transcript event, FAILURE
+      u_ok      a success result, no hook event (the hook failed)   -> NOTHING: it stays unterminated
+      u_hooked  a success result, and PostToolUse fired             -> the hook's event, not a second
+      u_denied  an is_error result, and the callback's DENIED event -> the denial, not a second
+      u_none    no result and no event (cut off)                    -> NOTHING: nothing is invented
+    """
+    out = []
+    run = RunIdentity(run_id="probe-unhooked", stage="extractor", advisory_id="ADV-2026-0002",
+                      pdf_path=ROOT / "data" / "advisories" / "not-read.pdf", pdf_sha256="a" * 64)
+    triage = "mcp__feeds__feeds_triage"
+    hook = telemetry.tool_hooks(run)["PostToolUse"][0].hooks[0]
+    asyncio.run(hook({"hook_event_name": "PostToolUse", "tool_name": SEARCH, "tool_use_id": "u_hooked",
+                      "duration_ms": 3, "tool_input": {}, "tool_response": [{"type": "text", "text": "ok"}]},
+                     "u_hooked", None))
+    telemetry.emit(run, telemetry.PERMISSION_DENIED, telemetry.DENIED, "denied", tool=PROPOSE, tool_use_id="u_denied",
+                   latency_ms=None, outcome="not on the write allowlist")
+    calls = {"u_err": triage, "u_ok": triage, "u_hooked": SEARCH, "u_denied": PROPOSE, "u_none": triage}
+    results = {"u_err": (True, 'Error: input could not be parsed as JSON'), "u_ok": (False, "Recorded: relevant"),
+               "u_hooked": (False, "ok"), "u_denied": (True, "Denied: not on the write allowlist")}
+    first = telemetry.record_unhooked(run, calls, results)
+    again = telemetry.record_unhooked(run, calls, results)
+    path = telemetry.telemetry_path(run)
+    evs = [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines() if line.strip()]
+    of = lambda i: [e for e in evs if e["payload"].get("tool_use_id") == i]  # noqa: E731
+
+    err = of("u_err")
+    out.append((len(err) == 1 and err[0]["stage"] == telemetry.TOOL_CALL and err[0]["status"] == telemetry.FAILURE
+                and err[0]["payload"].get("source") == "transcript" and "parsed as JSON" in err[0]["payload"]["outcome"]
+                and [e["payload"]["tool_use_id"] for e in first] == ["u_err"] and again == [],
+                "an is_error result no hook saw gets ONE transcript event (FAILURE), and a second pass adds none",
+                "%s | first %s | again %d" % ([(e["status"], e["payload"].get("source")) for e in err],
+                                              [e["payload"]["tool_use_id"] for e in first], len(again))))
+    out.append((of("u_ok") == [] and of("u_none") == [],
+                "a SUCCESS result with no hook event is NOT backfilled (a hook failed), and a call with no result "
+                "is not invented", "u_ok %d events, u_none %d" % (len(of("u_ok")), len(of("u_none")))))
+    out.append((len(of("u_hooked")) == 1 and "source" not in of("u_hooked")[0]["payload"]
+                and len(of("u_denied")) == 1 and of("u_denied")[0]["stage"] == telemetry.PERMISSION_DENIED,
+                "a hooked call and a denied call keep their one event: the transcript adds no second",
+                "u_hooked %d, u_denied %d" % (len(of("u_hooked")), len(of("u_denied")))))
+    got = telemetry.reconcile(run, list(calls))
+    out.append((got == {"calls": 5, "unterminated": ["u_ok", "u_none"], "duplicated": []},
+                "terminal_check still goes red for the success no hook recorded, and for the call cut off",
+                str(got)))
+    return out
+
+
 def all_checks() -> list:
-    return hook_checks() + permission_checks() + reconcile_checks()
+    return hook_checks() + permission_checks() + reconcile_checks() + unhooked_checks()
+
+
+def _recompile_unhooked(condition: str) -> None:
+    """A record_unhooked mutation. `condition` replaces the is_error rule: "False" is the function as first
+    written (it emits for a SUCCESS too); "True" backfills nothing. The function is recompiled from
+    telemetry.py and bound to the REAL module's globals, so it still writes only to this guard's temporary
+    TELEMETRY_DIR."""
+    src = Path(telemetry.__file__).read_text(encoding="utf-8")
+    anchor = "        if not is_error:\n            continue"
+    assert src.count(anchor) == 1, "unhooked mutation: the anchor moved"
+    ns: dict = {"__file__": telemetry.__file__}  # module-level code only defines names; nothing is written
+    exec(compile(src.replace(anchor, "        if %s:\n            continue" % condition), telemetry.__file__,
+                 "exec"), ns)
+    telemetry.record_unhooked = types.FunctionType(ns["record_unhooked"].__code__, telemetry.__dict__,
+                                                   "record_unhooked")
 
 
 def main(argv: list) -> int:
     ap = argparse.ArgumentParser(description="Pin the telemetry contract")
-    ap.add_argument("--mutate", choices=("refusal", "allowlist", "terminal"),
+    ap.add_argument("--mutate", choices=("refusal", "allowlist", "terminal", "unhooked-success",
+                                         "unhooked-none"),
                     help="remove one rule; the checks that depend on it MUST fail")
     args = ap.parse_args(argv)
 
@@ -290,6 +365,12 @@ def main(argv: list) -> int:
     elif args.mutate == "terminal":
         permissions._record_denial = lambda run, tool, tool_use_id, reason: {}
         print("MUTATED: a denial leaves no event.\n")
+    elif args.mutate == "unhooked-success":
+        _recompile_unhooked("False")
+        print("MUTATED: the transcript backfills a SUCCESS result no hook recorded.\n")
+    elif args.mutate == "unhooked-none":
+        _recompile_unhooked("True")
+        print("MUTATED: the transcript backfills nothing, not even a call the CLI refused.\n")
 
     failures = 0
     for ok, label, detail in all_checks():
