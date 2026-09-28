@@ -18,7 +18,7 @@ Usage:
     python evals/check_friday_run.py --mutate no-crash-report         # a run that raises leaves no run.json/report
     python evals/check_friday_run.py --mutate telemetry-elsewhere     # friday() leaves telemetry where it was
     python evals/check_friday_run.py --mutate no-cap-recheck          # a fourth request line is extracted
-    python evals/check_friday_run.py --mutate writes-real-inbox       # run.json lands in the REAL inbox/
+    python evals/check_friday_run.py --mutate writes-real-inbox       # the run also writes a file into the REAL inbox/
 
 WHAT IT HOLDS (spec sections 1, 2 and 5):
   budget       extractions start in queue order only while spend + US$1.00 <= US$5.00; the next is DEFERRED
@@ -52,9 +52,14 @@ WHAT IT HOLDS (spec sections 1, 2 and 5):
                a call with neither a hook event nor a result stays unterminated, and friday() driving that
                session reports RECONCILIATION_FAILED;
   hands off    the repository's git status, the real inbox/ and data/telemetry/ are unchanged -- and the
-               writes-real-inbox mutation proves that check can go red. Under it, what the guard planted in
-               the real inbox (folders named feeds-2026-10-02-aaa*, absent before the guard ran) is removed
-               after the check; nothing that existed before is ever touched.
+               writes-real-inbox mutation proves that check can go red. It must watch the REAL inbox to mean
+               anything: a default argument (root=inbox.INBOX_ROOT) is bound to the real path when the module
+               is loaded, so a decoy root would not see the leak it exists to catch. So, under that mutation
+               only, the run writes ONE file whose exact path the guard chose and recorded first:
+               inbox/.check_friday_run-plant-<pid>-<random>.json. No live run can own that name: it fails
+               inbox.RUN_ID (a leading dot), so run_dir refuses it and feeds.runs never lists it. The guard
+               refuses to start if the path already exists, and afterwards deletes exactly that path (and the
+               inbox folder itself only if this guard created it and it is empty). Nothing is deleted by pattern.
 
 COLD. Stub sessions and extractors, a scripted message stream in place of the SDK's query, a temporary
 inbox and advisory list. No network, no model, no CLI.
@@ -71,7 +76,7 @@ import hashlib
 import json
 import os
 import re
-import shutil
+import secrets
 import subprocess
 import sys
 import tempfile
@@ -123,9 +128,10 @@ MUTATIONS = {
                             "    pass\n"),
     "no-cap-recheck": ("friday", "                if position >= extraction.MAX_PER_RUN:\n", "                if False:\n"),
     "writes-real-inbox": ("friday", "    _save(inbox.run_dir(run.run_id, root) / reconcile.RUN_JSON,\n",
-                          "    _save(inbox.run_dir(run.run_id, inbox.INBOX_ROOT) / reconcile.RUN_JSON,\n"),
+                          "    _save(Path(os.environ[\"FC08_GUARD_PLANT\"]), {\"planted_by\": run.run_id})\n"
+                          "    _save(inbox.run_dir(run.run_id, root) / reconcile.RUN_JSON,\n"),
 }
-GUARD_RUNS = "feeds-2026-10-02-aaa"  # every run id this guard mints starts so
+PLANT_ENV = "FC08_GUARD_PLANT"
 SENTENCE = "This advisory describes red flags for trade-based money laundering through shell companies."
 
 
@@ -307,20 +313,25 @@ def untracked_state() -> list:
     return out
 
 
-def real_inbox_dirs() -> set:
-    real = ROOT / "inbox"
-    return {p.name for p in real.iterdir()} if real.exists() else set()
+def plant_path() -> Path:
+    """The ONE path the writes-real-inbox mutation may write: a name no live run can own (it fails inbox.RUN_ID,
+    so run_dir refuses it and feeds.runs never lists it), unique to this process."""
+    path = ROOT / "inbox" / (".check_friday_run-plant-%d-%s.json" % (os.getpid(), secrets.token_hex(6)))
+    assert not inbox.RUN_ID.fullmatch(path.name)
+    return path
 
 
-def remove_planted(before_dirs: set) -> list:
-    """Remove exactly the run folders this guard created in the REAL inbox (only a mutation does that): named
-    GUARD_RUNS*, and absent before the guard ran. Anything that existed before is never touched."""
-    real, removed = ROOT / "inbox", []
-    if real.exists():
-        for p in sorted(real.iterdir()):
-            if p.is_dir() and p.name.startswith(GUARD_RUNS) and p.name not in before_dirs:
-                shutil.rmtree(p)
-                removed.append(p.name)
+def remove_plant(path: Path, inbox_existed: bool) -> list:
+    """Delete exactly `path` (and its _save temp name), and the inbox folder only if this guard created it and it
+    is empty. Never a pattern, never anything else."""
+    removed = []
+    for p in (path, path.with_name("." + path.name + ".tmp")):
+        if p.exists():
+            p.unlink()
+            removed.append(p.name)
+    if not inbox_existed and path.parent.exists() and not any(path.parent.iterdir()):
+        path.parent.rmdir()
+        removed.append(path.parent.name + "/")
     return removed
 
 
@@ -347,16 +358,23 @@ def events_of(path: Path) -> list:
 
 
 def checks(mutation) -> list:
-    before, before_untracked, before_dirs = git_status(), untracked_state(), real_inbox_dirs()
+    plant, inbox_existed = plant_path(), (ROOT / "inbox").exists()
+    if plant.exists():
+        raise SystemExit("REFUSED: %s already exists; the guard deletes only what it creates" % plant)
+    before, before_untracked = git_status(), untracked_state()
+    if mutation == "writes-real-inbox":
+        os.environ[PLANT_ENV] = str(plant)
     try:
         out = body(mutation)
-        out.append((git_status() == before and untracked_state() == before_untracked,
+        after = untracked_state()
+        out.append((git_status() == before and after == before_untracked,
                     "the repository's git status, the real inbox/, data/telemetry/ and data/feeds/ are unchanged",
-                    "new in the real inbox: %s" % sorted(real_inbox_dirs() - before_dirs)))
+                    "changed: %s" % sorted({p for p, _, _ in after} ^ {p for p, _, _ in before_untracked})))
     finally:
-        planted = remove_planted(before_dirs)
+        os.environ.pop(PLANT_ENV, None)
+        planted = remove_plant(plant, inbox_existed)
     if planted:
-        print("  (removed %d run folder(s) this guard planted in the real inbox: %s)" % (len(planted), planted))
+        print("  (removed exactly what this guard planted in the real inbox: %s)" % planted)
     return out
 
 
