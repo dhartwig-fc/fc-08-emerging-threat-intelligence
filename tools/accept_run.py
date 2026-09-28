@@ -48,8 +48,16 @@ VALIDATES EVERYTHING FIRST, and refuses the whole run on any failure, writing no
   - no listed item is already in the ledger.
 Then writes, in this order: the copies, the live-feed advisory list (its entries and derived counts), the
 ledger (accepted and dropped items only), and accepted.json in the run's inbox folder. A failure before the
-ledger removes the copies AND the folders this call made and restores the advisory list, so the same
-acceptance can simply be retried. The owner commits; proposals then go through tools/review.py as in slice 1.
+ledger removes the copies AND the folders this call made and restores the advisory list byte for byte, so the
+same acceptance can simply be retried. That includes a failure part-way through a copy: every target is
+created exclusively ("xb", so nothing is ever overwritten even if it appeared after plan()) and registered
+for rollback before its first byte. The owner commits; proposals then go through tools/review.py as in slice 1.
+
+IF THE INBOX MARKER CANNOT BE WRITTEN (the last step, after the ledger), the acceptance IS recorded and is
+not rolled back; the run just still reads as pending, so every retry is refused ("already decided") and it
+blocks the next Friday. accept_run prints "RECORDED, BUT NOT MARKED" and exits 2. The recovery is one copy:
+    cp data/feeds/runs/<run_id>/accepted.json inbox/<run_id>/accepted.json
+Exit codes: 0 recorded (or a dry run); 1 refused, nothing written; 2 recorded, but the marker needs that copy.
 
 --expire moves a pending run of 14 days or more to inbox/expired/<run_id>/ and does not touch the ledger, so its
 items return (feeds/runs.py). It takes the Friday run's own exclusive lock (tools/friday_run.run_lock) and is
@@ -286,15 +294,38 @@ def counts(advisories: list) -> dict:
     return {"advisories": len(advisories), "by_source_type": dict(sorted(by_source.items()))}
 
 
+class MarkerNotWritten(Exception):
+    """The acceptance IS recorded -- copies, advisory list and ledger all written -- but the inbox marker
+    (inbox/<run_id>/accepted.json) is not. Nothing is rolled back: the ledger is the commit point."""
+
+
+def _write_new(dst: Path, created: list, fill) -> None:
+    """Create `dst` EXCLUSIVELY ("xb": never overwrite, re-proved at write time, not only by plan()), register it
+    for rollback BEFORE a single byte is written, then fill it. A failure mid-write (disk full, an I/O error,
+    Ctrl-C) leaves a truncated file the rollback knows about and removes, so a retry is never blocked by it."""
+    with open(dst, "xb") as out:
+        created.append(dst)
+        fill(out)
+
+
+def _copy_new(src: Path, dst: Path, created: list) -> None:
+    def fill(out):
+        with open(src, "rb") as inp:
+            shutil.copyfileobj(inp, out)
+    _write_new(dst, created, fill)
+
+
 def apply(p: dict, today: date, *, inbox_root: Path, seen_path: Path, advisory_list: Path) -> None:
+    """Write the plan. Any failure BEFORE the ledger is written removes every file and folder this call made and
+    restores the advisory list byte for byte, then re-raises. A failure AFTER it (only the inbox marker is left)
+    raises MarkerNotWritten, naming the one-copy recovery."""
     created, made = [], []
-    original = Path(advisory_list).read_text(encoding="utf-8") if Path(advisory_list).exists() else None
+    original = Path(advisory_list).read_bytes() if Path(advisory_list).exists() else None
     try:
         for a in p["accepted"]:
             for src, dst in a["copies"].values():
                 _mkdir(dst.parent, made)
-                shutil.copyfile(src, dst)
-                created.append(dst)
+                _copy_new(src, dst, created)
         dest = p["run_dest"]
         record = {"run_id": p["run_id"], "decided_on": today.isoformat(), "status": p["status"],
                   "override_reconciliation": p["override"],
@@ -308,15 +339,13 @@ def apply(p: dict, today: date, *, inbox_root: Path, seen_path: Path, advisory_l
         _mkdir(dest, made)
         for name in RUN_FILES:
             if (p["folder"] / name).exists():
-                shutil.copyfile(p["folder"] / name, dest / name)
-                created.append(dest / name)
+                _copy_new(p["folder"] / name, dest / name, created)
         orchestrator = p["folder"] / inbox.TELEMETRY / ("%s.jsonl" % p["run_id"])
         if orchestrator.exists():
             _mkdir(dest / "telemetry", made)
-            shutil.copyfile(orchestrator, dest / "telemetry" / orchestrator.name)
-            created.append(dest / "telemetry" / orchestrator.name)
-        (dest / runs.ACCEPTED).write_text(json.dumps(record, indent=2, sort_keys=True) + "\n", encoding="utf-8")
-        created.append(dest / runs.ACCEPTED)
+            _copy_new(orchestrator, dest / "telemetry" / orchestrator.name, created)
+        body = (json.dumps(record, indent=2, sort_keys=True) + "\n").encode("utf-8")
+        _write_new(dest / runs.ACCEPTED, created, lambda out: out.write(body))
         if p["accepted"]:
             advisories = p["alist"]["advisories"] + [a["entry"] for a in p["accepted"]]
             alist = dict(p["alist"], schema=FEED_LIST_SCHEMA, counts=counts(advisories), advisories=advisories)
@@ -331,12 +360,20 @@ def apply(p: dict, today: date, *, inbox_root: Path, seen_path: Path, advisory_l
             if Path(advisory_list).exists():
                 Path(advisory_list).unlink()
         else:
-            Path(advisory_list).write_text(original, encoding="utf-8")
+            Path(advisory_list).write_bytes(original)
         for folder in reversed(made):
             if folder.exists() and not any(folder.iterdir()):
                 folder.rmdir()
         raise
-    runs.mark_accepted(p["run_id"], record, inbox_root)
+    try:
+        runs.mark_accepted(p["run_id"], record, inbox_root)
+    except Exception as exc:  # after the ledger: nothing to roll back, and the owner must be told how to finish
+        marker = inbox.run_dir(p["run_id"], inbox_root) / runs.ACCEPTED
+        raise MarkerNotWritten(
+            "the acceptance of run %s IS recorded (copies, advisory list and ledger written), but its inbox marker "
+            "could not be written (%s: %s). Until it exists the run reads as pending and blocks the next Friday. "
+            "Recover with one copy -- nothing else is needed:\n    cp %s %s"
+            % (p["run_id"], type(exc).__name__, exc, dest / runs.ACCEPTED, marker)) from exc
 
 
 def ask(run_id: str, inbox_root: Path) -> dict:
@@ -433,8 +470,11 @@ def main(argv: list, *, inbox_root: Path = inbox.INBOX_ROOT, seen_path: Path = l
         return 1
     try:
         apply(p, today, inbox_root=inbox_root, seen_path=seen_path, advisory_list=advisory_list)
-    except ValueError as exc:
-        print("REFUSED: %s" % exc)
+    except MarkerNotWritten as exc:
+        print("RECORDED, BUT NOT MARKED: %s" % exc)
+        return 2
+    except (ValueError, OSError) as exc:
+        print("REFUSED: %s -- every copy this call made was removed; nothing is recorded" % exc)
         return 1
     print("RECORDED: %d decision(s) for run %s in %s: %s. Commit, then review the proposals with tools/review.py."
           % (len(p["entries"]), args.run_id, seen_path, what))

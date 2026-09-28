@@ -59,7 +59,9 @@ from agents import orchestrate_feeds as of, telemetry  # noqa: E402
 from feeds import extraction, inbox, reconcile, report  # noqa: E402
 from feeds.runs import run_date  # noqa: E402
 
-# Every list an advisory id may already be in: the golden corpus and the accepted live-feed advisories.
+# Every list an advisory id may already be in: the golden corpus and the accepted live-feed advisories. Every id
+# any run ALLOCATED is also read, from the inbox and from accepted runs' tracked copies (extraction.TRACKED_RUNS);
+# friday(tracked_runs=...) points a guard at a temporary one.
 ADVISORY_LISTS = (ROOT / "evals" / "golden" / "advisory_list.json", ROOT / "data" / "feeds" / "advisory_list.json")
 EVAL_VARIABLES = ("FEEDS_CATALOGUE", "FEEDS_CATALOGUE_BATCH")
 LOCK = ".friday.lock"
@@ -136,7 +138,7 @@ def run_lock(root: Path = inbox.INBOX_ROOT):
 
 
 async def friday(run: of.FeedsRun, session=None, extractor=None, root: Path = inbox.INBOX_ROOT,
-                 advisory_list=ADVISORY_LISTS) -> dict:
+                 advisory_list=ADVISORY_LISTS, tracked_runs: Path = extraction.TRACKED_RUNS) -> dict:
     """The whole run under the inbox's lock; a run that cannot take it is REFUSED before its session."""
     if session is None and Path(root).resolve() != Path(inbox.INBOX_ROOT).resolve():
         # The live feeds server writes inbox.INBOX_ROOT and nothing else: a session there, read from here,
@@ -145,10 +147,12 @@ async def friday(run: of.FeedsRun, session=None, extractor=None, root: Path = in
     with run_lock(root) as held:
         if not held:
             return write_refusal(run.run_id, [LOCKED % (Path(root) / LOCK)], root)
-        return await _locked_friday(run, session or of.run_session, extractor or extract_one, root, advisory_list)
+        return await _locked_friday(run, session or of.run_session, extractor or extract_one, root, advisory_list,
+                                    tracked_runs)
 
 
-async def _locked_friday(run: of.FeedsRun, session, extractor, root: Path, advisory_list) -> dict:
+async def _locked_friday(run: of.FeedsRun, session, extractor, root: Path, advisory_list,
+                         tracked_runs: Path = extraction.TRACKED_RUNS) -> dict:
     """The run itself. Whatever raises in here, run.json and report.md are still written (spec section 2: a
     report on EVERY run), the run is FAILED and the report names the exception."""
     started = _now()
@@ -178,7 +182,7 @@ async def _locked_friday(run: of.FeedsRun, session, extractor, root: Path, advis
                                    spent, of.EXTRACTION_BUDGET_USD, of.RUN_CEILING_USD)}
                 else:
                     advisory_id = extraction.allocate_advisory_id(run.run_id, req["key"], run_date(run.run_id).year,
-                                                                  advisory_list, root)
+                                                                  advisory_list, root, tracked_runs)
                     spent += of.EXTRACTION_BUDGET_USD  # counted at its cap while it runs, in case it raises
                     outcome = await extractor(run, req, advisory_id, root)
                     spent += counted(outcome.get("cost_usd"), of.EXTRACTION_BUDGET_USD) - of.EXTRACTION_BUDGET_USD

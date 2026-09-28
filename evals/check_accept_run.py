@@ -14,6 +14,8 @@ Usage:
     python evals/check_accept_run.py --mutate failed-default-drop   # a failed or budget-deferred item defaults to DROP
     python evals/check_accept_run.py --mutate gap-unrecorded        # an allocated id nothing used is not named
     python evals/check_accept_run.py --mutate expire-unlocked       # --expire moves a run while a Friday run holds the lock
+    python evals/check_accept_run.py --mutate register-after-copy   # a copy is registered for rollback only once complete
+    python evals/check_accept_run.py --mutate marker-bare           # a marker failure after the ledger reads as REFUSED
 
 WHAT IT HOLDS:
   accept      an EXTRACTED item's document, record, queue and telemetry are copied byte for byte to
@@ -28,7 +30,10 @@ WHAT IT HOLDS:
               refuses the WHOLE run: no file, no ledger line, the advisory list byte-identical;
   override    with --override-reconciliation "<reason>" that run is accepted and the reason is recorded;
   rollback    a failure while writing removes every copy AND every folder this call made and restores the
-              advisory list, so the same acceptance, retried, succeeds;
+              advisory list, so the same acceptance, retried, succeeds -- including a failure PART-WAY through a
+              copy (each target is created exclusively and registered before its first byte);
+  marker      if the inbox marker cannot be written after the ledger, accept_run says RECORDED, BUT NOT MARKED
+              (exit 2), never REFUSED, and names the one copy that recovers it; that copy does;
   unfinished  an item whose extraction FAILED, or was DEFERRED FOR BUDGET, cannot be accepted; the interactive
               default for it is DEFER (never drop), and a deferred item is not in the ledger, so it returns
               next Friday (Task 4 carry-forward: never silently lost, never dropped by default);
@@ -85,6 +90,9 @@ MUTATIONS = {
                             '    return "drop"\n'),
     "gap-unrecorded": ('"allocated_not_accepted": p["gaps"],', '"allocated_not_accepted": {},'),
     "expire-unlocked": ("            if not held:\n", "            if False:\n"),
+    "register-after-copy": ("        created.append(dst)\n        fill(out)\n", "        fill(out)\n        created.append(dst)\n"),
+    "marker-bare": ("    except Exception as exc:  # after the ledger: nothing to roll back",
+                    "    except ZeroDivisionError as exc:  # after the ledger: nothing to roll back"),
 }
 
 
@@ -195,7 +203,8 @@ def checks(mutation) -> list:
             run, keys, session = listed_run(m, box, rid, n_relevant=3, n_dropped=1, queue=queue, cost=cost,
                                             unterminated=unterminated, refused=refused)
             asyncio.run(m["friday"].friday(run, session=session, extractor=extractor or valid_extractor(m, tamper),
-                                           root=box, advisory_list=(golden, alist)))
+                                           root=box, advisory_list=(golden, alist),
+                                           tracked_runs=data / "feeds" / "runs"))
             return keys
 
         def accept(rid, decisions, *extra):
@@ -298,7 +307,8 @@ def checks(mutation) -> list:
         a0, l0 = alist.read_bytes(), seen.read_bytes()
         code, said = accept(rid, {keys[0]: "accept", keys[1]: "defer", keys[2]: "defer", keys[3]: "drop"})
         out.append((code == 1 and blocker.read_text() == "pre-existing\n" and alist.read_bytes() == a0
-                    and seen.read_bytes() == l0, "refused, writing nothing: a target that already exists",
+                    and seen.read_bytes() == l0 and "already exists; nothing is overwritten" in said,
+                    "refused BY THE PLAN, before any write: a target that already exists",
                     said.strip()[:120]))
         blocker.rename(tmp / "moved-blocker")
 
@@ -379,14 +389,73 @@ def checks(mutation) -> list:
         code, said = accept(rid, dec, "--override-reconciliation", "owner read the crash; the first record stands")
         record = read_json(data / "feeds" / "runs" / rid / "accepted.json") if code == 0 else {}
         listed_ids = {a["advisory_id"] for a in json.loads(alist.read_text(encoding="utf-8"))["advisories"]}
-        nxt = extraction.next_advisory_id(2026, (golden, alist), box)
+        nxt = extraction.next_advisory_id(2026, (golden, alist), box, data / "feeds" / "runs")
+        # ...and from a checkout with no inbox at all, only the tracked copy accept_run made.
+        cold = extraction.next_advisory_id(2026, (golden, alist), tmp / "no-inbox", data / "feeds" / "runs")
         out.append((rec["status"] == "FAILED" and bool(rec["crash"]) and gap is not None
                     and inflight.get("status") == "failed" and inflight.get("advisory_id") == gap and refused
                     and code == 0 and record.get("allocated_not_accepted") == {keys[1]: gap}
-                    and gap not in listed_ids and nxt > gap,
+                    and gap not in listed_ids and nxt > gap and cold > gap,
                     "a crashed run's in-flight item (an allocated id, no record) cannot be accepted, even with the "
                     "override; deferred, its id is named in accepted.json as allocated-and-unused, a gap never reused",
-                    "gap %s, next %s | %s | %s" % (gap, nxt, s_acc.strip()[:70], record.get("allocated_not_accepted"))))
+                    "gap %s, next %s (%s with no inbox) | %s | %s" % (gap, nxt, cold, s_acc.strip()[:50],
+                                                                     record.get("allocated_not_accepted"))))
+
+        # Review fix 1: a failure PART-WAY through a copy (here the record's: the second copy writes some bytes, then
+        # the disk is full). The truncated file must be rolled back like any other, and the retry must succeed.
+        rid = "feeds-2026-10-02-bbb009"
+        keys = make(rid)
+        snap = {p: p.read_bytes() for p in data.rglob("*") if p.is_file()}
+        a0, l0 = alist.read_bytes(), seen.read_bytes()
+        real_shutil, copies_seen = acc.shutil, []
+
+        def half_then_full(inp, out, *a):
+            copies_seen.append(out.name)
+            if len(copies_seen) == 2:
+                out.write(inp.read(7))
+                raise OSError(28, "No space left on device (planted mid-copy)")
+            return real_shutil.copyfileobj(inp, out, *a)
+        acc.shutil = types.SimpleNamespace(**{k: getattr(real_shutil, k) for k in dir(real_shutil)
+                                              if not k.startswith("__")})
+        acc.shutil.copyfileobj = half_then_full
+        try:
+            code, said = accept(rid, {keys[0]: "accept", keys[1]: "defer", keys[2]: "defer", keys[3]: "drop"})
+        finally:
+            acc.shutil = real_shutil
+        now = {p: p.read_bytes() for p in data.rglob("*") if p.is_file()}
+        leftover = sorted(str(p.relative_to(data)) for p in data.rglob("*") if p.is_dir() and not any(p.iterdir()))
+        restored = alist.read_bytes() == a0 and seen.read_bytes() == l0
+        code2, said2 = accept(rid, {keys[0]: "accept", keys[1]: "defer", keys[2]: "defer", keys[3]: "drop"})
+        out.append((code == 1 and "planted mid-copy" in said and len(copies_seen) == 2 and now == snap
+                    and not leftover and restored and code2 == 0
+                    and runs.classify(rid, box) == runs.ACCEPTED_STATE,
+                    "a failure PART-WAY through a copy leaves no truncated file and no folder behind, and the retry "
+                    "succeeds", "%s | left %s | %s" % (said.strip()[:80], sorted(set(map(str, now)) - set(map(str, snap)))[:2],
+                                                    said2.strip()[:40])))
+
+        # Review fix 3: the inbox marker cannot be written AFTER the ledger. Recorded, not refused; the printed
+        # recovery (one copy) is followed literally, and the run then reads as accepted.
+        rid = "feeds-2026-10-02-bbb010"
+        keys = make(rid)
+        real_runs = acc.runs
+        acc.runs = types.SimpleNamespace(**{k: getattr(runs, k) for k in dir(runs) if not k.startswith("__")})
+        acc.runs.mark_accepted = lambda *a, **k: (_ for _ in ()).throw(OSError(30, "Read-only file system (planted)"))
+        try:
+            code, said = accept(rid, {keys[0]: "accept", keys[1]: "defer", keys[2]: "defer", keys[3]: "drop"})
+        finally:
+            acc.runs = real_runs
+        items = {it["key"]: it for it in inbox.items(inbox.load(rid, box))}
+        in_ledger = (items[keys[0]]["source"], items[keys[0]]["item_id"]) in ledger.load(seen)
+        pending = runs.classify(rid, box) == runs.PENDING
+        cp = [l.split() for l in said.splitlines() if l.strip().startswith("cp ")]
+        if len(cp) == 1 and len(cp[0]) == 3 and Path(cp[0][1]).is_file() and not Path(cp[0][2]).exists():
+            Path(cp[0][2]).write_bytes(Path(cp[0][1]).read_bytes())  # the recovery, exactly as printed
+        code2, said2 = accept(rid, {keys[0]: "accept", keys[1]: "defer", keys[2]: "defer", keys[3]: "drop"})
+        out.append((code == 2 and "RECORDED, BUT NOT MARKED" in said and "REFUSED" not in said and in_ledger and pending
+                    and len(cp) == 1 and cp[0][2] == str(box / rid / "accepted.json")
+                    and runs.classify(rid, box) == runs.ACCEPTED_STATE and code2 == 1 and "already accepted" in said2,
+                    "a marker that cannot be written after the ledger reads RECORDED, BUT NOT MARKED (exit 2), not "
+                    "REFUSED, and the one copy it prints recovers the run", said.strip().splitlines()[0][:120]))
 
         young, old = "feeds-2026-09-25-ccc001", "feeds-2026-09-19-ccc002"
         for r in (young, old, "feeds-2026-09-01-ccc003"):

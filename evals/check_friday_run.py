@@ -396,7 +396,9 @@ def body(mutation) -> list:
 
     def run_friday(root, run, session, extractor, alist):
         try:
-            return asyncio.run(fr.friday(run, session=session, extractor=extractor, root=root, advisory_list=alist))
+            # A temporary tracked-runs folder too: the real data/feeds/runs/ would move the ids asserted here.
+            return asyncio.run(fr.friday(run, session=session, extractor=extractor, root=root, advisory_list=alist,
+                                         tracked_runs=Path(root).parent / "data" / "feeds" / "runs"))
         except Exception as exc:
             return {"status": "RAISED %s: %s" % (type(exc).__name__, exc)}
 

@@ -16,6 +16,7 @@ Usage:
     python evals/check_feeds_extract.py --mutate eval-extract      # request() queues an item of an eval run
     python evals/check_feeds_extract.py --mutate reallocate        # an id another run already allocated is allocated again
     python evals/check_feeds_extract.py --mutate hide-duplicates   # load_allocations keeps the last of two lines silently
+    python evals/check_feeds_extract.py --mutate inbox-ids-only    # accepted runs' tracked allocations are not read
 
 WHAT IT HOLDS:
   relevant only  a request is refused for an item not listed, with no verdict, or triaged not_relevant;
@@ -32,6 +33,8 @@ WHAT IT HOLDS:
   ids            next_advisory_id is one past every id in the advisory list and every id any run allocated,
                  expired runs included; a key is never allocated a second id, an id already allocated is never
                  allocated again (a stale computation raises), and load_allocations RAISES on a duplicate;
+                 an EMPTY inbox (a fresh clone) still allocates above every id in accepted runs' TRACKED copies,
+                 data/feeds/runs/<run>/advisory_ids.jsonl (here a temporary one), and refuses one of them;
   the queue      an extraction naming its feeds run writes inbox/<run>/proposals/<run_id>.jsonl: the runner's
                  RunIdentity and the server derive the SAME path; a malformed feeds run is refused; with no
                  feeds run the queue is data/proposals/ exactly as in slice 1;
@@ -89,6 +92,7 @@ MUTATIONS = {
     "hide-duplicates": (EXTRACTION, "        if entry[\"key\"] in out or entry[\"advisory_id\"] in out.values():\n",
                         "        if False:\n"),
     "reuse-id": (EXTRACTION, "        taken += _ids_in(path)\n", "        pass\n"),
+    "inbox-ids-only": (EXTRACTION, '    files += sorted(Path(tracked_runs).glob("*/%s" % ALLOCATIONS))\n', ""),
     "unreadable-raises": (EXTRACTION, "        except Exception as exc:  # labelled a PDF, but not one pypdf can page",
                           "        except ZeroDivisionError as exc:  # labelled a PDF, but not one pypdf can page"),
     "unreadable-unrecorded": (EXTRACTION, "            _append(run_id, REQUESTS, entry, root)  # recorded, so a retry",
@@ -273,14 +277,15 @@ def checks(mutation) -> list:
         alist = tmp / "advisory_list.json"
         alist.write_text(json.dumps({"advisories": [{"advisory_id": "ADV-2026-0020"}, {"advisory_id": "ADV-2025-0400"}]}),
                          encoding="utf-8")
-        first = ex.allocate_advisory_id(RUN, a1, 2026, alist, box)
+        tracked = tmp / "data" / "feeds" / "runs"   # temporary: the real one would move every id asserted here
+        first = ex.allocate_advisory_id(RUN, a1, 2026, alist, box, tracked)
         expired = box / "expired" / "feeds-2026-09-01-ddd444"
         expired.mkdir(parents=True)
         (expired / ex.ALLOCATIONS).write_text(json.dumps({"key": "k", "advisory_id": "ADV-2026-0023"}) + "\n",
                                               encoding="utf-8")
-        got = ex.next_advisory_id(2026, alist, box)
+        got = ex.next_advisory_id(2026, alist, box, tracked)
         out.append((first == "ADV-2026-0021" and got == "ADV-2026-0024" and ex.load_allocations(RUN, box) == {a1: first}
-                    and ex.next_advisory_id(2027, alist, box) == "ADV-2027-0001",
+                    and ex.next_advisory_id(2027, alist, box, tracked) == "ADV-2027-0001",
                     "the next advisory id is past the list and every run's allocations, expired runs included", got))
 
         def refused(fn):
@@ -288,11 +293,11 @@ def checks(mutation) -> list:
                 return "ALLOWED %s" % (fn(),)
             except ValueError as exc:
                 return "REFUSED %s" % exc
-        twice = refused(lambda: ex.allocate_advisory_id(RUN, a1, 2026, alist, box))
+        twice = refused(lambda: ex.allocate_advisory_id(RUN, a1, 2026, alist, box, tracked))
         computed = ex.next_advisory_id
         ex.next_advisory_id = lambda *a, **k: "ADV-2026-0023"  # stale: an expired run allocated it meanwhile
         try:
-            stale = refused(lambda: ex.allocate_advisory_id(RUN, a2, 2026, alist, box))
+            stale = refused(lambda: ex.allocate_advisory_id(RUN, a2, 2026, alist, box, tracked))
         finally:
             ex.next_advisory_id = computed
         out.append((twice.startswith("REFUSED") and stale.startswith("REFUSED") and "already allocated" in stale
@@ -308,6 +313,26 @@ def checks(mutation) -> list:
             dups.append(refused(lambda: ex.load_allocations(run, box)))
         out.append((all(d.startswith("REFUSED") for d in dups),
                     "load_allocations raises on a key with two ids and on an id given to two keys", str(dups)[:90]))
+
+        # A fresh clone: NO inbox history, only an accepted run's tracked copy (the gap ADV-2026-0040 among them).
+        fresh = tmp / "fresh-clone-inbox"
+        (fresh / RUN).mkdir(parents=True)
+        (tracked / "feeds-2026-09-18-eee555").mkdir(parents=True)
+        (tracked / "feeds-2026-09-18-eee555" / ex.ALLOCATIONS).write_text(
+            "".join(json.dumps({"key": k, "advisory_id": i}) + "\n" for k, i in (("ka", "ADV-2026-0039"),
+                                                                                ("kb", "ADV-2026-0040"))),
+            encoding="utf-8")
+        nxt = ex.next_advisory_id(2026, alist, fresh, tracked)
+        computed = ex.next_advisory_id
+        ex.next_advisory_id = lambda *a, **k: "ADV-2026-0040"  # stale: the gap, computed without the tracked copy
+        try:
+            reissued = refused(lambda: ex.allocate_advisory_id(RUN, a1, 2026, alist, fresh, tracked))
+        finally:
+            ex.next_advisory_id = computed
+        out.append((nxt == "ADV-2026-0041" and reissued.startswith("REFUSED") and "already allocated" in reissued
+                    and not ex.load_allocations(RUN, fresh),
+                    "a checkout with no inbox history still allocates above an accepted run's TRACKED allocations, and "
+                    "refuses to issue one of them again", "%s | %s" % (nxt, reissued[:50])))
 
         from agents.run_identity import RunIdentity
         doc = tmp / "doc.html"
@@ -355,8 +380,12 @@ def checks(mutation) -> list:
         out.append((said.startswith("Rejected") and "cap of 3" in said,
                     "the server's feeds_extract applies the same rules (this run's cap is already reached)", said[:80]))
         written = [p.relative_to(tmp) for p in tmp.rglob("*") if p.is_file()]
-        out.append((all(str(w).startswith("inbox/") or w.name in ("advisory_list.json", "doc.html") for w in written),
-                    "every file written is inside the temporary inbox", "%d files" % len(written)))
+        planted = {tracked.relative_to(tmp) / "feeds-2026-09-18-eee555" / ex.ALLOCATIONS}  # this guard's own fixture
+        out.append((all(str(w).startswith("inbox/") or w.name in ("advisory_list.json", "doc.html") or w in planted
+                        for w in written),
+                    "every file written is inside the temporary inbox", "%d files; outside: %s" % (
+                        len(written), [str(w) for w in written if not str(w).startswith("inbox/")
+                                       and w.name not in ("advisory_list.json", "doc.html") and w not in planted][:3])))
     out.append((git_status() == before, "the repository's git status is unchanged", ""))
     return out
 

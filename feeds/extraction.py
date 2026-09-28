@@ -30,6 +30,10 @@ request deferred for budget consumes no id. The allocation is written before the
 that dies mid-extraction still holds its id. An id in any run's allocations (expired runs included) is never
 allocated again, a stale computation raises rather than writing a duplicate, and load_allocations
 raises on one; accept_run keeps it, so the id a proposal carries is the id it is accepted under.
+"Any run" includes every ACCEPTED run's tracked copy, data/feeds/runs/<run_id>/advisory_ids.jsonl
+(TRACKED_RUNS): inbox/ is gitignored, so in a fresh clone, on a second machine or after the inbox is cleared
+that copy is the only record of an id allocated and never accepted -- a gap (owner decision 11) that must
+never be issued again.
 """
 
 from __future__ import annotations
@@ -48,6 +52,7 @@ from feeds.http import FetchRefused, _check_host
 REQUESTS = "extractions.jsonl"
 OUTCOMES = "extraction_runs.jsonl"
 ALLOCATIONS = "advisory_ids.jsonl"
+TRACKED_RUNS = inbox.ROOT / "data" / "feeds" / "runs"   # accept_run copies each accepted run's files here
 MAX_PER_RUN = 3
 PDF_TYPES = frozenset({"application/pdf"})
 ADVISORY_ID = re.compile(r"\AADV-(\d{4})-(\d{4})\Z")
@@ -196,21 +201,31 @@ def _ids_in(path: Path) -> List[str]:
     return [e.get("advisory_id") for e in _lines(path) if e.get("advisory_id")]
 
 
-def next_advisory_id(year: int, advisory_lists, inbox_root: Path = inbox.INBOX_ROOT) -> str:
+def allocation_files(inbox_root: Path = inbox.INBOX_ROOT, tracked_runs: Path = TRACKED_RUNS) -> List[Path]:
+    """Every file that records an allocated id: each run's in the inbox (inbox/expired/ included), and each
+    ACCEPTED run's tracked copy under `tracked_runs` -- the only one a checkout without the old inbox/ has."""
+    files = sorted(Path(inbox_root).glob("**/%s" % ALLOCATIONS))
+    files += sorted(Path(tracked_runs).glob("*/%s" % ALLOCATIONS))
+    return files
+
+
+def next_advisory_id(year: int, advisory_lists, inbox_root: Path = inbox.INBOX_ROOT,
+                     tracked_runs: Path = TRACKED_RUNS) -> str:
     """The next ADV-<year>-NNNN after every id in the advisory lists (the golden one and the live-feed one) and
-    every id any run has allocated, including expired runs (inbox/expired/): an id that ever reached a record
-    or a queue is never reused. `advisory_lists` is one path or several; a list that does not exist yet is empty."""
+    every id any run has allocated (allocation_files: expired runs and accepted runs' tracked copies included):
+    an id that ever reached a record or a queue is never reused. `advisory_lists` is one path or several; a list
+    that does not exist yet is empty."""
     paths = [advisory_lists] if isinstance(advisory_lists, (str, Path)) else list(advisory_lists)
     taken = [a["advisory_id"] for p in paths if Path(p).exists()
              for a in json.loads(Path(p).read_text(encoding="utf-8"))["advisories"]]
-    for path in sorted(Path(inbox_root).glob("**/%s" % ALLOCATIONS)):
+    for path in allocation_files(inbox_root, tracked_runs):
         taken += _ids_in(path)
     numbers = [int(m.group(2)) for m in map(ADVISORY_ID.match, taken) if m and int(m.group(1)) == year]
     return "ADV-%04d-%04d" % (year, max(numbers, default=0) + 1)
 
 
 def allocate_advisory_id(run_id: str, key: str, year: int, advisory_lists,
-                         root: Path = inbox.INBOX_ROOT) -> str:
+                         root: Path = inbox.INBOX_ROOT, tracked_runs: Path = TRACKED_RUNS) -> str:
     """Allocate the next advisory id to `key` and record it in the run's allocations BEFORE extraction.
 
     Refused (ValueError), never written: a key that already holds an id in this run, and an id that any run
@@ -219,8 +234,8 @@ def allocate_advisory_id(run_id: str, key: str, year: int, advisory_lists,
     read-then-append window; it does not close it -- serialising Friday runs is tools/friday_run.py's job."""
     if key in load_allocations(run_id, root):
         raise ValueError("%s already holds an advisory id in run %s; it is not allocated another" % (key, run_id))
-    advisory_id = next_advisory_id(year, advisory_lists, root)
-    allocated = {i for p in Path(root).glob("**/%s" % ALLOCATIONS) for i in _ids_in(p)}
+    advisory_id = next_advisory_id(year, advisory_lists, root, tracked_runs)
+    allocated = {i for p in allocation_files(root, tracked_runs) for i in _ids_in(p)}
     if advisory_id in allocated:
         raise ValueError("%s is already allocated; an advisory id is never allocated twice" % advisory_id)
     _append(run_id, ALLOCATIONS, {"key": key, "advisory_id": advisory_id, "allocated_at": _now()}, root)
