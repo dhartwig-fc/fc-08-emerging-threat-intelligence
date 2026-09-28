@@ -13,6 +13,12 @@ Usage:
     python evals/check_friday_run.py --mutate invent-terminal         # a call with no hook and no result is terminated
     python evals/check_friday_run.py --mutate refused-extracted       # a refused request gets an id and an extraction
     python evals/check_friday_run.py --mutate no-run-lock             # two Friday runs may allocate at once
+    python evals/check_friday_run.py --mutate unfinished-omits-failed # line 3 counts a failure the section omits
+    python evals/check_friday_run.py --mutate rows-by-key             # report rows sorted by key, not queue order
+    python evals/check_friday_run.py --mutate no-crash-report         # a run that raises leaves no run.json/report
+    python evals/check_friday_run.py --mutate telemetry-elsewhere     # friday() leaves telemetry where it was
+    python evals/check_friday_run.py --mutate no-cap-recheck          # a fourth request line is extracted
+    python evals/check_friday_run.py --mutate writes-real-inbox       # run.json lands in the REAL inbox/
 
 WHAT IT HOLDS (spec sections 1, 2 and 5):
   budget       extractions start in queue order only while spend + US$1.00 <= US$5.00; the next is DEFERRED
@@ -29,14 +35,26 @@ WHAT IT HOLDS (spec sections 1, 2 and 5):
   reconcile    an unterminated tool call makes the run RECONCILIATION_FAILED; a layout change is UNFINISHED
                and LOUD; a run that listed nothing is NOTHING_NEW;
   report       written on every run above; names every dropped item with its reason and quote, the deferred,
-               the cost against the ceiling; renders the same bytes twice;
+               the cost against the ceiling; renders the same bytes twice; line 3's "N unfinished" equals the
+               ## Unfinished section's count and its rows, which list failed items with their WHOLE error and
+               deferred ones with the spend; rows go in queue order (asserted on a run whose queue order is
+               not its key order), and a reason ending in "." is not doubled;
+  crash        an exception inside the run (here, the second extraction) still leaves run.json and report.md:
+               FAILED, naming the exception, the crashed extraction counted at its cap, and the lock released;
+  telemetry    friday() itself points every session's telemetry into inbox/<run_id>/telemetry/, whatever the
+               caller left TELEMETRY_DIR at, and restores it after;
+  cap          a fourth request line (request() refuses one; planted here) is not extracted, gets no id, and
+               the run is RECONCILIATION_FAILED;
   transcript   run_session, driven by a scripted message stream: a call answered by an is_error tool_result
                and no hook gets ONE terminal event (source "transcript"), terminal_check is clean, and a
                session that left a listed item without a verdict is NOT validated; a call a hook already
                recorded (PostToolUse, or PostToolUseFailure with an is_error result) is NOT terminated again;
                a call with neither a hook event nor a result stays unterminated, and friday() driving that
                session reports RECONCILIATION_FAILED;
-  hands off    the repository's git status, the real inbox/ and data/telemetry/ are unchanged.
+  hands off    the repository's git status, the real inbox/ and data/telemetry/ are unchanged -- and the
+               writes-real-inbox mutation proves that check can go red. Under it, what the guard planted in
+               the real inbox (folders named feeds-2026-10-02-aaa*, absent before the guard ran) is removed
+               after the check; nothing that existed before is ever touched.
 
 COLD. Stub sessions and extractors, a scripted message stream in place of the SDK's query, a temporary
 inbox and advisory list. No network, no model, no CLI.
@@ -52,6 +70,8 @@ import fcntl
 import hashlib
 import json
 import os
+import re
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -91,10 +111,21 @@ MUTATIONS = {
                         "        if tool_use_id in done:\n"
                         "            continue\n"
                         "        is_error, text = results.get(tool_use_id, (True, \"no result\"))\n"),
-    "refused-extracted": ("friday", '            if req.get("error") or not req.get("document"):\n',
-                          "            if False:\n"),
+    "refused-extracted": ("friday", '                elif req.get("error") or not req.get("document"):\n',
+                          "                elif False:\n"),
     "no-run-lock": ("friday", "        if not held:\n", "        if False:\n"),
+    "unfinished-omits-failed": ("report", '                  + [(k, "extraction failed: %s" % _cell(rec["failed"][k], '
+                                          'None)) for k in rec["failed"]]\n', "                  + []\n"),
+    "rows-by-key": ("reconcile", '"queued": list(requests)', '"queued": sorted(requests)'),
+    "no-crash-report": ("friday", "    except Exception as exc:  # a report on EVERY run: a crashed one is FAILED and says "
+                                  "why\n", "    except ZeroDivisionError as exc:\n"),
+    "telemetry-elsewhere": ("friday", "    telemetry.TELEMETRY_DIR = inbox.run_dir(run.run_id, root) / inbox.TELEMETRY\n",
+                            "    pass\n"),
+    "no-cap-recheck": ("friday", "                if position >= extraction.MAX_PER_RUN:\n", "                if False:\n"),
+    "writes-real-inbox": ("friday", "    _save(inbox.run_dir(run.run_id, root) / reconcile.RUN_JSON,\n",
+                          "    _save(inbox.run_dir(run.run_id, inbox.INBOX_ROOT) / reconcile.RUN_JSON,\n"),
 }
+GUARD_RUNS = "feeds-2026-10-02-aaa"  # every run id this guard mints starts so
 SENTENCE = "This advisory describes red flags for trade-based money laundering through shell companies."
 
 
@@ -137,9 +168,11 @@ class Unreadable:
 
 
 def listed_run(m, root: Path, run_id: str, n_relevant: int, n_dropped: int, queue: int, cost, fail=None,
-               unterminated=(), layout_changed=False, nothing=False, refused=()):
+               unterminated=(), layout_changed=False, nothing=False, refused=(), against_keys=False):
     """What an orchestrator session leaves: items listed and pinned, verdicts, requests, and its telemetry.
-    `refused`: queue positions whose linked PDF cannot be read, so their request line carries an error."""
+    `refused`: queue positions whose linked PDF cannot be read, so their request line carries an error.
+    `against_keys`: queue in DESCENDING key order, so queue order and key order provably differ. The returned
+    keys are then in queue order."""
     run = m["of"].FeedsRun(run_id)
     m["telemetry"].TELEMETRY_DIR = inbox.run_dir(run_id, root) / inbox.TELEMETRY
     state = {"run_id": run_id, "sources": {s: {"status": "ok", "error": None, "listed": 0, "already_seen": 0,
@@ -166,6 +199,8 @@ def listed_run(m, root: Path, run_id: str, n_relevant: int, n_dropped: int, queu
                                       "Drop reason %d: a licence notice." % i if i >= n_relevant else "Red flags.",
                                       SENTENCE, root)
         assert ok, msg
+    if against_keys:
+        keys = sorted(keys[:queue], reverse=True) + keys[queue:]
     for i, k in enumerate(keys[:queue]):
         ok, msg = extraction.request(run_id, k, Unreadable() if i in refused else Stub(), root)
         assert ok, msg
@@ -272,12 +307,60 @@ def untracked_state() -> list:
     return out
 
 
+def real_inbox_dirs() -> set:
+    real = ROOT / "inbox"
+    return {p.name for p in real.iterdir()} if real.exists() else set()
+
+
+def remove_planted(before_dirs: set) -> list:
+    """Remove exactly the run folders this guard created in the REAL inbox (only a mutation does that): named
+    GUARD_RUNS*, and absent before the guard ran. Anything that existed before is never touched."""
+    real, removed = ROOT / "inbox", []
+    if real.exists():
+        for p in sorted(real.iterdir()):
+            if p.is_dir() and p.name.startswith(GUARD_RUNS) and p.name not in before_dirs:
+                shutil.rmtree(p)
+                removed.append(p.name)
+    return removed
+
+
+def unfinished_counts(text: str) -> tuple:
+    """(line 3's "N unfinished", the ## Unfinished header's count, the rows under it)."""
+    lines = text.splitlines()
+    head = re.search(r"(\d+) unfinished;", lines[2]) if len(lines) > 2 else None
+    at = next((i for i, l in enumerate(lines) if l.startswith("## Unfinished: ")), None)
+    if at is None:
+        return (int(head.group(1)) if head else None, None, None)
+    rows, j = 0, at + 2
+    while j < len(lines) and lines[j].startswith("- `"):
+        rows, j = rows + 1, j + 1
+    return (int(head.group(1)) if head else None, int(re.match(r"## Unfinished: (\d+)", lines[at]).group(1)), rows)
+
+
+def report_text(rid: str, box: Path) -> str:
+    path = inbox.run_dir(rid, box) / "report.md"
+    return path.read_text(encoding="utf-8") if path.exists() else ""
+
+
 def events_of(path: Path) -> list:
     return [json.loads(l) for l in path.read_text(encoding="utf-8").splitlines() if l.strip()] if path.exists() else []
 
 
 def checks(mutation) -> list:
-    before, before_untracked = git_status(), untracked_state()
+    before, before_untracked, before_dirs = git_status(), untracked_state(), real_inbox_dirs()
+    try:
+        out = body(mutation)
+        out.append((git_status() == before and untracked_state() == before_untracked,
+                    "the repository's git status, the real inbox/, data/telemetry/ and data/feeds/ are unchanged",
+                    "new in the real inbox: %s" % sorted(real_inbox_dirs() - before_dirs)))
+    finally:
+        planted = remove_planted(before_dirs)
+    if planted:
+        print("  (removed %d run folder(s) this guard planted in the real inbox: %s)" % (len(planted), planted))
+    return out
+
+
+def body(mutation) -> list:
     m = load_all(mutation)
     fr = m["friday"]
     out = []
@@ -305,13 +388,32 @@ def checks(mutation) -> list:
                     "session US$2.50, extractions US$1.30 each: two start (2.50+1 and 3.80+1 fit US$5), the third is "
                     "DEFERRED FOR BUDGET with no id; ids -0021, -0022; UNFINISHED",
                     "%s, spent %s, %s" % (statuses, rec.get("spent_usd"), rec.get("status"))))
-        text = (inbox.run_dir(rid, box) / "report.md").read_text(encoding="utf-8")
+        text = report_text(rid, box)
         again = m["report"].render(rid, box)
         out.append((text.startswith("# Friday run %s: UNFINISHED\n" % rid) and "1 deferred for budget" in text
                     and all(("Drop reason %d" % i) in text for i in (3, 4)) and SENTENCE[:40] in text
                     and "US$5.10 counted against the US$5.00 ceiling" in text and text == again,
                     "the report names every dropped item with its reason and quote, the deferral and the cost against "
-                    "the ceiling, and renders the same bytes twice", text.splitlines()[0][:80]))
+                    "the ceiling, and renders the same bytes twice", text.splitlines()[0][:80] if text else "no report"))
+        out.append((unfinished_counts(text) == (1, 1, 1)
+                    and ("deferred for budget: US$5.10 spent; US$1.00 more would pass the US$5.00 ceiling") in text
+                    and "notice.. Quote" not in text and "notice. Quote" in text,
+                    "line 3's unfinished count equals the Unfinished section's, which names the deferral and its "
+                    "spend; a reason ending in a full stop is not given a second",
+                    "line 3 / header / rows %s" % (unfinished_counts(text),)))
+
+        rid = "feeds-2026-10-02-aaa016"
+        run, keys, session = listed_run(m, box, rid, n_relevant=3, n_dropped=0, queue=3, cost=0.3, against_keys=True)
+        rec = run_friday(box, run, session, extractor_with(m, [0.4, 0.4, 0.4]), alist)
+        text = report_text(rid, box)
+        lines = text.splitlines()
+        table = [next((i for i, l in enumerate(lines) if l.startswith("| `%s`" % k)), None) for k in keys]
+        kept = [next((i for i, l in enumerate(lines) if l.startswith("- `%s`" % k)), None) for k in keys]
+        alloc = extraction.load_allocations(rid, box)
+        out.append((keys != sorted(keys) and None not in table + kept and table == sorted(table)
+                    and kept == sorted(kept) and [alloc.get(k) for k in keys] == sorted(alloc.values()),
+                    "report rows go in QUEUE order, the order ids were allocated and the budget spent, on a run "
+                    "queued against key order", "table rows at %s, kept rows at %s" % (table, kept)))
 
         rid = "feeds-2026-10-02-aaa002"
         run, keys, session = listed_run(m, box, rid, n_relevant=3, n_dropped=0, queue=3, cost=None)
@@ -370,11 +472,15 @@ def checks(mutation) -> list:
         req_err = next((r.get("error") for r in extraction.load_requests(rid, box) if r["key"] == keys[1]), None)
         text = (inbox.run_dir(rid, box) / "report.md").read_text(encoding="utf-8")
         out.append((bool(req_err) and outs.get(keys[1], {}).get("status") == "failed" and keys[1] not in alloc
+                    and unfinished_counts(text) == (1, 1, 1)
+                    and ("extraction failed: %s" % " ".join(req_err.split())) in text
                     and asked == [keys[0], keys[2]] and sorted(alloc) == sorted([keys[0], keys[2]])
                     and keys[1] in rec.get("failed", {}) and ("`%s` | - | failed: Rejected:" % keys[1]) in text,
                     "a request whose line carries an error (an unreadable linked PDF) is reported FAILED, gets no "
-                    "advisory id and is never extracted; the items either side of it are",
-                    "extractor asked %s; allocated %s" % (asked, sorted(alloc))))
+                    "advisory id and is never extracted, and is listed as Unfinished with its WHOLE error, so line 3 "
+                    "and the section agree; the items either side of it are extracted",
+                    "extractor asked %s; allocated %s; line 3 / header / rows %s" % (
+                        asked, sorted(alloc), unfinished_counts(text))))
 
         # Carried ruling 1: one Friday run at a time; the lock is held across the session and every extraction.
         rid = "feeds-2026-10-02-aaa010"
@@ -410,6 +516,65 @@ def checks(mutation) -> list:
                     "take it is REFUSED before its session starts, allocating no advisory id",
                     "held inside %s; first run %s; second run %s, sessions started %s" % (
                         seen_inside, rec.get("status"), rec2.get("status"), started)))
+
+        # Review fix 1: a run that raises still leaves run.json and report.md, FAILED and naming the exception.
+        rid = "feeds-2026-10-02-aaa014"
+        run, keys, session = listed_run(m, box, rid, n_relevant=2, n_dropped=0, queue=2, cost=0.3)
+        inner = extractor_with(m, [0.5])
+
+        async def crashing(run_, req, advisory_id, root_):
+            if req["key"] == keys[1]:
+                raise RuntimeError("boom in extraction")
+            return await inner(run_, req, advisory_id, root_)
+        rec = run_friday(box, run, session, crashing, alist)
+        run_json = inbox.run_dir(rid, box) / "run.json"
+        saved = json.loads(run_json.read_text(encoding="utf-8")) if run_json.exists() else {}
+        text = report_text(rid, box)
+        with fr.run_lock(box) as free:
+            pass
+        out.append((rec.get("status") == "FAILED" and saved.get("crash") == "the run raised RuntimeError: boom in extraction"
+                    and text.startswith("# Friday run %s: FAILED\n" % rid)
+                    and "**FAILED: the run raised RuntimeError: boom in extraction**" in text
+                    and abs((saved.get("spent_usd") or 0) - 1.8) < 1e-6 and free,
+                    "a run that raises mid-extraction still writes run.json and report.md: FAILED, naming the "
+                    "exception, the crashed extraction counted at its US$1.00 cap (0.3+0.5+1.0), the lock released",
+                    "%s; crash %r; spent %s; lock free %s" % (rec.get("status"), saved.get("crash"),
+                                                              saved.get("spent_usd"), free)))
+
+        # Review fix 2: friday() points telemetry at the run folder itself, and restores what it found.
+        rid = "feeds-2026-10-02-aaa013"
+        run, keys, session = listed_run(m, box, rid, n_relevant=2, n_dropped=0, queue=2, cost=0.3)
+        stray = tmp / "stray-telemetry"
+        m["telemetry"].TELEMETRY_DIR = stray
+        rec = run_friday(box, run, session, extractor_with(m, [0.4, 0.4]), alist)
+        ext = [s_ for s_ in rec.get("sessions", []) if s_["agent"] == "extractor"]
+        out.append((not (stray.exists() and any(stray.iterdir())) and len(ext) == 2
+                    and all(abs((s_["cost_usd"] or 0) - 0.4) < 1e-9 for s_ in ext)
+                    and m["telemetry"].TELEMETRY_DIR == stray,
+                    "friday() itself puts every session's telemetry under inbox/<run_id>/telemetry/, whatever the "
+                    "caller left TELEMETRY_DIR at, and restores it after",
+                    "extractor sessions in the run %d; stray files %s" % (
+                        len(ext), sorted(p.name for p in stray.iterdir()) if stray.exists() else [])))
+
+        # Review fix 3: a fourth request line (request() refuses one; planted) is not extracted.
+        rid = "feeds-2026-10-02-aaa015"
+        run, keys, session = listed_run(m, box, rid, n_relevant=4, n_dropped=0, queue=3, cost=0.3)
+        cap = extraction.MAX_PER_RUN
+        extraction.MAX_PER_RUN = cap + 1
+        try:
+            planted_ok, _ = extraction.request(rid, keys[3], Stub(), box)
+        finally:
+            extraction.MAX_PER_RUN = cap
+        asked = []
+        rec = run_friday(box, run, session, extractor_with(m, [0.3] * 4, calls=asked), alist)
+        outs, alloc = extraction.load_outcomes(rid, box), extraction.load_allocations(rid, box)
+        out.append((planted_ok and asked == keys[:3] and keys[3] not in alloc
+                    and outs.get(keys[3], {}).get("status") == "failed"
+                    and "at most 3" in (outs.get(keys[3], {}).get("error") or "")
+                    and rec.get("status") == "RECONCILIATION_FAILED"
+                    and "4 extraction requests; a run queues at most 3" in rec.get("problems", []),
+                    "friday() re-checks the cap: a fourth request line is not extracted and gets no id, and the run "
+                    "is RECONCILIATION_FAILED", "extractor asked %d; %s" % (len(asked), rec.get("status"))))
 
         # Carried ruling 2: run_session itself, driven by a scripted stream.
         rid = "feeds-2026-10-02-aaa008"
@@ -460,8 +625,6 @@ def checks(mutation) -> list:
                     "reports RECONCILIATION_FAILED", "events for it %d; %s; %s" % (
                         len(lost), orch.get("unterminated"), rec.get("status"))))
 
-    out.append((git_status() == before and untracked_state() == before_untracked,
-                "the repository's git status, the real inbox/, data/telemetry/ and data/feeds/ are unchanged", ""))
     return out
 
 

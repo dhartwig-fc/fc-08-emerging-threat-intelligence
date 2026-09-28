@@ -12,7 +12,13 @@ starts only if the spend so far plus EXTRACTION_BUDGET_USD stays within RUN_CEIL
 is DEFERRED FOR BUDGET (no advisory id is allocated, and accept_run defers it to next Friday). Each
 extraction is slice 1's agents/extract_advisory.extract, unchanged in its gate, propose_link, citations and
 telemetry, with its OWN run identity naming this feeds run, so its queue and telemetry land in this run's
-inbox. A cost that never arrived (the SDK raised before its result) is counted at the session's cap.
+inbox. A cost that never arrived (the SDK raised before its result) is counted at the session's cap. At
+most extraction.MAX_PER_RUN requests are extracted: request() refuses a fourth, and friday() re-checks it.
+
+friday() points telemetry.TELEMETRY_DIR at inbox/<run_id>/telemetry/ for the run and restores it after, so
+every session's telemetry lands in the run whoever calls it. Whatever raises inside the run -- the session,
+an allocation, an extraction -- run.json and report.md are still written: the run is FAILED, and run.json's
+"crash" names the exception.
 
 WRITES only inbox/<run_id>/ (gitignored): run.json, advisory_ids.jsonl, extraction_runs.jsonl, records/,
 proposals/, telemetry/, report.md. Nothing tracked changes; tools/accept_run.py is the only way in.
@@ -88,9 +94,14 @@ async def extract_one(run: of.FeedsRun, request: dict, advisory_id: str, root: P
     from agents.run_identity import RunIdentity
     folder = inbox.run_dir(run.run_id, root)
     doc = folder / request["document"]["path"]
-    ident = RunIdentity.new("extractor", advisory_id, doc, feeds_run=run.run_id, inbox_root=root)
-    out = {"key": request["key"], "advisory_id": advisory_id, "extraction_run_id": ident.run_id,
-           "document_sha256": ident.pdf_sha256, "started_at": _now(), "status": None, "error": None, "record": None}
+    out = {"key": request["key"], "advisory_id": advisory_id, "extraction_run_id": None, "document_sha256": None,
+           "started_at": _now(), "status": None, "error": None, "record": None, "cost_usd": None}
+    try:
+        ident = RunIdentity.new("extractor", advisory_id, doc, feeds_run=run.run_id, inbox_root=root)
+    except Exception as exc:  # a document that cannot be hashed is this extraction's failure, not the run's
+        out.update(status="failed", error=("%s: %s" % (type(exc).__name__, exc))[:500], cost_usd=0.0)
+        return out
+    out.update(extraction_run_id=ident.run_id, document_sha256=ident.pdf_sha256)
     try:
         record, _ = await extract_advisory.extract(doc, advisory_id, of.MODEL, of.EXTRACTION_BUDGET_USD,
                                                    of.EXTRACTION_MAX_TURNS, run=ident)
@@ -138,26 +149,47 @@ async def friday(run: of.FeedsRun, session=None, extractor=None, root: Path = in
 
 
 async def _locked_friday(run: of.FeedsRun, session, extractor, root: Path, advisory_list) -> dict:
+    """The run itself. Whatever raises in here, run.json and report.md are still written (spec section 2: a
+    report on EVERY run), the run is FAILED and the report names the exception."""
     started = _now()
-    summary = await session(run)
-    spent = counted(summary.get("cost_usd"), of.MAX_BUDGET_USD)
-    if summary.get("failure") is None:
-        for req in extraction.load_requests(run.run_id, root):
-            if req.get("error") or not req.get("document"):
-                outcome = {"key": req["key"], "status": "failed", "error": req.get("error") or "no document",
-                           "cost_usd": 0.0}
-            elif not may_start(spent):
-                outcome = {"key": req["key"], "status": "deferred_budget", "cost_usd": 0.0,
-                           "error": "US$%.2f spent; US$%.2f more would pass the US$%.2f ceiling" % (
-                               spent, of.EXTRACTION_BUDGET_USD, of.RUN_CEILING_USD)}
-            else:
-                advisory_id = extraction.allocate_advisory_id(run.run_id, req["key"], run_date(run.run_id).year,
-                                                              advisory_list, root)
-                outcome = await extractor(run, req, advisory_id, root)
-                spent += counted(outcome.get("cost_usd"), of.EXTRACTION_BUDGET_USD)
-            extraction.append_outcome(run.run_id, outcome, root)
+    summary: dict = {}
+    crash: Optional[str] = None
+    spent = of.MAX_BUDGET_USD  # the session counts at its cap until its cost arrives
+    previous_dir = telemetry.TELEMETRY_DIR
+    # Every session this run starts -- the orchestrator and each extraction -- writes its telemetry into the
+    # run's own folder, whoever called friday(): never data/telemetry/, which reconcile_run does not read.
+    telemetry.TELEMETRY_DIR = inbox.run_dir(run.run_id, root) / inbox.TELEMETRY
+    try:
+        summary = await session(run)
+        spent = counted(summary.get("cost_usd"), of.MAX_BUDGET_USD)
+        if summary.get("failure") is None:
+            for position, req in enumerate(extraction.load_requests(run.run_id, root)):
+                if position >= extraction.MAX_PER_RUN:
+                    # request() refuses a fourth; this is defence in depth, and reconcile_run reports the line.
+                    outcome = {"key": req["key"], "status": "failed", "cost_usd": 0.0,
+                               "error": "request %d of a run that extracts at most %d; not extracted" % (
+                                   position + 1, extraction.MAX_PER_RUN)}
+                elif req.get("error") or not req.get("document"):
+                    outcome = {"key": req["key"], "status": "failed", "error": req.get("error") or "no document",
+                               "cost_usd": 0.0}
+                elif not may_start(spent):
+                    outcome = {"key": req["key"], "status": "deferred_budget", "cost_usd": 0.0,
+                               "error": "US$%.2f spent; US$%.2f more would pass the US$%.2f ceiling" % (
+                                   spent, of.EXTRACTION_BUDGET_USD, of.RUN_CEILING_USD)}
+                else:
+                    advisory_id = extraction.allocate_advisory_id(run.run_id, req["key"], run_date(run.run_id).year,
+                                                                  advisory_list, root)
+                    spent += of.EXTRACTION_BUDGET_USD  # counted at its cap while it runs, in case it raises
+                    outcome = await extractor(run, req, advisory_id, root)
+                    spent += counted(outcome.get("cost_usd"), of.EXTRACTION_BUDGET_USD) - of.EXTRACTION_BUDGET_USD
+                extraction.append_outcome(run.run_id, outcome, root)
+    except Exception as exc:  # a report on EVERY run: a crashed one is FAILED and says why
+        crash = ("the run raised %s: %s" % (type(exc).__name__, exc))[:500]
+    finally:
+        telemetry.TELEMETRY_DIR = previous_dir
     _save(inbox.run_dir(run.run_id, root) / reconcile.RUN_JSON,
-          {"run_id": run.run_id, "started_at": started, "ended_at": _now(), "failure": summary.get("failure"),
+          {"run_id": run.run_id, "started_at": started, "ended_at": _now(),
+           "failure": summary.get("failure") or crash, "crash": crash,
            "limit": summary.get("limit"), "orchestrator_cost_usd": summary.get("cost_usd"), "spent_usd": round(spent, 6),
            "ceiling_usd": of.RUN_CEILING_USD, "prompt_sha256": of.FULL_PROMPT_SHA256, "model": of.MODEL})
     report.write(run.run_id, root)
@@ -192,7 +224,6 @@ def main(argv: list, root: Path = inbox.INBOX_ROOT, today: date = None, extra_re
                  extraction.MAX_PER_RUN, of.RUN_CEILING_USD))
         return 0
     run = of.FeedsRun(inbox.mint_run_id(today or date.today()))
-    telemetry.TELEMETRY_DIR = inbox.run_dir(run.run_id, root) / inbox.TELEMETRY
     reasons = refusals() + list(extra_refusals or [])
     rec = write_refusal(run.run_id, reasons, root) if reasons else asyncio.run(friday(run, root=root))
     print("%s: %s -- %s" % (run.run_id, rec["status"], inbox.run_dir(run.run_id, root) / report.REPORT))

@@ -6,13 +6,16 @@ extraction_runs.jsonl, records/, proposals/, telemetry/, run.json, refusal.json 
   every listed item has one verdict, or it is UNFINISHED;
   every relevant item was extracted, or its failure, its budget deferral or its not being queued is REPORTED;
   every tool call of every session has exactly one terminal event (each session's terminal_check), and
-  every session that started also completed.
+  every session that started also completed;
+  no more than extraction.MAX_PER_RUN requests were queued (request() refuses a fourth; a fourth line is
+  corruption, and tools/friday_run.py does not extract it either).
 Bookkeeping that does not add up is a PROBLEM, and any problem makes the run RECONCILIATION_FAILED, which
 tools/accept_run.py refuses without an explicit, recorded override (spec section 5). Skipped work is not a
 problem: it is UNFINISHED, and accept_run defers it to next Friday.
 
 STATUS, first match wins: REFUSED (refusal.json) | FAILED (the orchestrator session failed: auth, credit,
-the CLI) | RECONCILIATION_FAILED | UNFINISHED | NOTHING_NEW | COMPLETE.
+the CLI; or the run raised after it, run.json's "crash") | RECONCILIATION_FAILED | UNFINISHED | NOTHING_NEW |
+COMPLETE. `queued` is in QUEUE order, the order the budget is spent in.
 """
 
 from __future__ import annotations
@@ -86,7 +89,10 @@ def reconcile_run(run_id: str, root: Path = inbox.INBOX_ROOT) -> dict:
         for k in sorted(set(requests) - set(outcomes)):
             problems.append("the extraction request for %s has no outcome" % k)
     extracted, failed, deferred = [], {}, []
-    for k, o in sorted(outcomes.items()):
+    queue_rank = {k: i for i, k in enumerate(requests)}
+    if len(requests) > extraction.MAX_PER_RUN:
+        problems.append("%d extraction requests; a run queues at most %d" % (len(requests), extraction.MAX_PER_RUN))
+    for k, o in sorted(outcomes.items(), key=lambda kv: (queue_rank.get(kv[0], len(queue_rank)), kv[0])):
         if o["status"] == "extracted":
             extracted.append(k)
             record = _json(folder / (o.get("record") or "none")) if o.get("record") else None
@@ -131,10 +137,11 @@ def reconcile_run(run_id: str, root: Path = inbox.INBOX_ROOT) -> dict:
     else:
         status = COMPLETE
     return {"run_id": run_id, "status": status, "refusal": refusal, "failure": run.get("failure"),
+            "crash": run.get("crash"),
             "sources": source_state, "never_listed_sources": never_listed, "source_failures": source_failures,
             "listed": sorted(listed), "verdicts": verdicts, "unfinished": unfinished, "relevant": relevant,
             "not_relevant": sorted(k for k, v in verdicts.items() if v["verdict"] == feeds_triage.NOT_RELEVANT),
-            "queued": sorted(requests), "extracted": extracted, "failed": failed, "deferred_budget": deferred,
+            "queued": list(requests), "extracted": extracted, "failed": failed, "deferred_budget": deferred,
             "not_queued": not_queued, "allocations": allocations, "sessions": sessions, "problems": problems,
             "spent_usd": run.get("spent_usd"), "known_cost_usd": round(sum(known), 6),
             "unknown_cost_sessions": sum(1 for s in sessions if s["cost_usd"] is None)}

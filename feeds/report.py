@@ -23,7 +23,13 @@ def _usd(x) -> str:
 
 
 def _cell(text, limit=160) -> str:
+    """One line of text for a table cell or a bullet; limit=None keeps it whole."""
     return " ".join(str(text or "").split())[:limit].replace("|", "/")
+
+
+def _sentence(text, limit) -> str:
+    """A reason that already ends in a full stop does not get a second one."""
+    return _cell(text, limit).rstrip(".")
 
 
 def actor_resolution(record: dict) -> tuple:
@@ -46,7 +52,11 @@ def summary_line(rec: dict) -> str:
     if rec["status"] == reconcile.REFUSED:
         return "Refused before any agent ran: %s." % "; ".join(rec["refusal"].get("reasons", []))
     if rec["status"] == reconcile.FAILED:
-        return "The orchestrator session failed: %s." % _cell(rec["failure"] or "no session telemetry", 200)
+        if rec.get("crash"):
+            return "The run failed after its session: %s." % _sentence(rec["crash"], 200)
+        return "The orchestrator session failed: %s." % _sentence(rec["failure"] or "no session telemetry", 200)
+    # The "unfinished" count here and the ## Unfinished section list the SAME four kinds of skipped work
+    # (check_friday_run pins that they agree): C2's notification reads this line, a person reads the section.
     return "%d new item(s), %d kept, %d dropped by triage, %d extracted, %d unfinished; %s spent of the %s." % (
         len(rec["listed"]), len(rec["relevant"]), len(rec["not_relevant"]), len(rec["extracted"]),
         len(rec["unfinished"]) + len(rec["not_queued"]) + len(rec["failed"]) + len(rec["deferred_budget"]),
@@ -58,6 +68,12 @@ def render(run_id: str, root: Path = inbox.INBOX_ROOT) -> str:
     folder = inbox.run_dir(run_id, root)
     items = {it["key"]: it for it in inbox.items(inbox.load(run_id, root))}
     outcomes = extraction.load_outcomes(run_id, root)
+    # Rows go in QUEUE order -- the order the budget was spent in -- then every other item in listing order.
+    order = list(rec["queued"]) + [k for k in items if k not in rec["queued"]]
+    rank = {k: i for i, k in enumerate(order)}
+
+    def in_order(keys):
+        return sorted(keys, key=lambda k: (rank.get(k, len(rank)), k))
     out = ["# Friday run %s: %s" % (run_id, rec["status"]), "", summary_line(rec), ""]
     loud = []
     if rec["refusal"]:
@@ -88,15 +104,23 @@ def render(run_id: str, root: Path = inbox.INBOX_ROOT) -> str:
     for title, keys in (("Kept by triage (relevant)", rec["relevant"]),
                         ("Dropped by triage (not relevant), with the reason and the quote", rec["not_relevant"])):
         out += ["", "## %s: %d" % (title, len(keys)), ""]
-        for k in keys:
+        for k in in_order(keys):
             v = rec["verdicts"][k]
             out.append("- `%s` %s -- %s. Quote (p.%s): \"%s\"" % (
-                k, _cell(items[k]["title"], 120), _cell(v["reason"], 300), ",".join(map(str, v["found_on"])),
+                k, _cell(items[k]["title"], 120), _sentence(v["reason"], 300), ",".join(map(str, v["found_on"])),
                 _cell(v["quote"], 200)))
-    unfinished = [(k, "no verdict") for k in rec["unfinished"]] + [(k, "relevant, not queued for extraction")
-                                                                   for k in rec["not_queued"]]
+        if not keys:
+            out.append("None.")
+    # Every kind of skipped work summary_line counts, each with its WHOLE reason (never cut to a cell).
+    unfinished = ([(k, "no verdict") for k in rec["unfinished"]]
+                  + [(k, "relevant, not queued for extraction") for k in rec["not_queued"]]
+                  + [(k, "extraction failed: %s" % _cell(rec["failed"][k], None)) for k in rec["failed"]]
+                  + [(k, "deferred for budget: %s" % _cell(outcomes[k].get("error"), None)) for k in rec["deferred_budget"]])
+    unfinished = sorted(unfinished, key=lambda row: (rank.get(row[0], len(rank)), row[0]))
     out += ["", "## Unfinished: %d (they return next Friday unless dropped)" % len(unfinished), ""]
     out += ["- `%s` %s: %s" % (k, _cell(items.get(k, {}).get("title"), 120), why) for k, why in unfinished]
+    if not unfinished:
+        out.append("None.")
 
     out += ["", "## Extraction: %d queued, %d extracted, %d failed, %d deferred for budget" % (
         len(rec["queued"]), len(rec["extracted"]), len(rec["failed"]), len(rec["deferred_budget"])), ""]
