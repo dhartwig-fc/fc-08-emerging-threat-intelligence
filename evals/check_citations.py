@@ -141,7 +141,7 @@ def check_record(record_path, pdf_path, verbose: bool = True):
     advisory_id = record.get("advisory_id") or Path(record_path).stem
     # The matching rule lives in schemas/citation_match.py, shared with the MCP
     # server and the review gate, so all three accept and refuse the same quotes.
-    index = PageIndex.from_pdf(pdf_path)
+    index = PageIndex.from_document(pdf_path)
     attested, problems = load_attestations()
     mine = [e for e in attested if e["advisory_id"] == advisory_id]
     covered = {attestation_identity(e) for e in mine}
@@ -338,7 +338,7 @@ def compute_current_defects(records_dir: Path, attested=None):
             continue
 
         record = json.loads(record_path.read_text(encoding="utf-8"))
-        rows = check_record_citations(advisory_id, record, PageIndex.from_pdf(pdf_path))
+        rows = check_record_citations(advisory_id, record, PageIndex.from_document(pdf_path))
         total_checked += len(rows)
         checked += rows
     if attested is None:

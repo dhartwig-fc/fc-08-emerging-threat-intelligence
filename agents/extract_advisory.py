@@ -40,14 +40,13 @@ import sys
 from collections import Counter
 from pathlib import Path
 
-from pypdf import PdfReader
 
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
 from schemas.advisory import AdvisoryRecord  # noqa: E402
 from agents.run_identity import RunIdentity  # noqa: E402
-from schemas.citation_match import file_sha256  # noqa: E402
+from schemas.citation_match import document_texts, file_sha256  # noqa: E402
 
 from claude_agent_sdk import AssistantMessage, ClaudeAgentOptions, ResultMessage, ToolUseBlock, query  # noqa: E402
 from claude_agent_sdk import ClaudeSDKError  # noqa: E402
@@ -93,13 +92,15 @@ The Knowledge Centre:
 """
 
 
-def pdf_to_pages(path: Path) -> list:
-    reader = PdfReader(str(path))
-    pages = []
-    for i, page in enumerate(reader.pages, start=1):
-        text = page.extract_text() or ""
-        pages.append("=== PAGE %d ===\n%s" % (i, text.strip()))
-    return pages
+def document_pages(path: Path) -> list:
+    """The prompt's pages, "=== PAGE n ===" each: a PDF through pypdf exactly as before, a pinned HTML
+    page (a live feed item, slice 2 C) through schemas/html_pages -- the pages propose_link and the
+    review gate re-find every quote on, through the same schemas.citation_match.document_texts."""
+    return ["=== PAGE %d ===\n%s" % (i, (text or "").strip()) for i, text in enumerate(document_texts(path), start=1)]
+
+
+# The name agents/review_advisory.py imports; a PDF's pages are unchanged by the rename.
+pdf_to_pages = document_pages
 
 
 def sha256_of(path: Path) -> str:
@@ -207,7 +208,7 @@ def agent_options(model: str, max_budget_usd: float, max_turns: int, run: RunIde
 
 
 async def extract(path: Path, advisory_id: str, model: str, max_budget_usd: float, max_turns: int) -> tuple:
-    pages = pdf_to_pages(path)
+    pages = document_pages(path)
 
     run = RunIdentity.new("extractor", advisory_id, path)
     options = agent_options(model, max_budget_usd, max_turns, run)

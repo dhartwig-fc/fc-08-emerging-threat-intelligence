@@ -215,7 +215,7 @@ def recheck(proposals, advisory_list: Path = ADVISORY_LIST, advisories_dir: Path
         if aid not in indexes:
             pdf = advisories_dir / Path(a["file"]).name
             ok = pdf.exists() and file_sha256(pdf) == a["sha256"]
-            indexes[aid] = PageIndex.from_pdf(pdf) if ok else None
+            indexes[aid] = PageIndex.from_document(pdf) if ok else None  # PDF or pinned HTML
         return indexes[aid]
 
     def evidence_problem(p: Proposal) -> Optional[str]:

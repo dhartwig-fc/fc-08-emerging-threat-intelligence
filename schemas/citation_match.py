@@ -90,7 +90,8 @@ import hashlib
 import re
 import unicodedata
 from dataclasses import dataclass
-from typing import Sequence, Tuple
+from pathlib import Path
+from typing import List, Sequence, Tuple
 
 EXACT, SPACING, ARTEFACT, OFF_PAGE, MISSING = "exact", "spacing", "artefact", "off_page", "missing"
 ELLIPSIS = "ellipsis"
@@ -190,6 +191,26 @@ def file_sha256(path) -> str:
     return h.hexdigest()
 
 
+DOCUMENT_SUFFIXES = (".pdf", ".html", ".htm")
+
+
+def document_texts(path) -> List[str]:
+    """The raw text of each page of a pinned document: pypdf for a .pdf, schemas/html_pages for .html/.htm.
+
+    By SUFFIX, never by sniffing, so the choice is visible in the file name every caller already holds
+    (feeds/inbox.py names a pinned file <sha256>.pdf or <sha256>.html from its content type). Anything
+    else is refused: a document that cannot be paged cannot carry a citation.
+    """
+    suffix = Path(path).suffix.lower()
+    if suffix == ".pdf":
+        from pypdf import PdfReader
+        return [p.extract_text() or "" for p in PdfReader(str(path)).pages]
+    if suffix in (".html", ".htm"):
+        from schemas.html_pages import html_pages
+        return html_pages(Path(path).read_bytes())
+    raise ValueError("%s is neither a PDF nor an HTML document (%s)" % (path, ", ".join(DOCUMENT_SUFFIXES)))
+
+
 @dataclass(frozen=True)
 class Located:
     status: str
@@ -219,6 +240,13 @@ class PageIndex:
         """Pages of a pinned HTML document, by schemas/html_pages.py's fixed rule (slice 2)."""
         from schemas.html_pages import html_pages
         return cls(html_pages(raw))
+
+    @classmethod
+    def from_document(cls, path) -> "PageIndex":
+        """A pinned document's pages, chosen by its kind (slice 2 C). THE loader for every caller that
+        re-finds a quote -- the extractor's prompt, propose_link, the review gate, check_citations -- so a
+        live feed's HTML advisory is paged by the same rule everywhere, and a PDF exactly as before."""
+        return cls(document_texts(path))
 
     def __len__(self) -> int:
         return len(self.pages)

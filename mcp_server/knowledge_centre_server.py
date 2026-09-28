@@ -521,7 +521,7 @@ def _refuse_queue(run: dict) -> Optional[str]:
 def _page_index(pdf_path: str, expected_sha: str) -> PageIndex:
     if file_sha256(pdf_path) != expected_sha:
         raise ValueError("document hash mismatch: %s is not the document this run was started on" % pdf_path)
-    return PageIndex.from_pdf(pdf_path)
+    return PageIndex.from_document(pdf_path)  # a PDF, or a live feed's pinned HTML (slice 2 C)
 
 
 def _refuse_for_run(params: "ProposeLinkInput", run: dict) -> Optional[str]:
