@@ -19,6 +19,7 @@ Usage:
     python evals/check_friday_run.py --mutate telemetry-elsewhere     # friday() leaves telemetry where it was
     python evals/check_friday_run.py --mutate no-cap-recheck          # a fourth request line is extracted
     python evals/check_friday_run.py --mutate writes-real-inbox       # the run also writes a file into the REAL inbox/
+    python evals/check_friday_run.py --mutate crash-skips-unreached   # after a crash, only the in-flight item is recorded
 
 WHAT IT HOLDS (spec sections 1, 2 and 5):
   budget       extractions start in queue order only while spend + US$1.00 <= US$5.00; the next is DEFERRED
@@ -39,8 +40,14 @@ WHAT IT HOLDS (spec sections 1, 2 and 5):
                ## Unfinished section's count and its rows, which list failed items with their WHOLE error and
                deferred ones with the spend; rows go in queue order (asserted on a run whose queue order is
                not its key order), and a reason ending in "." is not doubled;
-  crash        an exception inside the run (here, the second extraction) still leaves run.json and report.md:
-               FAILED, naming the exception, the crashed extraction counted at its cap, and the lock released;
+  crash        an exception inside the run (here, the second of three extractions) still leaves run.json and
+               report.md: FAILED, naming the exception, the crashed extraction counted at its cap, the lock
+               released -- and EVERY queued request has exactly one outcome: the in-flight one and the one never
+               reached are FAILED "the run crashed before this item was extracted (...)", no id is allocated for
+               them (the in-flight item keeps, and names, the id it held before it started), and ## Unfinished
+               and line 3 both count them. At the boundary: a crash INSIDE allocate_advisory_id records every
+               item without crashing again; when recording itself fails, the report is still written and names
+               it as a RECONCILIATION problem;
   telemetry    friday() itself points every session's telemetry into inbox/<run_id>/telemetry/, whatever the
                caller left TELEMETRY_DIR at, and restores it after;
   cap          a fourth request line (request() refuses one; planted here) is not extracted, gets no id, and
@@ -127,6 +134,10 @@ MUTATIONS = {
     "telemetry-elsewhere": ("friday", "    telemetry.TELEMETRY_DIR = inbox.run_dir(run.run_id, root) / inbox.TELEMETRY\n",
                             "    pass\n"),
     "no-cap-recheck": ("friday", "                if position >= extraction.MAX_PER_RUN:\n", "                if False:\n"),
+    "crash-skips-unreached": ("friday", '                                               "advisory_id": '
+                                        'allocations.get(req["key"]), "error": reason}, root)\n',
+                              '                                               "advisory_id": allocations.get(req["key"]), '
+                              '"error": reason}, root)\n            break\n'),
     "writes-real-inbox": ("friday", "    _save(inbox.run_dir(run.run_id, root) / reconcile.RUN_JSON,\n",
                           "    _save(Path(os.environ[\"FC08_GUARD_PLANT\"]), {\"planted_by\": run.run_id})\n"
                           "    _save(inbox.run_dir(run.run_id, root) / reconcile.RUN_JSON,\n"),
@@ -535,9 +546,10 @@ def body(mutation) -> list:
                     "held inside %s; first run %s; second run %s, sessions started %s" % (
                         seen_inside, rec.get("status"), rec2.get("status"), started)))
 
-        # Review fix 1: a run that raises still leaves run.json and report.md, FAILED and naming the exception.
+        # Review fix 1 (+ round 2): a run that raises still leaves run.json and report.md, FAILED and naming the
+        # exception, and every queued request -- in flight or never reached -- has exactly one outcome.
         rid = "feeds-2026-10-02-aaa014"
-        run, keys, session = listed_run(m, box, rid, n_relevant=2, n_dropped=0, queue=2, cost=0.3)
+        run, keys, session = listed_run(m, box, rid, n_relevant=3, n_dropped=0, queue=3, cost=0.3)
         inner = extractor_with(m, [0.5])
 
         async def crashing(run_, req, advisory_id, root_):
@@ -558,6 +570,54 @@ def body(mutation) -> list:
                     "exception, the crashed extraction counted at its US$1.00 cap (0.3+0.5+1.0), the lock released",
                     "%s; crash %r; spent %s; lock free %s" % (rec.get("status"), saved.get("crash"),
                                                               saved.get("spent_usd"), free)))
+        outs, alloc = extraction.load_outcomes(rid, box), extraction.load_allocations(rid, box)
+        why = "the run crashed before this item was extracted (RuntimeError: boom in extraction)"
+        out.append((sorted(outs) == sorted(keys) and outs[keys[0]]["status"] == "extracted"
+                    and all(outs[k]["status"] == "failed" and outs[k]["error"] == why for k in keys[1:])
+                    and keys[2] not in alloc and outs[keys[2]].get("advisory_id") is None
+                    and alloc.get(keys[1]) is not None and outs[keys[1]].get("advisory_id") == alloc[keys[1]]
+                    and len(alloc) == 2 and unfinished_counts(text) == (2, 2, 2)
+                    and ("extraction failed: %s" % why) in text
+                    and not any("has no outcome" in p_ for p_ in rec.get("problems", [])),
+                    "after a crash on the 2nd of 3, the in-flight and the never-reached request each get ONE failed "
+                    "'run crashed' outcome and no new id (the 2nd keeps the id it held); ## Unfinished and line 3 "
+                    "both count 2", "outcomes %s; allocated %d; line 3 / header / rows %s" % (
+                        [outs.get(k, {}).get("status") for k in keys], len(alloc), unfinished_counts(text))))
+
+        # The boundary: a crash INSIDE allocate_advisory_id (an advisory list that is not JSON).
+        rid = "feeds-2026-10-02-aaa017"
+        run, keys, session = listed_run(m, box, rid, n_relevant=2, n_dropped=0, queue=2, cost=0.3)
+        broken = tmp / "broken_advisory_list.json"
+        broken.write_text("{not json", encoding="utf-8")
+        asked = []
+        rec = run_friday(box, run, session, extractor_with(m, [0.5, 0.5], calls=asked), broken)
+        outs, text = extraction.load_outcomes(rid, box), report_text(rid, box)
+        out.append((rec.get("status") == "FAILED" and asked == [] and not extraction.load_allocations(rid, box)
+                    and sorted(outs) == sorted(keys) and all(o["status"] == "failed" and "JSONDecodeError" in o["error"]
+                                                              for o in outs.values())
+                    and unfinished_counts(text) == (2, 2, 2),
+                    "a crash inside allocate_advisory_id records every queued request once, allocates nothing, and "
+                    "does not crash again", "%s; outcomes %d; line 3 / header / rows %s" % (
+                        rec.get("status"), len(outs), unfinished_counts(text))))
+
+        # The boundary: recording itself fails -- the report is still written, and names it.
+        rid = "feeds-2026-10-02-aaa018"
+        run, keys, session = listed_run(m, box, rid, n_relevant=1, n_dropped=0, queue=1, cost=0.3)
+        real_append = extraction.append_outcome
+
+        def refuse_append(*a, **k):
+            raise OSError("disk full")
+        extraction.append_outcome = refuse_append
+        try:
+            rec = run_friday(box, run, session, extractor_with(m, [0.5]), alist)
+        finally:
+            extraction.append_outcome = real_append
+        text = report_text(rid, box)
+        out.append((rec.get("status") == "FAILED" and text.startswith("# Friday run %s: FAILED\n" % rid)
+                    and "**RECONCILIATION: after the crash, the unfinished requests' outcomes could not be recorded: "
+                        "OSError: disk full**" in text,
+                    "when recording the crash's outcomes itself fails, the report is still written, FAILED, and says "
+                    "so as a reconciliation problem", "%s" % rec.get("status")))
 
         # Review fix 2: friday() points telemetry at the run folder itself, and restores what it found.
         rid = "feeds-2026-10-02-aaa013"

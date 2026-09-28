@@ -51,16 +51,17 @@ def actor_resolution(record: dict) -> tuple:
 def summary_line(rec: dict) -> str:
     if rec["status"] == reconcile.REFUSED:
         return "Refused before any agent ran: %s." % "; ".join(rec["refusal"].get("reasons", []))
-    if rec["status"] == reconcile.FAILED:
-        if rec.get("crash"):
-            return "The run failed after its session: %s." % _sentence(rec["crash"], 200)
-        return "The orchestrator session failed: %s." % _sentence(rec["failure"] or "no session telemetry", 200)
     # The "unfinished" count here and the ## Unfinished section list the SAME four kinds of skipped work
     # (check_friday_run pins that they agree): C2's notification reads this line, a person reads the section.
-    return "%d new item(s), %d kept, %d dropped by triage, %d extracted, %d unfinished; %s spent of the %s." % (
+    counts = "%d new item(s), %d kept, %d dropped by triage, %d extracted, %d unfinished; %s spent of the %s" % (
         len(rec["listed"]), len(rec["relevant"]), len(rec["not_relevant"]), len(rec["extracted"]),
         len(rec["unfinished"]) + len(rec["not_queued"]) + len(rec["failed"]) + len(rec["deferred_budget"]),
         _usd(rec["spent_usd"]), CEILING_NOTE % 5.0)
+    if rec["status"] == reconcile.FAILED:
+        if rec.get("crash"):  # the session ran; say what it left, so a crashed run's unfinished items are counted
+            return "The run failed after its session (%s): %s." % (_sentence(rec["crash"], 200), counts)
+        return "The orchestrator session failed: %s." % _sentence(rec["failure"] or "no session telemetry", 200)
+    return counts + "."
 
 
 def render(run_id: str, root: Path = inbox.INBOX_ROOT) -> str:

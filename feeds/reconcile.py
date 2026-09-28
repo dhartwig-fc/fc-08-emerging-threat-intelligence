@@ -116,6 +116,9 @@ def reconcile_run(run_id: str, root: Path = inbox.INBOX_ROOT) -> dict:
                 s["run_id"], len(s["unterminated"]), len(s["duplicated"])))
     if refusal is None and run and orchestrator is None:
         problems.append("the orchestrator session left no telemetry")
+    if run.get("unrecorded"):
+        problems.append("after the crash, the unfinished requests' outcomes could not be recorded: %s"
+                        % run["unrecorded"])
 
     source_state = {name: {k: v for k, v in st.items() if k in ("status", "error", "listed", "already_seen")}
                     for name, st in state["sources"].items()}

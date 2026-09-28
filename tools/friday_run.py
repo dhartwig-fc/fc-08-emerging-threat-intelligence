@@ -187,13 +187,38 @@ async def _locked_friday(run: of.FeedsRun, session, extractor, root: Path, advis
         crash = ("the run raised %s: %s" % (type(exc).__name__, exc))[:500]
     finally:
         telemetry.TELEMETRY_DIR = previous_dir
+    unrecorded = None
+    if crash is not None and summary.get("failure") is None:
+        unrecorded = record_crash(run.run_id, "the run crashed before this item was extracted (%s)" % (
+            crash[len("the run raised "):]), root)
     _save(inbox.run_dir(run.run_id, root) / reconcile.RUN_JSON,
           {"run_id": run.run_id, "started_at": started, "ended_at": _now(),
-           "failure": summary.get("failure") or crash, "crash": crash,
+           "failure": summary.get("failure") or crash, "crash": crash, "unrecorded": unrecorded,
            "limit": summary.get("limit"), "orchestrator_cost_usd": summary.get("cost_usd"), "spent_usd": round(spent, 6),
            "ceiling_usd": of.RUN_CEILING_USD, "prompt_sha256": of.FULL_PROMPT_SHA256, "model": of.MODEL})
     report.write(run.run_id, root)
     return reconcile.reconcile_run(run.run_id, root)
+
+
+def record_crash(run_id: str, reason: str, root: Path) -> Optional[str]:
+    """After a crash, give every queued request that has no outcome yet -- the one in flight and every one not
+    reached -- a FAILED outcome naming the crash, so each is reported unfinished and returns next Friday.
+    Allocates nothing: an id the in-flight item already held stays allocated (never reused) and is named on
+    its outcome. A request that already has an outcome (the crash came after its append) is left alone.
+    Returns None, or why recording failed; the caller puts that in run.json and reconcile_run reports it."""
+    try:
+        allocations = extraction.load_allocations(run_id, root)
+        done = extraction.load_outcomes(run_id, root)
+        for req in extraction.load_requests(run_id, root):
+            if req["key"] in done:
+                continue
+            started = req["key"] in allocations  # it held an id, so it started: its cost is unknown, not zero
+            extraction.append_outcome(run_id, {"key": req["key"], "status": "failed",
+                                               "cost_usd": None if started else 0.0,
+                                               "advisory_id": allocations.get(req["key"]), "error": reason}, root)
+    except Exception as exc:  # recording must not crash the crash path: the report is still written
+        return ("%s: %s" % (type(exc).__name__, exc))[:500]
+    return None
 
 
 def write_refusal(run_id: str, reasons: list, root: Path = inbox.INBOX_ROOT) -> dict:
