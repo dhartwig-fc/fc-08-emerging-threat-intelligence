@@ -57,7 +57,13 @@ VALIDATES EVERYTHING FIRST, and refuses the whole run on any failure, writing no
     the pinned document (the shared matcher, PDF or HTML); every queue line passes the review gate's own
     re-check (governance/proposals.recheck) against the advisory-list entry about to be written; its
     extraction session completed with a clean terminal_check (or the override); nothing it would write exists;
-  - no listed item is already in the ledger.
+  - an item already in the ledger (decided in an EARLIER run) is never a reason to refuse this one (owner
+    ruling A, 2026-09-29, C2 Task 0 -- the old wording refused the WHOLE run, which deadlocked two runs
+    listing the same item: neither could be accepted nor, under 14 days, expired). It is instead carried as
+    already decided: never re-recorded, its ledger entry never touched, and named in accepted.json under
+    "already_decided" as decided in the run that first saw it. A decision file that tries to ACCEPT such an
+    item IS refused (copying a second record for an item the ledger already closed makes no sense); a drop or
+    defer for it is silently ignored, since it is not this run's decision to make.
 Then writes, in this order: the copies, the live-feed advisory list (its entries and derived counts), the
 ledger (accepted and dropped items only), and accepted.json in the run's inbox folder. A failure before the
 ledger removes the copies AND the folders this call made and restores the advisory list byte for byte, so the
@@ -235,9 +241,11 @@ def plan(run_id: str, decisions: dict, *, inbox_root: Path = inbox.INBOX_ROOT, s
         raise ValueError("run %s is %s (%s); accepting it needs --override-reconciliation \"<reason>\"" % (
             run_id, rec["status"], "; ".join(rec["problems"][:3]) or rec["failure"] or "no session"))
     seen = ledger.load(seen_path)
-    already = sorted(k for k, it in listed.items() if (it["source"], it["item_id"]) in seen)
-    if already:
-        raise ValueError("already decided in an earlier run: %s" % already)
+    # Owner ruling A (2026-09-29, C2 Task 0): an item already in the ledger -- decided in an earlier run --
+    # is carried as such, not a reason to refuse this whole run (C1 final review I-3: two runs listing the
+    # same item could otherwise deadlock, since neither could be accepted nor, under 14 days, expired).
+    already_decided = {k: seen[(it["source"], it["item_id"])]["first_seen_run"]
+                        for k, it in listed.items() if (it["source"], it["item_id"]) in seen}
     alist = (json.loads(Path(advisory_list).read_text(encoding="utf-8")) if Path(advisory_list).exists()
              else {"schema": FEED_LIST_SCHEMA, "advisories": []})
     golden = json.loads(Path(golden_list).read_text(encoding="utf-8"))["advisories"] if Path(golden_list).exists() else []
@@ -245,8 +253,13 @@ def plan(run_id: str, decisions: dict, *, inbox_root: Path = inbox.INBOX_ROOT, s
     requests = {r["key"]: r for r in extraction.load_requests(run_id, inbox_root)}
     outcomes = extraction.load_outcomes(run_id, inbox_root)
     allocations = extraction.load_allocations(run_id, inbox_root)
-    problems, accepted = [], []
-    for key in sorted(k for k, v in decisions.items() if v == "accept"):
+    # An already-decided item cannot be (re-)accepted: that would copy a second record for an item the ledger
+    # already closed. A drop or defer for it is not a problem -- it is simply not this run's decision to make,
+    # and is silently excluded below (never re-recorded, never rewritten).
+    problems = ["%s: already decided in %s; a decision file cannot re-accept it" % (k, already_decided[k])
+                for k in sorted(already_decided) if decisions[k] == "accept"]
+    accepted = []
+    for key in sorted(k for k, v in decisions.items() if v == "accept" and k not in already_decided):
         got, why = _check_accepted(run_id, key, listed[key], verdicts.get(key), outcomes.get(key), requests.get(key),
                                    allocations.get(key), folder, Path(data), golden + alist["advisories"], override)
         problems += why
@@ -258,15 +271,16 @@ def plan(run_id: str, decisions: dict, *, inbox_root: Path = inbox.INBOX_ROOT, s
     if problems:
         raise ValueError("; ".join(problems))
     entries = [{"source": listed[k]["source"], "item_id": listed[k]["item_id"], "decision": decisions[k]}
-               for k in sorted(listed) if decisions[k] != "defer"]
+               for k in sorted(listed) if k not in already_decided and decisions[k] != "defer"]
     # Every id this run allocated that no accepted item carries: an extraction that failed after its id was
     # allocated (the one in flight when the run crashed, say), or an extracted item a person deferred or
     # dropped. Never reused; named, so the gap is explained.
     taken = {a["key"] for a in accepted}
     gaps = {k: v for k, v in sorted(allocations.items()) if k not in taken}
     return {"run_id": run_id, "accepted": accepted, "entries": entries, "status": rec["status"],
-            "crash": rec["crash"], "problems": rec["problems"], "gaps": gaps,
-            "deferred": sorted(k for k, v in decisions.items() if v == "defer"), "run_dest": run_dest,
+            "crash": rec["crash"], "problems": rec["problems"], "gaps": gaps, "already_decided": already_decided,
+            "deferred": sorted(k for k, v in decisions.items() if v == "defer" and k not in already_decided),
+            "run_dest": run_dest,
             "folder": folder, "alist": alist, "override": override}
 
 
@@ -347,6 +361,9 @@ def apply(p: dict, today: date, *, inbox_root: Path, seen_path: Path, advisory_l
                   "accepted": {a["key"]: a["advisory_id"] for a in p["accepted"]},
                   "dropped": sorted("%s:%s" % (e["source"], e["item_id"]) for e in p["entries"] if e["decision"] == "drop"),
                   "deferred": p["deferred"],
+                  "already_decided": p["already_decided"],
+                  "already_decided_note": "decided in an earlier run, named here by that run's id: never "
+                                          "re-recorded and not a decision of this run (owner ruling A, 2026-09-29)",
                   "allocated_not_accepted": p["gaps"],
                   "allocated_not_accepted_note": "allocated when an extraction started and carried by no accepted "
                                                  "record: never reused (owner decision 11)"}
@@ -390,16 +407,24 @@ def apply(p: dict, today: date, *, inbox_root: Path, seen_path: Path, advisory_l
             % (p["run_id"], type(exc).__name__, exc, dest / runs.ACCEPTED, marker)) from exc
 
 
-def ask(run_id: str, inbox_root: Path) -> dict:
-    """The interactive form: the report, then one decision per item, with the evidence's default."""
+def ask(run_id: str, inbox_root: Path, seen_path: Path = ledger.SEEN_PATH) -> dict:
+    """The interactive form: the report, then one decision per item, with the evidence's default. An item
+    already decided in an earlier run (owner ruling A, 2026-09-29) is shown as such and asked nothing about --
+    its decisions.json entry is "defer", which plan() ignores for it (never re-recorded)."""
     folder = inbox.run_dir(run_id, inbox_root)
     report = folder / "report.md"
     print(report.read_text(encoding="utf-8") if report.exists() else "(no report.md)")
     rec = reconcile.reconcile_run(run_id, inbox_root)
     outcomes = extraction.load_outcomes(run_id, inbox_root)
+    seen = ledger.load(seen_path)
     decisions = {}
     for it in inbox.items(inbox.load(run_id, inbox_root)):
         k = it["key"]
+        seen_key = (it["source"], it["item_id"])
+        if seen_key in seen:
+            print("%s  %s\n   already decided in %s -- nothing asked" % (k, it["title"][:90], seen[seen_key]["first_seen_run"]))
+            decisions[k] = "defer"
+            continue
         v = rec["verdicts"].get(k, {}).get("verdict")
         default = default_decision(outcomes.get(k), v)
         answer = input("%s  %s\n   verdict %s, extraction %s  [a]ccept/[d]rop/de[f]er (default %s): " % (
@@ -473,15 +498,15 @@ def main(argv: list, *, inbox_root: Path = inbox.INBOX_ROOT, seen_path: Path = l
             return 1
         try:
             decisions = (json.loads(args.decisions.read_text(encoding="utf-8")) if args.decisions
-                         else ask(args.run_id, inbox_root))
+                         else ask(args.run_id, inbox_root, seen_path))
             p = plan(args.run_id, decisions, inbox_root=inbox_root, seen_path=seen_path, data=data,
                      advisory_list=advisory_list, golden_list=golden_list, override=args.override_reconciliation)
         except (ValueError, OSError) as exc:
             print("REFUSED: %s" % exc)
             return 1
-        what = "%d accepted (%s), %d dropped, %d deferred" % (
+        what = "%d accepted (%s), %d dropped, %d deferred, %d already decided" % (
             len(p["accepted"]), ", ".join(a["advisory_id"] for a in p["accepted"]) or "-",
-            sum(1 for e in p["entries"] if e["decision"] == "drop"), len(p["deferred"]))
+            sum(1 for e in p["entries"] if e["decision"] == "drop"), len(p["deferred"]), len(p["already_decided"]))
         if args.dry_run:
             print("DRY RUN: would record %d decision(s) for run %s: %s" % (len(p["entries"]), args.run_id, what))
             return 0
@@ -498,6 +523,10 @@ def main(argv: list, *, inbox_root: Path = inbox.INBOX_ROOT, seen_path: Path = l
             return 1
         print("RECORDED: %d decision(s) for run %s in %s: %s. Commit, then review the proposals with "
               "tools/review.py." % (len(p["entries"]), args.run_id, seen_path, what))
+        if p["already_decided"]:
+            print("ALREADY DECIDED: %d item(s) carried from earlier runs, untouched: %s" % (
+                len(p["already_decided"]), ", ".join(
+                    "%s (%s)" % (k, v) for k, v in sorted(p["already_decided"].items()))))
         if p["gaps"]:
             print("GAP: %d allocated advisory id(s) carried by no accepted record, never reused: %s" % (
                 len(p["gaps"]), ", ".join("%s (%s)" % (v, k) for k, v in p["gaps"].items())))
