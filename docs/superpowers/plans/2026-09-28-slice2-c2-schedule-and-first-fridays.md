@@ -15,7 +15,7 @@
    - Residual, stated rather than hidden: the `claude` CLI hands its environment to the MCP servers it starts, so the token is in those child processes' environments for the run's duration. It is not written anywhere.
 2. **Installing launchd (C1's decision 7).** **Recommended: you run `tools/schedule.py install` yourself (Task 6),** after one rehearsal and one real run by hand. `install` writes `~/Library/LaunchAgents/uk.fc08.friday-run.plist` and runs `launchctl bootstrap gui/<uid>`; `uninstall` reverses both. An agent runs `status` at most, which only reads.
 3. **The first run through the launcher, before launchd (Task 5).** **Recommended: two by hand.**
-   - A zero-cost rehearsal on a branch, which the preflight refuses. It proves the Keychain read, the refusal report and the one notification, and it is where macOS asks you once to "Always Allow" `security` to read the item.
+   - A zero-cost rehearsal on a branch, which the preflight refuses. It proves the Keychain read, the refusal report and the one notification. It is also where macOS MAY ask you once to "Always Allow" `security` to read the item -- or may not ask at all (final re-review N-2, 2026-09-29: INFERRED, NOT MEASURED -- an item made by `security add-generic-password` may already trust `/usr/bin/security`; see CLAUDE.md's "What the Keychain does and does not protect"). Task 5 is the first time either is observed; report which happened.
    - Then one real run on `main`: up to US$5.
 
    The alternative is to let the first launchd Friday be the first run through the launcher, and debug a missed notification a week later.
@@ -956,9 +956,13 @@ Run it from the repository root (`cli_path()` is imported from this checkout). T
 
 ### Task 5: OWNER STEP: two runs through the launcher, by hand
 
-- [ ] **Step 1: The zero-cost rehearsal, on a branch.** The preflight refuses "not main" before any agent runs.
+**Every command in this task runs in the SCHEDULE CLONE, `~/fc-08-schedule`, never in the development checkout** (owner decision, 2026-09-29; CLAUDE.md, "The schedule clone"). The development checkout never starts a Friday run.
+
+- [ ] **Step 0: Create the schedule clone, once,** exactly as CLAUDE.md's "The schedule clone" says: `git clone -b main` from GitHub, `core.hooksPath`, and the three symlinks (`.venv`, `data/advisories`, `data/reviewed`) with their `.git/info/exclude` line. It needs Task 3 done first: the clone takes `main` from GitHub, and C2's code is on `main` only after that merge is pushed. Check: `git -C ~/fc-08-schedule branch --show-current` prints `main`, and `git -C ~/fc-08-schedule status --short` prints nothing.
+- [ ] **Step 1: The zero-cost rehearsal, on a branch, in the clone.** The preflight refuses "not main" before any agent runs. This is the one time the clone leaves `main`, and it returns in the same step.
 
   ```bash
+  cd ~/fc-08-schedule
   git switch -c schedule-rehearsal
   bash scripts/schedule/friday_run.sh; echo "exit $?"
   git switch main && git branch -D schedule-rehearsal
@@ -968,24 +972,27 @@ Run it from the repository root (`cli_path()` is imported from this checkout). T
   - macOS may ask once whether `security` may read the item: choose **Always Allow**. **It may not ask at all** (INFERRED, not measured: an item made by `security add-generic-password` may already trust `/usr/bin/security`; see CLAUDE.md's runbook). Report which happened;
   - one notification, "FC08 Friday run: REFUSED";
   - `exit 10`: refused, and Python already posted the one notification (final review I-3; this line said `exit 1` until then). Any code other than 0 or 10 means the launcher posted a "CRASHED" notification instead: STOP and read the output;
-  - a new `inbox/feeds-.../report.md` naming the branch.
+  - a new `inbox/feeds-.../report.md` naming the branch, in the CLONE's `inbox/`.
 
   If no notification appears, allow notifications for Script Editor in System Settings, Notifications, and repeat. That run is `nothing_to_decide` and blocks nothing.
 - [ ] **Step 2: Preconditions for the real run**
-  - C1's dry-run run is decided (`.venv/bin/python tools/accept_run.py --pending` shows no `pending` run under 14 days old);
-  - the checkout is on `main`;
-  - `.venv/bin/python tools/check_all.py` passes.
+  - in the DEVELOPMENT checkout: C1's dry-run run is decided (`.venv/bin/python tools/accept_run.py --pending` shows no `pending` run under 14 days old). It is the one Friday run that ever used that checkout's inbox (accepted in `c4fa190`), and the clone cannot see it;
+  - in the clone: `git -C ~/fc-08-schedule pull --ff-only`, and it is on `main`;
+  - in the clone: `.venv/bin/python tools/check_all.py` passes (the full run: with the two data symlinks it measured `PASS: 39 run`; without them, five guards FAIL).
 - [ ] **Step 3: STOP: the owner's go. Cost: capped at US$5, expected US$2 to US$3.50.**
-- [ ] **Step 4: The real run:** `bash scripts/schedule/friday_run.sh; echo "exit $?"`. Expected `exit 0` (COMPLETE, NOTHING_NEW or UNFINISHED, notified by Python). `exit 10` means REFUSED or FAILED, already notified: read the report. Anything else means the launcher posted the notification: read the output. Report exactly as C1 Task 9 Step 4, plus:
+- [ ] **Step 4: The real run, in the clone:** `cd ~/fc-08-schedule && bash scripts/schedule/friday_run.sh; echo "exit $?"`. Expected `exit 0` (COMPLETE, NOTHING_NEW or UNFINISHED, notified by Python). `exit 10` means REFUSED or FAILED, already notified: read the report. Anything else means the launcher posted the notification: read the output. Report exactly as C1 Task 9 Step 4, plus:
   - the notification's words;
   - the log's two lines in `~/Library/Logs/uk.fc08.friday-run.log`. When run by hand the log is your Terminal; launchd writes the file.
-- [ ] **Step 5: STOP: the owner decides this run's items** (`tools/accept_run.py <run_id>`), or deliberately leaves it pending. Back-pressure then refuses the next Friday.
+- [ ] **Step 5: STOP: the owner decides this run's items, in the clone** (`cd ~/fc-08-schedule && .venv/bin/python tools/accept_run.py <run_id>`: the run's inbox is there), or deliberately leaves it pending. Back-pressure then refuses the next Friday. Commit and push as Task 8 Step 2 says.
 
 ---
 
 ### Task 6: OWNER STEP: install the schedule
 
+**In the schedule clone.** `install` renders the plist from the checkout it runs in, so run from `~/fc-08-schedule` the schedule starts the clone's own `scripts/schedule/friday_run.sh` (measured in a temporary clone on 2026-09-29: the rendered `ProgramArguments` named the clone's launcher). Run from the development checkout, it would schedule the development checkout, which is exactly what the owner ruled out. `status` is run from the clone too: its "matches the template" compares against the checkout running it.
+
 ```bash
+cd ~/fc-08-schedule
 .venv/bin/python tools/schedule.py install --dry-run
 .venv/bin/python tools/schedule.py install
 .venv/bin/python tools/schedule.py status
@@ -996,7 +1003,7 @@ Expected:
 - `INSTALLED: ~/Library/LaunchAgents/uk.fc08.friday-run.plist, every Friday at 09:00`;
 - `status` shows `installed`, `matches the template: True`, and `loaded in launchd: yes`.
 
-Undo at any time: `.venv/bin/python tools/schedule.py uninstall`.
+Undo at any time, from the clone: `.venv/bin/python tools/schedule.py uninstall`.
 
 ---
 
@@ -1006,7 +1013,7 @@ Undo at any time: `.venv/bin/python tools/schedule.py uninstall`.
 
 - [ ] Afterwards, report:
   - the notification;
-  - `tools/schedule.py status`: `last exit code`. **0** = finished acceptable, Python notified; **10** = refused or not acceptable, Python notified (a refused Friday reads 10 by design); **anything else** = Python posted nothing and the launcher posted a "CRASHED" notification, so read the log;
+  - `tools/schedule.py status`, run in `~/fc-08-schedule`: `last exit code`. **0** = finished acceptable, Python notified; **10** = refused or not acceptable, Python notified (a refused Friday reads 10 by design); **anything else** = Python posted nothing and the launcher posted a "CRASHED" notification, so read the log;
   - the log;
   - the report, as in C1 Task 9 Step 4.
 
@@ -1016,7 +1023,7 @@ Undo at any time: `.venv/bin/python tools/schedule.py uninstall`.
 
 ### Task 8: STOP: the first accepted run, through `review.py`
 
-- [ ] **Step 1:** The owner runs `.venv/bin/python tools/accept_run.py <run_id>`:
+- [ ] **Step 1:** The owner runs, in the schedule clone (`cd ~/fc-08-schedule`, after `git pull --ff-only`), `.venv/bin/python tools/accept_run.py <run_id>`:
   - the report is shown;
   - one decision per item: accept, drop or defer;
   - one confirmation.
@@ -1029,11 +1036,14 @@ git status --short     # expect: data/feeds/seen.json, data/feeds/advisory_list.
 .venv/bin/python tools/check_all.py | tail -1
 git add data/feeds data/proposals data/telemetry
 git commit -m "Slice 2 C2: accept run <run_id> -- <n> accepted (<ADV ids>), <m> dropped, <k> deferred"
+git push origin main     # from the clone; then, in the development checkout: git switch main && git pull --ff-only
 ```
+
+All of Step 2 runs in the clone. The accepted document is not in that commit (`data/advisories/` is gitignored); it reaches the development checkout through the shared `data/advisories/` symlink, not through git.
 
 `check_walkthrough` prints its INFO line: live data has moved past the snapshot. **No republish is owed**, because the page is pinned to its snapshot.
 
-- [ ] **Step 3: The proposals through the gate, as in slice 1:** `.venv/bin/python tools/review.py`. Claude shows the cards and recommends; the owner confirms each in chat. Only then is `--decisions` run. Commit the decision log and the rebuilt approvals.
+- [ ] **Step 3: The proposals through the gate, as in slice 1, in the clone like Step 2:** `.venv/bin/python tools/review.py` (it re-finds every quote in `data/advisories/`; without that symlink every proposal is quarantined). Claude shows the cards and recommends; the owner confirms each in chat. Only then is `--decisions` run. Commit the decision log and the rebuilt approvals.
 
 ---
 

@@ -56,6 +56,7 @@ WHAT IT HOLDS:
                 three preflight checks at once each refuse, with the reasons in the fixed order;
   which claude  (final review, I-2) preflight.cli_path() is the binary the Agent SDK would start for BOTH agents'
                 real options (the bundled CLI when the SDK ships one), and auth_status runs exactly that binary;
+                a claude that cannot be resolved at all refuses (N-1, below);
   one notice    friday_run --scheduled, refused, writes a REFUSED report and posts exactly one notification
                 whose words are the report's first two lines; a crash inside the scheduled run posts NONE of
                 its own; a notifier that itself fails to deliver is reported as a failure, not swallowed
@@ -64,6 +65,15 @@ WHAT IT HOLDS:
 COLD. Temporary folders, temporary git repositories, stub commands. It never runs launchctl, never reads the
 Keychain, never runs the claude CLI, and never writes ~/Library.
 
+COLD WITH RESPECT TO THE CLAUDE CLI TOO (final re-review, N-1). Every check that stubs the preflight's `run=` also
+stubs `preflight.cli_path` (`stubbed_cli`), so none of them needs the Agent SDK to RESOLVE a CLI. Exactly ONE
+check asks the SDK's real resolver: "preflight.cli_path() is the claude binary the Agent SDK would start". Where
+no CLI resolves (a runner whose SDK wheel ships no bundled CLI and has no claude anywhere), that one check
+reports SKIP with the reason -- it is not counted as a pass, and the last line says how many were skipped. It
+SKIPS only when the SDK's own resolver raises CLINotFoundError AND cli_path() raises it too; the preflight
+answering a path the SDK cannot resolve is a FAIL, and so is any other exception (the private `_find_cli` gone
+after an SDK upgrade is loud, never a skip).
+
 NOT A VACUOUS PASS. Each --mutate rewrites the script, the template or a module in memory or in a temporary
 copy; at least one check must fail.
 """
@@ -71,6 +81,7 @@ copy; at least one check must fail.
 from __future__ import annotations
 
 import argparse
+import contextlib
 import json
 import os
 import plistlib
@@ -93,6 +104,8 @@ PREFLIGHT = ROOT / "feeds" / "preflight.py"
 FRIDAY = ROOT / "tools" / "friday_run.py"
 SCHEDULE = ROOT / "tools" / "schedule.py"
 SENTINEL = "sk-ant-oat01-SENTINEL-never-print-me"
+# What the stubbed checks are told the SDK would start. Never executed: every `run=` that receives it is a stub.
+STUB_CLI = "/guard-stub/claude_agent_sdk/_bundled/claude"
 TEXT_MUTATIONS = {
     "log-token": (SCRIPT, 'if [ -z "$FC08_TOKEN" ]; then\n', 'echo "token $FC08_TOKEN"\nif [ -z "$FC08_TOKEN" ]; then\n'),
     "keep-api-key": (SCRIPT, "unset ANTHROPIC_API_KEY\n", ""),
@@ -196,6 +209,19 @@ def launcher(tmp: Path, mutation, token: bool, exit_code: int, inherited_token: 
     return {"code": got.returncode, "out": got.stdout + got.stderr,
             "saw": seen.read_text() if seen.exists() else "", "notes": notes.read_text() if notes.exists() else "",
             "script": script.read_text(), "security_args": sec_args.read_text() if sec_args.exists() else ""}
+
+
+@contextlib.contextmanager
+def stubbed_cli(pf, resolve=None):
+    """Replace the module-under-test's cli_path for the checks that already stub `run=` (final re-review, N-1), so
+    they hold whether or not a claude CLI resolves on this machine. auth_status looks cli_path up in its module's
+    globals at call time, so this reaches it. `resolve` substitutes a different resolver (e.g. one that raises)."""
+    real = pf.cli_path
+    pf.cli_path = resolve or (lambda: STUB_CLI)
+    try:
+        yield
+    finally:
+        pf.cli_path = real
 
 
 def git(repo: Path, *args) -> None:
@@ -428,12 +454,19 @@ def checks(mutation) -> list:
             "missing-binary": (stub_run(0, "", FileNotFoundError(2, "No such file or directory", "claude")), True),
             "json-null": (stub_run(0, "null"), True),
             "json-list": (stub_run(0, "[]"), True),
+            # N-1: the resolver itself raising -- here stubbed, so this holds on a machine with no CLI too
+            "no-cli-resolves": (stub_run(0, json.dumps({"loggedIn": True, "authMethod": "oauth_token"})), True),
         }
+        from claude_agent_sdk import CLINotFoundError
+
+        def unresolvable():
+            raise CLINotFoundError("guard stub: no claude CLI resolves")
         auth_detail = {}
         auth_ok = True
         for name, (run_stub, should_refuse) in auth_cases.items():
             try:
-                st = pf.auth_status(run_stub)
+                with stubbed_cli(pf, unresolvable if name == "no-cli-resolves" else None):
+                    st = pf.auth_status(run_stub)
                 verdict = pf.auth(st)
                 crashed = False
             except Exception as exc:  # noqa: BLE001 -- a crash here IS the failure this check exists to catch
@@ -442,7 +475,8 @@ def checks(mutation) -> list:
             auth_ok = auth_ok and ok
             auth_detail[name] = "crash" if crashed else bool(verdict)
         out.append((auth_ok, "auth_status refuses (never crashes, never passes) on a non-zero exit even with "
-                    "well-formed JSON, on non-JSON output, on `null` or a list, and on a missing claude binary",
+                    "well-formed JSON, on non-JSON output, on `null` or a list, on a missing claude binary, and when no "
+                    "claude CLI resolves at all",
                     auth_detail))
         missing_git = None
         git_crashed = False
@@ -468,27 +502,40 @@ def checks(mutation) -> list:
             return t._cli_path if t._cli_path is not None else t._find_cli()
         probe = RunIdentity(run_id="probe-check-schedule", stage="extractor", advisory_id="ADV-2026-0001",
                             pdf_path=ROOT / "data" / "advisories" / "fatf-tbml-2020.pdf", pdf_sha256="0" * 64)
+        # THE ONE CHECK AGAINST THE REAL RESOLVER (final re-review, N-1). Where no CLI resolves, it SKIPS -- only if
+        # the preflight agrees none resolves -- and a skip is reported as such, never counted as a pass.
         try:
             want = sorted({sdk_would_start(fr.of.agent_options(fr.of.FeedsRun("feeds-2026-10-09-ccc001"))),
                            sdk_would_start(extract_options("claude-sonnet-5", 1.0, 3, probe))})
-        except Exception as exc:  # noqa: BLE001 -- no CLI at all on this machine: the preflight must fail the same way
-            want = type(exc).__name__
+        except Exception as exc:  # noqa: BLE001 -- judged below: CLINotFoundError may skip, anything else fails
+            want = exc
         try:
             got_cli = pf.cli_path()
         except Exception as exc:  # noqa: BLE001
-            got_cli = type(exc).__name__
+            got_cli = exc
         bundled = Path(claude_agent_sdk.__file__).parent / "_bundled" / "claude"
-        same = want == [got_cli] if isinstance(want, list) else want == got_cli
-        out.append((same and (not bundled.is_file() or got_cli == str(bundled)),
-                   "preflight.cli_path() is the claude binary the Agent SDK would start for both the orchestrator's "
-                   "and the extractor's real options -- the bundled CLI when the SDK ships one, not PATH's",
-                   "sdk=%s preflight=%s" % (want, got_cli)))
+        label = ("preflight.cli_path() is the claude binary the Agent SDK would start for both the orchestrator's "
+                 "and the extractor's real options -- the bundled CLI when the SDK ships one, not PATH's")
+        if isinstance(want, CLINotFoundError):
+            agree = isinstance(got_cli, CLINotFoundError)
+            out.append((None if agree else False, label,
+                        ("SKIPPED: no claude CLI resolves on this machine (the SDK raised CLINotFoundError for both "
+                         "agents' options, and so did preflight.cli_path()), so WHICH binary would spend cannot be "
+                         "compared here; auth_status refuses in that state (the 'no-cli-resolves' case above)")
+                        if agree else "sdk=CLINotFoundError preflight=%r -- the preflight answers a CLI the SDK "
+                                      "cannot start" % (got_cli,)))
+        else:
+            same = isinstance(want, list) and want == [got_cli]
+            out.append((same and (not bundled.is_file() or got_cli == str(bundled)), label,
+                        "sdk=%s preflight=%s" % (want if isinstance(want, list) else repr(want),
+                                                 got_cli if isinstance(got_cli, str) else repr(got_cli))))
         auth_argv = []
-        pf.auth_status(run=lambda argv, **kw: (auth_argv.append(list(argv)), types.SimpleNamespace(
-            returncode=0, stdout=json.dumps({"loggedIn": True, "authMethod": "oauth_token"}), stderr=""))[1])
-        out.append((auth_argv == [[got_cli, "auth", "status", "--json"]],
+        with stubbed_cli(pf):
+            pf.auth_status(run=lambda argv, **kw: (auth_argv.append(list(argv)), types.SimpleNamespace(
+                returncode=0, stdout=json.dumps({"loggedIn": True, "authMethod": "oauth_token"}), stderr=""))[1])
+        out.append((auth_argv == [[STUB_CLI, "auth", "status", "--json"]],
                     "auth_status runs `<cli_path()> auth status --json`: the CLI that spends, not the first "
-                    "`claude` on PATH", auth_argv))
+                    "`claude` on PATH (cli_path stubbed, so this holds with no CLI on the machine)", auth_argv))
 
         # --- final review I-1: the seam --scheduled -> preflight.reasons(). Every check above that drives
         # --scheduled injects its reasons by hand; these inject NOTHING, so the REAL preflight.reasons() (the
@@ -535,11 +582,12 @@ def checks(mutation) -> list:
             return {"code": code, "reasons_calls": seam["calls"] - calls, "session": len(sessions) - ran,
                     "notes": len(posted), "reasons": json.loads(this[0].read_text())["reasons"] if this else []}
         try:
-            clean = scheduled("clean")
-            wrong_auth = scheduled("auth", auth={"loggedIn": True, "authMethod": "claude.ai"})
-            api_env = scheduled("env", env={"ANTHROPIC_API_KEY": "guard-dummy", "FEEDS_CATALOGUE": "guard-dummy"})
-            everything = scheduled("all", branch="feature", pending=True,
-                                   auth={"loggedIn": True, "authMethod": "claude.ai"})
+            with stubbed_cli(pf):  # N-1: the seam's `run=` is stubbed, so its CLI resolution is too
+                clean = scheduled("clean")
+                wrong_auth = scheduled("auth", auth={"loggedIn": True, "authMethod": "claude.ai"})
+                api_env = scheduled("env", env={"ANTHROPIC_API_KEY": "guard-dummy", "FEEDS_CATALOGUE": "guard-dummy"})
+                everything = scheduled("all", branch="feature", pending=True,
+                                       auth={"loggedIn": True, "authMethod": "claude.ai"})
         finally:
             pf.reasons = real_reasons
         out.append((clean["reasons_calls"] == 1 and clean["session"] == 1
@@ -640,15 +688,22 @@ def main(argv: list) -> int:
     args = ap.parse_args(argv)
     if args.mutate:
         print("MUTATED: %s\n" % args.mutate)
-    failures = 0
+    failures = skipped = 0
     for ok, label, detail in checks(args.mutate):
+        if ok is None:  # N-1: a SKIP is neither a pass nor a failure, and says why in full
+            print("  SKIP %s\n         %s" % (label, detail))
+            skipped += 1
+            continue
         print("  %-4s %s\n         %s" % ("PASS" if ok else "FAIL", label, str(detail)[:160]))
         failures += 0 if ok else 1
+    skip_note = ", %d skipped" % skipped if skipped else ""
     if args.mutate:
-        print("\n%s" % ("HELD: the mutation is detected (%d check%s failed)" % (failures, "" if failures == 1 else "s")
-                        if failures else "NOTHING PROVED: every check passed with the rule broken"))
+        print("\n%s" % ("HELD: the mutation is detected (%d check%s failed%s)" % (failures, "" if failures == 1 else "s",
+                                                                                 skip_note)
+                        if failures else "NOTHING PROVED: every check passed with the rule broken%s" % skip_note))
         return 0 if failures else 1
-    print("\n%s (%d failure%s)" % ("HELD" if not failures else "REFUSED", failures, "" if failures == 1 else "s"))
+    print("\n%s (%d failure%s%s)" % ("HELD" if not failures else "REFUSED", failures, "" if failures == 1 else "s",
+                                     skip_note))
     return 1 if failures else 0
 
 
