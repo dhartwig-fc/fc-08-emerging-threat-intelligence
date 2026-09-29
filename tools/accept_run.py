@@ -63,7 +63,9 @@ VALIDATES EVERYTHING FIRST, and refuses the whole run on any failure, writing no
     already decided: never re-recorded, its ledger entry never touched, and named in accepted.json under
     "already_decided" as decided in the run that first saw it. A decision file that tries to ACCEPT such an
     item IS refused (copying a second record for an item the ledger already closed makes no sense); a drop or
-    defer for it is silently ignored, since it is not this run's decision to make.
+    defer for it is ignored -- WITH A NOTE, not silently: the "ALREADY DECIDED" line (printed after RECORDED,
+    and after a --dry-run alike) names this run's own overridden decision for it and the run that actually
+    decided it, since it is not this run's decision to make.
 Then writes, in this order: the copies, the live-feed advisory list (its entries and derived counts), the
 ledger (accepted and dropped items only), and accepted.json in the run's inbox folder. A failure before the
 ledger removes the copies AND the folders this call made and restores the advisory list byte for byte, so the
@@ -72,8 +74,12 @@ created exclusively ("xb", so nothing is ever overwritten even if it appeared af
 for rollback before its first byte. The owner commits; proposals then go through tools/review.py as in slice 1.
 
 IF THE INBOX MARKER CANNOT BE WRITTEN (the last step, after the ledger), the acceptance IS recorded and is
-not rolled back; the run just still reads as pending, so every retry is refused ("already decided") and it
-blocks the next Friday. accept_run prints "RECORDED, BUT NOT MARKED" and exits 2. The recovery is one copy:
+not rolled back; the run just still reads as pending, so every retry is refused, and it blocks the next
+Friday -- naming "already decided ... cannot re-accept it" for any item this run had itself accepted (now in
+the ledger under this same run's id), and unconditionally by "<run>'s already exists; nothing is overwritten"
+once data/feeds/runs/<run_id>/ was written on the failed attempt, so a drop-only run's retry is refused too,
+just by the second reason rather than the first (owner ruling A, 2026-09-29, C2 Task 0). accept_run prints
+"RECORDED, BUT NOT MARKED" and exits 2. The recovery is one copy:
     cp data/feeds/runs/<run_id>/accepted.json inbox/<run_id>/accepted.json
 Exit codes: 0 recorded (or a dry run); 1 refused, nothing written; 2 recorded, but the marker needs that copy.
 
@@ -254,8 +260,8 @@ def plan(run_id: str, decisions: dict, *, inbox_root: Path = inbox.INBOX_ROOT, s
     outcomes = extraction.load_outcomes(run_id, inbox_root)
     allocations = extraction.load_allocations(run_id, inbox_root)
     # An already-decided item cannot be (re-)accepted: that would copy a second record for an item the ledger
-    # already closed. A drop or defer for it is not a problem -- it is simply not this run's decision to make,
-    # and is silently excluded below (never re-recorded, never rewritten).
+    # already closed. A drop or defer for it is not a problem -- it is simply not this run's decision to make --
+    # and is excluded below (never re-recorded, never rewritten); main() prints it as a note, not silently.
     problems = ["%s: already decided in %s; a decision file cannot re-accept it" % (k, already_decided[k])
                 for k in sorted(already_decided) if decisions[k] == "accept"]
     accepted = []
@@ -300,6 +306,20 @@ def default_decisions(run_id: str, inbox_root: Path = inbox.INBOX_ROOT) -> dict:
     outcomes = extraction.load_outcomes(run_id, inbox_root)
     return {it["key"]: default_decision(outcomes.get(it["key"]), rec["verdicts"].get(it["key"], {}).get("verdict"))
             for it in inbox.items(inbox.load(run_id, inbox_root))}
+
+
+def already_decided_note(already_decided: dict, decisions: dict) -> str:
+    """The note M-3 asks for: an already-decided item's drop or defer is IGNORED, not silently -- this names
+    this run's own (overridden) decision for it and the run that actually decided it. "" (falsy) when there
+    is nothing to carry, so callers can just `if note: print(note)`. An "accept" never reaches here: plan()
+    refuses the whole run first (an already-decided item cannot be re-accepted)."""
+    if not already_decided:
+        return ""
+    return "ALREADY DECIDED (ignored, with a note): %d item(s) carried from an earlier run, untouched -- this " \
+           "run's own decision for each is overridden: %s" % (
+               len(already_decided), ", ".join(
+                   "%s (this run said %r, decided in %s)" % (k, decisions.get(k), v)
+                   for k, v in sorted(already_decided.items())))
 
 
 def _mkdir(folder: Path, made: list) -> None:
@@ -507,8 +527,11 @@ def main(argv: list, *, inbox_root: Path = inbox.INBOX_ROOT, seen_path: Path = l
         what = "%d accepted (%s), %d dropped, %d deferred, %d already decided" % (
             len(p["accepted"]), ", ".join(a["advisory_id"] for a in p["accepted"]) or "-",
             sum(1 for e in p["entries"] if e["decision"] == "drop"), len(p["deferred"]), len(p["already_decided"]))
+        note = already_decided_note(p["already_decided"], decisions)
         if args.dry_run:
             print("DRY RUN: would record %d decision(s) for run %s: %s" % (len(p["entries"]), args.run_id, what))
+            if note:
+                print(note)
             return 0
         if not args.decisions and input("Apply: %s? [y/N] " % what).strip().lower() != "y":
             print("NOTHING WRITTEN")
@@ -523,10 +546,8 @@ def main(argv: list, *, inbox_root: Path = inbox.INBOX_ROOT, seen_path: Path = l
             return 1
         print("RECORDED: %d decision(s) for run %s in %s: %s. Commit, then review the proposals with "
               "tools/review.py." % (len(p["entries"]), args.run_id, seen_path, what))
-        if p["already_decided"]:
-            print("ALREADY DECIDED: %d item(s) carried from earlier runs, untouched: %s" % (
-                len(p["already_decided"]), ", ".join(
-                    "%s (%s)" % (k, v) for k, v in sorted(p["already_decided"].items()))))
+        if note:
+            print(note)
         if p["gaps"]:
             print("GAP: %d allocated advisory id(s) carried by no accepted record, never reused: %s" % (
                 len(p["gaps"]), ", ".join("%s (%s)" % (v, k) for k, v in p["gaps"].items())))

@@ -24,7 +24,8 @@ Usage:
     python evals/check_accept_run.py --mutate accept-ignores-record-id  # a record naming another id or document is accepted
     python evals/check_accept_run.py --mutate eval-pending           # runs.classify no longer reads the eval marker
     python evals/check_accept_run.py --mutate whole-run-refusal      # an item already decided elsewhere refuses the WHOLE run again
-    python evals/check_accept_run.py --mutate redecide-seen          # an already-decided item is re-recorded to the ledger
+    python evals/check_accept_run.py --mutate redecide-seen          # + an in-memory ledger.py that allows overwrite: the accept_run-side exclusion is the only barrier left, and it fails alone
+    python evals/check_accept_run.py --mutate no-reaccept-refusal    # a decision file may ACCEPT an already-decided item and it is silently recorded
 
 WHAT IT HOLDS:
   accept      an EXTRACTED item's document, record, queue and telemetry are copied byte for byte to
@@ -71,11 +72,17 @@ WHAT IT HOLDS:
   seed        --seed-catalogue records every catalogue item as a drop under "catalogue:<sha12>", once;
   overlap     an item already decided in an EARLIER run does not refuse the run listing it again (owner ruling
               A, 2026-09-29, C2 Task 0 -- C1 final review I-3: two runs listing the same item could otherwise
-              deadlock, since neither could be accepted nor, under 14 days, expired). It is carried as already
-              decided: never re-recorded, its ledger entry untouched, and named in the later run's accepted.json
-              as decided in the earlier one; a decision file that tries to ACCEPT it is refused; the run's
-              genuinely new items are decided as normal and the run itself is still RECORDED, so it stops
-              blocking `runs.blocking`.
+              deadlock, since neither could be accepted nor, under 14 days, expired). Checked clause by clause
+              (fix round 1, I-1/M-4): A and B accept on DIFFERENT days, so a leak would move both
+              `first_seen_run` and `decided_on`; the whole ledger FILE after B is compared byte for byte
+              against A's entries plus Y's, not just X's one entry. It is carried as already decided: never
+              re-recorded, its ledger entry untouched, and named in the later run's accepted.json as decided
+              in the earlier one, with a NOTE in the printed output naming this run's own overridden decision
+              (fix round 1, M-3) -- a decision file that tries to ACCEPT it is refused, naming the earlier run,
+              writing nothing (fix round 1, I-2); `ask()` prompts 0 times for it and carries it as defer (fix
+              round 1, M-2); a run whose EVERY listed item is already decided is still RECORDED with 0 new
+              decisions and drops out of `runs.blocking` (fix round 1, M-1); the run's genuinely new items are
+              decided as normal.
 
 COLD. Temporary inbox, data folders, advisory list and ledger; the document is a hand-built PDF; the queue
 and record are built to slice 1's contracts. No network, no model. The repository's git status is unchanged,
@@ -93,6 +100,7 @@ import contextlib
 import hashlib
 import io
 import json
+import os
 import subprocess
 import sys
 import tempfile
@@ -154,10 +162,22 @@ MUTATIONS = {
         '    if already:\n'
         '        raise ValueError("already decided in an earlier run: %s" % already)\n'
         '    already_decided = {}\n'),
-    # C2 Task 0: let an already-decided item slip back into the ledger write instead of being carried untouched.
+    # C2 Task 0 (final review I-1): remove the accept_run-side exclusion that keeps an already-decided item out
+    # of `entries`. On its own this is caught, but NOT by the byte-identical clause -- feeds/ledger.py's own
+    # duplicate-key check refuses the leaked key and the whole apply rolls back, which reads identically to
+    # `whole-run-refusal` from the outside. `checks()` pairs this with an in-memory `ledger.record_decisions`
+    # that OVERWRITES a seen key instead of raising (never touching the tracked feeds/ledger.py), removing that
+    # defence-in-depth layer so this exclusion is the ONLY thing left between B's decision file and X's entry.
+    # With both sites mutated, the byte-identical clause goes red on its own.
     "redecide-seen": (
         'if k not in already_decided and decisions[k] != "defer"]\n',
         'if decisions[k] != "defer"]\n'),
+    # C2 Task 0 (final review I-2): empty the refusal list at :259-260, so a decision file that says ACCEPT for
+    # an already-decided item is silently accepted instead of refused -- naming the earlier run.
+    "no-reaccept-refusal": (
+        '    problems = ["%s: already decided in %s; a decision file cannot re-accept it" % (k, already_decided[k])\n'
+        '                for k in sorted(already_decided) if decisions[k] == "accept"]\n',
+        "    problems = []\n"),
 }
 
 # feeds/runs.py is mutated separately: mark_accepted's atomicity is tested directly, not through accept_run.
@@ -318,13 +338,13 @@ def checks(mutation) -> list:
                                            tracked_runs=data / "feeds" / "runs"))
             return keys
 
-        def accept(rid, decisions, *extra):
+        def accept(rid, decisions, *extra, today=TODAY):
             f = tmp / ("%s.decisions.json" % rid)
             f.write_text(json.dumps(decisions), encoding="utf-8")
             buf = io.StringIO()
             try:
                 with contextlib.redirect_stdout(buf):
-                    code = acc.main([rid, "--decisions", str(f), *extra], inbox_root=box, seen_path=seen, today=TODAY,
+                    code = acc.main([rid, "--decisions", str(f), *extra], inbox_root=box, seen_path=seen, today=today,
                                     data=data, advisory_list=alist, golden_list=golden)
             except Exception as exc:
                 return None, "CRASHED %s: %s" % (type(exc).__name__, exc)
@@ -794,45 +814,151 @@ def checks(mutation) -> list:
         # suffix, so its first item's item_id -- and therefore its key, a hash of the item_id -- is X too) lists
         # X again plus a new item Y. Accepting B must carry X as already decided in A (never re-recorded, its
         # ledger entry untouched), decide Y as normal, and still be RECORDED so it stops blocking the next Friday.
+        # Fix round 1 (final review I-1/M-4): A and B accept on DIFFERENT days (2026-10-05, 2026-10-20), so a
+        # leaked re-record would move BOTH `first_seen_run` and `decided_on`, not just the run id -- the fixed
+        # TODAY both used before could not have revealed a `decided_on` rewrite. The conjunction is split into
+        # one check per clause, so a failure names the clause instead of a 100-character truncation of the
+        # detail string. And the whole ledger FILE after B is compared byte for byte against A's entries plus
+        # Y's, not just X's one entry.
         rid_a, rid_b = "feeds-2026-10-02-ddd001", "feeds-2026-10-09-ddd001"
+        today_a, today_b = date(2026, 10, 5), date(2026, 10, 20)
         run_a, keys_a, session_a = listed_run(m, box, rid_a, n_relevant=1, n_dropped=0, queue=0, cost=0.0)
         asyncio.run(m["friday"].friday(run_a, session=session_a, extractor=valid_extractor(m), root=box,
                                        advisory_list=(golden, alist), tracked_runs=data / "feeds" / "runs"))
         x_key = keys_a[0]
-        code_a, said_a = accept(rid_a, {x_key: "drop"})
+        code_a, said_a = accept(rid_a, {x_key: "drop"}, today=today_a)
         items_a = {it["key"]: it for it in inbox.items(inbox.load(rid_a, box))}
         x_named = "%s:%s" % (items_a[x_key]["source"], items_a[x_key]["item_id"])
-        x_entry_after_a = dict(ledger.load(seen).get((items_a[x_key]["source"], items_a[x_key]["item_id"]), {}))
+        ledger_after_a = ledger.load(seen)  # every entry, X's included, right after A: the expected baseline
+        x_entry_after_a = dict(ledger_after_a.get((items_a[x_key]["source"], items_a[x_key]["item_id"]), {}))
 
         run_b, keys_b, session_b = listed_run(m, box, rid_b, n_relevant=2, n_dropped=0, queue=0, cost=0.0)
         asyncio.run(m["friday"].friday(run_b, session=session_b, extractor=valid_extractor(m), root=box,
                                        advisory_list=(golden, alist), tracked_runs=data / "feeds" / "runs"))
         # The reproduction depends on this: the SAME run-id suffix gives the SAME item_id at the same index,
         # and the key is a hash of the item_id alone -- so run B's first item IS run A's item, key for key.
-        same_key = keys_b and keys_b[0] == x_key
+        same_key = bool(keys_b) and keys_b[0] == x_key
         y_key = next((k for k in keys_b if k != x_key), None)
 
-        blocking_before = [r for r, _ in runs.blocking(box, date(2026, 10, 10))]
-        code_b, said_b = accept(rid_b, {x_key: "drop", y_key: "drop"}) if y_key else (None, "no distinct Y key")
+        blocking_before = [r for r, _ in runs.blocking(box, date(2026, 10, 21))]
+        # I-1: give `redecide-seen` a real second site. Only under that mutation, replace `acc.ledger` with a
+        # version whose record_decisions OVERWRITES an already-seen key instead of refusing it -- removing
+        # feeds/ledger.py's own defence-in-depth duplicate check, in memory, on the TEMP ledger path only; the
+        # tracked feeds/ledger.py is never touched. With that layer gone, the accept_run-side exclusion this
+        # mutation breaks is the ONLY thing left between B's decision file and X's entry, so the byte-identical
+        # clause below can go red on its own instead of the whole apply refusing for an unrelated reason.
+        real_acc_ledger = acc.ledger
+        if mutation == "redecide-seen":
+            def _overwrite_seen(run_id_, decided_on_, decisions_, path=ledger.SEEN_PATH):
+                merged = dict(ledger.load(path))
+                new = {}
+                for d in decisions_:
+                    key_ = (d["source"], d["item_id"])
+                    new[key_] = {"source": key_[0], "item_id": key_[1], "decision": d["decision"],
+                                 "first_seen_run": run_id_, "decided_on": decided_on_}
+                merged.update(new)  # OVERWRITE, not refuse: the removed layer
+                tmp_path = Path(path).with_name("." + Path(path).name + ".tmp")
+                tmp_path.write_text(ledger.dump(list(merged.values())), encoding="utf-8")
+                os.replace(tmp_path, path)
+                return list(new.values())
+            acc.ledger = types.SimpleNamespace(**{k: getattr(real_acc_ledger, k) for k in dir(real_acc_ledger)
+                                                  if not k.startswith("__")})
+            acc.ledger.record_decisions = _overwrite_seen
+        try:
+            code_b, said_b = (accept(rid_b, {x_key: "drop", y_key: "drop"}, today=today_b) if y_key
+                              else (None, "no distinct Y key"))
+        finally:
+            acc.ledger = real_acc_ledger
         items_b = {it["key"]: it for it in inbox.items(inbox.load(rid_b, box))} if y_key else {}
-        seen_after = ledger.load(seen)
-        x_entry_after_b = seen_after.get((items_a[x_key]["source"], items_a[x_key]["item_id"]))
-        y_decided = y_key is not None and (items_b[y_key]["source"], items_b[y_key]["item_id"]) in seen_after
+        seen_after_b = ledger.load(seen)
+        x_entry_after_b = seen_after_b.get((items_a[x_key]["source"], items_a[x_key]["item_id"]))
+        y_named_pair = (items_b[y_key]["source"], items_b[y_key]["item_id"]) if y_key else None
+        y_entry_after_b = seen_after_b.get(y_named_pair) if y_named_pair else None
+        y_decided = y_named_pair is not None and y_named_pair in seen_after_b
         accepted_record = read_json(data / "feeds" / "runs" / rid_b / "accepted.json") if code_b == 0 else {}
-        blocking_after = [r for r, _ in runs.blocking(box, date(2026, 10, 10))]
-        out.append((code_a == 0 and same_key and rid_b in blocking_before and code_b == 0 and y_decided
-                    and x_entry_after_b == x_entry_after_a and bool(x_entry_after_a)
-                    and accepted_record.get("already_decided", {}).get(x_key) == rid_a
-                    and x_key not in accepted_record.get("accepted", {})
-                    and x_named not in accepted_record.get("dropped", [])
-                    and x_key not in accepted_record.get("deferred", [])
-                    and rid_b not in blocking_after,
-                    "Task 0 (owner ruling A, 2026-09-29): an item already decided in an earlier run (X, decided "
-                    "in A) does not refuse the whole run (B) -- B is recorded, Y's decision is in the ledger, "
-                    "X's ledger entry is byte-identical to A's, B's accepted.json names X as decided in A (not "
-                    "a decision of B's), and B no longer blocks",
-                    "code %s/%s | same_key %s | blocking before %s after %s | %s" % (
-                        code_a, code_b, same_key, blocking_before, blocking_after, str(said_b).strip()[:100])))
+        blocking_after = [r for r, _ in runs.blocking(box, date(2026, 10, 21))]
+        expected_ledger_bytes = (ledger.dump(list(ledger_after_a.values()) + [y_entry_after_b]).encode("utf-8")
+                                 if y_entry_after_b else None)
+        note_present = "ignored, with a note" in str(said_b) and x_key in str(said_b)
+        detail = "code %s/%s | same_key %s | x after A %s | x after B %s | %s" % (
+            code_a, code_b, same_key, x_entry_after_a, x_entry_after_b, str(said_b).strip()[-220:])
+        for label, ok in (
+                ("A accepted", code_a == 0),
+                ("same key (fixture control)", same_key),
+                ("B blocking before accepting it (control)", rid_b in blocking_before),
+                ("B recorded", code_b == 0),
+                ("Y's decision is in the ledger", y_decided),
+                ("X's ledger entry is byte-identical to A's",
+                 bool(x_entry_after_a) and x_entry_after_b == x_entry_after_a),
+                ("the WHOLE ledger file after B equals A's entries plus Y's",
+                 expected_ledger_bytes is not None and seen.read_bytes() == expected_ledger_bytes),
+                ("B's accepted.json names X as decided in A", accepted_record.get("already_decided", {}).get(x_key) == rid_a),
+                ("X is not a decision of B's: not accepted", x_key not in accepted_record.get("accepted", {})),
+                ("X is not a decision of B's: not dropped", x_named not in accepted_record.get("dropped", [])),
+                ("X is not a decision of B's: not deferred", x_key not in accepted_record.get("deferred", [])),
+                ("B no longer blocks", rid_b not in blocking_after),
+                ("the ignored decision is noted in the output, not silent (M-3)", note_present)):
+            out.append((ok, "Task 0 (owner ruling A, 2026-09-29): %s" % label, detail))
+
+        # M-1 (fix round 1): a run whose EVERY listed item is already decided must still be RECORDED with 0 new
+        # decisions, so it drops out of `runs.blocking`. The Task 0 case above always has a genuinely new item
+        # (Y); a regression like `if not p["entries"] and not p["accepted"]: raise` would stay green without
+        # a case that has none.
+        rid_c = "feeds-2026-10-16-ddd001"
+        run_c, keys_c, session_c = listed_run(m, box, rid_c, n_relevant=1, n_dropped=0, queue=0, cost=0.0)
+        asyncio.run(m["friday"].friday(run_c, session=session_c, extractor=valid_extractor(m), root=box,
+                                       advisory_list=(golden, alist), tracked_runs=data / "feeds" / "runs"))
+        ledger_before_c = seen.read_bytes()
+        blocking_c_before = [r for r, _ in runs.blocking(box, date(2026, 10, 17))]
+        code_c, said_c = accept(rid_c, {x_key: "drop"}, today=date(2026, 10, 17))
+        rec_c = read_json(data / "feeds" / "runs" / rid_c / "accepted.json") if code_c == 0 else {}
+        blocking_c_after = [r for r, _ in runs.blocking(box, date(2026, 10, 17))]
+        out.append((keys_c == [x_key] and rid_c in blocking_c_before and code_c == 0
+                    and seen.read_bytes() == ledger_before_c and "0 decision(s)" in said_c
+                    and "1 already decided" in said_c and rec_c.get("already_decided") == {x_key: rid_a}
+                    and rec_c.get("dropped") == [] and rec_c.get("accepted") == {}
+                    and runs.classify(rid_c, box) == runs.ACCEPTED_STATE and rid_c not in blocking_c_after,
+                    "M-1: a run whose every listed item is already decided is still RECORDED with 0 new "
+                    "decisions, the ledger untouched, classify() says accepted, and it stops blocking",
+                    "keys %s code %s | %s" % (keys_c, code_c, said_c.strip()[-200:])))
+
+        # I-2 (fix round 1): a decision file that says ACCEPT for an already-decided item must be refused,
+        # naming the earlier run, writing nothing -- copying a second record for an item the ledger already
+        # closed makes no sense. Paired with the "no-reaccept-refusal" mutation.
+        rid_d = "feeds-2026-10-23-ddd001"
+        run_d, keys_d, session_d = listed_run(m, box, rid_d, n_relevant=1, n_dropped=0, queue=0, cost=0.0)
+        asyncio.run(m["friday"].friday(run_d, session=session_d, extractor=valid_extractor(m), root=box,
+                                       advisory_list=(golden, alist), tracked_runs=data / "feeds" / "runs"))
+        ledger_before_d = seen.read_bytes()
+        code_d, said_d = accept(rid_d, {x_key: "accept"}, today=date(2026, 10, 24))
+        out.append((keys_d == [x_key] and code_d == 1 and rid_a in said_d and "re-accept" in said_d
+                    and seen.read_bytes() == ledger_before_d and not (data / "feeds" / "runs" / rid_d).exists(),
+                    "I-2: a decision file that tries to ACCEPT an already-decided item is refused, naming the "
+                    "earlier run, and writes nothing",
+                    "keys %s code %s | %s" % (keys_d, code_d, said_d.strip()[:200])))
+
+        # M-2 (fix round 1): ask()'s skip branch is interactive, so no --decisions-file case can reach it. Stub
+        # builtins.input to count calls: it must be called 0 times for an already-decided item, which must be
+        # carried into decisions.json as "defer" (plan() ignores a defer for it; see the Task 0 clauses above).
+        rid_e = "feeds-2026-10-30-ddd001"
+        run_e, keys_e, session_e = listed_run(m, box, rid_e, n_relevant=1, n_dropped=0, queue=0, cost=0.0)
+        asyncio.run(m["friday"].friday(run_e, session=session_e, extractor=valid_extractor(m), root=box,
+                                       advisory_list=(golden, alist), tracked_runs=data / "feeds" / "runs"))
+        input_calls, real_input = [], builtins.input
+
+        def _stub_input(prompt=""):
+            input_calls.append(prompt)
+            return "a"  # would ACCEPT if ask() ever prompted -- it must not, for an already-decided item
+        builtins.input = _stub_input
+        try:
+            with contextlib.redirect_stdout(io.StringIO()) as ask_buf:
+                asked = acc.ask(rid_e, box, seen)
+        finally:
+            builtins.input = real_input
+        out.append((keys_e == [x_key] and len(input_calls) == 0 and asked.get(x_key) == "defer"
+                    and ("already decided in %s" % rid_a) in ask_buf.getvalue(),
+                    "M-2: ask() skips an already-decided item, prompting input() 0 times, and carries it as defer",
+                    "keys %s | input calls %d | asked %s" % (keys_e, len(input_calls), asked)))
 
         cat = tmp / "catalogue.json"
         cat.write_text(json.dumps({"items": [{"source": "ofsi", "item_id": "c%d" % i} for i in range(4)]}), encoding="utf-8")
