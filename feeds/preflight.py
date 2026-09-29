@@ -9,7 +9,7 @@ with a notification by tools/friday_run.py --scheduled, and none of them spends 
                 subscription token (`claude setup-token`). "claude.ai" is the interactive login, which expires
                 (CLAUDE.md, Auth); "api_key" means ANTHROPIC_API_KEY, which bills pay-as-you-go.
 The expected method string was READ from the installed CLI (2.1.269), not observed with a token: its status
-code maps a token from the environment to "oauth_token". C2 Task 5 has the owner confirm it by hand.
+code maps a token from the environment to "oauth_token". C2 Task 4 has the owner confirm it by hand.
 The token itself is never read here: only the CLI's own summary of it.
 
 Fix round 1 (I-3): both subprocess calls fail closed rather than crashing or passing. `on_main` catches a
