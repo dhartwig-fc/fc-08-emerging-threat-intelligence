@@ -20,6 +20,7 @@ Usage:
     python evals/check_friday_run.py --mutate no-cap-recheck          # a fourth request line is extracted
     python evals/check_friday_run.py --mutate writes-real-inbox       # the run also writes a file into the REAL inbox/
     python evals/check_friday_run.py --mutate crash-skips-unreached   # after a crash, only the in-flight item is recorded
+    python evals/check_friday_run.py --mutate recon-ignores-allocation  # a record naming another advisory id is not RECONCILIATION_FAILED
 
 WHAT IT HOLDS (spec sections 1, 2 and 5):
   budget       extractions start in queue order only while spend + US$1.00 <= US$5.00; the next is DEFERRED
@@ -34,7 +35,10 @@ WHAT IT HOLDS (spec sections 1, 2 and 5):
   refusal      ANTHROPIC_API_KEY or an eval variable in the environment refuses the run before any agent,
                with a REFUSED report;
   reconcile    an unterminated tool call makes the run RECONCILIATION_FAILED; a layout change is UNFINISHED
-               and LOUD; a run that listed nothing is NOTHING_NEW;
+               and LOUD; a run that listed nothing is NOTHING_NEW; an extracted record naming another advisory
+               id, or another document's sha256, than the one this extraction actually allocated and pinned is
+               RECONCILIATION_FAILED, naming the mismatch (I-2, final review 2026-09-29 -- the check at
+               feeds/reconcile.py:102-106 had never been seen to fail);
   report       written on every run above; names every dropped item with its reason and quote, the deferred,
                the cost against the ceiling; renders the same bytes twice; line 3's "N unfinished" equals the
                ## Unfinished section's count and its rows, which list failed items with their WHOLE error and
@@ -141,6 +145,13 @@ MUTATIONS = {
     "writes-real-inbox": ("friday", "    _save(inbox.run_dir(run.run_id, root) / reconcile.RUN_JSON,\n",
                           "    _save(Path(os.environ[\"FC08_GUARD_PLANT\"]), {\"planted_by\": run.run_id})\n"
                           "    _save(inbox.run_dir(run.run_id, root) / reconcile.RUN_JSON,\n"),
+    "recon-ignores-allocation": ("reconcile",
+        '            elif record.get("advisory_id") != allocations.get(k) or record.get("advisory_id") != o.get("advisory_id"):\n'
+        '                problems.append("%s\'s record names %s, but the run allocated %s" % (k, record.get("advisory_id"),\n'
+        '                                                                                     allocations.get(k)))\n',
+        '            elif False:\n'
+        '                problems.append("%s\'s record names %s, but the run allocated %s" % (k, record.get("advisory_id"),\n'
+        '                                                                                     allocations.get(k)))\n'),
 }
 PLANT_ENV = "FC08_GUARD_PLANT"
 SENTENCE = "This advisory describes red flags for trade-based money laundering through shell companies."
@@ -237,10 +248,17 @@ def listed_run(m, root: Path, run_id: str, n_relevant: int, n_dropped: int, queu
     return run, keys, session
 
 
-def extractor_with(m, costs: list, calls: list = None, probe=None):
+WRONG_ADVISORY_ID = "ADV-2026-9999"
+WRONG_DOCUMENT_SHA256 = "f" * 64
+
+
+def extractor_with(m, costs: list, calls: list = None, probe=None, corrupt=None):
     """A stub extraction: a record of the pinned document under the allocated id, a two-line queue and its
     telemetry, as slice 1's extract leaves them. Costs are taken in order; None = a cost that never arrived.
-    `calls` collects the keys it was asked to extract; `probe` runs inside it (the lock check)."""
+    `calls` collects the keys it was asked to extract; `probe` runs inside it (the lock check).
+    `corrupt`: "advisory_id" | "document_sha256" (I-2, final review 2026-09-29) writes a record naming another
+    id, or another document, than the one this extraction was actually allocated and pinned -- the OUTCOME
+    friday() records still names the real, allocated id, exactly as a real extractor's return value would."""
     costs = list(costs)
 
     async def extractor(run, req, advisory_id, root):
@@ -260,8 +278,11 @@ def extractor_with(m, costs: list, calls: list = None, probe=None):
                                                        permission_denials=[]),
                           terminal_check={"calls": 0, "unterminated": [], "duplicated": []})
         rel = "records/%s.json" % advisory_id
-        inbox.write_file(run.run_id, rel, json.dumps({"advisory_id": advisory_id, "actors": [], "source": {
-            "document_sha256": ident.pdf_sha256}}).encode("utf-8"), root)
+        inbox.write_file(run.run_id, rel, json.dumps({
+            "advisory_id": advisory_id if corrupt != "advisory_id" else WRONG_ADVISORY_ID,
+            "actors": [], "source": {
+                "document_sha256": ident.pdf_sha256 if corrupt != "document_sha256" else WRONG_DOCUMENT_SHA256}}
+            ).encode("utf-8"), root)
         ident.queue_path.parent.mkdir(parents=True, exist_ok=True)
         ident.queue_path.write_text('{"a": 1}\n{"a": 2}\n', encoding="utf-8")
         return {"key": req["key"], "advisory_id": advisory_id, "extraction_run_id": ident.run_id, "status": "extracted",
@@ -480,6 +501,21 @@ def body(mutation) -> list:
                     and "--override-reconciliation" in text,
                     "an unterminated tool call fails reconciliation, loudly, and the report names the override",
                     rec.get("status")))
+
+        # I-2 (2026-09-29 final review): the check that an extracted record names its own allocated advisory id
+        # and the pinned document's sha256 (feeds/reconcile.py:102-106) had never been seen to fail. Two
+        # records, otherwise unremarkable: one names another advisory id, one names another document's sha256.
+        # Both must be RECONCILIATION_FAILED, naming the mismatch.
+        for corrupt, rid, expect in (
+                ("advisory_id", "feeds-2026-10-02-aaa019", "but the run allocated"),
+                ("document_sha256", "feeds-2026-10-02-aaa020", "is not of the document its request pinned")):
+            run, keys, session = listed_run(m, box, rid, n_relevant=1, n_dropped=0, queue=1, cost=0.3)
+            rec = run_friday(box, run, session, extractor_with(m, [0.5], corrupt=corrupt), alist)
+            out.append((rec.get("status") == "RECONCILIATION_FAILED"
+                        and any(expect in p for p in rec.get("problems", [])),
+                        "an extracted record naming another %s than the one actually allocated and pinned is "
+                        "RECONCILIATION_FAILED, naming the mismatch" % corrupt,
+                        "%s | %s" % (rec.get("status"), rec.get("problems"))))
 
         rid = "feeds-2026-10-02-aaa006"
         run, keys, session = listed_run(m, box, rid, n_relevant=0, n_dropped=0, queue=0, cost=0.1, nothing=True)

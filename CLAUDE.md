@@ -575,7 +575,11 @@ Plan: `docs/superpowers/plans/2026-09-27-slice2-b-triage-and-its-eval.md`.
 
 **Carry-forwards for sub-project C (recorded by the final B review; NOT fixed in B's code):**
 - **A `FEEDS_CATALOGUE` exported in the operator's shell could reach a live server.** A live `FeedsRun.env()` does not set it, so a live server can see whatever the CLI's inherited environment carries (final B review, Task 4 minor 4; not tested in B). C's live mode should pass `FEEDS_CATALOGUE=""` explicitly, which `_catalogue()` reads as no catalogue.
-- **No guard pins the per-session budget or turn cap.** `MAX_BUDGET_USD` (US$1.50) and `MAX_TURNS` (80) in `agents/orchestrate_feeds.py` are unguarded; B was covered only by the runner's identity check and the repeats' one-arm check, which do not bind a live run.
+- ~~**No guard pins the per-session budget or turn cap.**~~ **FIXED in C1** (final review 2026-09-29: this line was
+  still false on the branch it was written for). `check_feeds_orchestrator.py:76` now pins `MAX_BUDGET_USD`
+  (US$1.50), `MAX_TURNS` (80) and the run ceiling in `agents/orchestrate_feeds.py` -- `unpinned-budget` and
+  `over-ceiling` are its mutation labels (see the C1 table below). Unguarded only in B; nothing here binds
+  before that.
 - **The production `inbox/` holds B's 18 eval runs** (each `items.json` marked `"eval": true`), and will hold more if the repeats are re-run. Anything in C that lists pending runs must filter on the eval marker; `accept_run` already refuses an eval-marked run.
 - **`validated` is true for a session that triaged nothing.** `validated=failure is None` in `agents/orchestrate_feeds.py`, so a session with no failure and no verdict reports validated.
 
@@ -594,8 +598,8 @@ Plan: `docs/superpowers/plans/2026-09-28-slice2-c1-extraction-orchestrator-accep
 | `evals/check_document_pages.py` | pins the one document loader shared by the extractor, triage, the MCP server, propose_link's re-check and check_citations: a PDF or a pinned HTML page, paged the same way by every caller; --mutate pdf-only\|server-pdf\|gate-pdf\|extractor-pdf\|triage-pdf\|triage-own-loader |
 | `evals/check_feeds_extract.py` | pins `feeds_extract` and where a feeds extraction may write: relevant-only, capped at 3, the document chosen by rule, ids never reused or reallocated, an unreadable PDF refused and recorded rather than refetched, and that extract() passes run_started the sha256 of the prompt it actually sends; --mutate no-verdict-check\|no-cap\|second-request\|any-host\|own-host-rule\|no-text-queued\|eval-extract\|reallocate\|hide-duplicates\|reuse-id\|inbox-ids-only\|unreadable-raises\|unreadable-unrecorded\|queue-escape\|no-identity-match-check\|identity-check-refuses-all\|no-resolve\|stale-prompt-hash\|no-prompt-hash |
 | `evals/check_feeds_orchestrator.py` | proves the orchestrator reaches its mode's tools and nothing else, pins the run's budget, and pins FULL_PROMPT_SHA256 against FULL_PROMPT; --mutate builtin-tools\|settings\|preapprove-triage\|allow-propose\|extract-tool\|no-asymmetry\|extract-in-eval\|inherit-catalogue\|triage-drift\|unpinned-budget\|over-ceiling\|stale-full-hash |
-| `evals/check_friday_run.py` | pins the Friday run's budget, reconciliation and report, and the terminal event for a call no hook saw; --mutate no-budget-check\|unknown-cost-free\|no-transcript-terminal\|validated-empty\|quiet-reconcile\|report-hides-drops\|transcript-duplicates\|invent-terminal\|refused-extracted\|no-run-lock\|unfinished-omits-failed\|rows-by-key\|no-crash-report\|telemetry-elsewhere\|no-cap-recheck\|crash-skips-unreached\|writes-real-inbox |
-| `evals/check_accept_run.py` | pins `tools/accept_run.py` end to end, the only way a live result enters tracked data, plus `feeds/runs.mark_accepted`'s atomic write; --mutate no-citation-check\|no-gate-recheck\|ledger-defers\|no-override-needed\|overwrite-target\|no-rollback\|slice1-records\|rollback-leaves-dirs\|failed-default-drop\|gap-unrecorded\|expire-unlocked\|register-after-copy\|marker-bare\|accept-unlocked\|dryrun-unlocked\|no-not-extracted-refusal\|no-verdict-refusal\|direct-write (this last one is `feeds/runs.py`'s, checked as RUNS_MUTATIONS, not `accept_run.py`'s own source) |
+| `evals/check_friday_run.py` | pins the Friday run's budget, reconciliation and report, and the terminal event for a call no hook saw; --mutate no-budget-check\|unknown-cost-free\|no-transcript-terminal\|validated-empty\|quiet-reconcile\|report-hides-drops\|transcript-duplicates\|invent-terminal\|refused-extracted\|no-run-lock\|unfinished-omits-failed\|rows-by-key\|no-crash-report\|telemetry-elsewhere\|no-cap-recheck\|crash-skips-unreached\|writes-real-inbox\|recon-ignores-allocation |
+| `evals/check_accept_run.py` | pins `tools/accept_run.py` end to end, the only way a live result enters tracked data, plus `feeds/runs.mark_accepted`'s atomic write; --mutate no-citation-check\|no-gate-recheck\|ledger-defers\|no-override-needed\|overwrite-target\|no-rollback\|slice1-records\|rollback-leaves-dirs\|failed-default-drop\|gap-unrecorded\|expire-unlocked\|register-after-copy\|marker-bare\|accept-unlocked\|dryrun-unlocked\|no-not-extracted-refusal\|no-verdict-refusal\|accept-ignores-record-id\|direct-write\|eval-pending (the last two are `feeds/runs.py`'s, checked as RUNS_MUTATIONS, not `accept_run.py`'s own source) |
 
 **Accepted live records are NOT in data/records/ and live advisories are NOT in evals/golden/advisory_list.json** -- measured 2026-09-28: either one refuses every commit (check_citation_repair and actor_resolution pin data/records; the current digest batch pins the golden list by sha256). The gate reads both advisory lists.
 **Every guard that calls accept_run passes temporary data paths**: without them A's ledger guard wrote data/feeds/runs/ into the checkout.
@@ -604,4 +608,32 @@ Plan: `docs/superpowers/plans/2026-09-28-slice2-c1-extraction-orchestrator-accep
 
 **Every agent run now records the sha256 of the prompt it ran under (owner decision, 2026-09-29, before Task 9's first live dry run).** `agents/telemetry.run_started` gained `prompt_sha256: str = None`, recorded as `null` when not passed rather than omitted -- so a run from before this change reads the same as one that simply did not pass it. The extractor and reviewer each hash their own system-prompt constant (`extract_advisory.PROMPT_SHA256`, `review_advisory.PROMPT_SHA256`); the orchestrator passes `FULL_PROMPT_SHA256` live and `PROMPT_SHA256` in eval mode, the same two constants `check_feeds_orchestrator.py` already pinned. `check_feeds_extract.py` proves the extractor passes the hash of the prompt it actually sends -- not a stale or constant one -- by stubbing `query()` (not `document_pages`) so the check gets past `run_started` and the built options while starting no session. `check_walkthrough.py` and the section-10 counts are unaffected: they read `tools`, not this field.
 
-**Not yet:** Task 8 (seeding the ledger with 60 back-catalogue drops) and Task 9 (the first live dry run) both wait on the owner's go.
+~~**Not yet:** Task 8 (seeding the ledger with 60 back-catalogue drops) and Task 9 (the first live dry run) both
+wait on the owner's go.~~ **Both done (final review 2026-09-29 corrected this line, which was still true only
+of an earlier commit on this same branch):**
+
+- **Task 8** seeded the ledger with the 60 back-catalogue items as drops (`218eaf7`).
+- **Task 9** was the first live Friday run, `feeds-2026-09-29-865f66`: COMPLETE, US$0.06, 3 new items, all
+  dropped on the owner's decision, 0 extractions. Its evidence -- `items.json`, `triage.jsonl`, `run.json`,
+  `report.md`, `accepted.json` and the orchestrator's telemetry -- is in `data/feeds/runs/feeds-2026-09-29-865f66/`,
+  committed in `c4fa190`.
+
+**Not yet exercised live** (all built and guarded cold; none of it has run against a real relevant item, because
+the first live run triaged nothing relevant -- final review 2026-09-29, Recommendations 2 and 3):
+
+- `terminal_check` live, only 1 of the 3 sessions the DoD names (only the orchestrator session has run; no
+  extraction session has);
+- the resolver's resolution rate (`knowledge_centre_resolve_actor`'s live call count and resolved fraction);
+- extraction cost against the US$1 per-extraction cap -- how far a live session can overshoot it is unmeasured;
+- the extractor's own `PROMPT_SHA256` reaching `RUN_STARTED` live (the orchestrator's live selection *is*
+  measured correct; the extractor's has never run);
+- the linked-PDF choice (`document_hosts`) picking the publication over the listing page, on a real item;
+- transcript backfill (`agents.telemetry.record_unhooked`): 0 live events with `source: transcript` so far;
+- `accept_run` accepting a live item (documents, record, queue and telemetry copies, the live advisory list
+  write, the gate re-check, gap recording) -- the branch's only live ledger writes are the Task 8 seed and the
+  Task 9 drops, never an accept;
+- spec DoD 7, "at least one accepted live run whose proposals went through `tools/review.py`" -- NOT met; there
+  are no live proposals yet to review.
+
+**Read the first Friday that lists a genuinely relevant item as a first run, not as routine** -- it is the first
+live exercise of everything in the list above, all at once.

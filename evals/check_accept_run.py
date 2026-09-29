@@ -21,6 +21,8 @@ Usage:
     python evals/check_accept_run.py --mutate dryrun-unlocked       # --dry-run is exempted from the lock
     python evals/check_accept_run.py --mutate no-not-extracted-refusal  # accepting a never-extracted item crashes instead of refusing
     python evals/check_accept_run.py --mutate no-verdict-refusal     # accepting an extracted item with no triage verdict crashes
+    python evals/check_accept_run.py --mutate accept-ignores-record-id  # a record naming another id or document is accepted
+    python evals/check_accept_run.py --mutate eval-pending           # runs.classify no longer reads the eval marker
 
 WHAT IT HOLDS:
   accept      an EXTRACTED item's document, record, queue and telemetry are copied byte for byte to
@@ -57,14 +59,21 @@ WHAT IT HOLDS:
               still removed;
   no-verdict  an extracted item with no triage verdict refuses ("extracted but has no triage verdict"), never
               crashes;
+  record identity  an accepted record must name its own allocated advisory id and the pinned document's
+              sha256: a record naming another id, or another document, refuses the WHOLE run, writing nothing
+              (I-2, final review 2026-09-29 -- the check at accept_run.py:158-160 had never been seen to fail);
+  eval        a FRESH eval run, still inside the 14-day window, is never pending or blocking, and accept_run
+              refuses to decide it; a fresh NON-eval run of the same date DOES block, so the case is not
+              vacuous (I-1, final review 2026-09-29 -- the only prior fixture was 31 days old and was read
+              only after --expire had already moved it, so the live eval filter was never actually exercised);
   seed        --seed-catalogue records every catalogue item as a drop under "catalogue:<sha12>", once.
 
 COLD. Temporary inbox, data folders, advisory list and ledger; the document is a hand-built PDF; the queue
 and record are built to slice 1's contracts. No network, no model. The repository's git status is unchanged,
 and so are the gitignored places a leak would hide from it (inbox/, data/advisories/).
 
-NOT A VACUOUS PASS. Each --mutate rewrites tools/accept_run.py (or, for "direct-write", feeds/runs.py) in
-memory; at least one check must fail.
+NOT A VACUOUS PASS. Each --mutate rewrites tools/accept_run.py (or, for "direct-write" and "eval-pending",
+feeds/runs.py) in memory; at least one check must fail.
 """
 
 from __future__ import annotations
@@ -123,10 +132,16 @@ MUTATIONS = {
         "    pass\n"),
     "no-verdict-refusal": (
         '    if verdict is None:\n        return None, ["%s: extracted but has no triage verdict" % key]\n', ""),
+    "accept-ignores-record-id": (
+        '    if record.advisory_id != adv or record.source.document_sha256 != request["document"]["sha256"]:\n',
+        "    if False:\n"),
 }
 
 # feeds/runs.py is mutated separately: mark_accepted's atomicity is tested directly, not through accept_run.
 RUNS_MUTATIONS = {
+    "eval-pending": (
+        '    state = inbox.load(run_id, root)\n    if state.get("eval"):\n        return EVAL\n',
+        "    state = inbox.load(run_id, root)\n"),
     "direct-write": (
         '    body = json.dumps(record, indent=2, ensure_ascii=False, sort_keys=True) + "\\n"\n'
         '    tmp_path = path.with_name(".%s.tmp-%d" % (path.name, os.getpid()))\n'
@@ -173,9 +188,16 @@ def load_runs(mutation):
     return module
 
 
+WRONG_ADVISORY_ID = "ADV-2026-9999"
+WRONG_DOCUMENT_SHA256 = "f" * 64
+
+
 def valid_extractor(m, tamper=None):
     """A stub extraction leaving what slice 1's extract leaves, to its contracts: a VALID record citing the pinned
-    PDF, a proposal queue the gate accepts, and completed, clean telemetry. `tamper`: "record" | "queue"."""
+    PDF, a proposal queue the gate accepts, and completed, clean telemetry.
+    `tamper`: "record" | "queue" | "advisory_id" | "document_sha256". The last two (I-2, final review
+    2026-09-29) are schema-valid on their own -- they only fail the identity check that the record names its
+    own allocated id and the pinned document, at tools/accept_run.py:158-160."""
 
     async def extractor(run, req, advisory_id, root):
         from agents.run_identity import RunIdentity
@@ -188,10 +210,12 @@ def valid_extractor(m, tamper=None):
                           result=types.SimpleNamespace(num_turns=20, total_cost_usd=0.6, duration_ms=1, permission_denials=[]),
                           terminal_check={"calls": 0, "unterminated": [], "duplicated": []})
         cite = [{"page": 1, "quote": QUOTE if tamper != "record" else "Advisory text on front companies."}]
-        record = {"schema_version": "1.4.0", "advisory_id": advisory_id,
+        record = {"schema_version": "1.4.0",
+                  "advisory_id": advisory_id if tamper != "advisory_id" else WRONG_ADVISORY_ID,
                   "source": {"source_type": "fincen", "publisher": "FinCEN", "title": "A FinCEN advisory",
                              "published_on": "2026-10-01", "published_on_precision": "day", "url": req["document"]["url"],
-                             "document_sha256": ident.pdf_sha256, "page_count": 1},
+                             "document_sha256": ident.pdf_sha256 if tamper != "document_sha256" else WRONG_DOCUMENT_SHA256,
+                             "page_count": 1},
                   "summary": "A synthetic advisory about shell companies, built by the accept_run guard.",
                   "jurisdictions": ["US"], "actors": [], "indicators": [], "suggested_desks": ["trade_desk"],
                   "overall_confidence": "low", "extraction_notes": None,
@@ -368,6 +392,27 @@ def checks(mutation) -> list:
             now = {p: p.read_bytes() for p in data.rglob("*") if p.is_file()}
             out.append((code == 1 and reason in said and now == snap and alist.read_bytes() == a0
                         and seen.read_bytes() == l0, "refused, writing nothing: %s" % label, said.strip()[:140]))
+
+        # I-2 (2026-09-29 final review): the check that an accepted record names its own allocated advisory id
+        # and the pinned document's sha256 (accept_run.py:158-160) had never been seen to fail. reconcile.py's
+        # OWN identity check (feeds/reconcile.py:102-106) reads the same tampered record and already refuses
+        # the run as RECONCILIATION_FAILED, so this line is otherwise never reached: the override is what puts
+        # it in the path, exactly as the owner override does for a real, read RECONCILIATION_FAILED run. These
+        # two records are schema-valid on their own and pass every other check (citations, the review gate);
+        # once past reconciliation, only this identity check can catch them, and it must still refuse.
+        for tamper, rid, reason in (
+                ("advisory_id", "feeds-2026-10-02-bbb011", WRONG_ADVISORY_ID),
+                ("document_sha256", "feeds-2026-10-02-bbb014", WRONG_DOCUMENT_SHA256[:12])):
+            keys = make(rid, tamper=tamper)
+            snap = {p: p.read_bytes() for p in data.rglob("*") if p.is_file()}
+            a0, l0 = alist.read_bytes(), seen.read_bytes()
+            code, said = accept(rid, {keys[0]: "accept", keys[1]: "defer", keys[2]: "defer", keys[3]: "drop"},
+                                "--override-reconciliation", "owner read the record and the pinned document")
+            now = {p: p.read_bytes() for p in data.rglob("*") if p.is_file()}
+            out.append((code == 1 and "the record names" in said and reason in said and now == snap
+                        and alist.read_bytes() == a0 and seen.read_bytes() == l0,
+                        "refused, writing nothing, EVEN WITH the reconciliation override: a record naming "
+                        "another %s than its own" % tamper, said.strip()[:160]))
 
         rid = "feeds-2026-10-02-bbb004"
         keys = make(rid)
@@ -548,6 +593,37 @@ def checks(mutation) -> list:
                     "a pending run under 14 days blocks and refuses --expire; at 14+ it moves to inbox/expired/, the "
                     "ledger untouched; an eval run is never pending", "%s | blocking %s" % (buf.getvalue().strip()[:80],
                                                                                           blocking)))
+
+        # I-1 (2026-09-29 final review): the case above proves nothing about a LIVE eval run -- ccc004 is 31
+        # days old, so it can never be in `blocking` whatever the code does, and `pending` above is read only
+        # AFTER --expire has already run, which (under mutation 2) moves any eval run the classify() bug leaves
+        # PENDING before this check ever looks at it. A FRESH eval run, still inside the 14-day window, is
+        # read BEFORE anything else touches it; a fresh NON-eval run of the SAME date is the control, and it
+        # must block, or this case would pass vacuously too.
+        runs_i1 = load_runs(mutation)
+        box_i1 = tmp / "runs-i1"
+        fresh_eval, control = "feeds-2026-09-27-eee001", "feeds-2026-09-27-eee002"
+        inbox.save(fresh_eval, {"run_id": fresh_eval, "eval": True, "sources": {"ofac": {"items": [
+            {"key": "ofac:eee1", "source": "ofac", "item_id": "eee1"}]}}}, box_i1)
+        inbox.save(control, {"run_id": control, "sources": {"ofac": {"items": [
+            {"key": "ofac:eee2", "source": "ofac", "item_id": "eee2"}]}}}, box_i1)
+        blocking_i1 = [r for r, _ in runs_i1.blocking(box_i1, TODAY)]
+        i1_seen = tmp / "i1-ledger.json"
+        i1_seen.write_text(ledger.dump([]), encoding="utf-8")
+        f_i1 = tmp / "i1.decisions.json"
+        f_i1.write_text(json.dumps({"ofac:eee1": "drop"}), encoding="utf-8")
+        buf_i1 = io.StringIO()
+        with contextlib.redirect_stdout(buf_i1):
+            code_i1 = acc.main([fresh_eval, "--decisions", str(f_i1)], inbox_root=box_i1, seen_path=i1_seen,
+                               today=TODAY, data=tmp / "i1-data", advisory_list=tmp / "i1-alist.json",
+                               golden_list=tmp / "i1-golden.json")
+        said_i1 = buf_i1.getvalue()
+        out.append((runs_i1.classify(fresh_eval, box_i1) == runs_i1.EVAL and fresh_eval not in blocking_i1
+                    and control in blocking_i1 and code_i1 == 1 and "eval run" in said_i1,
+                    "a FRESH eval run inside the 14-day window is never pending or blocking, and accept_run "
+                    "refuses to decide it; a fresh NON-eval run of the same date DOES block (not vacuous)",
+                    "classify %s | blocking %s | code %s | %s" % (
+                        runs_i1.classify(fresh_eval, box_i1), blocking_i1, code_i1, said_i1.strip()[:100])))
 
         # Task 4 carry-forward: --expire takes the Friday run's OWN lock (tools/friday_run.run_lock), so it cannot
         # move a run folder while a live run is reading every run's allocations.
