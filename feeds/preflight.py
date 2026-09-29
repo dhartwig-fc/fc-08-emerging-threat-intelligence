@@ -1,9 +1,16 @@
 """
-The scheduled run's preflight (slice 2 C2, spec section 5): three refusals, each written up as a run report
-with a notification by tools/friday_run.py --scheduled, and none of them spends anything.
+The scheduled run's preflight (slice 2 C2, spec section 5): four refusals, each written up as a run report
+with a notification by tools/friday_run.py --scheduled, and none of them spends anything. All that apply are
+reported together, in the fixed order below.
 
   on main       the checkout is on branch `main` (a detached HEAD or a feature branch refuses): a Friday run
                 reads the committed ledger, prompts and guards, and must read the governed ones;
+  the clone     the checkout carries the schedule-clone marker, <git-dir>/fc08-schedule-clone (owner decision,
+                2026-09-29; re-review R-1): the schedule runs only from its own clone, ~/fc-08-schedule, never
+                from the development checkout. The marker lives INSIDE the git directory, so git can never
+                track, commit, push or clone it: a fresh clone of anything lacks it until the owner creates it
+                (CLAUDE.md, "The schedule clone", the create-once block). tools/schedule.py install refuses
+                without it too;
   back-pressure a pending run under 14 days old is still in the inbox (feeds/runs.py; eval runs never count);
   auth          `<cli_path()> auth status --json` -- the SDK's own CLI, see WHICH claude below -- says loggedIn
                 with authMethod "oauth_token", the long-lived subscription token (`claude setup-token`).
@@ -37,6 +44,9 @@ from typing import List, Optional
 from feeds import inbox, runs
 
 TOKEN_METHOD = "oauth_token"
+CLONE_MARKER = "fc08-schedule-clone"
+CLONE_STEP = ('create it only in the schedule clone, with CLAUDE.md\'s "The schedule clone" create-once block: '
+              'touch "$(git rev-parse --git-dir)/%s"' % CLONE_MARKER)
 
 
 def on_main(repo: Path, run=subprocess.run) -> Optional[str]:
@@ -47,6 +57,28 @@ def on_main(repo: Path, run=subprocess.run) -> Optional[str]:
     branch = (got.stdout or "").strip()
     if got.returncode != 0 or branch != "main":
         return "the checkout is on %r, not main" % (branch or got.stderr.strip()[:80])
+    return None
+
+
+def clone_marker(repo: Path, run=subprocess.run) -> Path:
+    """<git-dir>/fc08-schedule-clone for the checkout at `repo`. RAISES when git cannot say where its git
+    directory is; schedule_clone turns that into a refusal."""
+    got = run(["git", "rev-parse", "--git-dir"], cwd=str(repo), capture_output=True, text=True)
+    git_dir = (got.stdout or "").strip()
+    if got.returncode != 0 or not git_dir:
+        raise RuntimeError("`git rev-parse --git-dir` exited %d: %s" % (got.returncode, (got.stderr or "").strip()[:80]))
+    return Path(repo) / git_dir / CLONE_MARKER  # --git-dir may answer relative to repo; an absolute one wins the join
+
+
+def schedule_clone(repo: Path, run=subprocess.run) -> Optional[str]:
+    """None when this checkout is the marked schedule clone; otherwise why not (never raises)."""
+    try:
+        marker = clone_marker(repo, run)
+    except (OSError, RuntimeError) as exc:
+        return "the preflight could not find this checkout's git directory to look for the schedule-clone marker: %s" % exc
+    if not marker.is_file():
+        return ("this checkout is not the schedule clone: %s is missing -- the schedule runs only from its own clone "
+                "(~/fc-08-schedule), never from the development checkout; %s" % (marker, CLONE_STEP))
     return None
 
 
@@ -122,5 +154,6 @@ def auth(status: dict) -> Optional[str]:
 
 def reasons(repo: Path, root: Path = inbox.INBOX_ROOT, today: date = None, run=subprocess.run,
             status: dict = None) -> List[str]:
-    found = [on_main(repo, run), back_pressure(root, today), auth(status if status is not None else auth_status(run))]
+    found = [on_main(repo, run), schedule_clone(repo, run), back_pressure(root, today),
+             auth(status if status is not None else auth_status(run))]
     return [r for r in found if r]

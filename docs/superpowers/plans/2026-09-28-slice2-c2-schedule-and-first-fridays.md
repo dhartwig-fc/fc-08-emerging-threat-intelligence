@@ -958,7 +958,7 @@ Run it from the repository root (`cli_path()` is imported from this checkout). T
 
 **Every command in this task runs in the SCHEDULE CLONE, `~/fc-08-schedule`, never in the development checkout** (owner decision, 2026-09-29; CLAUDE.md, "The schedule clone"). The development checkout never starts a Friday run.
 
-- [ ] **Step 0: Create the schedule clone, once,** exactly as CLAUDE.md's "The schedule clone" says: `git clone -b main` from GitHub, `core.hooksPath`, and the three symlinks (`.venv`, `data/advisories`, `data/reviewed`) with their `.git/info/exclude` line. It needs Task 3 done first: the clone takes `main` from GitHub, and C2's code is on `main` only after that merge is pushed. Check: `git -C ~/fc-08-schedule branch --show-current` prints `main`, and `git -C ~/fc-08-schedule status --short` prints nothing.
+- [ ] **Step 0: Create the schedule clone, once,** exactly as CLAUDE.md's "The schedule clone" says: `git clone -b main` from GitHub, `core.hooksPath`, the three `ln -sn` symlinks (`.venv`, `data/advisories`, `data/reviewed`) with their anchored `.git/info/exclude` lines, and the schedule-clone marker, `touch "$(git rev-parse --git-dir)/fc08-schedule-clone"`. Without the marker every `--scheduled` run there is REFUSED and `schedule.py install` refuses (re-review R-1). Run the block once; if it fails part-way, delete `~/fc-08-schedule` and start again. It needs Task 3 done first: the clone takes `main` from GitHub, and C2's code is on `main` only after that merge is pushed. Check: `git -C ~/fc-08-schedule branch --show-current` prints `main`, `git -C ~/fc-08-schedule status --short` prints nothing, and `ls "$(git -C ~/fc-08-schedule rev-parse --absolute-git-dir)/fc08-schedule-clone"` finds the marker.
 - [ ] **Step 1: The zero-cost rehearsal, on a branch, in the clone.** The preflight refuses "not main" before any agent runs. This is the one time the clone leaves `main`, and it returns in the same step.
 
   ```bash
@@ -989,7 +989,7 @@ Run it from the repository root (`cli_path()` is imported from this checkout). T
 
 ### Task 6: OWNER STEP: install the schedule
 
-**In the schedule clone.** `install` renders the plist from the checkout it runs in, so run from `~/fc-08-schedule` the schedule starts the clone's own `scripts/schedule/friday_run.sh` (measured in a temporary clone on 2026-09-29: the rendered `ProgramArguments` named the clone's launcher). Run from the development checkout, it would schedule the development checkout, which is exactly what the owner ruled out. `status` is run from the clone too: its "matches the template" compares against the checkout running it.
+**In the schedule clone.** `install` renders the plist from the checkout it runs in, so run from `~/fc-08-schedule` the schedule starts the clone's own `scripts/schedule/friday_run.sh` (measured in a temporary clone on 2026-09-29: the rendered `ProgramArguments` named the clone's launcher). Run from the development checkout, it REFUSES: that checkout has no schedule-clone marker (measured 2026-09-29: `install --dry-run` there prints "DRY RUN: would REFUSE: this checkout is not the schedule clone", exit 1). `status` is run from the clone too: its "matches the template" compares against the checkout running it.
 
 ```bash
 cd ~/fc-08-schedule
@@ -1036,7 +1036,7 @@ git status --short     # expect: data/feeds/seen.json, data/feeds/advisory_list.
 .venv/bin/python tools/check_all.py | tail -1
 git add data/feeds data/proposals data/telemetry
 git commit -m "Slice 2 C2: accept run <run_id> -- <n> accepted (<ADV ids>), <m> dropped, <k> deferred"
-git push origin main     # from the clone; then, in the development checkout: git switch main && git pull --ff-only
+git push origin main     # from the clone; then, in the development checkout: git switch main && git pull --ff-only && git switch -
 ```
 
 All of Step 2 runs in the clone. The accepted document is not in that commit (`data/advisories/` is gitignored); it reaches the development checkout through the shared `data/advisories/` symlink, not through git.

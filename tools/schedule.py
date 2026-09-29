@@ -13,6 +13,10 @@ install refuses when a plist is already installed (uninstall first), so a schedu
 uninstall reports a failed bootout rather than ignoring it: the plist is left in place so a later `status`
 still shows it installed, instead of falsely reading "not installed" while the job is still loaded (fix
 round 1, M-5).
+install ALSO refuses -- --dry-run included, which says it would -- in a checkout without the schedule-clone
+marker, <git-dir>/fc08-schedule-clone (feeds/preflight.schedule_clone, the same check a scheduled run makes;
+re-review R-1): only the schedule clone, ~/fc-08-schedule, can be scheduled. status and uninstall do not check
+it: uninstall removes by LABEL, so it removes whichever checkout's job is installed.
 """
 
 from __future__ import annotations
@@ -25,6 +29,9 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(ROOT))
+from feeds import preflight  # noqa: E402
+
 LABEL = "uk.fc08.friday-run"
 TEMPLATE = ROOT / "scripts" / "schedule" / ("%s.plist" % LABEL)
 AGENTS = Path.home() / "Library" / "LaunchAgents"
@@ -41,14 +48,15 @@ def installed_path(agents: Path = AGENTS) -> Path:
     return Path(agents) / ("%s.plist" % LABEL)
 
 
-def main(argv: list, agents: Path = AGENTS, run=subprocess.run, uid: int = None, home: Path = None) -> int:
+def main(argv: list, agents: Path = AGENTS, run=subprocess.run, uid: int = None, home: Path = None,
+         repo: Path = ROOT) -> int:
     ap = argparse.ArgumentParser(description="Manage the Friday launchd schedule")
     ap.add_argument("action", choices=("install", "uninstall", "status"))
     ap.add_argument("--dry-run", action="store_true")
     args = ap.parse_args(argv)
     uid = os.getuid() if uid is None else uid
     target = installed_path(agents)
-    want = render(ROOT, home or Path.home())
+    want = render(repo, home or Path.home())
     if args.action == "status":
         on_disk = target.read_bytes() if target.exists() else None
         got = run([LAUNCHCTL, "print", "gui/%d/%s" % (uid, LABEL)], capture_output=True, text=True)
@@ -62,6 +70,10 @@ def main(argv: list, agents: Path = AGENTS, run=subprocess.run, uid: int = None,
     if args.action == "install":
         if target.exists():
             print("REFUSED: %s is already installed; run uninstall first" % target)
+            return 1
+        not_the_clone = preflight.schedule_clone(repo)
+        if not_the_clone:
+            print("%s: %s" % ("DRY RUN: would REFUSE" if args.dry_run else "REFUSED", not_the_clone))
             return 1
         if args.dry_run:
             print("DRY RUN: would write %s (%d bytes) and run %s bootstrap gui/%d %s"

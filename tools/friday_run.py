@@ -35,7 +35,8 @@ close it, and back-pressure (feeds.runs.blocking) cannot either -- two runs star
 pending run. The lock closes it, and it is taken in friday() rather than main() so every caller passes
 through it. flock is released by the kernel when the process exits: a crash leaves no stale lock.
 With --scheduled (C2; scripts/schedule/friday_run.sh passes it) it also refuses, through the same path, when
-feeds/preflight.py finds the checkout off main, an unaccepted run under 14 days old, or auth that is not the
+feeds/preflight.py finds the checkout off main, a checkout that is not the marked schedule clone
+(<git-dir>/fc08-schedule-clone, re-review R-1), an unaccepted run under 14 days old, or auth that is not the
 long-lived token -- and whatever friday_run.sh itself refused (--refuse REASON, e.g. no token in the Keychain).
 Then it posts ONE notification, the report's first two lines (feeds/notify.py).
 

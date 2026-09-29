@@ -24,6 +24,8 @@ Usage:
     python evals/check_schedule.py --mutate auth-on-path          # auth_status runs the PATH claude, not the SDK's
     python evals/check_schedule.py --mutate cli-on-path           # cli_path() answers PATH's claude, not the SDK's
     python evals/check_schedule.py --mutate user-unset            # the launcher's Keychain account needs USER set
+    python evals/check_schedule.py --mutate preflight-no-marker   # preflight.reasons() drops the schedule-clone marker
+    python evals/check_schedule.py --mutate install-no-marker     # schedule.py install schedules an unmarked checkout
 
 WHAT IT HOLDS:
   the plist     renders to a valid plist: label uk.fc08.friday-run; Fridays (Weekday 5) at 09:00; runs
@@ -31,7 +33,9 @@ WHAT IT HOLDS:
                 false; no environment but PATH, and no token anywhere in it;
   schedule.py   install writes exactly the rendered plist and bootstraps gui/<uid>; refuses a second install;
                 --dry-run writes nothing; uninstall boots out and removes it; a FAILED bootout is reported, not
-                swallowed, and leaves the plist in place; status only reads;
+                swallowed, and leaves the plist in place; status only reads; install -- and install --dry-run,
+                which says so -- REFUSES in a checkout without the schedule-clone marker, writing nothing and
+                calling no launchctl (re-review R-1);
   the launcher  run with stub security, python and osascript, and hermetic to the CALLING shell's own
                 environment (the guard never leaks its own real CLAUDE_CODE_OAUTH_TOKEN into any stub, and an
                 inherited dummy token in the shell that runs friday_run.sh is unset before the Keychain read,
@@ -46,14 +50,16 @@ WHAT IT HOLDS:
                 full contract; this is fix round 1's I-1), including when a stdout write raises AFTER the
                 notification has already posted (fix round 2's N-1: nothing that can raise runs between a
                 successful notify() and the return);
-  the preflight off main, detached, a pending run under 14 days, and any auth but loggedIn "oauth_token"
-                each refuse; a clean state passes; auth_status and on_main REFUSE -- never crash, never pass --
+  the preflight off main, detached, a checkout without <git-dir>/fc08-schedule-clone (re-review R-1; the
+                marker is invisible to `git status`), a pending run under 14 days, and any auth but loggedIn
+                "oauth_token" each refuse; a clean state passes; auth_status and on_main REFUSE -- never crash, never pass --
                 on a non-zero exit, non-JSON output, `null`, a list, or a missing binary (fix round 1's I-3);
   the seam      (final review, I-1) friday_run --scheduled with NO injected reasons runs the REAL
                 preflight.reasons() -- its git and claude calls stubbed through its own `run=` seam, and the agent
                 session replaced by a stub that can never spend -- exactly once: a clean state reaches the session;
-                wrong auth, an ANTHROPIC_API_KEY or FEEDS_CATALOGUE in the environment (C1's refusals()), and all
-                three preflight checks at once each refuse, with the reasons in the fixed order;
+                wrong auth, a missing schedule-clone marker, an ANTHROPIC_API_KEY or FEEDS_CATALOGUE in the
+                environment (C1's refusals()), and all four preflight checks at once each refuse, with the reasons
+                in the fixed order branch, clone marker, back-pressure, auth;
   which claude  (final review, I-2) preflight.cli_path() is the binary the Agent SDK would start for BOTH agents'
                 real options (the bundled CLI when the SDK ships one), and auth_status runs exactly that binary;
                 a claude that cannot be resolved at all refuses (N-1, below);
@@ -131,8 +137,8 @@ TEXT_MUTATIONS = {
                           "    found = preflight.reasons(ROOT, root, today) if preflight_reasons is None else list(preflight_reasons)\n",
                           "    found = [] if preflight_reasons is None else list(preflight_reasons)\n"),
     "reasons-drop-auth": (PREFLIGHT,
-                          "    found = [on_main(repo, run), back_pressure(root, today), auth(status if status is not None else auth_status(run))]\n",
-                          "    found = [on_main(repo, run), back_pressure(root, today)]\n"),
+                          "             auth(status if status is not None else auth_status(run))]\n",
+                          "             ]\n"),
     "scheduled-no-env-refusals": (FRIDAY,
                                   "    reasons = refusals() + list(extra_refusals or []) + list(args.refuse) + found\n",
                                   "    reasons = list(extra_refusals or []) + list(args.refuse) + found\n"),
@@ -141,6 +147,10 @@ TEXT_MUTATIONS = {
     "cli-on-path": (PREFLIGHT, "    return transport._find_cli()\n", '    return __import__("shutil").which("claude")\n'),
     # final review M-3: an unset USER under `set -u`
     "user-unset": (SCRIPT, 'ACCOUNT="${USER:-$(id -un)}"\n', 'ACCOUNT="$USER"\n'),
+    # re-review R-1: the schedule runs only from its marked clone
+    "preflight-no-marker": (PREFLIGHT, "    found = [on_main(repo, run), schedule_clone(repo, run), back_pressure(root, today),\n",
+                            "    found = [on_main(repo, run), back_pressure(root, today),\n"),
+    "install-no-marker": (SCHEDULE, "        not_the_clone = preflight.schedule_clone(repo)\n", "        not_the_clone = None\n"),
 }
 
 
@@ -298,16 +308,23 @@ def checks(mutation) -> list:
         calls = []
         fake = lambda argv, **kw: (calls.append(argv), types.SimpleNamespace(returncode=0, stdout="state = waiting", stderr=""))[1]  # noqa: E731
         agents = tmp / "LaunchAgents"
-        import contextlib
         import io
+        # re-review R-1: install needs the schedule-clone marker, so the happy path installs from a MARKED temporary
+        # git repository; an unmarked one is checked to refuse right after.
+        marked, unmarked = tmp / "clone-marked", tmp / "clone-unmarked"
+        for r in (marked, unmarked):
+            r.mkdir()
+            git(r, "init", "-q", "-b", "main")
+        marker_file = marked / ".git" / "fc08-schedule-clone"
+        marker_file.write_text("", encoding="utf-8")
         with contextlib.redirect_stdout(io.StringIO()):
-            dry = sched.main(["install", "--dry-run"], agents=agents, run=fake, uid=501, home=Path("/Users/owner"))
+            dry = sched.main(["install", "--dry-run"], agents=agents, run=fake, uid=501, home=Path("/Users/owner"), repo=marked)
             wrote_on_dry = sched.installed_path(agents).exists()
-            first = sched.main(["install"], agents=agents, run=fake, uid=501, home=Path("/Users/owner"))
-            same = sched.installed_path(agents).read_bytes() == sched.render(ROOT, Path("/Users/owner"))
-            second = sched.main(["install"], agents=agents, run=fake, uid=501, home=Path("/Users/owner"))
-            status = sched.main(["status"], agents=agents, run=fake, uid=501, home=Path("/Users/owner"))
-            gone = sched.main(["uninstall"], agents=agents, run=fake, uid=501, home=Path("/Users/owner"))
+            first = sched.main(["install"], agents=agents, run=fake, uid=501, home=Path("/Users/owner"), repo=marked)
+            same = sched.installed_path(agents).read_bytes() == sched.render(marked, Path("/Users/owner"))
+            second = sched.main(["install"], agents=agents, run=fake, uid=501, home=Path("/Users/owner"), repo=marked)
+            status = sched.main(["status"], agents=agents, run=fake, uid=501, home=Path("/Users/owner"), repo=marked)
+            gone = sched.main(["uninstall"], agents=agents, run=fake, uid=501, home=Path("/Users/owner"), repo=marked)
         verbs = [c[1] for c in calls]
         out.append((dry == 0 and not wrote_on_dry and first == 0 and same and second == 1 and status == 0 and gone == 0
                     and not sched.installed_path(agents).exists() and verbs == ["bootstrap", "print", "bootout"]
@@ -315,21 +332,40 @@ def checks(mutation) -> list:
                     "schedule.py: a dry run writes nothing; install writes the rendered plist and bootstraps gui/<uid>; "
                     "a second install refuses; status only reads; uninstall boots out and removes it", verbs))
 
+        # --- re-review R-1: install refuses in a checkout without the schedule-clone marker -- and --dry-run says it
+        # would -- writing nothing and calling no launchctl.
+        before = len(calls)
+        buf_dry, buf_real = io.StringIO(), io.StringIO()
+        with contextlib.redirect_stdout(buf_dry):
+            unmarked_dry = sched.main(["install", "--dry-run"], agents=agents, run=fake, uid=501,
+                                      home=Path("/Users/owner"), repo=unmarked)
+        with contextlib.redirect_stdout(buf_real):
+            unmarked_real = sched.main(["install"], agents=agents, run=fake, uid=501, home=Path("/Users/owner"),
+                                       repo=unmarked)
+        out.append((unmarked_dry == 1 and unmarked_real == 1 and len(calls) == before
+                    and not sched.installed_path(agents).exists()
+                    and buf_dry.getvalue().startswith("DRY RUN: would REFUSE") and "fc08-schedule-clone" in buf_dry.getvalue()
+                    and buf_real.getvalue().startswith("REFUSED") and "The schedule clone" in buf_real.getvalue(),
+                    "schedule.py install refuses in a checkout without the schedule-clone marker -- and --dry-run says "
+                    "it would -- writing no plist and calling no launchctl; the refusal names the runbook step",
+                    "dry=%s real=%s launchctl=%s %r" % (unmarked_dry, unmarked_real, calls[before:],
+                                                       buf_real.getvalue().strip()[:90])))
+
         # --- schedule.py uninstall: a FAILED bootout is reported, not swallowed, and the plist stays (fix round 1, M-5)
         with contextlib.redirect_stdout(io.StringIO()):
-            reinstalled = sched.main(["install"], agents=agents, run=fake, uid=502, home=Path("/Users/owner"))
+            reinstalled = sched.main(["install"], agents=agents, run=fake, uid=502, home=Path("/Users/owner"), repo=marked)
         fail_bootout = lambda argv, **kw: types.SimpleNamespace(  # noqa: E731
             returncode=1, stdout="", stderr="No such process") if argv[1] == "bootout" else types.SimpleNamespace(
             returncode=0, stdout="", stderr="")
         buf = io.StringIO()
         with contextlib.redirect_stdout(buf):
-            failed = sched.main(["uninstall"], agents=agents, run=fail_bootout, uid=502, home=Path("/Users/owner"))
+            failed = sched.main(["uninstall"], agents=agents, run=fail_bootout, uid=502, home=Path("/Users/owner"), repo=marked)
         out.append((reinstalled == 0 and failed == 1 and sched.installed_path(agents).exists()
                     and "REFUSED" in buf.getvalue() and "bootout" in buf.getvalue(),
                     "schedule.py uninstall reports a failed launchctl bootout instead of ignoring it, and leaves the "
                     "plist in place", buf.getvalue().strip()[:160]))
         with contextlib.redirect_stdout(io.StringIO()):
-            sched.main(["uninstall"], agents=agents, run=fake, uid=502, home=Path("/Users/owner"))  # clean up
+            sched.main(["uninstall"], agents=agents, run=fake, uid=502, home=Path("/Users/owner"), repo=marked)  # clean up
 
         # --- the launcher, with stubs. "none" (no token) now uses RESERVED: a real --refuse run notifies itself
         # and exits RESERVED, so this reproduces that path rather than an arbitrary stand-in exit code.
@@ -420,6 +456,22 @@ def checks(mutation) -> list:
         detached = pf.on_main(repo)
         out.append((on_main is None and bool(off) and bool(detached), "the preflight refuses a feature branch and a "
                     "detached HEAD, and passes main", "%s | %s" % (off, detached)))
+        # re-review R-1: the schedule-clone marker, <git-dir>/fc08-schedule-clone, against a REAL temporary repository
+        status_before = subprocess.run(["git", "status", "--porcelain", "--ignored"], cwd=str(repo),
+                                       capture_output=True, text=True).stdout
+        no_marker = pf.schedule_clone(repo)
+        (repo / ".git" / pf.CLONE_MARKER).write_text("", encoding="utf-8")
+        with_marker = pf.schedule_clone(repo)
+        status_after = subprocess.run(["git", "status", "--porcelain", "--ignored"], cwd=str(repo),
+                                      capture_output=True, text=True).stdout
+        sub = repo / "sub"
+        sub.mkdir()
+        from_sub = pf.schedule_clone(sub)  # --git-dir answers an ABSOLUTE path from a subdirectory
+        out.append((bool(no_marker) and "The schedule clone" in no_marker and with_marker is None and from_sub is None
+                    and status_before == status_after,
+                    "the preflight refuses a checkout without <git-dir>/fc08-schedule-clone, naming the runbook step, and "
+                    "passes one with it; the marker is invisible to git status, even with --ignored",
+                    "%s | %s | %s" % (str(no_marker)[:70], with_marker, from_sub)))
         box = tmp / "inbox"
         today = date(2026, 10, 9)
         inbox.save("feeds-2026-10-02-ddd001", {"run_id": "feeds-2026-10-02-ddd001", "sources": {"ofac": {"items": [
@@ -543,9 +595,13 @@ def checks(mutation) -> list:
         # ever runs -- and a wrapper counts the calls. The session is the no_session stub installed above.
         fr.preflight = pf
         real_reasons = pf.reasons
+        seam_git = tmp / "seam-git-dir"  # what the stubbed `git rev-parse --git-dir` answers (absolute)
+        seam_git.mkdir()
         seam = {"calls": 0, "branch": "main", "auth": {"loggedIn": True, "authMethod": "oauth_token"}}
 
         def seam_run(argv, **kw):
+            if list(argv) == ["git", "rev-parse", "--git-dir"]:
+                return types.SimpleNamespace(returncode=0, stdout=str(seam_git) + "\n", stderr="")
             if argv[0] == "git":
                 return types.SimpleNamespace(returncode=0, stdout=seam["branch"] + "\n", stderr="")
             if list(argv[1:]) == ["auth", "status", "--json"]:
@@ -559,8 +615,11 @@ def checks(mutation) -> list:
         pf.reasons = recording_reasons
         env_names = ("ANTHROPIC_API_KEY",) + tuple(fr.EVAL_VARIABLES)
 
-        def scheduled(label, branch="main", auth=None, env=None, pending=False):
+        def scheduled(label, branch="main", auth=None, env=None, pending=False, marker=True):
             seam["branch"], seam["auth"] = branch, auth or {"loggedIn": True, "authMethod": "oauth_token"}
+            (seam_git / "fc08-schedule-clone").unlink(missing_ok=True)
+            if marker:
+                (seam_git / "fc08-schedule-clone").write_text("", encoding="utf-8")
             box = tmp / ("inbox-seam-" + label)
             box.mkdir()
             if pending:
@@ -586,7 +645,8 @@ def checks(mutation) -> list:
                 clean = scheduled("clean")
                 wrong_auth = scheduled("auth", auth={"loggedIn": True, "authMethod": "claude.ai"})
                 api_env = scheduled("env", env={"ANTHROPIC_API_KEY": "guard-dummy", "FEEDS_CATALOGUE": "guard-dummy"})
-                everything = scheduled("all", branch="feature", pending=True,
+                unmarked_run = scheduled("unmarked", marker=False)
+                everything = scheduled("all", branch="feature", pending=True, marker=False,
                                        auth={"loggedIn": True, "authMethod": "claude.ai"})
         finally:
             pf.reasons = real_reasons
@@ -604,11 +664,19 @@ def checks(mutation) -> list:
                     and any("FEEDS_CATALOGUE" in r for r in api_env["reasons"]),
                     "on the scheduled path, C1's refusals() still applies: an ANTHROPIC_API_KEY or FEEDS_CATALOGUE "
                     "in the environment refuses before any session", api_env))
+        out.append((unmarked_run["reasons_calls"] == 1 and unmarked_run["session"] == 0
+                    and unmarked_run["code"] == RESERVED and unmarked_run["notes"] == 1
+                    and len(unmarked_run["reasons"]) == 1 and "not the schedule clone" in unmarked_run["reasons"][0]
+                    and "The schedule clone" in unmarked_run["reasons"][0],
+                    "on the scheduled path, a checkout on main but WITHOUT the schedule-clone marker refuses through "
+                    "preflight.reasons(), naming the runbook step: no session, one notification, the reserved exit "
+                    "(re-review R-1)", unmarked_run))
         order = [next((i for i, r in enumerate(everything["reasons"]) if needle in r), -1)
-                 for needle in ("not main", "unaccepted run", "'claude.ai'")]
+                 for needle in ("not main", "not the schedule clone", "unaccepted run", "'claude.ai'")]
         out.append((everything["session"] == 0 and -1 not in order and order == sorted(order),
-                    "off main, with a pending run and the wrong auth, the scheduled path reports all three preflight "
-                    "refusals together, in the fixed order branch, back-pressure, auth", everything["reasons"]))
+                    "off main, unmarked, with a pending run and the wrong auth, the scheduled path reports all four "
+                    "preflight refusals together, in the fixed order branch, clone marker, back-pressure, auth",
+                    everything["reasons"]))
 
         # --- fix round 1, I-2: the Python half of the one-notification contract
         notes = []
