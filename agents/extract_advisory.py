@@ -90,6 +90,7 @@ The Knowledge Centre:
 - A typology_id may only be one a tool returned. If the search reports no match, the typology is emergent: typology_id null, emergent true.
 - A search result marked TWIN carries the same technique as another code in a different family. The declaration names the twin and the preferred family where one exists. knowledge_centre_propose_link REFUSES the link unless your rationale names that twin and says why this family fits the advisory. Do not judge by whether the two labels look alike: SAN006 and TBML010 are the same technique with the words reordered.
 - When a result says its doctrine is authored as another id, prefer that id.
+- For each actor the document names (a person or an organisation, never a category), call knowledge_centre_resolve_actor with the name as the document gives it. Only a reply starting "Resolved:" is an identity: note it in extraction_notes as "name -> actor_id". A reply listing similar names is a suggestion for a human, not a resolution: if you mention it, label it a suggestion, and never treat a suggested actor_id as the actor's identity.
 - Before you finish, call knowledge_centre_propose_link once per typology in your record: with typology_id for a library match, with emergent_label for an emergent one. Pass the same citations as the record entry (page and verbatim quote); a quote that is not on the page it names is refused, and the refusal says where it is. Cite page numbers in the rationale.
 """
 
