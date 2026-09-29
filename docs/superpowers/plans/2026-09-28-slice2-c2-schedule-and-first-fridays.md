@@ -136,6 +136,48 @@ C1's Global Constraints hold. In addition:
 
 ---
 
+### Task 0: an item already decided in an earlier run does not refuse its whole run (C1 final review I-3; owner ruling A, 2026-09-29)
+
+**Why first.** Task 1 wires back-pressure to `runs.blocking`. Today, `tools/accept_run.plan()` refuses a WHOLE run if any item it lists is already in the ledger (`accept_run.py`, the `already decided in an earlier run` raise). Deferring that item does not help, and `--expire` refuses anything under 14 days. So when two runs list the same item and the older is accepted, the newer run can be neither accepted nor expired, and it blocks every Friday until day 14. C1's final review reproduced this. Owner ruling (option A): **an item already in the ledger counts as decided in its earlier run, and the rest of the run is decided as normal.**
+
+**Files:** `tools/accept_run.py` (`plan`, `apply`, `ask`, the RECORDED line), `evals/check_accept_run.py`, CLAUDE.md's C1 `accept_run` row.
+
+- [ ] **Step 1: The failing guard case.** Build it in `check_accept_run` from the review's reproduction:
+  - runs A (2026-10-02) and B (2026-10-09) both list item X, and B also lists a new item Y;
+  - accept A with X dropped;
+  - then accept B.
+
+  The case asserts all of the following:
+  1. B is RECORDED;
+  2. Y's decision is in the ledger;
+  3. X's ledger entry is byte-identical to A's (its `first_seen_run`, `decision` and `decided_on` are unchanged);
+  4. B's `accepted.json` names X as "decided in A", not as a decision of B's;
+  5. `runs.blocking` no longer lists B.
+
+  Run it and watch it fail on the current raise.
+- [ ] **Step 2: Implement.**
+  - **In `plan()`,** partition the listed items. Items already in the ledger are carried as `already_decided: {key: <first_seen_run>}`; everything else goes through the usual per-item rules.
+  - **An item already decided,** whatever the decision file says for it:
+    - is never re-recorded, and the ledger is never rewritten for it;
+    - a decision file that tries to ACCEPT it is refused, naming the earlier run, because an accept would copy a second record for an item the ledger already closed;
+    - a drop or defer for it is ignored, with a note.
+  - **If every listed item is already decided,** the run is still recorded as accepted, with 0 new decisions, so it stops blocking.
+  - **`ask()`** shows those items as "already decided in <run>" and asks nothing about them.
+  - **The RECORDED line** counts them separately.
+- [ ] **Step 3: Mutations.**
+  - `whole-run-refusal`: restore the old raise. The Step 1 case must go red.
+  - `redecide-seen`: let an already-decided item be re-recorded. The byte-identical-entry assertion must go red.
+
+  Run each one on its own, with its own `PYTHONPYCACHEPREFIX`.
+- [ ] **Step 4: Full check.**
+  - Run `check_accept_run` plain, then `tools/check_all.py --cold`.
+  - Update CLAUDE.md's `accept_run` row and the `check_accept_run` mutation list.
+- [ ] **Step 5: Commit.**
+  ```bash
+  git add tools/accept_run.py evals/check_accept_run.py CLAUDE.md
+  git commit -m "Slice 2 C2: an item already decided in an earlier run is carried, not refused -- two overlapping runs can both be accepted (owner ruling A)"
+  ```
+
 ### Task 1: the scheduled run: preflight, notification, launcher, plist and `schedule.py`
 
 **Files:**

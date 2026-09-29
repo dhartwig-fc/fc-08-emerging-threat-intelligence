@@ -575,11 +575,10 @@ Plan: `docs/superpowers/plans/2026-09-27-slice2-b-triage-and-its-eval.md`.
 
 **Carry-forwards for sub-project C (recorded by the final B review; NOT fixed in B's code):**
 - **A `FEEDS_CATALOGUE` exported in the operator's shell could reach a live server.** A live `FeedsRun.env()` does not set it, so a live server can see whatever the CLI's inherited environment carries (final B review, Task 4 minor 4; not tested in B). C's live mode should pass `FEEDS_CATALOGUE=""` explicitly, which `_catalogue()` reads as no catalogue.
-- ~~**No guard pins the per-session budget or turn cap.**~~ **FIXED in C1** (final review 2026-09-29: this line was
-  still false on the branch it was written for). `check_feeds_orchestrator.py:76` now pins `MAX_BUDGET_USD`
+- ~~**No guard pins the per-session budget or turn cap.**~~ **FIXED in C1** (true when B wrote it; C1's final review,
+  2026-09-29, found it had become false). `check_feeds_orchestrator.py:76` now pins `MAX_BUDGET_USD`
   (US$1.50), `MAX_TURNS` (80) and the run ceiling in `agents/orchestrate_feeds.py` -- `unpinned-budget` and
-  `over-ceiling` are its mutation labels (see the C1 table below). Unguarded only in B; nothing here binds
-  before that.
+  `over-ceiling` are its mutation labels (see the C1 table below). The budget was unguarded only in B.
 - **The production `inbox/` holds B's 18 eval runs** (each `items.json` marked `"eval": true`), and will hold more if the repeats are re-run. Anything in C that lists pending runs must filter on the eval marker; `accept_run` already refuses an eval-marked run.
 - **`validated` is true for a session that triaged nothing.** `validated=failure is None` in `agents/orchestrate_feeds.py`, so a session with no failure and no verdict reports validated.
 
@@ -621,8 +620,9 @@ of an earlier commit on this same branch):**
 **Not yet exercised live** (all built and guarded cold; none of it has run against a real relevant item, because
 the first live run triaged nothing relevant -- final review 2026-09-29, Recommendations 2 and 3):
 
-- `terminal_check` live, only 1 of the 3 sessions the DoD names (only the orchestrator session has run; no
-  extraction session has);
+- `terminal_check` on a live Friday run: 1 run so far (its orchestrator session; no extraction session has
+  run). Spec DoD 4 asks for "at least three times"; whether B's 18 eval sessions, which also carry it, count
+  toward that waits on a ruling;
 - the resolver's resolution rate (`knowledge_centre_resolve_actor`'s live call count and resolved fraction);
 - extraction cost against the US$1 per-extraction cap -- how far a live session can overshoot it is unmeasured;
 - the extractor's own `PROMPT_SHA256` reaching `RUN_STARTED` live (the orchestrator's live selection *is*
