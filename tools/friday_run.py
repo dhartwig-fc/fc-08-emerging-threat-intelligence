@@ -34,7 +34,11 @@ every advisory-id allocation and every extraction, and refuses when it cannot ta
 close it, and back-pressure (feeds.runs.blocking) cannot either -- two runs started together both see no
 pending run. The lock closes it, and it is taken in friday() rather than main() so every caller passes
 through it. flock is released by the kernel when the process exits: a crash leaves no stale lock.
-Sub-project C2 adds the scheduled preflight (on main, back-pressure, auth) through the same refusal path.
+With --scheduled (C2; scripts/schedule/friday_run.sh passes it) it also refuses, through the same path, when
+feeds/preflight.py finds the checkout off main, an unaccepted run under 14 days old, or auth that is not the
+long-lived token -- and whatever friday_run.sh itself refused (--refuse REASON, e.g. no token in the Keychain).
+Then it posts ONE notification, the report's first two lines (feeds/notify.py). A crash in scheduled mode exits 3
+without notifying, and friday_run.sh posts the one notification instead.
 
 EXIT 0 for COMPLETE, NOTHING_NEW and UNFINISHED (a person decides the rest); 1 for REFUSED, FAILED and
 RECONCILIATION_FAILED.
@@ -56,7 +60,7 @@ from typing import Optional
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 from agents import orchestrate_feeds as of, telemetry  # noqa: E402
-from feeds import extraction, inbox, reconcile, report  # noqa: E402
+from feeds import extraction, inbox, notify, preflight, reconcile, report  # noqa: E402
 from feeds.runs import run_date  # noqa: E402
 
 # Every list an advisory id may already be in: the golden corpus and the accepted live-feed advisories. Every id
@@ -243,10 +247,21 @@ def refusals(env=None) -> list:
     return out
 
 
-def main(argv: list, root: Path = inbox.INBOX_ROOT, today: date = None, extra_refusals=None) -> int:
+def main(argv: list, root: Path = inbox.INBOX_ROOT, today: date = None, extra_refusals=None,
+         preflight_reasons=None, notifier=None) -> int:
     ap = argparse.ArgumentParser(description="One Friday feeds run")
     ap.add_argument("--plan", action="store_true", help="print the budget and caps; start nothing")
+    ap.add_argument("--scheduled", action="store_true", help="launchd: run the preflight, then post one notification")
+    ap.add_argument("--refuse", action="append", default=[], metavar="REASON",
+                    help="a refusal friday_run.sh found before Python started (repeatable)")
     args = ap.parse_args(argv)
+    if args.scheduled:
+        try:
+            return _scheduled(args, root, today, extra_refusals, preflight_reasons, notifier)
+        except Exception:  # noqa: BLE001 -- friday_run.sh posts the one notification for a crash
+            import traceback
+            traceback.print_exc()
+            return 3
     if args.plan:
         print("orchestrator: US$%.2f, %d turns; extraction: US$%.2f, %d turns each, at most %d; ceiling US$%.2f"
               % (of.MAX_BUDGET_USD, of.MAX_TURNS, of.EXTRACTION_BUDGET_USD, of.EXTRACTION_MAX_TURNS,
@@ -256,6 +271,18 @@ def main(argv: list, root: Path = inbox.INBOX_ROOT, today: date = None, extra_re
     reasons = refusals() + list(extra_refusals or [])
     rec = write_refusal(run.run_id, reasons, root) if reasons else asyncio.run(friday(run, root=root))
     print("%s: %s -- %s" % (run.run_id, rec["status"], inbox.run_dir(run.run_id, root) / report.REPORT))
+    return 0 if rec["status"] in reconcile.ACCEPTABLE else 1
+
+
+def _scheduled(args, root, today, extra_refusals, preflight_reasons, notifier) -> int:
+    run = of.FeedsRun(inbox.mint_run_id(today or date.today()))
+    telemetry.TELEMETRY_DIR = inbox.run_dir(run.run_id, root) / inbox.TELEMETRY
+    found = preflight.reasons(ROOT, root, today) if preflight_reasons is None else list(preflight_reasons)
+    reasons = refusals() + list(extra_refusals or []) + list(args.refuse) + found
+    rec = write_refusal(run.run_id, reasons, root) if reasons else asyncio.run(friday(run, root=root))
+    path = inbox.run_dir(run.run_id, root) / report.REPORT
+    (notifier or notify.notify)(*notify.from_report(path))
+    print("%s: %s -- %s" % (run.run_id, rec["status"], path))
     return 0 if rec["status"] in reconcile.ACCEPTABLE else 1
 
 

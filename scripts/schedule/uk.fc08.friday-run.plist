@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!-- FC08 Friday run: every Friday at 09:00 local time. A TEMPLATE: tools/schedule.py install renders
+     __REPO__ and __HOME__ and writes the result to ~/Library/LaunchAgents/. It carries no token and no
+     environment beyond PATH; friday_run.sh reads the token from the Keychain at run time. -->
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>uk.fc08.friday-run</string>
+    <key>ProgramArguments</key>
+    <array>
+        <string>/bin/bash</string>
+        <string>__REPO__/scripts/schedule/friday_run.sh</string>
+    </array>
+    <key>StartCalendarInterval</key>
+    <dict>
+        <key>Weekday</key>
+        <integer>5</integer>
+        <key>Hour</key>
+        <integer>9</integer>
+        <key>Minute</key>
+        <integer>0</integer>
+    </dict>
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>PATH</key>
+        <string>__HOME__/.local/bin:/usr/local/bin:/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
+    </dict>
+    <key>StandardOutPath</key>
+    <string>__HOME__/Library/Logs/uk.fc08.friday-run.log</string>
+    <key>StandardErrorPath</key>
+    <string>__HOME__/Library/Logs/uk.fc08.friday-run.log</string>
+    <key>RunAtLoad</key>
+    <false/>
+</dict>
+</plist>
