@@ -41,6 +41,13 @@ TAKES THE FRIDAY RUN'S OWN LOCK (tools/friday_run.run_lock) across the plan+appl
 run could still be making them, so a snapshot taken mid-write would miss allocations made after it. --pending
 and --seed-catalogue never touch another run's allocations and stay unlocked.
 
+THE LOCK IS ALSO HELD ACROSS THE INTERACTIVE PROMPT -- ask()'s per-item questions and the final "Apply: ...?
+[y/N]" -- not just plan() and apply(). This is by design, not an oversight: the plan's snapshot of every
+run's allocations must stay valid until apply() writes, and a person deciding interactively is still inside
+that window. The consequence is real: a person who leaves the prompt open blocks the next Friday run for as
+long as it stays open, with a LOCKED refusal, same as if `accept_run` were still computing. Decide from a
+--decisions file for anything that must not wait on a person.
+
 VALIDATES EVERYTHING FIRST, and refuses the whole run on any failure, writing nothing:
   - the run exists, is not an eval run, is not already accepted, and every listed item is decided exactly once;
   - the run's reconciliation (feeds/reconcile.py) is acceptable -- a FAILED or RECONCILIATION_FAILED run needs

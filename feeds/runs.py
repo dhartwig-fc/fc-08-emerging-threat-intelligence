@@ -88,10 +88,12 @@ def mark_accepted(run_id: str, record: dict, root: Path = inbox.INBOX_ROOT) -> N
     whether this file EXISTS -- it never validates its content -- so a crash part-way through a direct write
     would leave a truncated marker that classify() still reads as accepted, and the run would never come
     back for a decision even though nothing valid was ever recorded. Write the body to a temp file in the
-    same directory first; only once it is complete, hard-link it into place (os.link raises if the target
-    already exists, so this can never overwrite a marker either, closing the same window a bare exists-check
-    leaves open); then always remove the temp file. A crash during the write leaves the temp file only, and
-    the run still classifies as PENDING."""
+    same directory first, fsync it so the bytes cannot be lost to a power loss between a "complete" write and
+    the link, then hard-link it into place (os.link raises if the target already exists, so this can never
+    overwrite a marker either, closing the same window a bare exists-check leaves open -- including the race
+    where another writer creates the marker between this call's own exists-check and its link: the original
+    marker survives and this call's temp is still removed); then always remove the temp file. A crash during
+    the write leaves the temp file only, and the run still classifies as PENDING."""
     path = inbox.run_dir(run_id, root) / ACCEPTED
     if path.exists():
         raise ValueError("run %s was already accepted" % run_id)
@@ -100,6 +102,8 @@ def mark_accepted(run_id: str, record: dict, root: Path = inbox.INBOX_ROOT) -> N
     try:
         with open(tmp_path, "w", encoding="utf-8") as f:
             f.write(body)
+            f.flush()
+            os.fsync(f.fileno())
         os.link(tmp_path, path)
     finally:
         if tmp_path.exists():

@@ -18,6 +18,8 @@ Usage:
     python evals/check_feeds_extract.py --mutate hide-duplicates   # load_allocations keeps the last of two lines silently
     python evals/check_feeds_extract.py --mutate inbox-ids-only    # accepted runs' tracked allocations are not read
     python evals/check_feeds_extract.py --mutate no-identity-match-check  # extract() trusts a mismatched RunIdentity
+    python evals/check_feeds_extract.py --mutate identity-check-refuses-all  # every passed identity is refused
+    python evals/check_feeds_extract.py --mutate no-resolve         # the identity check compares an unresolved path
 
 WHAT IT HOLDS:
   relevant only  a request is refused for an item not listed, with no verdict, or triaged not_relevant;
@@ -41,7 +43,9 @@ WHAT IT HOLDS:
                  feeds run the queue is data/proposals/ exactly as in slice 1;
   the tool       the server's feeds_extract applies these rules under a run identity and refuses without one;
   identity       extract() refuses a passed RunIdentity that does not match its own call's advisory id or
-                 document, before any session starts and with no file read for the mismatched path;
+                 document, before any session starts and with no file read for the mismatched path; a
+                 MATCHING identity -- same document, differently spelled -- gets past the check, proved by
+                 reaching (a stubbed) document_pages, never a session;
   inbox only     every file written is inside the temporary inbox; the repository's git status is unchanged.
 
 COLD. Stubbed HTTP, temporary inbox and advisory list. No network, no model.
@@ -112,6 +116,12 @@ MUTATIONS = {
         '                             "arguments (advisory %s, document %s)"\n'
         "                             % (run.run_id, run.advisory_id, run.pdf_path, advisory_id, resolved))\n",
         ""),
+    # Fix round 1, Important (F6): a version that refuses EVERY passed identity, matching one included, must
+    # also go red -- the negative-only guard above could not tell this apart from the real check.
+    "identity-check-refuses-all": (EXTRACT_ADVISORY,
+        '        if run.advisory_id != advisory_id or run.pdf_path != resolved:\n',
+        "        if True:\n"),
+    "no-resolve": (EXTRACT_ADVISORY, "        resolved = Path(path).resolve()\n", "        resolved = Path(path)\n"),
 }
 
 
@@ -423,6 +433,32 @@ def checks(mutation) -> list:
                    "extract() refuses a passed RunIdentity that does not match this call's own advisory id or "
                    "document, before any session starts (no file even read for the mismatched path)",
                    "%s | %s" % (exc1, exc2)))
+
+        # Fix round 1, Important (F6): the case above only ever proves a REFUSAL. A version of the check that
+        # refuses every passed identity (or that compares an unresolved path) would stay green. Add the
+        # positive case: a MATCHING identity, the same document spelled differently (redundant ".." segments,
+        # never resolved by hand here), must get PAST the check -- proved by reaching document_pages, stubbed
+        # to raise a sentinel so no session can ever start.
+        differently_spelled = doc_a.parent / ".." / doc_a.parent.name / doc_a.name
+        assert differently_spelled != doc_a and differently_spelled.resolve() == doc_a.resolve(), (
+            "the fixture must be an unresolved spelling of the SAME file, or this case proves nothing")
+
+        class _GotPastIdentityCheck(Exception):
+            pass
+
+        real_document_pages = ea.document_pages
+
+        def stubbed(_path):
+            raise _GotPastIdentityCheck("stub: extract() reached document_pages -- no session was reachable")
+        ea.document_pages = stubbed
+        try:
+            exc3 = raised(ea.extract(differently_spelled, "ADV-2026-0001", "stub-model", 1.0, 5, run=ident))
+        finally:
+            ea.document_pages = real_document_pages
+        out.append((isinstance(exc3, _GotPastIdentityCheck),
+                   "a MATCHING RunIdentity -- same document, spelled differently -- gets past the check "
+                   "(reaches document_pages; a refuse-everything or an unresolved-path version would raise "
+                   "ValueError here instead, before ever reaching it)", str(exc3)))
 
     out.append((git_status() == before, "the repository's git status is unchanged", ""))
     return out

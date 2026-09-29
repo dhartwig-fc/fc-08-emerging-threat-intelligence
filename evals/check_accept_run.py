@@ -18,6 +18,7 @@ Usage:
     python evals/check_accept_run.py --mutate marker-bare           # a marker failure after the ledger reads as REFUSED
     python evals/check_accept_run.py --mutate direct-write          # feeds/runs.mark_accepted writes the marker directly
     python evals/check_accept_run.py --mutate accept-unlocked       # accepting proceeds while a Friday run holds the lock
+    python evals/check_accept_run.py --mutate dryrun-unlocked       # --dry-run is exempted from the lock
     python evals/check_accept_run.py --mutate no-not-extracted-refusal  # accepting a never-extracted item crashes instead of refusing
     python evals/check_accept_run.py --mutate no-verdict-refusal     # accepting an extracted item with no triage verdict crashes
 
@@ -51,7 +52,9 @@ WHAT IT HOLDS:
               run holds it, writing nothing; released, the same acceptance succeeds;
   marker atomicity  feeds/runs.mark_accepted writes accepted.json atomically: a crash mid-write leaves no
               marker at all, never a truncated one classify() would misread as accepted, and the run still
-              classifies as pending;
+              classifies as pending; a marker another writer creates between this call's own exists-check and
+              its link is refused (os.link), the original survives untouched and this call's own temp is
+              still removed;
   no-verdict  an extracted item with no triage verdict refuses ("extracted but has no triage verdict"), never
               crashes;
   seed        --seed-catalogue records every catalogue item as a drop under "catalogue:<sha12>", once.
@@ -110,6 +113,10 @@ MUTATIONS = {
     "accept-unlocked": (
         "        if not held:\n            print(\"REFUSED: a Friday run holds %s; accepting a run reads",
         "        if False:\n            print(\"REFUSED: a Friday run holds %s; accepting a run reads"),
+    "dryrun-unlocked": (
+        "        if not held:\n            print(\"REFUSED: a Friday run holds %s; accepting a run reads",
+        "        if not held and not args.dry_run:\n            print(\"REFUSED: a Friday run holds %s; "
+        "accepting a run reads"),
     "no-not-extracted-refusal": (
         '    if not outcome or outcome.get("status") != "extracted":\n        return None, ["%s cannot be '
         'accepted: it was not extracted (%s)" % (key, (outcome or {}).get("status", "never queued"))]\n',
@@ -126,6 +133,8 @@ RUNS_MUTATIONS = {
         "    try:\n"
         '        with open(tmp_path, "w", encoding="utf-8") as f:\n'
         "            f.write(body)\n"
+        "            f.flush()\n"
+        "            os.fsync(f.fileno())\n"
         "        os.link(tmp_path, path)\n"
         "    finally:\n"
         "        if tmp_path.exists():\n"
@@ -571,12 +580,18 @@ def checks(mutation) -> list:
             locked_code2, locked_said2 = accept(rid, dec)
             locked_untouched = (alist.read_bytes() == a0 and seen.read_bytes() == l0
                                 and runs.classify(rid, box) == runs.PENDING)
+            # Fix round 1, minor 1 (F2): --dry-run is part of the plan+apply path too, so it must also refuse
+            # under the lock -- the docstring already claimed this, but nothing checked it.
+            dry_code2, dry_said2 = accept(rid, dec, "--dry-run")
+            dry_locked = (dry_code2 == 1 and "Friday run" in dry_said2 and alist.read_bytes() == a0
+                         and seen.read_bytes() == l0 and runs.classify(rid, box) == runs.PENDING)
         free_code2, free_said2 = accept(rid, dec)
         out.append((held2 and locked_code2 == 1 and "Friday run" in locked_said2 and locked_untouched
-                    and free_code2 == 0 and runs.classify(rid, box) == runs.ACCEPTED_STATE,
+                    and dry_locked and free_code2 == 0 and runs.classify(rid, box) == runs.ACCEPTED_STATE,
                     "accepting is refused while a Friday run holds the inbox's lock (the SAME lock), writing "
-                    "nothing; released, the same acceptance succeeds",
-                    "%s | %s" % (locked_said2.strip()[:100], free_said2.strip()[:60])))
+                    "nothing -- --dry-run included; released, the same acceptance succeeds",
+                    "%s | dry-run %s | %s" % (locked_said2.strip()[:80], dry_said2.strip()[:60],
+                                              free_said2.strip()[:60])))
 
         # F1 (2026-09-28 fixes brief): feeds/runs.mark_accepted must never leave a PARTIAL marker. classify()
         # only checks whether accepted.json EXISTS -- never its content -- so a crash mid-write must leave
@@ -616,6 +631,40 @@ def checks(mutation) -> list:
                     "a crash mid-write to the inbox marker leaves no marker at all (never a truncated one); "
                     "the run still classifies as pending, not accepted",
                     "leftover %s | classify %s" % (leftover, runs.classify(rid_f1, box2))))
+
+        # Fix round 1, minor 2 (F1): the RACE-refusal path -- another writer creates accepted.json between
+        # this call's own exists-check and its os.link. The original marker must survive untouched, and this
+        # call's own temp file must still be removed even though it raised.
+        box2b = tmp / "runs-f1-race"
+        rid_race = "feeds-2026-10-02-fff002"
+        inbox.save(rid_race, {"run_id": rid_race, "sources": {"ofac": {"items": [
+            {"key": "ofac:2", "source": "ofac", "item_id": "2"}]}}}, box2b)
+        runs_mod_race = load_runs(mutation)
+        marker_path = inbox.run_dir(rid_race, box2b) / runs.ACCEPTED
+        ORIGINAL = b'{"run_id": "the-original-writer-won"}\n'
+        real_os_race = runs_mod_race.os
+
+        def racing_link(src, dst, _real=real_os_race.link):
+            marker_path.write_bytes(ORIGINAL)  # another writer wins the race, right before this call's link
+            return _real(src, dst)
+        runs_mod_race.os = types.SimpleNamespace(**{k: getattr(real_os_race, k) for k in dir(real_os_race)
+                                                    if not k.startswith("__")})
+        runs_mod_race.os.link = racing_link
+        raced = None
+        try:
+            runs_mod_race.mark_accepted(rid_race, {"run_id": rid_race, "decided_on": "2026-10-02"}, box2b)
+        except OSError as exc:
+            raced = exc
+        finally:
+            runs_mod_race.os = real_os_race
+        leftover_race = sorted(p.name for p in marker_path.parent.iterdir()
+                               if p.name != inbox.ITEMS and p != marker_path)
+        out.append((isinstance(raced, FileExistsError) and marker_path.read_bytes() == ORIGINAL
+                    and not leftover_race,
+                    "a marker created by another writer between the exists-check and the link is refused "
+                    "(os.link), the original survives untouched, and this call's own temp file is still removed",
+                    "raised %s | content %s | leftover %s" % (
+                        type(raced).__name__, marker_path.read_bytes(), leftover_race)))
 
         # F5 (2026-09-28 fixes brief): an extracted item with no triage verdict must refuse, never crash.
         rid = "feeds-2026-10-02-bbb013"
