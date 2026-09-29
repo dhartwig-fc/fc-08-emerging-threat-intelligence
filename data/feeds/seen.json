@@ -283,6 +283,13 @@
     {
       "decided_on": "2026-09-29",
       "decision": "drop",
+      "first_seen_run": "feeds-2026-09-29-865f66",
+      "item_id": "20260928",
+      "source": "ofac"
+    },
+    {
+      "decided_on": "2026-09-29",
+      "decision": "drop",
       "first_seen_run": "catalogue:90b57e8ba022",
       "item_id": "https://www.gov.uk/government/news/uk-issues-largest-penalty-for-financial-sanctions-breaches-since-russias-2022-illegal-invasion-of-ukraine#2026-06-17T11:04:35Z",
       "source": "ofsi"
@@ -292,6 +299,13 @@
       "decision": "drop",
       "first_seen_run": "catalogue:90b57e8ba022",
       "item_id": "https://www.gov.uk/government/publications/check-if-an-email-or-communication-claiming-to-be-from-ofsi-is-genuine#2026-07-24T09:32:01Z",
+      "source": "ofsi"
+    },
+    {
+      "decided_on": "2026-09-29",
+      "decision": "drop",
+      "first_seen_run": "feeds-2026-09-29-865f66",
+      "item_id": "https://www.gov.uk/government/publications/financial-sanctions-licensing#2026-09-10T10:22:04Z",
       "source": "ofsi"
     },
     {
@@ -355,6 +369,13 @@
       "decision": "drop",
       "first_seen_run": "catalogue:90b57e8ba022",
       "item_id": "https://www.gov.uk/government/publications/ofsi-general-licence-int20256641960#2026-07-13T15:06:07Z",
+      "source": "ofsi"
+    },
+    {
+      "decided_on": "2026-09-29",
+      "decision": "drop",
+      "first_seen_run": "feeds-2026-09-29-865f66",
+      "item_id": "https://www.gov.uk/government/publications/ofsi-general-licence-int20257363752#2026-09-29T08:01:11Z",
       "source": "ofsi"
     },
     {

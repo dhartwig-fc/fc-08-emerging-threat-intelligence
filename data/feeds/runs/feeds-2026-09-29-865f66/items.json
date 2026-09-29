@@ -1,0 +1,106 @@
+{
+  "run_id": "feeds-2026-09-29-865f66",
+  "sources": {
+    "fincen": {
+      "already_seen": 15,
+      "error": null,
+      "items": [],
+      "listed": 15,
+      "listed_at": "2026-09-29T10:56:08Z",
+      "listing": "listings/fincen.html",
+      "listing_sha256": "78ff1d4e70f9e72ee42ac3aba77a3e87de5ee64023e16eb8d754d5398424876d",
+      "listing_url": "https://www.fincen.gov/resources/advisoriesbulletinsfact-sheets/advisories",
+      "status": "ok"
+    },
+    "ofac": {
+      "already_seen": 9,
+      "error": null,
+      "items": [
+        {
+          "document": {
+            "bytes": 39682,
+            "content_type": "text/html",
+            "fetched_at": "2026-09-29T10:56:50Z",
+            "final_url": "https://ofac.treasury.gov/recent-actions/20260928",
+            "linked_pdfs": [],
+            "page_error": null,
+            "pages": 1,
+            "path": "docs/55a18e35eaa3fe1d30cc506025b469d83b3c7b3cf48683c3c7dee40f5c8b7ac4.html",
+            "sha256": "55a18e35eaa3fe1d30cc506025b469d83b3c7b3cf48683c3c7dee40f5c8b7ac4",
+            "text_pages": 1
+          },
+          "item_id": "20260928",
+          "key": "ofac:e48df115bb6c423a",
+          "published": "2026-09-28",
+          "source": "ofac",
+          "summary": "",
+          "title": "Issuance of Amended Venezuela General Licenses",
+          "url": "https://ofac.treasury.gov/recent-actions/20260928"
+        }
+      ],
+      "listed": 10,
+      "listed_at": "2026-09-29T10:56:20Z",
+      "listing": "listings/ofac.html",
+      "listing_sha256": "868da127364388ad6ea786f7cbf7e54ec8a00fad0a55a06a5533a8d98952d39e",
+      "listing_url": "https://ofac.treasury.gov/recent-actions",
+      "status": "ok"
+    },
+    "ofsi": {
+      "already_seen": 18,
+      "error": null,
+      "items": [
+        {
+          "document": {
+            "bytes": 75755,
+            "content_type": "text/html",
+            "fetched_at": "2026-09-29T10:56:36Z",
+            "final_url": "https://www.gov.uk/government/publications/ofsi-general-licence-int20257363752",
+            "linked_pdfs": [
+              "https://assets.publishing.service.gov.uk/media/6aba8aa88cb3c0580e5012bf/General_Licence_-_Shah_Deniz_Project_Activities.pdf",
+              "https://assets.publishing.service.gov.uk/media/6aba77eafe72ed1e2b02f170/Publication_Notice_Document_-_Shah_Deniz_Project_Activities.pdf"
+            ],
+            "page_error": null,
+            "pages": 1,
+            "path": "docs/0066e9710b5e5d826efe9ea63d279a8efd39ff9e0434029b53411fc2d672dd39.html",
+            "sha256": "0066e9710b5e5d826efe9ea63d279a8efd39ff9e0434029b53411fc2d672dd39",
+            "text_pages": 1
+          },
+          "item_id": "https://www.gov.uk/government/publications/ofsi-general-licence-int20257363752#2026-09-29T08:01:11Z",
+          "key": "ofsi:55da0a525ae187c7",
+          "published": "2026-09-29",
+          "source": "ofsi",
+          "summary": "Details for OFSI General licence INT/2025/7363752, Shah Deniz Project Activities",
+          "title": "Guidance: OFSI General licence INT/2025/7363752",
+          "url": "https://www.gov.uk/government/publications/ofsi-general-licence-int20257363752"
+        },
+        {
+          "document": {
+            "bytes": 82111,
+            "content_type": "text/html",
+            "fetched_at": "2026-09-29T10:56:38Z",
+            "final_url": "https://www.gov.uk/government/publications/financial-sanctions-licensing",
+            "linked_pdfs": [],
+            "page_error": null,
+            "pages": 1,
+            "path": "docs/690301fa50a3681c3405a145d6c877d46b174a9027d35adaf2c90b5836860cbb.html",
+            "sha256": "690301fa50a3681c3405a145d6c877d46b174a9027d35adaf2c90b5836860cbb",
+            "text_pages": 1
+          },
+          "item_id": "https://www.gov.uk/government/publications/financial-sanctions-licensing#2026-09-10T10:22:04Z",
+          "key": "ofsi:12efeae36499e857",
+          "published": "2026-09-10",
+          "source": "ofsi",
+          "summary": "Guidance from OFSI for licence applications: licensing principles, delegation frameworks, and permitted 'reasonable' payments for staff and travel expenses.",
+          "title": "Guidance: Financial sanctions licensing: supplementary guidance",
+          "url": "https://www.gov.uk/government/publications/financial-sanctions-licensing"
+        }
+      ],
+      "listed": 20,
+      "listed_at": "2026-09-29T10:56:08Z",
+      "listing": "listings/ofsi.atom",
+      "listing_sha256": "1d7e587df722613304f725441d82d164a92cda315c3530433c101ca895ca11bd",
+      "listing_url": "https://www.gov.uk/government/organisations/office-of-financial-sanctions-implementation.atom",
+      "status": "ok"
+    }
+  }
+}

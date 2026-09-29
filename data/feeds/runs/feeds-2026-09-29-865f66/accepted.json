@@ -1,0 +1,19 @@
+{
+  "accepted": {},
+  "allocated_not_accepted": {},
+  "allocated_not_accepted_note": "allocated when an extraction started and carried by no accepted record: never reused (owner decision 11)",
+  "decided_on": "2026-09-29",
+  "deferred": [],
+  "dropped": [
+    "ofac:20260928",
+    "ofsi:https://www.gov.uk/government/publications/financial-sanctions-licensing#2026-09-10T10:22:04Z",
+    "ofsi:https://www.gov.uk/government/publications/ofsi-general-licence-int20257363752#2026-09-29T08:01:11Z"
+  ],
+  "override_reconciliation": null,
+  "reconciliation": {
+    "crash": null,
+    "problems": []
+  },
+  "run_id": "feeds-2026-09-29-865f66",
+  "status": "COMPLETE"
+}
