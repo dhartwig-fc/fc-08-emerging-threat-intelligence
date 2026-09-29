@@ -50,8 +50,17 @@ import-time failure before main() ever runs also exits 1, from the interpreter, 
 The shell side matches on the EXACT reserved code, not on a `>= N` threshold -- 10 is not "less bad" than 3,
 it is the one value that means "already handled".
 
+_scheduled orders its own last three steps so nothing that can raise runs between a successful notify() and
+the return: the status is computed and printed BEFORE notify() is called, and the return value is computed
+from state read before notify() ran, so posting the notification is the last thing that can fail (fix round
+2, N-1). The one residual this cannot reach is outside this function's control -- an interpreter-shutdown
+stdout flush failure (exit 120), or notify.notify's own subprocess call raising AFTER osascript has already
+displayed the notification -- named here rather than claimed fixed, because it isn't fixable from inside
+_scheduled.
+
 EXIT 0 for COMPLETE, NOTHING_NEW and UNFINISHED (a person decides the rest); 1 for REFUSED, FAILED and
-RECONCILIATION_FAILED.
+RECONCILIATION_FAILED -- this is the PLAIN (non-scheduled) run's own exit code, separate from the
+--scheduled contract above: a plain refusal exits 1, a *scheduled* one exits SCHEDULED_NOTIFIED_EXIT (10).
 """
 
 from __future__ import annotations
@@ -295,12 +304,16 @@ def _scheduled(args, root, today, extra_refusals, preflight_reasons, notifier) -
     reasons = refusals() + list(extra_refusals or []) + list(args.refuse) + found
     rec = write_refusal(run.run_id, reasons, root) if reasons else asyncio.run(friday(run, root=root))
     path = inbox.run_dir(run.run_id, root) / report.REPORT
-    posted = (notifier or notify.notify)(*notify.from_report(path))
+    # Fix round 2, N-1: everything that can raise -- including this print -- runs BEFORE notify() is called, and
+    # `acceptable` is a plain bool computed before it too. Once notify() has returned True, nothing remains that
+    # can raise and turn one posted notification into two (Python's own plus the shell's fallback).
+    acceptable = rec["status"] in reconcile.ACCEPTABLE
     print("%s: %s -- %s" % (run.run_id, rec["status"], path))
+    posted = (notifier or notify.notify)(*notify.from_report(path))
     if not posted:
         print("NOTIFICATION FAILED: friday_run.sh will post the one notification instead", file=sys.stderr)
         return 1
-    return 0 if rec["status"] in reconcile.ACCEPTABLE else SCHEDULED_NOTIFIED_EXIT
+    return 0 if acceptable else SCHEDULED_NOTIFIED_EXIT
 
 
 if __name__ == "__main__":

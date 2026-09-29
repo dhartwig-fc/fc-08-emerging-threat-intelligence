@@ -17,6 +17,7 @@ Usage:
     python evals/check_schedule.py --mutate export-token     # the token leaks into every later child, not just Python
     python evals/check_schedule.py --mutate ignore-auth-exit # auth_status trusts stdout even on a non-zero exit
     python evals/check_schedule.py --mutate xtrace-ux        # the launcher enables xtrace alongside -u
+    python evals/check_schedule.py --mutate keep-inherited-token  # an inherited CLAUDE_CODE_OAUTH_TOKEN is not unset
 
 WHAT IT HOLDS:
   the plist     renders to a valid plist: label uk.fc08.friday-run; Fridays (Weekday 5) at 09:00; runs
@@ -25,14 +26,20 @@ WHAT IT HOLDS:
   schedule.py   install writes exactly the rendered plist and bootstraps gui/<uid>; refuses a second install;
                 --dry-run writes nothing; uninstall boots out and removes it; a FAILED bootout is reported, not
                 swallowed, and leaves the plist in place; status only reads;
-  the launcher  run with stub security, python and osascript: the token reaches Python as
-                CLAUDE_CODE_OAUTH_TOKEN and appears in NO output, notification, argument or the environment of
-                any OTHER child process (not even a crash's own osascript call); ANTHROPIC_API_KEY is unset;
-                the script never enables tracing, in any `set` flag combination; notify() passes `--` before
-                the message and title, so a message starting with `-` cannot be read as an option;
+  the launcher  run with stub security, python and osascript, and hermetic to the CALLING shell's own
+                environment (the guard never leaks its own real CLAUDE_CODE_OAUTH_TOKEN into any stub, and an
+                inherited dummy token in the shell that runs friday_run.sh is unset before the Keychain read,
+                fix round 2's N-2): the token reaches Python as CLAUDE_CODE_OAUTH_TOKEN and appears in NO
+                output, notification, argument or the environment of any OTHER child process (not even a
+                crash's own osascript call); ANTHROPIC_API_KEY is unset; the script never enables tracing, in
+                any `set`/`shopt` flag combination and at any position on the line (fix round 2's N-3); notify()
+                passes `--` before the message and title, so a message starting with `-` cannot be read as an
+                option;
   the contract  every scheduled exit code -- 0, the reserved "already notified" code, 1, 2, 3 -- yields exactly
                 ONE notification in total, whichever side posts it (tools/friday_run.py's docstring has the
-                full contract; this is fix round 1's I-1);
+                full contract; this is fix round 1's I-1), including when a stdout write raises AFTER the
+                notification has already posted (fix round 2's N-1: nothing that can raise runs between a
+                successful notify() and the return);
   the preflight off main, detached, a pending run under 14 days, and any auth but loggedIn "oauth_token"
                 each refuse; a clean state passes; auth_status and on_main REFUSE -- never crash, never pass --
                 on a non-zero exit, non-JSON output, `null`, a list, or a missing binary (fix round 1's I-3);
@@ -92,6 +99,7 @@ TEXT_MUTATIONS = {
     "export-token": (SCRIPT, '    CLAUDE_CODE_OAUTH_TOKEN="$FC08_TOKEN" "$PYTHON" tools/friday_run.py --scheduled\n',
                      '    export CLAUDE_CODE_OAUTH_TOKEN="$FC08_TOKEN"; "$PYTHON" tools/friday_run.py --scheduled\n'),
     "xtrace-ux": (SCRIPT, "set -u\n", "set -ux\n"),
+    "keep-inherited-token": (SCRIPT, "unset CLAUDE_CODE_OAUTH_TOKEN\n", ""),
 }
 
 
@@ -119,10 +127,18 @@ def stub(path: Path, body: str) -> Path:
     return path
 
 
-def launcher(tmp: Path, mutation, token: bool, exit_code: int) -> dict:
+def launcher(tmp: Path, mutation, token: bool, exit_code: int, inherited_token: str = None) -> dict:
     """Run a copy of friday_run.sh in a fake repo with stub security, python and osascript. Both security and
     osascript also record whether they inherited CLAUDE_CODE_OAUTH_TOKEN, so a leak into EITHER (not just
-    Python's own argv/output) is caught -- fix round 1, M-2."""
+    Python's own argv/output) is caught -- fix round 1, M-2.
+
+    Hermetic to the CALLING process's own environment (fix round 2, N-2): `dict(os.environ, ...)` used to carry
+    a REAL CLAUDE_CODE_OAUTH_TOKEN straight through into every stub if the person -- or CI -- running this guard
+    had one exported (e.g. after `claude setup-token`), turning every ENV-LEAK check red for a reason that has
+    nothing to do with the script. It is popped here unconditionally. `inherited_token`, when given, puts a
+    caller-chosen value back -- simulating an operator's shell that itself exported one -- so a test can prove
+    friday_run.sh unsets it before the Keychain read rather than merely that the FIXTURE doesn't leak its own.
+    """
     repo = Path(tempfile.mkdtemp(dir=str(tmp), prefix="repo-%s-%d-" % (token, exit_code)))
     (repo / "scripts" / "schedule").mkdir(parents=True)
     script = repo / "scripts" / "schedule" / "friday_run.sh"
@@ -140,6 +156,9 @@ def launcher(tmp: Path, mutation, token: bool, exit_code: int) -> dict:
     env = dict(os.environ, FC08_SECURITY=str(security), FC08_PYTHON=str(python), FC08_OSASCRIPT=str(osa),
                STUB_HAS_TOKEN="1" if token else "0", STUB_EXIT=str(exit_code), ANTHROPIC_API_KEY="leak-me",
                USER=os.environ.get("USER", "owner"))
+    env.pop("CLAUDE_CODE_OAUTH_TOKEN", None)
+    if inherited_token is not None:
+        env["CLAUDE_CODE_OAUTH_TOKEN"] = inherited_token
     got = subprocess.run(["/bin/bash", str(script)], cwd=str(tmp), env=env, capture_output=True, text=True, timeout=60)
     return {"code": got.returncode, "out": got.stdout + got.stderr,
             "saw": seen.read_text() if seen.exists() else "", "notes": notes.read_text() if notes.exists() else "",
@@ -152,20 +171,27 @@ def git(repo: Path, *args) -> None:
 
 
 def is_tracing_enabled(source: str) -> bool:
-    """Any `set` invocation that turns xtrace (or verbose) ON, in any flag combination -- `set -x`, `set -eux`,
-    `set -ux` -- not just a literal `set -x` line (fix round 1, M-3). `set +x` / `set +o xtrace` (defensive,
-    turning it OFF) must NOT trip this."""
+    """Any `set` or `shopt` invocation that turns xtrace (or verbose) ON, anywhere on a line and in any flag
+    combination -- `set -x`, `set -eux`, `set -u -x`, `true; set -x`, `shopt -so xtrace`, `set -o xtrace` -- not
+    just a literal `set -x` line, and not just a line's FIRST flag word (fix round 1, M-3; fix round 2, N-3:
+    `set -u -x` used to read only "-u", the first word, and pass). `set +x` / `set +o xtrace` / a `shopt` call
+    that only NAMES xtrace without `-s`/`-o` enabling it must NOT trip this."""
     for raw in source.splitlines():
-        line = raw.strip()
-        if line.startswith("#"):
-            continue
-        if line.startswith("set -") and not line.startswith("set --"):
-            flags = line[len("set -"):].split()[0] if len(line) > len("set -") else ""
-            if "x" in flags:
+        line = raw.split("#", 1)[0]  # drop a trailing comment
+        for stmt in line.split(";"):  # `true; set -x` -- a `set`/`shopt` need not open the line
+            words = stmt.split()
+            if not words or words[0] not in ("set", "shopt"):
+                continue
+            cmd, rest = words[0], words[1:]
+            joined = " ".join(rest)
+            if "-o xtrace" in joined or "-o verbose" in joined:  # "+o ..." (disabling) has no "-o" substring
                 return True
-        if "-o xtrace" in line or "-o verbose" in line:  # "+o xtrace" (disabling) does not contain this substring
-            return True
-        if line.startswith("printenv") or line == "env":
+            if cmd == "shopt" and "xtrace" in joined and "-u" not in rest[:1]:
+                return True  # `shopt -so xtrace` / `shopt -s xtrace`; `shopt -u xtrace` (disabling) is exempt
+            for word in rest:
+                if word.startswith("-") and not word.startswith("--") and "x" in word[1:]:
+                    return True
+        if line.strip().startswith("printenv") or line.strip() == "env":
             return True
     return False
 
@@ -256,10 +282,15 @@ def checks(mutation) -> list:
                     "an acceptable or already-notified exit adds no notification of the script's own; a crash "
                     "posts exactly one", "ok %r | none %r | crash %r" % (ok["notes"][:30], none["notes"][:30], crash["notes"][:60])))
         out.append((is_tracing_enabled("set -x\ntrue\n") and is_tracing_enabled("set -eux\n")
-                    and is_tracing_enabled("set -ux\n") and not is_tracing_enabled("set -u\n")
-                    and not is_tracing_enabled("set +x\n") and not is_tracing_enabled("set +o xtrace +o verbose\n")
+                    and is_tracing_enabled("set -ux\n") and is_tracing_enabled("set -u -x\n")
+                    and is_tracing_enabled("set -e -x\n") and is_tracing_enabled("true; set -x\n")
+                    and is_tracing_enabled("shopt -so xtrace\n") and is_tracing_enabled("set -o xtrace\n")
+                    and not is_tracing_enabled("set -u\n") and not is_tracing_enabled("set +x\n")
+                    and not is_tracing_enabled("set +o xtrace +o verbose\n")
                     and not is_tracing_enabled(text(SCRIPT, mutation)),
-                    "the launcher never enables tracing, in any `set` flag combination", ""))
+                    "the launcher never enables tracing, in any `set`/`shopt` flag combination or position on "
+                    "the line (fix round 2, N-3: `set -u -x` and `true; set -x` are now caught, not just a "
+                    "line's first flag word)", ""))
 
         # --- fix round 1, I-1: every scheduled exit code yields exactly ONE notification in total. Python posts
         # its own for 0 (acceptable) and RESERVED (refused/failed) by contract; every other code means Python
@@ -273,6 +304,18 @@ def checks(mutation) -> list:
         out.append((all(v == 1 for v in totals.values()),
                     "every scheduled exit code (0, reserved, 1, 2, 3) yields exactly one notification in total, "
                     "from whichever side is supposed to post it", totals))
+
+        # --- fix round 2, N-2: an operator's shell that ALREADY exported a (different, dummy) CLAUDE_CODE_OAUTH_TOKEN
+        # must not leak it anywhere -- friday_run.sh unsets it before reading the Keychain, so only the Keychain's
+        # own sentinel ever reaches Python, and the dummy reaches no child at all (not even security or osascript).
+        DUMMY_TOKEN = "dummy-inherited-from-the-operators-own-shell"
+        inherited = launcher(tmp, mutation, token=True, exit_code=0, inherited_token=DUMMY_TOKEN)
+        out.append((DUMMY_TOKEN not in inherited["out"] and DUMMY_TOKEN not in inherited["saw"]
+                    and DUMMY_TOKEN not in inherited["notes"] and "ENV-LEAK" not in inherited["notes"]
+                    and "token=yes" in inherited["saw"] and SENTINEL not in inherited["notes"],
+                    "an inherited CLAUDE_CODE_OAUTH_TOKEN in the operator's own shell is unset before the "
+                    "Keychain is read; only the Keychain's own token reaches Python, and the inherited dummy "
+                    "reaches no child at all", "saw=%r notes=%r" % (inherited["saw"][:60], inherited["notes"][:60])))
 
         # --- notify() passes `--` before the message and title (fix round 1, M-1): a message of "-e" must not be
         # read as an osascript option.
@@ -398,6 +441,35 @@ def checks(mutation) -> list:
                     "notification of its own, and exits exactly the documented crash code (3, neither 0 nor "
                     "the reserved value, so friday_run.sh notifies instead)",
                     "code=%s notes=%s" % (code_crashed, notes3)))
+
+        # --- fix round 2, N-1: a stdout write that raises AFTER the notification was posted must still leave the
+        # TOTAL notification count at exactly one. `boom` arms itself the instant the notifier is called, so any
+        # write to stdout from that point on (e.g. a regressed print between notify() and the return) raises --
+        # simulating the same shape as an interpreter-shutdown flush failure, without needing a real subprocess.
+        class ExplodeAfterArmed:
+            armed = False
+            def write(self, s):  # noqa: D102
+                if self.armed:
+                    raise OSError(28, "No space left on device")
+                return len(s)
+            def flush(self):  # noqa: D102
+                if self.armed:
+                    raise OSError(28, "No space left on device")
+        boom = ExplodeAfterArmed()
+        notes4 = []
+        def arm_then_record(t, m):
+            notes4.append((t, m))
+            boom.armed = True
+            return True
+        with contextlib.redirect_stdout(boom), contextlib.redirect_stderr(io.StringIO()):
+            code_post_notify = fr.main(["--scheduled"], root=tmp / "inbox-postnotify", today=date(2026, 10, 9),
+                                       notifier=arm_then_record, preflight_reasons=["the checkout is on 'feature', not main"])
+        total_after_notify = len(notes4) + (0 if code_post_notify in (0, RESERVED) else 1)
+        out.append((total_after_notify == 1,
+                    "a stdout write that raises AFTER the notification was posted still yields exactly one "
+                    "notification in total: nothing that can raise runs between a successful notify() and the "
+                    "return (fix round 2, N-1)",
+                    "code=%s notes=%s total=%s" % (code_post_notify, notes4, total_after_notify)))
     return out
 
 
