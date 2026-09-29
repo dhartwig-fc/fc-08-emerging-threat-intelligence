@@ -1,4 +1,425 @@
 {
-  "items": [],
+  "items": [
+    {
+      "decided_on": "2026-09-29",
+      "decision": "drop",
+      "first_seen_run": "catalogue:90b57e8ba022",
+      "item_id": "aviso-de-fincen-fin-2025-a003",
+      "source": "fincen"
+    },
+    {
+      "decided_on": "2026-09-29",
+      "decision": "drop",
+      "first_seen_run": "catalogue:90b57e8ba022",
+      "item_id": "fincen-advisory-fin-2020-a003-spanish",
+      "source": "fincen"
+    },
+    {
+      "decided_on": "2026-09-29",
+      "decision": "drop",
+      "first_seen_run": "catalogue:90b57e8ba022",
+      "item_id": "fincen-advisory-fin-2020-a005-spanish",
+      "source": "fincen"
+    },
+    {
+      "decided_on": "2026-09-29",
+      "decision": "drop",
+      "first_seen_run": "catalogue:90b57e8ba022",
+      "item_id": "fincen-advisory-fin-2020-a006",
+      "source": "fincen"
+    },
+    {
+      "decided_on": "2026-09-29",
+      "decision": "drop",
+      "first_seen_run": "catalogue:90b57e8ba022",
+      "item_id": "fincen-advisory-fin-2020-a007",
+      "source": "fincen"
+    },
+    {
+      "decided_on": "2026-09-29",
+      "decision": "drop",
+      "first_seen_run": "catalogue:90b57e8ba022",
+      "item_id": "fincen-advisory-fin-2020-a008",
+      "source": "fincen"
+    },
+    {
+      "decided_on": "2026-09-29",
+      "decision": "drop",
+      "first_seen_run": "catalogue:90b57e8ba022",
+      "item_id": "fincen-advisory-fin-2020-a009",
+      "source": "fincen"
+    },
+    {
+      "decided_on": "2026-09-29",
+      "decision": "drop",
+      "first_seen_run": "catalogue:90b57e8ba022",
+      "item_id": "fincen-advisory-fin-2021-a001",
+      "source": "fincen"
+    },
+    {
+      "decided_on": "2026-09-29",
+      "decision": "drop",
+      "first_seen_run": "catalogue:90b57e8ba022",
+      "item_id": "fincen-advisory-fin-2021-a002",
+      "source": "fincen"
+    },
+    {
+      "decided_on": "2026-09-29",
+      "decision": "drop",
+      "first_seen_run": "catalogue:90b57e8ba022",
+      "item_id": "fincen-advisory-fin-2021-a003",
+      "source": "fincen"
+    },
+    {
+      "decided_on": "2026-09-29",
+      "decision": "drop",
+      "first_seen_run": "catalogue:90b57e8ba022",
+      "item_id": "fincen-advisory-fin-2021-a004",
+      "source": "fincen"
+    },
+    {
+      "decided_on": "2026-09-29",
+      "decision": "drop",
+      "first_seen_run": "catalogue:90b57e8ba022",
+      "item_id": "fincen-advisory-fin-2022-a001",
+      "source": "fincen"
+    },
+    {
+      "decided_on": "2026-09-29",
+      "decision": "drop",
+      "first_seen_run": "catalogue:90b57e8ba022",
+      "item_id": "fincen-advisory-fin-2022-a002",
+      "source": "fincen"
+    },
+    {
+      "decided_on": "2026-09-29",
+      "decision": "drop",
+      "first_seen_run": "catalogue:90b57e8ba022",
+      "item_id": "fincen-advisory-fin-2024-a001",
+      "source": "fincen"
+    },
+    {
+      "decided_on": "2026-09-29",
+      "decision": "drop",
+      "first_seen_run": "catalogue:90b57e8ba022",
+      "item_id": "fincen-advisory-fin-2024-a002",
+      "source": "fincen"
+    },
+    {
+      "decided_on": "2026-09-29",
+      "decision": "drop",
+      "first_seen_run": "catalogue:90b57e8ba022",
+      "item_id": "fincen-advisory-fin-2025-a001",
+      "source": "fincen"
+    },
+    {
+      "decided_on": "2026-09-29",
+      "decision": "drop",
+      "first_seen_run": "catalogue:90b57e8ba022",
+      "item_id": "fincen-advisory-fin-2025-a002",
+      "source": "fincen"
+    },
+    {
+      "decided_on": "2026-09-29",
+      "decision": "drop",
+      "first_seen_run": "catalogue:90b57e8ba022",
+      "item_id": "fincen-advisory-fin-2025-a003",
+      "source": "fincen"
+    },
+    {
+      "decided_on": "2026-09-29",
+      "decision": "drop",
+      "first_seen_run": "catalogue:90b57e8ba022",
+      "item_id": "fincen-advisory-fin-2026-a001",
+      "source": "fincen"
+    },
+    {
+      "decided_on": "2026-09-29",
+      "decision": "drop",
+      "first_seen_run": "catalogue:90b57e8ba022",
+      "item_id": "fincen-advisory-fin-2026-a002",
+      "source": "fincen"
+    },
+    {
+      "decided_on": "2026-09-29",
+      "decision": "drop",
+      "first_seen_run": "catalogue:90b57e8ba022",
+      "item_id": "20260812",
+      "source": "ofac"
+    },
+    {
+      "decided_on": "2026-09-29",
+      "decision": "drop",
+      "first_seen_run": "catalogue:90b57e8ba022",
+      "item_id": "20260818",
+      "source": "ofac"
+    },
+    {
+      "decided_on": "2026-09-29",
+      "decision": "drop",
+      "first_seen_run": "catalogue:90b57e8ba022",
+      "item_id": "20260820",
+      "source": "ofac"
+    },
+    {
+      "decided_on": "2026-09-29",
+      "decision": "drop",
+      "first_seen_run": "catalogue:90b57e8ba022",
+      "item_id": "20260821",
+      "source": "ofac"
+    },
+    {
+      "decided_on": "2026-09-29",
+      "decision": "drop",
+      "first_seen_run": "catalogue:90b57e8ba022",
+      "item_id": "20260824",
+      "source": "ofac"
+    },
+    {
+      "decided_on": "2026-09-29",
+      "decision": "drop",
+      "first_seen_run": "catalogue:90b57e8ba022",
+      "item_id": "20260826",
+      "source": "ofac"
+    },
+    {
+      "decided_on": "2026-09-29",
+      "decision": "drop",
+      "first_seen_run": "catalogue:90b57e8ba022",
+      "item_id": "20260827",
+      "source": "ofac"
+    },
+    {
+      "decided_on": "2026-09-29",
+      "decision": "drop",
+      "first_seen_run": "catalogue:90b57e8ba022",
+      "item_id": "20260828",
+      "source": "ofac"
+    },
+    {
+      "decided_on": "2026-09-29",
+      "decision": "drop",
+      "first_seen_run": "catalogue:90b57e8ba022",
+      "item_id": "20260902",
+      "source": "ofac"
+    },
+    {
+      "decided_on": "2026-09-29",
+      "decision": "drop",
+      "first_seen_run": "catalogue:90b57e8ba022",
+      "item_id": "20260903",
+      "source": "ofac"
+    },
+    {
+      "decided_on": "2026-09-29",
+      "decision": "drop",
+      "first_seen_run": "catalogue:90b57e8ba022",
+      "item_id": "20260904",
+      "source": "ofac"
+    },
+    {
+      "decided_on": "2026-09-29",
+      "decision": "drop",
+      "first_seen_run": "catalogue:90b57e8ba022",
+      "item_id": "20260908",
+      "source": "ofac"
+    },
+    {
+      "decided_on": "2026-09-29",
+      "decision": "drop",
+      "first_seen_run": "catalogue:90b57e8ba022",
+      "item_id": "20260909",
+      "source": "ofac"
+    },
+    {
+      "decided_on": "2026-09-29",
+      "decision": "drop",
+      "first_seen_run": "catalogue:90b57e8ba022",
+      "item_id": "20260910",
+      "source": "ofac"
+    },
+    {
+      "decided_on": "2026-09-29",
+      "decision": "drop",
+      "first_seen_run": "catalogue:90b57e8ba022",
+      "item_id": "20260914",
+      "source": "ofac"
+    },
+    {
+      "decided_on": "2026-09-29",
+      "decision": "drop",
+      "first_seen_run": "catalogue:90b57e8ba022",
+      "item_id": "20260916",
+      "source": "ofac"
+    },
+    {
+      "decided_on": "2026-09-29",
+      "decision": "drop",
+      "first_seen_run": "catalogue:90b57e8ba022",
+      "item_id": "20260917",
+      "source": "ofac"
+    },
+    {
+      "decided_on": "2026-09-29",
+      "decision": "drop",
+      "first_seen_run": "catalogue:90b57e8ba022",
+      "item_id": "20260918",
+      "source": "ofac"
+    },
+    {
+      "decided_on": "2026-09-29",
+      "decision": "drop",
+      "first_seen_run": "catalogue:90b57e8ba022",
+      "item_id": "20260923",
+      "source": "ofac"
+    },
+    {
+      "decided_on": "2026-09-29",
+      "decision": "drop",
+      "first_seen_run": "catalogue:90b57e8ba022",
+      "item_id": "20260924",
+      "source": "ofac"
+    },
+    {
+      "decided_on": "2026-09-29",
+      "decision": "drop",
+      "first_seen_run": "catalogue:90b57e8ba022",
+      "item_id": "https://www.gov.uk/government/news/uk-issues-largest-penalty-for-financial-sanctions-breaches-since-russias-2022-illegal-invasion-of-ukraine#2026-06-17T11:04:35Z",
+      "source": "ofsi"
+    },
+    {
+      "decided_on": "2026-09-29",
+      "decision": "drop",
+      "first_seen_run": "catalogue:90b57e8ba022",
+      "item_id": "https://www.gov.uk/government/publications/check-if-an-email-or-communication-claiming-to-be-from-ofsi-is-genuine#2026-07-24T09:32:01Z",
+      "source": "ofsi"
+    },
+    {
+      "decided_on": "2026-09-29",
+      "decision": "drop",
+      "first_seen_run": "catalogue:90b57e8ba022",
+      "item_id": "https://www.gov.uk/government/publications/hmt-licensing-guidance-presumption-of-denial-of-licence-applications-for-designated-iranian-banks#2026-09-23T16:20:37Z",
+      "source": "ofsi"
+    },
+    {
+      "decided_on": "2026-09-29",
+      "decision": "drop",
+      "first_seen_run": "catalogue:90b57e8ba022",
+      "item_id": "https://www.gov.uk/government/publications/imposition-of-monetary-penalty-citibank-na-london-branch#2026-09-02T09:22:20Z",
+      "source": "ofsi"
+    },
+    {
+      "decided_on": "2026-09-29",
+      "decision": "drop",
+      "first_seen_run": "catalogue:90b57e8ba022",
+      "item_id": "https://www.gov.uk/government/publications/imposition-of-monetary-penalty-sabre-global-technologies-limited-sgtl#2026-06-17T10:44:07Z",
+      "source": "ofsi"
+    },
+    {
+      "decided_on": "2026-09-29",
+      "decision": "drop",
+      "first_seen_run": "catalogue:90b57e8ba022",
+      "item_id": "https://www.gov.uk/government/publications/iran-nuclear-sanctions-guidance#2026-09-09T14:50:49Z",
+      "source": "ofsi"
+    },
+    {
+      "decided_on": "2026-09-29",
+      "decision": "drop",
+      "first_seen_run": "catalogue:90b57e8ba022",
+      "item_id": "https://www.gov.uk/government/publications/iran-sanctions-guidance#2026-09-09T14:51:49Z",
+      "source": "ofsi"
+    },
+    {
+      "decided_on": "2026-09-29",
+      "decision": "drop",
+      "first_seen_run": "catalogue:90b57e8ba022",
+      "item_id": "https://www.gov.uk/government/publications/ofsi-general-licence-int20244761108#2026-05-26T12:48:47Z",
+      "source": "ofsi"
+    },
+    {
+      "decided_on": "2026-09-29",
+      "decision": "drop",
+      "first_seen_run": "catalogue:90b57e8ba022",
+      "item_id": "https://www.gov.uk/government/publications/ofsi-general-licence-int20255635700#2026-08-06T13:08:25Z",
+      "source": "ofsi"
+    },
+    {
+      "decided_on": "2026-09-29",
+      "decision": "drop",
+      "first_seen_run": "catalogue:90b57e8ba022",
+      "item_id": "https://www.gov.uk/government/publications/ofsi-general-licence-int20255787748#2026-07-16T15:03:10Z",
+      "source": "ofsi"
+    },
+    {
+      "decided_on": "2026-09-29",
+      "decision": "drop",
+      "first_seen_run": "catalogue:90b57e8ba022",
+      "item_id": "https://www.gov.uk/government/publications/ofsi-general-licence-int20256641960#2026-07-13T15:06:07Z",
+      "source": "ofsi"
+    },
+    {
+      "decided_on": "2026-09-29",
+      "decision": "drop",
+      "first_seen_run": "catalogue:90b57e8ba022",
+      "item_id": "https://www.gov.uk/government/publications/ofsi-general-licence-int20257895596#2026-08-12T15:09:20Z",
+      "source": "ofsi"
+    },
+    {
+      "decided_on": "2026-09-29",
+      "decision": "drop",
+      "first_seen_run": "catalogue:90b57e8ba022",
+      "item_id": "https://www.gov.uk/government/publications/ofsi-general-licence-int20258031092#2026-08-12T15:09:02Z",
+      "source": "ofsi"
+    },
+    {
+      "decided_on": "2026-09-29",
+      "decision": "drop",
+      "first_seen_run": "catalogue:90b57e8ba022",
+      "item_id": "https://www.gov.uk/government/publications/ofsi-general-licence-int20268893924#2026-07-06T11:21:19Z",
+      "source": "ofsi"
+    },
+    {
+      "decided_on": "2026-09-29",
+      "decision": "drop",
+      "first_seen_run": "catalogue:90b57e8ba022",
+      "item_id": "https://www.gov.uk/government/publications/ofsi-general-licence-int20269491628#2026-06-24T14:31:48Z",
+      "source": "ofsi"
+    },
+    {
+      "decided_on": "2026-09-29",
+      "decision": "drop",
+      "first_seen_run": "catalogue:90b57e8ba022",
+      "item_id": "https://www.gov.uk/government/publications/ofsi-general-licence-int20269559192#2026-06-15T17:27:00Z",
+      "source": "ofsi"
+    },
+    {
+      "decided_on": "2026-09-29",
+      "decision": "drop",
+      "first_seen_run": "catalogue:90b57e8ba022",
+      "item_id": "https://www.gov.uk/government/publications/russia-sanctions-guidance#2026-05-19T23:01:01Z",
+      "source": "ofsi"
+    },
+    {
+      "decided_on": "2026-09-29",
+      "decision": "drop",
+      "first_seen_run": "catalogue:90b57e8ba022",
+      "item_id": "https://www.gov.uk/government/publications/the-us-and-uk-economic-sanctions-authorities-a-comparative-overview#2026-06-23T14:34:02Z",
+      "source": "ofsi"
+    },
+    {
+      "decided_on": "2026-09-29",
+      "decision": "drop",
+      "first_seen_run": "catalogue:90b57e8ba022",
+      "item_id": "https://www.gov.uk/government/publications/uk-financial-sanctions-faqs#2026-09-24T08:49:08Z",
+      "source": "ofsi"
+    },
+    {
+      "decided_on": "2026-09-29",
+      "decision": "drop",
+      "first_seen_run": "catalogue:90b57e8ba022",
+      "item_id": "https://www.gov.uk/guidance/financial-sanctions-webinars-and-events#2026-08-17T10:27:43Z",
+      "source": "ofsi"
+    }
+  ],
   "schema": "fc08-seen-items/1"
 }
