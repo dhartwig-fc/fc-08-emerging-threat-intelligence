@@ -3,7 +3,9 @@ The one macOS notification at the end of a scheduled run (slice 2 C2, spec secti
 
 The text is the report's own first two lines -- "# Friday run <id>: <STATUS>" and its one-sentence summary --
 so the notification can never say more, or other, than the report. The words reach osascript as ARGUMENTS
-(`on run argv`), never spliced into AppleScript source, so a title with a quote cannot become code.
+(`on run argv`), never spliced into AppleScript source, so a title with a quote cannot become code. They are
+also passed after a `--`, so a message that itself starts with `-` (e.g. "-e") is never read as an osascript
+option (fix round 1, M-1).
 """
 
 from __future__ import annotations
@@ -26,5 +28,5 @@ def notify(title: str, message: str, run=subprocess.run) -> bool:
     argv = [OSASCRIPT]
     for line in SCRIPT:
         argv += ["-e", line]
-    got = run(argv + [message, title], capture_output=True, text=True, timeout=30)
+    got = run(argv + ["--", message, title], capture_output=True, text=True, timeout=30)
     return got.returncode == 0

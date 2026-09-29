@@ -5,28 +5,41 @@ Usage:
     python evals/check_schedule.py
     python evals/check_schedule.py --mutate log-token        # friday_run.sh prints the token
     python evals/check_schedule.py --mutate keep-api-key     # friday_run.sh leaves ANTHROPIC_API_KEY set
-    python evals/check_schedule.py --mutate double-notify    # friday_run.sh notifies on every run, not only a crash
+    python evals/check_schedule.py --mutate double-notify    # friday_run.sh notifies on every run, not only when it must
     python evals/check_schedule.py --mutate wrong-day        # the plist fires on Mondays
     python evals/check_schedule.py --mutate token-in-plist   # the plist carries a token variable
     python evals/check_schedule.py --mutate any-auth         # the preflight accepts the interactive login
     python evals/check_schedule.py --mutate no-branch-check  # the preflight runs off main
     python evals/check_schedule.py --mutate no-back-pressure # the preflight ignores an unaccepted run
     python evals/check_schedule.py --mutate silent-refusal   # a refused scheduled run posts no notification
+    python evals/check_schedule.py --mutate crash-exits-1    # a scheduled crash exits 1 (read as "already notified")
+    python evals/check_schedule.py --mutate crash-notifies   # a scheduled crash ALSO notifies -- two notifications
+    python evals/check_schedule.py --mutate export-token     # the token leaks into every later child, not just Python
+    python evals/check_schedule.py --mutate ignore-auth-exit # auth_status trusts stdout even on a non-zero exit
+    python evals/check_schedule.py --mutate xtrace-ux        # the launcher enables xtrace alongside -u
 
 WHAT IT HOLDS:
   the plist     renders to a valid plist: label uk.fc08.friday-run; Fridays (Weekday 5) at 09:00; runs
                 /bin/bash scripts/schedule/friday_run.sh of THIS checkout; logs under ~/Library/Logs; RunAtLoad
                 false; no environment but PATH, and no token anywhere in it;
   schedule.py   install writes exactly the rendered plist and bootstraps gui/<uid>; refuses a second install;
-                --dry-run writes nothing; uninstall boots out and removes it; status only reads;
+                --dry-run writes nothing; uninstall boots out and removes it; a FAILED bootout is reported, not
+                swallowed, and leaves the plist in place; status only reads;
   the launcher  run with stub security, python and osascript: the token reaches Python as
-                CLAUDE_CODE_OAUTH_TOKEN and appears in NO output, notification or argument; ANTHROPIC_API_KEY is
-                unset; no token -> Python is told to refuse; a normal exit posts no second notification; a
-                crash (exit 3) posts exactly one; the script never enables tracing;
+                CLAUDE_CODE_OAUTH_TOKEN and appears in NO output, notification, argument or the environment of
+                any OTHER child process (not even a crash's own osascript call); ANTHROPIC_API_KEY is unset;
+                the script never enables tracing, in any `set` flag combination; notify() passes `--` before
+                the message and title, so a message starting with `-` cannot be read as an option;
+  the contract  every scheduled exit code -- 0, the reserved "already notified" code, 1, 2, 3 -- yields exactly
+                ONE notification in total, whichever side posts it (tools/friday_run.py's docstring has the
+                full contract; this is fix round 1's I-1);
   the preflight off main, detached, a pending run under 14 days, and any auth but loggedIn "oauth_token"
-                each refuse; a clean state passes;
+                each refuse; a clean state passes; auth_status and on_main REFUSE -- never crash, never pass --
+                on a non-zero exit, non-JSON output, `null`, a list, or a missing binary (fix round 1's I-3);
   one notice    friday_run --scheduled, refused, writes a REFUSED report and posts exactly one notification
-                whose words are the report's first two lines.
+                whose words are the report's first two lines; a crash inside the scheduled run posts NONE of
+                its own; a notifier that itself fails to deliver is reported as a failure, not swallowed
+                (fix round 1's I-2).
 
 COLD. Temporary folders, temporary git repositories, stub commands. It never runs launchctl, never reads the
 Keychain, never runs the claude CLI, and never writes ~/Library.
@@ -38,6 +51,7 @@ copy; at least one check must fail.
 from __future__ import annotations
 
 import argparse
+import json
 import os
 import plistlib
 import stat
@@ -51,6 +65,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 from feeds import inbox  # noqa: E402
+from feeds import notify as real_notify  # noqa: E402 -- never mutated by this guard; imported directly
 
 SCRIPT = ROOT / "scripts" / "schedule" / "friday_run.sh"
 TEMPLATE = ROOT / "scripts" / "schedule" / "uk.fc08.friday-run.plist"
@@ -61,15 +76,22 @@ SENTINEL = "sk-ant-oat01-SENTINEL-never-print-me"
 TEXT_MUTATIONS = {
     "log-token": (SCRIPT, 'if [ -z "$FC08_TOKEN" ]; then\n', 'echo "token $FC08_TOKEN"\nif [ -z "$FC08_TOKEN" ]; then\n'),
     "keep-api-key": (SCRIPT, "unset ANTHROPIC_API_KEY\n", ""),
-    "double-notify": (SCRIPT, 'if [ "$code" -ge 2 ]; then\n', 'if [ "$code" -ge 0 ]; then\n'),
+    "double-notify": (SCRIPT, 'if [ "$code" -ne 0 ] && [ "$code" -ne "$NOTIFIED_EXIT" ]; then\n', "if true; then\n"),
     "wrong-day": (TEMPLATE, "<key>Weekday</key>\n        <integer>5</integer>", "<key>Weekday</key>\n        <integer>1</integer>"),
     "token-in-plist": (TEMPLATE, "        <key>PATH</key>\n", "        <key>CLAUDE_CODE_OAUTH_TOKEN</key>\n        <string>x</string>\n"
                                                           "        <key>PATH</key>\n"),
     "any-auth": (PREFLIGHT, "    if status.get(\"authMethod\") != TOKEN_METHOD:\n", "    if False:\n"),
     "no-branch-check": (PREFLIGHT, '    if got.returncode != 0 or branch != "main":\n', "    if False:\n"),
     "no-back-pressure": (PREFLIGHT, "    if waiting:\n", "    if False:\n"),
-    "silent-refusal": (FRIDAY, "    (notifier or notify.notify)(*notify.from_report(path))\n",
-                       "    if not reasons:\n        (notifier or notify.notify)(*notify.from_report(path))\n"),
+    "ignore-auth-exit": (PREFLIGHT, "    if got.returncode != 0:\n", "    if False:\n"),
+    "silent-refusal": (FRIDAY, "    posted = (notifier or notify.notify)(*notify.from_report(path))\n",
+                       "    posted = (notifier or notify.notify)(*notify.from_report(path)) if not reasons else True\n"),
+    "crash-exits-1": (FRIDAY, "            return 3\n", "            return 1\n"),
+    "crash-notifies": (FRIDAY, "            traceback.print_exc()\n",
+                       "            traceback.print_exc()\n            (notifier or notify.notify)('FC08 Friday run: CRASHED', 'x')\n"),
+    "export-token": (SCRIPT, '    CLAUDE_CODE_OAUTH_TOKEN="$FC08_TOKEN" "$PYTHON" tools/friday_run.py --scheduled\n',
+                     '    export CLAUDE_CODE_OAUTH_TOKEN="$FC08_TOKEN"; "$PYTHON" tools/friday_run.py --scheduled\n'),
+    "xtrace-ux": (SCRIPT, "set -u\n", "set -ux\n"),
 }
 
 
@@ -98,18 +120,23 @@ def stub(path: Path, body: str) -> Path:
 
 
 def launcher(tmp: Path, mutation, token: bool, exit_code: int) -> dict:
-    """Run a copy of friday_run.sh in a fake repo with stub security, python and osascript."""
-    repo = tmp / ("repo-%s-%d" % (token, exit_code))
+    """Run a copy of friday_run.sh in a fake repo with stub security, python and osascript. Both security and
+    osascript also record whether they inherited CLAUDE_CODE_OAUTH_TOKEN, so a leak into EITHER (not just
+    Python's own argv/output) is caught -- fix round 1, M-2."""
+    repo = Path(tempfile.mkdtemp(dir=str(tmp), prefix="repo-%s-%d-" % (token, exit_code)))
     (repo / "scripts" / "schedule").mkdir(parents=True)
     script = repo / "scripts" / "schedule" / "friday_run.sh"
     script.write_text(text(SCRIPT, mutation), encoding="utf-8")
     seen, notes = repo / "python-saw.txt", repo / "notifications.txt"
-    security = stub(repo / "security", 'if [ "$STUB_HAS_TOKEN" = 1 ]; then echo "%s"; else exit 44; fi\n' % SENTINEL)
+    envcheck = '[ -n "${CLAUDE_CODE_OAUTH_TOKEN:-}" ] && echo "ENV-LEAK:$0" >> "%s" || true\n' % notes
+    security = stub(repo / "security", envcheck +
+                     'if [ "$STUB_HAS_TOKEN" = 1 ]; then echo "%s"; else exit 44; fi\n' % SENTINEL)
     python = stub(repo / "python", (
         '{ [ "${CLAUDE_CODE_OAUTH_TOKEN:-}" = "%s" ] && echo token=yes || echo token=no\n'
         '  [ -n "${ANTHROPIC_API_KEY:-}" ] && echo apikey=set || echo apikey=unset\n'
         '  echo "args=$*"; } > "%s"\nexit "$STUB_EXIT"\n') % (SENTINEL, seen))
-    osa = stub(repo / "osascript", 'for a in "$@"; do printf "%%s|" "$a"; done >> "%s"; echo >> "%s"\n' % (notes, notes))
+    osa = stub(repo / "osascript", envcheck +
+               'for a in "$@"; do printf "%%s|" "$a"; done >> "%s"; echo >> "%s"\n' % (notes, notes))
     env = dict(os.environ, FC08_SECURITY=str(security), FC08_PYTHON=str(python), FC08_OSASCRIPT=str(osa),
                STUB_HAS_TOKEN="1" if token else "0", STUB_EXIT=str(exit_code), ANTHROPIC_API_KEY="leak-me",
                USER=os.environ.get("USER", "owner"))
@@ -124,12 +151,31 @@ def git(repo: Path, *args) -> None:
                    capture_output=True)
 
 
+def is_tracing_enabled(source: str) -> bool:
+    """Any `set` invocation that turns xtrace (or verbose) ON, in any flag combination -- `set -x`, `set -eux`,
+    `set -ux` -- not just a literal `set -x` line (fix round 1, M-3). `set +x` / `set +o xtrace` (defensive,
+    turning it OFF) must NOT trip this."""
+    for raw in source.splitlines():
+        line = raw.strip()
+        if line.startswith("#"):
+            continue
+        if line.startswith("set -") and not line.startswith("set --"):
+            flags = line[len("set -"):].split()[0] if len(line) > len("set -") else ""
+            if "x" in flags:
+                return True
+        if "-o xtrace" in line or "-o verbose" in line:  # "+o xtrace" (disabling) does not contain this substring
+            return True
+        if line.startswith("printenv") or line == "env":
+            return True
+    return False
+
+
 def checks(mutation) -> list:
     out = []
     with tempfile.TemporaryDirectory() as tmp:
         tmp = Path(tmp)
         # --- the plist, rendered from the (possibly mutated) template
-        sched = module("schedule_under_test", SCHEDULE, None)
+        sched = module("schedule_under_test", SCHEDULE, mutation)
         tpl = tmp / "template.plist"
         tpl.write_text(text(TEMPLATE, mutation), encoding="utf-8")
         sched.TEMPLATE = tpl
@@ -148,6 +194,10 @@ def checks(mutation) -> list:
                     and not any("TOKEN" in w.upper() or "sk-ant" in w for w in words(d)),
                     "the plist carries no environment but PATH and no token",
                     sorted(d.get("EnvironmentVariables", {}))))
+
+        # --- the scheduled-run module, loaded early so its reserved exit code is available to every section below
+        fr = module("friday_under_test", FRIDAY, mutation)
+        RESERVED = fr.SCHEDULED_NOTIFIED_EXIT
 
         # --- schedule.py against a temporary LaunchAgents folder and a stub launchctl
         calls = []
@@ -170,27 +220,68 @@ def checks(mutation) -> list:
                     "schedule.py: a dry run writes nothing; install writes the rendered plist and bootstraps gui/<uid>; "
                     "a second install refuses; status only reads; uninstall boots out and removes it", verbs))
 
-        # --- the launcher, with stubs
+        # --- schedule.py uninstall: a FAILED bootout is reported, not swallowed, and the plist stays (fix round 1, M-5)
+        with contextlib.redirect_stdout(io.StringIO()):
+            reinstalled = sched.main(["install"], agents=agents, run=fake, uid=502, home=Path("/Users/owner"))
+        fail_bootout = lambda argv, **kw: types.SimpleNamespace(  # noqa: E731
+            returncode=1, stdout="", stderr="No such process") if argv[1] == "bootout" else types.SimpleNamespace(
+            returncode=0, stdout="", stderr="")
+        buf = io.StringIO()
+        with contextlib.redirect_stdout(buf):
+            failed = sched.main(["uninstall"], agents=agents, run=fail_bootout, uid=502, home=Path("/Users/owner"))
+        out.append((reinstalled == 0 and failed == 1 and sched.installed_path(agents).exists()
+                    and "REFUSED" in buf.getvalue() and "bootout" in buf.getvalue(),
+                    "schedule.py uninstall reports a failed launchctl bootout instead of ignoring it, and leaves the "
+                    "plist in place", buf.getvalue().strip()[:160]))
+        with contextlib.redirect_stdout(io.StringIO()):
+            sched.main(["uninstall"], agents=agents, run=fake, uid=502, home=Path("/Users/owner"))  # clean up
+
+        # --- the launcher, with stubs. "none" (no token) now uses RESERVED: a real --refuse run notifies itself
+        # and exits RESERVED, so this reproduces that path rather than an arbitrary stand-in exit code.
         ok = launcher(tmp, mutation, token=True, exit_code=0)
         crash = launcher(tmp, mutation, token=True, exit_code=3)
-        none = launcher(tmp, mutation, token=False, exit_code=1)
+        none = launcher(tmp, mutation, token=False, exit_code=RESERVED)
         leaked = [n for n, r in (("ok", ok), ("crash", crash), ("none", none))
-                  if SENTINEL in r["out"] or SENTINEL in r["notes"] or SENTINEL in r["saw"]]
+                  if SENTINEL in r["out"] or SENTINEL in r["notes"] or SENTINEL in r["saw"] or "ENV-LEAK" in r["notes"]]
         out.append((not leaked and "token=yes" in ok["saw"] and "token=no" in none["saw"],
-                    "the token reaches Python as CLAUDE_CODE_OAUTH_TOKEN and appears in no output, notification or "
-                    "argument", "leaked in %s; saw %r" % (leaked, ok["saw"][:40])))
+                    "the token reaches Python as CLAUDE_CODE_OAUTH_TOKEN and appears in no output, notification, "
+                    "argument or any OTHER child's environment", "leaked in %s; saw %r" % (leaked, ok["saw"][:40])))
         out.append(("apikey=unset" in ok["saw"] and "apikey=unset" in none["saw"],
                     "ANTHROPIC_API_KEY is unset before Python starts", ok["saw"].split("\n")[1:2]))
-        out.append(("--refuse" in none["saw"] and "Keychain" in none["saw"] and none["code"] == 1,
-                    "with no token in the Keychain, Python is told to refuse (and reports it)", none["saw"][-80:]))
+        out.append(("--refuse" in none["saw"] and "Keychain" in none["saw"] and none["code"] == RESERVED,
+                    "with no token in the Keychain, Python is told to refuse, notifies itself and exits the "
+                    "reserved code", none["saw"][-80:]))
         out.append((ok["notes"] == "" and none["notes"] == "" and crash["notes"].count("\n") == 1
                     and "CRASHED" in crash["notes"] and crash["code"] == 3,
-                    "a normal or refused exit adds no notification of the script's own; a crash posts exactly one",
-                    "ok %r | crash %r" % (ok["notes"][:30], crash["notes"][:60])))
-        body = [l.strip() for l in SCRIPT.read_text().splitlines() if not l.strip().startswith("#")]
-        out.append((not any(l.startswith("set -x") or "set -o xtrace" in l or l.startswith("printenv") or l == "env"
-                            for l in body),
-                    "the launcher never enables tracing or dumps its environment", ""))
+                    "an acceptable or already-notified exit adds no notification of the script's own; a crash "
+                    "posts exactly one", "ok %r | none %r | crash %r" % (ok["notes"][:30], none["notes"][:30], crash["notes"][:60])))
+        out.append((is_tracing_enabled("set -x\ntrue\n") and is_tracing_enabled("set -eux\n")
+                    and is_tracing_enabled("set -ux\n") and not is_tracing_enabled("set -u\n")
+                    and not is_tracing_enabled("set +x\n") and not is_tracing_enabled("set +o xtrace +o verbose\n")
+                    and not is_tracing_enabled(text(SCRIPT, mutation)),
+                    "the launcher never enables tracing, in any `set` flag combination", ""))
+
+        # --- fix round 1, I-1: every scheduled exit code yields exactly ONE notification in total. Python posts
+        # its own for 0 (acceptable) and RESERVED (refused/failed) by contract; every other code means Python
+        # posted nothing, so the shell must be the one that does.
+        totals = {}
+        for code in (0, RESERVED, 1, 2, 3):
+            r = launcher(tmp, mutation, token=True, exit_code=code)
+            shell_notified = r["notes"] != ""
+            python_notified_by_contract = code in (0, RESERVED)
+            totals[code] = int(shell_notified) + int(python_notified_by_contract)
+        out.append((all(v == 1 for v in totals.values()),
+                    "every scheduled exit code (0, reserved, 1, 2, 3) yields exactly one notification in total, "
+                    "from whichever side is supposed to post it", totals))
+
+        # --- notify() passes `--` before the message and title (fix round 1, M-1): a message of "-e" must not be
+        # read as an osascript option.
+        seen_argv = []
+        real_notify.notify("some title", "-e", run=lambda argv, **kw: (
+            seen_argv.append(argv), types.SimpleNamespace(returncode=0, stdout="", stderr=""))[1])
+        out.append((seen_argv and seen_argv[-1][-3:] == ["--", "-e", "some title"],
+                    "notify() passes -- before the message and title, so a message beginning with '-' is never "
+                    "read as an option", seen_argv[-1][-4:] if seen_argv else None))
 
         # --- the preflight
         pf = module("feeds.preflight", PREFLIGHT, mutation)
@@ -226,18 +317,87 @@ def checks(mutation) -> list:
                     "auth passes only loggedIn with authMethod oauth_token; the interactive login, an API key, logged "
                     "out, or no status each refuse", {k: bool(v) for k, v in verdict.items()}))
 
-        # --- one notification for a refused scheduled run
-        fr = module("friday_under_test", FRIDAY, mutation)
+        # --- fix round 1, I-3: auth_status and on_main fail closed on a hostile or broken CLI, never crash, never pass
+        def stub_run(rc, out_, exc=None, err="boom"):
+            def run(argv, **kw):
+                if exc:
+                    raise exc
+                return types.SimpleNamespace(returncode=rc, stdout=out_, stderr=err)
+            return run
+        auth_cases = {
+            "good": (stub_run(0, json.dumps({"loggedIn": True, "authMethod": "oauth_token"})), False),
+            "rc1-json-says-token": (stub_run(1, json.dumps({"loggedIn": True, "authMethod": "oauth_token"})), True),
+            "rc1-empty": (stub_run(1, ""), True),
+            "not-json": (stub_run(0, "Update available\n{}"), True),
+            "missing-binary": (stub_run(0, "", FileNotFoundError(2, "No such file or directory", "claude")), True),
+            "json-null": (stub_run(0, "null"), True),
+            "json-list": (stub_run(0, "[]"), True),
+        }
+        auth_detail = {}
+        auth_ok = True
+        for name, (run_stub, should_refuse) in auth_cases.items():
+            try:
+                st = pf.auth_status(run_stub)
+                verdict = pf.auth(st)
+                crashed = False
+            except Exception as exc:  # noqa: BLE001 -- a crash here IS the failure this check exists to catch
+                verdict, crashed = None, True
+            ok = (not crashed) and bool(verdict) == should_refuse
+            auth_ok = auth_ok and ok
+            auth_detail[name] = "crash" if crashed else bool(verdict)
+        out.append((auth_ok, "auth_status refuses (never crashes, never passes) on a non-zero exit even with "
+                    "well-formed JSON, on non-JSON output, on `null` or a list, and on a missing claude binary",
+                    auth_detail))
+        missing_git = None
+        git_crashed = False
+        try:
+            missing_git = pf.on_main(Path("."), run=stub_run(0, "", FileNotFoundError(2, "No such file or directory", "git")))
+        except Exception:  # noqa: BLE001
+            git_crashed = True
+        out.append((not git_crashed and bool(missing_git),
+                    "on_main refuses rather than crashing when git itself is missing",
+                    "crash" if git_crashed else missing_git))
+
+        # --- fix round 1, I-2: the Python half of the one-notification contract
         notes = []
+        good_notifier = lambda t, m: notes.append((t, m)) or True  # noqa: E731 -- list.append returns None
+
         with contextlib.redirect_stdout(io.StringIO()):
-            code = fr.main(["--scheduled"], root=tmp / "inbox2", today=date(2026, 10, 9), notifier=lambda t, m: notes.append((t, m)),
-                           preflight_reasons=["the checkout is on 'feature', not main"])
-        reports = list((tmp / "inbox2").glob("feeds-*/report.md"))
+            code_refused = fr.main(["--scheduled"], root=tmp / "inbox-refused", today=date(2026, 10, 9),
+                                   notifier=good_notifier, preflight_reasons=["the checkout is on 'feature', not main"])
+        reports = list((tmp / "inbox-refused").glob("feeds-*/report.md"))
         head = reports[0].read_text().splitlines()[0] if reports else ""
-        out.append((code == 1 and len(notes) == 1 and notes[0][0] == "FC08 Friday run: REFUSED" and "REFUSED" in head
-                    and "not main" in notes[0][1],
-                    "a refused scheduled run writes a REFUSED report and posts exactly one notification, from the "
-                    "report's own first lines", notes))
+        out.append((code_refused == RESERVED and len(notes) == 1 and notes[0][0] == "FC08 Friday run: REFUSED"
+                    and "REFUSED" in head and "not main" in notes[0][1],
+                    "a refused scheduled run writes a REFUSED report, posts exactly one notification from the "
+                    "report's own first lines, and exits the reserved code", notes))
+
+        notes2 = []
+        failing_notifier2 = lambda t, m: notes2.append((t, m)) or False  # noqa: E731
+        with contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(io.StringIO()):
+            code_failed_notify = fr.main(["--scheduled"], root=tmp / "inbox-failnotify", today=date(2026, 10, 9),
+                                         notifier=failing_notifier2, preflight_reasons=["the checkout is on 'feature', not main"])
+        out.append((code_failed_notify not in (0, RESERVED) and len(notes2) == 1,
+                    "when notify() itself returns False, --scheduled is called once, reports the failure, and "
+                    "exits a non-reserved non-zero code so friday_run.sh notifies instead",
+                    "code=%s notes=%s" % (code_failed_notify, notes2)))
+
+        # A NATURAL crash, not a notifier that raises: write_refusal's _save does `path.parent.mkdir(...)`, which
+        # raises NotADirectoryError when an ancestor of `root` is a plain file. This exercises main()'s except
+        # block for real, and -- unlike a raising notifier -- stays safe to call again if a mutation makes that
+        # except block ALSO notify (crash-notifies): the notifier here just appends and returns, it never re-raises.
+        bad_root = tmp / "not-a-directory"
+        bad_root.write_text("x", encoding="utf-8")
+        notes3 = []
+        crash_notifier = lambda t, m: notes3.append((t, m)) or True  # noqa: E731 -- only reached if a mutation makes the crash path notify
+        with contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(io.StringIO()):
+            code_crashed = fr.main(["--scheduled"], root=bad_root, today=date(2026, 10, 9),
+                                   notifier=crash_notifier, preflight_reasons=["the checkout is on 'feature', not main"])
+        out.append((code_crashed == 3 and len(notes3) == 0,
+                    "a crash inside the scheduled run (write_refusal failing on a non-directory root) posts NO "
+                    "notification of its own, and exits exactly the documented crash code (3, neither 0 nor "
+                    "the reserved value, so friday_run.sh notifies instead)",
+                    "code=%s notes=%s" % (code_crashed, notes3)))
     return out
 
 

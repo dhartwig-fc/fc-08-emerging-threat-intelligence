@@ -37,8 +37,18 @@ through it. flock is released by the kernel when the process exits: a crash leav
 With --scheduled (C2; scripts/schedule/friday_run.sh passes it) it also refuses, through the same path, when
 feeds/preflight.py finds the checkout off main, an unaccepted run under 14 days old, or auth that is not the
 long-lived token -- and whatever friday_run.sh itself refused (--refuse REASON, e.g. no token in the Keychain).
-Then it posts ONE notification, the report's first two lines (feeds/notify.py). A crash in scheduled mode exits 3
-without notifying, and friday_run.sh posts the one notification instead.
+Then it posts ONE notification, the report's first two lines (feeds/notify.py).
+
+THE EXIT-CODE CONTRACT WITH friday_run.sh (fix round 1, I-1/I-2): every exit path posts exactly one
+notification, and the exit code is how the two sides agree on who posted it.
+  0                     the run was ACCEPTABLE and Python's own notification was posted;
+  SCHEDULED_NOTIFIED_EXIT (10)  the run was REFUSED/FAILED and Python's own notification was posted;
+  anything else (1, 2, 3, ...)  Python posted NOTHING -- friday_run.sh must post the one notification itself.
+1 means notify() itself returned False (logged, not raised); 2 is argparse's own exit for a bad flag; 3 is a
+crash caught below, which deliberately posts nothing itself (friday_run.sh's notify() covers it); an
+import-time failure before main() ever runs also exits 1, from the interpreter, and is covered the same way.
+The shell side matches on the EXACT reserved code, not on a `>= N` threshold -- 10 is not "less bad" than 3,
+it is the one value that means "already handled".
 
 EXIT 0 for COMPLETE, NOTHING_NEW and UNFINISHED (a person decides the rest); 1 for REFUSED, FAILED and
 RECONCILIATION_FAILED.
@@ -71,6 +81,10 @@ EVAL_VARIABLES = ("FEEDS_CATALOGUE", "FEEDS_CATALOGUE_BATCH")
 LOCK = ".friday.lock"
 LOCKED = ("another Friday run holds %s; two runs at once could allocate the same advisory id -- wait for it "
           "to finish")
+# The one reserved --scheduled exit code: "Python already posted the one notification for a run that was not
+# acceptable". scripts/schedule/friday_run.sh checks for this EXACT value (fix round 1, I-1); see the exit-code
+# contract in the module docstring above.
+SCHEDULED_NOTIFIED_EXIT = 10
 
 
 def _now() -> str:
@@ -258,7 +272,7 @@ def main(argv: list, root: Path = inbox.INBOX_ROOT, today: date = None, extra_re
     if args.scheduled:
         try:
             return _scheduled(args, root, today, extra_refusals, preflight_reasons, notifier)
-        except Exception:  # noqa: BLE001 -- friday_run.sh posts the one notification for a crash
+        except Exception:  # noqa: BLE001 -- posts NO notification of its own; friday_run.sh posts the one instead
             import traceback
             traceback.print_exc()
             return 3
@@ -281,9 +295,12 @@ def _scheduled(args, root, today, extra_refusals, preflight_reasons, notifier) -
     reasons = refusals() + list(extra_refusals or []) + list(args.refuse) + found
     rec = write_refusal(run.run_id, reasons, root) if reasons else asyncio.run(friday(run, root=root))
     path = inbox.run_dir(run.run_id, root) / report.REPORT
-    (notifier or notify.notify)(*notify.from_report(path))
+    posted = (notifier or notify.notify)(*notify.from_report(path))
     print("%s: %s -- %s" % (run.run_id, rec["status"], path))
-    return 0 if rec["status"] in reconcile.ACCEPTABLE else 1
+    if not posted:
+        print("NOTIFICATION FAILED: friday_run.sh will post the one notification instead", file=sys.stderr)
+        return 1
+    return 0 if rec["status"] in reconcile.ACCEPTABLE else SCHEDULED_NOTIFIED_EXIT
 
 
 if __name__ == "__main__":

@@ -10,6 +10,9 @@ install and uninstall change persistent user configuration (launchd), so they ar
 an agent runs `status` at most. The template is scripts/schedule/uk.fc08.friday-run.plist: __REPO__ becomes this
 checkout, __HOME__ the home folder. launchctl is `bootstrap gui/<uid> <plist>` and `bootout gui/<uid>/<label>`.
 install refuses when a plist is already installed (uninstall first), so a schedule is never silently replaced.
+uninstall reports a failed bootout rather than ignoring it: the plist is left in place so a later `status`
+still shows it installed, instead of falsely reading "not installed" while the job is still loaded (fix
+round 1, M-5).
 """
 
 from __future__ import annotations
@@ -79,7 +82,11 @@ def main(argv: list, agents: Path = AGENTS, run=subprocess.run, uid: int = None,
     if args.dry_run:
         print("DRY RUN: would run %s bootout gui/%d/%s and remove %s" % (LAUNCHCTL, uid, LABEL, target))
         return 0
-    run([LAUNCHCTL, "bootout", "gui/%d/%s" % (uid, LABEL)], capture_output=True, text=True)
+    got = run([LAUNCHCTL, "bootout", "gui/%d/%s" % (uid, LABEL)], capture_output=True, text=True)
+    if got.returncode != 0:
+        print("REFUSED: launchctl bootout failed (%s); the plist is left in place -- it may still be loaded, "
+              "check with: python tools/schedule.py status" % (got.stderr or "").strip()[:200])
+        return 1
     target.unlink()
     print("UNINSTALLED: %s" % target)
     return 0
