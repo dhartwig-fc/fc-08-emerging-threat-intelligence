@@ -36,6 +36,11 @@ Once per run: the run's evidence -- items.json, triage.jsonl, the extraction fil
 accepted.json and the orchestrator's telemetry -- is copied to data/feeds/runs/<run_id>/, so every ledger
 decision is traceable to the verdict and reason behind it from a clone. The inbox copy is left whole.
 
+TAKES THE FRIDAY RUN'S OWN LOCK (tools/friday_run.run_lock) across the plan+apply path -- --dry-run included
+-- and is refused while a live Friday run holds it: reconciliation reads every run's allocations, and a live
+run could still be making them, so a snapshot taken mid-write would miss allocations made after it. --pending
+and --seed-catalogue never touch another run's allocations and stay unlocked.
+
 VALIDATES EVERYTHING FIRST, and refuses the whole run on any failure, writing nothing:
   - the run exists, is not an eval run, is not already accepted, and every listed item is decided exactly once;
   - the run's reconciliation (feeds/reconcile.py) is acceptable -- a FAILED or RECONCILIATION_FAILED run needs
@@ -122,6 +127,8 @@ def _check_accepted(run_id, key, item, verdict, outcome, request, alloc, folder,
     problems = []
     if not outcome or outcome.get("status") != "extracted":
         return None, ["%s cannot be accepted: it was not extracted (%s)" % (key, (outcome or {}).get("status", "never queued"))]
+    if verdict is None:
+        return None, ["%s: extracted but has no triage verdict" % key]
     adv, xrun = outcome["advisory_id"], outcome["extraction_run_id"]
     doc = folder / request["document"]["path"]
     ext = doc.suffix.lstrip(".")
@@ -451,37 +458,43 @@ def main(argv: list, *, inbox_root: Path = inbox.INBOX_ROOT, seen_path: Path = l
         return 0
     if not args.run_id:
         ap.error("RUN_ID is required")
-    try:
-        decisions = (json.loads(args.decisions.read_text(encoding="utf-8")) if args.decisions
-                     else ask(args.run_id, inbox_root))
-        p = plan(args.run_id, decisions, inbox_root=inbox_root, seen_path=seen_path, data=data,
-                 advisory_list=advisory_list, golden_list=golden_list, override=args.override_reconciliation)
-    except (ValueError, OSError) as exc:
-        print("REFUSED: %s" % exc)
-        return 1
-    what = "%d accepted (%s), %d dropped, %d deferred" % (
-        len(p["accepted"]), ", ".join(a["advisory_id"] for a in p["accepted"]) or "-",
-        sum(1 for e in p["entries"] if e["decision"] == "drop"), len(p["deferred"]))
-    if args.dry_run:
-        print("DRY RUN: would record %d decision(s) for run %s: %s" % (len(p["entries"]), args.run_id, what))
+    from tools.friday_run import LOCK, run_lock  # the Friday run's OWN lock, never a second copy of it
+    with run_lock(inbox_root) as held:
+        if not held:
+            print("REFUSED: a Friday run holds %s; accepting a run reads every run's allocations and would "
+                  "snapshot them mid-write -- wait for it to finish" % (Path(inbox_root) / LOCK))
+            return 1
+        try:
+            decisions = (json.loads(args.decisions.read_text(encoding="utf-8")) if args.decisions
+                         else ask(args.run_id, inbox_root))
+            p = plan(args.run_id, decisions, inbox_root=inbox_root, seen_path=seen_path, data=data,
+                     advisory_list=advisory_list, golden_list=golden_list, override=args.override_reconciliation)
+        except (ValueError, OSError) as exc:
+            print("REFUSED: %s" % exc)
+            return 1
+        what = "%d accepted (%s), %d dropped, %d deferred" % (
+            len(p["accepted"]), ", ".join(a["advisory_id"] for a in p["accepted"]) or "-",
+            sum(1 for e in p["entries"] if e["decision"] == "drop"), len(p["deferred"]))
+        if args.dry_run:
+            print("DRY RUN: would record %d decision(s) for run %s: %s" % (len(p["entries"]), args.run_id, what))
+            return 0
+        if not args.decisions and input("Apply: %s? [y/N] " % what).strip().lower() != "y":
+            print("NOTHING WRITTEN")
+            return 1
+        try:
+            apply(p, today, inbox_root=inbox_root, seen_path=seen_path, advisory_list=advisory_list)
+        except MarkerNotWritten as exc:
+            print("RECORDED, BUT NOT MARKED: %s" % exc)
+            return 2
+        except (ValueError, OSError) as exc:
+            print("REFUSED: %s -- every copy this call made was removed; nothing is recorded" % exc)
+            return 1
+        print("RECORDED: %d decision(s) for run %s in %s: %s. Commit, then review the proposals with "
+              "tools/review.py." % (len(p["entries"]), args.run_id, seen_path, what))
+        if p["gaps"]:
+            print("GAP: %d allocated advisory id(s) carried by no accepted record, never reused: %s" % (
+                len(p["gaps"]), ", ".join("%s (%s)" % (v, k) for k, v in p["gaps"].items())))
         return 0
-    if not args.decisions and input("Apply: %s? [y/N] " % what).strip().lower() != "y":
-        print("NOTHING WRITTEN")
-        return 1
-    try:
-        apply(p, today, inbox_root=inbox_root, seen_path=seen_path, advisory_list=advisory_list)
-    except MarkerNotWritten as exc:
-        print("RECORDED, BUT NOT MARKED: %s" % exc)
-        return 2
-    except (ValueError, OSError) as exc:
-        print("REFUSED: %s -- every copy this call made was removed; nothing is recorded" % exc)
-        return 1
-    print("RECORDED: %d decision(s) for run %s in %s: %s. Commit, then review the proposals with tools/review.py."
-          % (len(p["entries"]), args.run_id, seen_path, what))
-    if p["gaps"]:
-        print("GAP: %d allocated advisory id(s) carried by no accepted record, never reused: %s" % (
-            len(p["gaps"]), ", ".join("%s (%s)" % (v, k) for k, v in p["gaps"].items())))
-    return 0
 
 
 if __name__ == "__main__":

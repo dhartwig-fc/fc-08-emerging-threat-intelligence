@@ -212,7 +212,18 @@ def agent_options(model: str, max_budget_usd: float, max_turns: int, run: RunIde
 async def extract(path: Path, advisory_id: str, model: str, max_budget_usd: float, max_turns: int,
                   run: RunIdentity = None) -> tuple:
     """`run` is passed by a feeds run (tools/friday_run.py), whose identity names the feeds run so the
-    queue goes to its inbox; slice 1's command line leaves it None and gets a fresh identity as before."""
+    queue goes to its inbox; slice 1's command line leaves it None and gets a fresh identity as before.
+
+    A passed run is checked against this call's OWN arguments before anything else -- no file read, no
+    session -- because a runner passing a mismatched identity would show the agent one document while the
+    Knowledge Centre server checks quotes against another: every proposal would then be refused or
+    quarantined, a loud but confusing failure far from its real cause."""
+    if run is not None:
+        resolved = Path(path).resolve()
+        if run.advisory_id != advisory_id or run.pdf_path != resolved:
+            raise ValueError("the run identity %s (advisory %s, document %s) does not match this call's own "
+                             "arguments (advisory %s, document %s)"
+                             % (run.run_id, run.advisory_id, run.pdf_path, advisory_id, resolved))
     pages = document_pages(path)
 
     run = run or RunIdentity.new("extractor", advisory_id, path)

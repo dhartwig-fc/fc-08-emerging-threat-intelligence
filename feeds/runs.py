@@ -84,7 +84,23 @@ def expire(run_id: str, root: Path = inbox.INBOX_ROOT, today: date = None) -> Pa
 
 
 def mark_accepted(run_id: str, record: dict, root: Path = inbox.INBOX_ROOT) -> None:
+    """Write inbox/<run_id>/accepted.json ATOMICALLY. classify() below decides ACCEPTED_STATE purely by
+    whether this file EXISTS -- it never validates its content -- so a crash part-way through a direct write
+    would leave a truncated marker that classify() still reads as accepted, and the run would never come
+    back for a decision even though nothing valid was ever recorded. Write the body to a temp file in the
+    same directory first; only once it is complete, hard-link it into place (os.link raises if the target
+    already exists, so this can never overwrite a marker either, closing the same window a bare exists-check
+    leaves open); then always remove the temp file. A crash during the write leaves the temp file only, and
+    the run still classifies as PENDING."""
     path = inbox.run_dir(run_id, root) / ACCEPTED
     if path.exists():
         raise ValueError("run %s was already accepted" % run_id)
-    path.write_text(json.dumps(record, indent=2, ensure_ascii=False, sort_keys=True) + "\n", encoding="utf-8")
+    body = json.dumps(record, indent=2, ensure_ascii=False, sort_keys=True) + "\n"
+    tmp_path = path.with_name(".%s.tmp-%d" % (path.name, os.getpid()))
+    try:
+        with open(tmp_path, "w", encoding="utf-8") as f:
+            f.write(body)
+        os.link(tmp_path, path)
+    finally:
+        if tmp_path.exists():
+            tmp_path.unlink()

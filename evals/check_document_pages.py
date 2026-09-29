@@ -184,7 +184,10 @@ def checks(mutation) -> list:
                     "citations": [{"page": 1, "quote": quote}]}
             lines.append(dict(body, proposal_id=proposal_id(body), proposed_at="2026-10-02T09:00:00+00:00"))
         proposals = [gate.Proposal.from_line(d, source_file="%s.jsonl" % run_id) for d in lines]
-        got = attempt(lambda: gate.recheck(proposals, advisory_list=alist, advisories_dir=advisories))
+        # feed_list=None: this is a fixture id (ADV-2026-0099) against a TEMPORARY golden list, never the
+        # real live-feed list -- the default merges that in, and once a real acceptance reaches this id the
+        # cold guard fails with "in both" (F3, 2026-09-28 fixes brief).
+        got = attempt(lambda: gate.recheck(proposals, advisory_list=alist, advisories_dir=advisories, feed_list=None))
         ok = (not isinstance(got, str) and [p.citations[0][1] for p in got[0]] == [TRUE_QUOTE]
               and len(got[1]) == 1 and "not in the document" in got[1][0].reason)
         out.append((ok, "the gate passes the proposal quoting the HTML page and quarantines the fabricated one",

@@ -16,6 +16,10 @@ Usage:
     python evals/check_accept_run.py --mutate expire-unlocked       # --expire moves a run while a Friday run holds the lock
     python evals/check_accept_run.py --mutate register-after-copy   # a copy is registered for rollback only once complete
     python evals/check_accept_run.py --mutate marker-bare           # a marker failure after the ledger reads as REFUSED
+    python evals/check_accept_run.py --mutate direct-write          # feeds/runs.mark_accepted writes the marker directly
+    python evals/check_accept_run.py --mutate accept-unlocked       # accepting proceeds while a Friday run holds the lock
+    python evals/check_accept_run.py --mutate no-not-extracted-refusal  # accepting a never-extracted item crashes instead of refusing
+    python evals/check_accept_run.py --mutate no-verdict-refusal     # accepting an extracted item with no triage verdict crashes
 
 WHAT IT HOLDS:
   accept      an EXTRACTED item's document, record, queue and telemetry are copied byte for byte to
@@ -43,18 +47,27 @@ WHAT IT HOLDS:
   expire      a pending run under 14 days refuses --expire; at 14 it moves to inbox/expired/ and the ledger is
               untouched; an eval-marked run is never pending; while a Friday run holds the inbox's lock
               (tools/friday_run.run_lock, the SAME lock), --expire is refused and moves nothing;
+  lock        accepting (plan + apply, --dry-run included) takes the SAME lock and is refused while a Friday
+              run holds it, writing nothing; released, the same acceptance succeeds;
+  marker atomicity  feeds/runs.mark_accepted writes accepted.json atomically: a crash mid-write leaves no
+              marker at all, never a truncated one classify() would misread as accepted, and the run still
+              classifies as pending;
+  no-verdict  an extracted item with no triage verdict refuses ("extracted but has no triage verdict"), never
+              crashes;
   seed        --seed-catalogue records every catalogue item as a drop under "catalogue:<sha12>", once.
 
 COLD. Temporary inbox, data folders, advisory list and ledger; the document is a hand-built PDF; the queue
 and record are built to slice 1's contracts. No network, no model. The repository's git status is unchanged,
 and so are the gitignored places a leak would hide from it (inbox/, data/advisories/).
 
-NOT A VACUOUS PASS. Each --mutate rewrites tools/accept_run.py in memory; at least one check must fail.
+NOT A VACUOUS PASS. Each --mutate rewrites tools/accept_run.py (or, for "direct-write", feeds/runs.py) in
+memory; at least one check must fail.
 """
 
 from __future__ import annotations
 
 import argparse
+import builtins
 import contextlib
 import hashlib
 import io
@@ -74,6 +87,7 @@ from schemas.proposal_contract import SCHEMA, proposal_id  # noqa: E402
 from check_friday_run import listed_run, load_all  # noqa: E402
 
 ACCEPT = ROOT / "tools" / "accept_run.py"
+RUNS = ROOT / "feeds" / "runs.py"
 TODAY = date(2026, 10, 3)
 QUOTE = "Advisory text on shell companies."
 MUTATIONS = {
@@ -93,12 +107,37 @@ MUTATIONS = {
     "register-after-copy": ("        created.append(dst)\n        fill(out)\n", "        fill(out)\n        created.append(dst)\n"),
     "marker-bare": ("    except Exception as exc:  # after the ledger: nothing to roll back",
                     "    except ZeroDivisionError as exc:  # after the ledger: nothing to roll back"),
+    "accept-unlocked": (
+        "        if not held:\n            print(\"REFUSED: a Friday run holds %s; accepting a run reads",
+        "        if False:\n            print(\"REFUSED: a Friday run holds %s; accepting a run reads"),
+    "no-not-extracted-refusal": (
+        '    if not outcome or outcome.get("status") != "extracted":\n        return None, ["%s cannot be '
+        'accepted: it was not extracted (%s)" % (key, (outcome or {}).get("status", "never queued"))]\n',
+        "    pass\n"),
+    "no-verdict-refusal": (
+        '    if verdict is None:\n        return None, ["%s: extracted but has no triage verdict" % key]\n', ""),
+}
+
+# feeds/runs.py is mutated separately: mark_accepted's atomicity is tested directly, not through accept_run.
+RUNS_MUTATIONS = {
+    "direct-write": (
+        '    body = json.dumps(record, indent=2, ensure_ascii=False, sort_keys=True) + "\\n"\n'
+        '    tmp_path = path.with_name(".%s.tmp-%d" % (path.name, os.getpid()))\n'
+        "    try:\n"
+        '        with open(tmp_path, "w", encoding="utf-8") as f:\n'
+        "            f.write(body)\n"
+        "        os.link(tmp_path, path)\n"
+        "    finally:\n"
+        "        if tmp_path.exists():\n"
+        "            tmp_path.unlink()\n",
+        '    path.write_text(json.dumps(record, indent=2, ensure_ascii=False, sort_keys=True) + "\\n", '
+        'encoding="utf-8")\n'),
 }
 
 
 def load_accept(mutation):
     source = ACCEPT.read_text(encoding="utf-8")
-    if mutation:
+    if mutation and mutation in MUTATIONS:
         old, new = MUTATIONS[mutation]
         if source.count(old) != 1:
             raise SystemExit("MUTATION TARGET MISSING: %r is not in %s exactly once" % (old, ACCEPT))
@@ -106,6 +145,22 @@ def load_accept(mutation):
     module = types.ModuleType("accept_run_under_test")
     module.__file__ = str(ACCEPT)
     exec(compile(source, str(ACCEPT), "exec"), module.__dict__)
+    return module
+
+
+def load_runs(mutation):
+    """feeds/runs.py, mutated when `mutation` names one of RUNS_MUTATIONS. Loaded fresh and separately from
+    the real `runs` import above, so F1's atomicity check exercises mark_accepted/classify directly, and every
+    other check here (which uses the real, always-correct `runs`) is unaffected by this mutation."""
+    source = RUNS.read_text(encoding="utf-8")
+    if mutation and mutation in RUNS_MUTATIONS:
+        old, new = RUNS_MUTATIONS[mutation]
+        if source.count(old) != 1:
+            raise SystemExit("MUTATION TARGET MISSING: %r is not in %s exactly once" % (old, RUNS))
+        source = source.replace(old, new)
+    module = types.ModuleType("runs_under_test")
+    module.__file__ = str(RUNS)
+    exec(compile(source, str(RUNS), "exec"), module.__dict__)
     return module
 
 
@@ -230,7 +285,11 @@ def checks(mutation) -> list:
         decisions = {k_acc: "accept", k_def: "defer", k_def2: "defer", k_drop: "drop"}
         a0, l0 = alist.read_bytes(), seen.read_bytes()
         code, said = accept(rid, dict(decisions, **{k_drop: "accept"}))
-        out.append(untouched("an accept of an item never extracted", said, a0, l0) + ())
+        ok, label, detail = untouched("an accept of an item never extracted", said, a0, l0)
+        # F4 (2026-09-28 fixes brief): untouched() alone cannot tell a real refusal from a crash -- accept()
+        # returns (None, "CRASHED ...") on an exception, and "nothing written" still passes on a TypeError.
+        # Pin the actual refusal too: exit 1, and the reason accept_run prints.
+        out.append((ok and code == 1 and "was not extracted" in said, label, "code %s | %s" % (code, detail)))
         code, said = accept(rid, decisions, "--dry-run")
         out.append((code == 0 and "DRY RUN" in said and untouched("", said, a0, l0)[0], "a dry run writes nothing",
                     said.strip()[:120]))
@@ -287,16 +346,19 @@ def checks(mutation) -> list:
         code, said = accept(rid, decisions)
         out.append((code == 1 and "already accepted" in said, "a second acceptance is refused", said.strip()[:100]))
 
-        for n, (tamper, label) in enumerate((("record", "a record citing text not on its page"),
-                                             ("queue", "a queue line the review gate would quarantine"))):
+        # F4 (same weakness, same group): "code == 1" plus the reason accept_run actually prints, not just
+        # "nothing was written" -- which a crash also leaves true.
+        for n, (tamper, label, reason) in enumerate((
+                ("record", "a record citing text not on its page", "citation(s) are not on the page"),
+                ("queue", "a queue line the review gate would quarantine", "review gate would quarantine"))):
             rid = "feeds-2026-10-02-bbb00%d" % (n + 2)
             keys = make(rid, tamper=tamper)
             snap = {p: p.read_bytes() for p in data.rglob("*") if p.is_file()}
             a0, l0 = alist.read_bytes(), seen.read_bytes()
             code, said = accept(rid, {keys[0]: "accept", keys[1]: "defer", keys[2]: "defer", keys[3]: "drop"})
             now = {p: p.read_bytes() for p in data.rglob("*") if p.is_file()}
-            out.append((code == 1 and now == snap and alist.read_bytes() == a0 and seen.read_bytes() == l0,
-                        "refused, writing nothing: %s" % label, said.strip()[:140]))
+            out.append((code == 1 and reason in said and now == snap and alist.read_bytes() == a0
+                        and seen.read_bytes() == l0, "refused, writing nothing: %s" % label, said.strip()[:140]))
 
         rid = "feeds-2026-10-02-bbb004"
         keys = make(rid)
@@ -499,6 +561,86 @@ def checks(mutation) -> list:
                     "--expire is refused while a Friday run holds the inbox's lock (the SAME lock), moving nothing; "
                     "released, it expires the run", said.strip().splitlines()[0][:120] if said.strip() else ""))
 
+        # F2 (2026-09-28 fixes brief): accepting a run takes the SAME lock -- reconciliation reads every run's
+        # allocations, and a live Friday run could still be making them.
+        rid = "feeds-2026-10-02-bbb012"
+        keys = make(rid)
+        dec = {keys[0]: "accept", keys[1]: "defer", keys[2]: "defer", keys[3]: "drop"}
+        a0, l0 = alist.read_bytes(), seen.read_bytes()
+        with m["friday"].run_lock(box) as held2:
+            locked_code2, locked_said2 = accept(rid, dec)
+            locked_untouched = (alist.read_bytes() == a0 and seen.read_bytes() == l0
+                                and runs.classify(rid, box) == runs.PENDING)
+        free_code2, free_said2 = accept(rid, dec)
+        out.append((held2 and locked_code2 == 1 and "Friday run" in locked_said2 and locked_untouched
+                    and free_code2 == 0 and runs.classify(rid, box) == runs.ACCEPTED_STATE,
+                    "accepting is refused while a Friday run holds the inbox's lock (the SAME lock), writing "
+                    "nothing; released, the same acceptance succeeds",
+                    "%s | %s" % (locked_said2.strip()[:100], free_said2.strip()[:60])))
+
+        # F1 (2026-09-28 fixes brief): feeds/runs.mark_accepted must never leave a PARTIAL marker. classify()
+        # only checks whether accepted.json EXISTS -- never its content -- so a crash mid-write must leave
+        # nothing at the final path, not a truncated file classify() would misread as accepted.
+        box2 = tmp / "runs-f1"
+        rid_f1 = "feeds-2026-10-02-fff001"
+        inbox.save(rid_f1, {"run_id": rid_f1, "sources": {"ofac": {"items": [
+            {"key": "ofac:1", "source": "ofac", "item_id": "1"}]}}}, box2)
+        runs_mod = load_runs(mutation)
+
+        def crashing(real):
+            def opener(file, mode="r", *a, **kw):
+                f = real(file, mode, *a, **kw)
+                if any(c in mode for c in "wxa"):
+                    real_write = f.write
+
+                    def write(data, _rw=real_write):
+                        _rw(data[:5])
+                        raise OSError(28, "No space left on device (planted mid-write)")
+                    f.write = write
+                return f
+            return opener
+
+        real_bopen, real_ioopen = builtins.open, io.open
+        builtins.open, io.open = crashing(real_bopen), crashing(real_ioopen)
+        crashed = False
+        try:
+            runs_mod.mark_accepted(rid_f1, {"run_id": rid_f1, "decided_on": "2026-10-02"}, box2)
+        except OSError as exc:
+            crashed = "planted mid-write" in str(exc)
+        finally:
+            builtins.open, io.open = real_bopen, real_ioopen
+        marker_dir = inbox.run_dir(rid_f1, box2)
+        leftover = sorted(p.name for p in marker_dir.iterdir() if p.name != inbox.ITEMS)
+        out.append((crashed and not (marker_dir / runs.ACCEPTED).exists() and not leftover
+                    and runs.classify(rid_f1, box2) == runs.PENDING,
+                    "a crash mid-write to the inbox marker leaves no marker at all (never a truncated one); "
+                    "the run still classifies as pending, not accepted",
+                    "leftover %s | classify %s" % (leftover, runs.classify(rid_f1, box2))))
+
+        # F5 (2026-09-28 fixes brief): an extracted item with no triage verdict must refuse, never crash.
+        rid = "feeds-2026-10-02-bbb013"
+        keys = make(rid)
+        k0 = keys[0]
+        real_reconcile = acc.reconcile
+
+        def no_verdict(rid_, root_):
+            rec = real_reconcile.reconcile_run(rid_, root_)
+            return dict(rec, verdicts={k: v for k, v in rec["verdicts"].items() if k != k0})
+        acc.reconcile = types.SimpleNamespace(**{k: getattr(real_reconcile, k) for k in dir(real_reconcile)
+                                                 if not k.startswith("__")})
+        acc.reconcile.reconcile_run = no_verdict
+        snap = {p: p.read_bytes() for p in data.rglob("*") if p.is_file()}
+        a0, l0 = alist.read_bytes(), seen.read_bytes()
+        try:
+            code, said = accept(rid, {keys[0]: "accept", keys[1]: "defer", keys[2]: "defer", keys[3]: "drop"})
+        finally:
+            acc.reconcile = real_reconcile
+        now = {p: p.read_bytes() for p in data.rglob("*") if p.is_file()}
+        out.append((code == 1 and "has no triage verdict" in said and k0 in said and now == snap
+                    and alist.read_bytes() == a0 and seen.read_bytes() == l0,
+                    "an extracted item with no triage verdict refuses, naming it, and writes nothing",
+                    said.strip()[:140]))
+
         cat = tmp / "catalogue.json"
         cat.write_text(json.dumps({"items": [{"source": "ofsi", "item_id": "c%d" % i} for i in range(4)]}), encoding="utf-8")
         seed_ledger = tmp / "seed-ledger.json"
@@ -522,7 +664,8 @@ def checks(mutation) -> list:
 
 def main(argv: list) -> int:
     ap = argparse.ArgumentParser(description="Pin accept_run end to end")
-    ap.add_argument("--mutate", choices=sorted(MUTATIONS), help="break one rule in memory; a check MUST fail")
+    ap.add_argument("--mutate", choices=sorted(set(MUTATIONS) | set(RUNS_MUTATIONS)),
+                    help="break one rule in memory; a check MUST fail")
     args = ap.parse_args(argv)
     if args.mutate:
         print("MUTATED: %s\n" % args.mutate)

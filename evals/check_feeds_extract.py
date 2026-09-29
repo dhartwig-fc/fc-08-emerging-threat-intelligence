@@ -17,6 +17,7 @@ Usage:
     python evals/check_feeds_extract.py --mutate reallocate        # an id another run already allocated is allocated again
     python evals/check_feeds_extract.py --mutate hide-duplicates   # load_allocations keeps the last of two lines silently
     python evals/check_feeds_extract.py --mutate inbox-ids-only    # accepted runs' tracked allocations are not read
+    python evals/check_feeds_extract.py --mutate no-identity-match-check  # extract() trusts a mismatched RunIdentity
 
 WHAT IT HOLDS:
   relevant only  a request is refused for an item not listed, with no verdict, or triaged not_relevant;
@@ -39,6 +40,8 @@ WHAT IT HOLDS:
                  RunIdentity and the server derive the SAME path; a malformed feeds run is refused; with no
                  feeds run the queue is data/proposals/ exactly as in slice 1;
   the tool       the server's feeds_extract applies these rules under a run identity and refuses without one;
+  identity       extract() refuses a passed RunIdentity that does not match its own call's advisory id or
+                 document, before any session starts and with no file read for the mismatched path;
   inbox only     every file written is inside the temporary inbox; the repository's git status is unchanged.
 
 COLD. Stubbed HTTP, temporary inbox and advisory list. No network, no model.
@@ -71,6 +74,7 @@ from check_document_pages import tiny_pdf  # noqa: E402
 EXTRACTION = ROOT / "feeds" / "extraction.py"
 KC = ROOT / "mcp_server" / "knowledge_centre_server.py"
 SERVER = ROOT / "mcp_server" / "feeds_server.py"
+EXTRACT_ADVISORY = ROOT / "agents" / "extract_advisory.py"
 RUN = "feeds-2026-10-02-ccc333"
 JUNK_RUN = "feeds-2026-10-02-eee555"  # its own run, so this run's cap of 3 is not spent on it
 EVAL_RUN = "feeds-2026-10-02-fff666"  # an eval run (state["eval"]), as feeds_server's eval mode marks one
@@ -99,6 +103,15 @@ MUTATIONS = {
                               "            pass  # recorded, so a retry"),
     "queue-escape": (KC, "    folder = feeds_inbox.proposals_dir(feeds_run, FEEDS_INBOX_ROOT) if feeds_run else QUEUE_DIR\n",
                      "    folder = QUEUE_DIR\n"),
+    "no-identity-match-check": (EXTRACT_ADVISORY,
+        "    if run is not None:\n"
+        "        resolved = Path(path).resolve()\n"
+        '        if run.advisory_id != advisory_id or run.pdf_path != resolved:\n'
+        '            raise ValueError("the run identity %s (advisory %s, document %s) does not match this '
+        'call\'s own "\n'
+        '                             "arguments (advisory %s, document %s)"\n'
+        "                             % (run.run_id, run.advisory_id, run.pdf_path, advisory_id, resolved))\n",
+        ""),
 }
 
 
@@ -386,6 +399,31 @@ def checks(mutation) -> list:
                     "every file written is inside the temporary inbox", "%d files; outside: %s" % (
                         len(written), [str(w) for w in written if not str(w).startswith("inbox/")
                                        and w.name not in ("advisory_list.json", "doc.html") and w not in planted][:3])))
+
+        # F6 (2026-09-28 fixes brief): extract() must refuse a passed RunIdentity that does not match this
+        # call's own arguments, before any session starts. Never actually calls the model: a mismatch is
+        # caught before extract() even reads the document, proved here with a document that does not exist.
+        ea = load("extract_advisory_under_test", EXTRACT_ADVISORY, mutation)
+        from agents.run_identity import RunIdentity as RI
+        doc_a = tmp / "identity-a.pdf"
+        doc_a.write_bytes(page())  # RunIdentity.new hashes it, so it must exist; the CALL's own path need not
+        ident = RI.new("extractor", "ADV-2026-0001", doc_a)
+
+        def raised(coro):
+            try:
+                asyncio.run(coro)
+                return None
+            except Exception as exc:
+                return exc
+
+        exc1 = raised(ea.extract(tmp / "does-not-exist.pdf", "ADV-2026-0002", "stub-model", 1.0, 5, run=ident))
+        exc2 = raised(ea.extract(tmp / "also-missing.pdf", "ADV-2026-0001", "stub-model", 1.0, 5, run=ident))
+        out.append((isinstance(exc1, ValueError) and "ADV-2026-0001" in str(exc1) and "ADV-2026-0002" in str(exc1)
+                   and isinstance(exc2, ValueError) and "also-missing.pdf" in str(exc2),
+                   "extract() refuses a passed RunIdentity that does not match this call's own advisory id or "
+                   "document, before any session starts (no file even read for the mismatched path)",
+                   "%s | %s" % (exc1, exc2)))
+
     out.append((git_status() == before, "the repository's git status is unchanged", ""))
     return out
 
