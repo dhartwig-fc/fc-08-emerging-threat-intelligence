@@ -172,7 +172,8 @@ async def run_session(run: FeedsRun, model: str = MODEL, max_budget_usd: float =
                       max_turns: int = MAX_TURNS, inbox_root: Path = inbox.INBOX_ROOT) -> dict:
     """One orchestrator session, in the run's mode. Returns its summary; never raises for an agent-side
     failure, which is recorded (`failure`) so the caller decides."""
-    telemetry.run_started(run, model, max_budget_usd, max_turns, FULL_AGENT_TOOLS if run.live else AGENT_TOOLS)
+    telemetry.run_started(run, model, max_budget_usd, max_turns, FULL_AGENT_TOOLS if run.live else AGENT_TOOLS,
+                          prompt_sha256=FULL_PROMPT_SHA256 if run.live else PROMPT_SHA256)
     tool_calls: Counter = Counter()
     calls: dict = {}    # tool_use_id -> tool name, every call the agent made, in order
     results: dict = {}  # tool_use_id -> (is_error, text), every tool_result the transcript carried

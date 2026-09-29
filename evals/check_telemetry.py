@@ -8,6 +8,7 @@ Usage:
     python evals/check_telemetry.py --mutate terminal    # a denial leaves no event; MUST fail
     python evals/check_telemetry.py --mutate unhooked-success  # the transcript backfills a SUCCESS too; MUST fail
     python evals/check_telemetry.py --mutate unhooked-none     # the transcript backfills nothing at all; MUST fail
+    python evals/check_telemetry.py --mutate drop-prompt-sha   # RUN_STARTED never carries prompt_sha256; MUST fail
 
 WHY. PLAN.md week 5: "telemetry for every decision". Probed 2026-09-24 (spec,
 Section 3): PostToolUse carries duration_ms and the tool's reply; PostToolUseFailure
@@ -199,6 +200,16 @@ def hook_checks() -> list:
                 and done["payload"].get("terminal_check") == {"calls": 0, "unterminated": [], "duplicated": []},
                 "run_started records the agent's tools; run_completed its validated flag and terminal_check",
                 "%s / %s" % (started["stage"], done["stage"])))
+
+    # Prompt-sha brief (2026-09-29): a run's telemetry must say which prompt it ran under. `None` is
+    # recorded as null (present, never omitted) so a caller that does not pass it reads the same as a run
+    # from before the field existed.
+    out.append(("prompt_sha256" in started["payload"] and started["payload"]["prompt_sha256"] is None,
+                "run_started with no prompt_sha256 records null explicitly -- present, not omitted",
+                str(started["payload"].get("prompt_sha256"))))
+    hashed = telemetry.run_started(RUN, "claude-sonnet-5", 5.0, 60, (), prompt_sha256="f" * 64)
+    out.append((hashed["payload"].get("prompt_sha256") == "f" * 64,
+                "run_started(..., prompt_sha256=X) records exactly X", str(hashed["payload"].get("prompt_sha256"))))
     return out
 
 
@@ -348,14 +359,31 @@ def _recompile_unhooked(condition: str) -> None:
                                                    "record_unhooked")
 
 
+def _recompile_run_started() -> None:
+    """Mutation: drop-prompt-sha. run_started still accepts prompt_sha256 but never forwards it to
+    emit(), so RUN_STARTED never carries the field -- present or null -- whatever it is called with.
+    Recompiled from telemetry.py's real source and bound to the module's own globals, exactly as
+    _recompile_unhooked, so it still writes only to this guard's temporary TELEMETRY_DIR."""
+    src = Path(telemetry.__file__).read_text(encoding="utf-8")
+    anchor = "tools=list(tools), prompt_sha256=prompt_sha256)"
+    assert src.count(anchor) == 1, "run_started mutation: the anchor moved"
+    ns: dict = {"__file__": telemetry.__file__}  # module-level code only defines names; nothing is written
+    exec(compile(src.replace(anchor, "tools=list(tools))"), telemetry.__file__, "exec"), ns)
+    telemetry.run_started = types.FunctionType(ns["run_started"].__code__, telemetry.__dict__, "run_started",
+                                               ns["run_started"].__defaults__)
+
+
 def main(argv: list) -> int:
     ap = argparse.ArgumentParser(description="Pin the telemetry contract")
     ap.add_argument("--mutate", choices=("refusal", "allowlist", "terminal", "unhooked-success",
-                                         "unhooked-none"),
+                                         "unhooked-none", "drop-prompt-sha"),
                     help="remove one rule; the checks that depend on it MUST fail")
     args = ap.parse_args(argv)
 
-    if args.mutate == "refusal":
+    if args.mutate == "drop-prompt-sha":
+        _recompile_run_started()
+        print("MUTATED: RUN_STARTED never carries prompt_sha256.\n")
+    elif args.mutate == "refusal":
         telemetry.classify_response = lambda response: (telemetry.SUCCESS, "")
         print("MUTATED: every tool reply is classified SUCCESS.\n")
     elif args.mutate == "allowlist":

@@ -20,6 +20,8 @@ Usage:
     python evals/check_feeds_extract.py --mutate no-identity-match-check  # extract() trusts a mismatched RunIdentity
     python evals/check_feeds_extract.py --mutate identity-check-refuses-all  # every passed identity is refused
     python evals/check_feeds_extract.py --mutate no-resolve         # the identity check compares an unresolved path
+    python evals/check_feeds_extract.py --mutate stale-prompt-hash  # run_started is passed a constant/stale hash
+    python evals/check_feeds_extract.py --mutate no-prompt-hash     # run_started is called with no prompt_sha256 at all
 
 WHAT IT HOLDS:
   relevant only  a request is refused for an item not listed, with no verdict, or triaged not_relevant;
@@ -47,6 +49,9 @@ WHAT IT HOLDS:
                  MATCHING identity -- same document, differently spelled -- gets past the check, proved by
                  reaching (a stubbed) document_pages, never a session;
   inbox only     every file written is inside the temporary inbox; the repository's git status is unchanged.
+  prompt sha     extract() passes run_started the sha256 of the prompt it actually sends: sha256(system_prompt)
+                 == recorded prompt_sha256 == extract_advisory.PROMPT_SHA256, proved by stubbing query() so no
+                 session can start.
 
 COLD. Stubbed HTTP, temporary inbox and advisory list. No network, no model.
 
@@ -58,6 +63,7 @@ from __future__ import annotations
 
 import argparse
 import asyncio
+import hashlib
 import json
 import os
 import subprocess
@@ -70,6 +76,7 @@ ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "evals"))
 import feeds  # noqa: E402
+from agents import telemetry  # noqa: E402
 from feeds import http as fh, inbox, triage as feeds_triage  # noqa: E402
 from feeds.model import FeedItem  # noqa: E402
 from feeds.sources import linked_pdfs  # noqa: E402
@@ -122,6 +129,12 @@ MUTATIONS = {
         '        if run.advisory_id != advisory_id or run.pdf_path != resolved:\n',
         "        if True:\n"),
     "no-resolve": (EXTRACT_ADVISORY, "        resolved = Path(path).resolve()\n", "        resolved = Path(path)\n"),
+    "stale-prompt-hash": (EXTRACT_ADVISORY,
+        "    telemetry.run_started(run, model, max_budget_usd, max_turns, AGENT_TOOLS, prompt_sha256=PROMPT_SHA256)\n",
+        '    telemetry.run_started(run, model, max_budget_usd, max_turns, AGENT_TOOLS, prompt_sha256="0" * 64)\n'),
+    "no-prompt-hash": (EXTRACT_ADVISORY,
+        "    telemetry.run_started(run, model, max_budget_usd, max_turns, AGENT_TOOLS, prompt_sha256=PROMPT_SHA256)\n",
+        "    telemetry.run_started(run, model, max_budget_usd, max_turns, AGENT_TOOLS)\n"),
 }
 
 
@@ -459,6 +472,51 @@ def checks(mutation) -> list:
                    "a MATCHING RunIdentity -- same document, spelled differently -- gets past the check "
                    "(reaches document_pages; a refuse-everything or an unresolved-path version would raise "
                    "ValueError here instead, before ever reaching it)", str(exc3)))
+
+        # Prompt-sha brief (2026-09-29): the extractor must pass run_started the hash of the prompt it
+        # actually SENDS, not a constant or a stale one. Get further than the identity-check positive case
+        # above -- past run_started and the options -- and still start no session, by stubbing query()
+        # (not document_pages) in the extract_advisory module namespace. TELEMETRY_DIR is redirected so the
+        # real run_started, left in place, writes nowhere near the checkout.
+        doc_b = tmp / "identity-b.pdf"
+        doc_b.write_bytes(tiny_pdf(["Advisory text for the prompt-sha probe."]))  # a real PDF: document_pages()
+        ident_b = RI.new("extractor", "ADV-2026-0077", doc_b)                    # runs for real, unlike exc1-exc3
+
+        class _GotPastRunStarted(Exception):
+            pass
+
+        captured: dict = {}
+        real_query = ea.query
+        real_run_started = telemetry.run_started
+        real_telemetry_dir = telemetry.TELEMETRY_DIR
+
+        async def stub_query(*, prompt, options):
+            captured["system_prompt"] = options.system_prompt
+            raise _GotPastRunStarted("stub: extract() reached query() -- no session was started")
+            yield  # pragma: no cover -- keeps this an async generator; the raise above is always hit first
+
+        def capturing_run_started(run, model, max_budget_usd, max_turns, tools, **kwargs):
+            captured["prompt_sha256"] = kwargs.get("prompt_sha256")
+            return real_run_started(run, model, max_budget_usd, max_turns, tools, **kwargs)
+
+        ea.query = stub_query
+        telemetry.run_started = capturing_run_started
+        telemetry.TELEMETRY_DIR = tmp / "telemetry-scratch"  # never data/telemetry/
+        try:
+            exc4 = raised(ea.extract(doc_b, "ADV-2026-0077", "stub-model", 1.0, 5, run=ident_b))
+        finally:
+            ea.query = real_query
+            telemetry.run_started = real_run_started
+            telemetry.TELEMETRY_DIR = real_telemetry_dir
+
+        sent_hash = hashlib.sha256(captured.get("system_prompt", "").encode("utf-8")).hexdigest()
+        out.append((isinstance(exc4, _GotPastRunStarted)
+                   and captured.get("prompt_sha256") == ea.PROMPT_SHA256 == sent_hash,
+                   "the extractor passes run_started the hash of the prompt it actually sends: "
+                   "sha256(system_prompt) == recorded prompt_sha256 == extract_advisory.PROMPT_SHA256 "
+                   "(reaches query(); no session was started)",
+                   "%s | recorded %s | PROMPT_SHA256 %s" % (
+                       type(exc4).__name__, str(captured.get("prompt_sha256"))[:16], ea.PROMPT_SHA256[:16])))
 
     out.append((git_status() == before, "the repository's git status is unchanged", ""))
     return out

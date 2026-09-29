@@ -14,6 +14,7 @@ Usage:
     python evals/check_feeds_orchestrator.py --mutate triage-drift       # a live run's triage instructions differ from B's
     python evals/check_feeds_orchestrator.py --mutate unpinned-budget    # the session cap moves off US$1.50
     python evals/check_feeds_orchestrator.py --mutate over-ceiling       # the caps no longer fit the US$5 ceiling
+    python evals/check_feeds_orchestrator.py --mutate stale-full-hash    # FULL_PROMPT_SHA256 no longer matches FULL_PROMPT
 
 WHAT IT HOLDS (spec sections 1 and 4; the questions evals/check_tool_surface.py asks of the extractor):
   no built-ins   tools=[] and the argv carries --tools "", setting_sources=[], strict_mcp_config -- both modes;
@@ -29,6 +30,10 @@ WHAT IT HOLDS (spec sections 1 and 4; the questions evals/check_tool_surface.py 
   telemetry      the Post hooks are installed; the shadowing advisory names only feeds_read_page;
   the prompts    triage-only states the asymmetry, offers no extraction, and PROMPT_SHA256 is its hash; the
                  LIVE prompt BEGINS with those exact bytes and adds the extraction step (at most 3);
+                 FULL_PROMPT_SHA256 is the sha256 of FULL_PROMPT itself -- the value run_session() passes
+                 telemetry.run_started for a live run (prompt-sha brief, 2026-09-29). Neither this guard nor
+                 check_friday_run.py drives run_session() far enough to reach that call without a model, so
+                 this pins the constant, not the call site;
   the budget     pinned: US$1.50 and 80 turns per session, US$1.00 and 60 turns per extraction, 3
                  extractions and 10 verdicts per run, a US$5.00 ceiling -- and session + 3 extractions fits it.
 
@@ -60,7 +65,8 @@ from check_tool_surface import built_command  # noqa: E402
 from feeds import extraction as feeds_extraction, triage as feeds_triage  # noqa: E402
 
 MUTATIONS = ("builtin-tools", "settings", "preapprove-triage", "allow-propose", "extract-tool", "no-asymmetry",
-             "extract-in-eval", "inherit-catalogue", "triage-drift", "unpinned-budget", "over-ceiling")
+             "extract-in-eval", "inherit-catalogue", "triage-drift", "unpinned-budget", "over-ceiling",
+             "stale-full-hash")
 LIVE = of.FeedsRun("feeds-2026-10-02-fff555")
 EVAL_RUN = of.FeedsRun("feeds-2026-10-02-fff666", catalogue=ROOT / "evals" / "feeds" / "catalogue.json",
                        batch=("ofsi:0123456789abcdef",))
@@ -152,6 +158,8 @@ def checks(mutation) -> list:
     if mutation == "over-ceiling":
         of.EXTRACTION_BUDGET_USD = 1.50
         PINNED["EXTRACTION_BUDGET_USD"] = 1.50  # the pin moved WITH it: only the ceiling arithmetic can catch this
+    if mutation == "stale-full-hash":
+        of.FULL_PROMPT_SHA256 = "0" * 64
     out = []
     for run in (EVAL_RUN, LIVE):
         out += surface(of.agent_options(run), run, mutation)
@@ -198,6 +206,11 @@ def checks(mutation) -> list:
                 and hashlib.sha256(live_prompt[:len(of.TRIAGE_PROMPT)].encode("utf-8")).hexdigest() == of.PROMPT_SHA256
                 and "feeds_extract" in live_prompt[len(of.TRIAGE_PROMPT):] and "At most 3" in live_prompt,
                 "live: the prompt BEGINS with B's measured triage bytes and adds the extraction step (at most 3)",
+                of.FULL_PROMPT_SHA256[:16]))
+    # Prompt-sha brief (2026-09-29): run_session passes telemetry.run_started this exact constant for a
+    # live run. Pinned here rather than at the call site -- see the docstring above.
+    out.append((of.FULL_PROMPT_SHA256 == hashlib.sha256(of.FULL_PROMPT.encode("utf-8")).hexdigest(),
+                "FULL_PROMPT_SHA256 is the sha256 of FULL_PROMPT, the hash a live run's run_started call reports",
                 of.FULL_PROMPT_SHA256[:16]))
 
     got = {k: getattr(of, k) for k in PINNED}

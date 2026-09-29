@@ -58,6 +58,7 @@ from __future__ import annotations
 import argparse
 import asyncio
 import dataclasses
+import hashlib
 import json
 import sys
 from collections import Counter
@@ -136,6 +137,10 @@ If you cannot justify an addition against doctrine, DO NOT PROPOSE IT. An unjust
 Returning zero additions is a valid and useful answer when the record is complete.
 """
 
+# The prompt this run was actually sent, recorded in RUN_STARTED the same way as the extractor's
+# (agents.extract_advisory.PROMPT_SHA256). Owner decision, 2026-09-29, before Task 9's first live dry run.
+PROMPT_SHA256 = hashlib.sha256(REVIEWER_PROMPT.encode("utf-8")).hexdigest()
+
 
 def build_prompt(record: dict, pages: list) -> str:
     claimed = ["%s %s" % (t.get("typology_id") or "EMERGENT", t.get("label", ""))
@@ -162,7 +167,7 @@ async def review(pdf: Path, record: dict, model: str, max_budget_usd: float, max
         output_format={"type": "json_schema", "schema": ReviewAdditions.model_json_schema()},
     )
 
-    run_telemetry.run_started(run, model, max_budget_usd, max_turns, AGENT_TOOLS)
+    run_telemetry.run_started(run, model, max_budget_usd, max_turns, AGENT_TOOLS, prompt_sha256=PROMPT_SHA256)
     structured = None
     failure: str | None = None
     tool_calls: Counter = Counter()

@@ -216,12 +216,18 @@ def reconcile(run, tool_use_ids) -> dict:
             "duplicated": [i for i in ids if counts[i] > 1]}
 
 
-def run_started(run, model: str, max_budget_usd: float, max_turns: int, tools) -> dict:
+def run_started(run, model: str, max_budget_usd: float, max_turns: int, tools, prompt_sha256: str = None) -> dict:
     """`tools` is every qualified tool name the agent can call. It is recorded so what a run HAD is
-    measured, not inferred from its date (the walkthrough's section 10 counts it)."""
+    measured, not inferred from its date (the walkthrough's section 10 counts it).
+
+    `prompt_sha256` is the sha256 of the prompt this run was actually sent (owner decision, 2026-09-29,
+    before Task 9's first live dry run): the spec measures a resolver change "by the resolution rate on
+    live runs", and a run can only be tied to the prompt it ran under if its own telemetry says which
+    prompt that was. Recorded as `null` when not passed, never omitted, so a caller that does not pass it
+    reads the same as a run from before this field existed: absent or null both mean "not recorded"."""
     return emit(run, RUN_STARTED, SUCCESS, "%s run started" % run.stage, model=model,
                 max_budget_usd=max_budget_usd, max_turns=max_turns, pdf_sha256=run.pdf_sha256,
-                tools=list(tools))
+                tools=list(tools), prompt_sha256=prompt_sha256)
 
 
 def run_completed(run, status: str, message: str, *, result=None, validated: bool = False, **extra) -> dict:

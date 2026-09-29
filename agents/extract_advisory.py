@@ -35,6 +35,7 @@ from __future__ import annotations
 
 import argparse
 import asyncio
+import hashlib
 import json
 import sys
 from collections import Counter
@@ -93,6 +94,10 @@ The Knowledge Centre:
 - For each named actor you record (a person, an organisation, a network, a vessel or a wallet; never a category), call knowledge_centre_resolve_actor with the name as the document gives it and the actor_type you record. Only a reply starting "Resolved:" is an identity: note it in extraction_notes as "name -> actor_id". Any other reply ("Unresolved:", "Ambiguous:", "Not resolvable:") is not an identity: an actor_id it lists is for a human to decide, so if you mention it, label it a suggestion or an ambiguity, and never treat it as the actor's identity.
 - Before you finish, call knowledge_centre_propose_link once per typology in your record: with typology_id for a library match, with emergent_label for an emergent one. Pass the same citations as the record entry (page and verbatim quote); a quote that is not on the page it names is refused, and the refusal says where it is. Cite page numbers in the rationale.
 """
+
+# The prompt this run was actually sent, recorded in RUN_STARTED (agents/telemetry.run_started) so a run
+# can be tied to the prompt it ran under. Owner decision, 2026-09-29, before Task 9's first live dry run.
+PROMPT_SHA256 = hashlib.sha256(SYSTEM_PROMPT.encode("utf-8")).hexdigest()
 
 
 def document_pages(path: Path) -> list:
@@ -230,7 +235,7 @@ async def extract(path: Path, advisory_id: str, model: str, max_budget_usd: floa
     run = run or RunIdentity.new("extractor", advisory_id, path)
     options = agent_options(model, max_budget_usd, max_turns, run)
 
-    telemetry.run_started(run, model, max_budget_usd, max_turns, AGENT_TOOLS)
+    telemetry.run_started(run, model, max_budget_usd, max_turns, AGENT_TOOLS, prompt_sha256=PROMPT_SHA256)
     structured = None
     failure: str | None = None
     tool_calls: Counter = Counter()
