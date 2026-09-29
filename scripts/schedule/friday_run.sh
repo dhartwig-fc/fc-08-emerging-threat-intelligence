@@ -29,6 +29,9 @@ SERVICE="${FC08_KEYCHAIN_SERVICE:-uk.fc08.claude-oauth-token}"
 SECURITY="${FC08_SECURITY:-/usr/bin/security}"
 OSASCRIPT="${FC08_OSASCRIPT:-/usr/bin/osascript}"
 PYTHON="${FC08_PYTHON:-$REPO/.venv/bin/python}"
+# The Keychain account. launchd normally sets USER for a LaunchAgent, but under `set -u` an unset USER would
+# kill the read below and REFUSE with a misleading "no token" (final review, M-3): fall back to id -un.
+ACCOUNT="${USER:-$(id -un)}"
 
 notify() {
     "$OSASCRIPT" -e 'on run argv' -e 'display notification (item 1 of argv) with title (item 2 of argv)' \
@@ -40,7 +43,7 @@ unset ANTHROPIC_API_KEY
 unset CLAUDE_CODE_OAUTH_TOKEN
 echo "$(date -u +%Y-%m-%dT%H:%M:%SZ) friday_run.sh start in $REPO"
 
-FC08_TOKEN="$("$SECURITY" find-generic-password -a "$USER" -s "$SERVICE" -w 2>/dev/null)"
+FC08_TOKEN="$("$SECURITY" find-generic-password -a "$ACCOUNT" -s "$SERVICE" -w 2>/dev/null)"
 if [ -z "$FC08_TOKEN" ]; then
     "$PYTHON" tools/friday_run.py --scheduled --refuse "no long-lived token in the login Keychain (service $SERVICE)"
     code=$?

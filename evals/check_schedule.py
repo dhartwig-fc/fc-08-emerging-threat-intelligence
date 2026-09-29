@@ -18,6 +18,12 @@ Usage:
     python evals/check_schedule.py --mutate ignore-auth-exit # auth_status trusts stdout even on a non-zero exit
     python evals/check_schedule.py --mutate xtrace-ux        # the launcher enables xtrace alongside -u
     python evals/check_schedule.py --mutate keep-inherited-token  # an inherited CLAUDE_CODE_OAUTH_TOKEN is not unset
+    python evals/check_schedule.py --mutate seam-no-preflight     # --scheduled never consults preflight.reasons()
+    python evals/check_schedule.py --mutate reasons-drop-auth     # preflight.reasons() drops the auth check
+    python evals/check_schedule.py --mutate scheduled-no-env-refusals  # --scheduled drops C1's refusals() (API key)
+    python evals/check_schedule.py --mutate auth-on-path          # auth_status runs the PATH claude, not the SDK's
+    python evals/check_schedule.py --mutate cli-on-path           # cli_path() answers PATH's claude, not the SDK's
+    python evals/check_schedule.py --mutate user-unset            # the launcher's Keychain account needs USER set
 
 WHAT IT HOLDS:
   the plist     renders to a valid plist: label uk.fc08.friday-run; Fridays (Weekday 5) at 09:00; runs
@@ -43,6 +49,13 @@ WHAT IT HOLDS:
   the preflight off main, detached, a pending run under 14 days, and any auth but loggedIn "oauth_token"
                 each refuse; a clean state passes; auth_status and on_main REFUSE -- never crash, never pass --
                 on a non-zero exit, non-JSON output, `null`, a list, or a missing binary (fix round 1's I-3);
+  the seam      (final review, I-1) friday_run --scheduled with NO injected reasons runs the REAL
+                preflight.reasons() -- its git and claude calls stubbed through its own `run=` seam, and the agent
+                session replaced by a stub that can never spend -- exactly once: a clean state reaches the session;
+                wrong auth, an ANTHROPIC_API_KEY or FEEDS_CATALOGUE in the environment (C1's refusals()), and all
+                three preflight checks at once each refuse, with the reasons in the fixed order;
+  which claude  (final review, I-2) preflight.cli_path() is the binary the Agent SDK would start for BOTH agents'
+                real options (the bundled CLI when the SDK ships one), and auth_status runs exactly that binary;
   one notice    friday_run --scheduled, refused, writes a REFUSED report and posts exactly one notification
                 whose words are the report's first two lines; a crash inside the scheduled run posts NONE of
                 its own; a notifier that itself fails to deliver is reported as a failure, not swallowed
@@ -100,6 +113,21 @@ TEXT_MUTATIONS = {
                      '    export CLAUDE_CODE_OAUTH_TOKEN="$FC08_TOKEN"; "$PYTHON" tools/friday_run.py --scheduled\n'),
     "xtrace-ux": (SCRIPT, "set -u\n", "set -ux\n"),
     "keep-inherited-token": (SCRIPT, "unset CLAUDE_CODE_OAUTH_TOKEN\n", ""),
+    # final review I-1: the three one-line regressions that disconnected the seam with every check green
+    "seam-no-preflight": (FRIDAY,
+                          "    found = preflight.reasons(ROOT, root, today) if preflight_reasons is None else list(preflight_reasons)\n",
+                          "    found = [] if preflight_reasons is None else list(preflight_reasons)\n"),
+    "reasons-drop-auth": (PREFLIGHT,
+                          "    found = [on_main(repo, run), back_pressure(root, today), auth(status if status is not None else auth_status(run))]\n",
+                          "    found = [on_main(repo, run), back_pressure(root, today)]\n"),
+    "scheduled-no-env-refusals": (FRIDAY,
+                                  "    reasons = refusals() + list(extra_refusals or []) + list(args.refuse) + found\n",
+                                  "    reasons = list(extra_refusals or []) + list(args.refuse) + found\n"),
+    # final review I-2: the preflight checks a different claude from the one that spends
+    "auth-on-path": (PREFLIGHT, "        cli = cli_path()\n", '        cli = "claude"\n'),
+    "cli-on-path": (PREFLIGHT, "    return transport._find_cli()\n", '    return __import__("shutil").which("claude")\n'),
+    # final review M-3: an unset USER under `set -u`
+    "user-unset": (SCRIPT, 'ACCOUNT="${USER:-$(id -un)}"\n', 'ACCOUNT="$USER"\n'),
 }
 
 
@@ -127,7 +155,8 @@ def stub(path: Path, body: str) -> Path:
     return path
 
 
-def launcher(tmp: Path, mutation, token: bool, exit_code: int, inherited_token: str = None) -> dict:
+def launcher(tmp: Path, mutation, token: bool, exit_code: int, inherited_token: str = None,
+             unset_user: bool = False) -> dict:
     """Run a copy of friday_run.sh in a fake repo with stub security, python and osascript. Both security and
     osascript also record whether they inherited CLAUDE_CODE_OAUTH_TOKEN, so a leak into EITHER (not just
     Python's own argv/output) is caught -- fix round 1, M-2.
@@ -138,14 +167,16 @@ def launcher(tmp: Path, mutation, token: bool, exit_code: int, inherited_token: 
     nothing to do with the script. It is popped here unconditionally. `inherited_token`, when given, puts a
     caller-chosen value back -- simulating an operator's shell that itself exported one -- so a test can prove
     friday_run.sh unsets it before the Keychain read rather than merely that the FIXTURE doesn't leak its own.
+    `unset_user` runs it with USER removed from the environment (final review, M-3); `security` records its own
+    arguments, so the Keychain account it was asked for can be read back.
     """
     repo = Path(tempfile.mkdtemp(dir=str(tmp), prefix="repo-%s-%d-" % (token, exit_code)))
     (repo / "scripts" / "schedule").mkdir(parents=True)
     script = repo / "scripts" / "schedule" / "friday_run.sh"
     script.write_text(text(SCRIPT, mutation), encoding="utf-8")
-    seen, notes = repo / "python-saw.txt", repo / "notifications.txt"
+    seen, notes, sec_args = repo / "python-saw.txt", repo / "notifications.txt", repo / "security-args.txt"
     envcheck = '[ -n "${CLAUDE_CODE_OAUTH_TOKEN:-}" ] && echo "ENV-LEAK:$0" >> "%s" || true\n' % notes
-    security = stub(repo / "security", envcheck +
+    security = stub(repo / "security", envcheck + 'printf "%%s|" "$@" > "%s"\n' % sec_args +
                      'if [ "$STUB_HAS_TOKEN" = 1 ]; then echo "%s"; else exit 44; fi\n' % SENTINEL)
     python = stub(repo / "python", (
         '{ [ "${CLAUDE_CODE_OAUTH_TOKEN:-}" = "%s" ] && echo token=yes || echo token=no\n'
@@ -157,12 +188,14 @@ def launcher(tmp: Path, mutation, token: bool, exit_code: int, inherited_token: 
                STUB_HAS_TOKEN="1" if token else "0", STUB_EXIT=str(exit_code), ANTHROPIC_API_KEY="leak-me",
                USER=os.environ.get("USER", "owner"))
     env.pop("CLAUDE_CODE_OAUTH_TOKEN", None)
+    if unset_user:
+        env.pop("USER", None)
     if inherited_token is not None:
         env["CLAUDE_CODE_OAUTH_TOKEN"] = inherited_token
     got = subprocess.run(["/bin/bash", str(script)], cwd=str(tmp), env=env, capture_output=True, text=True, timeout=60)
     return {"code": got.returncode, "out": got.stdout + got.stderr,
             "saw": seen.read_text() if seen.exists() else "", "notes": notes.read_text() if notes.exists() else "",
-            "script": script.read_text()}
+            "script": script.read_text(), "security_args": sec_args.read_text() if sec_args.exists() else ""}
 
 
 def git(repo: Path, *args) -> None:
@@ -224,6 +257,16 @@ def checks(mutation) -> list:
         # --- the scheduled-run module, loaded early so its reserved exit code is available to every section below
         fr = module("friday_under_test", FRIDAY, mutation)
         RESERVED = fr.SCHEDULED_NOTIFIED_EXIT
+        # NO CHECK EVER STARTS AN AGENT SESSION, whatever a mutation disconnects. The scheduled path's session is
+        # replaced here, before any check calls it, by a stub that records the call and writes an ordinary
+        # refusal instead -- so a regression that lets a run through is SEEN (the stub was reached) and spends
+        # nothing. `_scheduled` looks `friday` up in the module's globals at call time, so this reaches it.
+        sessions = []
+
+        async def no_session(run, root=inbox.INBOX_ROOT, **kw):
+            sessions.append(run.run_id)
+            return fr.write_refusal(run.run_id, ["GUARD STUB: the agent session would have started here"], root)
+        fr.friday = no_session
 
         # --- schedule.py against a temporary LaunchAgents folder and a stub launchctl
         calls = []
@@ -317,6 +360,16 @@ def checks(mutation) -> list:
                     "Keychain is read; only the Keychain's own token reaches Python, and the inherited dummy "
                     "reaches no child at all", "saw=%r notes=%r" % (inherited["saw"][:60], inherited["notes"][:60])))
 
+        # --- final review M-3: with USER unset, `set -u` must not kill the Keychain read. The account falls back to
+        # `id -un`, so the token is still read -- rather than the run REFUSING with a misleading "no token".
+        me = subprocess.run(["id", "-un"], capture_output=True, text=True).stdout.strip()
+        nouser = launcher(tmp, mutation, token=True, exit_code=0, unset_user=True)
+        out.append(("-a|%s|" % me in nouser["security_args"] and "token=yes" in nouser["saw"] and nouser["code"] == 0
+                    and SENTINEL not in nouser["out"] + nouser["notes"],
+                    "with USER unset, the launcher still reads the Keychain under the owner's account (id -un) and "
+                    "hands the token to Python, instead of refusing with a misleading 'no token'",
+                    "code=%s security=%r saw=%r" % (nouser["code"], nouser["security_args"][:60], nouser["saw"][:40])))
+
         # --- notify() passes `--` before the message and title (fix round 1, M-1): a message of "-e" must not be
         # read as an osascript option.
         seen_argv = []
@@ -400,6 +453,114 @@ def checks(mutation) -> list:
         out.append((not git_crashed and bool(missing_git),
                     "on_main refuses rather than crashing when git itself is missing",
                     "crash" if git_crashed else missing_git))
+
+        # --- final review I-2: the preflight checks the claude the Agent SDK would START, not PATH's. The SDK's own
+        # resolution is computed here from BOTH agents' real options, the way connect() does it
+        # (claude_agent_sdk/_internal/transport/subprocess_cli.py:792-793: an options.cli_path wins, else
+        # _find_cli()), so an agent that later pins a different cli_path turns this red too.
+        import claude_agent_sdk
+        from claude_agent_sdk._internal.transport.subprocess_cli import SubprocessCLITransport
+        from agents.extract_advisory import agent_options as extract_options
+        from agents.run_identity import RunIdentity
+
+        def sdk_would_start(options):
+            t = SubprocessCLITransport(prompt="", options=options)
+            return t._cli_path if t._cli_path is not None else t._find_cli()
+        probe = RunIdentity(run_id="probe-check-schedule", stage="extractor", advisory_id="ADV-2026-0001",
+                            pdf_path=ROOT / "data" / "advisories" / "fatf-tbml-2020.pdf", pdf_sha256="0" * 64)
+        try:
+            want = sorted({sdk_would_start(fr.of.agent_options(fr.of.FeedsRun("feeds-2026-10-09-ccc001"))),
+                           sdk_would_start(extract_options("claude-sonnet-5", 1.0, 3, probe))})
+        except Exception as exc:  # noqa: BLE001 -- no CLI at all on this machine: the preflight must fail the same way
+            want = type(exc).__name__
+        try:
+            got_cli = pf.cli_path()
+        except Exception as exc:  # noqa: BLE001
+            got_cli = type(exc).__name__
+        bundled = Path(claude_agent_sdk.__file__).parent / "_bundled" / "claude"
+        same = want == [got_cli] if isinstance(want, list) else want == got_cli
+        out.append((same and (not bundled.is_file() or got_cli == str(bundled)),
+                   "preflight.cli_path() is the claude binary the Agent SDK would start for both the orchestrator's "
+                   "and the extractor's real options -- the bundled CLI when the SDK ships one, not PATH's",
+                   "sdk=%s preflight=%s" % (want, got_cli)))
+        auth_argv = []
+        pf.auth_status(run=lambda argv, **kw: (auth_argv.append(list(argv)), types.SimpleNamespace(
+            returncode=0, stdout=json.dumps({"loggedIn": True, "authMethod": "oauth_token"}), stderr=""))[1])
+        out.append((auth_argv == [[got_cli, "auth", "status", "--json"]],
+                    "auth_status runs `<cli_path()> auth status --json`: the CLI that spends, not the first "
+                    "`claude` on PATH", auth_argv))
+
+        # --- final review I-1: the seam --scheduled -> preflight.reasons(). Every check above that drives
+        # --scheduled injects its reasons by hand; these inject NOTHING, so the REAL preflight.reasons() (the
+        # module under test, mutations included) runs. Its own `run=` seam is stubbed -- no real git or claude
+        # ever runs -- and a wrapper counts the calls. The session is the no_session stub installed above.
+        fr.preflight = pf
+        real_reasons = pf.reasons
+        seam = {"calls": 0, "branch": "main", "auth": {"loggedIn": True, "authMethod": "oauth_token"}}
+
+        def seam_run(argv, **kw):
+            if argv[0] == "git":
+                return types.SimpleNamespace(returncode=0, stdout=seam["branch"] + "\n", stderr="")
+            if list(argv[1:]) == ["auth", "status", "--json"]:
+                return types.SimpleNamespace(returncode=0, stdout=json.dumps(seam["auth"]), stderr="")
+            raise AssertionError("the preflight ran something unexpected: %r" % (argv,))
+
+        def recording_reasons(*a, **kw):
+            seam["calls"] += 1
+            kw["run"] = seam_run  # forced: whatever a caller passes, no real subprocess runs in this guard
+            return real_reasons(*a, **kw)
+        pf.reasons = recording_reasons
+        env_names = ("ANTHROPIC_API_KEY",) + tuple(fr.EVAL_VARIABLES)
+
+        def scheduled(label, branch="main", auth=None, env=None, pending=False):
+            seam["branch"], seam["auth"] = branch, auth or {"loggedIn": True, "authMethod": "oauth_token"}
+            box = tmp / ("inbox-seam-" + label)
+            box.mkdir()
+            if pending:
+                inbox.save("feeds-2026-10-02-eee001", {"run_id": "feeds-2026-10-02-eee001", "sources": {"ofac": {
+                    "items": [{"key": "ofac:%016x" % 3, "source": "ofac", "item_id": "z"}]}}}, box)
+            calls, ran, posted = seam["calls"], len(sessions), []
+            saved = {n: os.environ.pop(n, None) for n in env_names}  # the guard's own shell must not decide this
+            os.environ.update(env or {})
+            try:
+                with contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(io.StringIO()):
+                    code = fr.main(["--scheduled"], root=box, today=date(2026, 10, 9),
+                                   notifier=lambda t, m: posted.append((t, m)) or True)
+            finally:
+                for n in env_names:
+                    os.environ.pop(n, None)
+                    if saved[n] is not None:
+                        os.environ[n] = saved[n]
+            this = sorted(p for p in box.glob("feeds-2026-10-09-*/" + fr.reconcile.REFUSAL))
+            return {"code": code, "reasons_calls": seam["calls"] - calls, "session": len(sessions) - ran,
+                    "notes": len(posted), "reasons": json.loads(this[0].read_text())["reasons"] if this else []}
+        try:
+            clean = scheduled("clean")
+            wrong_auth = scheduled("auth", auth={"loggedIn": True, "authMethod": "claude.ai"})
+            api_env = scheduled("env", env={"ANTHROPIC_API_KEY": "guard-dummy", "FEEDS_CATALOGUE": "guard-dummy"})
+            everything = scheduled("all", branch="feature", pending=True,
+                                   auth={"loggedIn": True, "authMethod": "claude.ai"})
+        finally:
+            pf.reasons = real_reasons
+        out.append((clean["reasons_calls"] == 1 and clean["session"] == 1
+                    and clean["reasons"] == ["GUARD STUB: the agent session would have started here"],
+                    "--scheduled with no injected reasons calls the real preflight.reasons() once, and a clean "
+                    "state (main, nothing pending, oauth_token, clean environment) goes on to the session", clean))
+        out.append((wrong_auth["reasons_calls"] == 1 and wrong_auth["session"] == 0 and wrong_auth["code"] == RESERVED
+                    and wrong_auth["notes"] == 1 and any("'claude.ai'" in r and "long-lived" in r
+                                                         for r in wrong_auth["reasons"]),
+                    "on the scheduled path, auth that is not the long-lived token refuses through preflight.reasons(): "
+                    "no session, one notification, the reserved exit", wrong_auth))
+        out.append((api_env["reasons_calls"] == 1 and api_env["session"] == 0 and api_env["code"] == RESERVED
+                    and any("ANTHROPIC_API_KEY" in r for r in api_env["reasons"])
+                    and any("FEEDS_CATALOGUE" in r for r in api_env["reasons"]),
+                    "on the scheduled path, C1's refusals() still applies: an ANTHROPIC_API_KEY or FEEDS_CATALOGUE "
+                    "in the environment refuses before any session", api_env))
+        order = [next((i for i, r in enumerate(everything["reasons"]) if needle in r), -1)
+                 for needle in ("not main", "unaccepted run", "'claude.ai'")]
+        out.append((everything["session"] == 0 and -1 not in order and order == sorted(order),
+                    "off main, with a pending run and the wrong auth, the scheduled path reports all three preflight "
+                    "refusals together, in the fixed order branch, back-pressure, auth", everything["reasons"]))
 
         # --- fix round 1, I-2: the Python half of the one-notification contract
         notes = []

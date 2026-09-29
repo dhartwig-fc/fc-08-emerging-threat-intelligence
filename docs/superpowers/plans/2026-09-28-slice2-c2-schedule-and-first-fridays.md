@@ -19,7 +19,7 @@
    - Then one real run on `main`: up to US$5.
 
    The alternative is to let the first launchd Friday be the first run through the launcher, and debug a missed notification a week later.
-4. **What the preflight accepts as auth.** It requires `claude auth status --json` to say `loggedIn: true` and `authMethod: "oauth_token"`. **That string was read from the installed CLI's code (2.1.269), not observed with a token.** Task 4 has you confirm it: the command prints the method and never the token. If it prints something else, `TOKEN_METHOD` changes, with its guard, before Task 5.
+4. **What the preflight accepts as auth.** It requires `<cli> auth status --json` to say `loggedIn: true` and `authMethod: "oauth_token"`, where `<cli>` is the `claude` binary the Agent SDK itself starts for the Friday sessions (`feeds.preflight.cli_path()`: the SDK's bundled CLI in `.venv`, NOT the `claude` on your PATH; final review I-2, 2026-09-29). **That string was read from the PATH CLI's code (2.1.269), not observed with a token.** Task 4 has you confirm it against `cli_path()`: the command prints the method and never the token. If it prints something else, `TOKEN_METHOD` changes, with its guard, before Task 5.
 
 ### Measured for this draft (2026-09-28)
 
@@ -58,7 +58,12 @@
    - a Mac powered off skips that Friday.
 
    A skipped Friday leaves no report, because nothing ran. The absence of a Friday notification is the only signal.
-3. **"One macOS notification at the end."** Python posts it: the report's own first two lines, refusals included. The shell posts one only when Python never got that far (exit 2 or more). A run that hangs posts nothing until it ends; the SDK's turn and budget caps bound it.
+3. **"One macOS notification at the end."** Python posts it: the report's own first two lines, refusals included. The shell posts one only when Python did not (final review I-3, 2026-09-29: this line used to say "exit 2 or more", a contract fix round 1 replaced). **The exit codes you will see**, from `bash scripts/schedule/friday_run.sh; echo "exit $?"` and as `last exit code` in `tools/schedule.py status` after a launchd Friday:
+   - **0**: the run finished acceptable (COMPLETE, NOTHING_NEW or UNFINISHED), and Python posted the one notification;
+   - **10**: the run was REFUSED or not acceptable (FAILED, RECONCILIATION_FAILED), and Python already posted the one notification. A refused Friday reads 10: that is the design working, not a crash;
+   - **anything else** (1, 2, 3, ...): Python posted nothing, and the launcher posted the one notification itself, titled "FC08 Friday run: CRASHED". Read the log.
+
+   A run that hangs posts nothing until it ends; the SDK's turn and budget caps bound it.
 4. **Back-pressure makes the manual runs and the schedule interact.** A run left pending blocks every scheduled run for 14 days from its date. So C1's dry run, and C2 Task 5's run, must be decided (accepted, or all dropped or deferred) before the first launchd Friday, or that Friday is REFUSED, loudly and harmlessly.
 
 ### Expected spend (C2)
@@ -110,7 +115,7 @@ C1's Global Constraints hold. In addition:
    - `loggedIn` with `authMethod == "oauth_token"`.
 
    All three are reported together, not the first alone.
-4. **A crash exits 3 without notifying.** The shell notifies for any exit of 2 or more, so exactly one notification reaches you either way.
+4. **A crash exits 3 without notifying.** The shell notifies for any exit except 0 and the reserved 10, the two codes on which Python has already notified, so exactly one notification reaches you either way. (This line said "any exit of 2 or more" until the final review, I-3.)
 5. **The plist:**
    - `StartCalendarInterval` Weekday 5, Hour 9, Minute 0 (local time);
    - `RunAtLoad` false;
@@ -932,10 +937,14 @@ Run by the owner in their own Terminal. Claude gives these lines and never runs 
 claude setup-token
 # copy the token it prints, then store it; -w with no value makes security PROMPT for it (no shell history):
 security add-generic-password -a "$USER" -s uk.fc08.claude-oauth-token -w
-# confirm the METHOD the CLI reports with it -- this prints two words, never the token:
+# the claude binary the Agent SDK starts for the Friday sessions -- the one the preflight checks, NOT PATH's:
+FC08_CLI="$(.venv/bin/python -c 'from feeds.preflight import cli_path; print(cli_path())')"; echo "$FC08_CLI"
+# confirm the METHOD that binary reports with the token -- this prints two words, never the token:
 CLAUDE_CODE_OAUTH_TOKEN="$(security find-generic-password -a "$USER" -s uk.fc08.claude-oauth-token -w)" \
-  claude auth status --json | python3 -c 'import json,sys; d=json.load(sys.stdin); print(d.get("loggedIn"), d.get("authMethod"))'
+  "$FC08_CLI" auth status --json | python3 -c 'import json,sys; d=json.load(sys.stdin); print(d.get("loggedIn"), d.get("authMethod"))'
 ```
+
+Run it from the repository root (`cli_path()` is imported from this checkout). The token goes only into the second command's environment, never onto its command line. `echo "$FC08_CLI"` should print a path ending `claude_agent_sdk/_bundled/claude` (measured 2026-09-29 by resolving it, without running it). If it prints anything else, report it with the last line.
 
 - [ ] The owner reports the last line.
   - **`True oauth_token`**: go on.
@@ -956,9 +965,9 @@ CLAUDE_CODE_OAUTH_TOKEN="$(security find-generic-password -a "$USER" -s uk.fc08.
   ```
 
   Expected:
-  - macOS asks once whether `security` may read the item: choose **Always Allow**;
+  - macOS may ask once whether `security` may read the item: choose **Always Allow**. **It may not ask at all** (INFERRED, not measured: an item made by `security add-generic-password` may already trust `/usr/bin/security`; see CLAUDE.md's runbook). Report which happened;
   - one notification, "FC08 Friday run: REFUSED";
-  - `exit 1`;
+  - `exit 10`: refused, and Python already posted the one notification (final review I-3; this line said `exit 1` until then). Any code other than 0 or 10 means the launcher posted a "CRASHED" notification instead: STOP and read the output;
   - a new `inbox/feeds-.../report.md` naming the branch.
 
   If no notification appears, allow notifications for Script Editor in System Settings, Notifications, and repeat. That run is `nothing_to_decide` and blocks nothing.
@@ -967,7 +976,7 @@ CLAUDE_CODE_OAUTH_TOKEN="$(security find-generic-password -a "$USER" -s uk.fc08.
   - the checkout is on `main`;
   - `.venv/bin/python tools/check_all.py` passes.
 - [ ] **Step 3: STOP: the owner's go. Cost: capped at US$5, expected US$2 to US$3.50.**
-- [ ] **Step 4: The real run:** `bash scripts/schedule/friday_run.sh; echo "exit $?"`. Report exactly as C1 Task 9 Step 4, plus:
+- [ ] **Step 4: The real run:** `bash scripts/schedule/friday_run.sh; echo "exit $?"`. Expected `exit 0` (COMPLETE, NOTHING_NEW or UNFINISHED, notified by Python). `exit 10` means REFUSED or FAILED, already notified: read the report. Anything else means the launcher posted the notification: read the output. Report exactly as C1 Task 9 Step 4, plus:
   - the notification's words;
   - the log's two lines in `~/Library/Logs/uk.fc08.friday-run.log`. When run by hand the log is your Terminal; launchd writes the file.
 - [ ] **Step 5: STOP: the owner decides this run's items** (`tools/accept_run.py <run_id>`), or deliberately leaves it pending. Back-pressure then refuses the next Friday.
@@ -997,7 +1006,7 @@ Undo at any time: `.venv/bin/python tools/schedule.py uninstall`.
 
 - [ ] Afterwards, report:
   - the notification;
-  - `tools/schedule.py status`: `last exit code`;
+  - `tools/schedule.py status`: `last exit code`. **0** = finished acceptable, Python notified; **10** = refused or not acceptable, Python notified (a refused Friday reads 10 by design); **anything else** = Python posted nothing and the launcher posted a "CRASHED" notification, so read the log;
   - the log;
   - the report, as in C1 Task 9 Step 4.
 
