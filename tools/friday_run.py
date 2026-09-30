@@ -19,7 +19,9 @@ THE CITATION WARNING (C2, owner decision 2026-09-30). After each extraction that
 runs that record's citations against the pinned document by the rule accept_run refuses on -- the same
 function, evals/check_citations.unplaced_citations -- and records the result on the outcome as
 "citation_check". The report shows it in the Extraction table and, for any item with a citation not on its
-page (or a check that could not run), in a loud **CITATIONS: ...** line. It spends nothing, never raises, and
+page (or a check that could not run), in a loud **CITATIONS: ...** line -- and line 3, the line the owner's
+alert carries, gains a clause after its counts ("; N record(s) cite text not on the page named -- accept_run
+will refuse"; "; N record(s) could not be checked"), omitted when nothing is flagged. It spends nothing, never raises, and
 changes neither the run's status nor the exit code: the item is still extracted; accept_run is still the gate.
 
 friday() points telemetry.TELEMETRY_DIR at inbox/<run_id>/telemetry/ for the run and restores it after, so

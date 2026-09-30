@@ -24,6 +24,8 @@ Usage:
     python evals/check_friday_run.py --mutate no-citation-warning     # the runner never checks an extracted record's citations
     python evals/check_friday_run.py --mutate runner-own-rule         # the runner judges "off page" by its own, narrower rule
     python evals/check_friday_run.py --mutate citation-error-silent   # a citation check that could not run reads as clean
+    python evals/check_friday_run.py --mutate no-alert-clause         # line 3 (the owner's alert) drops the citation warning
+    python evals/check_friday_run.py --mutate citation-check-raises   # the runner's citation check may raise past the run
 
 WHAT IT HOLDS (spec sections 1, 2 and 5):
   budget       extractions start in queue order only while spend + US$1.00 <= US$5.00; the next is DEFERRED
@@ -58,14 +60,20 @@ WHAT IT HOLDS (spec sections 1, 2 and 5):
   citations    (C2, owner decision 2026-09-30, "warn"; the first live run, feeds-2026-09-30-bd1185, reported two
                records "extracted" and accept_run then refused each for one citation not on its page) right
                after an extraction that produced a record, friday() checks its citations by THE rule accept_run
-               refuses on: a VALID record with one quote not on its page leaves the run COMPLETE, line 3 unchanged,
-               the Extraction table's "citations off page" cell "1 of 2" and a loud **CITATIONS: ...** line naming
+               refuses on: a VALID record with one quote not on its page leaves the run COMPLETE, line 3's counts
+               unchanged, the Extraction table's "citations not on their page" cell "1 of 2" and a loud
+               **CITATIONS: ...** line naming
                the item and the first bad citation -- and accept_run's own plan refuses that SAME item for that
                SAME citation, both through one function (a spy on evals/check_citations.unplaced_citations sees
                the runner and accept_run call it); a clean record gets no warning and plan accepts it; a check
                that cannot run (a citation with no quote) is recorded with its error, stated loudly, and does not
-               raise; an outcome written before the field existed still reconciles, renders ("not checked") and
-               plans;
+               raise (citation-check-raises narrows the except: the run goes FAILED); an outcome written before
+               the field existed still reconciles, renders ("not checked") and plans. THE ALERT (warn fix round 1,
+               controller ruling I-1): line 3 -- what notify.from_report sends, asserted on its output AFTER the
+               220-character cut -- gains "; N record(s) cite text not on the page named -- accept_run will
+               refuse" and/or "; N record(s) could not be checked" after every count (so line 3 still equals
+               ## Unfinished), and nothing when nothing is flagged; it survives the cut on a bd1185-shaped run
+               (5 listed, 2 flagged) and on a longer one (10 listed, 2 flagged + 1 unchecked);
   telemetry    friday() itself points every session's telemetry into inbox/<run_id>/telemetry/, whatever the
                caller left TELEMETRY_DIR at, and restores it after;
   cap          a fourth request line (request() refuses one; planted here) is not extracted, gets no id, and
@@ -114,7 +122,7 @@ sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "evals"))
 import agents  # noqa: E402
 import feeds  # noqa: E402
-from feeds import extraction, http as fh, inbox, triage as feeds_triage  # noqa: E402
+from feeds import extraction, http as fh, inbox, notify, triage as feeds_triage  # noqa: E402
 from feeds.model import FeedItem  # noqa: E402
 from feeds.sources import linked_pdfs  # noqa: E402
 from check_document_pages import tiny_pdf  # noqa: E402
@@ -182,6 +190,10 @@ MUTATIONS = {
     "citation-error-silent": ("friday", '        return {"checked": None, "off_page": None, "first": None,\n'
                                         '                "error": ("%s: %s" % (type(exc).__name__, exc))[:300]}\n',
                               '        return {"checked": 0, "off_page": 0, "first": None, "error": None}\n'),
+    # warn fix round 1: the owner's ALERT (line 3) carries the warning, and the never-raises clause is pinned
+    "no-alert-clause": ("report", "    counts += citation_clause(rec, outcomes or {})\n", "    pass\n"),
+    "citation-check-raises": ("friday", "    except Exception as exc:  # noqa: BLE001 -- recorded, never raised past the run\n",
+                              "    except ZeroDivisionError as exc:  # noqa: BLE001 -- recorded, never raised past the run\n"),
 }
 PLANT_ENV = "FC08_GUARD_PLANT"
 SENTENCE = "This advisory describes red flags for trade-based money laundering through shell companies."
@@ -542,7 +554,7 @@ def citation_cases(m, run_friday, tmp: Path, box: Path, alist: Path) -> list:
     out.append((rec.get("status") == "COMPLETE" and lines[:1] == ["# Friday run %s: COMPLETE" % rid]
                 and len(lines) > 2 and "1 extracted, 0 unfinished;" in lines[2]
                 and cc.get("checked") == 2 and cc.get("off_page") == 1 and loud in text
-                and "| 1 of 2 |" in row(text, keys[0]) and "| citations off page |" in text,
+                and "| 1 of 2 |" in row(text, keys[0]) and "| citations not on their page |" in text,
                 "a VALID record with one of its two citations not on its page: the run stays COMPLETE and line 3 "
                 "counts it extracted, the Extraction table says '1 of 2' and the report says so LOUDLY, naming the "
                 "item and the first bad citation", "%s | %s | %s" % (rec.get("status"), cc,
@@ -552,6 +564,11 @@ def citation_cases(m, run_friday, tmp: Path, box: Path, alist: Path) -> list:
                 "accept_run's own plan refuses that SAME item for that SAME citation, and both the runner and "
                 "accept_run went through the one function, evals/check_citations.unplaced_citations",
                 "runner calls %s, all calls %s | %s" % (runner_calls, calls, said[:120])))
+    alert = notify.from_report(inbox.run_dir(rid, box) / "report.md")[1]
+    out.append((alert.endswith("0 unfinished; US$0.90 spent of the US$5.00 ceiling" + FLAGGED % 1 + ".")
+                and unfinished_counts(text) == (0, 0, 0),
+                "the owner's ALERT (notify.from_report, after its cut) carries the warning, after every count, and "
+                "line 3 still equals ## Unfinished", alert))
 
     # B: the same, clean -- no warning, and plan accepts it.
     rid = "feeds-2026-10-02-aaa022"
@@ -561,8 +578,10 @@ def citation_cases(m, run_friday, tmp: Path, box: Path, alist: Path) -> list:
     cc, text, said = o.get("citation_check") or {}, report_text(rid, box), plan(rid, keys[0])
     out.append((rec.get("status") == "COMPLETE" and cc == {"checked": 1, "off_page": 0, "first": None, "error": None}
                 and "**CITATIONS" not in text and "| 0 of 1 |" in row(text, keys[0])
-                and said == "PLANNED %s" % [o.get("advisory_id")],
-                "a clean record: checked, no warning, '0 of 1', and accept_run's plan accepts it",
+                and said == "PLANNED %s" % [o.get("advisory_id")]
+                and text.splitlines()[2].endswith("spent of the US$5.00 ceiling."),
+                "a clean record: checked, no warning (line 3 ends at its counts), '0 of 1', and accept_run's plan "
+                "accepts it",
                 "%s | %s | %s" % (rec.get("status"), cc, said[:120])))
 
     # An outcome written BEFORE the field existed (strip it from B's): reconcile, report and accept_run still load it.
@@ -593,7 +612,41 @@ def citation_cases(m, run_friday, tmp: Path, box: Path, alist: Path) -> list:
                 "a citation check that cannot run does not raise: its error is recorded on the outcome, the table "
                 "says CHECK FAILED and a loud line says so; the run stays COMPLETE",
                 "%s | %s" % (rec.get("status"), cc)))
+    alert = notify.from_report(inbox.run_dir(rid, box) / "report.md")[1]
+    out.append((alert.endswith("ceiling" + UNCHECKED % 1 + ".") and "cite text" not in alert,
+                "the ALERT names a check that could not run separately from a quote not on its page", alert))
+
+    # D: the alert survives notify.from_report's 220-character cut -- on a bd1185-shaped run (5 listed, 2 kept,
+    # 3 dropped, both extractions flagged), and on a longer one (10 listed -- triage caps a run at 10 -- 2 flagged + 1
+    # unchecked: every clause at once).
+    for rid, shape, variants, clause in (
+            ("feeds-2026-10-02-aaa024", (2, 3), [[QUOTE, NOT_ON_PAGE]] * 2, FLAGGED % 2),
+            ("feeds-2026-10-02-aaa025", (3, 7), [[QUOTE, NOT_ON_PAGE]] * 2 + [[QUOTE, None]],
+             FLAGGED % 2 + UNCHECKED % 1)):
+        run, keys, session = listed_run(m, box, rid, n_relevant=shape[0], n_dropped=shape[1], queue=shape[0],
+                                        cost=0.3)
+        rec = run_friday(box, run, session, in_turn([cited_extractor(m, q) for q in variants]), alist)
+        text = report_text(rid, box)
+        line3 = text.splitlines()[2] if len(text.splitlines()) > 2 else ""
+        alert = notify.from_report(inbox.run_dir(rid, box) / "report.md")[1]
+        out.append((rec.get("status") == "COMPLETE" and line3.startswith("%d new item(s)" % sum(shape))
+                    and line3.endswith(clause + ".") and alert == line3 and unfinished_counts(text) == (0, 0, 0),
+                    "the whole warning survives the alert's cut on a %d-listed run (line 3 %d chars, cap 220), after "
+                    "every count" % (sum(shape), len(line3)), "%d chars: %s" % (len(alert), alert[-120:])))
     return out
+
+
+FLAGGED = "; %d record(s) cite text not on the page named -- accept_run will refuse"
+UNCHECKED = "; %d record(s) could not be checked"
+
+
+def in_turn(extractors: list):
+    """One extractor per call, in queue order."""
+    it = iter(extractors)
+
+    async def extractor(run, req, advisory_id, root):
+        return await next(it)(run, req, advisory_id, root)
+    return extractor
 
 
 def body(mutation) -> list:

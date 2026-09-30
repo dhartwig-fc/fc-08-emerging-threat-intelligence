@@ -48,7 +48,23 @@ def actor_resolution(record: dict) -> tuple:
     return named, resolved
 
 
-def summary_line(rec: dict) -> str:
+def citation_clause(rec: dict, outcomes: dict) -> str:
+    """Line 3's citation warning (C2 warn fix round 1, controller ruling I-1: the owner's ALERT must carry it,
+    and the alert shows only lines 1 and 3). "" when nothing is flagged, so every earlier report's line 3 is
+    byte-identical. Items whose check found quotes not on the page named are counted first -- they survive
+    notify.from_report's 220-character cut first -- and checks that could not run are named separately."""
+    ccs = [(outcomes.get(k) or {}).get("citation_check") for k in rec.get("extracted", [])]
+    flagged = sum(1 for cc in ccs if isinstance(cc, dict) and not cc.get("error") and cc.get("off_page"))
+    unchecked = sum(1 for cc in ccs if isinstance(cc, dict) and cc.get("error"))
+    clause = ""
+    if flagged:
+        clause += "; %d record(s) cite text not on the page named -- accept_run will refuse" % flagged
+    if unchecked:
+        clause += "; %d record(s) could not be checked" % unchecked
+    return clause
+
+
+def summary_line(rec: dict, outcomes: dict = None) -> str:
     if rec["status"] == reconcile.REFUSED:
         return "Refused before any agent ran: %s." % "; ".join(rec["refusal"].get("reasons", []))
     # The "unfinished" count here and the ## Unfinished section list the SAME four kinds of skipped work
@@ -57,6 +73,8 @@ def summary_line(rec: dict) -> str:
         len(rec["listed"]), len(rec["relevant"]), len(rec["not_relevant"]), len(rec["extracted"]),
         len(rec["unfinished"]) + len(rec["not_queued"]) + len(rec["failed"]) + len(rec["deferred_budget"]),
         _usd(rec["spent_usd"]), CEILING_NOTE % 5.0)
+    # AFTER every count, never between them: line 3's "N unfinished" still equals ## Unfinished.
+    counts += citation_clause(rec, outcomes or {})
     if rec["status"] == reconcile.FAILED:
         if rec.get("crash"):  # the session ran; say what it left, so a crashed run's unfinished items are counted
             return "The run failed after its session (%s): %s." % (_sentence(rec["crash"], 200), counts)
@@ -65,7 +83,7 @@ def summary_line(rec: dict) -> str:
 
 
 def citation_cell(o: dict) -> str:
-    """The Extraction table's "citations off page" cell, from the outcome's "citation_check" (tools/friday_run.
+    """The Extraction table's "citations not on their page" cell, from the outcome's "citation_check" (tools/friday_run.
     citation_check). An outcome written before C2's warning has no such field: "not checked", never a guess."""
     if o.get("status") != "extracted":
         return "-"
@@ -106,7 +124,7 @@ def render(run_id: str, root: Path = inbox.INBOX_ROOT) -> str:
 
     def in_order(keys):
         return sorted(keys, key=lambda k: (rank.get(k, len(rank)), k))
-    out = ["# Friday run %s: %s" % (run_id, rec["status"]), "", summary_line(rec), ""]
+    out = ["# Friday run %s: %s" % (run_id, rec["status"]), "", summary_line(rec, outcomes), ""]
     loud = []
     if rec["refusal"]:
         loud += ["**REFUSED: %s**" % r for r in rec["refusal"].get("reasons", [])]
@@ -160,7 +178,7 @@ def render(run_id: str, root: Path = inbox.INBOX_ROOT) -> str:
         len(rec["queued"]), len(rec["extracted"]), len(rec["failed"]), len(rec["deferred_budget"])), ""]
     if rec["queued"]:
         out += ["| item | advisory id | status | proposals | resolver calls (resolved) | record actors resolvable "
-                "| citations off page | cost |", "|---|---|---|---|---|---|---|---|"]
+                "| citations not on their page | cost |", "|---|---|---|---|---|---|---|---|"]
     by_id = {s["run_id"]: s for s in rec["sessions"]}
     for k in rec["queued"]:
         o = outcomes.get(k, {"status": "no outcome"})
