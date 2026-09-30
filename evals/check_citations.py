@@ -281,6 +281,22 @@ def check_record_citations(advisory_id: str, record: dict, index) -> list:
     return out
 
 
+def unplaced_citations(advisory_id: str, record: dict, document, index=None) -> tuple:
+    """(citations checked, [defect, ...] for each NOT on the page it names) for one record against its pinned
+    document: check_record_citations over PageIndex.from_document, keeping every citation the matcher does not
+    place (kind "off_page" or "missing"; each defect names its section, item, page and kind).
+
+    THE rule both halves of a Friday run use (slice 2 C2, owner decision 2026-09-30, "warn"):
+    tools/accept_run.py REFUSES an item on it, and tools/friday_run.py WARNS on it in the report right after
+    extraction -- one function, so the warning and the refusal cannot disagree about which citation is bad.
+    `index` is for a caller that has already paged this same document (accept_run also needs its page count);
+    it must be PageIndex.from_document(document). Raises whatever reading the document or the record raises."""
+    if index is None:
+        index = PageIndex.from_document(document)
+    checked = check_record_citations(advisory_id, record, index)
+    return len(checked), [d for _, ok, d in checked if not ok]
+
+
 def apply_attestations(checked: list, attested: list, unchecked=()):
     """(defects, n_attested, problems): attested citations leave the defects; bad entries are problems.
 

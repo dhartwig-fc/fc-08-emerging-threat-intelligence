@@ -54,7 +54,8 @@ VALIDATES EVERYTHING FIRST, and refuses the whole run on any failure, writing no
     --override-reconciliation "<reason>", which is recorded -- and a REFUSED run has nothing to accept;
   - per accepted item: the record validates against schemas/advisory.py, names its allocated id and the pinned
     document's sha256, names only library typology ids, and every citation is found on the page it names in
-    the pinned document (the shared matcher, PDF or HTML); every queue line passes the review gate's own
+    the pinned document (the shared matcher, PDF or HTML, through evals/check_citations.unplaced_citations --
+    the SAME function the Friday report warns on, right after extraction); every queue line passes the review gate's own
     re-check (governance/proposals.recheck) against the advisory-list entry about to be written; its
     extraction session completed with a clean terminal_check (or the override); nothing it would write exists;
   - an item already in the ledger (decided in an EARLIER run) is never a reason to refuse this one (owner
@@ -142,7 +143,7 @@ def _check_accepted(run_id, key, item, verdict, outcome, request, alloc, folder,
     from schemas.citation_match import PageIndex
     from governance import proposals as gate
     sys.path.insert(0, str(ROOT / "evals"))
-    from check_citations import check_record_citations
+    from check_citations import unplaced_citations  # the ONE rule; tools/friday_run.py warns on the same
     problems = []
     if not outcome or outcome.get("status") != "extracted":
         return None, ["%s cannot be accepted: it was not extracted (%s)" % (key, (outcome or {}).get("status", "never queued"))]
@@ -175,7 +176,7 @@ def _check_accepted(run_id, key, item, verdict, outcome, request, alloc, folder,
     if unknown:
         problems.append("%s: the record names typology ids the library does not hold: %s" % (key, unknown))
     index = PageIndex.from_document(doc)
-    bad = [d for _, ok, d in check_record_citations(adv, raw, index) if not ok]
+    _, bad = unplaced_citations(adv, raw, doc, index=index)
     if bad:
         problems.append("%s: %d citation(s) are not on the page they name, first: %s p%s (%s)" % (
             key, len(bad), bad[0]["section"], bad[0]["page"], bad[0]["kind"]))

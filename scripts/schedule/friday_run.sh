@@ -53,12 +53,13 @@ ACCOUNT="${USER:-$(id -un)}"
 # LaunchAgent -- a gui/<uid> job shares the owner's Aqua Mach bootstrap and audit session across fork/exec, and
 # neither `set -m` nor a POSIX process group affects that, but the first launchd Friday (or an owner rehearsal)
 # is the actual observation, not this comment. The words still reach osascript as ARGUMENTS after `--`, never
-# spliced into the AppleScript source.
+# spliced into the AppleScript source. Its stdin is /dev/null EXPLICITLY: with job control on, bash no longer
+# redirects an async command's stdin to /dev/null itself (alert re-review 1, m1).
 notify() {
     set -m
     "$OSASCRIPT" -e 'on run argv' \
         -e 'display alert (item 1 of argv) message (item 2 of argv) giving up after 86400' \
-        -e 'end run' -- "FC08 Friday run: CRASHED" "$1" >/dev/null 2>&1 &
+        -e 'end run' -- "FC08 Friday run: CRASHED" "$1" </dev/null >/dev/null 2>&1 &
     set +m
     disown 2>/dev/null || true
 }

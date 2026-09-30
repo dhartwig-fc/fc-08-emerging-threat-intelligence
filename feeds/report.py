@@ -64,6 +64,37 @@ def summary_line(rec: dict) -> str:
     return counts + "."
 
 
+def citation_cell(o: dict) -> str:
+    """The Extraction table's "citations off page" cell, from the outcome's "citation_check" (tools/friday_run.
+    citation_check). An outcome written before C2's warning has no such field: "not checked", never a guess."""
+    if o.get("status") != "extracted":
+        return "-"
+    cc = o.get("citation_check")
+    if not isinstance(cc, dict):
+        return "not checked"
+    if cc.get("error"):
+        return "CHECK FAILED"
+    return "%s of %s" % (cc.get("off_page"), cc.get("checked"))
+
+
+def citation_warning(key: str, o: dict) -> list:
+    """The loud line for one extracted item whose record cites text not on the page it names -- the rule
+    accept_run refuses on, run right after extraction -- or whose check could not run. [] otherwise."""
+    cc = o.get("citation_check") if o.get("status") == "extracted" else None
+    if not isinstance(cc, dict):
+        return []
+    adv = o.get("advisory_id") or "-"
+    if cc.get("error"):
+        return ["**CITATIONS: %s %s: the citation check could not run (%s); accept_run re-checks every citation "
+                "-- read the record before accepting it**" % (key, adv, _cell(cc["error"], 200))]
+    if cc.get("off_page"):
+        first = cc.get("first") or {}
+        return ["**CITATIONS: %s %s: %d of %d citation(s) are not on the page they name (first: %s p%s); accept_run "
+                "will refuse this item -- defer or drop it**" % (key, adv, cc["off_page"], cc.get("checked") or 0,
+                                                                  first.get("section"), first.get("page"))]
+    return []
+
+
 def render(run_id: str, root: Path = inbox.INBOX_ROOT) -> str:
     rec = reconcile.reconcile_run(run_id, root)
     folder = inbox.run_dir(run_id, root)
@@ -90,6 +121,8 @@ def render(run_id: str, root: Path = inbox.INBOX_ROOT) -> str:
             loud.append("**NOT LISTED: %s was never listed in this run**" % name)
     if rec["problems"]:
         loud += ["**RECONCILIATION: %s**" % p for p in rec["problems"]]
+    for k in rec["queued"]:  # queue order, like the Extraction table
+        loud += citation_warning(k, outcomes.get(k) or {})
     if loud:
         out += loud + [""]
 
@@ -127,7 +160,7 @@ def render(run_id: str, root: Path = inbox.INBOX_ROOT) -> str:
         len(rec["queued"]), len(rec["extracted"]), len(rec["failed"]), len(rec["deferred_budget"])), ""]
     if rec["queued"]:
         out += ["| item | advisory id | status | proposals | resolver calls (resolved) | record actors resolvable "
-                "| cost |", "|---|---|---|---|---|---|---|"]
+                "| citations off page | cost |", "|---|---|---|---|---|---|---|---|"]
     by_id = {s["run_id"]: s for s in rec["sessions"]}
     for k in rec["queued"]:
         o = outcomes.get(k, {"status": "no outcome"})
@@ -139,9 +172,10 @@ def render(run_id: str, root: Path = inbox.INBOX_ROOT) -> str:
             named, resolvable = actor_resolution(json.loads((folder / o["record"]).read_text(encoding="utf-8")))
             actors = "%d of %d" % (resolvable, named)
         status = o["status"] if o["status"] != "failed" else "failed: %s" % _cell(o.get("error"), 80)
-        out.append("| `%s` | %s | %s | %d | %s | %s | %s |" % (
+        out.append("| `%s` | %s | %s | %d | %s | %s | %s | %s |" % (
             k, o.get("advisory_id") or "-", status, proposals,
-            "%d (%d)" % (s.get("resolver_calls", 0), s.get("resolved", 0)) if s else "-", actors, _usd(o.get("cost_usd"))))
+            "%d (%d)" % (s.get("resolver_calls", 0), s.get("resolved", 0)) if s else "-", actors, citation_cell(o),
+            _usd(o.get("cost_usd"))))
 
     out += ["", "## Reconciliation: %s" % ("clean" if not rec["problems"] else "%d problem(s)" % len(rec["problems"])), "",
             "| session | agent | status | cost | turns | calls | unterminated | duplicated | from transcript |",

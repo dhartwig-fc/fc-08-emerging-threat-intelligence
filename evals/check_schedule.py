@@ -184,13 +184,13 @@ TEXT_MUTATIONS = {
                 "    set -m\n"
                 "    \"$OSASCRIPT\" -e 'on run argv' \\\n"
                 "        -e 'display alert (item 1 of argv) message (item 2 of argv) giving up after 86400' \\\n"
-                "        -e 'end run' -- \"FC08 Friday run: CRASHED\" \"$1\" >/dev/null 2>&1 &\n"
+                "        -e 'end run' -- \"FC08 Friday run: CRASHED\" \"$1\" </dev/null >/dev/null 2>&1 &\n"
                 "    set +m\n"
                 "    disown 2>/dev/null || true\n"
                 "}\n",
                 "    \"$OSASCRIPT\" -e 'on run argv' \\\n"
                 "        -e 'display alert (item 1 of argv) message (item 2 of argv) giving up after 86400' \\\n"
-                "        -e 'end run' -- \"FC08 Friday run: CRASHED\" \"$1\" >/dev/null 2>&1 &\n"
+                "        -e 'end run' -- \"FC08 Friday run: CRASHED\" \"$1\" </dev/null >/dev/null 2>&1 &\n"
                 "    disown 2>/dev/null || true\n"
                 "}\n"),
     # alert fix round 1, I-1: the PRODUCTION default starter (feeds/notify.py's own `run=subprocess.Popen`) is
@@ -531,16 +531,17 @@ def checks(mutation) -> list:
                     "from whichever side is supposed to post it", totals))
 
         # --- C2 Task: display alert, not display notification. `display alert ... giving up after 86400` BLOCKS
-        # osascript until clicked or timed out, so the launcher's own notify() must be DETACHED (`&` + `disown`).
+        # osascript until clicked or timed out, so the launcher's own notify() must never WAIT on it (`&`).
         # A stub osascript that sleeps 6s before doing anything else must not delay the launcher's own exit
         # beyond a few seconds -- `elapsed` is timed around subprocess.run alone (see launcher()'s docstring),
         # never around _settle's poll for the (still in-flight) notes file. Exit code 3 (crash) is the one path
-        # that calls the launcher's own notify(); `blocking-alert` (removing `&`/`disown`) makes the launcher
+        # that calls the launcher's own notify(); `blocking-alert` (removing the `&`) makes the launcher
         # wait out the full sleep, which this catches.
         slow = launcher(tmp, mutation, token=True, exit_code=3, slow_osascript=True)
         out.append((slow["elapsed"] < 3.0,
                     "the launcher returns promptly even when its own alert is slow to start or slow to be "
-                    "dismissed -- the osascript call is backgrounded and disowned, never waited on",
+                    "dismissed -- the osascript call is started in the background (`&`, in its own process group "
+                    "under `set -m`), never waited on",
                     "elapsed=%.2fs code=%s" % (slow["elapsed"], slow["code"])))
 
         # --- fix round 2, N-2: an operator's shell that ALREADY exported a (different, dummy) CLAUDE_CODE_OAUTH_TOKEN

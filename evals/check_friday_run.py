@@ -21,6 +21,9 @@ Usage:
     python evals/check_friday_run.py --mutate writes-real-inbox       # the run also writes a file into the REAL inbox/
     python evals/check_friday_run.py --mutate crash-skips-unreached   # after a crash, only the in-flight item is recorded
     python evals/check_friday_run.py --mutate recon-ignores-allocation  # a record naming another advisory id is not RECONCILIATION_FAILED
+    python evals/check_friday_run.py --mutate no-citation-warning     # the runner never checks an extracted record's citations
+    python evals/check_friday_run.py --mutate runner-own-rule         # the runner judges "off page" by its own, narrower rule
+    python evals/check_friday_run.py --mutate citation-error-silent   # a citation check that could not run reads as clean
 
 WHAT IT HOLDS (spec sections 1, 2 and 5):
   budget       extractions start in queue order only while spend + US$1.00 <= US$5.00; the next is DEFERRED
@@ -52,6 +55,17 @@ WHAT IT HOLDS (spec sections 1, 2 and 5):
                and line 3 both count them. At the boundary: a crash INSIDE allocate_advisory_id records every
                item without crashing again; when recording itself fails, the report is still written and names
                it as a RECONCILIATION problem;
+  citations    (C2, owner decision 2026-09-30, "warn"; the first live run, feeds-2026-09-30-bd1185, reported two
+               records "extracted" and accept_run then refused each for one citation not on its page) right
+               after an extraction that produced a record, friday() checks its citations by THE rule accept_run
+               refuses on: a VALID record with one quote not on its page leaves the run COMPLETE, line 3 unchanged,
+               the Extraction table's "citations off page" cell "1 of 2" and a loud **CITATIONS: ...** line naming
+               the item and the first bad citation -- and accept_run's own plan refuses that SAME item for that
+               SAME citation, both through one function (a spy on evals/check_citations.unplaced_citations sees
+               the runner and accept_run call it); a clean record gets no warning and plan accepts it; a check
+               that cannot run (a citation with no quote) is recorded with its error, stated loudly, and does not
+               raise; an outcome written before the field existed still reconciles, renders ("not checked") and
+               plans;
   telemetry    friday() itself points every session's telemetry into inbox/<run_id>/telemetry/, whatever the
                caller left TELEMETRY_DIR at, and restores it after;
   cap          a fourth request line (request() refuses one; planted here) is not extracted, gets no id, and
@@ -88,6 +102,7 @@ import json
 import os
 import re
 import secrets
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -135,7 +150,11 @@ MUTATIONS = {
     "rows-by-key": ("reconcile", '"queued": list(requests)', '"queued": sorted(requests)'),
     "no-crash-report": ("friday", "    except Exception as exc:  # a report on EVERY run: a crashed one is FAILED and says "
                                   "why\n", "    except ZeroDivisionError as exc:\n"),
-    "telemetry-elsewhere": ("friday", "    telemetry.TELEMETRY_DIR = inbox.run_dir(run.run_id, root) / inbox.TELEMETRY\n",
+    # Anchored on the comment above it: _scheduled (C2, 03d21b1) has the same assignment, so the bare line has not
+    # been unique since, and this mutation refused to run ("MUTATION TARGET MISSING") -- found 2026-09-30.
+    "telemetry-elsewhere": ("friday", "    # run's own folder, whoever called friday(): never data/telemetry/, which reconcile_run does not read.\n"
+                                      "    telemetry.TELEMETRY_DIR = inbox.run_dir(run.run_id, root) / inbox.TELEMETRY\n",
+                            "    # run's own folder, whoever called friday(): never data/telemetry/, which reconcile_run does not read.\n"
                             "    pass\n"),
     "no-cap-recheck": ("friday", "                if position >= extraction.MAX_PER_RUN:\n", "                if False:\n"),
     "crash-skips-unreached": ("friday", '                                               "advisory_id": '
@@ -152,6 +171,17 @@ MUTATIONS = {
         '            elif False:\n'
         '                problems.append("%s\'s record names %s, but the run allocated %s" % (k, record.get("advisory_id"),\n'
         '                                                                                     allocations.get(k)))\n'),
+    # C2 citation warning (owner decision 2026-09-30, "warn"):
+    "no-citation-warning": ("friday", '                        outcome["citation_check"] = citation_check(run.run_id, '
+                                      'outcome, req, root)\n', "                        pass\n"),
+    "runner-own-rule": ("friday", '        checked, bad = unplaced_citations(outcome["advisory_id"], raw, folder / '
+                                  'request["document"]["path"])\n',
+                        '        checked, bad = unplaced_citations(outcome["advisory_id"], raw, folder / '
+                        'request["document"]["path"])\n'
+                        '        bad = [d for d in bad if d["kind"] == "off_page"]\n'),
+    "citation-error-silent": ("friday", '        return {"checked": None, "off_page": None, "first": None,\n'
+                                        '                "error": ("%s: %s" % (type(exc).__name__, exc))[:300]}\n',
+                              '        return {"checked": 0, "off_page": 0, "first": None, "error": None}\n'),
 }
 PLANT_ENV = "FC08_GUARD_PLANT"
 SENTENCE = "This advisory describes red flags for trade-based money laundering through shell companies."
@@ -290,6 +320,61 @@ def extractor_with(m, costs: list, calls: list = None, probe=None, corrupt=None)
     return extractor
 
 
+QUOTE = "Advisory text on shell companies."   # Stub's pinned PDF holds exactly this on page 1
+NOT_ON_PAGE = "Advisory text on front companies."   # a one-word slip, as the live record's CJK character was
+
+
+def cited_extractor(m, quotes: list):
+    """A stub extraction leaving a VALID record (schemas/advisory.py) of the pinned PDF, one SAN001 typology
+    citing `quotes` on page 1 (None = a citation with no quote at all, which the check cannot even read), a
+    queue line the review gate accepts, and completed telemetry -- so accept_run's plan reaches its citation
+    check and nothing else refuses the item."""
+    from schemas.proposal_contract import SCHEMA, proposal_id
+
+    async def extractor(run, req, advisory_id, root):
+        from agents.run_identity import RunIdentity
+        folder = inbox.run_dir(run.run_id, root)
+        ident = RunIdentity.new("extractor", advisory_id, folder / req["document"]["path"], feeds_run=run.run_id,
+                                inbox_root=root)
+        tel = m["telemetry"]
+        tel.run_started(ident, "stub", 1.0, 60, ())
+        tel.run_completed(ident, tel.SUCCESS, "record validated", validated=True,
+                          result=types.SimpleNamespace(num_turns=20, total_cost_usd=0.6, duration_ms=1,
+                                                       permission_denials=[]),
+                          terminal_check={"calls": 0, "unterminated": [], "duplicated": []})
+        cites = [{"page": 1, "quote": q} if q is not None else {"page": 1} for q in quotes]
+        record = {"schema_version": "1.4.0", "advisory_id": advisory_id,
+                  "source": {"source_type": "fincen", "publisher": "FinCEN", "title": "A FinCEN advisory",
+                             "published_on": "2026-10-01", "published_on_precision": "day",
+                             "url": req["document"]["url"], "document_sha256": ident.pdf_sha256, "page_count": 1},
+                  "summary": "A synthetic advisory about shell companies, built by the Friday-run guard.",
+                  "jurisdictions": ["US"], "actors": [], "indicators": [], "suggested_desks": ["trade_desk"],
+                  "overall_confidence": "low", "extraction_notes": None,
+                  "typologies": [{"family": "sanctions", "typology_id": "SAN001", "label": "Sanctions evasion",
+                                  "emergent": False, "confidence": "low", "citations": cites}]}
+        rel = "records/%s.json" % advisory_id
+        inbox.write_file(run.run_id, rel, json.dumps(record, indent=2).encode("utf-8"), root)
+        body = {"schema": SCHEMA, "run_id": ident.run_id, "stage": "extractor", "advisory_id": advisory_id,
+                "document_sha256": ident.pdf_sha256, "typology_id": "SAN001", "emergent_label": None,
+                "rationale": "Page 1 describes shell companies.", "confidence": "low",
+                "citations": [{"page": 1, "quote": QUOTE}]}
+        ident.queue_path.parent.mkdir(parents=True, exist_ok=True)
+        ident.queue_path.write_text(json.dumps(dict(body, proposal_id=proposal_id(body),
+                                                    proposed_at="2026-10-02T09:00:00+00:00")) + "\n", encoding="utf-8")
+        return {"key": req["key"], "advisory_id": advisory_id, "extraction_run_id": ident.run_id, "status": "extracted",
+                "record": rel, "error": None, "cost_usd": 0.6}
+    return extractor
+
+
+def load_accept():
+    """tools/accept_run.py, unmutated, loaded after load_all so it reads the reconcile/extraction under test."""
+    path = ROOT / "tools" / "accept_run.py"
+    module = types.ModuleType("accept_run_for_friday_guard")
+    module.__file__ = str(path)
+    exec(compile(path.read_text(encoding="utf-8"), str(path), "exec"), module.__dict__)
+    return module
+
+
 def scripted_query(m, variant="transcript"):
     """Stands in for claude_agent_sdk.query.
 
@@ -410,6 +495,107 @@ def checks(mutation) -> list:
     return out
 
 
+def citation_cases(m, run_friday, tmp: Path, box: Path, alist: Path) -> list:
+    """C2's citation warning (owner decision 2026-09-30, "warn"), against accept_run's own plan."""
+    import check_citations
+    from feeds import ledger
+    acc = load_accept()
+    out = []
+    # A COPY of the tracked ledger, read by plan() only (it never writes): this guard does not build ledger bytes
+    # itself (check_feeds_ledger allows only named files to dump the ledger), and no stub item is in it.
+    seen = tmp / "citations-ledger.json"
+    shutil.copyfile(ledger.SEEN_PATH, seen)
+    feed_list = tmp / "citations-feed-list.json"
+    feed_list.write_text(json.dumps({"schema": "fc08-feed-advisories/1", "advisories": []}), encoding="utf-8")
+
+    def plan(rid_, key_):
+        try:
+            p = acc.plan(rid_, {key_: "accept"}, inbox_root=box, seen_path=seen, data=tmp / "citations-data",
+                         advisory_list=feed_list, golden_list=alist)
+            return "PLANNED %s" % [a["advisory_id"] for a in p["accepted"]]
+        except Exception as exc:
+            return "%s: %s" % (type(exc).__name__, exc)
+
+    def row(text, key_):
+        return next((l for l in text.splitlines() if l.startswith("| `%s`" % key_)), "")
+
+    # A: a VALID record, one of its two citations not on its page.
+    real, calls = check_citations.unplaced_citations, []
+
+    def spy(advisory_id, *a, **k):
+        calls.append(advisory_id)
+        return real(advisory_id, *a, **k)
+    rid = "feeds-2026-10-02-aaa021"
+    run, keys, session = listed_run(m, box, rid, n_relevant=1, n_dropped=0, queue=1, cost=0.3)
+    check_citations.unplaced_citations = spy
+    try:
+        rec = run_friday(box, run, session, cited_extractor(m, [QUOTE, NOT_ON_PAGE]), alist)
+        runner_calls = list(calls)
+        said = plan(rid, keys[0])
+    finally:
+        check_citations.unplaced_citations = real
+    o = extraction.load_outcomes(rid, box).get(keys[0], {})
+    adv, cc, text = o.get("advisory_id"), o.get("citation_check") or {}, report_text(rid, box)
+    loud = ("**CITATIONS: %s %s: 1 of 2 citation(s) are not on the page they name (first: typologies p1); accept_run "
+            "will refuse this item -- defer or drop it**" % (keys[0], adv))
+    lines = text.splitlines()
+    out.append((rec.get("status") == "COMPLETE" and lines[:1] == ["# Friday run %s: COMPLETE" % rid]
+                and len(lines) > 2 and "1 extracted, 0 unfinished;" in lines[2]
+                and cc.get("checked") == 2 and cc.get("off_page") == 1 and loud in text
+                and "| 1 of 2 |" in row(text, keys[0]) and "| citations off page |" in text,
+                "a VALID record with one of its two citations not on its page: the run stays COMPLETE and line 3 "
+                "counts it extracted, the Extraction table says '1 of 2' and the report says so LOUDLY, naming the "
+                "item and the first bad citation", "%s | %s | %s" % (rec.get("status"), cc,
+                                                                    next((l for l in lines if "CITATIONS" in l), "no line"))))
+    want = "%s: 1 citation(s) are not on the page they name, first: typologies p1 (missing)" % keys[0]
+    out.append((want in said and runner_calls == [adv] and calls == [adv, adv] and loud in text,
+                "accept_run's own plan refuses that SAME item for that SAME citation, and both the runner and "
+                "accept_run went through the one function, evals/check_citations.unplaced_citations",
+                "runner calls %s, all calls %s | %s" % (runner_calls, calls, said[:120])))
+
+    # B: the same, clean -- no warning, and plan accepts it.
+    rid = "feeds-2026-10-02-aaa022"
+    run, keys, session = listed_run(m, box, rid, n_relevant=1, n_dropped=0, queue=1, cost=0.3)
+    rec = run_friday(box, run, session, cited_extractor(m, [QUOTE]), alist)
+    o = extraction.load_outcomes(rid, box).get(keys[0], {})
+    cc, text, said = o.get("citation_check") or {}, report_text(rid, box), plan(rid, keys[0])
+    out.append((rec.get("status") == "COMPLETE" and cc == {"checked": 1, "off_page": 0, "first": None, "error": None}
+                and "**CITATIONS" not in text and "| 0 of 1 |" in row(text, keys[0])
+                and said == "PLANNED %s" % [o.get("advisory_id")],
+                "a clean record: checked, no warning, '0 of 1', and accept_run's plan accepts it",
+                "%s | %s | %s" % (rec.get("status"), cc, said[:120])))
+
+    # An outcome written BEFORE the field existed (strip it from B's): reconcile, report and accept_run still load it.
+    path = inbox.run_dir(rid, box) / extraction.OUTCOMES
+    old = [{k: v for k, v in json.loads(l).items() if k != "citation_check"}
+           for l in path.read_text(encoding="utf-8").splitlines() if l.strip()]
+    path.write_text("".join(json.dumps(e) + "\n" for e in old), encoding="utf-8")
+    try:
+        text, status = m["report"].render(rid, box), m["reconcile"].reconcile_run(rid, box)["status"]
+    except Exception as exc:
+        text, status = "", "RAISED %s: %s" % (type(exc).__name__, exc)
+    said = plan(rid, keys[0])
+    out.append((status == "COMPLETE" and "| not checked |" in row(text, keys[0]) and "**CITATIONS" not in text
+                and said.startswith("PLANNED"),
+                "an outcome written before the citation check existed still reconciles, renders ('not checked', "
+                "no warning) and plans", "%s | %s | %s" % (status, row(text, keys[0])[-60:], said[:80])))
+
+    # C: a check that cannot run (a citation with no quote) is recorded and stated, never raised or passed.
+    rid = "feeds-2026-10-02-aaa023"
+    run, keys, session = listed_run(m, box, rid, n_relevant=1, n_dropped=0, queue=1, cost=0.3)
+    rec = run_friday(box, run, session, cited_extractor(m, [QUOTE, None]), alist)
+    o = extraction.load_outcomes(rid, box).get(keys[0], {})
+    cc, text = o.get("citation_check") or {}, report_text(rid, box)
+    out.append((rec.get("status") == "COMPLETE" and (cc.get("error") or "").startswith("KeyError")
+                and cc.get("off_page") is None and "| CHECK FAILED |" in row(text, keys[0])
+                and ("**CITATIONS: %s %s: the citation check could not run (KeyError" % (keys[0], o.get("advisory_id")))
+                in text,
+                "a citation check that cannot run does not raise: its error is recorded on the outcome, the table "
+                "says CHECK FAILED and a loud line says so; the run stays COMPLETE",
+                "%s | %s" % (rec.get("status"), cc)))
+    return out
+
+
 def body(mutation) -> list:
     m = load_all(mutation)
     fr = m["friday"]
@@ -516,6 +702,8 @@ def body(mutation) -> list:
                         "an extracted record naming another %s than the one actually allocated and pinned is "
                         "RECONCILIATION_FAILED, naming the mismatch" % corrupt,
                         "%s | %s" % (rec.get("status"), rec.get("problems"))))
+
+        out += citation_cases(m, run_friday, tmp, box, alist)
 
         rid = "feeds-2026-10-02-aaa006"
         run, keys, session = listed_run(m, box, rid, n_relevant=0, n_dropped=0, queue=0, cost=0.1, nothing=True)

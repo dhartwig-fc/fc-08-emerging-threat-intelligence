@@ -15,6 +15,13 @@ telemetry, with its OWN run identity naming this feeds run, so its queue and tel
 inbox. A cost that never arrived (the SDK raised before its result) is counted at the session's cap. At
 most extraction.MAX_PER_RUN requests are extracted: request() refuses a fourth, and friday() re-checks it.
 
+THE CITATION WARNING (C2, owner decision 2026-09-30). After each extraction that produced a record, friday()
+runs that record's citations against the pinned document by the rule accept_run refuses on -- the same
+function, evals/check_citations.unplaced_citations -- and records the result on the outcome as
+"citation_check". The report shows it in the Extraction table and, for any item with a citation not on its
+page (or a check that could not run), in a loud **CITATIONS: ...** line. It spends nothing, never raises, and
+changes neither the run's status nor the exit code: the item is still extracted; accept_run is still the gate.
+
 friday() points telemetry.TELEMETRY_DIR at inbox/<run_id>/telemetry/ for the run and restores it after, so
 every session's telemetry lands in the run whoever calls it. Whatever raises inside the run -- the session,
 an allocation, an extraction -- run.json and report.md are still written: the run is FAILED, and run.json's
@@ -144,6 +151,28 @@ async def extract_one(run: of.FeedsRun, request: dict, advisory_id: str, root: P
     return out
 
 
+def citation_check(run_id: str, outcome: dict, request: dict, root: Path) -> dict:
+    """An extracted record's citations against its pinned document, by THE rule tools/accept_run.py refuses on
+    (evals/check_citations.unplaced_citations -- the same function, never a copy), recorded on the outcome so
+    the report can warn right after extraction instead of the owner learning it at acceptance (owner decision
+    2026-09-30, "warn": the first live run, feeds-2026-09-30-bd1185, reported both extractions "extracted" and
+    accept_run then refused each for one citation not on its page). Spends nothing and NEVER raises: a check
+    that cannot run is recorded with its error -- a problem the report states, never a silent pass.
+    {"checked": M, "off_page": N, "first": {section, item, page, kind} | None, "error": None | "<why>"}."""
+    try:
+        if str(ROOT / "evals") not in sys.path:
+            sys.path.insert(0, str(ROOT / "evals"))
+        from check_citations import unplaced_citations
+        folder = inbox.run_dir(run_id, root)
+        raw = json.loads((folder / outcome["record"]).read_text(encoding="utf-8"))
+        checked, bad = unplaced_citations(outcome["advisory_id"], raw, folder / request["document"]["path"])
+        first = {k: bad[0].get(k) for k in ("section", "item", "page", "kind")} if bad else None
+        return {"checked": checked, "off_page": len(bad), "first": first, "error": None}
+    except Exception as exc:  # noqa: BLE001 -- recorded, never raised past the run
+        return {"checked": None, "off_page": None, "first": None,
+                "error": ("%s: %s" % (type(exc).__name__, exc))[:300]}
+
+
 @contextlib.contextmanager
 def run_lock(root: Path = inbox.INBOX_ROOT):
     """The inbox's exclusive Friday lock, never waited for: yields True when held, False when another
@@ -214,6 +243,8 @@ async def _locked_friday(run: of.FeedsRun, session, extractor, root: Path, advis
                     spent += of.EXTRACTION_BUDGET_USD  # counted at its cap while it runs, in case it raises
                     outcome = await extractor(run, req, advisory_id, root)
                     spent += counted(outcome.get("cost_usd"), of.EXTRACTION_BUDGET_USD) - of.EXTRACTION_BUDGET_USD
+                    if outcome.get("status") == "extracted" and outcome.get("record"):
+                        outcome["citation_check"] = citation_check(run.run_id, outcome, req, root)
                 extraction.append_outcome(run.run_id, outcome, root)
     except Exception as exc:  # a report on EVERY run: a crashed one is FAILED and says why
         crash = ("the run raised %s: %s" % (type(exc).__name__, exc))[:500]
