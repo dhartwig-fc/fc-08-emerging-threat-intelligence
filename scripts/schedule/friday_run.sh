@@ -37,13 +37,29 @@ PYTHON="${FC08_PYTHON:-$REPO/.venv/bin/python}"
 ACCOUNT="${USER:-$(id -un)}"
 
 # display alert ... giving up after 86400 BLOCKS osascript until the owner clicks OK or 24h elapses, so it must
-# never run in the foreground here: backgrounded with `&` and detached from job control with `disown`, so this
-# function -- and the script -- returns immediately, and the alert window outlives the script's own exit. The
-# words still reach osascript as ARGUMENTS after `--`, never spliced into the AppleScript source.
+# never run in the foreground here. But under launchd, `&` alone is NOT enough (alert fix round 1, C-1,
+# MEASURED): launchd.plist(5) says "When a job dies, launchd kills any remaining processes with the same
+# process group ID as the job", and this plist sets no AbandonProcessGroup. In a non-interactive bash, job
+# control is OFF by default, so a plain `cmd &` leaves the child in the SAME process group as this script --
+# measured with `ps -o pgid=`: childpgid == the job's own pgid. `disown` only edits bash's own jobs table; it
+# sends no signal and changes no process group, so it does nothing for this (a non-interactive bash also sends
+# no SIGHUP on exit regardless, so `disown` was never doing the detaching work the old comment here claimed).
+# `set -m` turns job control ON just long enough for the `&` to put THIS ONE background job in its OWN process
+# group (measured: childpgid != the job's pgid), so launchd's group-kill on exit does not reach it; `set +m`
+# turns job control back off immediately after. Do NOT set AbandonProcessGroup in the plist instead: that would
+# also spare a crashed run's own leftover CLI/MCP children, which should still die with the job. `disown` is
+# kept too, harmless, in case this is ever run from an interactive shell. NOT MEASURED here (inferred only,
+# alert fix round 1, 1c): whether the alert is actually DRAWN in the owner's GUI session under a real launchd
+# LaunchAgent -- a gui/<uid> job shares the owner's Aqua Mach bootstrap and audit session across fork/exec, and
+# neither `set -m` nor a POSIX process group affects that, but the first launchd Friday (or an owner rehearsal)
+# is the actual observation, not this comment. The words still reach osascript as ARGUMENTS after `--`, never
+# spliced into the AppleScript source.
 notify() {
+    set -m
     "$OSASCRIPT" -e 'on run argv' \
         -e 'display alert (item 1 of argv) message (item 2 of argv) giving up after 86400' \
         -e 'end run' -- "FC08 Friday run: CRASHED" "$1" >/dev/null 2>&1 &
+    set +m
     disown 2>/dev/null || true
 }
 

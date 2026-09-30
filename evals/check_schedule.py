@@ -29,6 +29,8 @@ Usage:
     python evals/check_schedule.py --mutate blocking-alert        # the launcher's alert is no longer detached -- it blocks
     python evals/check_schedule.py --mutate notification-not-alert  # the launcher reverts to display notification
     python evals/check_schedule.py --mutate no-give-up            # the launcher's alert drops "giving up after 86400"
+    python evals/check_schedule.py --mutate no-set-m               # the alert shares the job's process group again
+    python evals/check_schedule.py --mutate blocking-default       # notify()'s own default starter waits (subprocess.run)
 
 WHAT IT HOLDS:
   the plist     renders to a valid plist: label uk.fc08.friday-run; Fridays (Weekday 5) at 09:00; runs
@@ -48,8 +50,14 @@ WHAT IT HOLDS:
                 `set`/`shopt` flag combination and at any position on the line (fix round 2's N-3); notify()
                 passes `--` before the title and message, so a message starting with `-` cannot be read as an
                 option; its alert is `display alert ... giving up after 86400`, not `display notification`
-                (measured never shown on the owner's Mac), and it is DETACHED -- backgrounded with `&` and
-                `disown` -- so the launcher returns promptly even when the alert itself is slow to start;
+                (measured never shown on the owner's Mac), it is DETACHED -- backgrounded with `&` -- so the
+                launcher returns promptly even when the alert itself is slow to start, AND (alert fix round 1,
+                C-1) it runs in its OWN process group (`set -m` around the `&`), measured by comparing pgids,
+                so launchd killing the job's process group on exit does not also kill the alert;
+  the default   (alert fix round 1, I-1) `notify()`'s PRODUCTION default starter -- `run=subprocess.Popen`,
+                never overridden -- is exercised directly (`OSASCRIPT` pointed at a local slow stub, no `run=`
+                passed) and returns promptly; a regression to a WAITING default (`subprocess.run`) is caught,
+                not just a regression in an injected stub;
   the contract  every scheduled exit code -- 0, the reserved "already notified" code, 1, 2, 3 -- yields exactly
                 ONE alert in total, whichever side posts it (tools/friday_run.py's docstring has the full
                 contract; this is fix round 1's I-1), including when a stdout write raises AFTER the alert has
@@ -98,6 +106,7 @@ import contextlib
 import json
 import os
 import plistlib
+import select
 import stat
 import subprocess
 import sys
@@ -117,6 +126,7 @@ TEMPLATE = ROOT / "scripts" / "schedule" / "uk.fc08.friday-run.plist"
 PREFLIGHT = ROOT / "feeds" / "preflight.py"
 FRIDAY = ROOT / "tools" / "friday_run.py"
 SCHEDULE = ROOT / "tools" / "schedule.py"
+NOTIFY = ROOT / "feeds" / "notify.py"
 SENTINEL = "sk-ant-oat01-SENTINEL-never-print-me"
 # What the stubbed checks are told the SDK would start. Never executed: every `run=` that receives it is a stub.
 STUB_CLI = "/guard-stub/claude_agent_sdk/_bundled/claude"
@@ -160,14 +170,35 @@ TEXT_MUTATIONS = {
                             "    found = [on_main(repo, run), back_pressure(root, today),\n"),
     "install-no-marker": (SCHEDULE, "        not_the_clone = preflight.schedule_clone(repo)\n", "        not_the_clone = None\n"),
     # C2 Task: display alert, not display notification -- the launcher's own crash-fallback notify()
-    "blocking-alert": (SCRIPT, ">/dev/null 2>&1 &\n    disown 2>/dev/null || true\n}\n",
-                      ">/dev/null 2>&1\n}\n"),
+    "blocking-alert": (SCRIPT, ">/dev/null 2>&1 &\n    set +m\n", ">/dev/null 2>&1\n    set +m\n"),
     "notification-not-alert": (SCRIPT,
                                "display alert (item 1 of argv) message (item 2 of argv) giving up after 86400",
                                "display notification (item 1 of argv) with title (item 2 of argv)"),
     "no-give-up": (SCRIPT,
                   "display alert (item 1 of argv) message (item 2 of argv) giving up after 86400",
                   "display alert (item 1 of argv) message (item 2 of argv)"),
+    # alert fix round 1, C-1: `set -m` is what puts the backgrounded alert in its OWN process group, so launchd
+    # killing the job's group does not also kill it. This reverts to the round-1 shape (plain `& disown`, which
+    # measurably leaves the child in the JOB's own process group under a non-interactive bash).
+    "no-set-m": (SCRIPT,
+                "    set -m\n"
+                "    \"$OSASCRIPT\" -e 'on run argv' \\\n"
+                "        -e 'display alert (item 1 of argv) message (item 2 of argv) giving up after 86400' \\\n"
+                "        -e 'end run' -- \"FC08 Friday run: CRASHED\" \"$1\" >/dev/null 2>&1 &\n"
+                "    set +m\n"
+                "    disown 2>/dev/null || true\n"
+                "}\n",
+                "    \"$OSASCRIPT\" -e 'on run argv' \\\n"
+                "        -e 'display alert (item 1 of argv) message (item 2 of argv) giving up after 86400' \\\n"
+                "        -e 'end run' -- \"FC08 Friday run: CRASHED\" \"$1\" >/dev/null 2>&1 &\n"
+                "    disown 2>/dev/null || true\n"
+                "}\n"),
+    # alert fix round 1, I-1: the PRODUCTION default starter (feeds/notify.py's own `run=subprocess.Popen`) is
+    # swapped for `subprocess.run`, which WAITS for the process to exit -- the exact regression that would hold
+    # every Friday run for up to 24h. Applied to a module()-loaded copy (`nt`), never to the shipped singleton
+    # `real_notify`, which this guard never mutates.
+    "blocking-default": (NOTIFY, "def notify(title: str, message: str, run=subprocess.Popen) -> bool:",
+                        "def notify(title: str, message: str, run=subprocess.run) -> bool:"),
 }
 
 
@@ -195,27 +226,27 @@ def stub(path: Path, body: str) -> Path:
     return path
 
 
-def _settle(path: Path, timeout: float = 2.0, quiet: float = 0.05) -> str:
-    """Wait for a possibly-BACKGROUNDED write to `path` to finish, then return its content (or "" if it never
-    appears). The launcher's own alert is now detached (`&` + `disown`, C2 Task: display alert, not display
-    notification), so friday_run.sh -- and therefore `subprocess.run` below -- can return before the stub
-    osascript it started has finished writing `notes`. Polls until the content has stopped changing for
-    `quiet` seconds, or `timeout` elapses (the file legitimately never appearing, e.g. the "ok"/"none" launcher
-    cases where notify() is never called, settles on "" almost immediately)."""
+def _await_eof(fd: int, timeout: float = 15.0) -> None:
+    """Block until `fd` (the READ end of a pipe whose WRITE end was handed to the launcher's subprocess tree)
+    reads EOF -- i.e. every process that ever held a copy of the write end, synchronous AND backgrounded, has
+    exited and closed it (alert fix round 1, I-2). This is a POSITIVE completion signal, not a guessed quiet
+    window: nothing here can mistake "the write hasn't started yet" for "no alert is coming", because
+    completion is declared only when the OS itself reports every holder gone. `timeout` is a pure safety net
+    against a genuinely hung child; hitting it raises loudly (a guard bug to investigate), never silently reads
+    as "settled" the way the old quiet-window `_settle()` could."""
     deadline = time.time() + timeout
-    last, stable_since = None, None
-    while time.time() < deadline:
-        cur = path.read_text() if path.exists() else ""
-        if cur == last:
-            if stable_since is None:
-                stable_since = time.time()
-            elif time.time() - stable_since >= quiet:
-                return cur
-        else:
-            stable_since = None
-        last = cur
-        time.sleep(0.02)
-    return path.read_text() if path.exists() else ""
+    try:
+        while True:
+            remaining = deadline - time.time()
+            if remaining <= 0:
+                raise TimeoutError("a process still holds the completion pipe open after %.0fs" % timeout)
+            ready, _, _ = select.select([fd], [], [], remaining)
+            if not ready:
+                raise TimeoutError("a process still holds the completion pipe open after %.0fs" % timeout)
+            if os.read(fd, 4096) == b"":
+                return
+    finally:
+        os.close(fd)
 
 
 def launcher(tmp: Path, mutation, token: bool, exit_code: int, inherited_token: str = None,
@@ -235,25 +266,38 @@ def launcher(tmp: Path, mutation, token: bool, exit_code: int, inherited_token: 
 
     `slow_osascript` makes the stub sleep 6s BEFORE doing anything else, standing in for a real alert window
     that is slow to appear (or that sits on screen for a while). `elapsed` in the result is timed around ONLY
-    the launcher's own process (`subprocess.run` on friday_run.sh), never around `_settle`'s poll below, so it
-    measures exactly what "the launcher returns promptly" means: with the alert backgrounded and disowned, this
-    stays small regardless of `slow_osascript`; the `blocking-alert` mutation (removing `&`/`disown`) makes the
-    launcher itself wait out the stub's sleep, and `elapsed` catches it.
+    the launcher's own process (`subprocess.run` on friday_run.sh), never around the wait for `notes` below, so
+    it measures exactly what "the launcher returns promptly" means: with the alert in its own process group
+    (`set -m`) and backgrounded, this stays small regardless of `slow_osascript`; the `blocking-alert` mutation
+    (dropping the trailing `&`) makes the launcher itself wait out the stub's sleep, and `elapsed` catches it.
+
+    `notes` is settled with a POSITIVE completion signal (alert fix round 1, I-2), not a guessed quiet window: a
+    pipe is opened before the subprocess runs, its write end is handed to bash via `pass_fds` (inheritable, so
+    EVERY child bash forks -- the synchronous python/security calls AND a backgrounded osascript -- inherits its
+    own copy across fork/exec, exactly like the completion pipe launchd itself watches), and our own copy is
+    closed the moment `subprocess.run` returns. Reading the other end to EOF then blocks until every one of
+    those copies has been closed by its holder exiting -- so `notes` is read only once nothing could still be
+    about to write it, however late that write started.
     """
     repo = Path(tempfile.mkdtemp(dir=str(tmp), prefix="repo-%s-%d-" % (token, exit_code)))
     (repo / "scripts" / "schedule").mkdir(parents=True)
     script = repo / "scripts" / "schedule" / "friday_run.sh"
     script.write_text(text(SCRIPT, mutation), encoding="utf-8")
     seen, notes, sec_args = repo / "python-saw.txt", repo / "notifications.txt", repo / "security-args.txt"
+    py_pgid, osa_pgid = repo / "python-pgid.txt", repo / "osascript-pgid.txt"
     envcheck = '[ -n "${CLAUDE_CODE_OAUTH_TOKEN:-}" ] && echo "ENV-LEAK:$0" >> "%s" || true\n' % notes
     security = stub(repo / "security", envcheck + 'printf "%%s|" "$@" > "%s"\n' % sec_args +
                      'if [ "$STUB_HAS_TOKEN" = 1 ]; then echo "%s"; else exit 44; fi\n' % SENTINEL)
+    # C-1's guard: the python stub records ITS OWN process group -- a synchronous foreground command, so its
+    # pgid is the job's own (what launchd's group-kill targets) -- to compare against osascript's below.
     python = stub(repo / "python", (
         '{ [ "${CLAUDE_CODE_OAUTH_TOKEN:-}" = "%s" ] && echo token=yes || echo token=no\n'
         '  [ -n "${ANTHROPIC_API_KEY:-}" ] && echo apikey=set || echo apikey=unset\n'
-        '  echo "args=$*"; } > "%s"\nexit "$STUB_EXIT"\n') % (SENTINEL, seen))
+        '  echo "args=$*"; } > "%s"\nps -o pgid= -p $$ | tr -d " " > "%s"\nexit "$STUB_EXIT"\n'
+        ) % (SENTINEL, seen, py_pgid))
     osa = stub(repo / "osascript", ("sleep 6\n" if slow_osascript else "") + envcheck +
-               'for a in "$@"; do printf "%%s|" "$a"; done >> "%s"; echo >> "%s"\n' % (notes, notes))
+               'for a in "$@"; do printf "%%s|" "$a"; done >> "%s"; echo >> "%s"\n'
+               'ps -o pgid= -p $$ | tr -d " " > "%s"\n' % (notes, notes, osa_pgid))
     env = dict(os.environ, FC08_SECURITY=str(security), FC08_PYTHON=str(python), FC08_OSASCRIPT=str(osa),
                STUB_HAS_TOKEN="1" if token else "0", STUB_EXIT=str(exit_code), ANTHROPIC_API_KEY="leak-me",
                USER=os.environ.get("USER", "owner"))
@@ -262,11 +306,20 @@ def launcher(tmp: Path, mutation, token: bool, exit_code: int, inherited_token: 
         env.pop("USER", None)
     if inherited_token is not None:
         env["CLAUDE_CODE_OAUTH_TOKEN"] = inherited_token
-    t0 = time.time()
-    got = subprocess.run(["/bin/bash", str(script)], cwd=str(tmp), env=env, capture_output=True, text=True, timeout=60)
-    elapsed = time.time() - t0
+    r_fd, w_fd = os.pipe()
+    os.set_inheritable(w_fd, True)
+    try:
+        t0 = time.time()
+        got = subprocess.run(["/bin/bash", str(script)], cwd=str(tmp), env=env, capture_output=True, text=True,
+                             timeout=60, pass_fds=(w_fd,))
+        elapsed = time.time() - t0
+    finally:
+        os.close(w_fd)  # drop OUR copy; only a still-running (backgrounded) child can now be holding it open
+    _await_eof(r_fd)     # closes r_fd itself; returns once every holder -- sync or backgrounded -- has exited
     return {"code": got.returncode, "out": got.stdout + got.stderr, "elapsed": elapsed,
-            "saw": seen.read_text() if seen.exists() else "", "notes": _settle(notes),
+            "saw": seen.read_text() if seen.exists() else "", "notes": notes.read_text() if notes.exists() else "",
+            "python_pgid": py_pgid.read_text().strip() if py_pgid.exists() else "",
+            "osascript_pgid": osa_pgid.read_text().strip() if osa_pgid.exists() else "",
             "script": script.read_text(), "security_args": sec_args.read_text() if sec_args.exists() else ""}
 
 
@@ -440,6 +493,19 @@ def checks(mutation) -> list:
                     "the launcher's own crash-fallback alert is exactly `display alert (item 1 of argv) message "
                     "(item 2 of argv) giving up after 86400` -- not `display notification`, which was measured "
                     "accepted but never shown on the owner's Mac", crash["notes"][:160]))
+        # --- alert fix round 1, C-1: under launchd, "when a job dies, launchd kills any remaining processes with
+        # the same process group ID as the job" (launchd.plist(5)), and this plist sets no AbandonProcessGroup.
+        # `set -m` around the backgrounded `&` is what keeps the alert alive: it puts osascript in ITS OWN
+        # process group, different from the job's. The python stub's pgid stands in for "the job's own group" --
+        # it runs as an ordinary synchronous foreground command, so its pgid IS the job's. `no-set-m` reverts to
+        # plain `& disown`, which measurably leaves the child in the job's own group under a non-interactive
+        # bash; this check catches it directly (not by inference from a real launchd kill, which no guard may
+        # perform).
+        out.append((bool(crash["python_pgid"]) and bool(crash["osascript_pgid"])
+                    and crash["python_pgid"] != crash["osascript_pgid"],
+                    "the launcher's alert runs in a DIFFERENT process group from the job's own (set -m around "
+                    "the background job), so launchd killing the job's process group on exit does not also kill "
+                    "the alert", "python_pgid=%r osascript_pgid=%r" % (crash["python_pgid"], crash["osascript_pgid"])))
         out.append((is_tracing_enabled("set -x\ntrue\n") and is_tracing_enabled("set -eux\n")
                     and is_tracing_enabled("set -ux\n") and is_tracing_enabled("set -u -x\n")
                     and is_tracing_enabled("set -e -x\n") and is_tracing_enabled("true; set -x\n")
@@ -562,6 +628,24 @@ def checks(mutation) -> list:
         out.append((elapsed_scheduled < 2.0 and code_prompt == RESERVED,
                     "_scheduled returns promptly even when starting the alert itself is slow -- it never waits "
                     "on notify()'s underlying process", "elapsed=%.2fs code=%s" % (elapsed_scheduled, code_prompt)))
+
+        # --- alert fix round 1, I-1: exercise the PRODUCTION default starter itself (`run=subprocess.Popen`,
+        # never overridden), not just an injected stub. Every check above supplies its own `run=`, so a
+        # regression to `run=subprocess.run` (which WAITS for the process) would hold every real Friday run for
+        # up to 24h and nothing here would have noticed. Loaded through `module()` (as `nt`) so the
+        # `blocking-default` mutation can reach it -- `real_notify` (the shipped singleton other code imports)
+        # is still never mutated by this guard. `nt.OSASCRIPT` (read at call time inside notify()) is pointed at
+        # a local stub that sleeps, so this never touches the real binary.
+        nt = module("notify_under_test", NOTIFY, mutation)
+        notify_stub = stub(tmp / "notify-osascript-stub", "sleep 5\nexit 0\n")
+        nt.OSASCRIPT = str(notify_stub)
+        t0 = time.time()
+        posted_default = nt.notify("T", "M")  # NO run= override: exercises the real default, whatever it is
+        elapsed_default = time.time() - t0
+        out.append((posted_default is True and elapsed_default < 2.0,
+                    "notify()'s PRODUCTION default starter (subprocess.Popen, no run= override) returns "
+                    "promptly even when osascript itself is slow to finish -- exercised directly, not only "
+                    "through an injected stub", "elapsed=%.2fs posted=%s" % (elapsed_default, posted_default)))
 
         # --- the preflight
         pf = module("feeds.preflight", PREFLIGHT, mutation)
