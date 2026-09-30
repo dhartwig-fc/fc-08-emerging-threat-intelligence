@@ -1,0 +1,147 @@
+{
+  "run_id": "feeds-2026-09-30-bd1185",
+  "sources": {
+    "fincen": {
+      "already_seen": 15,
+      "error": null,
+      "items": [],
+      "listed": 15,
+      "listed_at": "2026-09-30T21:00:51Z",
+      "listing": "listings/fincen.html",
+      "listing_sha256": "45020a7ac8f06d01465b7523f3b33b9166ab582ac1889b8a52e8227e3ccf3274",
+      "listing_url": "https://www.fincen.gov/resources/advisoriesbulletinsfact-sheets/advisories",
+      "status": "ok"
+    },
+    "ofac": {
+      "already_seen": 7,
+      "error": null,
+      "items": [
+        {
+          "document": {
+            "bytes": 47750,
+            "content_type": "text/html",
+            "fetched_at": "2026-09-30T21:01:31Z",
+            "final_url": "https://ofac.treasury.gov/recent-actions/20260930",
+            "linked_pdfs": [],
+            "page_error": null,
+            "pages": 4,
+            "path": "docs/7ca5474f8679c0f032fc9f0c5d2d66f556339ba799600938983128a9dc5cb450.html",
+            "sha256": "7ca5474f8679c0f032fc9f0c5d2d66f556339ba799600938983128a9dc5cb450",
+            "text_pages": 4
+          },
+          "item_id": "20260930",
+          "key": "ofac:dc63a1c2b84a58f7",
+          "published": "2026-09-30",
+          "source": "ofac",
+          "summary": "",
+          "title": "Counter Terrorism and Transnational Criminal Organizations Designations; Belarus, Counter Narcotics, and Libya Designations Removals",
+          "url": "https://ofac.treasury.gov/recent-actions/20260930"
+        },
+        {
+          "document": {
+            "bytes": 69702,
+            "content_type": "text/html",
+            "fetched_at": "2026-09-30T21:01:42Z",
+            "final_url": "https://ofac.treasury.gov/recent-actions/20260929",
+            "linked_pdfs": [],
+            "page_error": null,
+            "pages": 11,
+            "path": "docs/22b66d2f6391990bcb2b0330d7060dc2172e458bf8dcd6eb80358acc8129f144.html",
+            "sha256": "22b66d2f6391990bcb2b0330d7060dc2172e458bf8dcd6eb80358acc8129f144",
+            "text_pages": 11
+          },
+          "item_id": "20260929",
+          "key": "ofac:528a733c96bd988a",
+          "published": "2026-09-29",
+          "source": "ofac",
+          "summary": "",
+          "title": "Counter Narcotics, Counter Terrorism, Iran-related, and Non-Proliferation Designations",
+          "url": "https://ofac.treasury.gov/recent-actions/20260929"
+        },
+        {
+          "document": {
+            "bytes": 42018,
+            "content_type": "text/html",
+            "fetched_at": "2026-09-30T21:01:55Z",
+            "final_url": "https://ofac.treasury.gov/recent-actions/20260929_33",
+            "linked_pdfs": [],
+            "page_error": null,
+            "pages": 1,
+            "path": "docs/19f163f299412414e62c6237e1db539d88f2829b321e9a7df3422c7bcef88a6f.html",
+            "sha256": "19f163f299412414e62c6237e1db539d88f2829b321e9a7df3422c7bcef88a6f",
+            "text_pages": 1
+          },
+          "item_id": "20260929_33",
+          "key": "ofac:ee1214479fbfe752",
+          "published": "2026-09-29",
+          "source": "ofac",
+          "summary": "",
+          "title": "Publication of Regulatory Amendments; Publication of Cuba Sanctions Regulations; Issuance of New and Amended Cuba-related Frequently Asked Questions; Publication of Cuba-related OFAC Alert",
+          "url": "https://ofac.treasury.gov/recent-actions/20260929_33"
+        }
+      ],
+      "listed": 10,
+      "listed_at": "2026-09-30T21:01:02Z",
+      "listing": "listings/ofac.html",
+      "listing_sha256": "cedb68c051571af1c8c798f0b084eb3f0a18a3db3b4166a471104d25b418f5a2",
+      "listing_url": "https://ofac.treasury.gov/recent-actions",
+      "status": "ok"
+    },
+    "ofsi": {
+      "already_seen": 18,
+      "error": null,
+      "items": [
+        {
+          "document": {
+            "bytes": 80758,
+            "content_type": "text/html",
+            "fetched_at": "2026-09-30T21:01:16Z",
+            "final_url": "https://www.gov.uk/government/publications/annual-frozen-asset-review-and-reporting-form",
+            "linked_pdfs": [
+              "https://assets.publishing.service.gov.uk/media/6abbcbb37f89d9ff24aff258/Financial_Sanctions_Notice__FAR__2026.pdf"
+            ],
+            "page_error": null,
+            "pages": 1,
+            "path": "docs/96df5f1aa9c7058de4f3323b23c5ecaf8ebb4998507302d6747ff6a9e15a888c.html",
+            "sha256": "96df5f1aa9c7058de4f3323b23c5ecaf8ebb4998507302d6747ff6a9e15a888c",
+            "text_pages": 1
+          },
+          "item_id": "https://www.gov.uk/government/publications/annual-frozen-asset-review-and-reporting-form#2026-09-30T12:50:23Z",
+          "key": "ofsi:ce2f4cbd203e01ee",
+          "published": "2026-09-30",
+          "source": "ofsi",
+          "summary": "Guidance notice for the annual frozen asset reporting exercise 2026 and associated reporting form.",
+          "title": "Guidance: Annual frozen asset review: guidance and reporting form",
+          "url": "https://www.gov.uk/government/publications/annual-frozen-asset-review-and-reporting-form"
+        },
+        {
+          "document": {
+            "bytes": 89187,
+            "content_type": "text/html",
+            "fetched_at": "2026-09-30T21:01:19Z",
+            "final_url": "https://www.gov.uk/government/publications/uk-financial-sanctions-faqs",
+            "linked_pdfs": [],
+            "page_error": null,
+            "pages": 2,
+            "path": "docs/2471f072129d82ff7dfa5544c14ed2697209ef38556abbae63d397a6899765a6.html",
+            "sha256": "2471f072129d82ff7dfa5544c14ed2697209ef38556abbae63d397a6899765a6",
+            "text_pages": 2
+          },
+          "item_id": "https://www.gov.uk/government/publications/uk-financial-sanctions-faqs#2026-09-29T14:25:51Z",
+          "key": "ofsi:3e4b35d8597a4187",
+          "published": "2026-09-29",
+          "source": "ofsi",
+          "summary": "OFSI publishes FAQs providing short-form guidance and technical information on financial sanctions.",
+          "title": "Guidance: UK Financial Sanctions FAQs",
+          "url": "https://www.gov.uk/government/publications/uk-financial-sanctions-faqs"
+        }
+      ],
+      "listed": 20,
+      "listed_at": "2026-09-30T21:00:50Z",
+      "listing": "listings/ofsi.atom",
+      "listing_sha256": "9d5e5eeb6bff3480886146f93762cb7263514d86565dd143b67907956115cdc0",
+      "listing_url": "https://www.gov.uk/government/organisations/office-of-financial-sanctions-implementation.atom",
+      "status": "ok"
+    }
+  }
+}

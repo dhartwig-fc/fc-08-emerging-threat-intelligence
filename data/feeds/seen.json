@@ -288,10 +288,24 @@
       "source": "ofac"
     },
     {
+      "decided_on": "2026-09-30",
+      "decision": "drop",
+      "first_seen_run": "feeds-2026-09-30-bd1185",
+      "item_id": "20260929_33",
+      "source": "ofac"
+    },
+    {
       "decided_on": "2026-09-29",
       "decision": "drop",
       "first_seen_run": "catalogue:90b57e8ba022",
       "item_id": "https://www.gov.uk/government/news/uk-issues-largest-penalty-for-financial-sanctions-breaches-since-russias-2022-illegal-invasion-of-ukraine#2026-06-17T11:04:35Z",
+      "source": "ofsi"
+    },
+    {
+      "decided_on": "2026-09-30",
+      "decision": "drop",
+      "first_seen_run": "feeds-2026-09-30-bd1185",
+      "item_id": "https://www.gov.uk/government/publications/annual-frozen-asset-review-and-reporting-form#2026-09-30T12:50:23Z",
       "source": "ofsi"
     },
     {
@@ -432,6 +446,13 @@
       "decision": "drop",
       "first_seen_run": "catalogue:90b57e8ba022",
       "item_id": "https://www.gov.uk/government/publications/uk-financial-sanctions-faqs#2026-09-24T08:49:08Z",
+      "source": "ofsi"
+    },
+    {
+      "decided_on": "2026-09-30",
+      "decision": "drop",
+      "first_seen_run": "feeds-2026-09-30-bd1185",
+      "item_id": "https://www.gov.uk/government/publications/uk-financial-sanctions-faqs#2026-09-29T14:25:51Z",
       "source": "ofsi"
     },
     {
