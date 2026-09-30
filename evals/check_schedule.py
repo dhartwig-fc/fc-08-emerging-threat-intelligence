@@ -1,5 +1,5 @@
 """
-Pin the Friday schedule, its launcher, its preflight and its one notification (slice 2 C2, spec section 5).
+Pin the Friday schedule, its launcher, its preflight and its one end-of-run alert (slice 2 C2, spec section 5).
 
 Usage:
     python evals/check_schedule.py
@@ -26,6 +26,9 @@ Usage:
     python evals/check_schedule.py --mutate user-unset            # the launcher's Keychain account needs USER set
     python evals/check_schedule.py --mutate preflight-no-marker   # preflight.reasons() drops the schedule-clone marker
     python evals/check_schedule.py --mutate install-no-marker     # schedule.py install schedules an unmarked checkout
+    python evals/check_schedule.py --mutate blocking-alert        # the launcher's alert is no longer detached -- it blocks
+    python evals/check_schedule.py --mutate notification-not-alert  # the launcher reverts to display notification
+    python evals/check_schedule.py --mutate no-give-up            # the launcher's alert drops "giving up after 86400"
 
 WHAT IT HOLDS:
   the plist     renders to a valid plist: label uk.fc08.friday-run; Fridays (Weekday 5) at 09:00; runs
@@ -40,16 +43,18 @@ WHAT IT HOLDS:
                 environment (the guard never leaks its own real CLAUDE_CODE_OAUTH_TOKEN into any stub, and an
                 inherited dummy token in the shell that runs friday_run.sh is unset before the Keychain read,
                 fix round 2's N-2): the token reaches Python as CLAUDE_CODE_OAUTH_TOKEN and appears in NO
-                output, notification, argument or the environment of any OTHER child process (not even a
-                crash's own osascript call); ANTHROPIC_API_KEY is unset; the script never enables tracing, in
-                any `set`/`shopt` flag combination and at any position on the line (fix round 2's N-3); notify()
-                passes `--` before the message and title, so a message starting with `-` cannot be read as an
-                option;
+                output, alert, argument or the environment of any OTHER child process (not even a crash's own
+                osascript call); ANTHROPIC_API_KEY is unset; the script never enables tracing, in any
+                `set`/`shopt` flag combination and at any position on the line (fix round 2's N-3); notify()
+                passes `--` before the title and message, so a message starting with `-` cannot be read as an
+                option; its alert is `display alert ... giving up after 86400`, not `display notification`
+                (measured never shown on the owner's Mac), and it is DETACHED -- backgrounded with `&` and
+                `disown` -- so the launcher returns promptly even when the alert itself is slow to start;
   the contract  every scheduled exit code -- 0, the reserved "already notified" code, 1, 2, 3 -- yields exactly
-                ONE notification in total, whichever side posts it (tools/friday_run.py's docstring has the
-                full contract; this is fix round 1's I-1), including when a stdout write raises AFTER the
-                notification has already posted (fix round 2's N-1: nothing that can raise runs between a
-                successful notify() and the return);
+                ONE alert in total, whichever side posts it (tools/friday_run.py's docstring has the full
+                contract; this is fix round 1's I-1), including when a stdout write raises AFTER the alert has
+                already posted (fix round 2's N-1: nothing that can raise runs between a successful notify()
+                and the return);
   the preflight off main, detached, a checkout without <git-dir>/fc08-schedule-clone (re-review R-1; the
                 marker is invisible to `git status`), a pending run under 14 days, and any auth but loggedIn
                 "oauth_token" each refuse; a clean state passes; auth_status and on_main REFUSE -- never crash, never pass --
@@ -63,10 +68,12 @@ WHAT IT HOLDS:
   which claude  (final review, I-2) preflight.cli_path() is the binary the Agent SDK would start for BOTH agents'
                 real options (the bundled CLI when the SDK ships one), and auth_status runs exactly that binary;
                 a claude that cannot be resolved at all refuses (N-1, below);
-  one notice    friday_run --scheduled, refused, writes a REFUSED report and posts exactly one notification
-                whose words are the report's first two lines; a crash inside the scheduled run posts NONE of
-                its own; a notifier that itself fails to deliver is reported as a failure, not swallowed
-                (fix round 1's I-2).
+  one notice    friday_run --scheduled, refused, writes a REFUSED report and posts exactly one alert whose
+                words are the report's first two lines, title (item 1 of argv, the alert heading) before
+                message (item 2, its explanatory text); a crash inside the scheduled run posts NONE of its
+                own; a notifier that itself fails to deliver is reported as a failure, not swallowed (fix
+                round 1's I-2); `_scheduled` and the launcher both return promptly even when starting the
+                alert itself is slow -- neither waits on it (C2 Task: display alert, not display notification).
 
 COLD. Temporary folders, temporary git repositories, stub commands. It never runs launchctl, never reads the
 Keychain, never runs the claude CLI, and never writes ~/Library.
@@ -95,6 +102,7 @@ import stat
 import subprocess
 import sys
 import tempfile
+import time
 import types
 from datetime import date
 from pathlib import Path
@@ -151,6 +159,15 @@ TEXT_MUTATIONS = {
     "preflight-no-marker": (PREFLIGHT, "    found = [on_main(repo, run), schedule_clone(repo, run), back_pressure(root, today),\n",
                             "    found = [on_main(repo, run), back_pressure(root, today),\n"),
     "install-no-marker": (SCHEDULE, "        not_the_clone = preflight.schedule_clone(repo)\n", "        not_the_clone = None\n"),
+    # C2 Task: display alert, not display notification -- the launcher's own crash-fallback notify()
+    "blocking-alert": (SCRIPT, ">/dev/null 2>&1 &\n    disown 2>/dev/null || true\n}\n",
+                      ">/dev/null 2>&1\n}\n"),
+    "notification-not-alert": (SCRIPT,
+                               "display alert (item 1 of argv) message (item 2 of argv) giving up after 86400",
+                               "display notification (item 1 of argv) with title (item 2 of argv)"),
+    "no-give-up": (SCRIPT,
+                  "display alert (item 1 of argv) message (item 2 of argv) giving up after 86400",
+                  "display alert (item 1 of argv) message (item 2 of argv)"),
 }
 
 
@@ -178,8 +195,31 @@ def stub(path: Path, body: str) -> Path:
     return path
 
 
+def _settle(path: Path, timeout: float = 2.0, quiet: float = 0.05) -> str:
+    """Wait for a possibly-BACKGROUNDED write to `path` to finish, then return its content (or "" if it never
+    appears). The launcher's own alert is now detached (`&` + `disown`, C2 Task: display alert, not display
+    notification), so friday_run.sh -- and therefore `subprocess.run` below -- can return before the stub
+    osascript it started has finished writing `notes`. Polls until the content has stopped changing for
+    `quiet` seconds, or `timeout` elapses (the file legitimately never appearing, e.g. the "ok"/"none" launcher
+    cases where notify() is never called, settles on "" almost immediately)."""
+    deadline = time.time() + timeout
+    last, stable_since = None, None
+    while time.time() < deadline:
+        cur = path.read_text() if path.exists() else ""
+        if cur == last:
+            if stable_since is None:
+                stable_since = time.time()
+            elif time.time() - stable_since >= quiet:
+                return cur
+        else:
+            stable_since = None
+        last = cur
+        time.sleep(0.02)
+    return path.read_text() if path.exists() else ""
+
+
 def launcher(tmp: Path, mutation, token: bool, exit_code: int, inherited_token: str = None,
-             unset_user: bool = False) -> dict:
+             unset_user: bool = False, slow_osascript: bool = False) -> dict:
     """Run a copy of friday_run.sh in a fake repo with stub security, python and osascript. Both security and
     osascript also record whether they inherited CLAUDE_CODE_OAUTH_TOKEN, so a leak into EITHER (not just
     Python's own argv/output) is caught -- fix round 1, M-2.
@@ -192,6 +232,13 @@ def launcher(tmp: Path, mutation, token: bool, exit_code: int, inherited_token: 
     friday_run.sh unsets it before the Keychain read rather than merely that the FIXTURE doesn't leak its own.
     `unset_user` runs it with USER removed from the environment (final review, M-3); `security` records its own
     arguments, so the Keychain account it was asked for can be read back.
+
+    `slow_osascript` makes the stub sleep 6s BEFORE doing anything else, standing in for a real alert window
+    that is slow to appear (or that sits on screen for a while). `elapsed` in the result is timed around ONLY
+    the launcher's own process (`subprocess.run` on friday_run.sh), never around `_settle`'s poll below, so it
+    measures exactly what "the launcher returns promptly" means: with the alert backgrounded and disowned, this
+    stays small regardless of `slow_osascript`; the `blocking-alert` mutation (removing `&`/`disown`) makes the
+    launcher itself wait out the stub's sleep, and `elapsed` catches it.
     """
     repo = Path(tempfile.mkdtemp(dir=str(tmp), prefix="repo-%s-%d-" % (token, exit_code)))
     (repo / "scripts" / "schedule").mkdir(parents=True)
@@ -205,7 +252,7 @@ def launcher(tmp: Path, mutation, token: bool, exit_code: int, inherited_token: 
         '{ [ "${CLAUDE_CODE_OAUTH_TOKEN:-}" = "%s" ] && echo token=yes || echo token=no\n'
         '  [ -n "${ANTHROPIC_API_KEY:-}" ] && echo apikey=set || echo apikey=unset\n'
         '  echo "args=$*"; } > "%s"\nexit "$STUB_EXIT"\n') % (SENTINEL, seen))
-    osa = stub(repo / "osascript", envcheck +
+    osa = stub(repo / "osascript", ("sleep 6\n" if slow_osascript else "") + envcheck +
                'for a in "$@"; do printf "%%s|" "$a"; done >> "%s"; echo >> "%s"\n' % (notes, notes))
     env = dict(os.environ, FC08_SECURITY=str(security), FC08_PYTHON=str(python), FC08_OSASCRIPT=str(osa),
                STUB_HAS_TOKEN="1" if token else "0", STUB_EXIT=str(exit_code), ANTHROPIC_API_KEY="leak-me",
@@ -215,9 +262,11 @@ def launcher(tmp: Path, mutation, token: bool, exit_code: int, inherited_token: 
         env.pop("USER", None)
     if inherited_token is not None:
         env["CLAUDE_CODE_OAUTH_TOKEN"] = inherited_token
+    t0 = time.time()
     got = subprocess.run(["/bin/bash", str(script)], cwd=str(tmp), env=env, capture_output=True, text=True, timeout=60)
-    return {"code": got.returncode, "out": got.stdout + got.stderr,
-            "saw": seen.read_text() if seen.exists() else "", "notes": notes.read_text() if notes.exists() else "",
+    elapsed = time.time() - t0
+    return {"code": got.returncode, "out": got.stdout + got.stderr, "elapsed": elapsed,
+            "saw": seen.read_text() if seen.exists() else "", "notes": _settle(notes),
             "script": script.read_text(), "security_args": sec_args.read_text() if sec_args.exists() else ""}
 
 
@@ -386,6 +435,11 @@ def checks(mutation) -> list:
                     and "CRASHED" in crash["notes"] and crash["code"] == 3,
                     "an acceptable or already-notified exit adds no notification of the script's own; a crash "
                     "posts exactly one", "ok %r | none %r | crash %r" % (ok["notes"][:30], none["notes"][:30], crash["notes"][:60])))
+        out.append(("display alert (item 1 of argv) message (item 2 of argv) giving up after 86400" in crash["notes"]
+                    and "display notification" not in crash["notes"],
+                    "the launcher's own crash-fallback alert is exactly `display alert (item 1 of argv) message "
+                    "(item 2 of argv) giving up after 86400` -- not `display notification`, which was measured "
+                    "accepted but never shown on the owner's Mac", crash["notes"][:160]))
         out.append((is_tracing_enabled("set -x\ntrue\n") and is_tracing_enabled("set -eux\n")
                     and is_tracing_enabled("set -ux\n") and is_tracing_enabled("set -u -x\n")
                     and is_tracing_enabled("set -e -x\n") and is_tracing_enabled("true; set -x\n")
@@ -410,6 +464,19 @@ def checks(mutation) -> list:
                     "every scheduled exit code (0, reserved, 1, 2, 3) yields exactly one notification in total, "
                     "from whichever side is supposed to post it", totals))
 
+        # --- C2 Task: display alert, not display notification. `display alert ... giving up after 86400` BLOCKS
+        # osascript until clicked or timed out, so the launcher's own notify() must be DETACHED (`&` + `disown`).
+        # A stub osascript that sleeps 6s before doing anything else must not delay the launcher's own exit
+        # beyond a few seconds -- `elapsed` is timed around subprocess.run alone (see launcher()'s docstring),
+        # never around _settle's poll for the (still in-flight) notes file. Exit code 3 (crash) is the one path
+        # that calls the launcher's own notify(); `blocking-alert` (removing `&`/`disown`) makes the launcher
+        # wait out the full sleep, which this catches.
+        slow = launcher(tmp, mutation, token=True, exit_code=3, slow_osascript=True)
+        out.append((slow["elapsed"] < 3.0,
+                    "the launcher returns promptly even when its own alert is slow to start or slow to be "
+                    "dismissed -- the osascript call is backgrounded and disowned, never waited on",
+                    "elapsed=%.2fs code=%s" % (slow["elapsed"], slow["code"])))
+
         # --- fix round 2, N-2: an operator's shell that ALREADY exported a (different, dummy) CLAUDE_CODE_OAUTH_TOKEN
         # must not leak it anywhere -- friday_run.sh unsets it before reading the Keychain, so only the Keychain's
         # own sentinel ever reaches Python, and the dummy reaches no child at all (not even security or osascript).
@@ -432,14 +499,69 @@ def checks(mutation) -> list:
                     "hands the token to Python, instead of refusing with a misleading 'no token'",
                     "code=%s security=%r saw=%r" % (nouser["code"], nouser["security_args"][:60], nouser["saw"][:40])))
 
-        # --- notify() passes `--` before the message and title (fix round 1, M-1): a message of "-e" must not be
-        # read as an osascript option.
-        seen_argv = []
-        real_notify.notify("some title", "-e", run=lambda argv, **kw: (
-            seen_argv.append(argv), types.SimpleNamespace(returncode=0, stdout="", stderr=""))[1])
-        out.append((seen_argv and seen_argv[-1][-3:] == ["--", "-e", "some title"],
-                    "notify() passes -- before the message and title, so a message beginning with '-' is never "
-                    "read as an option", seen_argv[-1][-4:] if seen_argv else None))
+        # --- C2 Task: display alert, not display notification. feeds/notify.py's own AppleScript is pinned
+        # exactly (this module is never mutated by this guard -- real_notify is the shipped module, imported
+        # directly at the top).
+        out.append((real_notify.SCRIPT[1] == "display alert (item 1 of argv) message (item 2 of argv) giving up after 86400",
+                    "feeds/notify.py's AppleScript is exactly `display alert (item 1 of argv) message (item 2 "
+                    "of argv) giving up after 86400` -- not `display notification`, which was measured accepted "
+                    "(exit 0) but never shown on the owner's Mac", real_notify.SCRIPT[1]))
+
+        # notify() passes `--` before the TITLE and MESSAGE, in that order (fix round 1, M-1, now applied to
+        # `display alert <heading> message <body>`'s two argv slots -- the heading first, the reverse of
+        # `display notification`'s old message-then-title order): a message of "-e" must not be read as an
+        # osascript option, and the call is started DETACHED (start_new_session=True, all three standard
+        # streams to DEVNULL) rather than waited on.
+        seen_argv, seen_kwargs = [], []
+
+        def record_start(argv, **kw):
+            seen_argv.append(argv)
+            seen_kwargs.append(kw)
+        real_notify.notify("some title", "-e", run=record_start)
+        out.append((bool(seen_argv) and seen_argv[-1][-3:] == ["--", "some title", "-e"]
+                    and bool(seen_kwargs) and seen_kwargs[-1].get("start_new_session") is True
+                    and seen_kwargs[-1].get("stdin") is subprocess.DEVNULL
+                    and seen_kwargs[-1].get("stdout") is subprocess.DEVNULL
+                    and seen_kwargs[-1].get("stderr") is subprocess.DEVNULL,
+                    "notify() passes -- before the title and message (title first, matching `display alert "
+                    "<heading> message <body>`), so a message beginning with '-' is never read as an option, "
+                    "and starts the call detached (start_new_session=True, stdio to DEVNULL)",
+                    "argv=%r kwargs=%r" % (seen_argv[-1][-4:] if seen_argv else None,
+                                          sorted((seen_kwargs[-1] if seen_kwargs else {}).keys()))))
+
+        # notify() must not WAIT on the process it starts, even when starting it is slow: a stub `run` that
+        # itself spawns a real, slow -- but never osascript -- process (`sleep 5`) proves this. A
+        # `.wait()`/`.communicate()` regression would make notify() block for the full sleep.
+        def slow_start(argv, **kw):
+            passthrough = {k: v for k, v in kw.items() if k in ("stdin", "stdout", "stderr", "start_new_session")}
+            return subprocess.Popen(["sleep", "5"], **passthrough)
+        t0 = time.time()
+        posted = real_notify.notify("T", "M", run=slow_start)
+        elapsed_notify = time.time() - t0
+        out.append((posted is True and elapsed_notify < 2.0,
+                    "notify() starts the alert and returns immediately -- it never waits on the process it "
+                    "started, even when starting it is slow", "elapsed=%.2fs posted=%s" % (elapsed_notify, posted)))
+
+        # `_scheduled` (tools/friday_run.py's --scheduled path) must not be delayed either, calling the REAL
+        # notify.notify with no notifier injected. real_notify.notify's own `run` default is swapped for
+        # `slow_start` here -- never osascript, and real_notify is never mutated by this guard -- so what is
+        # timed is `_scheduled`'s OWN return, not notify()'s internals a second time.
+        orig_notify = real_notify.notify
+
+        def notify_with_slow_start(title, message, run=slow_start):
+            return orig_notify(title, message, run=run)
+        real_notify.notify = notify_with_slow_start
+        try:
+            t0 = time.time()
+            with contextlib.redirect_stdout(io.StringIO()):
+                code_prompt = fr.main(["--scheduled"], root=tmp / "inbox-promptness", today=date(2026, 10, 9),
+                                      preflight_reasons=["the checkout is on 'feature', not main"])
+            elapsed_scheduled = time.time() - t0
+        finally:
+            real_notify.notify = orig_notify
+        out.append((elapsed_scheduled < 2.0 and code_prompt == RESERVED,
+                    "_scheduled returns promptly even when starting the alert itself is slow -- it never waits "
+                    "on notify()'s underlying process", "elapsed=%.2fs code=%s" % (elapsed_scheduled, code_prompt)))
 
         # --- the preflight
         pf = module("feeds.preflight", PREFLIGHT, mutation)

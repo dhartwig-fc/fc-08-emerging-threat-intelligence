@@ -12,13 +12,16 @@
 # into (e.g. Claude Code's own session) must not leak it into `security` or a crash's own `osascript` call --
 # the ONE token that ever reaches Python is the one this script itself reads from the Keychain below.
 #
-# ONE NOTIFICATION -- THE EXIT-CODE CONTRACT (fix round 1, I-1/I-2; see tools/friday_run.py's docstring).
-# tools/friday_run.py --scheduled posts the one notification itself (the report's first two lines) and signals
-# that it did so with its exit code: 0 (acceptable) or NOTIFIED_EXIT below (refused/failed). ANY OTHER exit
-# code -- 1 (its own notify() call failed, though the run itself finished), 2 (a bad flag), 3 (a crash) or
-# anything else (an import-time failure, a missing interpreter, a broken venv) -- means Python posted NOTHING,
-# and this script posts the one notification instead, worded to say only what is true of every one of those
-# cases: it did not post its own notification, not that it necessarily "did not finish" (fix round 2, N-4).
+# ONE NOTICE -- THE EXIT-CODE CONTRACT (fix round 1, I-1/I-2; see tools/friday_run.py's docstring). The notice
+# is an ALERT WINDOW (`display alert ... giving up after 86400`), not a notification: `display notification`
+# was measured accepted (exit 0) but never shown on the owner's Mac, with no Script Editor entry in System
+# Settings -> Notifications to grant -- there was nothing to fix by permissioning. `display alert` was
+# measured working. tools/friday_run.py --scheduled posts the one alert itself (the report's first two lines)
+# and signals that it did so with its exit code: 0 (acceptable) or NOTIFIED_EXIT below (refused/failed). ANY
+# OTHER exit code -- 1 (its own notify() call failed, though the run itself finished), 2 (a bad flag), 3 (a
+# crash) or anything else (an import-time failure, a missing interpreter, a broken venv) -- means Python
+# posted NOTHING, and this script posts the one alert instead, worded to say only what is true of every one of
+# those cases: it did not post its own alert, not that it necessarily "did not finish" (fix round 2, N-4).
 # This is checked against the EXACT reserved value, never a `>=` threshold: a threshold reads a larger
 # "acceptable" code range as "already notified" the moment the reserved value crosses it.
 set -u
@@ -33,9 +36,15 @@ PYTHON="${FC08_PYTHON:-$REPO/.venv/bin/python}"
 # kill the read below and REFUSE with a misleading "no token" (final review, M-3): fall back to id -un.
 ACCOUNT="${USER:-$(id -un)}"
 
+# display alert ... giving up after 86400 BLOCKS osascript until the owner clicks OK or 24h elapses, so it must
+# never run in the foreground here: backgrounded with `&` and detached from job control with `disown`, so this
+# function -- and the script -- returns immediately, and the alert window outlives the script's own exit. The
+# words still reach osascript as ARGUMENTS after `--`, never spliced into the AppleScript source.
 notify() {
-    "$OSASCRIPT" -e 'on run argv' -e 'display notification (item 1 of argv) with title (item 2 of argv)' \
-        -e 'end run' -- "$1" "FC08 Friday run: CRASHED" >/dev/null 2>&1 || true
+    "$OSASCRIPT" -e 'on run argv' \
+        -e 'display alert (item 1 of argv) message (item 2 of argv) giving up after 86400' \
+        -e 'end run' -- "FC08 Friday run: CRASHED" "$1" >/dev/null 2>&1 &
+    disown 2>/dev/null || true
 }
 
 cd "$REPO" || { notify "The repository is not at $REPO."; exit 2; }
@@ -54,7 +63,7 @@ fi
 FC08_TOKEN=""
 unset FC08_TOKEN
 if [ "$code" -ne 0 ] && [ "$code" -ne "$NOTIFIED_EXIT" ]; then
-    notify "The run did not post its notification (exit $code). See ~/Library/Logs/uk.fc08.friday-run.log"
+    notify "The run did not post its alert (exit $code). See ~/Library/Logs/uk.fc08.friday-run.log"
 fi
 echo "$(date -u +%Y-%m-%dT%H:%M:%SZ) friday_run.sh end, exit $code"
 exit "$code"
