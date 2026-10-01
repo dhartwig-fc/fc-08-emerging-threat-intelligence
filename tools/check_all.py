@@ -89,7 +89,7 @@ GUARDS = [
     ("check_friday_run", ["evals/check_friday_run.py"], "cold"),
     ("check_accept_run", ["evals/check_accept_run.py"], "cold"),
     ("check_schedule", ["evals/check_schedule.py"], "cold"),
-    # Static: every text --mutate's anchor still matches its source, since this list never runs a mutation.
+    # Static: every text --mutate anchor and rebound name still matches its source; this list never runs a mutation.
     ("check_mutation_anchors", ["evals/check_mutation_anchors.py"], "cold"),
     ("check_published_walkthrough --cold", ["evals/check_published_walkthrough.py", "--cold"], "cold"),
     ("check_published_walkthrough", ["evals/check_published_walkthrough.py"], "needs-portfolio"),
