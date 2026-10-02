@@ -1,0 +1,155 @@
+{
+  "run_id": "feeds-2026-10-02-10ce44",
+  "sources": {
+    "fincen": {
+      "already_seen": 15,
+      "error": null,
+      "items": [],
+      "listed": 15,
+      "listed_at": "2026-10-02T08:00:13Z",
+      "listing": "listings/fincen.html",
+      "listing_sha256": "bb1729bdda844df4e5a7ade3c79aa67dfa750b4d5cbda0beac7e9a962b270b01",
+      "listing_url": "https://www.fincen.gov/resources/advisoriesbulletinsfact-sheets/advisories",
+      "status": "ok"
+    },
+    "ofac": {
+      "already_seen": 7,
+      "error": null,
+      "items": [
+        {
+          "document": {
+            "bytes": 55238,
+            "content_type": "text/html",
+            "fetched_at": "2026-10-02T08:00:54Z",
+            "final_url": "https://ofac.treasury.gov/recent-actions/20261001",
+            "linked_pdfs": [],
+            "page_error": null,
+            "pages": 5,
+            "path": "docs/cdd0f7914df25bc1c2f28c175b05b35e57844288cf5871e8fc409efa2dbf9426.html",
+            "sha256": "cdd0f7914df25bc1c2f28c175b05b35e57844288cf5871e8fc409efa2dbf9426",
+            "text_pages": 5
+          },
+          "item_id": "20261001",
+          "key": "ofac:94d34cd7226d01c2",
+          "published": "2026-10-01",
+          "source": "ofac",
+          "summary": "",
+          "title": "Iran-related Designations and Designations Updates; Transnational Criminal Organizations Designation; Publication of Iran-related Determination; Publication of Amended Iran-related Frequently Asked Question",
+          "url": "https://ofac.treasury.gov/recent-actions/20261001"
+        },
+        {
+          "document": {
+            "bytes": 47750,
+            "content_type": "text/html",
+            "fetched_at": "2026-10-02T08:01:05Z",
+            "final_url": "https://ofac.treasury.gov/recent-actions/20260930",
+            "linked_pdfs": [],
+            "page_error": null,
+            "pages": 4,
+            "path": "docs/34999341fac5e6cb408bf03a71c04dc34a89f0d63f1e2a4eb0cdf973f9253164.html",
+            "sha256": "34999341fac5e6cb408bf03a71c04dc34a89f0d63f1e2a4eb0cdf973f9253164",
+            "text_pages": 4
+          },
+          "item_id": "20260930",
+          "key": "ofac:dc63a1c2b84a58f7",
+          "published": "2026-09-30",
+          "source": "ofac",
+          "summary": "",
+          "title": "Counter Terrorism and Transnational Criminal Organizations Designations; Belarus, Counter Narcotics, and Libya Designations Removals",
+          "url": "https://ofac.treasury.gov/recent-actions/20260930"
+        },
+        {
+          "document": {
+            "bytes": 69703,
+            "content_type": "text/html",
+            "fetched_at": "2026-10-02T08:01:16Z",
+            "final_url": "https://ofac.treasury.gov/recent-actions/20260929",
+            "linked_pdfs": [],
+            "page_error": null,
+            "pages": 11,
+            "path": "docs/512a34ef936a0ef882f2e799a475d055099ec3813c2a8ab89f4fe2af894ff3b3.html",
+            "sha256": "512a34ef936a0ef882f2e799a475d055099ec3813c2a8ab89f4fe2af894ff3b3",
+            "text_pages": 11
+          },
+          "item_id": "20260929",
+          "key": "ofac:528a733c96bd988a",
+          "published": "2026-09-29",
+          "source": "ofac",
+          "summary": "",
+          "title": "Counter Narcotics, Counter Terrorism, Iran-related, and Non-Proliferation Designations",
+          "url": "https://ofac.treasury.gov/recent-actions/20260929"
+        }
+      ],
+      "listed": 10,
+      "listed_at": "2026-10-02T08:00:25Z",
+      "listing": "listings/ofac.html",
+      "listing_sha256": "f90f035257d07416b9bd5e782f51289d35903171072968c45b2b5d6decb395ac",
+      "listing_url": "https://ofac.treasury.gov/recent-actions",
+      "status": "ok"
+    },
+    "ofsi": {
+      "already_seen": 18,
+      "error": null,
+      "items": [
+        {
+          "document": {
+            "bytes": 81154,
+            "content_type": "text/html",
+            "fetched_at": "2026-10-02T08:00:40Z",
+            "final_url": "https://www.gov.uk/government/publications/ofsi-general-licence-int20255635700",
+            "linked_pdfs": [
+              "https://assets.publishing.service.gov.uk/media/6abd34a626660e5f62a7f19a/GL_October_2026_INT.2025.5635700.pdf",
+              "https://assets.publishing.service.gov.uk/media/6abd181df04a15f5337227d8/PN_October_2026_INT.2025.5635700.pdf"
+            ],
+            "page_error": null,
+            "pages": 1,
+            "path": "docs/bb11a7397e5af2dac79589f9dccde6f0f8c587624f12c4f304aef0eecc1cf672.html",
+            "sha256": "bb11a7397e5af2dac79589f9dccde6f0f8c587624f12c4f304aef0eecc1cf672",
+            "text_pages": 1
+          },
+          "item_id": "https://www.gov.uk/government/publications/ofsi-general-licence-int20255635700#2026-10-01T09:28:10Z",
+          "key": "ofsi:2a536bfa411d1703",
+          "published": "2026-10-01",
+          "source": "ofsi",
+          "summary": "Details for OFSI General licence INT/2025/5635700, Russian Oil Exempt Projects",
+          "title": "Guidance: OFSI General licence INT/2025/5635700",
+          "url": "https://www.gov.uk/government/publications/ofsi-general-licence-int20255635700"
+        },
+        {
+          "document": {
+            "bytes": 138848,
+            "content_type": "text/html",
+            "fetched_at": "2026-10-02T08:00:43Z",
+            "final_url": "https://www.gov.uk/government/publications/russian-oil-services-ban",
+            "linked_pdfs": [
+              "https://assets.publishing.service.gov.uk/media/6717abc438149ce9d09e3821/20241021_price_cap_advisory.pdf",
+              "https://assets.publishing.service.gov.uk/media/6968c82e3f43dfed1544b091/Oil_Price_Cap_-_INT.2024.4423849_-__General_Licence_-_Amendment_of_15_January_2026.pdf",
+              "https://assets.publishing.service.gov.uk/media/6abe24f7f04a15f53372283a/Oil_Price_Cap_-_Publication_Notice_s__-__Amendment_of_1_October_2026.pdf",
+              "https://assets.publishing.service.gov.uk/media/63fcd7f6e90e0740de2669d3/2470056_Correspondent_Banking_GL_2702.pdf",
+              "https://assets.publishing.service.gov.uk/media/6489b1e9b32b9e000ca96749/Derivatives-Futures_GL_INT-2023-3074680_June_2023.pdf",
+              "https://assets.publishing.service.gov.uk/media/6abe250755bc01d752a7f1df/INT-2022-2470156_-_Exempt_Projects_and_Countries_GL_October_2026.pdf"
+            ],
+            "page_error": null,
+            "pages": 6,
+            "path": "docs/1b0afbcb640ab8c82276ca90273b2e6589bf39551d7262189ed8f8e0aba89186.html",
+            "sha256": "1b0afbcb640ab8c82276ca90273b2e6589bf39551d7262189ed8f8e0aba89186",
+            "text_pages": 6
+          },
+          "item_id": "https://www.gov.uk/government/publications/russian-oil-services-ban#2026-10-01T09:28:05Z",
+          "key": "ofsi:25f1f5c678b4baeb",
+          "published": "2026-10-01",
+          "source": "ofsi",
+          "summary": "Guidance, general licences and reporting forms relating to the Maritime Services Ban and Oil Price Cap Exception.",
+          "title": "Guidance: Maritime Services Ban and Oil Price Cap: licences and reporting forms",
+          "url": "https://www.gov.uk/government/publications/russian-oil-services-ban"
+        }
+      ],
+      "listed": 20,
+      "listed_at": "2026-10-02T08:00:13Z",
+      "listing": "listings/ofsi.atom",
+      "listing_sha256": "5a261ef20ec304039b20815733ab674460eb7eeeb3780617aaa0b62febd5ed44",
+      "listing_url": "https://www.gov.uk/government/organisations/office-of-financial-sanctions-implementation.atom",
+      "status": "ok"
+    }
+  }
+}

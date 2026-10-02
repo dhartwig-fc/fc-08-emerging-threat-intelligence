@@ -372,6 +372,13 @@
       "source": "ofsi"
     },
     {
+      "decided_on": "2026-10-02",
+      "decision": "drop",
+      "first_seen_run": "feeds-2026-10-02-10ce44",
+      "item_id": "https://www.gov.uk/government/publications/ofsi-general-licence-int20255635700#2026-10-01T09:28:10Z",
+      "source": "ofsi"
+    },
+    {
       "decided_on": "2026-09-29",
       "decision": "drop",
       "first_seen_run": "catalogue:90b57e8ba022",
@@ -432,6 +439,13 @@
       "decision": "drop",
       "first_seen_run": "catalogue:90b57e8ba022",
       "item_id": "https://www.gov.uk/government/publications/russia-sanctions-guidance#2026-05-19T23:01:01Z",
+      "source": "ofsi"
+    },
+    {
+      "decided_on": "2026-10-02",
+      "decision": "drop",
+      "first_seen_run": "feeds-2026-10-02-10ce44",
+      "item_id": "https://www.gov.uk/government/publications/russian-oil-services-ban#2026-10-01T09:28:05Z",
       "source": "ofsi"
     },
     {

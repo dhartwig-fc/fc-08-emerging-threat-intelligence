@@ -1,0 +1,28 @@
+{
+  "accepted": {},
+  "allocated_not_accepted": {
+    "ofac:528a733c96bd988a": "ADV-2026-0023",
+    "ofac:94d34cd7226d01c2": "ADV-2026-0025",
+    "ofac:dc63a1c2b84a58f7": "ADV-2026-0024"
+  },
+  "allocated_not_accepted_note": "allocated when an extraction started and carried by no accepted record: never reused (owner decision 11)",
+  "already_decided": {},
+  "already_decided_note": "decided in an earlier run, named here by that run's id: never re-recorded and not a decision of this run (owner ruling A, 2026-09-29)",
+  "decided_on": "2026-10-02",
+  "deferred": [
+    "ofac:528a733c96bd988a",
+    "ofac:94d34cd7226d01c2",
+    "ofac:dc63a1c2b84a58f7"
+  ],
+  "dropped": [
+    "ofsi:https://www.gov.uk/government/publications/ofsi-general-licence-int20255635700#2026-10-01T09:28:10Z",
+    "ofsi:https://www.gov.uk/government/publications/russian-oil-services-ban#2026-10-01T09:28:05Z"
+  ],
+  "override_reconciliation": null,
+  "reconciliation": {
+    "crash": null,
+    "problems": []
+  },
+  "run_id": "feeds-2026-10-02-10ce44",
+  "status": "COMPLETE"
+}

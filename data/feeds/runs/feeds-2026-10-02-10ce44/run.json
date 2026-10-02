@@ -1,0 +1,14 @@
+{
+  "ceiling_usd": 5.0,
+  "crash": null,
+  "ended_at": "2026-10-02T08:26:37Z",
+  "failure": null,
+  "limit": null,
+  "model": "claude-sonnet-5",
+  "orchestrator_cost_usd": 0.10187420000000001,
+  "prompt_sha256": "1971636680ed013778eea450a57125966dad3c1dbefbb2d5f5e9a140c72aba68",
+  "run_id": "feeds-2026-10-02-10ce44",
+  "spent_usd": 1.955077,
+  "started_at": "2026-10-02T08:00:06Z",
+  "unrecorded": null
+}
