@@ -303,11 +303,11 @@ async def extract(path: Path, advisory_id: str, model: str, max_budget_usd: floa
                 record, quote_repair, result = await _check_and_repair(
                     client, record, path, advisory_id, max_budget_usd, max_turns, result, seen, quote_repair)
     except Exception as exc:
-        telemetry.record_unhooked(run, seen.names, seen.results)
+        _terminate_calls(run, seen)
         telemetry.run_completed(run, telemetry.FAILURE, str(exc)[:300], result=result, validated=False,
                                 terminal_check=telemetry.reconcile(run, seen.tool_use_ids))
         raise
-    telemetry.record_unhooked(run, seen.names, seen.results)
+    _terminate_calls(run, seen)
     terminal_check = telemetry.reconcile(run, seen.tool_use_ids)
     telemetry.run_completed(run, telemetry.SUCCESS, "record validated", result=result, validated=True,
                             terminal_check=terminal_check, quote_repair=quote_repair)
@@ -350,6 +350,14 @@ class _Seen:
         self.names: dict = {}
         self.results: dict = {}
         self.interrupted = False
+
+
+def _terminate_calls(run, seen: "_Seen") -> None:
+    """Every call the session started ends with one terminal event: the CLI-answered ones, and -- if the runner
+    interrupted a turn -- the ones it cut off (S-1)."""
+    telemetry.record_unhooked(run, seen.names, seen.results)
+    if seen.interrupted:
+        telemetry.record_interrupted(run, seen.names, seen.results)
 
 
 async def _receive_turn(client, seen: "_Seen", limit: int = None) -> "ResultMessage | None":
@@ -472,6 +480,7 @@ async def _check_and_repair(client, record: AdvisoryRecord, path: Path, advisory
             await client.query(repair_prompt(index, bad, note["checked"]))
             turn = await _receive_turn(client, seen, limit=allowance)
         except Exception as exc:  # noqa: BLE001 -- the SDK raising mid-repair must not lose a valid record
+            note["interrupted"] = seen.interrupted  # S-3: the interrupt may have been issued before it raised
             note["error"] = ("the repair turn raised %s: %s" % (type(exc).__name__, exc))[:300]
             break
         note["interrupted"] = seen.interrupted

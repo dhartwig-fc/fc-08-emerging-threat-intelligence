@@ -189,6 +189,26 @@ def record_unhooked(run, calls: dict, results: dict) -> list:
     return out
 
 
+def record_interrupted(run, calls: dict, results: dict) -> list:
+    """The ONE terminal event for each call an INTERRUPTED session left with neither a hook event nor a result.
+
+    A turn the runner interrupted (extract_advisory's repair allowance) is cut off mid-round: the call the
+    interrupt landed on may never fire PostToolUse and never return a result, and terminal_check would call it
+    unterminated -- which fails the extraction's reconciliation at accept time. Each such call gets one FAILURE
+    event, source "interrupt", so the evidence says it was cut off by the runner and nothing is invented about
+    what it did. A call WITH a result is left alone (record_unhooked handles an is_error one; a success with no
+    event is a failed hook, which must stay visible)."""
+    done = terminated(run)
+    out = []
+    for tool_use_id, tool in calls.items():
+        if tool_use_id in done or tool_use_id in results:
+            continue
+        out.append(emit(run, TOOL_CALL, FAILURE, "%s interrupted by the runner (no hook fired, no result)" % tool,
+                        tool=tool, tool_use_id=tool_use_id, latency_ms=None, outcome="interrupted",
+                        source="interrupt"))
+    return out
+
+
 def reconcile(run, tool_use_ids) -> dict:
     """Did THIS run leave exactly one terminal event per tool call? Read, not assumed.
 

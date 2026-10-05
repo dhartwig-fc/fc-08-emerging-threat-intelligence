@@ -139,19 +139,11 @@ MARKERS = ("MUTATION TARGET MISSING", "MUTATION DOES NOT APPLY", ".count(old)", 
 
 # Rebind sites the static reader cannot resolve to a name in a repository module, by (guard, site, label).
 # The size is pinned: a NEW unresolvable site fails until it is listed here with its reason.
-_SDK_FIELD = ("a field of claude_agent_sdk's ClaudeAgentOptions, an installed package outside the repository; a "
-              "renamed field raises TypeError when the label runs -- loud, but only when it runs")
 KNOWN_UNCOVERED = {
     ("check_feeds_orchestrator.py", "module.__file__", "(setup)"):
         "set on a FRESH types.ModuleType the guard builds itself; nothing in the repository is rebound",
-    ("check_feeds_orchestrator.py", "dataclasses.replace(o, tools=...)", "builtin-tools"): _SDK_FIELD,
-    ("check_feeds_orchestrator.py", "dataclasses.replace(o, setting_sources=...)", "settings"): _SDK_FIELD,
-    ("check_feeds_orchestrator.py", "dataclasses.replace(o, allowed_tools=...)", "preapprove-triage"): _SDK_FIELD,
     ("check_feeds_runner.py", "session.calls", "(setup)"):
         "an attribute on the guard's own wrapper function (counted()); nothing in the repository is rebound",
-    ("check_tool_surface.py", "dataclasses.replace(o, mcp_servers=...)", "(setup)"): _SDK_FIELD,
-    ("check_tool_surface.py", "dataclasses.replace(o, can_use_tool=...)", "(any label)"): _SDK_FIELD,
-    ("check_tool_surface.py", "dataclasses.replace(o, tools=...)", "(any label)"): _SDK_FIELD,
     ("check_tool_surface.py", "transport._cli_path", "(setup)"):
         "an SDK transport instance attribute; the guard itself raises if hasattr(transport, '_cli_path') is false",
     ("check_walkthrough.py", "replace(pinned[-1], decided_at=...)", "(setup)"):
@@ -162,10 +154,16 @@ KNOWN_UNCOVERED = {
     ("check_walkthrough.py", "replace(pinned[-1], note=...)", "(setup)"):
         "as decided_at: a decision-log entry field; a rename raises TypeError in the plain run",
 }
-KNOWN_UNCOVERED_SIZE = 12  # 2026-10-01: 12 entries covering 14 sites (two sites repeat an entry's shape)
+KNOWN_UNCOVERED_SIZE = 6   # entries; 2026-10-05: the six SDK-field entries moved out (N-3)
+KNOWN_UNCOVERED_SITES = 8  # SITES those entries cover: session.calls and transport._cli_path each occur twice (N-2)
+
+# A dataclasses.replace(o, field=...) in a guard that builds `o` with agent_options() rebinds a field of
+# claude_agent_sdk's ClaudeAgentOptions: read from the installed package's types.py, never imported.
+SDK_BUILDER = "agent_options"
+SDK_CLASS = "ClaudeAgentOptions"
 
 MIN_ANCHORS = 178  # measured 2026-10-01 at 075744b: 178 anchors across 13 guards. A floor, not a pin.
-MIN_REBINDS = 101  # measured 2026-10-01: 101 rebind sites across 14 exempt guards. A floor, not a pin.
+MIN_REBINDS = 107  # measured 2026-10-05: 107 rebind sites across 14 exempt guards (101 + 6 SDK fields). A floor, not a pin.
 
 MUTATIONS = ("duplicate-anchor", "missing-anchor", "unlisted-guard", "label-added-in-function",
              "renamed-rebind-target")
@@ -176,6 +174,14 @@ UNLISTED = "check_zz_unlisted_probe.py"
 # The anchor review's measured case: a label added inside main(), invisible to a module-level reader.
 IN_FUNCTION = ("check_html_pages.py", "def main(argv: list) -> int:\n",
                "def main(argv: list) -> int:\n    MUTATIONS['zz-dead'] = ('THIS ANCHOR IS NOWHERE', 'x')\n")
+# N-1: the check each mutation MUST fail (a prefix of that check's label). A floor failure alone never counts.
+EXPECT = {
+    "duplicate-anchor": "check_friday_run.py --mutate telemetry-elsewhere: anchor found exactly once",
+    "missing-anchor": "check_accept_run.py --mutate whole-run-refusal: anchor found exactly once",
+    "unlisted-guard": "groups: every evals/check_*.py",
+    "label-added-in-function": "check_html_pages.py: MUTATIONS reads statically",
+    "renamed-rebind-target": "check_publish_boundary.py: every attribute it rebinds",
+}
 # The anchor review's measured rebind case: check_publish_boundary --mutate no-email sets pb._EMAIL.
 RENAMED = ("governance/publish_boundary.py", "_EMAIL", "_EMAIL_RENAMED")
 
@@ -575,14 +581,39 @@ def rebind_sites(tree: ast.Module) -> list:
     return out
 
 
+def sdk_fields():
+    """The ClaudeAgentOptions class-body field names in the installed claude_agent_sdk/types.py, or None."""
+    import importlib.util
+    spec = importlib.util.find_spec("claude_agent_sdk")  # a top-level package: found, not imported
+    if spec is None or not spec.submodule_search_locations:
+        return None
+    types_py = Path(next(iter(spec.submodule_search_locations))) / "types.py"
+    if not types_py.exists():
+        return None
+    for node in ast.parse(types_py.read_text(encoding="utf-8")).body:
+        if isinstance(node, ast.ClassDef) and node.name == SDK_CLASS:
+            return {n.target.id for n in node.body if isinstance(n, ast.AnnAssign) and isinstance(n.target, ast.Name)}
+    return None
+
+
 def examine_rebinds(guard: str, tree: ast.Module, root: Path, read: Reader) -> tuple:
     """(checked, missing, unresolved): sites found in their target, sites whose name is gone, and sites the
     reader cannot resolve, each as (site, label, detail)."""
     parents = {c: p for p in ast.walk(tree) for c in ast.iter_child_nodes(p)}
     res = Resolver(tree, root, read)
     checked, missing, unresolved = [], [], []
+    builds_options = any(isinstance(c, ast.Call) and (ast.unparse(c.func) == SDK_BUILDER or ast.unparse(c.func).endswith("." + SDK_BUILDER))
+                         for c in ast.walk(tree))
     for site, base, names, node in rebind_sites(tree):
         label = label_of(node, parents)
+        if base is None and builds_options and isinstance(node, ast.Call) and len(names) == 1:
+            fields = sdk_fields()
+            if fields is None:
+                unresolved.append((site, label, "the installed %s could not be read" % SDK_CLASS))
+            else:
+                (checked if names[0] in fields else missing).append(
+                    (site, label, "found" if names[0] in fields else "%s has no field %s" % (SDK_CLASS, names[0])))
+            continue
         kind = res.name(base) if base else ("unresolved", "the rebound object is not a name")
         if kind[0] == "module":
             if not names:
@@ -674,7 +705,7 @@ def examine(guards_dir: Path = EVALS, root: Path = ROOT, redirect=None) -> tuple
                             "count 1" if n == 1 else "count %d: the mutation would refuse to run (MUTATION TARGET "
                             "MISSING) -- re-anchor it" % n))
 
-    problems, uncovered_seen = [], set()
+    problems, uncovered_seen, uncovered_sites = [], set(), 0
     for guard in sorted(set(EXEMPT) - {SELF}):
         path = guards_dir / guard
         if not path.exists():
@@ -686,6 +717,7 @@ def examine(guards_dir: Path = EVALS, root: Path = ROOT, redirect=None) -> tuple
             key = (guard, site, label)
             if key in KNOWN_UNCOVERED:
                 uncovered_seen.add(key)
+                uncovered_sites += 1
             else:
                 unlisted.append("%s [%s]: %s" % (site, label, why))
         if checked or missing or unresolved:
@@ -696,10 +728,12 @@ def examine(guards_dir: Path = EVALS, root: Path = ROOT, redirect=None) -> tuple
                         or "%d site(s) found in their targets%s" % (len(checked), ", %d known-uncovered" % (
                             len(unresolved)) if unresolved else "")))
     stale = sorted(set(KNOWN_UNCOVERED) - uncovered_seen)
-    out.append((not stale and len(KNOWN_UNCOVERED) == KNOWN_UNCOVERED_SIZE,
-                "KNOWN_UNCOVERED holds exactly %d entries, each still matching an unresolvable site"
-                % KNOWN_UNCOVERED_SIZE, "; ".join("%s %s [%s] no longer matches a site" % k for k in stale)
-                or "%d entries" % len(KNOWN_UNCOVERED)))
+    out.append((not stale and len(KNOWN_UNCOVERED) == KNOWN_UNCOVERED_SIZE and uncovered_sites == KNOWN_UNCOVERED_SITES,
+                "KNOWN_UNCOVERED holds exactly %d entries covering exactly %d sites, each entry still matching an "
+                "unresolvable site" % (KNOWN_UNCOVERED_SIZE, KNOWN_UNCOVERED_SITES),
+                "; ".join("%s %s [%s] no longer matches a site" % k for k in stale)
+                or "%d entries, %d sites%s" % (len(KNOWN_UNCOVERED), uncovered_sites, "" if uncovered_sites == KNOWN_UNCOVERED_SITES
+                                               else " (pinned %d: a site was added or lost)" % KNOWN_UNCOVERED_SITES)))
 
     problems = []
     for guard in sorted((set(EXEMPT) | set(NO_MUTATIONS)) - {SELF}):
@@ -721,8 +755,8 @@ def examine(guards_dir: Path = EVALS, root: Path = ROOT, redirect=None) -> tuple
                 "%d anchors across %d guards (of %d checked)" % (len(all_rows), len(contributing), len(CHECKED))))
     out.append((len(all_rebinds) >= MIN_REBINDS,
                 "not vacuous: at least %d rebind sites resolved and found in their targets" % MIN_REBINDS,
-                "%d rebind sites across %d exempt guards; %d known-uncovered" % (
-                    len(all_rebinds), len({r[0] for r in all_rebinds}), len(KNOWN_UNCOVERED))))
+                "%d rebind sites across %d exempt guards; %d known-uncovered entries, %d sites" % (
+                    len(all_rebinds), len({r[0] for r in all_rebinds}), len(KNOWN_UNCOVERED), uncovered_sites)))
     return out, all_rows, all_rebinds
 
 
@@ -785,15 +819,22 @@ def main(argv: list) -> int:
     args = ap.parse_args(argv)
     if args.mutate:
         print("MUTATED: %s\n" % args.mutate)
-    failures = 0
+    failures, named = 0, False
     with tempfile.TemporaryDirectory(prefix="fc08_mutation_anchors_") as tmp:
         for ok, label, detail in checks(args.mutate, Path(tmp)):
             print("  %-4s %s\n         %s" % ("PASS" if ok else "FAIL", label, str(detail)[:300]))
             failures += 0 if ok else 1
+            if not ok and args.mutate and label.startswith(EXPECT[args.mutate]):
+                named = True
     if args.mutate:
-        print("\n%s" % ("HELD: the mutation is detected (%d check%s failed)" % (failures, "" if failures == 1 else "s")
-                        if failures else "NOTHING PROVED: every check passed with the defect planted"))
-        return 0 if failures else 1
+        if named:
+            print("\nHELD: the mutation is detected by the check it must fail (%d check%s failed in all)"
+                  % (failures, "" if failures == 1 else "s"))
+        else:
+            print("\nNOTHING PROVED: %s" % ("the check it must fail (%r) did not fail; %d other check(s) did"
+                                            % (EXPECT[args.mutate], failures) if failures
+                                            else "every check passed with the defect planted"))
+        return 0 if named else 1
     print("\n%s (%d failure%s)" % ("HELD" if not failures else "REFUSED", failures, "" if failures == 1 else "s"))
     return 1 if failures else 0
 

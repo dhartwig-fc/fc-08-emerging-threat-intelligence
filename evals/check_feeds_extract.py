@@ -198,6 +198,14 @@ MUTATIONS = {
     "invalid-repair-uncaught": (EXTRACT_ADVISORY,
         "        except Exception as exc:  # noqa: BLE001 -- the original record stands\n",
         "        except ZeroDivisionError as exc:  # noqa: BLE001 -- the original record stands\n"),
+    # S-1: an interrupted turn leaves a tool call the interrupt cut off with no result and no hook; each needs a
+    # terminal event, or the extraction's reconciliation fails at accept time.
+    "no-interrupt-backfill": (EXTRACT_ADVISORY,
+        "        telemetry.record_interrupted(run, seen.names, seen.results)\n", "        pass\n"),
+    # S-3: the interrupt was issued, then the turn raised: quote_repair must still say interrupted.
+    "interrupted-lost-on-raise": (EXTRACT_ADVISORY,
+        '            note["interrupted"] = seen.interrupted  # S-3: the interrupt may have been issued before it raised\n',
+        ""),
     "first-check-uncaught": (EXTRACT_ADVISORY,
         "    except Exception as exc:  # noqa: BLE001 -- the runner's own check reports a document that cannot be checked\n",
         "    except ZeroDivisionError as exc:  # noqa: BLE001 -- the runner's own check reports a document that cannot be checked\n"),
@@ -316,6 +324,11 @@ def turn(structured, cost, *, error=False, calls=1, turns=1, denials=None, durat
                                  errors=["stub: out of budget"] if error else None)]
 
 
+class RaisingTurn(list):
+    """A scripted turn that, once the runner has interrupted it, raises `then_raise` instead of ending."""
+    then_raise = None
+
+
 def stub_session(script):
     """A stand-in for claude_agent_sdk.ClaudeSDKClient: no CLI, no model. Each query() consumes the next scripted
     turn (a list of messages ending in a ResultMessage); `log` records every client built, every message sent."""
@@ -353,6 +366,8 @@ def stub_session(script):
                                             is_error=True, num_turns=1, session_id="stub",
                                             total_cost_usd=message.total_cost_usd, errors=["stub: interrupted"])
                 yield message
+                if self._stopped and getattr(self._now, "then_raise", None) is not None:
+                    raise self._now.then_raise
     return _Client, log
 
 
@@ -542,6 +557,25 @@ def quote_checks(mutation, ea, kc, tmp: Path, box: Path) -> list:
                 "the repair turn is held to the turns left of the extraction's total (4 of 60 here): a repair that "
                 "runs past them is interrupted once, and the first record stands with the reason reported",
                 "%s | interrupts %d | %s" % (rec_g if sum_g is None else "ok", log_g["interrupts"], qg)))
+    # S-1: the stub DID start tool calls in the interrupted turn (5 of them: the sixth round is never read)
+    rec_s, sum_s, log_s, ev_s = drive([turn(first_bad, FIRST_COST, turns=56, tag="s"),
+                                       turn(good, REPAIRED_COST, calls=6, turns=6, tag="S")], max_turns=60)
+    started = {e["payload"].get("tool_use_id") for e in ev_s if e.get("stage") == telemetry.TOOL_CALL}
+    out.append((sum_s is not None and log_s["interrupts"] == 1 and sum_s["unterminated"] == 0
+                and sum_s["duplicated"] == 0 and {"S0", "S4"} <= started
+                and quote_of(rec_s, "actors") == SDN_DROPPED,
+                "an interrupted repair turn that started tool calls leaves 0 unterminated (each is given one "
+                "terminal event) and the first record is kept",
+                "%s | unterminated %s | terminal events for %s" % (
+                    rec_s if sum_s is None else "ok", (sum_s or {}).get("unterminated"), sorted(started))))
+    raising = RaisingTurn(turn(good, REPAIRED_COST, calls=6, turns=6, tag="R"))
+    raising.then_raise = RuntimeError("stub: the CLI died after the interrupt")
+    rec_r, sum_r, log_r, _ = drive([turn(first_bad, FIRST_COST, turns=56, tag="r"), raising], max_turns=60)
+    qr = (sum_r or {}).get("quote_repair") or {}
+    out.append((sum_r is not None and log_r["interrupts"] == 1 and qr.get("interrupted") is True
+                and "the repair turn raised" in (qr.get("error") or "") and sum_r["unterminated"] == 0,
+                "an interrupt issued and then a turn that raises: quote_repair.interrupted is still True and the "
+                "calls are still terminated", "%s | %s" % (rec_r if sum_r is None else "ok", qr)))
     rec_h, sum_h, log_h, _ = drive([turn(first_bad, FIRST_COST, turns=57, tag="h"), turn(good, REPAIRED_COST)],
                                    max_turns=60)
     qh = (sum_h or {}).get("quote_repair") or {}
