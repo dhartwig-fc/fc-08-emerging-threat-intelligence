@@ -29,6 +29,25 @@ Evidence: SAN006 on ADV-2026-0016 was RETRIEVED by search, CONFIRMED with
 get_typology, then dropped -- 0 of 7 runs under the old prompt, 3 of 3 under the
 new one, with indicators rising 9.9 -> 13.3 of the document's 14 and zero new
 false positives. Probe: evals/probe_prompt_variant.py.
+
+2026-10-02 (slice 2 C2): the extractor checks its own quotes, in code. Every live Friday extraction to that
+date was refused at acceptance (bd1185: ADV-2026-0021/0022; 10ce44: 0023..0025, 1/21, 1/19 and 26/46 quotes
+off their page). OFAC SDN entries embed each name's original script -- "HAMEDANI, Mehnoosh Poursaraf
+(Arabic: <script>), China; DOB 07 Mar 1984" -- and the extractor dropped the bracketed script or
+mistranscribed a CJK character, so the quote was not verbatim; one quote was verbatim but cited p4 for text
+on p5. Slice 1 learned that a prompt rule fails under tool load, so there are two code rules and one line of
+advice:
+  1. the tool knowledge_centre_check_quote(page, quote) asks the SAME rule accept_run refuses on
+     (schemas/citation_match.PageIndex.locate) before the agent finishes;
+  2. after the record is produced, extract() runs evals/check_citations.unplaced_citations -- the function
+     tools/friday_run.py warns on and tools/accept_run.py refuses on, never a copy -- and if any citation is
+     off its page the SAME session gets ONE repair turn naming each one (MAX_REPAIR_TURNS), the result is
+     re-checked once, and whatever still fails is reported exactly as before (the runner's warning, then
+     accept_run's refusal). The repair turn is in the same session, so the CLI's --max-budget-usd, which is
+     the session's running total, bounds the first turn and the repair together: the US$1.00 extraction cap
+     is not raised. The summary and RUN_COMPLETED record whether a repair turn ran and how many citations
+     failed before and after it.
+  3. one prompt line, advice only.
 """
 
 from __future__ import annotations
@@ -47,10 +66,10 @@ sys.path.insert(0, str(ROOT))
 
 from schemas.advisory import AdvisoryRecord  # noqa: E402
 from agents.run_identity import RunIdentity  # noqa: E402
-from schemas.citation_match import document_texts, file_sha256  # noqa: E402
+from schemas.citation_match import PageIndex, document_texts, file_sha256, quote_reply  # noqa: E402
 
 from claude_agent_sdk import (  # noqa: E402
-    AssistantMessage, ClaudeAgentOptions, ResultMessage, ToolResultBlock, ToolUseBlock, UserMessage, query,
+    AssistantMessage, ClaudeAgentOptions, ClaudeSDKClient, ResultMessage, ToolResultBlock, ToolUseBlock, UserMessage,
 )
 from claude_agent_sdk import ClaudeSDKError  # noqa: E402
 
@@ -65,8 +84,15 @@ KC_TOOLS = (
     "knowledge_centre_get_typology",
     "knowledge_centre_search_typologies",
     "knowledge_centre_resolve_actor",
+    "knowledge_centre_check_quote",
     "knowledge_centre_propose_link",
 )
+
+# Slice 2 C2 (owner ruling 2026-10-02): at most ONE repair turn per extraction, never a loop; the cost of that
+# turn counts inside the extraction's own budget because it runs in the same session.
+MAX_REPAIR_TURNS = 1
+# The repair turn names each failing citation; past this many it names the first ones and says how many more.
+MAX_REPAIR_LINES = 60
 
 # The qualified names the agent can call, recorded in RUN_STARTED (agents/telemetry.run_started).
 AGENT_TOOLS = tuple("mcp__%s__%s" % (SERVER_KEY, name) for name in KC_TOOLS)
@@ -78,6 +104,7 @@ Rules:
 - Extract only what the document states. Never add typologies, actors or indicators from your own knowledge.
 - Every typology, actor and indicator must carry at least one citation with page number and verbatim quote.
 - Citation page is the n in the "=== PAGE n ===" marker above the text, never the number printed on the page. Put the printed number in printed_folio.
+- Quote non-Latin script exactly as written, or choose a span that contains none (for example DOB, place of birth, address). Cite the page the text is actually on. Check each quote with knowledge_centre_check_quote before you finish.
 - published_on_precision says how much of the date the document states. "December 2020" is 2020-12-01 with precision month.
 - A class of actor the document describes (organised crime groups, professional money launderers) is actor_type category, not organisation.
 - Whether an indicator is a typology depends on the shape of the document. In a narrative report, a red flag mentioned once in passing is not a typology: label what the report is about. In an indicator-list document (a red alert, a FATF risk-indicator paper, a FinCEN red-flag section) the indicators ARE the content -- each indicator, or each group of related indicators, may carry a typology, and a single bullet is sufficient evidence.
@@ -184,8 +211,8 @@ def agent_options(model: str, max_budget_usd: float, max_turns: int, run: RunIde
     its own contract whether or not it chooses to use them. Guarded by
     `evals/check_tool_surface.py`, which proves both directions.
 
-    Week 5 adds the other half. `allowed_tools` pre-approves only the four
-    read-only Knowledge Centre tools; `can_use_tool` (agents/permissions.py)
+    Week 5 adds the other half. `allowed_tools` pre-approves only the
+    read-only Knowledge Centre tools (the four lookups and, since 2026-10-02, check_quote); `can_use_tool` (agents/permissions.py)
     decides every other MCP tool against WRITE_ALLOWLIST -- the CLI's own
     StructuredOutput tool is auto-allowed and never reaches it (measured in the
     ADV-2026-0013 run); and the Post hooks
@@ -238,58 +265,48 @@ async def extract(path: Path, advisory_id: str, model: str, max_budget_usd: floa
     telemetry.run_started(run, model, max_budget_usd, max_turns, AGENT_TOOLS, prompt_sha256=PROMPT_SHA256)
     structured = None
     failure: str | None = None
-    tool_calls: Counter = Counter()
-    # Every call's id, so RUN_COMPLETED can record whether each one got exactly
-    # one terminal event (telemetry.reconcile) rather than assume it.
-    tool_use_ids: list = []
-    # Slice 2 C: a call the CLI answered with no hook gets its terminal event from the transcript.
-    names: dict = {}
-    results: dict = {}
+    seen = _Seen()
     result: ResultMessage | None = None
+    quote_repair = {"checked": None, "failing_before": None, "failing_after": None, "repair_turns": 0,
+                    "skipped": None, "error": None, "cost_after_first_usd": None}
     try:
         with expected_shadowing():
-            async for message in query(prompt=build_prompt(advisory_id, path, pages), options=options):
-                if isinstance(message, AssistantMessage):
-                    for block in message.content:
-                        if isinstance(block, ToolUseBlock):
-                            tool_calls[block.name] += 1
-                            tool_use_ids.append(block.id)
-                            names[block.id] = block.name
-                elif isinstance(message, UserMessage) and isinstance(message.content, list):
-                    for block in message.content:
-                        if isinstance(block, ToolResultBlock):
-                            text = block.content if isinstance(block.content, str) else " ".join(
-                                str(c.get("text", "")) for c in block.content or [] if isinstance(c, dict))
-                            results[block.tool_use_id] = (bool(block.is_error), text)
-                elif isinstance(message, ResultMessage):
-                    result = message
-                    if message.is_error:
-                        # Recorded, NOT raised here: raising inside `async for`
-                        # abandons the SDK's generator and its teardown masks the
-                        # real error. Let the loop end, then raise.
-                        failure = "Agent run failed: %s" % (message.errors or message.result)
+            # ONE session for the whole extraction: the first turn produces the record, and -- only when the
+            # shared citation rule finds a quote off its page -- the same session gets one repair turn.
+            # ClaudeSDKClient and not query(): query() closes the CLI's stdin after the first result, which
+            # cannot carry a second turn while hooks and can_use_tool are installed (SDK, Query.wait_for_
+            # result_and_end_input). The first turn is the same prompt and the same options as before.
+            async with ClaudeSDKClient(options) as client:
+                await client.query(build_prompt(advisory_id, path, pages))
+                result = await _receive_turn(client, seen)
+                if result is not None:
+                    if result.is_error:
+                        # Recorded, NOT raised here: raising inside a receive loop abandons the SDK's
+                        # generator and its teardown masks the real error. Let the turn end, then raise.
+                        failure = "Agent run failed: %s" % (result.errors or result.result)
                     else:
-                        structured = message.structured_output
-
-        if failure:
-            raise RuntimeError(failure)
-        if structured is None:
-            raise RuntimeError("Agent returned no structured output (stop_reason=%s)"
-                               % (result.stop_reason if result else None))
-        record = AdvisoryRecord.model_validate(structured)
-        _refuse_unknown_ids(record)
+                        structured = result.structured_output
+                if failure:
+                    raise RuntimeError(failure)
+                if structured is None:
+                    raise RuntimeError("Agent returned no structured output (stop_reason=%s)"
+                                       % (result.stop_reason if result else None))
+                record = AdvisoryRecord.model_validate(structured)
+                _refuse_unknown_ids(record)
+                record, quote_repair, result = await _check_and_repair(
+                    client, record, path, advisory_id, max_budget_usd, result, seen, quote_repair)
     except Exception as exc:
-        telemetry.record_unhooked(run, names, results)
+        telemetry.record_unhooked(run, seen.names, seen.results)
         telemetry.run_completed(run, telemetry.FAILURE, str(exc)[:300], result=result, validated=False,
-                                terminal_check=telemetry.reconcile(run, tool_use_ids))
+                                terminal_check=telemetry.reconcile(run, seen.tool_use_ids))
         raise
-    telemetry.record_unhooked(run, names, results)
-    terminal_check = telemetry.reconcile(run, tool_use_ids)
+    telemetry.record_unhooked(run, seen.names, seen.results)
+    terminal_check = telemetry.reconcile(run, seen.tool_use_ids)
     telemetry.run_completed(run, telemetry.SUCCESS, "record validated", result=result, validated=True,
-                            terminal_check=terminal_check)
+                            terminal_check=terminal_check, quote_repair=quote_repair)
 
     summary = {
-        "tool_calls": dict(tool_calls),
+        "tool_calls": dict(seen.tool_calls),
         "unterminated": len(terminal_check["unterminated"]),
         "duplicated": len(terminal_check["duplicated"]),
         "turns": result.num_turns if result else None,
@@ -297,11 +314,139 @@ async def extract(path: Path, advisory_id: str, model: str, max_budget_usd: floa
         "duration_s": round(result.duration_ms / 1000, 1) if result else None,
         "permission_denials": len(result.permission_denials or []) if result else None,
         "run_id": run.run_id,
-        "queue_path": str(run.queue_path.relative_to(ROOT)),
-        "telemetry_path": str(telemetry.telemetry_path(run).relative_to(ROOT)),
+        "queue_path": _shown(run.queue_path),
+        "telemetry_path": _shown(telemetry.telemetry_path(run)),
         "proposals_written": _count_lines(run.queue_path),
+        "quote_repair": quote_repair,
     }
     return record, summary
+
+
+def _shown(path: Path) -> str:
+    """A path as the summary prints it: relative to the repository when it is inside it (always, for a real run),
+    else as it is -- a guard that points the inbox and telemetry at a temporary folder must not crash here."""
+    try:
+        return str(path.relative_to(ROOT))
+    except ValueError:
+        return str(path)
+
+
+class _Seen:
+    """What a session's messages showed, across every turn of it: tool-call counts, every call's id (so
+    RUN_COMPLETED can record whether each got exactly one terminal event, telemetry.reconcile, rather than
+    assume it), and -- Slice 2 C -- the names and results a call the CLI answered with no hook needs its
+    terminal event from."""
+
+    def __init__(self) -> None:
+        self.tool_calls: Counter = Counter()
+        self.tool_use_ids: list = []
+        self.names: dict = {}
+        self.results: dict = {}
+
+
+async def _receive_turn(client, seen: "_Seen") -> "ResultMessage | None":
+    """Read one turn of the session to its ResultMessage (returned; None if the session ended without one).
+    Never raises on an error RESULT -- the caller decides what an error result means for its turn."""
+    result = None
+    async for message in client.receive_response():
+        if isinstance(message, AssistantMessage):
+            for block in message.content:
+                if isinstance(block, ToolUseBlock):
+                    seen.tool_calls[block.name] += 1
+                    seen.tool_use_ids.append(block.id)
+                    seen.names[block.id] = block.name
+        elif isinstance(message, UserMessage) and isinstance(message.content, list):
+            for block in message.content:
+                if isinstance(block, ToolResultBlock):
+                    text = block.content if isinstance(block.content, str) else " ".join(
+                        str(c.get("text", "")) for c in block.content or [] if isinstance(c, dict))
+                    seen.results[block.tool_use_id] = (bool(block.is_error), text)
+        elif isinstance(message, ResultMessage):
+            result = message
+    return result
+
+
+def _unplaced(record: AdvisoryRecord, path: Path, advisory_id: str, index: PageIndex) -> tuple:
+    """(citations checked, [failing citation with its quote]) by THE rule -- evals/check_citations.
+    unplaced_citations, the function tools/friday_run.py warns on and tools/accept_run.py refuses on. Never a
+    copy of it: imported at call time, so a guard can put a spy on it and see this call go through."""
+    if str(ROOT / "evals") not in sys.path:
+        sys.path.insert(0, str(ROOT / "evals"))
+    from check_citations import unplaced_citations, with_quotes
+    raw = json.loads(record.model_dump_json())  # the record exactly as it is written to the inbox
+    checked, bad = unplaced_citations(advisory_id, raw, path, index=index)
+    return checked, with_quotes(raw, bad)
+
+
+def repair_prompt(index: PageIndex, failing: list, checked: int) -> str:
+    """The one repair turn's message: each failing citation (section, item, cited page, and the shared rule's own
+    answer -- wrong page, or where the quote stops agreeing with the page), then what to do about it."""
+    lines = []
+    for n, d in enumerate(failing[:MAX_REPAIR_LINES], start=1):
+        quote = d.get("quote")
+        shown = json.dumps(quote[:100] + ("..." if len(quote) > 100 else ""), ensure_ascii=False) if quote else "(not found)"
+        lines.append("%d. %s %s, cites page %d, quote %s -- %s" % (
+            n, d["section"], json.dumps(d["item"], ensure_ascii=False), d["page"], shown,
+            quote_reply(index, d["page"], quote) if quote else "its quote could not be read back from the record"))
+    if len(failing) > MAX_REPAIR_LINES:
+        lines.append("... and %d more, found by the same rule: check every quote you cite." % (len(failing) - MAX_REPAIR_LINES))
+    return (
+        "Quote check, run by code on your record: %d of %d citations are not on the page they name.\n\n%s\n\n"
+        "Correct each of these: quote the page text exactly as written -- non-Latin script included, or choose a span "
+        "that contains none -- and cite the page the text is actually on. Check each corrected quote with "
+        "knowledge_centre_check_quote before you finish. Leave every citation that is not listed, and every other "
+        "field, exactly as it is, and do not call knowledge_centre_propose_link again: your proposals are already "
+        "queued. Reply with the complete corrected record."
+        % (len(failing), checked, "\n".join(lines)))
+
+
+async def _check_and_repair(client, record: AdvisoryRecord, path: Path, advisory_id: str, max_budget_usd: float,
+                            result: "ResultMessage | None", seen: "_Seen", note: dict) -> tuple:
+    """(record, note, result): the record's citations against the pinned document by the shared rule, and --
+    when any is off its page -- up to MAX_REPAIR_TURNS repair turn(s) in the SAME session, re-checking the
+    corrected record after each. Anything still failing is left for the runner's warning and accept_run, exactly
+    as before. The repair spends inside this session's budget: the CLI's --max-budget-usd is the session's
+    running total, and a first turn that has already spent it gets no repair turn at all (recorded in
+    note["skipped"]). A repair turn that errors, or returns a record that does not validate, keeps the original
+    record (recorded in note["error"]); it never fails an extraction that had a valid record."""
+    note["cost_after_first_usd"] = result.total_cost_usd if result is not None else None
+    try:
+        index = PageIndex.from_document(path)
+        note["checked"], bad = _unplaced(record, path, advisory_id, index)
+    except Exception as exc:  # noqa: BLE001 -- the runner's own check reports a document that cannot be checked
+        note["error"] = ("the quote check could not run: %s: %s" % (type(exc).__name__, exc))[:300]
+        return record, note, result
+    note["failing_before"] = note["failing_after"] = len(bad)
+    for _ in range(MAX_REPAIR_TURNS):
+        if not bad:
+            break
+        spent = result.total_cost_usd if result is not None else None
+        if spent is not None and spent >= max_budget_usd:
+            note["skipped"] = "the first turn spent US$%.2f of the US$%.2f budget" % (spent, max_budget_usd)
+            break
+        note["repair_turns"] += 1
+        try:
+            await client.query(repair_prompt(index, bad, note["checked"]))
+            turn = await _receive_turn(client, seen)
+        except Exception as exc:  # noqa: BLE001 -- the SDK raising mid-repair must not lose a valid record
+            note["error"] = ("the repair turn raised %s: %s" % (type(exc).__name__, exc))[:300]
+            break
+        if turn is not None:
+            result = turn  # its total_cost_usd is the session's running total, repair included
+        if turn is None or turn.is_error or turn.structured_output is None:
+            note["error"] = ("the repair turn returned no record (%s)" % (
+                (turn.errors or turn.result or turn.subtype) if turn is not None else "no result"))[:300]
+            break
+        try:
+            corrected = AdvisoryRecord.model_validate(turn.structured_output)
+            _refuse_unknown_ids(corrected)
+        except Exception as exc:  # noqa: BLE001 -- the original record stands
+            note["error"] = ("the repair turn's record was refused: %s: %s" % (type(exc).__name__, exc))[:300]
+            break
+        record = corrected
+        note["checked"], bad = _unplaced(record, path, advisory_id, index)
+        note["failing_after"] = len(bad)
+    return record, note, result
 
 
 def main() -> int:

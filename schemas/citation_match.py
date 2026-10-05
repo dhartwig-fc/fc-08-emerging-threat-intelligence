@@ -229,6 +229,7 @@ class PageIndex:
         self.tight = [p.replace(" ", "") for p in self.pages]
         self.tight_all = "".join(self.tight)
         self.letters = [_letters(p) for p in self.pages]
+        self.cased = [_norm_cased(t or "") for t in page_texts]  # the pages in their own case, for quote_reply only
 
     @classmethod
     def from_pdf(cls, path) -> "PageIndex":
@@ -279,3 +280,105 @@ class PageIndex:
         if len(found) == 1:
             return Located(OFF_PAGE, found)
         return Located(MISSING)
+
+
+# ---------------------------------------------------------------------------
+# Asking the rule a question: "is THIS quote on THIS page, and if not, where does it part company?"
+# (slice 2 C2, 2026-10-02). Every live extraction to that date was refused at acceptance for quotes the
+# matcher could not place, because OFAC SDN entries embed each name's original script and the extractor
+# dropped or mistranscribed it. The extractor now asks the same rule BEFORE it finishes -- the MCP tool
+# knowledge_centre_check_quote -- and the one repair turn after it names the same answers. Both come from
+# quote_reply below, and quote_reply decides ok / wrong page / not found by PageIndex.locate and nothing
+# else, so the tool, the repair turn, propose_link, the review gate and accept_run cannot disagree about a
+# quote. Only the "where it diverges" detail is new, and it never changes a verdict.
+# ---------------------------------------------------------------------------
+
+# How much of the page, and of the quote, a "not found" reply shows either side of the divergence.
+DIVERGENCE_SNIPPET = 60
+# A shared opening shorter than this is coincidence (a few letters occur anywhere), not a place where a
+# quote left the page's text: the reply then says no real opening matches instead of pointing at noise.
+DIVERGENCE_MIN_PREFIX = 8
+
+VERBATIM, WRONG_PAGE, NOT_FOUND = "verbatim", "wrong_page", "not_found"
+
+
+def _norm_cased(s: str) -> str:
+    """norm() without the lower-casing: the same collapse of quotes, dashes, soft hyphens and whitespace,
+    kept in the page's own case so a divergence shown to the agent can be copied as written."""
+    s = s.replace('‘', "'").replace('’', "'").replace('“', '"').replace('”', '"')
+    s = s.replace("–", "-").replace("—", "-").replace("\xad", "")
+    return re.sub(r"\s+", " ", s).strip()
+
+
+def _longest_prefix_in(q: str, page: str) -> Tuple[int, int]:
+    """(k, position): the longest k such that q[:k] occurs in page, and where. A prefix that occurs makes every
+    shorter one occur, so a binary search finds the longest."""
+    lo, hi = 0, len(q)
+    while lo < hi:
+        mid = (lo + hi + 1) // 2
+        if q[:mid] in page:
+            lo = mid
+        else:
+            hi = mid - 1
+    return lo, (page.find(q[:lo]) if lo else -1)
+
+
+def divergence(index: "PageIndex", page: int, quote: str) -> dict:
+    """Where the quote's opening stops agreeing with the document: the page it agrees with longest (the cited
+    page wins a tie), how many characters agree, and what each side says next.
+    {"chars": K, "page": N, "page_reads": "...", "quote_has": "..."}; page is 0 and the texts empty when
+    no real opening (DIVERGENCE_MIN_PREFIX characters) is anywhere in the document."""
+    q = norm(quote)
+    cited = page - 1
+    order = ([cited] if 0 <= cited < len(index.pages) else []) + [i for i in range(len(index.pages)) if i != cited]
+    best = (0, -1, -1)
+    for i in order:
+        k, pos = _longest_prefix_in(q, index.pages[i])
+        if k > best[0]:
+            best = (k, i, pos)
+    k, i, pos = best
+    if k < DIVERGENCE_MIN_PREFIX:
+        return {"chars": k, "page": 0, "page_reads": "", "quote_has": ""}
+    # Cased text only when the case-fold kept every character in place; otherwise the lower-cased text.
+    page_text = index.cased[i] if len(index.cased[i]) == len(index.pages[i]) else index.pages[i]
+    qc = _norm_cased(quote)
+    quote_text = qc if len(qc) == len(q) else q
+    return {"chars": k, "page": i + 1,
+            "page_reads": page_text[pos + k: pos + k + DIVERGENCE_SNIPPET].strip(),
+            "quote_has": quote_text[k: k + DIVERGENCE_SNIPPET].strip()}
+
+
+def quote_check(index: "PageIndex", page: int, quote: str) -> dict:
+    """One quote against one document, by the shared rule: {"status": VERBATIM | WRONG_PAGE | NOT_FOUND,
+    "pages": the cited page (verbatim) or the pages the quote IS on (wrong_page), "page_count": N, and for
+    NOT_FOUND "divergence": divergence(...)}."""
+    hit = index.locate(page, quote)
+    if hit.ok:
+        return {"status": VERBATIM, "pages": (page,), "page_count": len(index)}
+    if hit.status == OFF_PAGE:
+        return {"status": WRONG_PAGE, "pages": tuple(hit.found_on), "page_count": len(index)}
+    return {"status": NOT_FOUND, "pages": (), "page_count": len(index), "divergence": divergence(index, page, quote)}
+
+
+def quote_reply(index: "PageIndex", page: int, quote: str) -> str:
+    """The sentence the agent reads: knowledge_centre_check_quote's reply, and each line of the repair turn.
+
+      Verbatim: on page N.
+      Wrong page: the quote is on page(s) M, not N.
+      Not found: the longest matching prefix is K characters; the page then reads '...' where the quote has '...'.
+
+    Short on purpose: never a whole page, only the DIVERGENCE_SNIPPET characters either side of where the
+    quote and the page part company."""
+    got = quote_check(index, page, quote)
+    if got["status"] == VERBATIM:
+        return "Verbatim: on page %d." % page
+    if got["status"] == WRONG_PAGE:
+        return "Wrong page: the quote is on page(s) %s, not %d." % (", ".join(str(n) for n in got["pages"]), page)
+    d, lead = got["divergence"], ""
+    if not 1 <= page <= got["page_count"]:
+        lead = "page %d does not exist (the document has %d page(s)); " % (page, got["page_count"])
+    if not d["page"]:
+        return ("Not found: %sno real opening of the quote is anywhere in the document (the longest matching prefix "
+                "is %d characters). Copy the text exactly from one page." % (lead, d["chars"]))
+    return ("Not found: %sthe longest matching prefix is %d characters, on page %d; the page then reads '%s' where "
+            "the quote has '%s'." % (lead, d["chars"], d["page"], d["page_reads"], d["quote_has"]))

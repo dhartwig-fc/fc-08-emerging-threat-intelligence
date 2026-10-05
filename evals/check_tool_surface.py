@@ -175,10 +175,10 @@ def static_checks() -> list:
 
     all_kc = {"mcp__%s__%s" % (SERVER_KEY, t) for t in KC_TOOLS}
     out.append((list(o.allowed_tools) == list(READ_ONLY_TOOLS),
-                "allowed_tools pre-approves ONLY the four read-only Knowledge Centre tools",
+                "allowed_tools pre-approves ONLY the read-only Knowledge Centre tools (the four lookups and check_quote)",
                 "allowed_tools=%r" % (o.allowed_tools,)))
     out.append((PROPOSE_TOOL not in o.allowed_tools and set(o.allowed_tools) | WRITE_ALLOWLIST == all_kc,
-                "propose_link is NOT pre-approved; read-only + allowlist cover the four tools exactly",
+                "propose_link is NOT pre-approved; read-only + allowlist cover the six tools exactly",
                 "so every non-read tool reaches the permission callback"))
     out.append((o.can_use_tool is not None and o.permission_prompt_tool_name is None
                 and o.permission_mode in (None, "default"),
@@ -198,12 +198,12 @@ def static_checks() -> list:
                 "the installed callback DENIES a write tool off the allowlist and ALLOWS propose_link",
                 "write -> %s, propose_link -> %s" % (type(denied).__name__, type(allowed).__name__)))
 
-    # And the argv: the CLI must be told to pre-approve exactly the four reads,
+    # And the argv: the CLI must be told to pre-approve exactly the read-only tools,
     # and must not be handed a mode that skips the callback.
     allowed_arg = cmd[cmd.index("--allowedTools") + 1] if "--allowedTools" in cmd else ""
     out.append((sorted(allowed_arg.split(",")) == sorted(READ_ONLY_TOOLS)
                 and "--permission-mode" not in cmd and "--dangerously-skip-permissions" not in cmd,
-                "argv pre-approves exactly the four read-only tools, with no permission mode or skip flag",
+                "argv pre-approves exactly the read-only tools, with no permission mode or skip flag",
                 "--allowedTools %s" % allowed_arg))
     out.append((sorted(o.hooks or {}) == ["PostToolUse", "PostToolUseFailure"],
                 "the Post hooks are installed for telemetry", str(sorted(o.hooks or {}))))
@@ -216,7 +216,7 @@ def static_checks() -> list:
         raise RuntimeError("SDK no longer exposes _get_can_use_tool_shadowed_warning; re-derive this check")
     msg = sdk_types._get_can_use_tool_shadowed_warning(o.permission_mode, list(o.allowed_tools)) or ""
     out.append((msg.startswith(SHADOWING_MESSAGE),
-                "the SDK's shadowing advisory names exactly the four read-only tools", msg[:100]))
+                "the SDK's shadowing advisory names exactly the read-only tools", msg[:100]))
     import warnings
     with warnings.catch_warnings(record=True) as seen:
         warnings.simplefilter("always")

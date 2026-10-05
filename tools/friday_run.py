@@ -142,11 +142,13 @@ async def extract_one(run: of.FeedsRun, request: dict, advisory_id: str, root: P
         return out
     out.update(extraction_run_id=ident.run_id, document_sha256=ident.pdf_sha256)
     try:
-        record, _ = await extract_advisory.extract(doc, advisory_id, of.MODEL, of.EXTRACTION_BUDGET_USD,
-                                                   of.EXTRACTION_MAX_TURNS, run=ident)
+        record, summary = await extract_advisory.extract(doc, advisory_id, of.MODEL, of.EXTRACTION_BUDGET_USD,
+                                                         of.EXTRACTION_MAX_TURNS, run=ident)
         rel = "%s/%s.json" % (inbox.RECORDS, advisory_id)
         inbox.write_file(run.run_id, rel, record.model_dump_json(indent=2).encode("utf-8"), root)
-        out.update(status="extracted", record=rel)
+        # Slice 2 C2: whether the extractor spent a repair turn on quotes off their page, and how many
+        # citations failed before and after it (agents/extract_advisory.py), so the report can show it.
+        out.update(status="extracted", record=rel, quote_repair=summary.get("quote_repair"))
     except Exception as exc:  # recorded: an extraction that fails is reported, never raised past the run
         out.update(status="failed", error=("%s: %s" % (type(exc).__name__, exc))[:500])
     out["cost_usd"] = reconcile.session_cost(telemetry.telemetry_path(ident))

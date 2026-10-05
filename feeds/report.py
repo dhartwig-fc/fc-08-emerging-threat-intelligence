@@ -92,7 +92,14 @@ def citation_cell(o: dict) -> str:
         return "not checked"
     if cc.get("error"):
         return "CHECK FAILED"
-    return "%s of %s" % (cc.get("off_page"), cc.get("checked"))
+    cell = "%s of %s" % (cc.get("off_page"), cc.get("checked"))
+    qr = o.get("quote_repair")  # Slice 2 C2: the extractor's own quote check (agents/extract_advisory.py)
+    if isinstance(qr, dict) and qr.get("repair_turns"):
+        cell += " (repair turn: %s failing before, %s after%s)" % (
+            qr.get("failing_before"), qr.get("failing_after"), "; the turn itself failed" if qr.get("error") else "")
+    elif isinstance(qr, dict) and qr.get("skipped"):
+        cell += " (no repair turn: %s)" % _cell(qr["skipped"], 80)
+    return cell
 
 
 def citation_warning(key: str, o: dict) -> list:

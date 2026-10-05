@@ -8,7 +8,7 @@ allowed_tools auto-approves a whole tool before the callback runs (SDK
 CanUseToolShadowedWarning). As first specified, this item would have passed while
 checking nothing.
 
-So allowed_tools pre-approves ONLY the four read-only tools, and every other
+So allowed_tools pre-approves ONLY the read-only tools, and every other
 MCP tool -- propose_link, and anything a future server exposes -- reaches this
 callback. The CLI's own StructuredOutput tool does not: it is auto-allowed and
 never consulted here (measured in the ADV-2026-0013 run). The callback allows a
@@ -43,6 +43,9 @@ READ_ONLY_TOOLS = tuple("mcp__%s__%s" % (SERVER_KEY, t) for t in (
     "knowledge_centre_get_typology",
     "knowledge_centre_search_typologies",
     "knowledge_centre_resolve_actor",
+    # Slice 2 C2 (2026-10-02): the extractor checks its own quotes. Read-only: it asks the shared quote rule
+    # a question and writes nothing, so it is pre-approved like the other reads.
+    "knowledge_centre_check_quote",
 ))
 PROPOSE_TOOL = "mcp__%s__knowledge_centre_propose_link" % SERVER_KEY
 WRITE_ALLOWLIST = frozenset({PROPOSE_TOOL})

@@ -22,6 +22,12 @@ Usage:
     python evals/check_feeds_extract.py --mutate no-resolve         # the identity check compares an unresolved path
     python evals/check_feeds_extract.py --mutate stale-prompt-hash  # run_started is passed a constant/stale hash
     python evals/check_feeds_extract.py --mutate no-prompt-hash     # run_started is called with no prompt_sha256 at all
+    python evals/check_feeds_extract.py --mutate no-repair-turn     # a record with a quote off its page gets no repair turn
+    python evals/check_feeds_extract.py --mutate two-repair-turns   # a still-bad record gets a SECOND repair turn
+    python evals/check_feeds_extract.py --mutate repair-skips-recheck  # the corrected record is trusted, not re-checked
+    python evals/check_feeds_extract.py --mutate tool-private-matcher  # check_quote answers by its own substring test
+    python evals/check_feeds_extract.py --mutate repair-unrecorded  # the Friday outcome drops the quote_repair note
+    python evals/check_feeds_extract.py --mutate repair-cell-hidden # the report's citations cell hides the repair turn
 
 WHAT IT HOLDS:
   relevant only  a request is refused for an item not listed, with no verdict, or triaged not_relevant;
@@ -49,6 +55,20 @@ WHAT IT HOLDS:
                  MATCHING identity -- same document, differently spelled -- gets past the check, proved by
                  reaching (a stubbed) document_pages, never a session;
   inbox only     every file written is inside the temporary inbox; the repository's git status is unchanged.
+  quote tool     (slice 2 C2, 2026-10-02) knowledge_centre_check_quote answers "Verbatim: on page N.", "Wrong page: the
+                 quote is on page(s) M, not N." and "Not found: ..." with where the quote and the page part company
+                 (the OFAC shape: the bracketed Arabic script the extractor dropped), briefly, on a fixture of an
+                 OFAC-shaped HTML page; it agrees with evals/check_citations.unplaced_citations on every one of a
+                 record's citations, including one only the SPACING tier places -- one rule, never a copy;
+  repair turn    extract() runs unplaced_citations on its own record and, for one off-page quote and one non-Latin
+                 drop, sends EXACTLY ONE repair turn in the same session naming both (section, item, cited page and
+                 the rule's own answer); the corrected record is re-checked and passes; a still-bad record is
+                 reported (failing before/after, repair_turns 1) and gets NO second turn; a clean record gets none;
+                 a first turn that already spent the budget gets none; a repair turn that errors keeps the first
+                 record. One client, one options object, the same max_budget_usd (the repair is inside the
+                 US$1.00 cap), extraction.MAX_PER_RUN still 3. Driven through a stub ClaudeSDKClient: no model;
+  recorded       the summary and RUN_COMPLETED carry quote_repair; tools/friday_run.extract_one puts it on the
+                 outcome with the session's running cost; the report's citations cell shows the repair turn.
   prompt sha     extract() passes run_started the sha256 of the prompt it actually sends: sha256(system_prompt)
                  == recorded prompt_sha256 == extract_advisory.PROMPT_SHA256, proved by stubbing query() so no
                  session can start.
@@ -86,6 +106,8 @@ EXTRACTION = ROOT / "feeds" / "extraction.py"
 KC = ROOT / "mcp_server" / "knowledge_centre_server.py"
 SERVER = ROOT / "mcp_server" / "feeds_server.py"
 EXTRACT_ADVISORY = ROOT / "agents" / "extract_advisory.py"
+FRIDAY_RUN = ROOT / "tools" / "friday_run.py"
+REPORT = ROOT / "feeds" / "report.py"
 RUN = "feeds-2026-10-02-ccc333"
 JUNK_RUN = "feeds-2026-10-02-eee555"  # its own run, so this run's cap of 3 is not spent on it
 EVAL_RUN = "feeds-2026-10-02-fff666"  # an eval run (state["eval"]), as feeds_server's eval mode marks one
@@ -135,6 +157,22 @@ MUTATIONS = {
     "no-prompt-hash": (EXTRACT_ADVISORY,
         "    telemetry.run_started(run, model, max_budget_usd, max_turns, AGENT_TOOLS, prompt_sha256=PROMPT_SHA256)\n",
         "    telemetry.run_started(run, model, max_budget_usd, max_turns, AGENT_TOOLS)\n"),
+    # Slice 2 C2 (2026-10-02): the extractor checks its own quotes.
+    "no-repair-turn": (EXTRACT_ADVISORY, "    for _ in range(MAX_REPAIR_TURNS):\n", "    for _ in range(0):\n"),
+    "two-repair-turns": (EXTRACT_ADVISORY, "MAX_REPAIR_TURNS = 1\n", "MAX_REPAIR_TURNS = 2\n"),
+    "repair-skips-recheck": (EXTRACT_ADVISORY,
+        '        note["checked"], bad = _unplaced(record, path, advisory_id, index)\n'
+        '        note["failing_after"] = len(bad)\n',
+        '        bad = []\n'
+        '        note["failing_after"] = 0\n'),
+    "tool-private-matcher": (KC, "    return quote_reply(index, params.page, params.quote)\n",
+        "    page_text = index.pages[params.page - 1] if 1 <= params.page <= len(index) else \"\"\n"
+        "    return (\"Verbatim: on page %d.\" % params.page if \" \".join(params.quote.lower().split()) in page_text\n"
+        "            else \"Not found: no such text.\")\n"),
+    "repair-unrecorded": (FRIDAY_RUN,
+        '        out.update(status="extracted", record=rel, quote_repair=summary.get("quote_repair"))\n',
+        '        out.update(status="extracted", record=rel)\n'),
+    "repair-cell-hidden": (REPORT, '    if isinstance(qr, dict) and qr.get("repair_turns"):\n', "    if False:\n"),
 }
 
 
@@ -190,6 +228,286 @@ def setup(tmp: Path, docs: dict, run: str = RUN) -> list:
 def git_status() -> str:
     return subprocess.run(["git", "status", "--porcelain", "--untracked-files=all"], cwd=ROOT,
                           capture_output=True, text=True).stdout
+
+
+# ---------------------------------------------------------------------------
+# Slice 2 C2 (2026-10-02): the extractor checks its own quotes. The fixture is an OFAC-shaped page (the 10ce44
+# ADV-2026-0025 shape: an SDN entry carries each name's original script) of three pages, built in code so the
+# guard runs cold and reads nothing outside the repository.
+# ---------------------------------------------------------------------------
+SCRIPT = "مهنوش پورصراف همدانی"  # Persian script
+SDN = "HAMEDANI, Mehnoosh Poursaraf (Arabic: %s), China; DOB 07 Mar 1984; POB Qom, Iran; nationality Iran" % SCRIPT
+SDN_DROPPED = "HAMEDANI, Mehnoosh Poursaraf, China; DOB 07 Mar 1984; POB Qom, Iran; nationality Iran"  # the script gone
+SDN_SPAN = "DOB 07 Mar 1984; POB Qom, Iran; nationality Iran"  # a span that contains none
+TYPOLOGY_LINE = "Over-invoicing and under-invoicing of goods remains the most common TBML technique observed."
+SPACED_PAGE = "The officials were in collus ion with the exporter to hide the shipment."  # pypdf-style split word
+SPACED_QUOTE = "in collusion with the exporter to hide the shipment"  # placed by the SPACING tier only
+INDICATOR_LINE = "Prices that deviate significantly from market benchmarks should prompt further enquiry."
+QUOTE_ADV = "ADV-2026-0088"
+QUOTE_RUN = "feeds-2026-10-02-abc123"
+FIRST_COST, REPAIRED_COST, BUDGET = 0.30, 0.45, 1.00
+
+
+def _para(text: str, size: int = 1600) -> str:
+    out = text
+    while len(out) < size:  # long enough that two paragraphs never share a 3000-character page
+        out += " The register lists further entries for this programme."
+    return out
+
+
+def quote_document() -> bytes:
+    paras = (SDN + ". " + TYPOLOGY_LINE, SPACED_PAGE, INDICATOR_LINE)
+    return ("<html><body><main>%s</main></body></html>" % "".join("<p>%s</p>" % _para(t) for t in paras)).encode("utf-8")
+
+
+def quote_record(actor_quote: str, indicator_page: int) -> dict:
+    """The example record with three citations: the typology's is verbatim on page 1; the actor's quote is
+    `actor_quote` on page 1; the indicator's text is on page 3 and is cited as `indicator_page`."""
+    rec = json.loads((ROOT / "evals" / "example_record.json").read_text(encoding="utf-8"))
+    rec["advisory_id"] = QUOTE_ADV
+    rec["typologies"] = [dict(rec["typologies"][0], citations=[{"page": 1, "paragraph": 1, "quote": TYPOLOGY_LINE}])]
+    rec["actors"] = [dict(rec["actors"][0], name="HAMEDANI, Mehnoosh Poursaraf", actor_type="person", aliases=[],
+                          citations=[{"page": 1, "paragraph": 1, "quote": actor_quote}])]
+    rec["indicators"] = [dict(rec["indicators"][0], citations=[{"page": indicator_page, "paragraph": 1,
+                                                                 "quote": INDICATOR_LINE}])]
+    return rec
+
+
+def turn(structured, cost, *, error=False, calls=1):
+    """One scripted turn of the stubbed session: `calls` check_quote tool uses, then the ResultMessage."""
+    from claude_agent_sdk import AssistantMessage, ResultMessage, ToolUseBlock
+    name = "mcp__knowledge_centre__knowledge_centre_check_quote"
+    msgs = [AssistantMessage(content=[ToolUseBlock(id="t%d" % i, name=name, input={})], model="stub")
+            for i in range(calls)]
+    return msgs + [ResultMessage(subtype="error_max_budget_usd" if error else "success", duration_ms=10,
+                                 duration_api_ms=8, is_error=error, num_turns=1, session_id="stub",
+                                 total_cost_usd=cost, structured_output=structured,
+                                 errors=["stub: out of budget"] if error else None)]
+
+
+def stub_session(script):
+    """A stand-in for claude_agent_sdk.ClaudeSDKClient: no CLI, no model. Each query() consumes the next scripted
+    turn (a list of messages ending in a ResultMessage); `log` records every client built, every message sent."""
+    log = {"built": [], "sent": []}
+
+    class _Client:
+        def __init__(self, options):
+            log["built"].append(options)
+            self._turns, self._now = list(script), None
+
+        async def __aenter__(self):
+            return self
+
+        async def __aexit__(self, *exc):
+            return False
+
+        async def query(self, prompt, session_id="default"):
+            log["sent"].append(prompt)
+            self._now = self._turns.pop(0) if self._turns else []
+
+        async def receive_response(self):
+            for message in self._now or []:
+                yield message
+    return _Client, log
+
+
+def quote_checks(mutation, ea, kc, tmp: Path, box: Path) -> list:
+    """The quote tool, the repair turn and where each is recorded -- see WHAT IT HOLDS."""
+    import agents
+    import check_citations
+    from agents.run_identity import RunIdentity
+    from feeds import extraction as feeds_extraction, report as _report
+    from schemas.citation_match import PageIndex
+    fr = load("friday_run_under_test", FRIDAY_RUN, mutation)
+    rep = load("feeds_report_under_test", REPORT, mutation)
+    out = []
+    doc = tmp / "quote-fixture.html"
+    doc.write_bytes(quote_document())
+    index = PageIndex.from_document(doc)
+    ident = RunIdentity.new("extractor", QUOTE_ADV, doc)
+
+    # ---- the tool: three answers, brief, one rule ----
+    saved = {k: os.environ.get(k) for k in ident.env()}
+    os.environ.update(ident.env())
+
+    def ask(page, quote):
+        try:
+            return asyncio.run(kc.check_quote(kc.CheckQuoteInput(page=page, quote=quote)))
+        except Exception as exc:
+            return "RAISED %s: %s" % (type(exc).__name__, exc)
+    try:
+        verbatim, wrong = ask(1, SDN_SPAN), ask(2, INDICATOR_LINE)
+        absent = ask(1, SDN_DROPPED)
+        spaced = ask(2, SPACED_QUOTE)
+        # One citation of each kind, asked of the tool and of THE rule accept_run refuses on, by the same record.
+        record = quote_record(SDN_DROPPED, 2)
+        record["indicators"][0]["citations"].append({"page": 2, "paragraph": 1, "quote": SPACED_QUOTE})
+        record["indicators"][0]["citations"].append({"page": 1, "paragraph": 1, "quote": SDN_SPAN})
+        _, bad = check_citations.unplaced_citations(QUOTE_ADV, record, doc, index=index)
+        flagged = {(d["section"], d["page"], d["quote_sha256"]) for d in bad}
+        disagree = []
+        for section in ("typologies", "actors", "indicators"):
+            for item in record[section]:
+                for c in item["citations"]:
+                    said = ask(c["page"], c["quote"]).startswith("Verbatim")
+                    ruled = (section, c["page"], check_citations._quote_sha256(c["quote"])) not in flagged
+                    if said != ruled:
+                        disagree.append((section, c["page"], c["quote"][:30], ask(c["page"], c["quote"])[:40]))
+        for k in ident.env():
+            os.environ.pop(k, None)
+        no_run = ask(1, SDN_SPAN)
+    finally:
+        for k, v in saved.items():
+            os.environ.pop(k, None) if v is None else os.environ.__setitem__(k, v)
+    out.append((verbatim == "Verbatim: on page 1." and wrong == "Wrong page: the quote is on page(s) 3, not 2."
+                and absent.startswith("Not found: the longest matching prefix is ")
+                and " characters" in absent and "the page then reads '(Arabic: " + SCRIPT in absent
+                and "where the quote has ', China; DOB 07 Mar 1984" in absent,
+                "knowledge_centre_check_quote answers verbatim, wrong page, and not found with the divergence "
+                "(the page reads '(Arabic: <script>)' where the quote dropped it), on the real server function",
+                "%s | %s | %s" % (verbatim, wrong, absent[:90])))
+    out.append((len(absent) < 400 and "register lists further entries" not in absent
+                and spaced == "Verbatim: on page 2." and no_run.startswith("Rejected"),
+                "its replies are brief (a divergence, never a page), a spacing-tier quote is verbatim, and without a "
+                "run identity it refuses rather than guess a document",
+                "%d chars | %s | %s" % (len(absent), spaced, no_run[:50])))
+    out.append((len(bad) == 2 and not disagree,
+                "the tool and evals/check_citations.unplaced_citations agree on every citation of a record (a "
+                "verbatim span, a wrong page, a dropped script, and a quote only the SPACING tier places): one "
+                "rule, never a private copy", "flagged %d; disagree: %s" % (len(bad), disagree[:2])))
+
+    # ---- the repair turn, through a stub session ----
+    good = quote_record(SDN_SPAN, 3)
+    first_bad = quote_record(SDN_DROPPED, 2)
+    still_bad = quote_record(SDN_DROPPED, 3)
+
+    spy_calls = []
+    real_unplaced = check_citations.unplaced_citations
+
+    def spy(*a, **k):
+        spy_calls.append(1)
+        return real_unplaced(*a, **k)
+
+    def drive(script, budget=BUDGET):
+        """extract() on the fixture with a stub session; (record, summary, log, telemetry events) or the exception."""
+        client, log = stub_session(script)
+        real_client, real_dir = ea.ClaudeSDKClient, telemetry.TELEMETRY_DIR
+        ea.ClaudeSDKClient = client
+        telemetry.TELEMETRY_DIR = tmp / "telemetry-scratch"
+        run = RunIdentity.new("extractor", QUOTE_ADV, doc)
+        check_citations.unplaced_citations = spy
+        spy_calls.clear()
+        try:
+            record, summary = asyncio.run(ea.extract(doc, QUOTE_ADV, "stub-model", budget, 5, run=run))
+            path = telemetry.telemetry_path(run)
+            events = [json.loads(l) for l in path.read_text(encoding="utf-8").splitlines()] if path.exists() else []
+            return record, summary, log, events
+        except Exception as exc:
+            return exc, None, log, []
+        finally:
+            ea.ClaudeSDKClient, telemetry.TELEMETRY_DIR = real_client, real_dir
+            check_citations.unplaced_citations = real_unplaced
+
+    def quote_of(record, section):
+        return getattr(record, section)[0].citations[0].quote
+
+    rec_a, sum_a, log_a, ev_a = drive([turn(first_bad, FIRST_COST), turn(good, REPAIRED_COST)])
+    qa = (sum_a or {}).get("quote_repair") or {}
+    sent_a = log_a["sent"][1] if len(log_a["sent"]) > 1 else ""
+    out.append((sum_a is not None and len(log_a["sent"]) == 2 and qa.get("repair_turns") == 1
+                and qa.get("failing_before") == 2 and qa.get("failing_after") == 0
+                and "2 of 3 citations are not on the page they name" in sent_a
+                and 'indicators "' in sent_a and "cites page 2" in sent_a
+                and "Wrong page: the quote is on page(s) 3, not 2." in sent_a
+                and 'actors "HAMEDANI, Mehnoosh Poursaraf"' in sent_a and "(Arabic: " + SCRIPT in sent_a
+                and sent_a.count("\n1. ") == 1 and sent_a.count("\n2. ") == 1 and "\n3. " not in sent_a
+                and "knowledge_centre_check_quote" in sent_a,
+                "one off-page quote and one non-Latin drop: exactly ONE repair turn is sent, in the same session, "
+                "naming both (section, item, cited page, and the rule's own answer for each)",
+                "%s | sent %d | %s" % (rec_a if sum_a is None else "ok", len(log_a["sent"]), qa)))
+    out.append((sum_a is not None and quote_of(rec_a, "actors") == SDN_SPAN and rec_a.indicators[0].citations[0].page == 3
+                and len(spy_calls) == 2 and sum_a["tool_calls"] == {
+                    "mcp__knowledge_centre__knowledge_centre_check_quote": 2},
+                "the corrected record is the one returned, it is re-checked by the shared rule (unplaced_citations ran "
+                "twice: before and after), and tool calls from BOTH turns are counted",
+                "spy calls %d | %s" % (len(spy_calls), (sum_a or {}).get("tool_calls"))))
+
+    rec_b, sum_b, log_b, ev_b = drive([turn(first_bad, FIRST_COST), turn(still_bad, REPAIRED_COST), turn(good, 0.6)])
+    qb = (sum_b or {}).get("quote_repair") or {}
+    done_b = [e for e in ev_b if e.get("stage") == telemetry.RUN_COMPLETED]
+    out.append((sum_b is not None and len(log_b["sent"]) == 2 and qb.get("repair_turns") == 1
+                and qb.get("failing_before") == 2 and qb.get("failing_after") == 1
+                and quote_of(rec_b, "actors") == SDN_DROPPED
+                and done_b and (done_b[-1]["payload"].get("quote_repair") or {}).get("failing_after") == 1,
+                "a record still failing after its repair turn is REPORTED (failing 2 -> 1, in the summary and in "
+                "RUN_COMPLETED) and gets NO second turn: the first message and one repair, never a loop",
+                "%s | sent %d | %s" % (rec_b if sum_b is None else "ok", len(log_b["sent"]), qb)))
+
+    rec_c, sum_c, log_c, _ = drive([turn(good, FIRST_COST), turn(good, REPAIRED_COST)])
+    qc = (sum_c or {}).get("quote_repair") or {}
+    out.append((sum_c is not None and len(log_c["sent"]) == 1 and qc.get("repair_turns") == 0
+                and qc.get("failing_before") == 0 and qc.get("failing_after") == 0,
+                "a record with every citation on its page gets no repair turn", str(qc)))
+
+    rec_d, sum_d, log_d, _ = drive([turn(first_bad, BUDGET), turn(good, BUDGET + 0.2)])
+    qd = (sum_d or {}).get("quote_repair") or {}
+    out.append((sum_d is not None and len(log_d["sent"]) == 1 and qd.get("repair_turns") == 0
+                and qd.get("failing_before") == 2 and qd.get("skipped"),
+                "a first turn that has already spent the whole budget gets no repair turn (the repair is inside the "
+                "cap, never on top of it); the failure is reported as before", str(qd)))
+
+    rec_e, sum_e, log_e, _ = drive([turn(first_bad, FIRST_COST), turn(None, 0.4, error=True)])
+    qe = (sum_e or {}).get("quote_repair") or {}
+    out.append((sum_e is not None and len(log_e["sent"]) == 2 and qe.get("error") and qe.get("failing_after") == 2
+                and quote_of(rec_e, "actors") == SDN_DROPPED and sum_e["cost_usd"] == 0.4,
+                "a repair turn that errors keeps the first valid record and reports the error: an extraction that "
+                "had a record is never lost to its repair", "%s | %s" % (rec_e if sum_e is None else "ok", qe)))
+
+    from agents import orchestrate_feeds as of
+    built = log_a["built"]
+    out.append((len(built) == 1 and built[0].max_budget_usd == BUDGET and of.EXTRACTION_BUDGET_USD == 1.00
+                and feeds_extraction.MAX_PER_RUN == 3 and ea.MAX_REPAIR_TURNS == 1
+                and sum_a is not None and sum_a["cost_usd"] == REPAIRED_COST <= BUDGET,
+                "the caps are unchanged: ONE client and ONE options object carry the first turn and the repair, "
+                "with the budget it was called with; the extraction budget is still US$1.00 and a run still "
+                "extracts at most 3; the reported cost is the session's running total, repair included",
+                "built %d client(s), max_budget_usd %s; EXTRACTION_BUDGET_USD %s; MAX_PER_RUN %s" % (
+                    len(built), built[0].max_budget_usd if built else None, of.EXTRACTION_BUDGET_USD,
+                    feeds_extraction.MAX_PER_RUN)))
+
+    # ---- where it is recorded: the Friday outcome and the report ----
+    real_attr = getattr(agents, "extract_advisory", None)
+    client, log = stub_session([turn(first_bad, FIRST_COST), turn(good, REPAIRED_COST)])
+    run_box = tmp / "friday-box"
+    (run_box / QUOTE_RUN / "docs").mkdir(parents=True)
+    pinned = run_box / QUOTE_RUN / "docs" / "quote-fixture.html"
+    pinned.write_bytes(quote_document())
+    real_client, real_dir = ea.ClaudeSDKClient, telemetry.TELEMETRY_DIR
+    ea.ClaudeSDKClient = client
+    agents.extract_advisory = ea  # extract_one imports it by name at call time
+    telemetry.TELEMETRY_DIR = run_box / QUOTE_RUN / inbox.TELEMETRY
+    try:
+        outcome = asyncio.run(fr.extract_one(of.FeedsRun(QUOTE_RUN), {"key": "ofac:abc", "document": {
+            "path": "docs/quote-fixture.html"}}, QUOTE_ADV, run_box))
+    except Exception as exc:
+        outcome = {"status": "RAISED %s: %s" % (type(exc).__name__, exc)}
+    finally:
+        ea.ClaudeSDKClient, telemetry.TELEMETRY_DIR = real_client, real_dir
+        if real_attr is not None:
+            agents.extract_advisory = real_attr
+    qo = outcome.get("quote_repair") or {}
+    out.append((outcome.get("status") == "extracted" and qo.get("repair_turns") == 1 and qo.get("failing_before") == 2
+                and qo.get("failing_after") == 0 and outcome.get("cost_usd") == REPAIRED_COST,
+                "the Friday outcome records whether a repair turn ran and the failing counts before and after, and "
+                "its cost is the session's running total (repair included)", str(outcome)[:160]))
+    cell = rep.citation_cell(dict(outcome, citation_check={"off_page": 0, "checked": 3, "error": None}))
+    out.append((cell == "0 of 3 (repair turn: 2 failing before, 0 after)"
+                and rep.citation_cell(dict(outcome, quote_repair=None, citation_check={
+                    "off_page": 0, "checked": 3, "error": None})) == "0 of 3",
+                "the report's citations cell shows the repair turn when there was one, and is unchanged when there "
+                "was not", cell))
+    return out
+
 
 
 def checks(mutation) -> list:
@@ -476,8 +794,9 @@ def checks(mutation) -> list:
         # Prompt-sha brief (2026-09-29): the extractor must pass run_started the hash of the prompt it
         # actually SENDS, not a constant or a stale one. Get further than the identity-check positive case
         # above -- past run_started and the options -- and still start no session, by stubbing query()
-        # (not document_pages) in the extract_advisory module namespace. TELEMETRY_DIR is redirected so the
-        # real run_started, left in place, writes nowhere near the checkout.
+        # (not document_pages) in the extract_advisory module namespace -- since slice 2 C2 the session is a
+        # ClaudeSDKClient, so it is the client that is stubbed, stopping at its first query(). TELEMETRY_DIR is
+        # redirected so the real run_started, left in place, writes nowhere near the checkout.
         doc_b = tmp / "identity-b.pdf"
         doc_b.write_bytes(tiny_pdf(["Advisory text for the prompt-sha probe."]))  # a real PDF: document_pages()
         ident_b = RI.new("extractor", "ADV-2026-0077", doc_b)                    # runs for real, unlike exc1-exc3
@@ -486,26 +805,34 @@ def checks(mutation) -> list:
             pass
 
         captured: dict = {}
-        real_query = ea.query
+        real_client = ea.ClaudeSDKClient
         real_run_started = telemetry.run_started
         real_telemetry_dir = telemetry.TELEMETRY_DIR
 
-        async def stub_query(*, prompt, options):
-            captured["system_prompt"] = options.system_prompt
-            raise _GotPastRunStarted("stub: extract() reached query() -- no session was started")
-            yield  # pragma: no cover -- keeps this an async generator; the raise above is always hit first
+        class _StopAtFirstQuery:
+            def __init__(self, options):
+                captured["system_prompt"] = options.system_prompt
+
+            async def __aenter__(self):
+                return self
+
+            async def __aexit__(self, *exc):
+                return False
+
+            async def query(self, prompt, session_id="default"):
+                raise _GotPastRunStarted("stub: extract() reached the session's first query() -- no session was started")
 
         def capturing_run_started(run, model, max_budget_usd, max_turns, tools, **kwargs):
             captured["prompt_sha256"] = kwargs.get("prompt_sha256")
             return real_run_started(run, model, max_budget_usd, max_turns, tools, **kwargs)
 
-        ea.query = stub_query
+        ea.ClaudeSDKClient = _StopAtFirstQuery
         telemetry.run_started = capturing_run_started
         telemetry.TELEMETRY_DIR = tmp / "telemetry-scratch"  # never data/telemetry/
         try:
             exc4 = raised(ea.extract(doc_b, "ADV-2026-0077", "stub-model", 1.0, 5, run=ident_b))
         finally:
-            ea.query = real_query
+            ea.ClaudeSDKClient = real_client
             telemetry.run_started = real_run_started
             telemetry.TELEMETRY_DIR = real_telemetry_dir
 
@@ -514,9 +841,11 @@ def checks(mutation) -> list:
                    and captured.get("prompt_sha256") == ea.PROMPT_SHA256 == sent_hash,
                    "the extractor passes run_started the hash of the prompt it actually sends: "
                    "sha256(system_prompt) == recorded prompt_sha256 == extract_advisory.PROMPT_SHA256 "
-                   "(reaches query(); no session was started)",
+                   "(reaches the session's first query(); no session was started)",
                    "%s | recorded %s | PROMPT_SHA256 %s" % (
                        type(exc4).__name__, str(captured.get("prompt_sha256"))[:16], ea.PROMPT_SHA256[:16])))
+
+        out += quote_checks(mutation, ea, kc, tmp, box)
 
     out.append((git_status() == before, "the repository's git status is unchanged", ""))
     return out

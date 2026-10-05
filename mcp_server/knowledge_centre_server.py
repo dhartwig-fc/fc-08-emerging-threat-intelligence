@@ -38,7 +38,7 @@ TYPOLOGY_PATH = Path(os.environ.get("NEXUS_TYPOLOGY_PATH", ROOT / "data" / "typo
 
 # The server is launched as a script, so the repo root is not on sys.path.
 sys.path.insert(0, str(ROOT))
-from schemas.citation_match import PageIndex, file_sha256  # noqa: E402
+from schemas.citation_match import PageIndex, file_sha256, quote_reply  # noqa: E402
 # The contract the review gate re-asserts: one definition for both sides.
 from schemas.proposal_contract import QUOTE_MAX, QUOTE_MIN, SCHEMA, proposal_id  # noqa: E402
 from schemas.actor_match import resolve as resolve_names  # noqa: E402
@@ -128,6 +128,14 @@ class ProposedCitation(BaseModel):
 
     page: int = Field(..., ge=1, description="PDF page index: the n in the '=== PAGE n ===' marker")
     quote: str = Field(..., min_length=QUOTE_MIN, max_length=QUOTE_MAX, description="Verbatim text from that page")
+
+
+class CheckQuoteInput(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    page: int = Field(..., ge=1, description="PDF page index: the n in the '=== PAGE n ===' marker")
+    quote: str = Field(..., min_length=1, max_length=QUOTE_MAX,
+                       description="The quote exactly as the record will carry it, on the page it will cite")
 
 
 class ProposeLinkInput(BaseModel):
@@ -561,6 +569,32 @@ def _refuse_citations(params: "ProposeLinkInput", run: dict) -> Optional[str]:
                 "page number from its '=== PAGE n ===' marker, and propose again. %s"
                 % (len(bad), "" if len(bad) == 1 else "s", " | ".join(bad[:3])))
     return None
+
+
+@mcp.tool(
+    name="knowledge_centre_check_quote",
+    annotations={"title": "Check a quote", "readOnlyHint": True, "destructiveHint": False, "idempotentHint": True, "openWorldHint": False},
+)
+async def check_quote(params: CheckQuoteInput) -> str:
+    """
+    Check a citation BEFORE you finish: is this quote on this page of the document you are extracting?
+
+    Answers one of: "Verbatim: on page N."; "Wrong page: the quote is on page(s) M, not N."; or
+    "Not found: ..." with where the quote stops agreeing with the page and what each says next. It
+    changes nothing and writes nothing. It asks the SAME rule propose_link, the review gate and
+    acceptance apply (schemas/citation_match.PageIndex.locate, over the same page index), so a quote it
+    calls verbatim will not be refused later for being off its page. Quote non-Latin script exactly as
+    written on the page, or pick a span that contains none.
+    """
+    run = _run_context()
+    if run is None:
+        return ("Rejected: this server was started without a run identity (%s), so it does not know which "
+                "document to check against." % ", ".join(RUN_ENV + (QUEUE_ENV,)))
+    try:
+        index = _page_index(run["NEXUS_PDF_PATH"], run["NEXUS_PDF_SHA256"])
+    except (OSError, ValueError) as exc:
+        return "Rejected: %s" % exc
+    return quote_reply(index, params.page, params.quote)
 
 
 @mcp.tool(

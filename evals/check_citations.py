@@ -297,6 +297,24 @@ def unplaced_citations(advisory_id: str, record: dict, document, index=None) -> 
     return len(checked), [d for _, ok, d in checked if not ok]
 
 
+def with_quotes(record: dict, defects: list) -> list:
+    """The defects unplaced_citations returned, each COPIED with its "quote" added -- for the
+    one caller that has to show an agent WHICH quote failed (agents/extract_advisory's repair turn). A defect
+    names its citation by identity (section, item, page, quote_sha256), never by the quote itself, so the quote
+    is found in `record` by that same identity. A defect whose citation is not in `record` gets quote None."""
+    out = []
+    for d in defects:
+        quote = None
+        for item in record.get(d["section"], []):
+            if _label_for(item) != d["item"]:
+                continue
+            for c in item.get("citations", []):
+                if c["page"] == d["page"] and _quote_sha256(c["quote"]) == d["quote_sha256"]:
+                    quote = c["quote"]
+        out.append(dict(d, quote=quote))
+    return out
+
+
 def apply_attestations(checked: list, attested: list, unchecked=()):
     """(defects, n_attested, problems): attested citations leave the defects; bad entries are problems.
 
