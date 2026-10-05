@@ -749,6 +749,12 @@ def examine(guards_dir: Path = EVALS, root: Path = ROOT, redirect=None) -> tuple
                 "no-mutation guards have no --mutate", "; ".join(problems) or "%d guards read" % (
                     len(EXEMPT) - 1 + len(NO_MUTATIONS))))
 
+    out.append((set(EXPECT) == set(MUTATIONS),
+                "EXPECT names the check each of this guard's own --mutate labels must fail, and no other",
+                "missing from EXPECT: %s; not a label: %s" % (sorted(set(MUTATIONS) - set(EXPECT)),
+                                                              sorted(set(EXPECT) - set(MUTATIONS)))
+                if set(EXPECT) != set(MUTATIONS) else "%d labels" % len(MUTATIONS)))
+
     contributing = sorted({g for g, *_ in all_rows})
     out.append((len(all_rows) >= MIN_ANCHORS and contributing == sorted(CHECKED),
                 "not vacuous: at least %d anchors examined, from every CHECKED guard" % MIN_ANCHORS,

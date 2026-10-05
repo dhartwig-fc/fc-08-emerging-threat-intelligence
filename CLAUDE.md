@@ -624,13 +624,13 @@ of an earlier commit on this same branch):**
   `report.md`, `accepted.json` and the orchestrator's telemetry -- is in `data/feeds/runs/feeds-2026-09-29-865f66/`,
   committed in `c4fa190`.
 
-**Not yet exercised live -- re-measured 2026-10-05 against `feeds-2026-09-30-bd1185` and `feeds-2026-10-02-10ce44`.** MEASURED now: `terminal_check` (4 sessions at bd1185, DoD 4's three met), the resolver rate, extraction cost under the cap, the extractor's `PROMPT_SHA256` in `RUN_STARTED`, and transcript backfill (1 live event). STILL WAITING: the overshoot of the US$1 cap (no extraction has exceeded it), the publication-over-listing document choice, an accepted live item, and `tools/review.py` over accepted proposals. Each item below says which:
+**Not yet exercised live -- re-measured 2026-10-05 against `feeds-2026-09-30-bd1185` and `feeds-2026-10-02-10ce44`.** MEASURED now: `terminal_check` (4 live sessions in all, 3 at bd1185; DoD 4's three met), the resolver rate, extraction cost under the cap, the extractor's `PROMPT_SHA256` in `RUN_STARTED`, and transcript backfill (1 live event). STILL WAITING: the overshoot of the US$1 cap (no extraction has exceeded it), the publication-over-listing document choice, an accepted live item, and `tools/review.py` over accepted proposals. Each item below says which:
 
-- **MEASURED** `terminal_check` on live sessions: 4 sessions at bd1185, reconciliation clean; 10ce44 added more. Spec DoD 4's "at least three" is met;
+- **MEASURED** `terminal_check` on live sessions: 4 live sessions in all (3 at bd1185), reconciliation clean; 10ce44's orchestrator also reconciled clean. Spec DoD 4's "at least three" is met;
 - **MEASURED** the resolver's rate: bd1185 10 calls/2 resolved and 17/0; 10ce44 56 calls, 2 resolved; unresolved names noted "for a human", none misrecorded;
 - extraction cost against the US$1 cap: **measured** US$0.36 to 0.86 per extraction over 5 extractions, all under it; **still waiting:** how far a session can overshoot it;
 - **MEASURED** the extractor's `PROMPT_SHA256` reaching `RUN_STARTED` live (both bd1185 extractions equal `extract_advisory.PROMPT_SHA256`);
-- **STILL WAITING** the linked-PDF choice (`document_hosts`) picking the publication over the listing page: both live items had no single linked PDF and took the OFAC recent-actions HTML page;
+- **STILL WAITING** the linked-PDF choice (`document_hosts`) picking the publication over the listing page: bd1185's two items had no single linked PDF and took the OFAC recent-actions HTML page (no document choice is recorded for 10ce44's third item);
 - **MEASURED** transcript backfill (`agents.telemetry.record_unhooked`): fired once live at bd1185 (a `search_typologies` is_error answered by the CLI);
 - **STILL WAITING** `accept_run` accepting a live item (documents, record, queue and telemetry copies, the live advisory list
   write, the gate re-check, gap recording) -- the branch's only live ledger writes are the Task 8 seed and the
@@ -725,7 +725,7 @@ git status --short --ignored | grep -v __pycache__       # expect: !! .venv, !! 
 - C2 merged and pushed at `ad4f1cd` (2026-10-01).
 - The token was stored 2026-09-30, then rotated the same day after a subagent read the owner's Terminal. `cli_path()` auth status printed `True oauth_token`, so `TOKEN_METHOD` is verified.
 - The schedule was installed 2026-10-01 (`schedule.py install`, from `~/fc-08-schedule`).
-- The first launchd Friday, run `10ce44` on 2026-10-02: COMPLETE, US$1.96, 3 extracted, all refused at acceptance for non-verbatim quotes because the extractor dropped non-Latin script; the 3 were deferred, ADV-2026-0021 to 0025 are left as gaps.
+- The first launchd Friday, run `10ce44` on 2026-10-02: COMPLETE, US$1.96, 3 extracted, all flagged by the report's citation warning for non-verbatim quotes (the extractor dropped non-Latin script; `accept_run` would refuse them), and the owner deferred all three; ADV-2026-0021 to 0025 are left as gaps. The `accept_run` refusal itself was run `bd1185`'s.
 - The quote-check fix is branch `slice2-c2-quote` (the section above).
 - Measured: no Keychain prompt appeared when the launcher read the token.
 - Measured: `display notification` never displayed on the owner's Mac, which is why the run uses alert windows.

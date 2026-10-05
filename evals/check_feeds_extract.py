@@ -118,6 +118,7 @@ EXTRACTION = ROOT / "feeds" / "extraction.py"
 KC = ROOT / "mcp_server" / "knowledge_centre_server.py"
 SERVER = ROOT / "mcp_server" / "feeds_server.py"
 EXTRACT_ADVISORY = ROOT / "agents" / "extract_advisory.py"
+TELEMETRY = ROOT / "agents" / "telemetry.py"
 FRIDAY_RUN = ROOT / "tools" / "friday_run.py"
 REPORT = ROOT / "feeds" / "report.py"
 RUN = "feeds-2026-10-02-ccc333"
@@ -206,10 +207,29 @@ MUTATIONS = {
     "interrupted-lost-on-raise": (EXTRACT_ADVISORY,
         '            note["interrupted"] = seen.interrupted  # S-3: the interrupt may have been issued before it raised\n',
         ""),
+    # Fix round 1, I-1: record_interrupted's two safety properties. (A) it must not terminate a call that has a
+    # SUCCESS result and no hook event -- that is a failed hook, and must stay visible; (B) it runs only in a
+    # session the runner interrupted. The first is a mutation of agents/telemetry.py, applied in memory.
+    "interrupt-backfills-successes": (TELEMETRY, "        if tool_use_id in done or tool_use_id in results:\n",
+                                      "        if tool_use_id in done:\n"),
+    "backfill-without-interrupt": (EXTRACT_ADVISORY,
+        "    if seen.interrupted:\n        telemetry.record_interrupted(run, seen.names, seen.results)\n",
+        "    telemetry.record_interrupted(run, seen.names, seen.results)\n"),
     "first-check-uncaught": (EXTRACT_ADVISORY,
         "    except Exception as exc:  # noqa: BLE001 -- the runner's own check reports a document that cannot be checked\n",
         "    except ZeroDivisionError as exc:  # noqa: BLE001 -- the runner's own check reports a document that cannot be checked\n"),
 }
+
+
+def mutate_telemetry(mutation) -> None:
+    """A mutation of agents/telemetry.py, applied in memory: the guard's `telemetry` is the real, shared module,
+    so the mutated source is executed into its own namespace (the process ends with the run)."""
+    if mutation and MUTATIONS[mutation][0] == TELEMETRY:
+        old, new = MUTATIONS[mutation][1:]
+        source = TELEMETRY.read_text(encoding="utf-8")
+        if source.count(old) != 1:
+            raise SystemExit("MUTATION TARGET MISSING: %r is not in %s exactly once" % (old, TELEMETRY))
+        exec(compile(source.replace(old, new), str(TELEMETRY), "exec"), telemetry.__dict__)
 
 
 def load(name: str, path: Path, mutation):
@@ -378,6 +398,7 @@ def quote_checks(mutation, ea, kc, tmp: Path, box: Path) -> list:
     from agents.run_identity import RunIdentity
     from feeds import extraction as feeds_extraction, report as _report
     from schemas.citation_match import PageIndex
+    mutate_telemetry(mutation)
     fr = load("friday_run_under_test", FRIDAY_RUN, mutation)
     rep = load("feeds_report_under_test", REPORT, mutation)
     out = []
@@ -576,6 +597,25 @@ def quote_checks(mutation, ea, kc, tmp: Path, box: Path) -> list:
                 and "the repair turn raised" in (qr.get("error") or "") and sum_r["unterminated"] == 0,
                 "an interrupt issued and then a turn that raises: quote_repair.interrupted is still True and the "
                 "calls are still terminated", "%s | %s" % (rec_r if sum_r is None else "ok", qr)))
+    # I-1 (A): a call the CLI ANSWERED with a success and for which no hook fired is a failed hook. The interrupt
+    # backfill must leave it unterminated, or terminal_check goes green over exactly the defect it exists to catch.
+    from claude_agent_sdk import ToolResultBlock, UserMessage
+    answered = turn(good, REPAIRED_COST, calls=6, turns=6, tag="Q")
+    answered.insert(1, UserMessage(content=[ToolResultBlock(tool_use_id="Q0", content="ok", is_error=False)]))
+    rec_t, sum_t, log_t, ev_t = drive([turn(first_bad, FIRST_COST, turns=56, tag="t"), answered], max_turns=60)
+    held = {e["payload"].get("tool_use_id") for e in ev_t if e.get("stage") == telemetry.TOOL_CALL}
+    out.append((sum_t is not None and log_t["interrupts"] == 1 and sum_t["unterminated"] == 1 and "Q0" not in held
+                and {"Q1", "Q4", "t0"} <= held,
+                "an interrupt backfills the calls it cut off (no result, no event) but NOT a call with a success "
+                "result and no hook event: that one stays unterminated, so a failed hook stays visible",
+                "unterminated %s | terminal events for %s" % ((sum_t or {}).get("unterminated"), sorted(held))))
+    # I-1 (B): the backfill runs only in a session the runner interrupted. Here nothing is interrupted and the stub
+    # fires no hooks, so both calls (one per turn) are genuinely unterminated and must be reported as such.
+    rec_u, sum_u, log_u, _ = drive([turn(first_bad, FIRST_COST, tag="u"), turn(good, REPAIRED_COST, tag="U")])
+    out.append((sum_u is not None and log_u["interrupts"] == 0 and sum_u["unterminated"] == 2,
+                "in a session that was NOT interrupted, calls with no terminal event are never backfilled: "
+                "both stay unterminated", "interrupts %s | unterminated %s" % (
+                    log_u["interrupts"], (sum_u or {}).get("unterminated"))))
     rec_h, sum_h, log_h, _ = drive([turn(first_bad, FIRST_COST, turns=57, tag="h"), turn(good, REPAIRED_COST)],
                                    max_turns=60)
     qh = (sum_h or {}).get("quote_repair") or {}
