@@ -624,9 +624,9 @@ of an earlier commit on this same branch):**
   `report.md`, `accepted.json` and the orchestrator's telemetry -- is in `data/feeds/runs/feeds-2026-09-29-865f66/`,
   committed in `c4fa190`.
 
-**Not yet exercised live -- re-measured 2026-10-05 against `feeds-2026-09-30-bd1185` and `feeds-2026-10-02-10ce44`.** MEASURED now: `terminal_check` (4 live sessions in all, 3 at bd1185; DoD 4's three met), the resolver rate, extraction cost under the cap, the extractor's `PROMPT_SHA256` in `RUN_STARTED`, and transcript backfill (1 live event). STILL WAITING: the overshoot of the US$1 cap (no extraction has exceeded it), the publication-over-listing document choice, an accepted live item, and `tools/review.py` over accepted proposals. Each item below says which:
+**Not yet exercised live -- re-measured 2026-10-05 against `feeds-2026-09-30-bd1185` and `feeds-2026-10-02-10ce44`.** MEASURED now: `terminal_check` (8 live sessions in all: 1 at 865f66, 3 at bd1185, 4 at 10ce44; DoD 4's three met), the resolver rate, extraction cost under the cap, the extractor's `PROMPT_SHA256` in `RUN_STARTED`, and transcript backfill (1 live event). STILL WAITING: the overshoot of the US$1 cap (no extraction has exceeded it), the publication-over-listing document choice, an accepted live item, and `tools/review.py` over accepted proposals. Each item below says which:
 
-- **MEASURED** `terminal_check` on live sessions: 4 live sessions in all (3 at bd1185), reconciliation clean; 10ce44's orchestrator also reconciled clean. Spec DoD 4's "at least three" is met;
+- **MEASURED** `terminal_check` on live sessions: 8 live sessions in all (1 at 865f66, 3 at bd1185, 4 at 10ce44), reconciliation clean; 10ce44's orchestrator also reconciled clean. Spec DoD 4's "at least three" is met;
 - **MEASURED** the resolver's rate: bd1185 10 calls/2 resolved and 17/0; 10ce44 56 calls, 2 resolved; unresolved names noted "for a human", none misrecorded;
 - extraction cost against the US$1 cap: **measured** US$0.36 to 0.86 per extraction over 5 extractions, all under it; **still waiting:** how far a session can overshoot it;
 - **MEASURED** the extractor's `PROMPT_SHA256` reaching `RUN_STARTED` live (both bd1185 extractions equal `extract_advisory.PROMPT_SHA256`);
