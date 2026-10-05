@@ -9,6 +9,10 @@ Usage:
     python evals/check_tool_surface.py --mutate-queue
                                                    # static only: the server's QUEUE_DIR points elsewhere
                                                    # (in memory); the queue-agreement checks MUST fail
+    python evals/check_tool_surface.py --mutate-unlisted
+                                                   # static only: the extractor's KC_TOOLS lacks
+                                                   # knowledge_centre_check_quote (in memory); the checks that
+                                                   # the lists cover the server's tools MUST fail
 
 WHY THIS EXISTS.
 
@@ -305,9 +309,13 @@ def main(argv: list) -> int:
                     help="with --live: a callback that allows everything; the write probe MUST breach")
     ap.add_argument("--mutate-queue", action="store_true",
                     help="static only: point the server's QUEUE_DIR elsewhere in memory; checks MUST fail")
+    ap.add_argument("--mutate-unlisted", action="store_true",
+                    help="static only: drop check_quote from the extractor's KC_TOOLS in memory; checks MUST fail")
     args = ap.parse_args(argv)
-    if args.mutate_queue and args.live:
-        ap.error("--mutate-queue is a static mutation; do not combine it with --live")
+    if (args.mutate_queue or args.mutate_unlisted) and args.live:
+        ap.error("--mutate-queue and --mutate-unlisted are static mutations; do not combine them with --live")
+    if args.mutate_queue and args.mutate_unlisted:
+        ap.error("one static mutation at a time")
 
     failures = 0
     if args.mutate_queue:
@@ -315,11 +323,17 @@ def main(argv: list) -> int:
         from mcp_server import knowledge_centre_server as kc
         kc.QUEUE_DIR = Path(tempfile.mkdtemp(prefix="fc08_drifted_queue_"))
         print("MUTATED: the server's QUEUE_DIR is %s\n" % kc.QUEUE_DIR)
+    if args.mutate_unlisted:
+        # THE MUTATION: the extractor's tool list forgets the new tool while the server still serves it
+        # (the 2026-10-02 slice 2 C2 tool). In memory only: the guard's own copy of the list.
+        global KC_TOOLS
+        KC_TOOLS = tuple(t for t in KC_TOOLS if t != "knowledge_centre_check_quote")
+        print("MUTATED: KC_TOOLS lacks knowledge_centre_check_quote\n")
     print("=== static ===")
     for ok, label, detail in static_checks():
         print("  %-4s %s\n         %s" % ("PASS" if ok else "FAIL", label, detail))
         failures += 0 if ok else 1
-    if args.mutate_queue:
+    if args.mutate_queue or args.mutate_unlisted:
         print("\n%s" % ("HELD: the probe detects the defect when the rule is removed" if failures
                         else "NOTHING PROVED: it passed with the rule gone"))
         return 0 if failures else 1

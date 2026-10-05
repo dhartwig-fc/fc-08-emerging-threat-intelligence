@@ -62,7 +62,7 @@ FEEDS_WRITE_ALLOWLIST = frozenset("mcp__%s__%s" % (FEEDS_SERVER_KEY, t)
 # its allowlist above is unchanged, and its server does not list the tool.
 FEEDS_FULL_WRITE_ALLOWLIST = FEEDS_WRITE_ALLOWLIST | {"mcp__%s__feeds_extract" % FEEDS_SERVER_KEY}
 
-# The exact start of the SDK's advisory when these four are pre-approved.
+# The exact start of the SDK's advisory when the read-only tools are pre-approved.
 SHADOWING_MESSAGE = "can_use_tool will not be invoked for: %s." % ", ".join(READ_ONLY_TOOLS)
 
 
@@ -102,7 +102,7 @@ def expected_shadowing(read_only=None):
 
     They are pre-approved on purpose, so the advisory is expected on every run.
     Any other shadowing -- a different tool pre-approved -- still warns. `read_only`
-    defaults to the four Knowledge Centre reads; the feeds orchestrator passes its own.
+    defaults to the Knowledge Centre reads (READ_ONLY_TOOLS); the feeds orchestrator passes its own.
     """
     message = SHADOWING_MESSAGE if read_only is None else \
         "can_use_tool will not be invoked for: %s." % ", ".join(read_only)

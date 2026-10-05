@@ -55,6 +55,7 @@ from __future__ import annotations
 import argparse
 import asyncio
 import hashlib
+import dataclasses
 import json
 import sys
 from collections import Counter
@@ -91,6 +92,11 @@ KC_TOOLS = (
 # Slice 2 C2 (owner ruling 2026-10-02): at most ONE repair turn per extraction, never a loop; the cost of that
 # turn counts inside the extraction's own budget because it runs in the same session.
 MAX_REPAIR_TURNS = 1
+# The CLI counts max_turns PER user turn and options cannot change mid-session, so the repair turn would get a
+# fresh allowance of its own. It is held to what is LEFT of the extraction's total instead (see
+# _check_and_repair): no repair turn unless at least this many API rounds remain, and the turn is interrupted
+# in code if it uses more than remain. Enough for a couple of check_quote calls and the corrected record.
+REPAIR_MIN_TURNS = 4
 # The repair turn names each failing citation; past this many it names the first ones and says how many more.
 MAX_REPAIR_LINES = 60
 
@@ -268,7 +274,8 @@ async def extract(path: Path, advisory_id: str, model: str, max_budget_usd: floa
     seen = _Seen()
     result: ResultMessage | None = None
     quote_repair = {"checked": None, "failing_before": None, "failing_after": None, "repair_turns": 0,
-                    "skipped": None, "error": None, "cost_after_first_usd": None}
+                    "skipped": None, "error": None, "cost_after_first_usd": None,
+                    "repair_allowance_turns": None, "interrupted": False}
     try:
         with expected_shadowing():
             # ONE session for the whole extraction: the first turn produces the record, and -- only when the
@@ -294,7 +301,7 @@ async def extract(path: Path, advisory_id: str, model: str, max_budget_usd: floa
                 record = AdvisoryRecord.model_validate(structured)
                 _refuse_unknown_ids(record)
                 record, quote_repair, result = await _check_and_repair(
-                    client, record, path, advisory_id, max_budget_usd, result, seen, quote_repair)
+                    client, record, path, advisory_id, max_budget_usd, max_turns, result, seen, quote_repair)
     except Exception as exc:
         telemetry.record_unhooked(run, seen.names, seen.results)
         telemetry.run_completed(run, telemetry.FAILURE, str(exc)[:300], result=result, validated=False,
@@ -342,14 +349,23 @@ class _Seen:
         self.tool_use_ids: list = []
         self.names: dict = {}
         self.results: dict = {}
+        self.interrupted = False
 
 
-async def _receive_turn(client, seen: "_Seen") -> "ResultMessage | None":
+async def _receive_turn(client, seen: "_Seen", limit: int = None) -> "ResultMessage | None":
     """Read one turn of the session to its ResultMessage (returned; None if the session ended without one).
-    Never raises on an error RESULT -- the caller decides what an error result means for its turn."""
+    Never raises on an error RESULT -- the caller decides what an error result means for its turn.
+
+    `limit`: the most API rounds (distinct assistant messages) this turn may use. The first round past it
+    interrupts the session once (seen.interrupted), and the turn is read on to the result the CLI then sends."""
     result = None
+    rounds: set = set()
     async for message in client.receive_response():
         if isinstance(message, AssistantMessage):
+            rounds.add(message.message_id or id(message))
+            if limit is not None and len(rounds) > limit and not seen.interrupted:
+                seen.interrupted = True
+                await client.interrupt()
             for block in message.content:
                 if isinstance(block, ToolUseBlock):
                     seen.tool_calls[block.name] += 1
@@ -400,15 +416,36 @@ def repair_prompt(index: PageIndex, failing: list, checked: int) -> str:
         % (len(failing), checked, "\n".join(lines)))
 
 
+def _session_total(first: "ResultMessage | None", turn: "ResultMessage") -> "ResultMessage":
+    """The result a two-turn session reports. Measured from the bundled CLI (2.1.259): total_cost_usd is the
+    session's running total, but num_turns, permission_denials and duration are PER TURN -- so the closing
+    figures are the first turn's plus the repair's (denials combined), and the cost is the later total."""
+    if first is None:
+        return turn
+    return dataclasses.replace(
+        turn,
+        num_turns=(first.num_turns or 0) + (turn.num_turns or 0),
+        duration_ms=(first.duration_ms or 0) + (turn.duration_ms or 0),
+        duration_api_ms=(first.duration_api_ms or 0) + (turn.duration_api_ms or 0),
+        permission_denials=list(first.permission_denials or []) + list(turn.permission_denials or []),
+        total_cost_usd=turn.total_cost_usd if turn.total_cost_usd is not None else first.total_cost_usd)
+
+
 async def _check_and_repair(client, record: AdvisoryRecord, path: Path, advisory_id: str, max_budget_usd: float,
-                            result: "ResultMessage | None", seen: "_Seen", note: dict) -> tuple:
+                            max_turns: int, result: "ResultMessage | None", seen: "_Seen", note: dict) -> tuple:
     """(record, note, result): the record's citations against the pinned document by the shared rule, and --
     when any is off its page -- up to MAX_REPAIR_TURNS repair turn(s) in the SAME session, re-checking the
     corrected record after each. Anything still failing is left for the runner's warning and accept_run, exactly
     as before. The repair spends inside this session's budget: the CLI's --max-budget-usd is the session's
-    running total, and a first turn that has already spent it gets no repair turn at all (recorded in
-    note["skipped"]). A repair turn that errors, or returns a record that does not validate, keeps the original
-    record (recorded in note["error"]); it never fails an extraction that had a valid record."""
+    running total (bundled CLI 2.1.259: it ends a turn with error_max_budget_usd once the session total reaches
+    the budget, so one API call can overshoot, as in any single turn), and a first turn that has already spent
+    it gets no repair turn at all (recorded in note["skipped"]). The TURN allowance is held in code the same
+    way: the repair gets what is left of max_turns after the first turn (note["repair_allowance_turns"]), is
+    skipped under REPAIR_MIN_TURNS, and is interrupted if it uses more (note["interrupted"]). The closing
+    result is the whole session's (_session_total). A repair turn that errors, or returns a record that does
+    not validate, keeps the original record (recorded in note["error"]): no failure of the repair turn or of
+    the first check fails an extraction that had a valid record. (The re-check of a corrected, schema-valid
+    record is not wrapped: every field it reads is required, so it cannot realistically raise.)"""
     note["cost_after_first_usd"] = result.total_cost_usd if result is not None else None
     try:
         index = PageIndex.from_document(path)
@@ -424,18 +461,26 @@ async def _check_and_repair(client, record: AdvisoryRecord, path: Path, advisory
         if spent is not None and spent >= max_budget_usd:
             note["skipped"] = "the first turn spent US$%.2f of the US$%.2f budget" % (spent, max_budget_usd)
             break
+        allowance = max_turns - ((result.num_turns or 0) if result is not None else 0)
+        if allowance < REPAIR_MIN_TURNS:
+            note["skipped"] = "the first turn used %s of the %s turn allowance" % (
+                (result.num_turns if result is not None else 0), max_turns)
+            break
         note["repair_turns"] += 1
+        note["repair_allowance_turns"] = allowance
         try:
             await client.query(repair_prompt(index, bad, note["checked"]))
-            turn = await _receive_turn(client, seen)
+            turn = await _receive_turn(client, seen, limit=allowance)
         except Exception as exc:  # noqa: BLE001 -- the SDK raising mid-repair must not lose a valid record
             note["error"] = ("the repair turn raised %s: %s" % (type(exc).__name__, exc))[:300]
             break
+        note["interrupted"] = seen.interrupted
         if turn is not None:
-            result = turn  # its total_cost_usd is the session's running total, repair included
+            result = _session_total(result, turn)  # cost: the running total; turns, denials, duration: summed
         if turn is None or turn.is_error or turn.structured_output is None:
-            note["error"] = ("the repair turn returned no record (%s)" % (
-                (turn.errors or turn.result or turn.subtype) if turn is not None else "no result"))[:300]
+            note["error"] = ("the repair turn returned no record (%s%s)" % (
+                (turn.errors or turn.result or turn.subtype) if turn is not None else "no result",
+                "; interrupted at its %d-turn allowance" % allowance if seen.interrupted else ""))[:300]
             break
         try:
             corrected = AdvisoryRecord.model_validate(turn.structured_output)

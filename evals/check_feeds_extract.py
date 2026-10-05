@@ -28,6 +28,11 @@ Usage:
     python evals/check_feeds_extract.py --mutate tool-private-matcher  # check_quote answers by its own substring test
     python evals/check_feeds_extract.py --mutate repair-unrecorded  # the Friday outcome drops the quote_repair note
     python evals/check_feeds_extract.py --mutate repair-cell-hidden # the report's citations cell hides the repair turn
+    python evals/check_feeds_extract.py --mutate repair-reports-last-turn  # RUN_COMPLETED reports only the repair turn's turns/denials/duration
+    python evals/check_feeds_extract.py --mutate repair-ignores-allowance  # the repair turn is not held to the turns left
+    python evals/check_feeds_extract.py --mutate repair-raise-uncaught     # an SDK exception mid-repair escapes extract()
+    python evals/check_feeds_extract.py --mutate invalid-repair-uncaught   # a corrected record that fails validation escapes
+    python evals/check_feeds_extract.py --mutate first-check-uncaught      # a first quote check that cannot run escapes
 
 WHAT IT HOLDS:
   relevant only  a request is refused for an item not listed, with no verdict, or triaged not_relevant;
@@ -67,6 +72,13 @@ WHAT IT HOLDS:
                  a first turn that already spent the budget gets none; a repair turn that errors keeps the first
                  record. One client, one options object, the same max_budget_usd (the repair is inside the
                  US$1.00 cap), extraction.MAX_PER_RUN still 3. Driven through a stub ClaudeSDKClient: no model;
+  one session    after a repair turn RUN_COMPLETED and the summary report turns, permission denials and duration SUMMED
+                 over both turns (each stub turn reports its own) and the cost as the session's running total;
+                 the repair turn gets only the turns left of the extraction's total (none under REPAIR_MIN_TURNS,
+                 interrupted past them);
+  keeps the record  an SDK exception mid-repair, a corrected record that fails validation (schema, unknown typology
+                 id) and a first quote check that cannot run each keep the first record, report why in
+                 quote_repair.error, and raise nothing out of extract();
   recorded       the summary and RUN_COMPLETED carry quote_repair; tools/friday_run.extract_one puts it on the
                  outcome with the session's running cost; the report's citations cell shows the repair turn.
   prompt sha     extract() passes run_started the sha256 of the prompt it actually sends: sha256(system_prompt)
@@ -173,6 +185,22 @@ MUTATIONS = {
         '        out.update(status="extracted", record=rel, quote_repair=summary.get("quote_repair"))\n',
         '        out.update(status="extracted", record=rel)\n'),
     "repair-cell-hidden": (REPORT, '    if isinstance(qr, dict) and qr.get("repair_turns"):\n', "    if False:\n"),
+    # Fix round 1 (review quote-check-review.md I-2, I-3).
+    "repair-reports-last-turn": (EXTRACT_ADVISORY,
+        "            result = _session_total(result, turn)  # cost: the running total; turns, denials, duration: summed\n",
+        "            result = turn\n"),
+    "repair-ignores-allowance": (EXTRACT_ADVISORY,
+        "            turn = await _receive_turn(client, seen, limit=allowance)\n",
+        "            turn = await _receive_turn(client, seen)\n"),
+    "repair-raise-uncaught": (EXTRACT_ADVISORY,
+        "        except Exception as exc:  # noqa: BLE001 -- the SDK raising mid-repair must not lose a valid record\n",
+        "        except ZeroDivisionError as exc:  # noqa: BLE001 -- the SDK raising mid-repair must not lose a valid record\n"),
+    "invalid-repair-uncaught": (EXTRACT_ADVISORY,
+        "        except Exception as exc:  # noqa: BLE001 -- the original record stands\n",
+        "        except ZeroDivisionError as exc:  # noqa: BLE001 -- the original record stands\n"),
+    "first-check-uncaught": (EXTRACT_ADVISORY,
+        "    except Exception as exc:  # noqa: BLE001 -- the runner's own check reports a document that cannot be checked\n",
+        "    except ZeroDivisionError as exc:  # noqa: BLE001 -- the runner's own check reports a document that cannot be checked\n"),
 }
 
 
@@ -273,27 +301,30 @@ def quote_record(actor_quote: str, indicator_page: int) -> dict:
     return rec
 
 
-def turn(structured, cost, *, error=False, calls=1):
-    """One scripted turn of the stubbed session: `calls` check_quote tool uses, then the ResultMessage."""
+def turn(structured, cost, *, error=False, calls=1, turns=1, denials=None, duration=10, tag="t"):
+    """One scripted turn of the stubbed session: `calls` check_quote tool uses (each its own API round, with its
+    own message id), then the ResultMessage, which reports THIS turn's `turns`, `denials` and `duration` (the
+    CLI's per-turn figures) and the session's running `cost`."""
     from claude_agent_sdk import AssistantMessage, ResultMessage, ToolUseBlock
     name = "mcp__knowledge_centre__knowledge_centre_check_quote"
-    msgs = [AssistantMessage(content=[ToolUseBlock(id="t%d" % i, name=name, input={})], model="stub")
-            for i in range(calls)]
-    return msgs + [ResultMessage(subtype="error_max_budget_usd" if error else "success", duration_ms=10,
-                                 duration_api_ms=8, is_error=error, num_turns=1, session_id="stub",
+    msgs = [AssistantMessage(content=[ToolUseBlock(id="%s%d" % (tag, i), name=name, input={})], model="stub",
+                             message_id="%s-msg-%d" % (tag, i)) for i in range(calls)]
+    return msgs + [ResultMessage(subtype="error_max_budget_usd" if error else "success", duration_ms=duration,
+                                 duration_api_ms=duration - 2, is_error=error, num_turns=turns, session_id="stub",
                                  total_cost_usd=cost, structured_output=structured,
+                                 permission_denials=list(denials or []),
                                  errors=["stub: out of budget"] if error else None)]
 
 
 def stub_session(script):
     """A stand-in for claude_agent_sdk.ClaudeSDKClient: no CLI, no model. Each query() consumes the next scripted
     turn (a list of messages ending in a ResultMessage); `log` records every client built, every message sent."""
-    log = {"built": [], "sent": []}
+    log = {"built": [], "sent": [], "interrupts": 0}
 
     class _Client:
         def __init__(self, options):
             log["built"].append(options)
-            self._turns, self._now = list(script), None
+            self._turns, self._now, self._stopped = list(script), None, False
 
         async def __aenter__(self):
             return self
@@ -304,9 +335,23 @@ def stub_session(script):
         async def query(self, prompt, session_id="default"):
             log["sent"].append(prompt)
             self._now = self._turns.pop(0) if self._turns else []
+            self._stopped = False
+            if isinstance(self._now, BaseException):  # the SDK raising mid-session
+                raise self._now
+
+        async def interrupt(self):
+            log["interrupts"] += 1
+            self._stopped = True
 
         async def receive_response(self):
+            from claude_agent_sdk import AssistantMessage, ResultMessage
             for message in self._now or []:
+                if self._stopped and isinstance(message, AssistantMessage):
+                    continue  # an interrupted turn does no more rounds ...
+                if self._stopped and isinstance(message, ResultMessage):  # ... and ends with an error result
+                    message = ResultMessage(subtype="error_during_execution", duration_ms=1, duration_api_ms=1,
+                                            is_error=True, num_turns=1, session_id="stub",
+                                            total_cost_usd=message.total_cost_usd, errors=["stub: interrupted"])
                 yield message
     return _Client, log
 
@@ -388,7 +433,7 @@ def quote_checks(mutation, ea, kc, tmp: Path, box: Path) -> list:
         spy_calls.append(1)
         return real_unplaced(*a, **k)
 
-    def drive(script, budget=BUDGET):
+    def drive(script, budget=BUDGET, max_turns=60, broken_index=False):
         """extract() on the fixture with a stub session; (record, summary, log, telemetry events) or the exception."""
         client, log = stub_session(script)
         real_client, real_dir = ea.ClaudeSDKClient, telemetry.TELEMETRY_DIR
@@ -396,9 +441,16 @@ def quote_checks(mutation, ea, kc, tmp: Path, box: Path) -> list:
         telemetry.TELEMETRY_DIR = tmp / "telemetry-scratch"
         run = RunIdentity.new("extractor", QUOTE_ADV, doc)
         check_citations.unplaced_citations = spy
+        real_index = ea.PageIndex
+        if broken_index:
+            class _Unreadable:
+                @staticmethod
+                def from_document(path):
+                    raise OSError("stub: the pinned document cannot be read back")
+            ea.PageIndex = _Unreadable
         spy_calls.clear()
         try:
-            record, summary = asyncio.run(ea.extract(doc, QUOTE_ADV, "stub-model", budget, 5, run=run))
+            record, summary = asyncio.run(ea.extract(doc, QUOTE_ADV, "stub-model", budget, max_turns, run=run))
             path = telemetry.telemetry_path(run)
             events = [json.loads(l) for l in path.read_text(encoding="utf-8").splitlines()] if path.exists() else []
             return record, summary, log, events
@@ -407,6 +459,7 @@ def quote_checks(mutation, ea, kc, tmp: Path, box: Path) -> list:
         finally:
             ea.ClaudeSDKClient, telemetry.TELEMETRY_DIR = real_client, real_dir
             check_citations.unplaced_citations = real_unplaced
+            ea.PageIndex = real_index
 
     def quote_of(record, section):
         return getattr(record, section)[0].citations[0].quote
@@ -462,6 +515,71 @@ def quote_checks(mutation, ea, kc, tmp: Path, box: Path) -> list:
                 and quote_of(rec_e, "actors") == SDN_DROPPED and sum_e["cost_usd"] == 0.4,
                 "a repair turn that errors keeps the first valid record and reports the error: an extraction that "
                 "had a record is never lost to its repair", "%s | %s" % (rec_e if sum_e is None else "ok", qe)))
+
+    # ---- fix round 1, I-2: one session's closing figures, summed across its turns ----
+    first_t = turn(first_bad, FIRST_COST, turns=7, denials=["denied-a"], duration=1000, tag="f")
+    repair_t = turn(good, REPAIRED_COST, turns=5, denials=["denied-b", "denied-c"], duration=2000, tag="r")
+    rec_f, sum_f, log_f, ev_f = drive([first_t, repair_t])
+    done_f = [e for e in ev_f if e.get("stage") == telemetry.RUN_COMPLETED]
+    pay_f = done_f[-1]["payload"] if done_f else {}
+    out.append((sum_f is not None and pay_f.get("turns") == 12 and pay_f.get("permission_denials") == 3
+                and pay_f.get("duration_ms") == 3000 and pay_f.get("cost_usd") == REPAIRED_COST
+                and sum_f["turns"] == 12 and sum_f["permission_denials"] == 3 and sum_f["duration_s"] == 3.0
+                and sum_f["cost_usd"] == REPAIRED_COST,
+                "after a repair turn RUN_COMPLETED and the summary report turns, permission denials and duration "
+                "SUMMED over both turns (7+5, 1+2, 1000+2000 ms: each stub turn reports its own, as the CLI does) "
+                "and the cost as the session's running total (not summed)",
+                "%s | summary %s" % ({k: pay_f.get(k) for k in ("turns", "permission_denials", "duration_ms", "cost_usd")},
+                                     {k: (sum_f or {}).get(k) for k in ("turns", "permission_denials", "duration_s")})))
+
+    # the turn allowance: the repair gets what is LEFT of max_turns (here 60 - 56 = 4), never a fresh one
+    long_repair = turn(good, REPAIRED_COST, calls=6, turns=6, tag="L")
+    rec_g, sum_g, log_g, _ = drive([turn(first_bad, FIRST_COST, turns=56, tag="g"), long_repair], max_turns=60)
+    qg = (sum_g or {}).get("quote_repair") or {}
+    out.append((sum_g is not None and len(log_g["sent"]) == 2 and qg.get("repair_allowance_turns") == 4
+                and log_g["interrupts"] == 1 and qg.get("interrupted") is True and qg.get("error")
+                and quote_of(rec_g, "actors") == SDN_DROPPED,
+                "the repair turn is held to the turns left of the extraction's total (4 of 60 here): a repair that "
+                "runs past them is interrupted once, and the first record stands with the reason reported",
+                "%s | interrupts %d | %s" % (rec_g if sum_g is None else "ok", log_g["interrupts"], qg)))
+    rec_h, sum_h, log_h, _ = drive([turn(first_bad, FIRST_COST, turns=57, tag="h"), turn(good, REPAIRED_COST)],
+                                   max_turns=60)
+    qh = (sum_h or {}).get("quote_repair") or {}
+    out.append((sum_h is not None and len(log_h["sent"]) == 1 and qh.get("repair_turns") == 0 and qh.get("skipped")
+                and "57" in qh["skipped"], "a first turn that left fewer than REPAIR_MIN_TURNS (3 of 60) gets no "
+                "repair turn, and says why", str(qh)))
+    rec_i, sum_i, log_i, _ = drive([turn(first_bad, FIRST_COST, turns=2, tag="i"), long_repair], max_turns=60)
+    out.append((sum_i is not None and log_i["interrupts"] == 0 and len(log_i["sent"]) == 2
+                and quote_of(rec_i, "actors") == SDN_SPAN,
+                "a repair turn inside its allowance (6 rounds of 58 left) is never interrupted",
+                "interrupts %d" % log_i["interrupts"]))
+
+    # ---- fix round 1, I-3: the branches that keep the first record ----
+    rec_j, sum_j, log_j, _ = drive([turn(first_bad, FIRST_COST), RuntimeError("stub: the CLI died mid-turn")])
+    qj = (sum_j or {}).get("quote_repair") or {}
+    out.append((sum_j is not None and quote_of(rec_j, "actors") == SDN_DROPPED and len(log_j["sent"]) == 2
+                and "the repair turn raised RuntimeError" in (qj.get("error") or ""),
+                "the SDK raising mid-repair: the first record is kept and reported, nothing raises out of extract()",
+                "%s | %s" % (rec_j if sum_j is None else "ok", qj.get("error"))))
+    schema_bad = dict(good, typologies=[dict(good["typologies"][0], confidence="certain-beyond-doubt")])
+    id_bad = dict(good, typologies=[dict(good["typologies"][0], typology_id="ZZZ999")])
+    refused = []
+    for label, corrected in (("schema violation", schema_bad), ("unknown typology id", id_bad)):
+        rec_k, sum_k, log_k, _ = drive([turn(first_bad, FIRST_COST), turn(corrected, REPAIRED_COST)])
+        qk = (sum_k or {}).get("quote_repair") or {}
+        refused.append((label, sum_k is not None and quote_of(rec_k, "actors") == SDN_DROPPED
+                        and "the repair turn's record was refused" in (qk.get("error") or "")
+                        and qk.get("failing_after") == 2))
+    out.append((all(ok for _, ok in refused),
+                "a corrected record that fails validation (a schema violation; an unknown typology id) keeps the "
+                "first record and reports it refused, raising nothing out of extract()", str(refused)))
+    rec_l, sum_l, log_l, _ = drive([turn(first_bad, FIRST_COST), turn(good, REPAIRED_COST)], broken_index=True)
+    ql = (sum_l or {}).get("quote_repair") or {}
+    out.append((sum_l is not None and quote_of(rec_l, "actors") == SDN_DROPPED and len(log_l["sent"]) == 1
+                and "the quote check could not run" in (ql.get("error") or "") and ql.get("repair_turns") == 0,
+                "a first quote check that cannot run (the document cannot be read back) keeps the record, sends no "
+                "repair turn, and reports why -- the runner's own check then says it again",
+                "%s | %s" % (rec_l if sum_l is None else "ok", ql.get("error"))))
 
     from agents import orchestrate_feeds as of
     built = log_a["built"]
