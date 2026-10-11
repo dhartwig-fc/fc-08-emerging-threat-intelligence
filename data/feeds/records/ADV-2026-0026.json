@@ -1,0 +1,158 @@
+{
+  "schema_version": "1.4.0",
+  "advisory_id": "ADV-2026-0026",
+  "source": {
+    "source_type": "ofac",
+    "publisher": "U.S. Department of the Treasury, Office of Foreign Assets Control (OFAC)",
+    "title": "Settlement Agreement between OFAC and Pegasus Worldwide Logistics; International Criminal Court Designation and General Licenses; Burma-related Designation Removal",
+    "published_on": "2026-10-09",
+    "published_on_precision": "day",
+    "url": null,
+    "document_sha256": "55aad77ae7d0943f3c08d0556a4cd7f18c9bb93bb0b5308f51106cc329b0028e",
+    "page_count": 1
+  },
+  "summary": "OFAC announced a $175,015 settlement with freight forwarder Pegasus Worldwide Logistics for four apparent violations of the Illicit Drug Trafficking Sanctions Regulations (dealing in blocked property by facilitating importation, between September 2023 and February 2024, of a machine supplied by a designated company) and six apparent violations of the Reporting, Procedures and Penalties Regulations (failing for six months to fully respond to an OFAC subpoena); OFAC deemed the conduct non-egregious and not voluntarily disclosed. The same release adds the International Criminal Court to the SDN List and issues four related general licenses (GL 13-16) covering ICC transactions, telecommunications/enterprise software, pension payments, and detainee-related transactions, and removes a Burma-related SDN listing for an individual previously linked to a designated person.",
+  "jurisdictions": [
+    "US",
+    "NL",
+    "MM"
+  ],
+  "typologies": [
+    {
+      "family": "sanctions",
+      "typology_id": "SAN006",
+      "label": "Trade Based Sanctions Evasion",
+      "emergent": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 1,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "Pegasus dealt in blocked property by facilitating the importation of a machine supplied by a designated company"
+        }
+      ],
+      "added_by": "extractor",
+      "review_justification": null
+    },
+    {
+      "family": "sanctions",
+      "typology_id": null,
+      "label": "Non-cooperation with regulator subpoena / recordkeeping failure",
+      "emergent": true,
+      "confidence": "low",
+      "citations": [
+        {
+          "page": 1,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "Pegasus also failed to respond fully for six months to an OFAC subpoena"
+        }
+      ],
+      "added_by": "extractor",
+      "review_justification": null
+    }
+  ],
+  "actors": [
+    {
+      "name": "Pegasus Worldwide Logistics",
+      "actor_type": "organisation",
+      "aliases": [],
+      "jurisdiction": null,
+      "role": "Freight forwarding firm; settled sanctions violations with OFAC",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 1,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "a freight forwarding firm involved in cross-border shipments"
+        }
+      ]
+    },
+    {
+      "name": "INTERNATIONAL CRIMINAL COURT",
+      "actor_type": "organisation",
+      "aliases": [],
+      "jurisdiction": "NL",
+      "role": "Entity newly added to OFAC SDN List",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 1,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "INTERNATIONAL CRIMINAL COURT, Oude Waalsdorperweg 10 2597 AK, The Hague, Netherlands"
+        }
+      ]
+    },
+    {
+      "name": "HTET, Theint Win",
+      "actor_type": "person",
+      "aliases": [],
+      "jurisdiction": "MM",
+      "role": "Individual removed from OFAC SDN List (Burma-related)",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 1,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "HTET, Theint Win, Burma; DOB 21 May 1999; nationality Burma"
+        }
+      ]
+    },
+    {
+      "name": "ZAW, Thein Win",
+      "actor_type": "person",
+      "aliases": [],
+      "jurisdiction": null,
+      "role": "Designated person to whom the delisted individual was linked",
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 1,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "Linked To: ZAW, Thein Win"
+        }
+      ]
+    }
+  ],
+  "indicators": [
+    {
+      "indicator_type": "network",
+      "description": "Trading party (importer counterparty) linked to / supplied by a designated sanctioned company; the import transaction was the mechanism of dealing in blocked property.",
+      "detectable_in_transaction_data": true,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 1,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "Pegasus dealt in blocked property by facilitating the importation of a machine supplied by a designated company"
+        }
+      ]
+    },
+    {
+      "indicator_type": "behavioural",
+      "description": "Subject entity failed to fully respond to a regulator's subpoena for an extended period, obstructing investigative visibility into the conduct.",
+      "detectable_in_transaction_data": false,
+      "confidence": "low",
+      "citations": [
+        {
+          "page": 1,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "Pegasus also failed to respond fully for six months to an OFAC subpoena"
+        }
+      ]
+    }
+  ],
+  "suggested_desks": [
+    "sanctions_desk",
+    "trade_desk"
+  ],
+  "overall_confidence": "medium",
+  "extraction_notes": "Actor resolution: all four named actors returned 'Unresolved' from the register (Pegasus Worldwide Logistics, INTERNATIONAL CRIMINAL COURT, HTET Theint Win, and ZAW Thein Win inferred from the 'Linked To' field) -- none are confirmed identities in the governed register; treat as new/unmatched entities pending human review. This is a brief OFAC recent-actions bulletin combining three unrelated items (enforcement settlement, ICC designation/general licenses, Burma delisting); only the Pegasus settlement carries typology-relevant content. The subpoena non-response typology is proposed as emergent since no library match cleared the search floor (closest CM004 at 0.16); a human may judge it better folded into a correspondent-banking or compliance-failure family not surfaced by the search phrase used. The ICC designation and general licenses (GL 13-16) and the Burma delisting are administrative list-change facts with no associated typology or indicator, included in the summary/actors for completeness only."
+}

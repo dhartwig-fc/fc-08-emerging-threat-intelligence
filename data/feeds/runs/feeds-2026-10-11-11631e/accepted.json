@@ -1,0 +1,23 @@
+{
+  "accepted": {},
+  "allocated_not_accepted": {},
+  "allocated_not_accepted_note": "allocated when an extraction started and carried by no accepted record: never reused (owner decision 11)",
+  "already_decided": {},
+  "already_decided_note": "decided in an earlier run, named here by that run's id: never re-recorded and not a decision of this run (owner ruling A, 2026-09-29)",
+  "decided_on": "2026-10-11",
+  "deferred": [
+    "ofsi:1e49c49ca389ac5c",
+    "ofsi:5bf3cdb7659fe36b",
+    "ofsi:bd73b8e3b0c6fcc2"
+  ],
+  "dropped": [],
+  "override_reconciliation": "interrupted by the owner (Ctrl-C) 2026-10-11 during triage; nothing extracted; all items deferred",
+  "reconciliation": {
+    "crash": null,
+    "problems": [
+      "session feeds-2026-10-11-11631e started and never completed"
+    ]
+  },
+  "run_id": "feeds-2026-10-11-11631e",
+  "status": "RECONCILIATION_FAILED"
+}

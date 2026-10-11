@@ -1,0 +1,58 @@
+{
+  "run_id": "feeds-2026-10-11-11631e",
+  "sources": {
+    "fincen": {
+      "already_seen": 15,
+      "error": null,
+      "items": [],
+      "listed": 15,
+      "listed_at": "2026-10-11T08:44:07Z",
+      "listing": "listings/fincen.html",
+      "listing_sha256": "14a15841d97cebccd875193cce4d613053af073ce051c0a9ee53a6703341bc01",
+      "listing_url": "https://www.fincen.gov/resources/advisoriesbulletinsfact-sheets/advisories",
+      "status": "ok"
+    },
+    "ofsi": {
+      "already_seen": 17,
+      "error": null,
+      "items": [
+        {
+          "document": null,
+          "item_id": "https://www.gov.uk/government/publications/uk-financial-sanctions-faqs#2026-10-09T09:50:21Z",
+          "key": "ofsi:bd73b8e3b0c6fcc2",
+          "published": "2026-10-09",
+          "source": "ofsi",
+          "summary": "OFSI publishes FAQs providing short-form guidance and technical information on financial sanctions.",
+          "title": "Guidance: UK Financial Sanctions FAQs",
+          "url": "https://www.gov.uk/government/publications/uk-financial-sanctions-faqs"
+        },
+        {
+          "document": null,
+          "item_id": "https://www.gov.uk/government/publications/ofsi-general-licence-int202611080040#2026-10-08T11:10:36Z",
+          "key": "ofsi:5bf3cdb7659fe36b",
+          "published": "2026-10-08",
+          "source": "ofsi",
+          "summary": "Details for OFSI General Licence INT/2026/11080040.",
+          "title": "Guidance: OFSI General Licence - INT/2026/11080040",
+          "url": "https://www.gov.uk/government/publications/ofsi-general-licence-int202611080040"
+        },
+        {
+          "document": null,
+          "item_id": "https://www.gov.uk/government/publications/ofsi-general-licence-int20268893924#2026-10-07T14:14:57Z",
+          "key": "ofsi:1e49c49ca389ac5c",
+          "published": "2026-10-07",
+          "source": "ofsi",
+          "summary": "Details for OFSI General Licence INT/2026/8893924, Maritime Mutual Re-Insurance Wind Down General Licence",
+          "title": "Guidance: OFSI General Licence INT/2026/8893924",
+          "url": "https://www.gov.uk/government/publications/ofsi-general-licence-int20268893924"
+        }
+      ],
+      "listed": 20,
+      "listed_at": "2026-10-11T08:44:06Z",
+      "listing": "listings/ofsi.atom",
+      "listing_sha256": "47e59512619cd19faa92904ce160697651c844b432a129b6444366d2f0306c58",
+      "listing_url": "https://www.gov.uk/government/organisations/office-of-financial-sanctions-implementation.atom",
+      "status": "ok"
+    }
+  }
+}

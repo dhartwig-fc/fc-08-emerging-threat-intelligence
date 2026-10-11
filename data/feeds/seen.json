@@ -295,6 +295,41 @@
       "source": "ofac"
     },
     {
+      "decided_on": "2026-10-11",
+      "decision": "drop",
+      "first_seen_run": "feeds-2026-10-11-e7ad24",
+      "item_id": "20261002",
+      "source": "ofac"
+    },
+    {
+      "decided_on": "2026-10-11",
+      "decision": "drop",
+      "first_seen_run": "feeds-2026-10-11-e7ad24",
+      "item_id": "20261005",
+      "source": "ofac"
+    },
+    {
+      "decided_on": "2026-10-11",
+      "decision": "drop",
+      "first_seen_run": "feeds-2026-10-11-e7ad24",
+      "item_id": "20261008",
+      "source": "ofac"
+    },
+    {
+      "decided_on": "2026-10-11",
+      "decision": "accept",
+      "first_seen_run": "feeds-2026-10-11-e7ad24",
+      "item_id": "20261009",
+      "source": "ofac"
+    },
+    {
+      "decided_on": "2026-10-11",
+      "decision": "drop",
+      "first_seen_run": "feeds-2026-10-11-e7ad24",
+      "item_id": "20261009_33",
+      "source": "ofac"
+    },
+    {
       "decided_on": "2026-09-29",
       "decision": "drop",
       "first_seen_run": "catalogue:90b57e8ba022",
@@ -414,10 +449,24 @@
       "source": "ofsi"
     },
     {
+      "decided_on": "2026-10-11",
+      "decision": "drop",
+      "first_seen_run": "feeds-2026-10-11-e7ad24",
+      "item_id": "https://www.gov.uk/government/publications/ofsi-general-licence-int202611080040#2026-10-08T11:10:36Z",
+      "source": "ofsi"
+    },
+    {
       "decided_on": "2026-09-29",
       "decision": "drop",
       "first_seen_run": "catalogue:90b57e8ba022",
       "item_id": "https://www.gov.uk/government/publications/ofsi-general-licence-int20268893924#2026-07-06T11:21:19Z",
+      "source": "ofsi"
+    },
+    {
+      "decided_on": "2026-10-11",
+      "decision": "drop",
+      "first_seen_run": "feeds-2026-10-11-e7ad24",
+      "item_id": "https://www.gov.uk/government/publications/ofsi-general-licence-int20268893924#2026-10-07T14:14:57Z",
       "source": "ofsi"
     },
     {
@@ -467,6 +516,13 @@
       "decision": "drop",
       "first_seen_run": "feeds-2026-09-30-bd1185",
       "item_id": "https://www.gov.uk/government/publications/uk-financial-sanctions-faqs#2026-09-29T14:25:51Z",
+      "source": "ofsi"
+    },
+    {
+      "decided_on": "2026-10-11",
+      "decision": "drop",
+      "first_seen_run": "feeds-2026-10-11-e7ad24",
+      "item_id": "https://www.gov.uk/government/publications/uk-financial-sanctions-faqs#2026-10-09T09:50:21Z",
       "source": "ofsi"
     },
     {

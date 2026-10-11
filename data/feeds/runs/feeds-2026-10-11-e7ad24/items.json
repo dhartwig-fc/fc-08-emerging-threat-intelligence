@@ -1,0 +1,277 @@
+{
+  "run_id": "feeds-2026-10-11-e7ad24",
+  "sources": {
+    "fincen": {
+      "already_seen": 15,
+      "error": null,
+      "items": [],
+      "listed": 15,
+      "listed_at": "2026-10-11T08:51:10Z",
+      "listing": "listings/fincen.html",
+      "listing_sha256": "01f3c6d475bc4e1bb40f58a526fe2c6ae3efb7ea9128ed0efa6096c597640dc9",
+      "listing_url": "https://www.fincen.gov/resources/advisoriesbulletinsfact-sheets/advisories",
+      "status": "ok"
+    },
+    "ofac": {
+      "already_seen": 2,
+      "error": null,
+      "items": [
+        {
+          "document": {
+            "bytes": 43221,
+            "content_type": "text/html",
+            "fetched_at": "2026-10-11T08:51:53Z",
+            "final_url": "https://ofac.treasury.gov/recent-actions/20261009",
+            "linked_pdfs": [],
+            "page_error": null,
+            "pages": 1,
+            "path": "docs/55aad77ae7d0943f3c08d0556a4cd7f18c9bb93bb0b5308f51106cc329b0028e.html",
+            "sha256": "55aad77ae7d0943f3c08d0556a4cd7f18c9bb93bb0b5308f51106cc329b0028e",
+            "text_pages": 1
+          },
+          "item_id": "20261009",
+          "key": "ofac:67443fcb784dba53",
+          "published": "2026-10-09",
+          "source": "ofac",
+          "summary": "",
+          "title": "Settlement Agreement between the U.S. Department of the Treasury's Office of Foreign Assets Control and Pegasus Worldwide Logistics; International Criminal Court Designation and General Licenses; Burma-related Designation Removal",
+          "url": "https://ofac.treasury.gov/recent-actions/20261009"
+        },
+        {
+          "document": {
+            "bytes": 39052,
+            "content_type": "text/html",
+            "fetched_at": "2026-10-11T08:52:03Z",
+            "final_url": "https://ofac.treasury.gov/recent-actions/20261009_33",
+            "linked_pdfs": [],
+            "page_error": null,
+            "pages": 1,
+            "path": "docs/256b0fe29909d49bac02739a89e7b09065348a93a06d8eab0876ddbe204a53fc.html",
+            "sha256": "256b0fe29909d49bac02739a89e7b09065348a93a06d8eab0876ddbe204a53fc",
+            "text_pages": 1
+          },
+          "item_id": "20261009_33",
+          "key": "ofac:7c79f8bed47fc571",
+          "published": "2026-10-09",
+          "source": "ofac",
+          "summary": "",
+          "title": "Issuance of Russia-related General License",
+          "url": "https://ofac.treasury.gov/recent-actions/20261009_33"
+        },
+        {
+          "document": {
+            "bytes": 57582,
+            "content_type": "text/html",
+            "fetched_at": "2026-10-11T08:52:15Z",
+            "final_url": "https://ofac.treasury.gov/recent-actions/20261008",
+            "linked_pdfs": [],
+            "page_error": null,
+            "pages": 6,
+            "path": "docs/1ab44978f738b70a795e8e0338be9046b726829540a68240464237755f4ecf69.html",
+            "sha256": "1ab44978f738b70a795e8e0338be9046b726829540a68240464237755f4ecf69",
+            "text_pages": 6
+          },
+          "item_id": "20261008",
+          "key": "ofac:aadbaddff9b290c6",
+          "published": "2026-10-08",
+          "source": "ofac",
+          "summary": "",
+          "title": "Iran-related Designations; Issuance of Iran-related General License; Issuance of Amended Russia-related General License",
+          "url": "https://ofac.treasury.gov/recent-actions/20261008"
+        },
+        {
+          "document": {
+            "bytes": 99985,
+            "content_type": "text/html",
+            "fetched_at": "2026-10-11T08:52:25Z",
+            "final_url": "https://ofac.treasury.gov/recent-actions/20261005",
+            "linked_pdfs": [],
+            "page_error": null,
+            "pages": 21,
+            "path": "docs/54d2d5a2c2d4bd7e2a25ef0db2ab0f444aa2f4a86ab96cf94c99391290d3e98d.html",
+            "sha256": "54d2d5a2c2d4bd7e2a25ef0db2ab0f444aa2f4a86ab96cf94c99391290d3e98d",
+            "text_pages": 21
+          },
+          "item_id": "20261005",
+          "key": "ofac:ce5ba6b58a11204c",
+          "published": "2026-10-05",
+          "source": "ofac",
+          "summary": "",
+          "title": "Designations Removals; Designations Updates; Publication of Iran-related OFAC Alert; Publication of Amended Iran-related Frequently Asked Question",
+          "url": "https://ofac.treasury.gov/recent-actions/20261005"
+        },
+        {
+          "document": {
+            "bytes": 41439,
+            "content_type": "text/html",
+            "fetched_at": "2026-10-11T08:52:38Z",
+            "final_url": "https://ofac.treasury.gov/recent-actions/20261002",
+            "linked_pdfs": [],
+            "page_error": null,
+            "pages": 1,
+            "path": "docs/0845d35154e0c4e161fe7cdc2d050ad30ffdd248216292792c3fc5763757f4e4.html",
+            "sha256": "0845d35154e0c4e161fe7cdc2d050ad30ffdd248216292792c3fc5763757f4e4",
+            "text_pages": 1
+          },
+          "item_id": "20261002",
+          "key": "ofac:0868dd93bc51b8da",
+          "published": "2026-10-02",
+          "source": "ofac",
+          "summary": "",
+          "title": "Counter Terrorism Designations",
+          "url": "https://ofac.treasury.gov/recent-actions/20261002"
+        },
+        {
+          "document": {
+            "bytes": 55236,
+            "content_type": "text/html",
+            "fetched_at": "2026-10-11T08:52:49Z",
+            "final_url": "https://ofac.treasury.gov/recent-actions/20261001",
+            "linked_pdfs": [],
+            "page_error": null,
+            "pages": 5,
+            "path": "docs/1d3e62a214735ed87f933582c85223a5871c23f4a2492c4e8763a476dfa4c365.html",
+            "sha256": "1d3e62a214735ed87f933582c85223a5871c23f4a2492c4e8763a476dfa4c365",
+            "text_pages": 5
+          },
+          "item_id": "20261001",
+          "key": "ofac:94d34cd7226d01c2",
+          "published": "2026-10-01",
+          "source": "ofac",
+          "summary": "",
+          "title": "Iran-related Designations and Designations Updates; Transnational Criminal Organizations Designation; Publication of Iran-related Determination; Publication of Amended Iran-related Frequently Asked Question",
+          "url": "https://ofac.treasury.gov/recent-actions/20261001"
+        },
+        {
+          "document": {
+            "bytes": 47750,
+            "content_type": "text/html",
+            "fetched_at": "2026-10-11T08:53:01Z",
+            "final_url": "https://ofac.treasury.gov/recent-actions/20260930",
+            "linked_pdfs": [],
+            "page_error": null,
+            "pages": 4,
+            "path": "docs/70e0742109fb6b1b9c4ae1b01077f058f6594c1d432207dbcb469c93a93c76b2.html",
+            "sha256": "70e0742109fb6b1b9c4ae1b01077f058f6594c1d432207dbcb469c93a93c76b2",
+            "text_pages": 4
+          },
+          "item_id": "20260930",
+          "key": "ofac:dc63a1c2b84a58f7",
+          "published": "2026-09-30",
+          "source": "ofac",
+          "summary": "",
+          "title": "Counter Terrorism and Transnational Criminal Organizations Designations; Belarus, Counter Narcotics, and Libya Designations Removals",
+          "url": "https://ofac.treasury.gov/recent-actions/20260930"
+        },
+        {
+          "document": {
+            "bytes": 69701,
+            "content_type": "text/html",
+            "fetched_at": "2026-10-11T08:53:11Z",
+            "final_url": "https://ofac.treasury.gov/recent-actions/20260929",
+            "linked_pdfs": [],
+            "page_error": null,
+            "pages": 11,
+            "path": "docs/354dc9b52f20e0d5a8c62f406f56b11083ccce1b3cbde392ae4d068545d4f28a.html",
+            "sha256": "354dc9b52f20e0d5a8c62f406f56b11083ccce1b3cbde392ae4d068545d4f28a",
+            "text_pages": 11
+          },
+          "item_id": "20260929",
+          "key": "ofac:528a733c96bd988a",
+          "published": "2026-09-29",
+          "source": "ofac",
+          "summary": "",
+          "title": "Counter Narcotics, Counter Terrorism, Iran-related, and Non-Proliferation Designations",
+          "url": "https://ofac.treasury.gov/recent-actions/20260929"
+        }
+      ],
+      "listed": 10,
+      "listed_at": "2026-10-11T08:51:21Z",
+      "listing": "listings/ofac.html",
+      "listing_sha256": "e34c3f74966ba36f9198f757f34a35c9d96bed60e53ab5b7b7c699c5021c3af8",
+      "listing_url": "https://ofac.treasury.gov/recent-actions",
+      "status": "ok"
+    },
+    "ofsi": {
+      "already_seen": 17,
+      "error": null,
+      "items": [
+        {
+          "document": {
+            "bytes": 88812,
+            "content_type": "text/html",
+            "fetched_at": "2026-10-11T08:51:37Z",
+            "final_url": "https://www.gov.uk/government/publications/uk-financial-sanctions-faqs",
+            "linked_pdfs": [],
+            "page_error": null,
+            "pages": 2,
+            "path": "docs/6e2cb6a21fa437e94e824f4eccdbe463415ce05b0d79283e7b5bbe9de1cdb52c.html",
+            "sha256": "6e2cb6a21fa437e94e824f4eccdbe463415ce05b0d79283e7b5bbe9de1cdb52c",
+            "text_pages": 2
+          },
+          "item_id": "https://www.gov.uk/government/publications/uk-financial-sanctions-faqs#2026-10-09T09:50:21Z",
+          "key": "ofsi:bd73b8e3b0c6fcc2",
+          "published": "2026-10-09",
+          "source": "ofsi",
+          "summary": "OFSI publishes FAQs providing short-form guidance and technical information on financial sanctions.",
+          "title": "Guidance: UK Financial Sanctions FAQs",
+          "url": "https://www.gov.uk/government/publications/uk-financial-sanctions-faqs"
+        },
+        {
+          "document": {
+            "bytes": 70569,
+            "content_type": "text/html",
+            "fetched_at": "2026-10-11T08:51:39Z",
+            "final_url": "https://www.gov.uk/government/publications/ofsi-general-licence-int202611080040",
+            "linked_pdfs": [
+              "https://assets.publishing.service.gov.uk/media/6ac77912b016250bca013a30/Zarubezhneft_Wind_Down_GL.pdf",
+              "https://assets.publishing.service.gov.uk/media/6ac77903ab368efeb4c9335b/Zarubezhneft_Wind_Down_GL_PN.pdf"
+            ],
+            "page_error": null,
+            "pages": 1,
+            "path": "docs/b6ec4317a4e79b3013f5769cbdf6ffd47bdc4a735f21de511b9099363d32880b.html",
+            "sha256": "b6ec4317a4e79b3013f5769cbdf6ffd47bdc4a735f21de511b9099363d32880b",
+            "text_pages": 1
+          },
+          "item_id": "https://www.gov.uk/government/publications/ofsi-general-licence-int202611080040#2026-10-08T11:10:36Z",
+          "key": "ofsi:5bf3cdb7659fe36b",
+          "published": "2026-10-08",
+          "source": "ofsi",
+          "summary": "Details for OFSI General Licence INT/2026/11080040.",
+          "title": "Guidance: OFSI General Licence - INT/2026/11080040",
+          "url": "https://www.gov.uk/government/publications/ofsi-general-licence-int202611080040"
+        },
+        {
+          "document": {
+            "bytes": 75033,
+            "content_type": "text/html",
+            "fetched_at": "2026-10-11T08:51:41Z",
+            "final_url": "https://www.gov.uk/government/publications/ofsi-general-licence-int20268893924",
+            "linked_pdfs": [
+              "https://assets.publishing.service.gov.uk/media/6ac63ca4ab368efeb4c932b8/Amended_Maritime_Mutual_-_INT-2026-8893924_GL_7_October_2026.pdf",
+              "https://assets.publishing.service.gov.uk/media/6ac63cadab368efeb4c932b9/Amended_-_Maritime_Mutual_INT-2026-8893924_PN_7_October_2026.pdf"
+            ],
+            "page_error": null,
+            "pages": 1,
+            "path": "docs/f8a7f8a4d2a1ab6708efabd7e1883fc8fe821b42f5b1343a7e9c2fdd509518c2.html",
+            "sha256": "f8a7f8a4d2a1ab6708efabd7e1883fc8fe821b42f5b1343a7e9c2fdd509518c2",
+            "text_pages": 1
+          },
+          "item_id": "https://www.gov.uk/government/publications/ofsi-general-licence-int20268893924#2026-10-07T14:14:57Z",
+          "key": "ofsi:1e49c49ca389ac5c",
+          "published": "2026-10-07",
+          "source": "ofsi",
+          "summary": "Details for OFSI General Licence INT/2026/8893924, Maritime Mutual Re-Insurance Wind Down General Licence",
+          "title": "Guidance: OFSI General Licence INT/2026/8893924",
+          "url": "https://www.gov.uk/government/publications/ofsi-general-licence-int20268893924"
+        }
+      ],
+      "listed": 20,
+      "listed_at": "2026-10-11T08:51:09Z",
+      "listing": "listings/ofsi.atom",
+      "listing_sha256": "47e59512619cd19faa92904ce160697651c844b432a129b6444366d2f0306c58",
+      "listing_url": "https://www.gov.uk/government/organisations/office-of-financial-sanctions-implementation.atom",
+      "status": "ok"
+    }
+  }
+}

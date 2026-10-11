@@ -1,0 +1,33 @@
+{
+  "schema": "fc08-feed-advisories/1",
+  "advisories": [
+    {
+      "advisory_id": "ADV-2026-0026",
+      "file": "adv-2026-0026-ofac.html",
+      "publisher": "OFAC (US Treasury)",
+      "source_type": "ofac",
+      "title": "Settlement Agreement between the U.S. Department of the Treasury's Office of Foreign Assets Control and Pegasus Worldwide Logistics; International Criminal Court Designation and General Licenses; Burma-related Designation Removal",
+      "published_on": "2026-10-09",
+      "published_on_precision": "day",
+      "url": "https://ofac.treasury.gov/recent-actions/20261009",
+      "source_matrix_tier": "live feed",
+      "sha256": "55aad77ae7d0943f3c08d0556a4cd7f18c9bb93bb0b5308f51106cc329b0028e",
+      "bytes": 43221,
+      "pages": 1,
+      "selection_rationale": "live feed run feeds-2026-10-11-e7ad24, item ofac:67443fcb784dba53: triaged relevant: Settlement describes enforcement case: freight forwarder dealt in blocked property by facilitating importation of a machine from a designated company, and stonewalled a subpoena for six months.",
+      "feed": {
+        "run_id": "feeds-2026-10-11-e7ad24",
+        "key": "ofac:67443fcb784dba53",
+        "item_id": "20261009",
+        "listed_url": "https://ofac.treasury.gov/recent-actions/20261009",
+        "extraction_run_id": "adv-2026-0026-extractor-3e5c8263f4"
+      }
+    }
+  ],
+  "counts": {
+    "advisories": 1,
+    "by_source_type": {
+      "ofac": 1
+    }
+  }
+}
