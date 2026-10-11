@@ -92,7 +92,12 @@ EXTRACTION_SECTION = """Before your final message, queue extraction. This run ex
 - feeds_extract refuses an item not triaged relevant. It may fetch the publication's own PDF, linked from the page you read. If it replies "Failed:", name the item in your final message.
 - In your final message, mark each queued item "queued"."""
 
-FULL_PROMPT = TRIAGE_PROMPT + "\n\n" + EXTRACTION_SECTION
+# Owner rule (2026-10-11), LIVE only: OFAC designation-page verdicts flipped from run to run
+# (ofac:94d34cd7226d01c2, ofac:dc63a1c2b84a58f7: kept 2026-09-30 and 10-02, dropped 10-11). It is appended, not
+# woven into TRIAGE_PROMPT, so an eval run's bytes (PROMPT_SHA256) stay the ones B measured.
+OFAC_DESIGNATION_RULE = """An OFAC designation page is relevant when it names a network AND says how that network moved money or evaded sanctions: front or shell companies, crypto or digital-currency addresses, or a laundering, procurement or financing role. A bare list of names with no such line, or a page of only removals and updates, is not relevant. When you mark such a page relevant, quote that network-and-method line as your evidence."""
+
+FULL_PROMPT = TRIAGE_PROMPT + "\n\n" + OFAC_DESIGNATION_RULE + "\n\n" + EXTRACTION_SECTION
 PROMPT_SHA256 = hashlib.sha256(TRIAGE_PROMPT.encode("utf-8")).hexdigest()
 FULL_PROMPT_SHA256 = hashlib.sha256(FULL_PROMPT.encode("utf-8")).hexdigest()
 

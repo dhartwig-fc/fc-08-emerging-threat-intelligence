@@ -15,6 +15,8 @@ Usage:
     python evals/check_feeds_orchestrator.py --mutate unpinned-budget    # the session cap moves off US$1.50
     python evals/check_feeds_orchestrator.py --mutate over-ceiling       # the caps no longer fit the US$5 ceiling
     python evals/check_feeds_orchestrator.py --mutate stale-full-hash    # FULL_PROMPT_SHA256 no longer matches FULL_PROMPT
+    python evals/check_feeds_orchestrator.py --mutate drop-ofac-rule     # the live prompt loses the OFAC designation rule
+    python evals/check_feeds_orchestrator.py --mutate leak-ofac-rule     # the OFAC rule leaks into the eval (triage) prompt
 
 WHAT IT HOLDS (spec sections 1 and 4; the questions evals/check_tool_surface.py asks of the extractor):
   no built-ins   tools=[] and the argv carries --tools "", setting_sources=[], strict_mcp_config -- both modes;
@@ -66,13 +68,14 @@ from feeds import extraction as feeds_extraction, triage as feeds_triage  # noqa
 
 MUTATIONS = ("builtin-tools", "settings", "preapprove-triage", "allow-propose", "extract-tool", "no-asymmetry",
              "extract-in-eval", "inherit-catalogue", "triage-drift", "unpinned-budget", "over-ceiling",
-             "stale-full-hash")
+             "stale-full-hash", "drop-ofac-rule", "leak-ofac-rule")
 LIVE = of.FeedsRun("feeds-2026-10-02-fff555")
 EVAL_RUN = of.FeedsRun("feeds-2026-10-02-fff666", catalogue=ROOT / "evals" / "feeds" / "catalogue.json",
                        batch=("ofsi:0123456789abcdef",))
 TRIAGE = "mcp__feeds__feeds_triage"
 EXTRACT = "mcp__feeds__feeds_extract"
 SERVER = ROOT / "mcp_server" / "feeds_server.py"
+EVAL_PROMPT_SHA256 = "58333bd271470b94dc3ecd686c6a9e11938c515a3b33187be359eb47e1480378"  # B's measured bytes
 PINNED = {"MAX_BUDGET_USD": 1.50, "MAX_TURNS": 80, "RUN_CEILING_USD": 5.00, "EXTRACTION_BUDGET_USD": 1.00,
           "EXTRACTION_MAX_TURNS": 60}
 
@@ -160,6 +163,10 @@ def checks(mutation) -> list:
         PINNED["EXTRACTION_BUDGET_USD"] = 1.50  # the pin moved WITH it: only the ceiling arithmetic can catch this
     if mutation == "stale-full-hash":
         of.FULL_PROMPT_SHA256 = "0" * 64
+    if mutation == "drop-ofac-rule":
+        of.FULL_PROMPT = of.FULL_PROMPT.replace(of.OFAC_DESIGNATION_RULE + "\n\n", "")
+    if mutation == "leak-ofac-rule":
+        of.TRIAGE_PROMPT = of.TRIAGE_PROMPT + "\n\n" + of.OFAC_DESIGNATION_RULE
     out = []
     for run in (EVAL_RUN, LIVE):
         out += surface(of.agent_options(run), run, mutation)
@@ -207,6 +214,15 @@ def checks(mutation) -> list:
                 and "feeds_extract" in live_prompt[len(of.TRIAGE_PROMPT):] and "At most 3" in live_prompt,
                 "live: the prompt BEGINS with B's measured triage bytes and adds the extraction step (at most 3)",
                 of.FULL_PROMPT_SHA256[:16]))
+    out.append((of.OFAC_DESIGNATION_RULE in live_prompt and of.OFAC_DESIGNATION_RULE not in o.system_prompt
+                and "network-and-method line" in live_prompt,
+                "owner rule 2026-10-11: the LIVE prompt contains the OFAC designation rule and the eval prompt does not",
+                "in live %s, in eval %s" % (of.OFAC_DESIGNATION_RULE in live_prompt,
+                                            of.OFAC_DESIGNATION_RULE in o.system_prompt)))
+    out.append((hashlib.sha256(o.system_prompt.encode("utf-8")).hexdigest() == EVAL_PROMPT_SHA256
+                and of.PROMPT_SHA256 == EVAL_PROMPT_SHA256,
+                "the eval prompt is byte-identical to the bytes B measured (PROMPT_SHA256 unchanged)",
+                hashlib.sha256(o.system_prompt.encode("utf-8")).hexdigest()[:16]))
     # Prompt-sha brief (2026-09-29): run_session passes telemetry.run_started this exact constant for a
     # live run. Pinned here rather than at the call site -- see the docstring above.
     out.append((of.FULL_PROMPT_SHA256 == hashlib.sha256(of.FULL_PROMPT.encode("utf-8")).hexdigest(),
