@@ -64,6 +64,19 @@
         "adv-2026-0013-extractor-f617bd3b00"
       ],
       "typology_id": "SAN007"
+    },
+    {
+      "advisory_id": "ADV-2026-0026",
+      "decided_at": "2026-10-11T09:10:52+00:00",
+      "link_key": "ADV-2026-0026::SAN006",
+      "note": "owner 2026-10-11: freight forwarder facilitating import of a machine from a designated company is trade-based sanctions evasion",
+      "proposal_ids": [
+        "f7c68931b2a8befb"
+      ],
+      "run_ids": [
+        "adv-2026-0026-extractor-3e5c8263f4"
+      ],
+      "typology_id": "SAN006"
     }
   ],
   "generated_from": "data/review_decisions.jsonl"
