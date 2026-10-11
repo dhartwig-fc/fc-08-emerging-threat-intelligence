@@ -26,6 +26,9 @@ Usage:
     python evals/check_friday_run.py --mutate citation-error-silent   # a citation check that could not run reads as clean
     python evals/check_friday_run.py --mutate no-alert-clause         # line 3 (the owner's alert) drops the citation warning
     python evals/check_friday_run.py --mutate citation-check-raises   # the runner's citation check may raise past the run
+    python evals/check_friday_run.py --mutate crash-catches-exception-only  # an interrupt bypasses the crash path
+    python evals/check_friday_run.py --mutate no-sigterm-handler      # a SIGTERM is not converted into the crash path
+    python evals/check_friday_run.py --mutate classify-ignores-extracted-nothing  # a crashed run that extracted nothing blocks
 
 WHAT IT HOLDS (spec sections 1, 2 and 5):
   budget       extractions start in queue order only while spend + US$1.00 <= US$5.00; the next is DEFERRED
@@ -57,6 +60,14 @@ WHAT IT HOLDS (spec sections 1, 2 and 5):
                and line 3 both count them. At the boundary: a crash INSIDE allocate_advisory_id records every
                item without crashing again; when recording itself fails, the report is still written and names
                it as a RECONCILIATION problem;
+  interrupt    (C2 hardening, measured live 2026-10-11: Ctrl-C left feeds-2026-10-11-11631e with no run.json or
+               report.md, "pending", and it would have REFUSED the next Friday) a KeyboardInterrupt in the
+               session, a real SIGINT (asyncio's cancel) and a real SIGTERM mid-extraction each take the crash
+               path -- run.json and report.md written, every queued request FAILED naming the interrupt, the lock
+               released, the previous SIGTERM handler restored -- and are then RE-RAISED (non-zero exit). A run
+               that extracted NOTHING is classified nothing_to_decide and is absent from runs.blocking(); one
+               interrupted AFTER an extraction stays pending. Under --scheduled an interrupt posts no Python
+               alert and exits neither 0 nor 10, so with friday_run.sh's one alert the total is exactly one;
   citations    (C2, owner decision 2026-09-30, "warn"; the first live run, feeds-2026-09-30-bd1185, reported two
                records "extracted" and accept_run then refused each for one citation not on its page) right
                after an extraction that produced a record, friday() checks its citations by THE rule accept_run
@@ -104,8 +115,10 @@ from __future__ import annotations
 
 import argparse
 import asyncio
+import contextlib
 import fcntl
 import hashlib
+import io
 import json
 import os
 import re
@@ -128,7 +141,7 @@ from feeds.sources import linked_pdfs  # noqa: E402
 from check_document_pages import tiny_pdf  # noqa: E402
 
 FILES = {"telemetry": ROOT / "agents" / "telemetry.py", "of": ROOT / "agents" / "orchestrate_feeds.py",
-         "reconcile": ROOT / "feeds" / "reconcile.py", "report": ROOT / "feeds" / "report.py",
+         "reconcile": ROOT / "feeds" / "reconcile.py", "runs": ROOT / "feeds" / "runs.py", "report": ROOT / "feeds" / "report.py",
          "friday": ROOT / "tools" / "friday_run.py"}
 MUTATIONS = {
     "no-budget-check": ("friday", "    return spent + of.EXTRACTION_BUDGET_USD <= of.RUN_CEILING_USD + 1e-9\n",
@@ -192,6 +205,12 @@ MUTATIONS = {
                               '        return {"checked": 0, "off_page": 0, "first": None, "error": None}\n'),
     # warn fix round 1: the owner's ALERT (line 3) carries the warning, and the never-raises clause is pinned
     "no-alert-clause": ("report", "    counts += citation_clause(rec, outcomes or {})\n", "    pass\n"),
+    # C2 hardening (2026-10-11): an interrupt is a crash too, and a crash that extracted nothing never blocks.
+    "crash-catches-exception-only": ("friday", "    except (KeyboardInterrupt, asyncio.CancelledError) as exc:  # the same crash path, then re-raised below\n",
+                                     "    except ZeroDivisionError as exc:  # the same crash path, then re-raised below\n"),
+    "no-sigterm-handler": ("friday", "        loop.add_signal_handler(signal.SIGTERM, lambda: (terminated.append(1), task.cancel()))\n",
+                           "        pass\n"),
+    "classify-ignores-extracted-nothing": ("runs", "    if crashed_extracting_nothing(folder):\n", "    if False:\n"),
     "citation-check-raises": ("friday", "    except Exception as exc:  # noqa: BLE001 -- recorded, never raised past the run\n",
                               "    except ZeroDivisionError as exc:  # noqa: BLE001 -- recorded, never raised past the run\n"),
 }
@@ -207,6 +226,7 @@ def load_all(mutation):
                                        ("of", (agents, "orchestrate_feeds", "agents.orchestrate_feeds")),
                                        ("reconcile", (feeds, "reconcile", "feeds.reconcile")),
                                        ("report", (feeds, "report", "feeds.report")),
+                                       ("runs", (feeds, "runs", "feeds.runs")),
                                        ("friday", (None, None, "friday_run_under_test"))):
         path = FILES[name]
         source = path.read_text(encoding="utf-8")
@@ -897,6 +917,123 @@ def body(mutation) -> list:
                         "OSError: disk full**" in text,
                     "when recording the crash's outcomes itself fails, the report is still written, FAILED, and says "
                     "so as a reconciliation problem", "%s" % rec.get("status")))
+
+        # C2 hardening (2026-10-11): an interrupt is a crash, and a crash that extracted nothing never blocks.
+        import signal
+
+        def interrupted(rid, n, extractor_for, scheduled=False):
+            """Run a stub Friday that is interrupted; returns (what escaped, Python's alerts, keys, run id)."""
+            notes_, seen_ = [], {}
+            tracked_ = Path(box).parent / "data" / "feeds" / "runs"
+
+            async def wired(run__, root=box, **kw):
+                run_, keys_, session_ = listed_run(m, root, run__.run_id, n_relevant=n, n_dropped=0, queue=n, cost=0.3)
+                seen_.update(rid=run__.run_id, keys=keys_)
+                return await real(run__, session=session_, extractor=extractor_for(keys_), root=root,
+                                  advisory_list=alist, tracked_runs=tracked_)
+            real = fr.friday
+            escaped = None
+            try:
+                if scheduled:
+                    fr.friday = wired
+                    with contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(io.StringIO()):
+                        fr.main(["--scheduled"], root=box, today=date(2026, 10, 2), preflight_reasons=[],
+                                notifier=lambda t, b_: notes_.append((t, b_)) or True)
+                else:
+                    run_, keys_, session_ = listed_run(m, box, rid, n_relevant=n, n_dropped=0, queue=n, cost=0.3)
+                    seen_.update(rid=rid, keys=keys_)
+                    asyncio.run(real(run_, session=session_, extractor=extractor_for(keys_), root=box,
+                                     advisory_list=alist, tracked_runs=tracked_))
+            except BaseException as exc:  # noqa: BLE001 -- the interrupt escaping IS the behaviour under test
+                escaped = exc
+            finally:
+                fr.friday = real
+            return escaped, notes_, seen_.get("keys", []), seen_.get("rid", rid)
+
+        def after(rid):
+            folder_ = inbox.run_dir(rid, box)
+            saved_ = json.loads((folder_ / "run.json").read_text(encoding="utf-8")) if (folder_ / "run.json").exists() else {}
+            with fr.run_lock(box) as free_:
+                pass
+            return (saved_, (folder_ / "report.md").exists(), m["runs"].classify(rid, box),
+                    [r_ for r_, _a in m["runs"].blocking(box, date(2026, 10, 3))], free_)
+
+        def interrupting(kind):
+            async def go(key_i):
+                if kind == "keyboard":
+                    raise KeyboardInterrupt()
+                os.kill(os.getpid(), signal.SIGINT if kind == "sigint" else signal.SIGTERM)
+                await asyncio.sleep(3)
+            return go
+
+        def nothing_extracted(kind):
+            def make(keys_):
+                async def extractor(run_, req, advisory_id, root_):
+                    await interrupting(kind)(req["key"])
+                return extractor
+            return make
+
+        from datetime import date
+        outer = []
+        previous_outer = signal.signal(signal.SIGTERM, lambda *a: outer.append("SIGTERM reached the outer handler"))
+        try:
+            for n_, (kind, name, shown) in enumerate((
+                    ("keyboard", "aaa030", "KeyboardInterrupt"), ("sigint", "aaa031", "KeyboardInterrupt"),
+                    ("sigterm", "aaa032", "SIGTERM"))):
+                rid = "feeds-2026-10-02-%s" % name
+                escaped, _n, keys, _r = interrupted(rid, 2, nothing_extracted(kind))
+                saved, has_report, state, blocks, free = after(rid)
+                outs = extraction.load_outcomes(rid, box)
+                handler_back = signal.getsignal(signal.SIGTERM)
+                text = report_text(rid, box)
+                out.append((escaped is not None and not isinstance(escaped, Exception)
+                            and saved.get("crash") is not None and shown in (saved.get("crash") or "")
+                            and has_report and text.startswith("# Friday run %s: FAILED\n" % rid)
+                            and sorted(outs) == sorted(keys)
+                            and all(o["status"] == "failed" and shown in o["error"] for o in outs.values())
+                            and state == "nothing_to_decide" and rid not in blocks and free
+                            and handler_back is not signal.SIG_DFL and not outer,
+                            "%s mid-run: run.json and report.md are written (FAILED, naming the interrupt), every queued "
+                            "request has a failed outcome naming it, the run classifies nothing_to_decide and is not in "
+                            "blocking(), the lock is released, the interrupt still escapes (non-zero exit)%s" % (
+                                kind, " and the previous SIGTERM handler is back" if kind == "sigterm" else ""),
+                            "escaped %r; crash %r; report %s; state %s; blocking %s; lock free %s; outer %s" % (
+                                escaped, saved.get("crash"), has_report, state, blocks, free, outer)))
+                outer.clear()
+
+            # An interrupt AFTER an extraction completed leaves the run pending: a record exists to be decided.
+            rid = "feeds-2026-10-02-aaa033"
+
+            def one_then_interrupt(keys_):
+                inner_ = extractor_with(m, [0.4])
+
+                async def extractor(run_, req, advisory_id, root_):
+                    if req["key"] == keys_[0]:
+                        return await inner_(run_, req, advisory_id, root_)
+                    raise KeyboardInterrupt()
+                return extractor
+            escaped, _n, keys, _r = interrupted(rid, 2, one_then_interrupt)
+            saved, has_report, state, blocks, free = after(rid)
+            outs = extraction.load_outcomes(rid, box)
+            out.append((isinstance(escaped, KeyboardInterrupt) and has_report and state == "pending" and rid in blocks
+                        and outs[keys[0]]["status"] == "extracted" and outs[keys[1]]["status"] == "failed" and free,
+                        "an interrupt AFTER one extraction completed leaves the run pending (and blocking): the "
+                        "record it produced still needs a decision",
+                        "escaped %r; state %s; blocking %s" % (escaped, state, blocks)))
+
+            # --scheduled: an interrupt posts no Python alert and exits neither 0 nor 10, so friday_run.sh's one
+            # alert makes exactly one. (RESERVED is read from the module; main() lets the interrupt escape.)
+            escaped, notes_, keys, rid = interrupted("", 2, nothing_extracted("keyboard"), scheduled=True)
+            saved, has_report, state, blocks, free = after(rid)
+            code_ = None if escaped is None else (escaped.code if isinstance(escaped, SystemExit) else 130)
+            total_ = len(notes_) + (0 if code_ in (0, fr.SCHEDULED_NOTIFIED_EXIT) else 1)
+            out.append((isinstance(escaped, KeyboardInterrupt) and has_report and state == "nothing_to_decide"
+                        and notes_ == [] and total_ == 1,
+                        "a scheduled run interrupted mid-extraction writes its report, posts NO alert from Python and "
+                        "exits non-zero and not 10, so the launcher's alert is the one alert (total exactly one)",
+                        "escaped %r; python alerts %d; exit %s; total %d" % (escaped, len(notes_), code_, total_)))
+        finally:
+            signal.signal(signal.SIGTERM, previous_outer)
 
         # Review fix 2: friday() points telemetry at the run folder itself, and restores what it found.
         rid = "feeds-2026-10-02-aaa013"

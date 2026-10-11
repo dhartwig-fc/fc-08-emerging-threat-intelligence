@@ -27,7 +27,12 @@ changes neither the run's status nor the exit code: the item is still extracted;
 friday() points telemetry.TELEMETRY_DIR at inbox/<run_id>/telemetry/ for the run and restores it after, so
 every session's telemetry lands in the run whoever calls it. Whatever raises inside the run -- the session,
 an allocation, an extraction -- run.json and report.md are still written: the run is FAILED, and run.json's
-"crash" names the exception.
+"crash" names the exception. An INTERRUPT takes the same path: Ctrl-C (KeyboardInterrupt / asyncio's cancel) or
+SIGTERM (a handler installed for the run's duration only, previous one restored) writes run.json and report.md,
+gives every queued request a failed outcome naming it, releases the lock -- and is then RE-RAISED (SIGTERM as
+SystemExit(143)), so the process still exits non-zero. Under --scheduled that exit is neither 0 nor 10, so
+friday_run.sh posts the one alert (Python posted none). feeds.runs.classify calls a crashed run that extracted
+nothing "nothing_to_decide": it never blocks the next Friday.
 
 WRITES only inbox/<run_id>/ (gitignored): run.json, advisory_ids.jsonl, extraction_runs.jsonl, records/,
 proposals/, telemetry/, report.md. Nothing tracked changes; tools/accept_run.py is the only way in.
@@ -81,6 +86,7 @@ import contextlib
 import fcntl
 import json
 import os
+import signal
 import sys
 from datetime import date, datetime, timezone
 from pathlib import Path
@@ -219,6 +225,16 @@ async def _locked_friday(run: of.FeedsRun, session, extractor, root: Path, advis
     started = _now()
     summary: dict = {}
     crash: Optional[str] = None
+    interrupt: Optional[BaseException] = None  # re-raised after the report: an interrupt is recorded, never swallowed
+    terminated: list = []
+    # SIGTERM (logout, shutdown) cancels this task, so it takes the same crash path as Ctrl-C; the previous
+    # handler is put back in the finally. Ctrl-C reaches the task as CancelledError (asyncio.run's own handler)
+    # or as KeyboardInterrupt (raised straight in the session).
+    loop, task, previous_term = asyncio.get_running_loop(), asyncio.current_task(), signal.getsignal(signal.SIGTERM)
+    try:
+        loop.add_signal_handler(signal.SIGTERM, lambda: (terminated.append(1), task.cancel()))
+    except (NotImplementedError, RuntimeError, ValueError):  # not the main thread: nothing to convert
+        previous_term = None
     spent = of.MAX_BUDGET_USD  # the session counts at its cap until its cost arrives
     previous_dir = telemetry.TELEMETRY_DIR
     # Every session this run starts -- the orchestrator and each extraction -- writes its telemetry into the
@@ -252,8 +268,15 @@ async def _locked_friday(run: of.FeedsRun, session, extractor, root: Path, advis
                 extraction.append_outcome(run.run_id, outcome, root)
     except Exception as exc:  # a report on EVERY run: a crashed one is FAILED and says why
         crash = ("the run raised %s: %s" % (type(exc).__name__, exc))[:500]
+    except (KeyboardInterrupt, asyncio.CancelledError) as exc:  # the same crash path, then re-raised below
+        interrupt = exc
+        crash = ("the run raised %s: %s" % (("SIGTERM", "terminated") if terminated else
+                                            ("KeyboardInterrupt", "interrupted")))
     finally:
         telemetry.TELEMETRY_DIR = previous_dir
+        if previous_term is not None:
+            loop.remove_signal_handler(signal.SIGTERM)
+            signal.signal(signal.SIGTERM, previous_term)
     unrecorded = None
     if crash is not None and summary.get("failure") is None:
         unrecorded = record_crash(run.run_id, "the run crashed before this item was extracted (%s)" % (
@@ -264,7 +287,10 @@ async def _locked_friday(run: of.FeedsRun, session, extractor, root: Path, advis
            "limit": summary.get("limit"), "orchestrator_cost_usd": summary.get("cost_usd"), "spent_usd": round(spent, 6),
            "ceiling_usd": of.RUN_CEILING_USD, "prompt_sha256": of.FULL_PROMPT_SHA256, "model": of.MODEL})
     report.write(run.run_id, root)
-    return reconcile.reconcile_run(run.run_id, root)
+    rec = reconcile.reconcile_run(run.run_id, root)
+    if interrupt is not None:
+        raise SystemExit(128 + signal.SIGTERM) if terminated else interrupt
+    return rec
 
 
 def record_crash(run_id: str, reason: str, root: Path) -> Optional[str]:

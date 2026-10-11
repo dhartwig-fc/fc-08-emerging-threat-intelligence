@@ -5,7 +5,10 @@ A run folder under inbox/ is exactly one of:
   eval               items.json carries "eval": true (evals/run_feeds_triage.py, slice 2 B). NEVER pending:
                      B's 18 eval runs share the production inbox, and a Friday must not wait on them.
   accepted           tools/accept_run.py wrote accepted.json into it.
-  nothing_to_decide  no items.json (refused or failed before listing), or no item listed as new.
+  nothing_to_decide  no items.json (refused or failed before listing), or no item listed as new, or a run that
+                     CRASHED (run.json "crash": an exception, Ctrl-C or SIGTERM) before any extraction produced a
+                     record: nothing in it is decided, its items are not in the ledger, and they come back
+                     next Friday on their own.
   pending            listed at least one new item and has not been accepted.
 inbox/expired/<run_id>/ holds runs `accept_run --expire` moved aside; nothing here counts them.
 
@@ -33,6 +36,20 @@ def run_date(run_id: str) -> date:
     return date.fromisoformat(run_id[len("feeds-"):len("feeds-") + 10])
 
 
+def crashed_extracting_nothing(folder: Path) -> bool:
+    """run.json names a crash and no outcome is "extracted". A crash AFTER an extraction stays pending: a
+    record exists that a person must decide on."""
+    try:
+        saved = json.loads((folder / "run.json").read_text(encoding="utf-8"))
+        if not saved.get("crash"):
+            return False
+        lines = (folder / "extraction_runs.jsonl").read_text(encoding="utf-8").splitlines() \
+            if (folder / "extraction_runs.jsonl").exists() else []
+    except (OSError, ValueError, AttributeError):
+        return False
+    return not any(json.loads(l).get("status") == "extracted" for l in lines if l.strip())
+
+
 def classify(run_id: str, root: Path = inbox.INBOX_ROOT) -> str:
     folder = inbox.run_dir(run_id, root)
     if not (folder / inbox.ITEMS).exists():
@@ -42,6 +59,8 @@ def classify(run_id: str, root: Path = inbox.INBOX_ROOT) -> str:
         return EVAL
     if (folder / ACCEPTED).exists():
         return ACCEPTED_STATE
+    if crashed_extracting_nothing(folder):
+        return NOTHING
     return PENDING if inbox.items(state) else NOTHING
 
 
