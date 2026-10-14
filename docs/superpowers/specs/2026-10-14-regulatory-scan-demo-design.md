@@ -29,4 +29,5 @@ root refusals; `site/SCAN_PUBLISHED`), `evals/check_scan_demo.py` (independent r
 
 ## Known gaps, recorded not fixed
 - The run's report.md and accepted.json disagree about two notices; shown, not resolved.
-- The walkthrough page does not yet link back to the scan page (would change `build_walkthrough.py` and its pins).
+- ~~The walkthrough page does not yet link back to the scan page.~~ Closed 2026-10-14 (f62b985): it does, and
+  `check_scan_demo` fails if either page stops linking to the other.
