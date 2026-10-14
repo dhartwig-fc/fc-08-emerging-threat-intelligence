@@ -14,8 +14,8 @@ the whole list -- a decision is never silently dropped. An empty list is refused
     ADV-2026-0002 BA008: approve -- note
     - ADV-2026-0002 EMERGENT[shadow fleet ship-to-ship transfer]: reject -- note
 
-The deciding modes take --queue-dir, --log, --approved-links and
---approved-emergent all overridden or none: any mixture is refused before
+The deciding modes take --queue-dir, --log, --approved-links,
+--approved-emergent and --approved-proposals all overridden or none: any mixture is refused before
 anything is read or written, so a scratch run can never touch the real record.
 
 Both deciding modes go through governance.decisions.apply, which refuses an
@@ -40,7 +40,7 @@ from governance import decisions as gd  # noqa: E402
 from governance import proposals as gp  # noqa: E402
 
 MARKERS = re.compile(r"^[\s\-*\u2022]+")  # leading whitespace, -, * and the bullet a phone inserts
-LINE = re.compile(r"^(ADV-\d{4}-\d{4})\s+(?:([A-Z]{2,6}\d{3}[A-Z]?)|EMERGENT\[(.+?)\]):\s*(approve|reject)"
+LINE = re.compile(r"^(ADV-\d{4}-\d{4})\s+(?:([A-Z]{2,6}\d{3}[A-Z]?)|EMERGENT\[(.+?)\]|PROPOSAL\[\s*(TP-\d{4}-\d{3})\s*\]):\s*(approve|reject)"
                   r"\s*(?:--\s*(.*))?$", re.I)
 
 
@@ -53,8 +53,9 @@ def parse_decisions(text: str) -> list:
         m = LINE.match(line)
         if not m:
             raise SystemExit("cannot read decision line, nothing written: %r" % raw.strip())
-        aid, tid, label, decision, note = m.groups()
-        out.append((gp.link_key(aid.upper(), tid.upper() if tid else None, label), decision.lower(),
+        aid, tid, label, tp, decision, note = m.groups()
+        out.append((gp.link_key(aid.upper(), tid.upper() if tid else None, label, tp.upper() if tp else None),
+                    decision.lower(),
                     (note or "").strip()))
     return out
 
@@ -79,7 +80,7 @@ def _context():
 
 
 def _finish(args) -> None:
-    gd.write_approved(gd.load_log(args.log), args.approved_links, args.approved_emergent)
+    gd.write_approved(gd.load_log(args.log), args.approved_links, args.approved_emergent, args.approved_proposals)
 
 
 def cmd_list(args) -> int:
@@ -120,7 +121,7 @@ def cmd_decisions(args) -> int:
 
 def cmd_check(args) -> int:
     decisions, problems = gd.load_log_checked(args.log)
-    problems += gd.check_approved(decisions, args.approved_links, args.approved_emergent)
+    problems += gd.check_approved(decisions, args.approved_links, args.approved_emergent, args.approved_proposals)
     known = {p.proposal_id: p.link_key for p in gp.load_queue(args.queue_dir)[0]}
     problems += gd.check_log(decisions, known)
     for p in problems:
@@ -131,7 +132,7 @@ def cmd_check(args) -> int:
 
 
 def _mixed_record_paths(args) -> str:
-    """'' when the four record paths are all at their defaults (the real record) or all overridden;
+    """'' when the five record paths are all at their defaults (the real record) or all overridden;
     otherwise the refusal, naming both sides.
 
     They travel together because each one feeds the next: the queue feeds the log,
@@ -140,12 +141,13 @@ def _mixed_record_paths(args) -> str:
     """
     paths = (("--queue-dir", args.queue_dir, gp.QUEUE_DIR), ("--log", args.log, gd.LOG),
              ("--approved-links", args.approved_links, gd.APPROVED_LINKS),
-             ("--approved-emergent", args.approved_emergent, gd.APPROVED_EMERGENT))
+             ("--approved-emergent", args.approved_emergent, gd.APPROVED_EMERGENT),
+             ("--approved-proposals", args.approved_proposals, gd.APPROVED_PROPOSALS))
     moved = [flag for flag, given, default in paths if Path(given).resolve() != Path(default).resolve()]
     if not moved or len(moved) == len(paths):
         return ""
     kept = [flag for flag, _, _ in paths if flag not in moved]
-    return ("REFUSED: the four record paths travel together, all overridden or none -- overridden: %s; "
+    return ("REFUSED: the five record paths travel together, all overridden or none -- overridden: %s; "
             "at default: %s. Nothing was read or written." % (", ".join(moved), ", ".join(kept)))
 
 
@@ -196,6 +198,7 @@ def main(argv: list) -> int:
     ap.add_argument("--log", type=Path, default=gd.LOG)
     ap.add_argument("--approved-links", type=Path, default=gd.APPROVED_LINKS)
     ap.add_argument("--approved-emergent", type=Path, default=gd.APPROVED_EMERGENT)
+    ap.add_argument("--approved-proposals", type=Path, default=gd.APPROVED_PROPOSALS)
     args = ap.parse_args(argv)
     if args.list:
         return cmd_list(args)

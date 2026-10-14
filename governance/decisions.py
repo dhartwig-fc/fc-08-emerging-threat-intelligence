@@ -37,6 +37,7 @@ from governance.proposals import ROOT, Link
 LOG = ROOT / "data" / "review_decisions.jsonl"
 APPROVED_LINKS = ROOT / "data" / "approved_links.json"
 APPROVED_EMERGENT = ROOT / "data" / "approved_emergent.json"
+APPROVED_PROPOSALS = ROOT / "data" / "approved_proposal_links.json"   # Stage565 S2; read by fc-10
 OPEN, DECIDED, NEW_EVIDENCE = "open", "decided", "new_evidence"
 DECISIONS = ("approve", "reject")
 
@@ -58,11 +59,14 @@ class Decision:
     proposal_ids: Tuple[str, ...]
     run_ids: Tuple[str, ...]
     quotes_seen_sha256: Tuple[str, ...]
+    typology_proposal: Optional[str] = None   # Stage565 S2; absent from every pre-S2 line
 
     def to_line(self) -> str:
         d = asdict(self)
         for k in ("proposal_ids", "run_ids", "quotes_seen_sha256"):
             d[k] = list(d[k])
+        if d["typology_proposal"] is None:
+            del d["typology_proposal"]           # governed and emergent lines serialise exactly as before S2
         return json.dumps(d, sort_keys=True, ensure_ascii=False)
 
     @classmethod
@@ -174,6 +178,7 @@ def apply(requests, links: Dict[str, Link], quarantined: Dict[str, str], log_pat
                               "a change of mind needs its own dated record" % (key, p.decision, p.decided_at[:10]))
         out.append(Decision(decided_at=stamp, link_key=key, kind=link.kind, advisory_id=link.advisory_id,
                             typology_id=link.typology_id, emergent_label=link.emergent_label,
+                            typology_proposal=link.typology_proposal,
                             decision=decision, note=(note or "").strip(), proposal_ids=link.proposal_ids,
                             run_ids=link.run_ids, quotes_seen_sha256=tuple(sorted(link.quote_hashes()))))
     log_path.parent.mkdir(parents=True, exist_ok=True)
@@ -183,6 +188,9 @@ def apply(requests, links: Dict[str, Link], quarantined: Dict[str, str], log_pat
     return out
 
 
+_TARGET = {"governed": "typology_id", "emergent": "emergent_label", "proposal": "typology_proposal"}
+
+
 def _rows(decisions, kind: str) -> list:
     rows = []
     for d in sorted(latest(decisions).values(), key=lambda d: d.link_key):
@@ -190,38 +198,36 @@ def _rows(decisions, kind: str) -> list:
             continue
         row = {"link_key": d.link_key, "advisory_id": d.advisory_id, "decided_at": d.decided_at,
                "note": d.note, "run_ids": list(d.run_ids), "proposal_ids": list(d.proposal_ids)}
-        if kind == "governed":
-            row["typology_id"] = d.typology_id
-        else:
-            row["emergent_label"] = d.emergent_label
+        row[_TARGET[kind]] = getattr(d, _TARGET[kind])
         rows.append(row)
     return rows
 
 
-def rebuild(decisions) -> Tuple[str, str]:
-    """(links file text, emergent file text), byte-identical for the same log."""
+def rebuild(decisions) -> Tuple[str, str, str]:
+    """(links, emergent, proposal links) file texts, byte-identical for the same log."""
     def dump(rows) -> str:
         return json.dumps({"generated_from": "data/review_decisions.jsonl", "approved": rows},
                           indent=2, sort_keys=True, ensure_ascii=False) + "\n"
     decisions = list(decisions)
-    return dump(_rows(decisions, "governed")), dump(_rows(decisions, "emergent"))
+    return tuple(dump(_rows(decisions, k)) for k in ("governed", "emergent", "proposal"))
 
 
-def write_approved(decisions, links_path: Path = APPROVED_LINKS, emergent_path: Path = APPROVED_EMERGENT) -> None:
-    links_text, emergent_text = rebuild(decisions)
-    links_path.parent.mkdir(parents=True, exist_ok=True)
-    links_path.write_text(links_text, encoding="utf-8")
-    emergent_path.write_text(emergent_text, encoding="utf-8")
+def write_approved(decisions, links_path: Path = APPROVED_LINKS, emergent_path: Path = APPROVED_EMERGENT,
+                   proposals_path: Path = APPROVED_PROPOSALS) -> None:
+    for path, text in zip((links_path, emergent_path, proposals_path), rebuild(decisions)):
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(text, encoding="utf-8")
 
 
-def check_approved(decisions, links_path: Path = APPROVED_LINKS,
-                   emergent_path: Path = APPROVED_EMERGENT) -> List[str]:
+def check_approved(decisions, links_path: Path = APPROVED_LINKS, emergent_path: Path = APPROVED_EMERGENT,
+                   proposals_path: Path = APPROVED_PROPOSALS) -> List[str]:
     """Problems, empty when the files are exactly what the log rebuilds to."""
     decisions = list(decisions)
-    if not decisions and not links_path.exists() and not emergent_path.exists():
+    paths = (links_path, emergent_path, proposals_path)
+    if not decisions and not any(p.exists() for p in paths):
         return []
     problems = []
-    for path, want in zip((links_path, emergent_path), rebuild(decisions)):
+    for path, want in zip(paths, rebuild(decisions)):
         if not path.exists():
             problems.append("%s is missing; rebuild with tools/review.py" % path.name)
         elif path.read_text(encoding="utf-8") != want:

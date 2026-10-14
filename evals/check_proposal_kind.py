@@ -70,8 +70,41 @@ def checks_queue():
         gp._contract_problem(p) or "ok"
 
 
+from governance import decisions as gd  # noqa: E402
+import review  # noqa: E402  (tools/review.py)
+
+
+def _decision(kind, **over):
+    base = dict(decided_at="2026-10-14T00:00:00+00:00", link_key="k", kind=kind, advisory_id="ADV-2026-0030",
+                typology_id=None, emergent_label=None, decision="approve", note="n", proposal_ids=("p",),
+                run_ids=("r",), quotes_seen_sha256=("q",))
+    base.update(over)
+    return gd.Decision(**base)
+
+
+def checks_decisions():
+    old = {"decided_at": "2026-10-11T09:10:52+00:00", "link_key": "ADV-2026-0026::SAN006", "kind": "governed",
+           "advisory_id": "ADV-2026-0026", "typology_id": "SAN006", "emergent_label": None, "decision": "approve",
+           "note": "n", "proposal_ids": ["p"], "run_ids": ["r"], "quotes_seen_sha256": ["q"]}
+    d = gd.Decision.from_line(old)
+    yield d.typology_proposal is None and "typology_proposal" not in json.loads(d.to_line()), \
+        "a pre-S2 decision line reads and re-serialises unchanged", d.link_key
+    prop = _decision("proposal", link_key="ADV-2026-0030::PROPOSAL[TP-2026-001]", typology_proposal="TP-2026-001")
+    emer = _decision("emergent", link_key="ADV-2026-0031::EMERGENT[x]", emergent_label="x")
+    links_t, emergent_t, proposals_t = gd.rebuild([prop, emer])
+    rows = json.loads(proposals_t)["approved"]
+    yield [r.get("typology_proposal") for r in rows] == ["TP-2026-001"], \
+        "a proposal approval lands in the proposals file", proposals_t.strip()[:80]
+    yield "TP-2026-001" not in emergent_t and "EMERGENT[x]" not in proposals_t, \
+        "emergent and proposal approvals never cross files", "separate"
+    parsed = review.parse_decisions("ADV-2026-0030 PROPOSAL[tp-2026-001]: approve -- same channel")
+    yield parsed == [("ADV-2026-0030::PROPOSAL[TP-2026-001]", "approve", "same channel")], \
+        "a pasted PROPOSAL decision line parses to the gate's key", repr(parsed)
+
+
 def checks():
     yield from checks_queue()
+    yield from checks_decisions()
 
 
 def main(argv: list) -> int:

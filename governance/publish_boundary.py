@@ -18,7 +18,7 @@ from governance import decisions as gd
 
 FORBIDDEN_LITERALS: Tuple[str, ...] = (
     ".jsonl", ".superpowers", ".venv",
-    gd.LOG.name, gd.APPROVED_LINKS.name, gd.APPROVED_EMERGENT.name,
+    gd.LOG.name, gd.APPROVED_LINKS.name, gd.APPROVED_EMERGENT.name, gd.APPROVED_PROPOSALS.name,
 )
 _PATH_PATTERNS: Tuple[Pattern, ...] = (
     re.compile(r"/Users/[^\s\"'<]*"),
