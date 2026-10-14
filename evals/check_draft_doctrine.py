@@ -5,17 +5,24 @@ nothing else. Usage: .venv/bin/python evals/check_draft_doctrine.py [--mutate LA
 from __future__ import annotations
 
 import argparse
+import asyncio
 import copy
+import hashlib
+import json
 import re
 import sys
+import tempfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
 from schemas import doctrine_draft as ddr  # noqa: E402
+from agents import draft_doctrine as dd  # noqa: E402
+from agents.permissions import PROPOSE_TOOL, READ_ONLY_TOOLS  # noqa: E402
+from claude_agent_sdk import ResultMessage  # noqa: E402
 
-MUTATIONS = ("cite-any", "multiline")
+MUTATIONS = ("cite-any", "multiline", "write-tool", "overwrite", "no-pages")
 MUTATION = None
 
 PROPOSAL = {
@@ -75,8 +82,98 @@ def checks_pure():
     yield ddr.allowed_citations(no_pages) == set(), "an import without pages allows no citation", ""
 
 
+def stub(structured=None, error=None):
+    log = {"built": [], "prompt": None}
+
+    class _Client:
+        def __init__(self, options):
+            log["built"].append(options)
+
+        async def __aenter__(self):
+            return self
+
+        async def __aexit__(self, *exc):
+            return False
+
+        async def query(self, prompt, session_id="default"):
+            log["prompt"] = prompt
+
+        async def receive_response(self):
+            yield ResultMessage(subtype="error_during_execution" if error else "success", duration_ms=1,
+                                duration_api_ms=1, is_error=bool(error), num_turns=2, session_id="stub",
+                                total_cost_usd=0.04, result=error, structured_output=structured)
+    return _Client, log
+
+
+def run(structured=None, error=None, proposal=PROPOSAL, existing=None):
+    """draft() against a stub session in a scratch tree: (path or the refusal, log, files written, import sha)."""
+    with tempfile.TemporaryDirectory() as d:
+        d = Path(d)
+        imp = d / "typology_proposals.json"
+        imp.write_text(json.dumps({"proposals": [proposal]}), encoding="utf-8")
+        out = d / "doctrine_drafts"
+        if existing is not None:
+            out.mkdir()
+            (out / "TP-2026-001.md").write_text(existing, encoding="utf-8")
+        client, log = stub(structured, error)
+        real = dd.ClaudeSDKClient
+        dd.ClaudeSDKClient = client
+        try:
+            got = asyncio.run(dd.draft("TP-2026-001", "stub-model", 0.5, 10, import_path=imp, out_dir=out))
+        except (Exception, SystemExit) as exc:  # the refusal IS the result; SystemExit is how the CLI refuses
+            got = exc
+        finally:
+            dd.ClaudeSDKClient = real
+        files = {p.name: p.read_bytes() for p in sorted(out.iterdir())} if out.exists() else {}
+        return got, log, files, hashlib.sha256(imp.read_bytes()).hexdigest()
+
+
+def checks_session():
+    o = dd.agent_options("stub-model", 0.5, 10)
+    yield o.tools == [], "the drafting agent has no built-in tools (tools=[])", o.tools
+    yield o.setting_sources == [] and o.strict_mcp_config is True, \
+        "it inherits no settings and only the one MCP server", (o.setting_sources, o.strict_mcp_config)
+    yield list(o.allowed_tools) == list(dd.DRAFT_TOOLS) and set(dd.DRAFT_TOOLS) <= set(READ_ONLY_TOOLS) \
+        and PROPOSE_TOOL not in o.allowed_tools, "it may only read the Knowledge Centre: no write tool", o.allowed_tools
+    denied = [asyncio.run(o.can_use_tool(t, {}, None)) for t in (PROPOSE_TOOL, "Write")]
+    yield all(type(r).__name__ == "PermissionResultDeny" for r in denied), \
+        "its callback denies propose_link and any built-in", [type(r).__name__ for r in denied]
+    yield o.output_format["schema"] == ddr.DoctrineDraft.model_json_schema(), \
+        "it must answer in the DoctrineDraft schema", ""
+
+    got, log, files, imp_sha = run(good())
+    md = files.get("TP-2026-001.md", b"")
+    man = json.loads(files.get("TP-2026-001.json", b"{}"))
+    yield isinstance(got, Path) and md.startswith(b"# TP-2026-001 "), "a good answer is written as the draft", got
+    yield man.get("draft_sha256") == hashlib.sha256(md).hexdigest() and man.get("import_sha256") == imp_sha \
+        and man.get("prompt_sha256") == dd.PROMPT_SHA256 and man.get("proposal_id") == "TP-2026-001", \
+        "the manifest pins the draft, the import and the prompt", man
+    yield all(c["quote"] in (log["prompt"] or "") and "p.%d" % c["page"] in (log["prompt"] or "")
+              for e in PROPOSAL["evidence"] for c in e["citations"]), \
+        "the prompt carries every evidence quote with its page", (log["prompt"] or "")[:80]
+
+    got, _, files, _ = run(_with_statement(citations=[{"advisory_id": "ADV-2026-0003", "page": 9}]))
+    yield isinstance(got, BaseException) and not files, "an answer citing evidence the proposal lacks writes nothing", got
+    got, _, files, _ = run(_with_statement(text=LINE + "\nmore"))
+    yield isinstance(got, BaseException) and not files, "an answer breaking a rendering rule writes nothing", got
+    got, _, files, _ = run(good(), error="stub: the model failed")
+    yield isinstance(got, BaseException) and not files, "a failed session writes nothing", got
+
+    got, log, _, _ = run(good(), proposal=dict(PROPOSAL, proposal_id="TP-2026-002"))
+    yield isinstance(got, BaseException) and not log["built"], "an unknown proposal is refused before any session", got
+    no_pages = copy.deepcopy(PROPOSAL)
+    no_pages["evidence"][0].pop("citations")
+    got, log, _, _ = run(good(), proposal=no_pages)
+    yield isinstance(got, BaseException) and "re-import" in str(got) and not log["built"], \
+        "an import without pages is refused before any session", got
+    got, log, files, _ = run(good(), existing="the owner's earlier draft\n")
+    yield isinstance(got, BaseException) and files.get("TP-2026-001.md") == b"the owner's earlier draft\n" \
+        and not log["built"], "an existing draft is never overwritten", got
+
+
 def checks():
     yield from checks_pure()
+    yield from checks_session()
 
 
 def main(argv: list) -> int:
@@ -89,6 +186,12 @@ def main(argv: list) -> int:
         ddr.citation_problems = lambda draft, proposal: []
     elif MUTATION == "multiline":
         ddr.text_problems = lambda text: []
+    elif MUTATION == "write-tool":
+        dd.DRAFT_TOOLS = dd.DRAFT_TOOLS + (PROPOSE_TOOL,)
+    elif MUTATION == "overwrite":
+        dd._refuse_existing = lambda path: None
+    elif MUTATION == "no-pages":
+        dd._refuse_pageless = lambda proposal: None
     failures = 0
     for ok, label, detail in checks():
         print("  %-4s %s\n         %s" % ("PASS" if ok else "FAIL", label, detail))
