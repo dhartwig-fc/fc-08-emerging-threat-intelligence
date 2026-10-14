@@ -128,6 +128,7 @@ EXEMPT = {
     "check_publisher.py": "--mutate patches publisher/builder functions in memory (MUTATION == ...)",
     "check_proposals_import.py": "--mutate perturbs a synthetic export or the converted dict in memory",
     "check_proposal_kind.py": "--mutate rebinds governance and server functions in memory",
+    "check_draft_doctrine.py": "--mutate rebinds draft_doctrine and doctrine_draft functions in memory",
     "check_review_gate.py": "--mutate rebinds gate functions in memory",
     "check_scan_demo.py": "--mutate perturbs a deep copy of tools/build_scan_demo.py's inputs (or the built page) in memory",
     "check_tool_surface.py": "--mutate* replace the options object or QUEUE_DIR in memory",
