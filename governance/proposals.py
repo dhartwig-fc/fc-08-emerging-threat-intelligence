@@ -43,15 +43,26 @@ ADVISORY_LIST = ROOT / "evals" / "golden" / "advisory_list.json"
 FEED_ADVISORY_LIST = ROOT / "data" / "feeds" / "advisory_list.json"
 ADVISORIES_DIR = ROOT / "data" / "advisories"
 LIBRARY = ROOT / "data" / "typologies.json"
+TYPOLOGY_PROPOSALS = ROOT / "data" / "typology_proposals.json"   # the S1 import of fc-10's open proposals
+
+
+def open_proposal_ids(path: Path = TYPOLOGY_PROPOSALS) -> set:
+    """Ids of the fc-10 typology proposals still in development, as last imported. None imported: empty."""
+    if not path.exists():
+        return set()
+    return {p["proposal_id"] for p in json.loads(path.read_text(encoding="utf-8")).get("proposals", [])}
 
 
 def quote_hash(page: int, quote: str) -> str:
     return hashlib.sha256(("%d|%s" % (page, norm(quote))).encode("utf-8")).hexdigest()[:16]
 
 
-def link_key(advisory_id: str, typology_id: Optional[str], emergent_label: Optional[str]) -> str:
+def link_key(advisory_id: str, typology_id: Optional[str], emergent_label: Optional[str],
+             typology_proposal: Optional[str] = None) -> str:
     if typology_id:
         return "%s::%s" % (advisory_id, typology_id)
+    if typology_proposal:
+        return "%s::PROPOSAL[%s]" % (advisory_id, typology_proposal.upper())
     return "%s::EMERGENT[%s]" % (advisory_id, " ".join((emergent_label or "").split()).lower())
 
 
@@ -68,6 +79,9 @@ class Proposal:
     rationale: str
     confidence: str
     citations: Tuple[Tuple[int, str], ...]
+    # Stage565 S2: the link names an open fc-10 typology proposal. Kept OUT of body() when unset so every
+    # proposal written before S2 recomputes its id unchanged.
+    typology_proposal: Optional[str] = None
     # The queue file the line was read from. Not part of the proposal: never in
     # body(), so never in the id. The re-check holds it against run_id.
     source_file: str = ""
@@ -79,24 +93,27 @@ class Proposal:
                    typology_id=d.get("typology_id"), emergent_label=d.get("emergent_label"),
                    rationale=d["rationale"], confidence=d["confidence"],
                    citations=tuple((int(c["page"]), c["quote"]) for c in d["citations"]),
-                   source_file=source_file)
+                   typology_proposal=d.get("typology_proposal"), source_file=source_file)
 
     def body(self) -> dict:
         """What the server hashed: the line minus proposal_id and proposed_at, rebuilt from the fields
         the gate actually uses -- so the id covers everything a reviewer is shown."""
-        return {"schema": SCHEMA, "run_id": self.run_id, "stage": self.stage, "advisory_id": self.advisory_id,
-                "document_sha256": self.document_sha256, "typology_id": self.typology_id,
-                "emergent_label": self.emergent_label, "rationale": self.rationale,
-                "confidence": self.confidence,
-                "citations": [{"page": pg, "quote": q} for pg, q in self.citations]}
+        out = {"schema": SCHEMA, "run_id": self.run_id, "stage": self.stage, "advisory_id": self.advisory_id,
+               "document_sha256": self.document_sha256, "typology_id": self.typology_id,
+               "emergent_label": self.emergent_label, "rationale": self.rationale,
+               "confidence": self.confidence,
+               "citations": [{"page": pg, "quote": q} for pg, q in self.citations]}
+        if self.typology_proposal:
+            out["typology_proposal"] = self.typology_proposal
+        return out
 
     @property
     def kind(self) -> str:
-        return "governed" if self.typology_id else "emergent"
+        return "governed" if self.typology_id else "proposal" if self.typology_proposal else "emergent"
 
     @property
     def link_key(self) -> str:
-        return link_key(self.advisory_id, self.typology_id, self.emergent_label)
+        return link_key(self.advisory_id, self.typology_id, self.emergent_label, self.typology_proposal)
 
 
 @dataclass(frozen=True)
@@ -112,10 +129,11 @@ class Link:
     typology_id: Optional[str]
     emergent_label: Optional[str]
     proposals: List[Proposal] = field(default_factory=list)
+    typology_proposal: Optional[str] = None
 
     @property
     def kind(self) -> str:
-        return "governed" if self.typology_id else "emergent"
+        return "governed" if self.typology_id else "proposal" if self.typology_proposal else "emergent"
 
     def quotes(self) -> List[Tuple[int, str, int]]:
         """Distinct quotes in page order, each with how many proposals carried it."""
@@ -196,10 +214,10 @@ def _contract_problem(p: Proposal) -> Optional[str]:
     if recomputed != p.proposal_id:
         return ("proposal_id %s does not recompute (the line hashes to %s): it was changed after the "
                 "server wrote it" % (p.proposal_id, recomputed))
-    has_typology, has_label = bool((p.typology_id or "").strip()), bool((p.emergent_label or "").strip())
-    if has_typology == has_label:
-        return ("names %s of typology_id and emergent_label; a proposal names exactly one"
-                % ("both" if has_typology else "neither"))
+    named = [bool((v or "").strip()) for v in (p.typology_id, p.emergent_label, p.typology_proposal)]
+    if sum(named) != 1:
+        return ("names %s of typology_id, emergent_label and typology_proposal; a proposal names exactly one"
+                % {0: "neither", 2: "both", 3: "all three"}[sum(named)])
     if p.stage not in STAGES:
         return "stage %r is not one of %s" % (p.stage, ", ".join(STAGES))
     if Path(p.source_file).stem != p.run_id:
@@ -213,11 +231,13 @@ def _contract_problem(p: Proposal) -> Optional[str]:
 
 
 def recheck(proposals, advisory_list: Path = ADVISORY_LIST, advisories_dir: Path = ADVISORIES_DIR,
-            library: Path = LIBRARY, feed_list: Optional[Path] = FEED_ADVISORY_LIST) -> Tuple[List[Proposal], List[Quarantined]]:
+            library: Path = LIBRARY, feed_list: Optional[Path] = FEED_ADVISORY_LIST,
+            open_proposals: Path = TYPOLOGY_PROPOSALS) -> Tuple[List[Proposal], List[Quarantined]]:
     """Split proposals into clean and quarantined. A quarantined proposal can never be approved.
     `feed_list` is the live-feed advisory list (slice 2 C); None leaves it out."""
     advisories = _advisories(advisory_list, feed_list)
     known = _library_ids(library)
+    open_ids = open_proposal_ids(open_proposals)
     indexes: Dict[str, Optional[PageIndex]] = {}
     clean: List[Proposal] = []
     quarantined: List[Quarantined] = []
@@ -240,6 +260,8 @@ def recheck(proposals, advisory_list: Path = ADVISORY_LIST, advisories_dir: Path
                     % (p.document_sha256[:12], a["sha256"][:12]))
         if p.typology_id and p.typology_id not in known:
             return "%s is not in the library" % p.typology_id
+        if p.typology_proposal and p.typology_proposal not in open_ids:
+            return "%s is not an open typology proposal (fc-10 may have closed or merged it)" % p.typology_proposal
         if not p.citations:
             return "no citations"
         index = index_for(a)
@@ -271,7 +293,8 @@ def group(proposals) -> Dict[str, Link]:
     for p in sorted(proposals, key=lambda p: (p.link_key, p.proposed_at, p.proposal_id)):
         link = links.get(p.link_key)
         if link is None:
-            link = links[p.link_key] = Link(p.link_key, p.advisory_id, p.typology_id, p.emergent_label)
+            link = links[p.link_key] = Link(p.link_key, p.advisory_id, p.typology_id, p.emergent_label,
+                                            typology_proposal=p.typology_proposal)
         link.proposals.append(p)
     return dict(sorted(links.items()))
 

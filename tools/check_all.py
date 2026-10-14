@@ -90,6 +90,7 @@ GUARDS = [
     ("check_accept_run", ["evals/check_accept_run.py"], "cold"),
     ("check_schedule", ["evals/check_schedule.py"], "cold"),
     ("check_proposals_import", ["evals/check_proposals_import.py"], "cold"),
+    ("check_proposal_kind", ["evals/check_proposal_kind.py"], "cold"),
     # Static: every text --mutate anchor and rebound name still matches its source; this list never runs a mutation.
     ("check_mutation_anchors", ["evals/check_mutation_anchors.py"], "cold"),
     ("check_published_walkthrough --cold", ["evals/check_published_walkthrough.py", "--cold"], "cold"),
