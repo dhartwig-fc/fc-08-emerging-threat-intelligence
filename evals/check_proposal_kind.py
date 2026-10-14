@@ -102,6 +102,9 @@ def checks_decisions():
         "a pasted PROPOSAL decision line parses to the gate's key", repr(parsed)
 
 
+from mcp_server import knowledge_centre_server as kc_server  # noqa: E402  (reload keeps this object)
+
+
 def _kc(proposals_path: Path):
     os.environ["NEXUS_TYPOLOGY_PROPOSALS_PATH"] = str(proposals_path)
     import importlib
@@ -119,6 +122,11 @@ def checks_server():
                           "quotes": ["Underground banking is one tool often used by professional money launderers."]}]}]}),
             encoding="utf-8")
         kc = _kc(path)
+        if MUTATION == "unknown-tp":
+            kc_server._open_proposals = lambda: [{"proposal_id": "TP-2026-009", "family": "sanctions",
+                                           "working_name": "x", "evidence": []}] + json.loads(path.read_text())["proposals"]
+        if MUTATION == "no-tier":
+            kc_server._proposal_records = lambda: []
         P = kc.ProposeLinkInput
         args = dict(advisory_id="ADV-2026-0030", rationale="a rationale long enough to pass", confidence="medium",
                     citations=[{"page": 1, "quote": "Underground banking moved the funds."}])
@@ -134,6 +142,11 @@ def checks_server():
             "a matching open proposal is listed, with how to link it", text[:90]
         path.write_text(json.dumps({"proposals": []}), encoding="utf-8")
         kc = _kc(path)
+        if MUTATION == "unknown-tp":
+            kc_server._open_proposals = lambda: [{"proposal_id": "TP-2026-009", "family": "sanctions",
+                                           "working_name": "x", "evidence": []}] + json.loads(path.read_text())["proposals"]
+        if MUTATION == "no-tier":
+            kc_server._proposal_records = lambda: []
         base = "No match above the floor (0.25). Treat as a possible emergent typology and propose it with emergent_label."
         yield kc._with_proposals(base, "underground banking platform") == base, \
             "with no open proposals the governed answer is unchanged (never an unimported TP)", "unchanged"
@@ -152,6 +165,13 @@ def main(argv: list) -> int:
     ap.add_argument("--mutate", choices=MUTATIONS)
     args = ap.parse_args(argv)
     MUTATION = args.mutate
+    if MUTATION == "body-always":
+        real = gp.Proposal.body
+        gp.Proposal.body = lambda self: {**real(self), "typology_proposal": self.typology_proposal}
+    elif MUTATION == "two-targets":
+        gp._contract_problem = lambda p: None
+    elif MUTATION == "kind-fallback":
+        gd._TARGET["proposal"] = "emergent_label"
     failures = 0
     for ok, label, detail in checks():
         print("  %-4s %s\n         %s" % ("PASS" if ok else "FAIL", label, detail))
