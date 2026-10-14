@@ -48,6 +48,28 @@ RECORDS_DIR = ROOT / "data" / "records_merged"
 DIGESTS_DIR = ROOT / "data" / "digests"
 NO_ADVISORIES = "No advisory in this batch routes to this desk."
 APPROVED_NOT_IN_RECORD = "owner-approved, not in the record"
+OPEN_PROPOSALS_HEADING = "## Open typology proposals"
+_GENERAL = "general_intel"
+
+
+def proposals_for(desk: str, open_proposals, routing: dict) -> list:
+    """The open proposals this desk is shown (Stage565 S4, plan R23): its family's, and on General intelligence
+    also every proposal whose family has no desk."""
+    fam = routing["family_desks"]
+    return [p for p in sorted(open_proposals, key=lambda p: p["proposal_id"])
+            if fam.get(p["family"]) == desk or (desk == _GENERAL and p["family"] not in fam)]
+
+
+def _proposal_lines(mine) -> list:
+    out = [OPEN_PROPOSALS_HEADING, "",
+           "Techniques NEXUS is still defining, opened by the owner from patterns an agent noticed. Link an "
+           "advisory to one only through the review gate.", ""]
+    for p in mine:
+        advs = sorted({e["advisory_id"] for e in p.get("evidence", [])})
+        out.append("- **%s %s** -- stage %s; %d %s (%s). Not a typology yet."
+                   % (p["proposal_id"], p["working_name"], p["stage"], len(advs),
+                      "advisory" if len(advs) == 1 else "advisories", ", ".join(advs)))
+    return out + [""]
 
 
 def _visible(decision) -> bool:
@@ -90,7 +112,7 @@ def _cite(decision, proposals_by_id) -> str:
 
 
 def render_desk(desk: str, batch_id: str, entries: List[tuple], n_records: int, library: dict, routing: dict,
-                standing: dict, proposals_by_id: dict, advisories: dict) -> str:
+                standing: dict, proposals_by_id: dict, advisories: dict, open_proposals=()) -> str:
     titles = routing["desk_titles"]
     out = ["# %s -- digest, batch %s" % (titles[desk], batch_id), "",
            "This batch covers %d advisory records; %d reach this desk. Approvals are the owner's, from the "
@@ -99,6 +121,9 @@ def render_desk(desk: str, batch_id: str, entries: List[tuple], n_records: int, 
            "the extraction agent's own suggestion, and say so." % ", ".join(
                titles[d] for d in routing["suggestion_only_desks"]),
            ""]
+    mine_props = proposals_for(desk, open_proposals, routing)
+    if mine_props:
+        out += _proposal_lines(mine_props)
     if not entries:
         return "\n".join(out + [NO_ADVISORIES, ""])
     for rec, reasons in entries:
@@ -129,6 +154,14 @@ def render_desk(desk: str, batch_id: str, entries: List[tuple], n_records: int, 
             out += ["### Approved emergent candidates", ""]
             out += ["- **%s**%s (approved %s)" % (d.emergent_label, _cite(d, proposals_by_id), d.decided_at[:10])
                     for d in emergent]
+            out.append("")
+        linked = sorted((d for d in mine if _visible(d) and d.kind == "proposal"), key=lambda d: d.link_key)
+        if linked:
+            names = {p["proposal_id"]: p["working_name"] for p in open_proposals}
+            out += ["### Linked to open typology proposals", ""]
+            out += ["- **%s%s**%s (approved %s)" % (d.typology_proposal,
+                                                    " %s" % names[d.typology_proposal] if d.typology_proposal in names else "",
+                                                    _cite(d, proposals_by_id), d.decided_at[:10]) for d in linked]
             out.append("")
         out += ["### Awaiting review", ""]
         out += (["- %s %s -- asserted by the pipeline, not yet decided"
@@ -174,12 +207,12 @@ def _routes(rec: dict, standing: dict, library: dict, routing: dict) -> Dict[str
 
 
 def build_batch(batch_id: str, records: List[dict], library: dict, routing: dict, standing: dict,
-                proposals_by_id: dict, advisories: dict) -> Dict[str, str]:
+                proposals_by_id: dict, advisories: dict, open_proposals=()) -> Dict[str, str]:
     """desk -> Markdown for every desk, in desk order."""
     by_desk: Dict[str, List[tuple]] = {d: [] for d in desks_in_order(routing)}
     for rec in sorted(records, key=lambda r: r["advisory_id"]):
         for desk, reasons in _routes(rec, standing, library, routing).items():
             by_desk[desk].append((rec, reasons))
     return {desk: render_desk(desk, batch_id, entries, len(records), library, routing, standing,
-                              proposals_by_id, advisories)
+                              proposals_by_id, advisories, open_proposals=open_proposals)
             for desk, entries in by_desk.items()}

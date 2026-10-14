@@ -51,6 +51,7 @@ from governance.routing import ROUTING, load_routing  # noqa: E402
 BATCH_ID = re.compile(r"^[a-z0-9][a-z0-9-]{0,60}$")
 MANIFEST = "manifest.json"
 CURRENT = DIGESTS_DIR / "CURRENT"
+PROPOSALS_IMPORT = ROOT / "data" / "typology_proposals.json"
 _MUTATE = None  # set only by evals/check_digest_batch.py through --_mutate
 
 
@@ -68,7 +69,7 @@ def _config_paths(routing_path: Path) -> dict:
 
 
 def build(batch_id: str, record_paths, queue_paths, log_path: Path, log_lines=None,
-         routing_path: Path = ROUTING):
+         routing_path: Path = ROUTING, proposals_path: Path = None):
     """(desk -> Markdown, manifest) from exactly these inputs and the first log_lines of the log."""
     lines, log_sha, decisions = gd.log_prefix(log_lines, log_path)
     records = [json.loads(p.read_text(encoding="utf-8")) for p in record_paths]
@@ -76,8 +77,14 @@ def build(batch_id: str, record_paths, queue_paths, log_path: Path, log_lines=No
     advisories = {a["advisory_id"]: a for a in json.loads(ADVISORY_LIST.read_text(encoding="utf-8"))["advisories"]}
     proposals, _ = load_queue_files(queue_paths)
     routing = load_routing(routing_path)
+    # Stage565 S4 (plan R22): the open typology proposals are an input only when the import holds one, and only
+    # then is it pinned below -- a batch built with an empty import keeps the old manifest shape and rebuilds
+    # byte for byte however many proposals are imported later.
+    open_proposals = []
+    if proposals_path is not None and proposals_path.exists():
+        open_proposals = json.loads(proposals_path.read_text(encoding="utf-8"))["proposals"]
     batch = build_batch(batch_id, records, library, routing, gd.latest(decisions),
-                        {p.proposal_id: p for p in proposals}, advisories)
+                        {p.proposal_id: p for p in proposals}, advisories, open_proposals=open_proposals)
     manifest = {
         "batch_id": batch_id,
         "decision_log": {"lines": lines, "sha256": log_sha},
@@ -85,6 +92,8 @@ def build(batch_id: str, record_paths, queue_paths, log_path: Path, log_lines=No
         "proposals": {p.name: _sha(p) for p in queue_paths},
         "config": {name: _sha(p) for name, p in _config_paths(routing_path).items()},
     }
+    if open_proposals and _MUTATE != "unpinned":
+        manifest["typology_proposals"] = {proposals_path.name: _sha(proposals_path)}
     return batch, manifest
 
 
@@ -98,7 +107,7 @@ def _manifest_text(manifest: dict) -> str:
 
 
 def check(batch_id: str, out_dir: Path, records_dir: Path, queue_dir: Path, log_path: Path,
-         routing_path: Path = ROUTING) -> list:
+         routing_path: Path = ROUTING, proposals_path: Path = PROPOSALS_IMPORT) -> list:
     folder = out_dir / batch_id
     mpath = folder / MANIFEST
     if not mpath.exists():
@@ -120,13 +129,16 @@ def check(batch_id: str, out_dir: Path, records_dir: Path, queue_dir: Path, log_
     moved += [name for name, want in sorted(m.get("config", {}).items())
               if name not in config_paths or not config_paths[name].exists()
               or _sha(config_paths[name]) != want]
+    pinned_props = m.get("typology_proposals", {})
+    moved += [name for name, want in sorted(pinned_props.items())
+              if proposals_path.name != name or not proposals_path.exists() or _sha(proposals_path) != want]
     if moved:
         return ["inputs moved since this batch: %s" % n for n in moved]
 
     rebuild_from = None if _MUTATE == "prefix" else pinned["lines"]
     batch, rebuilt = build(batch_id, [records_dir / n for n in sorted(m["records"])],
                            [queue_dir / n for n in sorted(m["proposals"])], log_path, rebuild_from,
-                           routing_path)
+                           routing_path, proposals_path if pinned_props else None)
     problems = []
     for desk, text in batch.items():
         path = folder / ("%s.md" % desk)
@@ -154,8 +166,9 @@ def main(argv: list) -> int:
     mode = ap.add_mutually_exclusive_group()
     mode.add_argument("--check", action="store_true")
     mode.add_argument("--backfill-manifest", action="store_true")
-    ap.add_argument("--_mutate", choices=("prefix", "overwrite"), help=argparse.SUPPRESS)
+    ap.add_argument("--_mutate", choices=("prefix", "overwrite", "unpinned"), help=argparse.SUPPRESS)
     ap.add_argument("--routing", type=Path, default=ROUTING, help=argparse.SUPPRESS)
+    ap.add_argument("--typology-proposals", type=Path, default=PROPOSALS_IMPORT, help=argparse.SUPPRESS)
     args = ap.parse_args(argv)
     _MUTATE = args._mutate
     if _MUTATE == "overwrite" and args.out_dir.resolve() == DIGESTS_DIR.resolve():
@@ -187,7 +200,8 @@ def main(argv: list) -> int:
     folder = args.out_dir / args.batch_id
 
     if args.check:
-        problems = check(args.batch_id, args.out_dir, args.records_dir, args.queue_dir, args.log, args.routing)
+        problems = check(args.batch_id, args.out_dir, args.records_dir, args.queue_dir, args.log, args.routing,
+                         args.typology_proposals)
         for p in problems:
             print("FAIL  %s" % p)
         print("batch %s matches a fresh build from its pinned inputs" % args.batch_id if not problems
@@ -195,7 +209,8 @@ def main(argv: list) -> int:
         return 1 if problems else 0
 
     records, queue = _current_inputs(args.records_dir, args.queue_dir)
-    batch, manifest = build(args.batch_id, records, queue, args.log, routing_path=args.routing)
+    batch, manifest = build(args.batch_id, records, queue, args.log, routing_path=args.routing,
+                            proposals_path=args.typology_proposals)
 
     if args.backfill_manifest:
         if (folder / MANIFEST).exists():
