@@ -95,6 +95,8 @@ agents/review_advisory.py          the additive reviewer: what did the extractio
 evals/review_ADV-2026-0001.md      week-1 review: what the first real run got wrong and why
 governance/publish_boundary.py     what a public page must not carry: local paths, internal file names, email addresses; violations() lists them
 evals/check_publish_boundary.py    pins the publish boundary cold: legitimate data/ URLs and metadata prose pass, real paths/internal names/addresses refused; --mutate no-paths|no-internal|no-email
+tools/import_fc10_proposals.py     one-way import of fc-10's typology proposal export (Stage565 S1) into data/typology_proposals.json, with fc-10's commit and the file's sha256; deterministic
+evals/check_proposals_import.py    pins that import cold (ids, quotes, counts, order-independence); currency against fc-10 is checked from fc-10's side; --mutate bad-id|no-quotes|count-drift|not-deterministic
 tools/build_walkthrough.py         builds the public walkthrough page (one advisory, PDF to owner-approved links) from governed files only, no clock/git/PDF; --check; --repin re-takes the snapshot below from the live files (its only clock read; it rebuilds and publishes nothing)
 site/walkthrough_snapshot.json     the committed snapshot the page's corpus and section 10's runs and accepted-item count are pinned to (canonical JSON; taken_on, advisories, extraction_runs, feed_accepted)
 site/threat-intel/index.html       the built walkthrough page (tracked); PUBLISHED -- site/PUBLISHED holds the sha256 the portfolio's committed copy matches (this line read "BUILT, NOT YET PUBLISHED" until 2026-10-14; measured equal that day)

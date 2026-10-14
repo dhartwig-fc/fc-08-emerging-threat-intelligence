@@ -1,0 +1,11 @@
+{
+  "note": "Governed export from fc-10's typology proposal ledger. Regenerate with tools/import_fc10_proposals.py; never hand-edit.",
+  "proposals": [],
+  "source": {
+    "file": "indexes/typology_proposals.json",
+    "proposal_count": 0,
+    "repository": "fc-10-intelligence-repository-layer",
+    "sha256": "8e51d955d77914e3e03e5ab4c9a02a0f2414132906a4bc1f079ffb29b430ab8b"
+  },
+  "version": "fc10-3a171f7a"
+}
