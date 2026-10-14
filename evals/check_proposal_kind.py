@@ -102,9 +102,48 @@ def checks_decisions():
         "a pasted PROPOSAL decision line parses to the gate's key", repr(parsed)
 
 
+def _kc(proposals_path: Path):
+    os.environ["NEXUS_TYPOLOGY_PROPOSALS_PATH"] = str(proposals_path)
+    import importlib
+    from mcp_server import knowledge_centre_server as kc
+    return importlib.reload(kc)
+
+
+def checks_server():
+    with tempfile.TemporaryDirectory() as d:
+        path = Path(d) / "typology_proposals.json"
+        path.write_text(json.dumps({"proposals": [{
+            "proposal_id": "TP-2026-001", "working_name": "Underground banking via alternative banking platforms",
+            "family": "sanctions", "stage": "corroborating", "summary": "Underground banking; ABP",
+            "evidence": [{"advisory_id": "ADV-2026-0003", "publisher": "FATF",
+                          "quotes": ["Underground banking is one tool often used by professional money launderers."]}]}]}),
+            encoding="utf-8")
+        kc = _kc(path)
+        P = kc.ProposeLinkInput
+        args = dict(advisory_id="ADV-2026-0030", rationale="a rationale long enough to pass", confidence="medium",
+                    citations=[{"page": 1, "quote": "Underground banking moved the funds."}])
+        yield kc._refuse_target(P(typology_proposal="TP-2026-001", **args)) is None, \
+            "an open proposal is an acceptable target", "TP-2026-001"
+        r = kc._refuse_target(P(typology_proposal="TP-2026-009", **args))
+        yield bool(r) and "not an open typology proposal" in r, "a TP that is not open is refused", r or "accepted"
+        r = kc._refuse_target(P(typology_proposal="TP-2026-001", emergent_label="x y z", **args))
+        yield bool(r) and "exactly one" in r, "two targets are refused", r or "accepted"
+        text = kc._with_proposals("No match above the floor (0.25). Treat as a possible emergent typology and "
+                                  "propose it with emergent_label.", "underground banking platform")
+        yield "TP-2026-001" in text and "typology_proposal" in text, \
+            "a matching open proposal is listed, with how to link it", text[:90]
+        path.write_text(json.dumps({"proposals": []}), encoding="utf-8")
+        kc = _kc(path)
+        base = "No match above the floor (0.25). Treat as a possible emergent typology and propose it with emergent_label."
+        yield kc._with_proposals(base, "underground banking platform") == base, \
+            "with no open proposals the governed answer is unchanged (never an unimported TP)", "unchanged"
+    os.environ.pop("NEXUS_TYPOLOGY_PROPOSALS_PATH", None)
+
+
 def checks():
     yield from checks_queue()
     yield from checks_decisions()
+    yield from checks_server()
 
 
 def main(argv: list) -> int:

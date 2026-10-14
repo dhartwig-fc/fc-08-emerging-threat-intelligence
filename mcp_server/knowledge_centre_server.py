@@ -35,6 +35,23 @@ from pydantic import BaseModel, ConfigDict, Field
 
 ROOT = Path(__file__).resolve().parent.parent
 TYPOLOGY_PATH = Path(os.environ.get("NEXUS_TYPOLOGY_PATH", ROOT / "data" / "typologies.json"))
+TYPOLOGY_PROPOSALS_ENV = "NEXUS_TYPOLOGY_PROPOSALS_PATH"
+
+
+def _open_proposals() -> list:
+    """fc-10's open typology proposals, as imported (Stage565). Read per call, like the library."""
+    path = Path(os.environ.get(TYPOLOGY_PROPOSALS_ENV, ROOT / "data" / "typology_proposals.json"))
+    if not path.exists():
+        return []
+    return json.loads(path.read_text(encoding="utf-8")).get("proposals", [])
+
+
+def _proposal_records() -> list:
+    """Open proposals in the shape the ranker reads: id, label, summary and the evidence quotes as indicators."""
+    return [{"typology_id": p["proposal_id"], "family": p["family"], "label": p["working_name"],
+             "summary": p.get("summary", ""),
+             "indicators": [q for e in p.get("evidence", []) for q in e.get("quotes", [])]}
+            for p in _open_proposals()]
 
 # The server is launched as a script, so the repo root is not on sys.path.
 sys.path.insert(0, str(ROOT))
@@ -148,6 +165,8 @@ class ProposeLinkInput(BaseModel):
         description="Existing typology to link. Omit when proposing an emergent typology.",
     )
     emergent_label: Optional[str] = Field(None, min_length=3, max_length=120)
+    typology_proposal: Optional[str] = Field(None, pattern=r"^TP-\d{4}-\d{3}$",
+                                             description="An open NEXUS typology proposal id the search returned")
     rationale: str = Field(..., min_length=20, max_length=1000, description="Why this link holds, citing page numbers")
     confidence: str = Field(..., pattern=r"^(high|medium|low)$")
     citations: List[ProposedCitation] = Field(
@@ -288,10 +307,10 @@ SEARCH_ALIASES = {
                  "price deflated below market value"],
 }
 
-def _search_index() -> tuple:
+def _search_index(records=None) -> tuple:
     """(docs, idf) over the current library. 57 records; rebuilt per call on purpose."""
     docs = []
-    for r in _typologies():
+    for r in (_typologies() if records is None else records):
         label = set(_stems(r["label"]))
         body = set(_stems(" ".join(
             [r.get("summary", ""), r.get("intelligence_question", "")]
@@ -310,7 +329,7 @@ def _search_index() -> tuple:
     return docs, idf
 
 
-def rank_typologies(query: str) -> List[tuple]:
+def rank_typologies(query: str, records=None) -> List[tuple]:
     """Every typology scored 0..1 against the query, best first. Pure; used by the tool and by evals.
 
     TWO SCORES, and the better one wins. Measured 2026-09-11 over the 413 governed
@@ -338,7 +357,7 @@ def rank_typologies(query: str) -> List[tuple]:
     0.351 to 0.625 but weakens the "no match, treat as emergent" answer the floor
     exists to give, which evals/search_probes.py guards.
     """
-    docs, idf = _search_index()
+    docs, idf = _search_index(records)
     q = list(dict.fromkeys(_stems(query)))
     q_set = set(q)
     denom = sum(idf(t) for t in q) or 1.0
@@ -465,6 +484,28 @@ async def search_typologies(params: SearchTypologiesInput) -> str:
     Do not rely on the two labels looking alike -- SAN006 and TBML010 are the same
     technique with the words reordered.
     """
+    return _with_proposals(_governed_search(params), params.query)
+
+
+_NO_MATCH = "No match above the floor"
+
+
+def _with_proposals(governed: str, query: str) -> str:
+    """Append the open typology proposals that clear the floor (Stage565 S2, plan ruling R7). Scored over
+    their own index so a proposal never displaces a governed typology; listed only if imported."""
+    hits = [(s, r) for s, r in rank_typologies(query, _proposal_records()) if s >= SEARCH_SCORE_FLOOR]
+    if not hits:
+        return governed
+    block = ["Open typology proposals (in development in NEXUS, not typologies yet). If the technique is one of "
+             "these, call knowledge_centre_propose_link with typology_proposal set to its id, not emergent_label:",
+             "score | proposal | family | working name"]
+    block += ["%.2f | %s | %s | %s" % (s, r["typology_id"], r["family"], r["label"]) for s, r in hits]
+    if governed.startswith(_NO_MATCH):
+        return "No governed typology clears the floor.\n" + "\n".join(block)
+    return governed + "\n\n" + "\n".join(block)
+
+
+def _governed_search(params: SearchTypologiesInput) -> str:
     ranked = rank_typologies(params.query)
     above = [(s, r) for s, r in ranked if s >= SEARCH_SCORE_FLOOR]
     if not above:
@@ -597,6 +638,19 @@ async def check_quote(params: CheckQuoteInput) -> str:
     return quote_reply(index, params.page, params.quote)
 
 
+def _refuse_target(params) -> Optional[str]:
+    """Exactly one target, and that target exists: a library typology or an OPEN proposal."""
+    named = [bool(v) for v in (params.typology_id, params.emergent_label, params.typology_proposal)]
+    if sum(named) != 1:
+        return "Rejected: provide exactly one of typology_id, emergent_label or typology_proposal."
+    if params.typology_id and not any(r["typology_id"] == params.typology_id for r in _typologies()):
+        return "Rejected: %s is not in the library. Use emergent_label if this is new." % params.typology_id
+    if params.typology_proposal and params.typology_proposal not in {p["proposal_id"] for p in _open_proposals()}:
+        return ("Rejected: %s is not an open typology proposal. Link only a proposal the search returned."
+                % params.typology_proposal)
+    return None
+
+
 @mcp.tool(
     name="knowledge_centre_propose_link",
     annotations={"title": "Propose advisory link", "readOnlyHint": False, "destructiveHint": False, "idempotentHint": False, "openWorldHint": False},
@@ -606,8 +660,9 @@ async def propose_link(params: ProposeLinkInput) -> str:
     Propose that an advisory be pinned to a typology, or propose an emergent typology.
 
     This never writes to the library. It appends to this run's review queue; a
-    human decides in tools/review.py. Exactly one of typology_id or
-    emergent_label must be given, and every proposal carries the citations it
+    human decides in tools/review.py. Exactly one of typology_id,
+    emergent_label or typology_proposal (an open NEXUS proposal the search
+    listed) must be given, and every proposal carries the citations it
     rests on, each verified against the page it names.
     """
     # GOVERNANCE: a proposal nobody can trace to a run and a document cannot be
@@ -619,13 +674,12 @@ async def propose_link(params: ProposeLinkInput) -> str:
     refusal = _refuse_queue(run)
     if refusal:
         return refusal
-    if bool(params.typology_id) == bool(params.emergent_label):
-        return "Rejected: provide exactly one of typology_id or emergent_label."
     refusal = _refuse_for_run(params, run)
     if refusal:
         return refusal
-    if params.typology_id and not any(r["typology_id"] == params.typology_id for r in _typologies()):
-        return "Rejected: %s is not in the library. Use emergent_label if this is new." % params.typology_id
+    refusal = _refuse_target(params)
+    if refusal:
+        return refusal
 
     # GOVERNANCE, not advice. A twinned code may not be pinned without the
     # rationale naming the twin it was chosen over. The refusal is what makes the
@@ -656,6 +710,8 @@ async def propose_link(params: ProposeLinkInput) -> str:
         "confidence": params.confidence,
         "citations": [{"page": c.page, "quote": c.quote} for c in params.citations],
     }
+    if params.typology_proposal:
+        body["typology_proposal"] = params.typology_proposal   # absent when unset: pre-S2 ids unchanged
     record = {"proposal_id": proposal_id(body),
               "proposed_at": datetime.now(timezone.utc).isoformat(), **body}
     path = _proposals_path(run)
@@ -664,7 +720,8 @@ async def propose_link(params: ProposeLinkInput) -> str:
         fh.write(json.dumps(record, ensure_ascii=False) + "\n")
     return "Accepted into review queue: %s -> %s (proposal %s)" % (
         params.advisory_id,
-        params.typology_id or "EMERGENT(%s)" % params.emergent_label,
+        params.typology_id or ("PROPOSAL(%s)" % params.typology_proposal if params.typology_proposal
+                               else "EMERGENT(%s)" % params.emergent_label),
         record["proposal_id"],
     )
 
