@@ -32,6 +32,7 @@ WHAT IT CHECKS (checks()):
   quality      the triage band and reviewer recall are the ones CLAUDE.md records; extraction precision and
                recall are evals/score_report.json's
   coverage     the live feeds are exactly feeds.sources.SOURCES
+  cross-link   the walkthrough links to this page and this page to the walkthrough (both published side by side)
   boundary     the page crosses no publish boundary (no paths, internal files, emails)
   no cost      no money figure appears (owner, 2026-10-14)
   nexus        WARM: the portfolio's published SAN006 case page names the subject, case and run the page
@@ -247,6 +248,10 @@ def checks():
 
     yield sorted(P["coverage"]["live"]) == sorted(bs.DISPLAY[s] for s in SOURCES), \
         "the live feeds are exactly the configured sources", ", ".join(P["coverage"]["live"])
+
+    walkthrough = (ROOT / "site" / "threat-intel" / "index.html").read_text(encoding="utf-8")
+    yield 'href="index.html"' in page and 'href="scan.html"' in walkthrough, \
+        "the scan page and the walkthrough link to each other", "scan -> index.html, walkthrough -> scan.html"
 
     leaks = pb.violations(page)
     yield not leaks, "the page crosses no publish boundary", ", ".join(leaks) or "clean"

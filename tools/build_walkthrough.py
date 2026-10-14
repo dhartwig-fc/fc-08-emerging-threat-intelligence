@@ -1138,6 +1138,7 @@ HEAD = """<!doctype html>
 """
 
 BRAND = """  <a href="../future-capabilities.html" class="backlink">&larr; Future capabilities</a>
+  <a href="scan.html" class="backlink" style="margin-left:18px">Watch a live Friday run, replayed &rarr;</a>
   <div class="brand">
     <svg class="shield" viewBox="0 0 40 46" fill="none" aria-hidden="true">
       <path d="M20 2 L36 8 V22 C36 33 29 41 20 44 C11 41 4 33 4 22 V8 Z"
