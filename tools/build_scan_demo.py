@@ -36,6 +36,7 @@ Cost is deliberately not shown (owner, 2026-10-14). Deterministic: no clock, no 
 from __future__ import annotations
 
 import argparse
+import copy
 import html
 import json
 import plistlib
@@ -64,6 +65,32 @@ CLAUDE_MD = ROOT / "CLAUDE.md"
 PLIST = ROOT / "scripts" / "schedule" / "uk.fc08.friday-run.plist"
 FATF_MANUAL = ROOT / "tools" / "fetch_fatf_via_chrome.js"
 OUT = ROOT / "site" / "scan-demo" / "index.html"
+PROPOSALS_IMPORT = ROOT / "data" / "typology_proposals.json"
+# Stage565 S4 (spec §7.2, plan R21): the six steps from "the agent noticed something" to "NEXUS scores it".
+# BUILT only when the named fc-08 files exist (evals/check_scan_demo.py checks); Build and Live happen in
+# NEXUS, and fc-08 sees them through the imported proposals and the typology export.
+PIPELINE = [
+    {"n": 1, "name": "Spot", "actor": "AGENT", "built": True, "evidence": ["agents/extract_advisory.py"],
+     "what": "The extraction agent reads an advisory, searches the typology library, and when nothing fits it "
+             "proposes an emergent pattern, with the quotes it rests on."},
+    {"n": 2, "name": "Decide", "actor": "PERSON", "built": True, "evidence": ["tools/review.py"],
+     "what": "A person approves or rejects every emergent pattern in the review gate. A rejection is recorded "
+             "with its reason; nothing the agent proposed counts until a person decides."},
+    {"n": 3, "name": "Propose", "actor": "PERSON", "built": True,
+     "evidence": ["tools/import_fc10_proposals.py", "mcp_server/knowledge_centre_server.py"],
+     "what": "The owner opens a typology proposal in NEXUS from approved patterns. From then on the agents see "
+             "it, and an advisory describing the same technique is linked to it as more evidence."},
+    {"n": 4, "name": "Define", "actor": "PERSON", "built": True, "evidence": ["agents/draft_doctrine.py"],
+     "what": "A drafting agent writes doctrine in which every statement cites the evidence; a person edits it, "
+             "commits it to a toolkit and approves it. Only then does the technique get a typology id."},
+    {"n": 5, "name": "Build", "actor": "NEXUS", "built": True, "evidence": ["tools/import_fc10_proposals.py"],
+     "what": "Engineers build the detection engine, sample data and NEXUS integration by hand; NEXUS records the "
+             "toolkit commit and refuses to call it live until a release passes."},
+    {"n": 6, "name": "Live", "actor": "NEXUS", "built": True,
+     "evidence": ["data/typologies.json", "mcp_server/knowledge_centre_server.py"],
+     "what": "The typology is in the library the agents search, so the next advisory describing it is linked "
+             "as a governed typology, not proposed as something new."},
+]
 
 # Source types that are not regulators or agencies: never shown as "not yet scanned".
 NOT_A_FEED = ("industry", "press", "other")
@@ -125,6 +152,9 @@ def inputs() -> dict:
         "kc_tools": list(KC_TOOLS),
         "schema_version": SCHEMA_VERSION,
         "schedule": {"day": DAYS[when["Weekday"]], "time": "%02d:%02d" % (when["Hour"], when.get("Minute", 0))},
+        "log": _jsonl(gd.LOG),
+        "proposals": json.loads(PROPOSALS_IMPORT.read_text(encoding="utf-8"))["proposals"],
+        "pipeline": copy.deepcopy(PIPELINE),
     }
 
 
@@ -132,6 +162,39 @@ def _duration(start: str, end: str) -> str:
     secs = int((datetime.fromisoformat(end.replace("Z", "+00:00"))
                 - datetime.fromisoformat(start.replace("Z", "+00:00"))).total_seconds())
     return "%d min %02d s" % (secs // 60, secs % 60)
+
+
+def _pipeline(inp: dict, links: list) -> dict:
+    """The something-new section's data (Stage565 S4): counts from the decision log and the import; the example is
+    the first open proposal or, while none is open, this advisory's decided emergent pattern."""
+    latest = {}
+    for d in inp["log"]:
+        latest[d["link_key"]] = d
+    em = [d for d in latest.values() if d.get("kind") == "emergent"]
+    props = sorted(inp["proposals"], key=lambda p: p["proposal_id"])
+    counts = {"emergent_decided": len(em), "emergent_approved": sum(d["decision"] == "approve" for d in em),
+              "emergent_rejected": sum(d["decision"] == "reject" for d in em),
+              "proposal_links_approved": sum(d.get("kind") == "proposal" and d["decision"] == "approve"
+                                             for d in latest.values()),
+              "open": len(props),
+              "defining": sum(p["stage"] in ("doctrine_drafted", "doctrine_approved") for p in props),
+              "building": sum(p["stage"] == "engine_built" for p in props)}
+    if props:
+        p = props[0]
+        example = {"ref": p["proposal_id"], "kind": "proposal", "name": p["working_name"], "stage": p["stage"],
+                   "advisories": sorted({e["advisory_id"] for e in p.get("evidence", [])})}
+    else:
+        em_links = [l for l in links if l["emergent"]]
+        if not em_links:
+            raise SystemExit("REFUSED: no open proposal and no decided emergent on %s to show as the example" % ADVISORY)
+        l = em_links[0]
+        example = {"ref": "%s::EMERGENT[%s]" % (ADVISORY, l["name"].lower()), "kind": "emergent", "name": l["name"],
+                   "decision": l["decision"], "note": l["note"], "decided_on": l["decided_on"]}
+    # The evidence paths stay here: they are repository paths, and the publish boundary keeps those off a public
+    # page. The guard checks them against the same inputs the page is built from.
+    steps = [{k: v for k, v in step.items() if k != "evidence"} for step in inp["pipeline"]]
+    return {"headline": "The agent can only notice; a person defines.", "steps": steps,
+            "counts": counts, "example": example}
 
 
 def payload(inp: dict) -> dict:
@@ -198,6 +261,7 @@ def payload(inp: dict) -> dict:
                                      "detectable": i["detectable_in_transaction_data"]} for i in rec["indicators"]],
                      "desks": rec["suggested_desks"], "links": links},
         "corroborates": {"typology": CORROBORATES[0], "name": san["label"], "indicator": CORROBORATES[1]},
+        "pipeline": _pipeline(inp, links),
         "fc10": FC10,
         "coverage": {"live": [DISPLAY[s] for s in inp["live"]], "manual": [DISPLAY[s] for s in inp["manual"]],
                      "not_yet": [DISPLAY.get(s, s) for s in inp["source_types"] if s not in taken]},
@@ -297,6 +361,11 @@ h2{margin:0;font-size:16px}
 .stage{border:1px solid var(--line-2);border-radius:10px;padding:12px;background:var(--raised)}
 .stage .top{display:flex;justify-content:space-between;align-items:baseline;gap:6px}
 .kind{font:600 10.5px var(--mono);border:1px solid;border-radius:5px;padding:1px 6px}
+.grid3{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:12px;margin-top:8px}
+.step{border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+.step .n{font:600 11px var(--mono);color:var(--faint)}
+.step .tech{font:11px/1.5 var(--mono);color:var(--faint);margin-top:8px}
+.built{font:600 10px var(--mono);color:var(--ok);border:1px solid var(--ok);border-radius:6px;padding:1px 6px}
 .next{border:1.5px dashed var(--gold);border-radius:14px;padding:16px;background:rgba(233,200,119,.04)}
 .nb{font:600 11px var(--mono);color:var(--gold);border:1px solid var(--gold);border-radius:6px;padding:2px 8px}
 .dash{border:1px dashed var(--line-2);border-radius:10px;padding:12px}
@@ -356,6 +425,13 @@ footer{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px;font-si
 <section class="grid2" aria-label="The advisory">
 <div class="card" id="advisory"></div>
 <div class="card"><div class="label">Typology links, decided by a person</div><div id="links"></div></div>
+</section>
+
+<section class="card" aria-label="When the agent finds something new">
+<div style="display:flex;flex-wrap:wrap;align-items:baseline;gap:8px 14px"><h2>When the agent finds something new</h2></div>
+<p class="sub" id="newHeadline"></p>
+<div class="grid3" id="newSteps"></div>
+<div class="dash" id="newExample" style="margin-top:12px"></div>
 </section>
 
 <section class="next" aria-label="Next capability">
@@ -475,6 +551,26 @@ footer{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px;font-si
       (l.emergent ? "A new pattern the agent proposed because nothing in the library fitted." : "Governed NEXUS typology, proposed from the library the agent is allowed to read.") +
       '</div><div style="font-size:12.5px;margin-top:6px">Owner, ' + esc(l.decided_on) + ': “' + esc(l.note.replace(/^owner \d{4}-\d\d-\d\d: /, "")) + '”</div></div>';
   }).join("");
+
+  var N = P.pipeline, NC = N.counts;
+  var COUNT = [
+    NC.emergent_decided + " emergent pattern(s) proposed and decided",
+    NC.emergent_approved + " approved, " + NC.emergent_rejected + " rejected",
+    NC.open + " proposal(s) open; " + NC.proposal_links_approved + " advisory link(s) approved",
+    NC.defining + " in doctrine",
+    NC.building + " engine(s) built, awaiting release",
+    "counted in NEXUS: the export carries only proposals still in development"
+  ];
+  $("newHeadline").textContent = N.headline + " Six steps take a pattern an agent noticed to a typology NEXUS scores; each is marked as built.";
+  $("newSteps").innerHTML = N.steps.map(function (s, i) {
+    return '<div class="step"><div class="top"><span class="n">' + s.n + '</span> <span class="kind">' + esc(s.actor) + '</span> <span class="' + (s.built ? "built" : "nb") + '">' + (s.built ? "BUILT" : "NOT BUILT") + '</span></div>' +
+      '<b style="display:block;margin-top:4px">' + esc(s.name) + '</b><p style="margin:6px 0 0;font-size:12.5px;color:var(--fg-2)">' + esc(s.what) + '</p>' +
+      '<div class="tech">' + esc(COUNT[i]) + '</div></div>';
+  }).join("");
+  var X = N.example;
+  $("newExample").innerHTML = X.kind === "proposal"
+    ? '<div class="label">In development now</div><b>' + esc(X.ref) + ' · ' + esc(X.name) + '</b> — stage ' + esc(X.stage) + ', ' + X.advisories.length + ' advisory(ies): ' + X.advisories.map(esc).join(", ")
+    : '<div class="label">The real example, from this run</div>On ' + esc(X.decided_on) + ' the agent proposed <b>' + esc(X.name) + '</b> as something new. The owner ' + (X.decision === "approve" ? "approved" : "rejected") + ' it: “' + esc(X.note.replace(/^owner \d{4}-\d\d-\d\d: /, "")) + '”. No typology proposal is open yet, so this pattern stopped at step 2 — the gate working.';
 
   var K = P.corroborates, F = P.fc10;
   $("nextDoctrine").innerHTML = '<div class="mono" style="font-size:11px;color:var(--gold)">' + esc(A.id) + ' → ' + esc(K.typology) + ' doctrine</div><b style="display:block;margin-top:4px">Corroborate or extend the typology\'s red flags</b>' +

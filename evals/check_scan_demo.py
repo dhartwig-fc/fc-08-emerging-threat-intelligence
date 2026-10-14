@@ -67,7 +67,8 @@ from governance import publish_boundary as pb  # noqa: E402
 from publish_scan_demo import DEFAULT_PORTFOLIO  # noqa: E402
 
 MUTATIONS = ("drop-notice", "flip-verdict", "move-fate", "edit-quote", "reverse-decision", "citation-count",
-             "wrong-model", "extra-tool", "eval-number", "drop-coverage", "leak-path", "show-cost")
+             "wrong-model", "extra-tool", "eval-number", "drop-coverage", "leak-path", "show-cost",
+             "built-lie", "drop-decision", "fake-proposal")
 MUTATION = None
 NOT_RUN = object()
 SEEDS = ("0", "1", "42", "4242")
@@ -106,6 +107,13 @@ def _mutated_inputs() -> dict:
         inp["triage_band"]["recall"][0] = "0.990"
     elif m == "drop-coverage":
         inp["live"] = [s for s in inp["live"] if s != "ofsi"]
+    elif m == "built-lie":
+        inp["pipeline"][3]["evidence"] = ["agents/no_such_drafter.py"]
+    elif m == "drop-decision":
+        inp["log"] = [d for d in inp["log"] if d.get("kind") != "emergent"]
+    elif m == "fake-proposal":
+        inp["proposals"] = inp["proposals"] + [{"proposal_id": "TP-2099-999", "working_name": "Invented",
+                                                "family": "sanctions", "stage": "open", "evidence": []}]
     return inp
 
 
@@ -146,6 +154,8 @@ def _truth() -> dict:
         "decisions": {d["link_key"]: d for d in _jsonl(gd.LOG) if d.get("advisory_id") == bs.ADVISORY},
         "typologies": json.loads(bs.TYPOLOGIES.read_text(encoding="utf-8"))["typologies"],
         "score": json.loads(bs.SCORE_REPORT.read_text(encoding="utf-8"))["totals"]["typologies"],
+        "log": _jsonl(gd.LOG),
+        "proposals": json.loads((ROOT / "data" / "typology_proposals.json").read_text(encoding="utf-8"))["proposals"],
         "triage_line": next((ln for ln in claude.splitlines() if "The triage band, measured" in ln), ""),
         "reviewer_line": next((ln for ln in claude.splitlines() if "FULL SET, all" in ln and "reviewer" in ln), ""),
     }
@@ -257,6 +267,35 @@ def checks():
     yield not leaks, "the page crosses no publish boundary", ", ".join(leaks) or "clean"
     costs = sorted(set(m.group(0) for m in COST.finditer(page)))
     yield not costs, "no cost figure on the page", ", ".join(costs) or "none"
+
+    # Stage565 S4 (spec §7.2, plan R21): the six steps, computed here from the raw files, never from the builder.
+    PL = P.get("pipeline", {})
+    names = [s["name"] for s in PL.get("steps", [])]
+    yield names == ["Spot", "Decide", "Propose", "Define", "Build", "Live"], \
+        "the something-new section lays out the six steps, in order", names
+    used = _mutated_inputs()["pipeline"]          # the inputs the page was built from; paths never reach the page
+    missing = ["%s: %s" % (s["name"], f) for s in used if s["built"] for f in s["evidence"] if not (ROOT / f).exists()]
+    shown = [(s["name"], s["built"]) for s in PL.get("steps", [])]
+    yield bool(used) and not missing and shown == [(s["name"], s["built"]) for s in used], \
+        "every step marked BUILT names fc-08 files that exist", missing or shown
+    latest = {}
+    for d in T["log"]:
+        latest[d["link_key"]] = d
+    em = [d for d in latest.values() if d.get("kind") == "emergent"]
+    want = {"emergent_decided": len(em), "emergent_approved": sum(d["decision"] == "approve" for d in em),
+            "emergent_rejected": sum(d["decision"] == "reject" for d in em),
+            "proposal_links_approved": sum(d.get("kind") == "proposal" and d["decision"] == "approve"
+                                           for d in latest.values()),
+            "open": len(T["proposals"]),
+            "defining": sum(p["stage"] in ("doctrine_drafted", "doctrine_approved") for p in T["proposals"]),
+            "building": sum(p["stage"] == "engine_built" for p in T["proposals"])}
+    yield PL.get("counts") == want, "the step counts are the decision log's and the import's", PL.get("counts")
+    ex = PL.get("example", {})
+    want_ex = (sorted(p["proposal_id"] for p in T["proposals"])[0] if T["proposals"]
+               else "%s::EMERGENT" % bs.ADVISORY)
+    yield ex.get("ref", "").startswith(want_ex), \
+        "the example is the first open proposal, or ADV-2026-0026's decided emergent when none is open", ex.get("ref")
+    yield "The agent can only notice; a person defines." in page, "the section says who decides", ""
 
     portfolio = Path(os.path.expanduser(DEFAULT_PORTFOLIO))
     nexus = portfolio / "projects" / "nexus"
