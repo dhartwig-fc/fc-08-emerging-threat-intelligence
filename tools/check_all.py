@@ -93,6 +93,10 @@ GUARDS = [
     ("check_mutation_anchors", ["evals/check_mutation_anchors.py"], "cold"),
     ("check_published_walkthrough --cold", ["evals/check_published_walkthrough.py", "--cold"], "cold"),
     ("check_published_walkthrough", ["evals/check_published_walkthrough.py"], "needs-portfolio"),
+    ("check_scan_demo", ["evals/check_scan_demo.py"], "cold"),
+    ("build_scan_demo --check", ["tools/build_scan_demo.py", "--check"], "cold"),
+    ("check_published_scan_demo --cold", ["evals/check_published_scan_demo.py", "--cold"], "cold"),
+    ("check_published_scan_demo", ["evals/check_published_scan_demo.py"], "needs-portfolio"),
     # The batch is DATA (data/digests/CURRENT), so cutting a new batch never edits this list.
     ("build_digests --check (current batch)", ["tools/build_digests.py", "--current", "--check"], "cold"),
     ("build_actor_register --check", ["tools/build_actor_register.py", "--check"], "cold"),

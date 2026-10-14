@@ -127,12 +127,13 @@ EXEMPT = {
     "check_publish_boundary.py": "--mutate empties the boundary's pattern tuples in memory",
     "check_publisher.py": "--mutate patches publisher/builder functions in memory (MUTATION == ...)",
     "check_review_gate.py": "--mutate rebinds gate functions in memory",
+    "check_scan_demo.py": "--mutate perturbs a deep copy of tools/build_scan_demo.py's inputs (or the built page) in memory",
     "check_tool_surface.py": "--mutate* replace the options object or QUEUE_DIR in memory",
     "check_twin_pairs.py": "--mutate empties the twin map in memory",
     "check_walkthrough.py": "--mutate sets tools/build_walkthrough.py's _MUTATE (or a guard-side read), a code switch",
     SELF: "its own labels plant temporary copies in code; it has no text table",
 }
-NO_MUTATIONS = ("check_citations.py", "check_published_walkthrough.py")
+NO_MUTATIONS = ("check_citations.py", "check_published_scan_demo.py", "check_published_walkthrough.py")
 
 # A text-mutation loader leaves one of these in its source; an EXEMPT or NO_MUTATIONS guard must carry none.
 MARKERS = ("MUTATION TARGET MISSING", "MUTATION DOES NOT APPLY", ".count(old)", ".count(anchor)")
