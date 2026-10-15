@@ -274,9 +274,80 @@ def payload(inp: dict) -> dict:
     }
 
 
+def _fig_box(x: int, y: int, w: int, title: str, sub: str, cls: str = "") -> str:
+    cx = x + w // 2
+    return ('<rect class="%s" x="%d" y="%d" width="%d" height="56" rx="8"/>'
+            '<text class="t" x="%d" y="%d" text-anchor="middle" dominant-baseline="central">%s</text>'
+            '<text x="%d" y="%d" text-anchor="middle" dominant-baseline="central">%s</text>'
+            % (cls, x, y, w, cx, y + 19, html.escape(title), cx, y + 38, html.escape(sub)))
+
+
+def _fig_open(mid: str, height: int, title: str, desc: str) -> str:
+    return ('<svg class="fig" viewBox="0 0 680 %d" role="img"><title>%s</title><desc>%s</desc>'
+            '<defs><marker id="%s" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" '
+            'orient="auto-start-reverse"><path d="M2 1L8 5L2 9" fill="none" stroke="#8d9db3" stroke-width="1.5" '
+            'stroke-linecap="round" stroke-linejoin="round"/></marker></defs>'
+            % (height, html.escape(title), html.escape(desc), mid))
+
+
+def two_paths_svg() -> str:
+    """The fork after a person's decision: a link to a known typology, or a pattern that matches nothing.
+    The known path is labelled Next while the page's Next section still reads NOT BUILT."""
+    arr = ' class="arr" marker-end="url(#figA)"'
+    parts = [_fig_open("figA", 580, "After a person decides: two paths",
+                       "A scan reads advisories, an agent proposes links, a person reviews each one. A link to a "
+                       "known typology is routed to its desk; a pattern matching nothing becomes a typology "
+                       "proposal that, once live, joins the library so the next advisory takes the known path."),
+             _fig_box(190, 30, 300, "Weekly scan", "Fridays: fetch and triage advisories"),
+             '<line x1="340" y1="86" x2="340" y2="114"%s/>' % arr,
+             _fig_box(190, 116, 300, "An agent reads the advisory", "Indicators, quotes, proposed links", "agent"),
+             '<line x1="340" y1="172" x2="340" y2="200"%s/>' % arr,
+             _fig_box(190, 202, 300, "A person reviews each link", "Approve or reject, with a reason", "person"),
+             '<path d="M340 258 L340 272 L190 272 L190 286"%s/>' % arr,
+             '<path d="M340 258 L340 272 L490 272 L490 286"%s/>' % arr,
+             _fig_box(60, 288, 260, "Links a known typology", "e.g. %s to %s" % (ADVISORY, CORROBORATES[0])),
+             _fig_box(360, 288, 260, "Matches nothing known", "An emergent pattern"),
+             '<line x1="190" y1="344" x2="190" y2="382"%s/>' % arr,
+             '<line x1="490" y1="344" x2="490" y2="382"%s/>' % arr,
+             _fig_box(60, 384, 260, "Routed to its desk", "Next: corroborate, re-review"),
+             _fig_box(360, 384, 260, "Typology proposal", "Opened by the owner in NEXUS"),
+             '<line x1="490" y1="440" x2="490" y2="478"%s/>' % arr,
+             _fig_box(360, 480, 260, "Goes live", "Joins the typology library"),
+             '<path class="arr loop" d="M360 508 L190 508 L190 442" marker-end="url(#figA)"/>',
+             '<text x="275" y="528" text-anchor="middle">The next advisory on it</text>',
+             '<text x="275" y="546" text-anchor="middle">takes the known path</text>',
+             "</svg>"]
+    return "".join(parts)
+
+
+FIG_ACTOR = {"AGENT": ("agent", "An agent"), "PERSON": ("person", "A person decides"), "NEXUS": ("", "Done in NEXUS")}
+
+
+def steps_svg() -> str:
+    """PIPELINE drawn as a flow, two rows of three, coloured by actor: generated from the same list the step
+    cards render, so the picture and the cards cannot disagree."""
+    xs, ys, w = (40, 250, 460), (30, 140), 180
+    parts = [_fig_open("figS", 270, "From a noticed pattern to a live typology",
+                       "The six steps " + ", ".join(s["name"] for s in PIPELINE) + ", coloured by who acts.")]
+    for i, s in enumerate(PIPELINE):
+        x, y = xs[i % 3], ys[i // 3]
+        cls, who = FIG_ACTOR[s["actor"]]
+        parts.append(_fig_box(x, y, w, "%d %s" % (s["n"], s["name"]), who, cls))
+        if i % 3 != 2 and i + 1 < len(PIPELINE):
+            parts.append('<line class="arr" x1="%d" y1="%d" x2="%d" y2="%d" marker-end="url(#figS)"/>'
+                         % (x + w, y + 28, x + w + 28, y + 28))
+    if len(PIPELINE) > 3:
+        parts.append('<path class="arr" d="M550 86 L550 113 L130 113 L130 138" marker-end="url(#figS)"/>')
+    parts.append('<rect class="agent" x="150" y="230" width="12" height="12" rx="3"/><text x="170" y="240">Agent</text>'
+                 '<rect class="person" x="250" y="230" width="12" height="12" rx="3"/><text x="270" y="240">Person</text>'
+                 '<rect x="370" y="230" width="12" height="12" rx="3"/><text x="390" y="240">NEXUS</text></svg>')
+    return "".join(parts)
+
+
 def build(inp: dict) -> str:
     data = json.dumps(payload(inp), ensure_ascii=False, sort_keys=True, separators=(",", ":")).replace("</", "<\\/")
-    return TEMPLATE.replace("__PAYLOAD__", data).replace("__RUN__", html.escape(RUN_ID))
+    return (TEMPLATE.replace("__PAYLOAD__", data).replace("__RUN__", html.escape(RUN_ID))
+            .replace("__FIG_PATHS__", two_paths_svg()).replace("__FIG_STEPS__", steps_svg()))
 
 
 TEMPLATE = r"""<!doctype html>
@@ -370,6 +441,13 @@ h2{margin:0;font-size:16px}
 .nb{font:600 11px var(--mono);color:var(--gold);border:1px solid var(--gold);border-radius:6px;padding:2px 8px}
 .dash{border:1px dashed var(--line-2);border-radius:10px;padding:12px}
 .tools{font:11.5px var(--mono);color:var(--fg-2);margin-top:6px;line-height:1.7;overflow-wrap:anywhere}
+.figwrap{overflow-x:auto;margin-top:10px}
+.fig{display:block;width:100%;min-width:520px;max-width:680px;height:auto;margin:0 auto}
+.fig text{font:12px var(--sans);fill:var(--fg-2)}
+.fig text.t{font-size:14px;font-weight:500;fill:var(--fg)}
+.fig rect{fill:var(--raised);stroke:var(--line-2);stroke-width:1}
+.fig rect.agent{stroke:var(--blue)}.fig rect.person{stroke:var(--gold)}
+.fig .arr{fill:none;stroke:#8d9db3;stroke-width:1.2}.fig .loop{stroke:var(--ok);stroke-dasharray:4 3}
 footer{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px;font-size:12px;color:var(--faint);border-top:1px solid var(--line);padding-top:12px}
 </style>
 </head>
@@ -427,9 +505,16 @@ footer{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px;font-si
 <div class="card"><div class="label">Typology links, decided by a person</div><div id="links"></div></div>
 </section>
 
+<section class="card" aria-label="Two paths after a decision">
+<h2>After a person decides: two paths</h2>
+<p class="sub" style="font-size:13px;color:var(--muted)">The scan never creates a typology. A person's decision on each link sends it one of two ways: a link to a typology NEXUS already governs goes to that typology's desk; a pattern that matches nothing can become a new typology, and once live it is one the next advisory links to directly.</p>
+<div class="figwrap">__FIG_PATHS__</div>
+</section>
+
 <section class="card" aria-label="When the agent finds something new">
 <div style="display:flex;flex-wrap:wrap;align-items:baseline;gap:8px 14px"><h2>When the agent finds something new</h2></div>
 <p class="sub" id="newHeadline"></p>
+<div class="figwrap">__FIG_STEPS__</div>
 <div class="grid3" id="newSteps"></div>
 <div class="dash" id="newExample" style="margin-top:12px"></div>
 </section>
