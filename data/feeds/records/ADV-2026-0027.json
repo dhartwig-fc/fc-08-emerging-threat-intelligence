@@ -1,0 +1,373 @@
+{
+  "schema_version": "1.4.0",
+  "advisory_id": "ADV-2026-0027",
+  "source": {
+    "source_type": "ofac",
+    "publisher": "U.S. Department of the Treasury, Office of Foreign Assets Control (OFAC)",
+    "title": "PRESS CHART - Cartel del Noreste Facilitators Network - October 2026 (Treasury Targets Cartel del Noreste's Horse Racing Enterprise and Expansive Criminal Network)",
+    "published_on": "2026-10-13",
+    "published_on_precision": "day",
+    "url": null,
+    "document_sha256": "d98f056dd5ac97a14e0724e749959a802721f2c470ff6fb026126da12e755fbd",
+    "page_count": 3
+  },
+  "summary": "OFAC added four Mexican individuals and eleven Mexican entities to the SDN List on 13 October 2026 for their roles in a Cartel del Noreste (CDN) facilitation network. The individuals -- Gamaliel Garza Elias, Gamaliel Garza Garcia, Pablo Cesar Guajardo Alvarez ('El Takia') and Francisco Javier Inzunza Partida ('Pancho Amador') -- are designated under Executive Order 13224 (as amended) and the illicit-drugs sanctions program. Almost all of the designated entities, spanning construction, horse racing/hospitality, real estate development, propane and gas wholesale, equine breeding, and transportation/logistics, are listed as 'Linked To' Gamaliel Garza Garcia or Cartel del Noreste directly, several having been incorporated in 2024-2025 shortly before designation. The release frames the action as targeting the cartel's 'horse racing enterprise and expansive criminal network' of ostensibly legitimate businesses used to give the organisation a commercial face in Nuevo Laredo, Tamaulipas and Anahuac, Nuevo Leon.",
+  "jurisdictions": [
+    "MX",
+    "US"
+  ],
+  "typologies": [
+    {
+      "family": "sanctions",
+      "typology_id": "SAN004",
+      "label": "Front Companies",
+      "emergent": false,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 1,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "Treasury Targets Cartel del Noreste's Horse Racing Enterprise and Expansive Criminal Network"
+        },
+        {
+          "page": 2,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "Organization Established Date 11 Mar 2025; Organization Type: Wholesale of solid, liquid and gaseous fuels and related products"
+        },
+        {
+          "page": 2,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "Organization Type: Raising of horses and other equines [SDGT] [ILLICIT-DRUGS-EO14059] (Linked To: GARZA GARCIA, Gamaliel)"
+        }
+      ],
+      "added_by": "extractor",
+      "review_justification": null
+    }
+  ],
+  "actors": [
+    {
+      "name": "GARZA ELIAS, Gamaliel",
+      "actor_type": "person",
+      "aliases": [],
+      "jurisdiction": "MX",
+      "role": "Designated individual; CEGESA (Construcciones y Edificaciones Garza Elias) is linked to him",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 1,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "GARZA ELIAS, Gamaliel, Anahuac, Nuevo Leon, Mexico; DOB 10 Jul 1997; POB Nuevo Laredo, Tamaulipas, Mexico"
+        }
+      ]
+    },
+    {
+      "name": "GARZA GARCIA, Gamaliel",
+      "actor_type": "person",
+      "aliases": [],
+      "jurisdiction": "MX",
+      "role": "Designated individual linked to Cartel del Noreste and to the majority of the newly designated front entities",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 1,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "GARZA GARCIA, Gamaliel, Anahuac, Nuevo Leon, Mexico; DOB 23 Oct 1974; POB Nuevo Leon, Mexico"
+        }
+      ]
+    },
+    {
+      "name": "GUAJARDO ALVAREZ, Pablo Cesar",
+      "actor_type": "person",
+      "aliases": [
+        "El Takia"
+      ],
+      "jurisdiction": "MX",
+      "role": "Designated individual, linked to Cartel del Noreste",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 1,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "GUAJARDO ALVAREZ, Pablo Cesar (a.k.a. \"El Takia\"), Mexico; DOB 29 Dec 1998; POB Tamaulipas, Mexico"
+        }
+      ]
+    },
+    {
+      "name": "INZUNZA PARTIDA, Francisco Javier",
+      "actor_type": "person",
+      "aliases": [
+        "AMADOR INZUNZA, Francisco",
+        "Pancho Amador"
+      ],
+      "jurisdiction": "MX",
+      "role": "Designated individual",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 1,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "INZUNZA PARTIDA, Francisco Javier (a.k.a. AMADOR INZUNZA, Francisco; a.k.a. \"Pancho Amador\"), Mexico; DOB 21 Nov 1986; POB Coahuila, Mexico"
+        }
+      ]
+    },
+    {
+      "name": "CARTEL DEL NORESTE",
+      "actor_type": "organisation",
+      "aliases": [
+        "CDN"
+      ],
+      "jurisdiction": "MX",
+      "role": "Designated drug trafficking organisation; the front-company network exists to benefit it",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 1,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "(Linked To: CARTEL DEL NORESTE)"
+        }
+      ]
+    },
+    {
+      "name": "CLUB LA MOLIENDA",
+      "actor_type": "organisation",
+      "aliases": [
+        "LA MOLIENDA RACE TRACK",
+        "RESTAURANT BAR LA MOLIENDA"
+      ],
+      "jurisdiction": "MX",
+      "role": "Horse racing / hospitality front entity linked to Cartel del Noreste",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 1,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "CLUB LA MOLIENDA (a.k.a. LA MOLIENDA RACE TRACK; a.k.a. RESTAURANT BAR LA MOLIENDA), Nuevo Laredo, Tamaulipas, Mexico"
+        }
+      ]
+    },
+    {
+      "name": "CONCRETOS Y PRODUCTOS ASFALTICOS DEL NORTE, S.A. DE C.V.",
+      "actor_type": "organisation",
+      "aliases": [],
+      "jurisdiction": "MX",
+      "role": "Road/railway construction entity linked to Gamaliel Garza Garcia",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 1,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "CONCRETOS Y PRODUCTOS ASFALTICOS DEL NORTE, S.A. DE C.V., Nuevo Laredo, Tamaulipas, Mexico"
+        }
+      ]
+    },
+    {
+      "name": "CONSTRUACEROS DEL FUERTE, S.A. DE C.V.",
+      "actor_type": "organisation",
+      "aliases": [],
+      "jurisdiction": "MX",
+      "role": "Building construction entity linked to Gamaliel Garza Garcia",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 1,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "CONSTRUACEROS DEL FUERTE, S.A. DE C.V., Nuevo Laredo, Tamaulipas, Mexico"
+        }
+      ]
+    },
+    {
+      "name": "CONSTRUCCIONES Y EDIFICACIONES GARZA ELIAS, S.A. DE C.V.",
+      "actor_type": "organisation",
+      "aliases": [
+        "CEGESA",
+        "CEGESA S.A. DE C.V."
+      ],
+      "jurisdiction": "MX",
+      "role": "Building construction entity linked to Gamaliel Garza Garcia",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 2,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "CONSTRUCCIONES Y EDIFICACIONES GARZA ELIAS, S.A. DE C.V. (a.k.a. CEGESA; a.k.a. CEGESA S.A. DE C.V.), Anahuac, Nuevo Leon, Mexico"
+        }
+      ]
+    },
+    {
+      "name": "CUADRA SAN DIBANH",
+      "actor_type": "organisation",
+      "aliases": [],
+      "jurisdiction": "MX",
+      "role": "Equine breeding entity linked to Gamaliel Garza Garcia",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 2,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "CUADRA SAN DIBANH, Anahuac, Nuevo Leon, Mexico"
+        }
+      ]
+    },
+    {
+      "name": "DISTRIBUIDORA DE GAS ECONOMICO, S.A. DE C.V.",
+      "actor_type": "organisation",
+      "aliases": [],
+      "jurisdiction": "MX",
+      "role": "Gas wholesale entity linked to Gamaliel Garza Garcia",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 2,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "DISTRIBUIDORA DE GAS ECONOMICO, S.A. DE C.V., Nuevo Laredo, Tamaulipas, Mexico"
+        }
+      ]
+    },
+    {
+      "name": "GAS ENERGIA CONFIABLE, S.A. DE C.V.",
+      "actor_type": "organisation",
+      "aliases": [],
+      "jurisdiction": "MX",
+      "role": "Gas wholesale entity linked to Gamaliel Garza Garcia",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 2,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "GAS ENERGIA CONFIABLE, S.A. DE C.V., Nuevo Laredo, Tamaulipas, Mexico"
+        }
+      ]
+    },
+    {
+      "name": "INOVA NLD DESARROLLOS INMOBILARIOS, S.A. DE C.V.",
+      "actor_type": "organisation",
+      "aliases": [],
+      "jurisdiction": "MX",
+      "role": "Real estate/construction entity linked to Gamaliel Garza Garcia",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 2,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "INOVA NLD DESARROLLOS INMOBILARIOS, S.A. DE C.V., Nuevo Laredo, Tamaulipas, Mexico"
+        }
+      ]
+    },
+    {
+      "name": "PROPANE TRADING GROUP, S.A. DE C.V.",
+      "actor_type": "organisation",
+      "aliases": [],
+      "jurisdiction": "MX",
+      "role": "Gas wholesale entity linked to Gamaliel Garza Garcia",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 2,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "PROPANE TRADING GROUP, S.A. DE C.V., Nuevo Laredo, Tamaulipas, Mexico"
+        }
+      ]
+    },
+    {
+      "name": "TAMEX LOGISTICS",
+      "actor_type": "organisation",
+      "aliases": [
+        "TAMEX LEASING"
+      ],
+      "jurisdiction": "MX",
+      "role": "Transportation and storage entity designated under the illicit-drugs program",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 2,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "TAMEX LOGISTICS (a.k.a. TAMEX LEASING), Villa de Hidalgo 239, Granjas Guzman, Nuevo Laredo, Tamaulipas 88293, Mexico"
+        }
+      ]
+    },
+    {
+      "name": "TRANSPORTADORA DE GAS DE NUEVO LAREDO, S.A. DE C.V.",
+      "actor_type": "organisation",
+      "aliases": [],
+      "jurisdiction": "MX",
+      "role": "Gas wholesale entity designated under the illicit-drugs program",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 3,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "TRANSPORTADORA DE GAS DE NUEVO LAREDO, S.A. DE C.V., Nuevo Laredo, Tamaulipas, Mexico"
+        }
+      ]
+    }
+  ],
+  "indicators": [
+    {
+      "indicator_type": "network",
+      "description": "A single designated individual (Gamaliel Garza Garcia) is listed as the link for a cluster of entities across unrelated sectors -- construction, horse racing/hospitality, real estate, gas wholesale, equine breeding -- consistent with a front-company network built around one controller.",
+      "detectable_in_transaction_data": false,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 2,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "Organization Type: Raising of horses and other equines [SDGT] [ILLICIT-DRUGS-EO14059] (Linked To: GARZA GARCIA, Gamaliel)"
+        }
+      ]
+    },
+    {
+      "indicator_type": "documentary",
+      "description": "Several of the designated entities were formally incorporated only months before the October 2026 designation (e.g. established 11 March 2025), consistent with recently-formed shell/front entities.",
+      "detectable_in_transaction_data": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 2,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "Organization Established Date 11 Mar 2025; Organization Type: Wholesale of solid, liquid and gaseous fuels and related products"
+        }
+      ]
+    },
+    {
+      "indicator_type": "product",
+      "description": "A horse racing track/restaurant-bar operated as an apparently legitimate leisure and hospitality business is designated as linked to the cartel, illustrating use of a cash-intensive leisure business as a commercial front.",
+      "detectable_in_transaction_data": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 1,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "Organization Type: Operation of sports facilities; alt. Organization Type: Restaurants and mobile food service activities"
+        }
+      ]
+    }
+  ],
+  "suggested_desks": [
+    "sanctions_desk",
+    "fiu_liaison"
+  ],
+  "overall_confidence": "high",
+  "extraction_notes": "None of the fifteen named actors (4 individuals, 11 entities, plus Cartel del Noreste) resolved against the governed actor register -- all returned 'Unresolved: ... is not in the actor register', so no actor_id mapping could be recorded; a human should decide whether any map to existing register entries. This is a standalone OFAC SDN designation chart (not a typology-list document), so the single front-companies typology (SAN004) was supported at high confidence because the document develops the technique across eleven linked entities rather than a single passing mention. No transaction-level, narrative TBML, correspondent-banking or capital-markets content is present in this document."
+}

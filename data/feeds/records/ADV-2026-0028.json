@@ -1,0 +1,481 @@
+{
+  "schema_version": "1.4.0",
+  "advisory_id": "ADV-2026-0028",
+  "source": {
+    "source_type": "ofac",
+    "publisher": "U.S. Department of the Treasury - Office of Foreign Assets Control (OFAC)",
+    "title": "Iran-related Designations and Designations Updates; Transnational Criminal Organizations Designation; Publication of Iran-related Determination; Publication of Amended Iran-related Frequently Asked Question",
+    "published_on": "2026-10-01",
+    "published_on_precision": "day",
+    "url": null,
+    "document_sha256": "0cc2b787d8ea00bf3a8ba39c4617d1ea141074685fb1948461e0649f945331a8",
+    "page_count": 5
+  },
+  "summary": "OFAC announced 'Operation Economic Outcast', adding two Iranian individuals and roughly 30 entities to the SDN List for sanctions evasion tied to Iran's automotive and rail sectors (EO 13871/EO 13902), alongside a separate Transnational Criminal Organization designation (A7 Network) and two name/property amendments. The core network comprises newly incorporated trading companies in Hong Kong, China, the UAE, Turkey, Indonesia and Germany, several explicitly tagged 'Linked To' designated Iranian individuals (Ramin Keshvardoust, Mehnoosh Poursaraf Hamedani) or to major Iranian automotive and rail manufacturers (HEPCO, Iran Khodro, Saipa, Zamyad, the Islamic Republic of Iran Railway Company, Raja Passenger Trains). OFAC also published an EO 13902 sectoral determination covering Iran's automotive and rail sectors and an amended Iran-related FAQ (831).",
+  "jurisdictions": [
+    "IR",
+    "CN",
+    "HK",
+    "AE",
+    "RU",
+    "KG",
+    "NG",
+    "ZW",
+    "ID",
+    "DE",
+    "TR",
+    "KZ",
+    "GE",
+    "DM"
+  ],
+  "typologies": [
+    {
+      "family": "sanctions",
+      "typology_id": "SAN004",
+      "label": "Front Companies",
+      "emergent": false,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 1,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "BONASOL GROUP CO., LIMITED (a.k.a. \"LIDA SHINE GROUP LIMITED\"), Unit 2610, 26/F, Apec Plaza, 49 Hoi Yuen Road, Kowloon, Hong Kong, China; Organization Established Date 18 Jul 2023; Business Registration Number 75524718 (Hong Kong) [IRAN-EO13902]."
+        },
+        {
+          "page": 1,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "FIDAR FOOLAD RADMAN (Arabic: شرکت فیدار فولاد رادمان), No. 35, 2nd Floor, Northeast Unit, Raz Boulevard, Ammar Street, Farmanieh, Tehran, Iran; Additional Sanctions Information - Subject to Secondary Sanctions; Organization Established Date 17 Apr 2018; National ID No. 14007529243 (Iran); Registration Number 525217 (Iran) [IRAN-EO13871] (Linked To: KESHVARDOUST, Ramin)."
+        },
+        {
+          "page": 2,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "HEPCO SHANGHAI CO., LTD. (Chinese Simplified: 赫世浦上海机械贸易有限公司) (a.k.a. HESHIPU SHANGHAI MACHINERY TRADING CO., LTD; a.k.a. SHANGHAI HEPCO LTD.), Room C-25, 6th Floor, Building 1, No. 198, Huashen Road, China (Shanghai) Pilot Free Trade Zone, Pudong New Area, Shanghai 200135, China"
+        }
+      ],
+      "added_by": "extractor",
+      "review_justification": null
+    },
+    {
+      "family": "network",
+      "typology_id": "PAT007",
+      "label": "Shell Company Network",
+      "emergent": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 1,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "BONASOL GROUP CO., LIMITED (a.k.a. \"LIDA SHINE GROUP LIMITED\"), Unit 2610, 26/F, Apec Plaza, 49 Hoi Yuen Road, Kowloon, Hong Kong, China; Organization Established Date 18 Jul 2023; Business Registration Number 75524718 (Hong Kong) [IRAN-EO13902]."
+        },
+        {
+          "page": 1,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "EAST CONCORD DEVELOPMENT LIMITED, Rm 2610, 26/F, Apec Plz, 49 Hoi Yuen Rd, Kwun Tong, Hong Kong, China; Organization Established Date 10 Oct 2024; Business Registration Number 77164714 (Hong Kong) [IRAN-EO13902]."
+        }
+      ],
+      "added_by": "extractor",
+      "review_justification": null
+    }
+  ],
+  "actors": [
+    {
+      "name": "HAMEDANI, Mehnoosh Poursaraf",
+      "actor_type": "person",
+      "aliases": [],
+      "jurisdiction": "IR",
+      "role": "Designated individual, linked to Shanghai Ruimi Import and Export Trade Co., Ltd.",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 1,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "nationality Iran; alt. nationality Dominica; Additional Sanctions Information - Subject to Secondary Sanctions; Gender Female; National ID No. 0058172041 (Iran) (individual) [IRAN-EO13871] (Linked To: SHANGHAI RUIMI IMPORT AND EXPORT TRADE CO., LTD.)."
+        }
+      ]
+    },
+    {
+      "name": "KESHVARDOUST, Ramin",
+      "actor_type": "person",
+      "aliases": [],
+      "jurisdiction": "IR",
+      "role": "Designated individual; hub of a linked network comprising Fidar Foolad Radman, M and R Steel Co., Ltd. and Shanghai Ruimi Import and Export Trade Co., Ltd.",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 1,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "nationality Iran; alt. nationality Dominica; Additional Sanctions Information - Subject to Secondary Sanctions; Gender Male; Passport W55497664 (Iran) expires 27 Dec 2026; National ID No. 0063416611 (Iran) (individual) [IRAN-EO13871]."
+        }
+      ]
+    },
+    {
+      "name": "A7 NETWORK",
+      "actor_type": "network",
+      "aliases": [],
+      "jurisdiction": null,
+      "role": "Designated Transnational Criminal Organization, operating across Russia, Kyrgyzstan, Nigeria and Zimbabwe",
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 1,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "A7 NETWORK, Russia; Kyrgyzstan; Nigeria; Zimbabwe; Organization Established Date 2024; Target Type Criminal Organization [TCO]."
+        }
+      ]
+    },
+    {
+      "name": "BONASOL GROUP CO., LIMITED",
+      "actor_type": "organisation",
+      "aliases": [
+        "LIDA SHINE GROUP LIMITED"
+      ],
+      "jurisdiction": "HK",
+      "role": "Newly incorporated Hong Kong trading front company designated under IRAN-EO13902",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 1,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "BONASOL GROUP CO., LIMITED (a.k.a. \"LIDA SHINE GROUP LIMITED\"), Unit 2610, 26/F, Apec Plaza, 49 Hoi Yuen Road, Kowloon, Hong Kong, China; Organization Established Date 18 Jul 2023; Business Registration Number 75524718 (Hong Kong) [IRAN-EO13902]."
+        }
+      ]
+    },
+    {
+      "name": "EAST CONCORD DEVELOPMENT LIMITED",
+      "actor_type": "organisation",
+      "aliases": [],
+      "jurisdiction": "HK",
+      "role": "Hong Kong front company sharing registered unit/floor with Bonasol Group, designated under IRAN-EO13902",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 1,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "EAST CONCORD DEVELOPMENT LIMITED, Rm 2610, 26/F, Apec Plz, 49 Hoi Yuen Rd, Kwun Tong, Hong Kong, China; Organization Established Date 10 Oct 2024; Business Registration Number 77164714 (Hong Kong) [IRAN-EO13902]."
+        }
+      ]
+    },
+    {
+      "name": "DOMINION TRADING GROUP LIMITED",
+      "actor_type": "organisation",
+      "aliases": [
+        "XINYI INTERNATIONAL DEVELOPMENT CO., LIMITED"
+      ],
+      "jurisdiction": "HK",
+      "role": "Hong Kong trading company designated under IRAN-EO13902",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 1,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "DOMINION TRADING GROUP LIMITED (a.k.a. \"XINYI INTERNATIONAL DEVELOPMENT CO., LIMITED\"), Rm 40H, Blk AD, 19/F, Golden Bear Ind. Ctr., 66-82 Chai Wan Kok St., Tsuen Wan, Hong Kong, China; Organization Established Date 23 Oct 2024; Business Registration Number 77222102 (Hong Kong) [IRAN-EO13902]."
+        }
+      ]
+    },
+    {
+      "name": "FIDAR FOOLAD RADMAN",
+      "actor_type": "organisation",
+      "aliases": [],
+      "jurisdiction": "IR",
+      "role": "Iranian entity designated under IRAN-EO13871, linked to Keshvardoust, Ramin",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 1,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "FIDAR FOOLAD RADMAN (Arabic: شرکت فیدار فولاد رادمان), No. 35, 2nd Floor, Northeast Unit, Raz Boulevard, Ammar Street, Farmanieh, Tehran, Iran; Additional Sanctions Information - Subject to Secondary Sanctions; Organization Established Date 17 Apr 2018; National ID No. 14007529243 (Iran); Registration Number 525217 (Iran) [IRAN-EO13871] (Linked To: KESHVARDOUST, Ramin)."
+        }
+      ]
+    },
+    {
+      "name": "M AND R STEEL CO., LTD.",
+      "actor_type": "organisation",
+      "aliases": [
+        "BEIJING M & R STEEL CO., LTD."
+      ],
+      "jurisdiction": "CN",
+      "role": "Beijing-based trading company designated under IRAN-EO13871, linked to Keshvardoust, Ramin",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 3,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "M AND R STEEL CO., LTD. (a.k.a. BEIJING M & R STEEL CO., LTD. (Chinese Simplified: 北京润达森进出口贸易有限公司)), Unit 3005, Building 5, Wanda Plaza No. 93, Jian'guo Road, Chaoyang District, Beijing 100022, China; Organization Established Date 16 Apr 2008; Unified Social Credit Code (USCC) 91110105674279546N (China) [IRAN-EO13871] (Linked To: KESHVARDOUST, Ramin)."
+        }
+      ]
+    },
+    {
+      "name": "SHANGHAI RUIMI IMPORT AND EXPORT TRADE CO., LTD.",
+      "actor_type": "organisation",
+      "aliases": [],
+      "jurisdiction": "CN",
+      "role": "Shanghai-based trading company designated under IRAN-EO13871, linked to Keshvardoust, Ramin and to Hamedani, Mehnoosh Poursaraf",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 4,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "SHANGHAI RUIMI IMPORT AND EXPORT TRADE CO., LTD. (Chinese Simplified: 上海睿弥进出口贸易有限公司), 1125, No. 35 Rijing Road, China Pilot Free Trade Zone, Shanghai 200000, China; Organization Established Date 29 Jan 2019; Unified Social Credit Code (USCC) 91310115MA1K49TG93 (China) [IRAN-EO13871] (Linked To: KESHVARDOUST, Ramin)."
+        }
+      ]
+    },
+    {
+      "name": "HEAVY EQUIPMENT PRODUCTION COMPANY",
+      "actor_type": "organisation",
+      "aliases": [
+        "HEPCO"
+      ],
+      "jurisdiction": "IR",
+      "role": "Iranian heavy-equipment manufacturer designated under the EO 13902 automotive and rail sectors determination",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 2,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "HEAVY EQUIPMENT PRODUCTION COMPANY (Arabic: شرکت تولید تجهیزات سنگین هپکو) (a.k.a. \"HEPCO\"), Ground Floor, No. 102 Somayyeh Street, Ramsar Street, Government Gate, Tehran, Tehran 1581875513, Iran"
+        }
+      ]
+    },
+    {
+      "name": "HEPCO SHANGHAI CO., LTD.",
+      "actor_type": "organisation",
+      "aliases": [
+        "HESHIPU SHANGHAI MACHINERY TRADING CO., LTD",
+        "SHANGHAI HEPCO LTD."
+      ],
+      "jurisdiction": "CN",
+      "role": "China-based trading entity linked to Heavy Equipment Production Company (HEPCO)",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 2,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "HEPCO SHANGHAI CO., LTD. (Chinese Simplified: 赫世浦上海机械贸易有限公司) (a.k.a. HESHIPU SHANGHAI MACHINERY TRADING CO., LTD; a.k.a. SHANGHAI HEPCO LTD.), Room C-25, 6th Floor, Building 1, No. 198, Huashen Road, China (Shanghai) Pilot Free Trade Zone, Pudong New Area, Shanghai 200135, China"
+        }
+      ]
+    },
+    {
+      "name": "IRAN KHODRO COMPANY",
+      "actor_type": "organisation",
+      "aliases": [
+        "IRAN KHODRO INDUSTRIAL GROUP COMPANY"
+      ],
+      "jurisdiction": "IR",
+      "role": "Iranian automobile manufacturer designated under the EO 13902 automotive and rail sectors determination",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 2,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "IRAN KHODRO COMPANY (Arabic: شرکت ایران خودرو سهامی علم)"
+        }
+      ]
+    },
+    {
+      "name": "SAIPA IRANIAN AUTOMOBILE MANUFACTURING COMPANY",
+      "actor_type": "organisation",
+      "aliases": [
+        "SAIPA HOLDING COMPANY"
+      ],
+      "jurisdiction": "IR",
+      "role": "Iranian automobile manufacturer designated under the EO 13902 automotive and rail sectors determination",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 4,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "SAIPA IRANIAN AUTOMOBILE MANUFACTURING COMPANY (Arabic: شرکت ایرانی تولید اتومبیل سایپا سهامی عام)"
+        }
+      ]
+    },
+    {
+      "name": "ZAMYAD COMPANY",
+      "actor_type": "organisation",
+      "aliases": [
+        "ZAMYAD PUBLIC JOINT STOCK COMPANY"
+      ],
+      "jurisdiction": "IR",
+      "role": "Iranian automobile manufacturer designated under the EO 13902 automotive and rail sectors determination",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 5,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "ZAMYAD COMPANY (Arabic: شرکت زامیاد سهامی علم)"
+        }
+      ]
+    },
+    {
+      "name": "ISLAMIC REPUBLIC OF IRAN RAILWAY COMPANY",
+      "actor_type": "organisation",
+      "aliases": [
+        "THE RAILWAYS OF ISLAMIC REPUBLIC OF IRAN COMPANY"
+      ],
+      "jurisdiction": "IR",
+      "role": "Iranian state railway company designated under the EO 13902 automotive and rail sectors determination",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 3,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "ISLAMIC REPUBLIC OF IRAN RAILWAY COMPANY"
+        }
+      ]
+    },
+    {
+      "name": "RAJA PASSENGER TRAINS COMPANY",
+      "actor_type": "organisation",
+      "aliases": [
+        "RAJA RAIL TRANSPORTATION COMPANY"
+      ],
+      "jurisdiction": "IR",
+      "role": "Iranian rail transportation company designated under the EO 13902 automotive and rail sectors determination",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 4,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "RAJA PASSENGER TRAINS COMPANY (Arabic: شرکت قطارهای مسافری رجاء)"
+        }
+      ]
+    },
+    {
+      "name": "TECH-TRADE INTERNATIONAL IMPEX GMBH",
+      "actor_type": "organisation",
+      "aliases": [],
+      "jurisdiction": "DE",
+      "role": "Germany-based entity designated under IRAN-EO13871, linked to Esfahan's Mobarakeh Steel Company",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 5,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "TECH-TRADE INTERNATIONAL IMPEX GMBH, Engelbertstrasse 13a, Hilden 40724, Germany; Organization Established Date 29 Nov 2017; Trade License No. HRB 82099 (Germany); Registration Number DER1101.HRB82099 (Germany) [IRAN-EO13871] (Linked To: ESFAHAN'S MOBARAKEH STEEL COMPANY)."
+        }
+      ]
+    },
+    {
+      "name": "ESFAHAN'S MOBARAKEH STEEL COMPANY",
+      "actor_type": "organisation",
+      "aliases": [],
+      "jurisdiction": "IR",
+      "role": "Iranian steel company named as the linked party behind Tech-Trade International Impex GmbH",
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 5,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "TECH-TRADE INTERNATIONAL IMPEX GMBH, Engelbertstrasse 13a, Hilden 40724, Germany; Organization Established Date 29 Nov 2017; Trade License No. HRB 82099 (Germany); Registration Number DER1101.HRB82099 (Germany) [IRAN-EO13871] (Linked To: ESFAHAN'S MOBARAKEH STEEL COMPANY)."
+        }
+      ]
+    }
+  ],
+  "indicators": [
+    {
+      "indicator_type": "documentary",
+      "description": "Trading company incorporated very recently (within one to two years of designation), consistent with a shell set up specifically to service the sanctioned trade rather than an established business.",
+      "detectable_in_transaction_data": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 1,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "BONASOL GROUP CO., LIMITED (a.k.a. \"LIDA SHINE GROUP LIMITED\"), Unit 2610, 26/F, Apec Plaza, 49 Hoi Yuen Road, Kowloon, Hong Kong, China; Organization Established Date 18 Jul 2023; Business Registration Number 75524718 (Hong Kong) [IRAN-EO13902]."
+        }
+      ]
+    },
+    {
+      "indicator_type": "network",
+      "description": "Entity explicitly tagged as 'Linked To' a designated Iranian individual or manufacturer, indicating the trading company exists to transact on that party's behalf.",
+      "detectable_in_transaction_data": false,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 1,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "FIDAR FOOLAD RADMAN (Arabic: شرکت فیدار فولاد رادمان), No. 35, 2nd Floor, Northeast Unit, Raz Boulevard, Ammar Street, Farmanieh, Tehran, Iran; Additional Sanctions Information - Subject to Secondary Sanctions; Organization Established Date 17 Apr 2018; National ID No. 14007529243 (Iran); Registration Number 525217 (Iran) [IRAN-EO13871] (Linked To: KESHVARDOUST, Ramin)."
+        }
+      ]
+    },
+    {
+      "indicator_type": "network",
+      "description": "Two separately incorporated trading companies share the same registered unit and floor address in Hong Kong, suggesting a common shell-company infrastructure.",
+      "detectable_in_transaction_data": true,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 1,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "BONASOL GROUP CO., LIMITED (a.k.a. \"LIDA SHINE GROUP LIMITED\"), Unit 2610, 26/F, Apec Plaza, 49 Hoi Yuen Road, Kowloon, Hong Kong, China; Organization Established Date 18 Jul 2023; Business Registration Number 75524718 (Hong Kong) [IRAN-EO13902]."
+        },
+        {
+          "page": 1,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "EAST CONCORD DEVELOPMENT LIMITED, Rm 2610, 26/F, Apec Plz, 49 Hoi Yuen Rd, Kwun Tong, Hong Kong, China; Organization Established Date 10 Oct 2024; Business Registration Number 77164714 (Hong Kong) [IRAN-EO13902]."
+        }
+      ]
+    },
+    {
+      "indicator_type": "documentary",
+      "description": "Trading company operates under a second, distinct registered name (a.k.a.), a form of rebranding seen repeatedly across the designated entities.",
+      "detectable_in_transaction_data": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 1,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "DOMINION TRADING GROUP LIMITED (a.k.a. \"XINYI INTERNATIONAL DEVELOPMENT CO., LIMITED\"), Rm 40H, Blk AD, 19/F, Golden Bear Ind. Ctr., 66-82 Chai Wan Kok St., Tsuen Wan, Hong Kong, China; Organization Established Date 23 Oct 2024; Business Registration Number 77222102 (Hong Kong) [IRAN-EO13902]."
+        }
+      ]
+    },
+    {
+      "indicator_type": "behavioural",
+      "description": "Designated Iranian individual holds a second, non-Iranian nationality (Dominica), consistent with use of an alternate citizenship to transact outside Iranian nationality screens.",
+      "detectable_in_transaction_data": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 1,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "nationality Iran; alt. nationality Dominica; Additional Sanctions Information - Subject to Secondary Sanctions; Gender Female; National ID No. 0058172041 (Iran) (individual) [IRAN-EO13871] (Linked To: SHANGHAI RUIMI IMPORT AND EXPORT TRADE CO., LTD.)."
+        }
+      ]
+    }
+  ],
+  "suggested_desks": [
+    "sanctions_desk",
+    "trade_desk",
+    "correspondent_desk"
+  ],
+  "overall_confidence": "high",
+  "extraction_notes": "Actor resolution: all 18 named actors returned 'Unresolved' from knowledge_centre_resolve_actor (none are existing identities in the register). For A7 NETWORK, the tool additionally returned similar-name suggestions (ACT-cd34bc99b1 Avalanche network; ACT-7aec1dbb9f QQAAZZ; ACT-92fd666c89 Zarringhalam shadow banking network, all score 1.00) -- these are suggestions only, not an identity, and none is clearly the correct match given A7 Network's stated Russia/Kyrgyzstan/Nigeria/Zimbabwe footprint. For ISLAMIC REPUBLIC OF IRAN RAILWAY COMPANY, the tool suggested ACT-c112e4cc46 'Islamic Republic of Iran Shipping Lines' (score 0.60) -- a different entity, not treated as an identity. This record extracts a representative subset of the roughly 30 entities added to the SDN List in the source document (the two individuals, the TCO network, the five Hong Kong/China front companies explicitly tied by 'Linked To' tags to the two individuals or to HEPCO, the six core Iranian automotive/rail manufacturers, and the Germany-based entity linked to Esfahan's Mobarakeh Steel Company); the remaining ~15 SDN additions (e.g. Hessenberg/Jedburgh, Integrated Auto Parts LLC, Iran Khodro Diesel, KGT Trading, Meizi, Niroo Motor Damavand, Niroo Motor Shiraz, Pars Khodro, PT Golden Motorcycle International, Sherkat-e Rah Ahan-e Khamle-o-Naghle, Silver Line Metal Trading, Tanex Global Trading, Traco International FZE, Troy Trading, and the Ever Shining/Fluxus Marine list-maintenance amendments) follow the same front-company pattern but were not individually transcribed given volume. No typology was recorded for the A7 Network TCO designation itself: the document gives only the bare designation (jurisdictions, establishment date, TCO tag) with no described modus operandi, so there is no technique to pin to a typology. Jurisdiction codes for Hong Kong (HK) and Dominica (DM) are listed separately from China (CN) and Iran (IR) per ISO 3166-1."
+}

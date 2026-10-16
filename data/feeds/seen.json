@@ -295,6 +295,13 @@
       "source": "ofac"
     },
     {
+      "decided_on": "2026-10-16",
+      "decision": "accept",
+      "first_seen_run": "feeds-2026-10-16-c88458",
+      "item_id": "20261001",
+      "source": "ofac"
+    },
+    {
       "decided_on": "2026-10-11",
       "decision": "drop",
       "first_seen_run": "feeds-2026-10-11-e7ad24",
@@ -327,6 +334,27 @@
       "decision": "drop",
       "first_seen_run": "feeds-2026-10-11-e7ad24",
       "item_id": "20261009_33",
+      "source": "ofac"
+    },
+    {
+      "decided_on": "2026-10-16",
+      "decision": "accept",
+      "first_seen_run": "feeds-2026-10-16-c88458",
+      "item_id": "20261013",
+      "source": "ofac"
+    },
+    {
+      "decided_on": "2026-10-16",
+      "decision": "accept",
+      "first_seen_run": "feeds-2026-10-16-c88458",
+      "item_id": "20261013_33",
+      "source": "ofac"
+    },
+    {
+      "decided_on": "2026-10-16",
+      "decision": "drop",
+      "first_seen_run": "feeds-2026-10-16-c88458",
+      "item_id": "20261014",
       "source": "ofac"
     },
     {
@@ -446,6 +474,13 @@
       "decision": "drop",
       "first_seen_run": "catalogue:90b57e8ba022",
       "item_id": "https://www.gov.uk/government/publications/ofsi-general-licence-int20258031092#2026-08-12T15:09:02Z",
+      "source": "ofsi"
+    },
+    {
+      "decided_on": "2026-10-16",
+      "decision": "drop",
+      "first_seen_run": "feeds-2026-10-16-c88458",
+      "item_id": "https://www.gov.uk/government/publications/ofsi-general-licence-int202610050568#2026-10-12T13:48:44Z",
       "source": "ofsi"
     },
     {
