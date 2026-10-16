@@ -123,7 +123,9 @@ FC10 = {
     "subject": "Global Metals Ltd",
     "case_id": "SAN006-TRD001",
     "run_id": "san006-ba55d5fa16",
-    "case_page": "../investigation-cross-domain/products/SAN006.html",
+    # The subject's page on the redesigned case (owner, 2026-10-16), not the per-product page, which keeps the
+    # pre-redesign product template. It links to that product page, which carries the run id.
+    "case_page": "../investigation-cross-domain/entities/CE-5338081c.html",
     "doctrine_page": "../knowledge-centre/knowledge/SAN006.html",
 }
 

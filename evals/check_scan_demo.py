@@ -377,7 +377,13 @@ def checks():
     case = (nexus / "threat-intel" / F["case_page"]).resolve()
     doctrine = (nexus / "threat-intel" / F["doctrine_page"]).resolve()
     text = case.read_text(encoding="utf-8") if case.exists() else ""
-    yield all(v in text for v in (F["subject"], F["run_id"], F["typology"])) and doctrine.exists(), \
+    # The link lands on the subject's entity page; the run id lives on the product page it links to, so the
+    # provenance is checked one hop on: the entity page must name the subject and link to that product page.
+    product = (case.parent / ("../products/%s.html" % F["typology"])).resolve()
+    links = 'href="../products/%s.html"' % F["typology"] in text
+    ptext = product.read_text(encoding="utf-8") if product.exists() else ""
+    yield (all(v in text for v in (F["subject"], F["typology"])) and links
+           and all(v in ptext for v in (F["subject"], F["run_id"])) and doctrine.exists()), \
         "the declared NEXUS case matches the published one", "%s · %s · %s" % (F["subject"], F["case_id"], F["run_id"])
 
 
