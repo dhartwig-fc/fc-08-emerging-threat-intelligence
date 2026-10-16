@@ -15,6 +15,8 @@ Usage:
     python evals/check_scan_demo.py --mutate drop-coverage   # a live feed is missing from the coverage strip
     python evals/check_scan_demo.py --mutate leak-path       # a local path reaches the page
     python evals/check_scan_demo.py --mutate show-cost       # a cost figure reaches the page
+    python evals/check_scan_demo.py --mutate built-without-import  # the Now block claims BUILT from an empty import
+    python evals/check_scan_demo.py --mutate wrong-rereview  # the Now block shows a re-review the import does not hold
 
 WHY. The page is a public claim that a real run went exactly this way. Every value on it must equal the
 record it came from, so this guard reads those records ITSELF -- not through the builder's inputs() -- and
@@ -35,6 +37,7 @@ WHAT IT CHECKS (checks()):
   cross-link   the walkthrough links to this page and this page to the walkthrough (both published side by side)
   boundary     the page crosses no publish boundary (no paths, internal files, emails)
   no cost      no money figure appears (owner, 2026-10-14)
+  impact       the Now block equals data/advisory_impact.json, read here; BUILT only with a SAN006 corroboration
   nexus        WARM: the portfolio's published SAN006 case page names the subject, case and run the page
                declares, and the doctrine page exists. NOT RUN without the portfolio checkout.
 
@@ -68,7 +71,7 @@ from publish_scan_demo import DEFAULT_PORTFOLIO  # noqa: E402
 
 MUTATIONS = ("drop-notice", "flip-verdict", "move-fate", "edit-quote", "reverse-decision", "citation-count",
              "wrong-model", "extra-tool", "eval-number", "drop-coverage", "leak-path", "show-cost",
-             "built-lie", "drop-decision", "fake-proposal")
+             "built-lie", "drop-decision", "fake-proposal", "built-without-import", "wrong-rereview")
 MUTATION = None
 NOT_RUN = object()
 SEEDS = ("0", "1", "42", "4242")
@@ -114,6 +117,10 @@ def _mutated_inputs() -> dict:
     elif m == "fake-proposal":
         inp["proposals"] = inp["proposals"] + [{"proposal_id": "TP-2099-999", "working_name": "Invented",
                                                 "family": "sanctions", "stage": "open", "evidence": []}]
+    elif m == "built-without-import":
+        inp["impact"] = {"typologies": {}}
+    elif m == "wrong-rereview":
+        inp["impact"]["typologies"][bs.CORROBORATES[0]]["rereviews"][0]["subject"] = "Someone Else Ltd"
     return inp
 
 
@@ -156,6 +163,7 @@ def _truth() -> dict:
         "score": json.loads(bs.SCORE_REPORT.read_text(encoding="utf-8"))["totals"]["typologies"],
         "log": _jsonl(gd.LOG),
         "proposals": json.loads((ROOT / "data" / "typology_proposals.json").read_text(encoding="utf-8"))["proposals"],
+        "impact": json.loads((ROOT / "data" / "advisory_impact.json").read_text(encoding="utf-8")),
         "triage_line": next((ln for ln in claude.splitlines() if "The triage band, measured" in ln), ""),
         "reviewer_line": next((ln for ln in claude.splitlines() if "FULL SET, all" in ln and "reviewer" in ln), ""),
     }
@@ -296,6 +304,32 @@ def checks():
     yield ex.get("ref", "").startswith(want_ex), \
         "the example is the first open proposal, or ADV-2026-0026's decided emergent when none is open", ex.get("ref")
     yield "The agent can only notice; a person defines." in page, "the section says who decides", ""
+
+    I, TI = P.get("impact", {}), T["impact"]["typologies"]
+    san = TI.get(bs.CORROBORATES[0], {})
+    yield I.get("built") is bool(san.get("corroborations")) and I.get("built") is True, \
+        "the Now block is BUILT exactly when the import holds a SAN006 corroboration", I.get("built")
+    want_rr = (san.get("rereviews") or [None])[0]
+    fields = ("id", "subject", "case_id", "status", "outcome", "raised_at", "closed_at")
+    yield bool(want_rr) and I.get("rereview") == {k: want_rr[k] for k in fields}, \
+        "the Now block's re-review is the import's", (I.get("rereview") or {}).get("id")
+    corrs = [c for t in TI.values() for c in t.get("corroborations", [])]
+    rrs = [r for t in TI.values() for r in t.get("rereviews", [])]
+    want_tot = {"corroborations": len(corrs), "typologies": sum(1 for t in TI.values() if t.get("corroborations")),
+                "rereviews": len(rrs), "open": sum(r["status"] == "open" for r in rrs),
+                "absorbed_on": max((c["absorbed_at"][:10] for c in corrs), default="")}
+    yield {k: I.get(k) for k in want_tot} == want_tot, "the Now block's totals are the import's", want_tot
+    yield bool(want_rr) and (bs.FC10["subject"], bs.FC10["case_id"]) == (want_rr["subject"], want_rr["case_id"]), \
+        "the declared FC10 case is the import's SAN006 re-review", bs.FC10["case_id"]
+    closed = copy.deepcopy(T["impact"])
+    for r in closed["typologies"].get(bs.CORROBORATES[0], {}).get("rereviews", [])[:1]:
+        r.update(status="closed", outcome="unchanged", closed_at="2026-10-20T09:00:00")
+    cv = bs.impact_view(closed)
+    yield (cv["rereview"] or {}).get("status") == "closed" and cv["open"] == want_tot["open"] - 1, \
+        "impact_view shows a closed re-review as closed", "open %s" % cv["open"]
+    ev = bs.impact_view({"typologies": {}})
+    yield ev["built"] is False and ev["doctrine"] is None and ev["rereview"] is None, \
+        "an empty import builds no BUILT claim", ""
 
     portfolio = Path(os.path.expanduser(DEFAULT_PORTFOLIO))
     nexus = portfolio / "projects" / "nexus"

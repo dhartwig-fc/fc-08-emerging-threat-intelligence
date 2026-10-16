@@ -66,6 +66,7 @@ PLIST = ROOT / "scripts" / "schedule" / "uk.fc08.friday-run.plist"
 FATF_MANUAL = ROOT / "tools" / "fetch_fatf_via_chrome.js"
 OUT = ROOT / "site" / "scan-demo" / "index.html"
 PROPOSALS_IMPORT = ROOT / "data" / "typology_proposals.json"
+IMPACT_IMPORT = ROOT / "data" / "advisory_impact.json"   # Stage566 K4b: fc-10's advisory impact, imported
 # Stage565 S4 (spec §7.2, plan R21): the six steps from "the agent noticed something" to "NEXUS scores it".
 # BUILT only when the named fc-08 files exist (evals/check_scan_demo.py checks); Build and Live happen in
 # NEXUS, and fc-08 sees them through the imported proposals and the typology export.
@@ -154,6 +155,9 @@ def inputs() -> dict:
         "schedule": {"day": DAYS[when["Weekday"]], "time": "%02d:%02d" % (when["Hour"], when.get("Minute", 0))},
         "log": _jsonl(gd.LOG),
         "proposals": json.loads(PROPOSALS_IMPORT.read_text(encoding="utf-8"))["proposals"],
+        # K4b-R2: no import yet reads as an empty one -- the page then claims nothing was absorbed.
+        "impact": (json.loads(IMPACT_IMPORT.read_text(encoding="utf-8")) if IMPACT_IMPORT.exists()
+                   else {"typologies": {}}),
         "pipeline": copy.deepcopy(PIPELINE),
     }
 
@@ -195,6 +199,28 @@ def _pipeline(inp: dict, links: list) -> dict:
     steps = [{k: v for k, v in step.items() if k != "evidence"} for step in inp["pipeline"]]
     return {"headline": "The agent can only notice; a person defines.", "steps": steps,
             "counts": counts, "example": example}
+
+
+def impact_view(impact: dict) -> dict:
+    """What the Now block shows, from the imported advisory impact export alone (Stage566 K4b, spec §5.2)."""
+    ts = impact.get("typologies") or {}
+    corrs = [c for t in ts.values() for c in t.get("corroborations") or []]
+    rrs = [r for t in ts.values() for r in t.get("rereviews") or []]
+    mine = ts.get(CORROBORATES[0]) or {}
+    mc = mine.get("corroborations") or []
+    doc = next((c for c in mc if c["advisory_id"] == ADVISORY), mc[0] if mc else None)
+    rr = (mine.get("rereviews") or [None])[0]
+    return {
+        "built": bool(mc),
+        "absorbed_on": max((c["absorbed_at"][:10] for c in corrs), default=""),
+        "corroborations": len(corrs),
+        "typologies": sum(1 for t in ts.values() if t.get("corroborations")),
+        "rereviews": len(rrs),
+        "open": sum(r["status"] == "open" for r in rrs),
+        "doctrine": {k: doc[k] for k in ("advisory_id", "publisher", "decided_at", "quotes")} if doc else None,
+        "rereview": ({k: rr[k] for k in ("id", "subject", "case_id", "status", "outcome", "raised_at", "closed_at")}
+                     if rr else None),
+    }
 
 
 def payload(inp: dict) -> dict:
@@ -263,6 +289,7 @@ def payload(inp: dict) -> dict:
         "corroborates": {"typology": CORROBORATES[0], "name": san["label"], "indicator": CORROBORATES[1]},
         "pipeline": _pipeline(inp, links),
         "fc10": FC10,
+        "impact": impact_view(inp["impact"]),
         "coverage": {"live": [DISPLAY[s] for s in inp["live"]], "manual": [DISPLAY[s] for s in inp["manual"]],
                      "not_yet": [DISPLAY.get(s, s) for s in inp["source_types"] if s not in taken]},
         "agents": {"model": inp["model"], "triage_tools": inp["triage_tools"], "kc_tools": inp["kc_tools"],
@@ -292,7 +319,7 @@ def _fig_open(mid: str, height: int, title: str, desc: str) -> str:
 
 def two_paths_svg() -> str:
     """The fork after a person's decision: a link to a known typology, or a pattern that matches nothing.
-    The known path is labelled Next while the page's Next section still reads NOT BUILT."""
+    The known path is absorbed into NEXUS (Stage566 K4b): corroboration and a product re-review."""
     arr = ' class="arr" marker-end="url(#figA)"'
     parts = [_fig_open("figA", 580, "After a person decides: two paths",
                        "A scan reads advisories, an agent proposes links, a person reviews each one. A link to a "
@@ -309,7 +336,7 @@ def two_paths_svg() -> str:
              _fig_box(360, 288, 260, "Matches nothing known", "An emergent pattern"),
              '<line x1="190" y1="344" x2="190" y2="382"%s/>' % arr,
              '<line x1="490" y1="344" x2="490" y2="382"%s/>' % arr,
-             _fig_box(60, 384, 260, "Routed to its desk", "Next: corroborate, re-review"),
+             _fig_box(60, 384, 260, "Absorbed into NEXUS", "Corroborate + re-review"),
              _fig_box(360, 384, 260, "Typology proposal", "Opened by the owner in NEXUS"),
              '<line x1="490" y1="440" x2="490" y2="478"%s/>' % arr,
              _fig_box(360, 480, 260, "Goes live", "Joins the typology library"),
@@ -519,13 +546,22 @@ footer{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px;font-si
 <div class="dash" id="newExample" style="margin-top:12px"></div>
 </section>
 
-<section class="next" aria-label="Next capability">
-<div style="display:flex;flex-wrap:wrap;align-items:baseline;gap:8px 14px"><h2>Next: the advisory acts inside NEXUS</h2><span class="nb">NOT BUILT</span></div>
-<p class="sub" style="color:var(--muted)">Today an approved advisory is linked to a typology and routed to a desk. The next step closes the loop, through the same owner gate.</p>
+<section class="next" aria-label="Now: the advisory acts inside NEXUS">
+<div style="display:flex;flex-wrap:wrap;align-items:baseline;gap:8px 14px"><h2>Now: the advisory acts inside NEXUS</h2><span id="nowBadge"></span></div>
+<p class="sub" style="color:var(--muted)" id="nowSub"></p>
 <div class="grid2" style="gap:14px">
-<div class="dash" id="nextDoctrine"></div>
-<div class="dash" id="nextCase"></div>
+<div class="dash" id="nowDoctrine"></div>
+<div class="dash" id="nowCase"></div>
 </div>
+<p class="note" id="nowTotals"></p>
+</section>
+
+<section class="card" aria-label="Next capability">
+<div style="display:flex;flex-wrap:wrap;align-items:baseline;gap:8px 14px"><h2>Next</h2><span class="nb">NOT BUILT</span></div>
+<ul style="margin:8px 0 0;padding-left:18px;font-size:13px;color:var(--fg-2)">
+<li><b>New red flags:</b> an agent compares the advisory with the typology's red flags; a person approves genuinely new ones.</li>
+<li><b>Cases on the desk:</b> re-review the queue cases of the typology, not only its product.</li>
+</ul>
 </section>
 
 <footer><span>Deep-dive on one advisory, from PDF to approved links: <a href="index.html">the threat-intelligence walkthrough</a> · <a href="../index.html">NEXUS</a></span><span>Public regulator notices; NEXUS case data is synthetic</span></footer>
@@ -658,10 +694,19 @@ footer{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px;font-si
     : '<div class="label">The real example, from this run</div>On ' + esc(X.decided_on) + ' the agent proposed <b>' + esc(X.name) + '</b> as something new. The owner ' + (X.decision === "approve" ? "approved" : "rejected") + ' it: “' + esc(X.note.replace(/^owner \d{4}-\d\d-\d\d: /, "")) + '”. No typology proposal is open yet, so this pattern stopped at step 2 — the gate working.';
 
   var K = P.corroborates, F = P.fc10;
-  $("nextDoctrine").innerHTML = '<div class="mono" style="font-size:11px;color:var(--gold)">' + esc(A.id) + ' → ' + esc(K.typology) + ' doctrine</div><b style="display:block;margin-top:4px">Corroborate or extend the typology\'s red flags</b>' +
-    '<p style="margin:4px 0 0;font-size:12.5px;color:var(--muted)">The network indicator matches one <a href="' + esc(F.doctrine_page) + '">' + esc(K.typology) + ' · ' + esc(K.name) + '</a> already lists: “' + esc(K.indicator) + '”. The agent would attach this case as evidence and propose any genuinely new flag for the owner to approve.</p>';
-  $("nextCase").innerHTML = '<div class="mono" style="font-size:11px;color:var(--gold)">' + esc(F.typology) + ' → cases on the desk</div><b style="display:block;margin-top:4px">Re-review what NEXUS already holds</b>' +
-    '<p style="margin:4px 0 0;font-size:12.5px;color:var(--muted)">NEXUS already manufactures an ' + esc(F.typology) + ' product: <a href="' + esc(F.case_page) + '">' + esc(F.subject) + ' (' + esc(F.case_id) + ')</a>. An approved advisory would put it on the sanctions desk\'s queue to be re-read against the new evidence, as a recorded event on the case log.</p>';
+  var I = P.impact, D = I.doctrine, R = I.rereview;
+  var MON = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  function day(v) { var d = new Date(v.slice(0, 10) + "T00:00:00Z"); return d.getUTCDate() + " " + MON[d.getUTCMonth()] + " " + d.getUTCFullYear(); }
+  var NOT = '<p style="margin:0;font-size:12.5px;color:var(--muted)">Not yet absorbed in NEXUS</p>';
+  var HEAD = '<div class="mono" style="font-size:11px;color:var(--gold)">';
+  $("nowBadge").innerHTML = I.built ? '<span class="built">BUILT</span>' : "";
+  $("nowSub").textContent = I.built ? "On " + day(I.absorbed_on) + " the owner absorbed " + I.corroborations + " approved advisory links. Each corroborates its typology and puts its product up for re-review. Nothing reopens a case or edits doctrine on its own." : "Not yet absorbed in NEXUS.";
+  $("nowDoctrine").innerHTML = D ? HEAD + esc(D.advisory_id) + ' → ' + esc(K.typology) + ' doctrine</div><b style="display:block;margin-top:4px">Corroborated</b>' +
+    D.quotes.map(function (q) { return '<p class="q" style="margin:4px 0 0;font-size:12.5px">“' + esc(q.quote) + '” (p. ' + esc(String(q.page)) + ')</p>'; }).join("") +
+    '<p style="margin:6px 0 0;font-size:12.5px;color:var(--muted)">' + esc(D.publisher) + ' · approved ' + esc(day(D.decided_at)) + ' · <a href="' + esc(F.doctrine_page) + '">' + esc(K.typology) + ' doctrine</a></p>' : NOT;
+  $("nowCase").innerHTML = R ? HEAD + esc(K.typology) + ' → product re-review</div><b style="display:block;margin-top:4px">' + esc(R.id) + ' · <a href="' + esc(F.case_page) + '">' + esc(R.subject) + ' (' + esc(R.case_id) + ')</a></b>' +
+    '<p style="margin:4px 0 0;font-size:12.5px;color:var(--muted)">requested ' + esc(day(R.raised_at)) + ' · ' + (R.status === "closed" ? "closed " + esc(day(R.closed_at)) + " · " + esc(R.outcome) : esc(R.status)) + '</p>' : NOT;
+  $("nowTotals").textContent = I.built ? "Across NEXUS: " + I.typologies + " typologies corroborated · " + I.rereviews + " re-reviews (" + I.open + " open)" : "";
   render();
 })();
 </script>
