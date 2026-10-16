@@ -787,7 +787,7 @@ footer{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px;font-si
   var NOT = '<p style="margin:0;font-size:12.5px;color:var(--muted)">Not yet absorbed in NEXUS</p>';
   var HEAD = '<div class="mono" style="font-size:11px;color:var(--gold)">';
   $("nowBadge").innerHTML = I.built ? '<span class="built">BUILT</span>' : "";
-  $("nowSub").textContent = I.built ? "On " + day(I.absorbed_on) + " the owner absorbed " + I.corroborations + " approved advisory links. Each corroborates its typology and puts its product up for re-review. Nothing reopens a case or edits doctrine on its own." : "Not yet absorbed in NEXUS.";
+  $("nowSub").textContent = I.built ? "By " + day(I.absorbed_on) + " the owner had absorbed " + I.corroborations + " approved advisory links. Each corroborates its typology and puts its product up for re-review. Nothing reopens a case or edits doctrine on its own." : "Not yet absorbed in NEXUS.";
   $("nowDoctrine").innerHTML = D ? HEAD + esc(D.advisory_id) + ' → ' + esc(K.typology) + ' doctrine</div><b style="display:block;margin-top:4px">Corroborated</b>' +
     D.quotes.map(function (q) { return '<p class="q" style="margin:4px 0 0;font-size:12.5px">“' + esc(q.quote) + '” (p. ' + esc(String(q.page)) + ')</p>'; }).join("") +
     '<p style="margin:6px 0 0;font-size:12.5px;color:var(--muted)">' + esc(D.publisher) + ' · approved ' + esc(day(D.decided_at)) + ' · <a href="' + esc(F.doctrine_page) + '">' + esc(K.typology) + ' doctrine</a></p>' : NOT;

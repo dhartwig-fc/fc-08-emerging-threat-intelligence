@@ -1,10 +1,10 @@
 {
   "note": "Governed export from fc-10's advisory impact ledger. Regenerate with tools/import_fc10_impact.py; never hand-edit.",
   "source": {
-    "event_count": 12,
+    "event_count": 18,
     "file": "indexes/advisory_impact.json",
     "repository": "fc-10-intelligence-repository-layer",
-    "sha256": "55f64145668cd8bdaef8092570905b4d566fb5e580e8a728cb17b094906139dd"
+    "sha256": "1ae371a5e9f4eccc219a0199055ec1b7688ac317ab0bdbba7ba5f08a30f2a83a"
   },
   "typologies": {
     "BA005": {
@@ -32,6 +32,38 @@
           "raised_at": "2026-10-15T17:30:00",
           "status": "open",
           "subject": "Dmitri Petrov"
+        }
+      ]
+    },
+    "PAT007": {
+      "corroborations": [
+        {
+          "absorbed_at": "2026-10-16T12:00:00",
+          "advisory_id": "ADV-2026-0028",
+          "decided_at": "2026-10-16T08:52:52+00:00",
+          "published_on": "2026-10-01",
+          "publisher": "U.S. Department of the Treasury - Office of Foreign Assets Control (OFAC)",
+          "quotes": [
+            {
+              "page": 1,
+              "quote": "BONASOL GROUP CO., LIMITED (a.k.a. \"LIDA SHINE GROUP LIMITED\"), Unit 2610, 26/F, Apec Plaza, 49 Hoi Yuen Road, Kowloon, Hong Kong, China; Organization Established Date 18 Jul 2023; Business Registration Number 75524718 (Hong Kong) [IRAN-EO13902]."
+            },
+            {
+              "page": 1,
+              "quote": "EAST CONCORD DEVELOPMENT LIMITED, Rm 2610, 26/F, Apec Plz, 49 Hoi Yuen Rd, Kwun Tong, Hong Kong, China; Organization Established Date 10 Oct 2024; Business Registration Number 77164714 (Hong Kong) [IRAN-EO13902]."
+            }
+          ]
+        }
+      ],
+      "rereviews": [
+        {
+          "case_id": "PAT007-C001",
+          "closed_at": "",
+          "id": "RR-8",
+          "outcome": "",
+          "raised_at": "2026-10-16T12:00:00",
+          "status": "open",
+          "subject": "Alpha Trading Ltd"
         }
       ]
     },
@@ -113,6 +145,48 @@
               "quote": "Use of corporate vehicles (i.e., legal entities, such as shell companies, and legal arrangements) to obscure (i) ownership, (ii) source of funds, or (iii) countries involved"
             }
           ]
+        },
+        {
+          "absorbed_at": "2026-10-16T12:00:00",
+          "advisory_id": "ADV-2026-0027",
+          "decided_at": "2026-10-16T08:52:52+00:00",
+          "published_on": "2026-10-13",
+          "publisher": "U.S. Department of the Treasury, Office of Foreign Assets Control (OFAC)",
+          "quotes": [
+            {
+              "page": 1,
+              "quote": "Treasury Targets Cartel del Noreste's Horse Racing Enterprise and Expansive Criminal Network"
+            },
+            {
+              "page": 2,
+              "quote": "Organization Established Date 11 Mar 2025; Organization Type: Wholesale of solid, liquid and gaseous fuels and related products"
+            },
+            {
+              "page": 2,
+              "quote": "Organization Type: Raising of horses and other equines [SDGT] [ILLICIT-DRUGS-EO14059] (Linked To: GARZA GARCIA, Gamaliel)"
+            }
+          ]
+        },
+        {
+          "absorbed_at": "2026-10-16T12:00:00",
+          "advisory_id": "ADV-2026-0028",
+          "decided_at": "2026-10-16T08:52:52+00:00",
+          "published_on": "2026-10-01",
+          "publisher": "U.S. Department of the Treasury - Office of Foreign Assets Control (OFAC)",
+          "quotes": [
+            {
+              "page": 1,
+              "quote": "BONASOL GROUP CO., LIMITED (a.k.a. \"LIDA SHINE GROUP LIMITED\"), Unit 2610, 26/F, Apec Plaza, 49 Hoi Yuen Road, Kowloon, Hong Kong, China; Organization Established Date 18 Jul 2023; Business Registration Number 75524718 (Hong Kong) [IRAN-EO13902]."
+            },
+            {
+              "page": 1,
+              "quote": "FIDAR FOOLAD RADMAN (Arabic: شرکت فیدار فولاد رادمان), No. 35, 2nd Floor, Northeast Unit, Raz Boulevard, Ammar Street, Farmanieh, Tehran, Iran; Additional Sanctions Information - Subject to Secondary Sanctions; Organization Established Date 17 Apr 2018; National ID No. 14007529243 (Iran); Registration Number 525217 (Iran) [IRAN-EO13871] (Linked To: KESHVARDOUST, Ramin)."
+            },
+            {
+              "page": 2,
+              "quote": "HEPCO SHANGHAI CO., LTD. (Chinese Simplified: 赫世浦上海机械贸易有限公司) (a.k.a. HESHIPU SHANGHAI MACHINERY TRADING CO., LTD; a.k.a. SHANGHAI HEPCO LTD.), Room C-25, 6th Floor, Building 1, No. 198, Huashen Road, China (Shanghai) Pilot Free Trade Zone, Pudong New Area, Shanghai 200135, China"
+            }
+          ]
         }
       ],
       "rereviews": [
@@ -122,6 +196,24 @@
           "id": "RR-4",
           "outcome": "",
           "raised_at": "2026-10-15T17:30:00",
+          "status": "open",
+          "subject": "Apex Logistics FZE"
+        },
+        {
+          "case_id": "SAN004-APEX",
+          "closed_at": "",
+          "id": "RR-7",
+          "outcome": "",
+          "raised_at": "2026-10-16T12:00:00",
+          "status": "open",
+          "subject": "Apex Logistics FZE"
+        },
+        {
+          "case_id": "SAN004-APEX",
+          "closed_at": "",
+          "id": "RR-9",
+          "outcome": "",
+          "raised_at": "2026-10-16T12:00:00",
           "status": "open",
           "subject": "Apex Logistics FZE"
         }
@@ -188,5 +280,5 @@
       ]
     }
   },
-  "version": "fc10-bbc34e2e"
+  "version": "fc10-bcb6ce5a"
 }
