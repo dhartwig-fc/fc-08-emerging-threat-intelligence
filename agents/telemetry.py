@@ -252,8 +252,12 @@ def run_started(run, model: str, max_budget_usd: float, max_turns: int, tools, p
 
 def run_completed(run, status: str, message: str, *, result=None, validated: bool = False, **extra) -> dict:
     """The run's closing event. `extra` is merged into the payload -- the runners pass
-    terminal_check=reconcile(...) so the invariant is recorded per run, not assumed."""
+    terminal_check=reconcile(...) so the invariant is recorded per run, not assumed. `result_subtype` is the
+    CLI's own verdict on the closing turn ("success", "error_max_turns", "error_max_budget_usd", ...), recorded
+    since 2026-10-16 so a turn count above max_turns can be read as counted-differently or cap-not-enforced;
+    null when there was no result."""
     return emit(run, RUN_COMPLETED, status, message, validated=validated,
+                result_subtype=getattr(result, "subtype", None),
                 turns=getattr(result, "num_turns", None), cost_usd=getattr(result, "total_cost_usd", None),
                 duration_ms=getattr(result, "duration_ms", None),
                 permission_denials=len(getattr(result, "permission_denials", None) or []) if result else None,
