@@ -29,6 +29,8 @@ Usage:
     python evals/check_feeds_extract.py --mutate repair-unrecorded  # the Friday outcome drops the quote_repair note
     python evals/check_feeds_extract.py --mutate repair-cell-hidden # the report's citations cell hides the repair turn
     python evals/check_feeds_extract.py --mutate repair-reports-last-turn  # RUN_COMPLETED reports only the repair turn's turns/denials/duration
+    python evals/check_feeds_extract.py --mutate rounds-not-counted  # RUN_COMPLETED's model_rounds stays 0 whatever the session did
+    python evals/check_feeds_extract.py --mutate no-result-subtype   # RUN_COMPLETED drops the closing result's subtype
     python evals/check_feeds_extract.py --mutate repair-ignores-allowance  # the repair turn is not held to the turns left
     python evals/check_feeds_extract.py --mutate repair-raise-uncaught     # an SDK exception mid-repair escapes extract()
     python evals/check_feeds_extract.py --mutate invalid-repair-uncaught   # a corrected record that fails validation escapes
@@ -187,6 +189,8 @@ MUTATIONS = {
         '        out.update(status="extracted", record=rel)\n'),
     "repair-cell-hidden": (REPORT, '    if isinstance(qr, dict) and qr.get("repair_turns"):\n', "    if False:\n"),
     # Fix round 1 (review quote-check-review.md I-2, I-3).
+    "rounds-not-counted": (EXTRACT_ADVISORY, "    seen.rounds += len(rounds)\n", "    pass\n"),
+    "no-result-subtype": (TELEMETRY, '                result_subtype=getattr(result, "subtype", None),\n', ""),
     "repair-reports-last-turn": (EXTRACT_ADVISORY,
         "            result = _session_total(result, turn)  # cost: the running total; turns, denials, duration: summed\n",
         "            result = turn\n"),
@@ -567,6 +571,14 @@ def quote_checks(mutation, ea, kc, tmp: Path, box: Path) -> list:
                 "and the cost as the session's running total (not summed)",
                 "%s | summary %s" % ({k: pay_f.get(k) for k in ("turns", "permission_denials", "duration_ms", "cost_usd")},
                                      {k: (sum_f or {}).get(k) for k in ("turns", "permission_denials", "duration_s")})))
+    # 2026-10-16: the CLI's num_turns (12 here, as scripted) is recorded beside what the runner counted itself --
+    # two distinct assistant messages, one per turn -- and the closing result's subtype, so a turn count above
+    # max_turns can be told apart from a cap the CLI let pass.
+    out.append((pay_f.get("model_rounds") == 2 and pay_f.get("result_subtype") == "success"
+                and (sum_f or {}).get("model_rounds") == 2,
+                "RUN_COMPLETED records the model rounds the runner counted across both turns (2, beside the CLI's "
+                "num_turns 12) and the closing result's subtype",
+                {k: pay_f.get(k) for k in ("model_rounds", "result_subtype", "turns")}))
 
     # the turn allowance: the repair gets what is LEFT of max_turns (here 60 - 56 = 4), never a fresh one
     long_repair = turn(good, REPAIRED_COST, calls=6, turns=6, tag="L")

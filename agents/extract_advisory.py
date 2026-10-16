@@ -306,18 +306,19 @@ async def extract(path: Path, advisory_id: str, model: str, max_budget_usd: floa
     except Exception as exc:
         _terminate_calls(run, seen)
         telemetry.run_completed(run, telemetry.FAILURE, str(exc)[:300], result=result, validated=False,
-                                terminal_check=telemetry.reconcile(run, seen.tool_use_ids))
+                                terminal_check=telemetry.reconcile(run, seen.tool_use_ids), model_rounds=seen.rounds)
         raise
     _terminate_calls(run, seen)
     terminal_check = telemetry.reconcile(run, seen.tool_use_ids)
     telemetry.run_completed(run, telemetry.SUCCESS, "record validated", result=result, validated=True,
-                            terminal_check=terminal_check, quote_repair=quote_repair)
+                            terminal_check=terminal_check, quote_repair=quote_repair, model_rounds=seen.rounds)
 
     summary = {
         "tool_calls": dict(seen.tool_calls),
         "unterminated": len(terminal_check["unterminated"]),
         "duplicated": len(terminal_check["duplicated"]),
         "turns": result.num_turns if result else None,
+        "model_rounds": seen.rounds,
         "cost_usd": result.total_cost_usd if result else None,
         "duration_s": round(result.duration_ms / 1000, 1) if result else None,
         "permission_denials": len(result.permission_denials or []) if result else None,
@@ -351,6 +352,11 @@ class _Seen:
         self.names: dict = {}
         self.results: dict = {}
         self.interrupted = False
+        # Distinct assistant messages over every turn: the API rounds, counted HERE because num_turns is the CLI's
+        # own figure. Measured 2026-10-16: ADV-2026-0028 reported num_turns 63 against max_turns 60 on a success
+        # with no repair turn, and nothing recorded could say whether the CLI counts turns differently or let the
+        # cap pass. RUN_COMPLETED now carries both, with the result's subtype.
+        self.rounds = 0
 
 
 def _terminate_calls(run, seen: "_Seen") -> None:
@@ -388,6 +394,7 @@ async def _receive_turn(client, seen: "_Seen", limit: int = None) -> "ResultMess
                     seen.results[block.tool_use_id] = (bool(block.is_error), text)
         elif isinstance(message, ResultMessage):
             result = message
+    seen.rounds += len(rounds)
     return result
 
 
