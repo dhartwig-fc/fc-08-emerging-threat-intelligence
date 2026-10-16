@@ -337,6 +337,15 @@ def cli_checks(w: dict) -> list:
     out.append((found == ["evals/y.py", "tools/x.sh"],
                 "the scan is not vacuous: it finds a .sh naming the log and an evals/ .py naming approvals",
                 str(found)))
+    nest = WORK / "scan-nested"
+    for rel, text in ((".worktrees/copy/governance/decisions.py", "LOG = 'data/review_decisions.jsonl'\n"),
+                      (".worktrees/copy/evals/check_review_gate.py", "LOG = 'data/review_decisions.jsonl'\n"),
+                      ("tools/x.sh", "cat data/review_decisions.jsonl\n")):
+        (nest / rel).parent.mkdir(parents=True, exist_ok=True)
+        (nest / rel).write_text(text, encoding="utf-8")
+    found = _naming_the_record(nest)
+    out.append((found == ["tools/x.sh"],
+                "a nested git worktree under .worktrees/ is not scanned, and a writer beside it still is", str(found)))
     return out
 
 
@@ -348,7 +357,9 @@ def _naming_the_record(root: Path) -> list:
     hits = []
     for path in sorted(root.rglob("*")):
         rel = path.relative_to(root).as_posix()
-        if path.suffix not in (".py", ".sh") or not path.is_file() or rel.startswith(".venv/") or rel in allowed:
+        # .worktrees/ holds nested git worktrees: other checkouts of this repository, not code of this one.
+        if (path.suffix not in (".py", ".sh") or not path.is_file() or rel.startswith((".venv/", ".worktrees/"))
+                or rel in allowed):
             continue
         if any(n in path.read_text(encoding="utf-8", errors="replace") for n in names):
             hits.append(rel)

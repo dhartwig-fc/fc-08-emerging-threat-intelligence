@@ -108,10 +108,11 @@ def writer_violations(files: dict) -> list:
     return out
 
 
-def repo_python() -> dict:
-    skip = {".venv", ".superpowers", ".git", "__pycache__"}
-    return {str(p.relative_to(ROOT)): p.read_text(encoding="utf-8", errors="replace")
-            for p in ROOT.rglob("*.py") if not skip & set(p.relative_to(ROOT).parts)}
+def repo_python(root: Path = ROOT) -> dict:
+    # .worktrees holds nested git worktrees: other checkouts of this repository, not modules of this one.
+    skip = {".venv", ".superpowers", ".git", "__pycache__", ".worktrees"}
+    return {str(p.relative_to(root)): p.read_text(encoding="utf-8", errors="replace")
+            for p in root.rglob("*.py") if not skip & set(p.relative_to(root).parts)}
 
 
 def item(source: str, item_id: str) -> dict:
@@ -263,6 +264,18 @@ def checks(ledger, inbox, accept) -> list:
                 "only feeds/ledger.py names seen.json, only tools/accept_run.py records decisions, and no other module "
                 "calls ledger.dump( (a planted rogue writer is caught on each of the three)",
                 "violations %s; planted %s; scanned %d files" % (real, planted, len(scanned))))
+    with tempfile.TemporaryDirectory() as d:
+        tree = Path(d)
+        for rel, text in (("feeds/ledger.py", "SEEN = 'seen.json'\n"),
+                          (".worktrees/copy/feeds/ledger.py", "SEEN = 'seen.json'\n"),
+                          (".worktrees/copy/tools/accept_run.py", "ledger.record_decisions(r, d, x)\n"),
+                          ("tools/rogue.py", "open('data/feeds/seen.json')\n")):
+            (tree / rel).parent.mkdir(parents=True, exist_ok=True)
+            (tree / rel).write_text(text, encoding="utf-8")
+        nested = writer_violations(repo_python(tree))
+    out.append((nested == ["tools/rogue.py names seen.json"],
+                "a nested git worktree under .worktrees/ is not scanned, and a rogue writer beside it still is",
+                str(nested)))
     return out
 
 
