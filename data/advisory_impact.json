@@ -1,0 +1,192 @@
+{
+  "note": "Governed export from fc-10's advisory impact ledger. Regenerate with tools/import_fc10_impact.py; never hand-edit.",
+  "source": {
+    "event_count": 12,
+    "file": "indexes/advisory_impact.json",
+    "repository": "fc-10-intelligence-repository-layer",
+    "sha256": "55f64145668cd8bdaef8092570905b4d566fb5e580e8a728cb17b094906139dd"
+  },
+  "typologies": {
+    "BA005": {
+      "corroborations": [
+        {
+          "absorbed_at": "2026-10-15T17:30:00",
+          "advisory_id": "ADV-2026-0013",
+          "decided_at": "2026-09-24T14:46:56+00:00",
+          "published_on": "2023-03-02",
+          "publisher": "U.S. Department of Commerce, Department of the Treasury, and Department of Justice",
+          "quotes": [
+            {
+              "page": 5,
+              "quote": "Transferring funds from shell companies in foreign jurisdictions into U.S. bank accounts and quickly forwarding or distributing funds to obfuscate the audit trail or the foreign source of the money"
+            }
+          ]
+        }
+      ],
+      "rereviews": [
+        {
+          "case_id": "BA005-RM019",
+          "closed_at": "",
+          "id": "RR-1",
+          "outcome": "",
+          "raised_at": "2026-10-15T17:30:00",
+          "status": "open",
+          "subject": "Dmitri Petrov"
+        }
+      ]
+    },
+    "SAN001": {
+      "corroborations": [
+        {
+          "absorbed_at": "2026-10-15T17:30:00",
+          "advisory_id": "ADV-2026-0013",
+          "decided_at": "2026-09-24T14:46:56+00:00",
+          "published_on": "2023-03-02",
+          "publisher": "U.S. Department of Commerce, Department of the Treasury, and Department of Justice",
+          "quotes": [
+            {
+              "page": 2,
+              "quote": "Use of corporate vehicles (i.e., legal entities, such as shell companies, and legal arrangements) to obscure (i) ownership, (ii) source of funds, or (iii) countries involved, particularly sanctioned jurisdictions"
+            }
+          ]
+        }
+      ],
+      "rereviews": [
+        {
+          "case_id": "SAN001-ENT001",
+          "closed_at": "",
+          "id": "RR-2",
+          "outcome": "",
+          "raised_at": "2026-10-15T17:30:00",
+          "status": "open",
+          "subject": "Meridian Trading Ltd"
+        }
+      ]
+    },
+    "SAN003": {
+      "corroborations": [
+        {
+          "absorbed_at": "2026-10-15T17:30:00",
+          "advisory_id": "ADV-2026-0013",
+          "decided_at": "2026-09-24T14:46:56+00:00",
+          "published_on": "2023-03-02",
+          "publisher": "U.S. Department of Commerce, Department of the Treasury, and Department of Justice",
+          "quotes": [
+            {
+              "page": 3,
+              "quote": "Routing purchases through certain transshipment points commonly used to illegally redirect restricted items to Russia or Belarus."
+            },
+            {
+              "page": 4,
+              "quote": "shipping integrated circuit components, which are critical components in missiles and military satellites, to Russia via a Bulgarian front company"
+            }
+          ]
+        }
+      ],
+      "rereviews": [
+        {
+          "case_id": "SAN003-SHIP001",
+          "closed_at": "",
+          "id": "RR-3",
+          "outcome": "",
+          "raised_at": "2026-10-15T17:30:00",
+          "status": "open",
+          "subject": "Consignment A (MV Harmony)"
+        }
+      ]
+    },
+    "SAN004": {
+      "corroborations": [
+        {
+          "absorbed_at": "2026-10-15T17:30:00",
+          "advisory_id": "ADV-2026-0013",
+          "decided_at": "2026-09-24T14:46:56+00:00",
+          "published_on": "2023-03-02",
+          "publisher": "U.S. Department of Commerce, Department of the Treasury, and Department of Justice",
+          "quotes": [
+            {
+              "page": 4,
+              "quote": "used a front company to transfer funds from Milandr to another front in a third country, which purchased microchips to divert to Russia"
+            },
+            {
+              "page": 2,
+              "quote": "Use of corporate vehicles (i.e., legal entities, such as shell companies, and legal arrangements) to obscure (i) ownership, (ii) source of funds, or (iii) countries involved"
+            }
+          ]
+        }
+      ],
+      "rereviews": [
+        {
+          "case_id": "SAN004-APEX",
+          "closed_at": "",
+          "id": "RR-4",
+          "outcome": "",
+          "raised_at": "2026-10-15T17:30:00",
+          "status": "open",
+          "subject": "Apex Logistics FZE"
+        }
+      ]
+    },
+    "SAN006": {
+      "corroborations": [
+        {
+          "absorbed_at": "2026-10-15T17:30:00",
+          "advisory_id": "ADV-2026-0026",
+          "decided_at": "2026-10-11T09:10:52+00:00",
+          "published_on": "2026-10-09",
+          "publisher": "U.S. Department of the Treasury, Office of Foreign Assets Control (OFAC)",
+          "quotes": [
+            {
+              "page": 1,
+              "quote": "Pegasus dealt in blocked property by facilitating the importation of a machine supplied by a designated company"
+            }
+          ]
+        }
+      ],
+      "rereviews": [
+        {
+          "case_id": "SAN006-TRD001",
+          "closed_at": "",
+          "id": "RR-6",
+          "outcome": "",
+          "raised_at": "2026-10-15T17:30:00",
+          "status": "open",
+          "subject": "Global Metals Ltd"
+        }
+      ]
+    },
+    "SAN007": {
+      "corroborations": [
+        {
+          "absorbed_at": "2026-10-15T17:30:00",
+          "advisory_id": "ADV-2026-0013",
+          "decided_at": "2026-09-24T14:46:56+00:00",
+          "published_on": "2023-03-02",
+          "publisher": "U.S. Department of Commerce, Department of the Treasury, and Department of Justice",
+          "quotes": [
+            {
+              "page": 4,
+              "quote": "illegally export military and sensitive dual-use items to Russia and embargoed Venezuelan oil to Russian and Chinese end users"
+            },
+            {
+              "page": 5,
+              "quote": "The sensitive items at issue included advanced electronics and sophisticated testing equipment used in quantum computing, hypersonic, and nuclear weapons development"
+            }
+          ]
+        }
+      ],
+      "rereviews": [
+        {
+          "case_id": "SAN007-DU001",
+          "closed_at": "",
+          "id": "RR-5",
+          "outcome": "",
+          "raised_at": "2026-10-15T17:30:00",
+          "status": "open",
+          "subject": "Vantor Instruments Ltd"
+        }
+      ]
+    }
+  },
+  "version": "fc10-bbc34e2e"
+}

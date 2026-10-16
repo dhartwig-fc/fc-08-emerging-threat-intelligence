@@ -127,6 +127,7 @@ EXEMPT = {
     "check_publish_boundary.py": "--mutate empties the boundary's pattern tuples in memory",
     "check_publisher.py": "--mutate patches publisher/builder functions in memory (MUTATION == ...)",
     "check_proposals_import.py": "--mutate perturbs a synthetic export or the converted dict in memory",
+    "check_impact_import.py": "--mutate perturbs a synthetic export or the converted dict in memory",
     "check_proposal_kind.py": "--mutate rebinds governance and server functions in memory",
     "check_draft_doctrine.py": "--mutate rebinds draft_doctrine and doctrine_draft functions in memory",
     "check_digest_proposals.py": "--mutate rebinds digest.proposals_for in memory, or passes build_digests' --_mutate",
