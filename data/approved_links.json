@@ -77,6 +77,45 @@
         "adv-2026-0026-extractor-3e5c8263f4"
       ],
       "typology_id": "SAN006"
+    },
+    {
+      "advisory_id": "ADV-2026-0027",
+      "decided_at": "2026-10-16T08:52:52+00:00",
+      "link_key": "ADV-2026-0027::SAN004",
+      "note": "owner 2026-10-16: Cartel del Noreste proceeds laundered through front companies (race track, construction, fuel, logistics)",
+      "proposal_ids": [
+        "75def6c19c79818c"
+      ],
+      "run_ids": [
+        "adv-2026-0027-extractor-0cd9e5eb76"
+      ],
+      "typology_id": "SAN004"
+    },
+    {
+      "advisory_id": "ADV-2026-0028",
+      "decided_at": "2026-10-16T08:52:52+00:00",
+      "link_key": "ADV-2026-0028::PAT007",
+      "note": "owner 2026-10-16: separately incorporated Hong Kong designees share one registered address",
+      "proposal_ids": [
+        "f05277d8daafcc8a"
+      ],
+      "run_ids": [
+        "adv-2026-0028-extractor-846449976d"
+      ],
+      "typology_id": "PAT007"
+    },
+    {
+      "advisory_id": "ADV-2026-0028",
+      "decided_at": "2026-10-16T08:52:52+00:00",
+      "link_key": "ADV-2026-0028::SAN004",
+      "note": "owner 2026-10-16: Hong Kong/Shanghai/UAE shell and trading companies procuring for Iran's automotive and rail sectors",
+      "proposal_ids": [
+        "825cbb7dd208aba5"
+      ],
+      "run_ids": [
+        "adv-2026-0028-extractor-846449976d"
+      ],
+      "typology_id": "SAN004"
     }
   ],
   "generated_from": "data/review_decisions.jsonl"
