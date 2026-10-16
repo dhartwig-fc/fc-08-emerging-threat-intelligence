@@ -107,8 +107,9 @@ site/walkthrough_snapshot.json     the committed snapshot the page's corpus and 
 site/threat-intel/index.html       the built walkthrough page (tracked); PUBLISHED -- site/PUBLISHED holds the sha256 the portfolio's committed copy matches (this line read "BUILT, NOT YET PUBLISHED" until 2026-10-14; measured equal that day)
 evals/check_walkthrough.py         pins the walkthrough as a faithful, deterministic projection of its inputs; --mutate drop-citation|unpinned-log|wrong-page|swap-notes|wrong-count|desk-scope|two-runs|typed-score|actor-id|digest-header|telemetry-count|attested-count|swap-moves|resolver-runs|resolver-prompt|feed-accepted|desk-total|register-unresolved|corpus-count|emergent-undecided|legacy-count|snapshot-count|snapshot-evidence|unpinned-advisory|unpinned-golden|snapshot-undercount (snapshot-evidence and snapshot-undercount are guard-side: a TEMPORARY copy of a pinned run's telemetry, and an in-memory extra ledger accept, never a tracked file)
 tools/publish_walkthrough.py       writes the built page into a portfolio checkout's projects/nexus/threat-intel/ and records its sha256 in site/PUBLISHED; refuses a page that differs from a fresh build or crosses the boundary; never commits or pushes either repo, and prints the steps still to do (a publish is not finished when it returns)
-tools/build_scan_demo.py           builds the public regulatory-scan demo (site/scan-demo/index.html): the pinned Friday run feeds-2026-10-11-e7ad24 replayed, ADV-2026-0026, the agents' tool surface and the quality bands, every value read from tracked files or the agents' own constants; --check
-evals/check_scan_demo.py           pins that page to the records it shows, read independently of the builder; deterministic under four hash seeds; boundary- and cost-clean; WARM half checks the declared NEXUS SAN006 case against the portfolio; --mutate drop-notice|flip-verdict|move-fate|edit-quote|reverse-decision|citation-count|wrong-model|extra-tool|eval-number|drop-coverage|leak-path|show-cost
+tools/build_scan_demo.py           builds the public regulatory-scan demo (site/scan-demo/index.html): the pinned Friday run feeds-2026-10-11-e7ad24 replayed, ADV-2026-0026, the agents' tool surface and the quality bands, every value read from tracked files or the agents' own constants; --check; --repin re-takes site/scan_demo_snapshot.json from the live files (its only clock read; it rebuilds and publishes nothing)
+site/scan_demo_snapshot.json       the committed snapshot the scan demo's something-new section is pinned to (canonical JSON; decided_through, the decided_at of the last decision it counts; proposals, a pinned copy of the fc-10 import; taken_on)
+evals/check_scan_demo.py           pins that page to the records it shows, read independently of the builder; deterministic under four hash seeds; boundary- and cost-clean; WARM half checks the declared NEXUS SAN006 case against the portfolio; --mutate drop-notice|flip-verdict|move-fate|edit-quote|reverse-decision|citation-count|wrong-model|extra-tool|eval-number|drop-coverage|leak-path|show-cost|built-lie|drop-decision|fake-proposal|built-without-import|wrong-rereview|unpinned-log (this line listed 12 of them until 2026-10-16)
 tools/publish_scan_demo.py         writes that page to the portfolio's projects/nexus/threat-intel/scan.html and its sha256 to site/SCAN_PUBLISHED; same refusals and contract as publish_walkthrough.py
 evals/check_published_scan_demo.py the scan demo's staleness gate (cold half + needs-portfolio half), mirroring check_published_walkthrough.py
 evals/check_published_walkthrough.py  the staleness gate: site/PUBLISHED's sha256 must equal the committed page's (cold), and the copy the portfolio has COMMITTED (`git show HEAD:...`, never the file on its disk) must match it (warm); names the missing portfolio add+commit step; NOT RUN (exit 2) when the portfolio is absent or not a git repository; "never published" passes before the first publish; runs inside tools/check_all.py on every commit
@@ -547,6 +548,16 @@ capability (doctrine corroboration, and re-review of the SAN006 case NEXUS alrea
   published case page when the checkout is present (NOT RUN otherwise).
 - Republishing follows the walkthrough's procedure with site/SCAN_PUBLISHED in place of site/PUBLISHED. A
   rebuilt, unrepublished page refuses every commit here, as the walkthrough's does.
+- **The something-new section is PINNED (2026-10-16).** It counted the whole decision log and the fc-10
+  proposal import live, so the first review after publishing -- the 2026-10-16 Friday's four decisions --
+  made the committed page stale, and every fc-08 commit was refused until a republish: a review is routine,
+  a publish needs the owner's go, and the page made one wait on the other. It now reads both through
+  `site/scan_demo_snapshot.json`: `decided_through` cuts the append-only, timestamped log (no copy of the
+  log is kept; the build refuses a cut no decision was made at) and `proposals` pins the import. The first
+  snapshot (taken_on 2026-10-15, decisions through 2026-10-11T09:10:52) rebuilds the published page byte for
+  byte, so pinning needed no republish. Moving the section is `--repin`, then rebuild, then republish on the
+  owner's go. The walkthrough's sections 9-10 have been pinned the same way since 2026-09-27; a third public
+  page built from live review state would repeat this.
 
 Spec: `docs/superpowers/specs/2026-10-14-regulatory-scan-demo-design.md`.
 

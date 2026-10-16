@@ -17,6 +17,10 @@ Usage:
     python evals/check_scan_demo.py --mutate show-cost       # a cost figure reaches the page
     python evals/check_scan_demo.py --mutate built-without-import  # the Now block claims BUILT from an empty import
     python evals/check_scan_demo.py --mutate wrong-rereview  # the Now block shows a re-review the import does not hold
+    python evals/check_scan_demo.py --mutate built-lie       # a step shows BUILT naming a file that does not exist
+    python evals/check_scan_demo.py --mutate drop-decision   # the step counts lose the decided emergent patterns
+    python evals/check_scan_demo.py --mutate fake-proposal   # an invented open proposal reaches the step counts
+    python evals/check_scan_demo.py --mutate unpinned-log    # the builder counts a decision made after the pin
 
 WHY. The page is a public claim that a real run went exactly this way. Every value on it must equal the
 record it came from, so this guard reads those records ITSELF -- not through the builder's inputs() -- and
@@ -36,13 +40,17 @@ WHAT IT CHECKS (checks()):
   coverage     the live feeds are exactly feeds.sources.SOURCES
   cross-link   the walkthrough links to this page and this page to the walkthrough (both published side by side)
   boundary     the page crosses no publish boundary (no paths, internal files, emails)
+  pipeline     the six steps, in order, BUILT only over files that exist; the step counts and the example
+               equal the decision log CUT at the snapshot's decided_through and the snapshot's proposals
+  snapshot     site/scan_demo_snapshot.json is the shape --repin writes, and its cut is a decision the log
+               really holds (2026-10-16: a review no longer moves the page; only --repin does)
   no cost      no money figure appears (owner, 2026-10-14)
   impact       the Now block equals data/advisory_impact.json, read here; BUILT only with a SAN006 corroboration
   nexus        WARM: the portfolio's published SAN006 case page names the subject, case and run the page
                declares, and the doctrine page exists. NOT RUN without the portfolio checkout.
 
-NOT A VACUOUS PASS. Each --mutate perturbs a deep copy of the builder's inputs (or, for the last two, the
-built page) in memory; at least one check must then fail.
+NOT A VACUOUS PASS. Each --mutate perturbs a deep copy of the builder's inputs (or, for leak-path and
+show-cost, the built page) in memory; at least one check must then fail.
 """
 
 from __future__ import annotations
@@ -55,6 +63,7 @@ import os
 import re
 import subprocess
 import sys
+from datetime import datetime, timedelta
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -71,7 +80,8 @@ from publish_scan_demo import DEFAULT_PORTFOLIO  # noqa: E402
 
 MUTATIONS = ("drop-notice", "flip-verdict", "move-fate", "edit-quote", "reverse-decision", "citation-count",
              "wrong-model", "extra-tool", "eval-number", "drop-coverage", "leak-path", "show-cost",
-             "built-lie", "drop-decision", "fake-proposal", "built-without-import", "wrong-rereview")
+             "built-lie", "drop-decision", "fake-proposal", "built-without-import", "wrong-rereview",
+             "unpinned-log")
 MUTATION = None
 NOT_RUN = object()
 SEEDS = ("0", "1", "42", "4242")
@@ -121,6 +131,13 @@ def _mutated_inputs() -> dict:
         inp["impact"] = {"typologies": {}}
     elif m == "wrong-rereview":
         inp["impact"]["typologies"][bs.CORROBORATES[0]]["rereviews"][0]["subject"] = "Someone Else Ltd"
+    elif m == "unpinned-log":
+        # A builder that ignores the pin: the whole live log plus one emergent decision made after the cut,
+        # so the mutation proves something even on a day when nothing has been decided since the snapshot.
+        later = datetime.fromisoformat(bs.load_snapshot()["decided_through"]) + timedelta(days=1)
+        inp["log"] = _jsonl(gd.LOG) + [{"advisory_id": "ADV-2099-0001", "decided_at": later.isoformat(),
+                                        "decision": "reject", "kind": "emergent",
+                                        "link_key": "ADV-2099-0001::EMERGENT[invented]"}]
     return inp
 
 
@@ -136,6 +153,17 @@ def _page() -> str:
 def _payload(page: str) -> dict:
     m = re.search(r'<script id="payload" type="application/json">(.*?)</script>', page, re.S)
     return json.loads(m.group(1)) if m else {}
+
+
+def _snapshot() -> dict:
+    """The committed snapshot, read raw (the shape clause uses the builder's loader; this does not)."""
+    return json.loads(bs.SNAPSHOT.read_text(encoding="utf-8"))
+
+
+def _cut(log: list) -> list:
+    """The log at or before the snapshot's decided_through: the slice the page may count."""
+    through = datetime.fromisoformat(_snapshot()["decided_through"])
+    return [d for d in log if datetime.fromisoformat(d["decided_at"]) <= through]
 
 
 def _truth() -> dict:
@@ -158,11 +186,11 @@ def _truth() -> dict:
     return {
         "items": items, "triage": triage, "accepted": acc, "fate": fate, "extraction": ext,
         "record": json.loads(bs.RECORD.read_text(encoding="utf-8")),
-        "decisions": {d["link_key"]: d for d in _jsonl(gd.LOG) if d.get("advisory_id") == bs.ADVISORY},
+        "decisions": {d["link_key"]: d for d in _cut(_jsonl(gd.LOG)) if d.get("advisory_id") == bs.ADVISORY},
         "typologies": json.loads(bs.TYPOLOGIES.read_text(encoding="utf-8"))["typologies"],
         "score": json.loads(bs.SCORE_REPORT.read_text(encoding="utf-8"))["totals"]["typologies"],
-        "log": _jsonl(gd.LOG),
-        "proposals": json.loads((ROOT / "data" / "typology_proposals.json").read_text(encoding="utf-8"))["proposals"],
+        "log": _cut(_jsonl(gd.LOG)),
+        "proposals": _snapshot()["proposals"],
         "impact": json.loads((ROOT / "data" / "advisory_impact.json").read_text(encoding="utf-8")),
         "triage_line": next((ln for ln in claude.splitlines() if "The triage band, measured" in ln), ""),
         "reviewer_line": next((ln for ln in claude.splitlines() if "FULL SET, all" in ln and "reviewer" in ln), ""),
@@ -330,6 +358,15 @@ def checks():
     ev = bs.impact_view({"typologies": {}})
     yield ev["built"] is False and ev["doctrine"] is None and ev["rereview"] is None, \
         "an empty import builds no BUILT claim", ""
+    try:
+        bs.load_snapshot()
+        shape = ""
+    except SystemExit as exc:
+        shape = str(exc)
+    yield not shape, "the snapshot is the shape --repin writes", shape or bs.SNAPSHOT.name
+    through = _snapshot().get("decided_through")
+    yield any(d.get("decided_at") == through for d in _jsonl(gd.LOG)), \
+        "the snapshot's cut is a decision the log really holds", through
 
     portfolio = Path(os.path.expanduser(DEFAULT_PORTFOLIO))
     nexus = portfolio / "projects" / "nexus"

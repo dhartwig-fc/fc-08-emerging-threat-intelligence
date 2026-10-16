@@ -4,6 +4,8 @@ Build the public "regulatory intelligence scan" demo page: one real Friday run, 
 Usage:
     python tools/build_scan_demo.py            # write site/scan-demo/index.html
     python tools/build_scan_demo.py --check    # exit 1 if the committed page differs from a fresh build
+    python tools/build_scan_demo.py --repin    # re-take site/scan_demo_snapshot.json from the live files;
+                                               # rebuilds and publishes nothing
 
 WHAT IT SHOWS. The pinned run RUN_ID and the advisory it produced, ADVISORY: every listing the
 orchestrator read, every notice it triaged with its verdict, reason and quote, what acceptance did with
@@ -30,7 +32,17 @@ NEXUS case page when that checkout is present):
   triage band, reviewer R     the dated lines in CLAUDE.md that record them (parsed; a reworded line
                               refuses the build rather than going stale silently)
 
-Cost is deliberately not shown (owner, 2026-10-14). Deterministic: no clock, no network, no git.
+THE SNAPSHOT (2026-10-16). The something-new section counts the WHOLE review decision log and the fc-10
+proposal import, and both move whenever the owner reviews a Friday run -- so on 2026-10-16 the first review
+after publishing made the committed page stale and every fc-08 commit was refused until a republish. The
+page now reads neither live. site/scan_demo_snapshot.json holds decided_through (the decided_at of the last
+decision the page counts; the log is append-only and timestamped, so a cut is a faithful pin and no copy of
+the log is kept) and a pinned copy of the import's proposals. A review no longer moves the page; re-pinning
+is a deliberate act, --repin, and the page then needs rebuilding and republishing on the owner's go. The
+walkthrough has pinned its moving inputs the same way since 2026-09-27 (tools/build_walkthrough.py).
+
+Cost is deliberately not shown (owner, 2026-10-14). Deterministic: no network, no git, and no clock except
+--repin, which dates the snapshot it writes.
 """
 
 from __future__ import annotations
@@ -42,7 +54,7 @@ import json
 import plistlib
 import re
 import sys
-from datetime import datetime
+from datetime import date, datetime
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -67,6 +79,8 @@ FATF_MANUAL = ROOT / "tools" / "fetch_fatf_via_chrome.js"
 OUT = ROOT / "site" / "scan-demo" / "index.html"
 PROPOSALS_IMPORT = ROOT / "data" / "typology_proposals.json"
 IMPACT_IMPORT = ROOT / "data" / "advisory_impact.json"   # Stage566 K4b: fc-10's advisory impact, imported
+SNAPSHOT = ROOT / "site" / "scan_demo_snapshot.json"
+SNAPSHOT_FIELDS = ("decided_through", "proposals", "taken_on")
 # Stage565 S4 (spec §7.2, plan R21): the six steps from "the agent noticed something" to "NEXUS scores it".
 # BUILT only when the named fc-08 files exist (evals/check_scan_demo.py checks); Build and Live happen in
 # NEXUS, and fc-08 sees them through the imported proposals and the typology export.
@@ -123,8 +137,81 @@ def _jsonl(path: Path) -> list:
     return [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines() if line.strip()]
 
 
+def _at(stamp: str) -> datetime:
+    return datetime.fromisoformat(stamp.replace("Z", "+00:00"))
+
+
+def snapshot_text(snap: dict) -> str:
+    """The canonical bytes of a snapshot: sorted keys, indent 2, trailing newline."""
+    return json.dumps(snap, indent=2, sort_keys=True, ensure_ascii=False) + "\n"
+
+
+def load_snapshot(path: Path = None) -> dict:
+    """The committed snapshot, refused unless it is exactly the shape --repin writes."""
+    path = SNAPSHOT if path is None else path
+    try:
+        snap = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        raise SystemExit("REFUSED: the scan demo snapshot %s cannot be read: %s (re-take it with --repin)"
+                         % (path.name, exc))
+    if not isinstance(snap, dict) or tuple(sorted(snap)) != SNAPSHOT_FIELDS:
+        raise SystemExit("REFUSED: %s must hold exactly %s" % (path.name, ", ".join(SNAPSHOT_FIELDS)))
+    if not isinstance(snap["taken_on"], str) or not re.fullmatch(r"\d{4}-\d{2}-\d{2}", snap["taken_on"]):
+        raise SystemExit("REFUSED: %s: taken_on %r is not YYYY-MM-DD" % (path.name, snap["taken_on"]))
+    try:
+        _at(snap["decided_through"])
+    except (TypeError, ValueError):
+        raise SystemExit("REFUSED: %s: decided_through %r is not a timestamp" % (path.name, snap["decided_through"]))
+    props = snap["proposals"]
+    if (not isinstance(props, list) or not all(isinstance(p, dict) and isinstance(p.get("proposal_id"), str)
+                                               for p in props)
+            or [p["proposal_id"] for p in props] != sorted({p["proposal_id"] for p in props})):
+        raise SystemExit("REFUSED: %s: proposals must be distinct entries, sorted by proposal_id" % path.name)
+    return snap
+
+
+def _pinned_log(log: list, cut: str) -> list:
+    """The decisions at or before the cut. Refused unless the cut is a decision the log really holds, so a
+    snapshot cannot invent a point in the log's history."""
+    if not any(d.get("decided_at") == cut for d in log):
+        raise SystemExit("REFUSED: no decision in %s was made at the snapshot's decided_through %s"
+                         % (gd.LOG.name, cut))
+    return [d for d in log if _at(d["decided_at"]) <= _at(cut)]
+
+
+def compute_snapshot(taken_on: str, log_path: Path = None, proposals_path: Path = None) -> dict:
+    """The snapshot the live files give now: the last decision's timestamp and the import's proposals."""
+    log = _jsonl(gd.LOG if log_path is None else log_path)
+    if not log:
+        raise SystemExit("REFUSED: the decision log is empty; nothing to pin")
+    proposals = json.loads((PROPOSALS_IMPORT if proposals_path is None else proposals_path)
+                           .read_text(encoding="utf-8"))["proposals"]
+    return {"decided_through": max(log, key=lambda d: _at(d["decided_at"]))["decided_at"],
+            "proposals": sorted(proposals, key=lambda p: p["proposal_id"]), "taken_on": taken_on}
+
+
+def repin(path: Path = None, today: str = None) -> int:
+    """Re-take the snapshot from the live files and write it. When the pinned data is unchanged, the old
+    taken_on stands and nothing is written. Rebuilds nothing and publishes nothing."""
+    path = SNAPSHOT if path is None else path
+    new = compute_snapshot(today or date.today().isoformat())
+    old = load_snapshot(path) if path.exists() else None
+    if old is not None and {k: v for k, v in old.items() if k != "taken_on"} == \
+            {k: v for k, v in new.items() if k != "taken_on"}:
+        print("unchanged since the snapshot of %s; nothing written" % old["taken_on"])
+        return 0
+    path.write_text(snapshot_text(new), encoding="utf-8")
+    print("wrote %s (taken_on %s, decisions through %s, %d proposals)"
+          % (path.relative_to(ROOT), new["taken_on"], new["decided_through"], len(new["proposals"])))
+    print("the page is not rebuilt: run tools/build_scan_demo.py, then republish on the owner's go")
+    return 0
+
+
 def inputs() -> dict:
-    """Everything the page is built from, read once. The guard perturbs a deep copy of this."""
+    """Everything the page is built from, read once. The guard perturbs a deep copy of this. The decision
+    log and the proposal import come through the snapshot, never live."""
+    snap = load_snapshot()
+    log = _pinned_log(_jsonl(gd.LOG), snap["decided_through"])
     claude = CLAUDE_MD.read_text(encoding="utf-8")
     t, r = TRIAGE_BAND.search(claude), REVIEWER.search(claude)
     if not t or not r:
@@ -139,7 +226,7 @@ def inputs() -> dict:
         "accepted": json.loads((RUN_DIR / "accepted.json").read_text(encoding="utf-8")),
         "extraction": [x for x in _jsonl(RUN_DIR / "extraction_runs.jsonl") if x.get("advisory_id") == ADVISORY],
         "record": json.loads(RECORD.read_text(encoding="utf-8")),
-        "decisions": [d for d in _jsonl(gd.LOG) if d.get("advisory_id") == ADVISORY],
+        "decisions": [d for d in log if d.get("advisory_id") == ADVISORY],
         "typologies": json.loads(TYPOLOGIES.read_text(encoding="utf-8"))["typologies"],
         "score": json.loads(SCORE_REPORT.read_text(encoding="utf-8"))["totals"]["typologies"],
         "triage_band": {"date": t.group(1), "recall": [t.group(2), t.group(3)], "precision": [t.group(4), t.group(5)],
@@ -153,8 +240,8 @@ def inputs() -> dict:
         "kc_tools": list(KC_TOOLS),
         "schema_version": SCHEMA_VERSION,
         "schedule": {"day": DAYS[when["Weekday"]], "time": "%02d:%02d" % (when["Hour"], when.get("Minute", 0))},
-        "log": _jsonl(gd.LOG),
-        "proposals": json.loads(PROPOSALS_IMPORT.read_text(encoding="utf-8"))["proposals"],
+        "log": log,
+        "proposals": copy.deepcopy(snap["proposals"]),
         # K4b-R2: no import yet reads as an empty one -- the page then claims nothing was absorbed.
         "impact": (json.loads(IMPACT_IMPORT.read_text(encoding="utf-8")) if IMPACT_IMPORT.exists()
                    else {"typologies": {}}),
@@ -718,7 +805,14 @@ footer{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px;font-si
 def main(argv: list) -> int:
     ap = argparse.ArgumentParser(description="Build the regulatory scan demo page")
     ap.add_argument("--check", action="store_true", help="exit 1 if the committed page differs from a fresh build")
+    ap.add_argument("--repin", action="store_true",
+                    help="re-take site/scan_demo_snapshot.json from the live files; rebuilds and publishes nothing")
     args = ap.parse_args(argv)
+    if args.repin:
+        if args.check:
+            print("REFUSED: --repin runs alone", file=sys.stderr)
+            return 2
+        return repin()
     page = build(inputs())
     if args.check:
         if not OUT.exists() or OUT.read_text(encoding="utf-8") != page:
