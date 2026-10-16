@@ -50,7 +50,7 @@ from pydantic import BaseModel, ConfigDict, Field
 ROOT = Path(__file__).resolve().parent.parent
 # The server is launched as a script, so the repo root is not on sys.path.
 sys.path.insert(0, str(ROOT))
-from feeds import extraction as feeds_extraction, http as feeds_http, inbox, ledger, triage as feeds_triage  # noqa: E402
+from feeds import deferred, extraction as feeds_extraction, http as feeds_http, inbox, ledger, triage as feeds_triage  # noqa: E402
 from feeds.model import FeedItem, LayoutChanged  # noqa: E402
 from feeds.sources import DOCUMENT_TYPES, MAX_DOCUMENT_BYTES, MAX_LISTING_BYTES, SOURCES, linked_pdfs  # noqa: E402
 from schemas.citation_match import PageIndex  # noqa: E402
@@ -59,6 +59,7 @@ RUN_ENV = "FEEDS_RUN_ID"
 # Module attributes, never tool arguments, so the agent cannot choose them. A guard swaps them.
 INBOX_ROOT = inbox.INBOX_ROOT
 SEEN_PATH = ledger.SEEN_PATH
+RUNS_DIR = deferred.RUNS_DIR
 HTTP_GET = feeds_http.get
 # EVAL MODE (slice 2 B): the back-catalogue's pinned documents, gitignored. See _catalogue().
 CATALOGUE_DOCS = ROOT / "evals" / "feeds" / "docs"
@@ -140,10 +141,15 @@ def _load_catalogue():
         return None, "%s the eval catalogue is unusable: %s" % (feeds_triage.REJECTED, exc)
 
 
-def _new_items_reply(source: str, new: list, listed: int) -> str:
+def _new_items_reply(source: str, new: list, listed: int, carried: list = ()) -> str:
     rows = ["%s | %s | %s | %s" % (it.key, it.published, it.title, it.summary or "-") for it in new]
-    return "%d new of %d listed on %s:\nkey | published | title | summary\n%s" % (
+    rows += ["%s | %s | %s | %s" % (c["key"], c["published"], c["title"], c["summary"] or "-") for c in carried]
+    reply = "%d new of %d listed on %s:\nkey | published | title | summary\n%s" % (
         len(new), listed, source, "\n".join(rows))
+    if carried:
+        reply += ("\n%d of these were deferred in an earlier run and are no longer on the listing; they are new to "
+                  "you and listed here like any other: %s" % (len(carried), ", ".join(c["key"] for c in carried)))
+    return reply
 
 
 def _list_catalogue(run_id: str, state: dict, source: str, cat) -> str:
@@ -228,12 +234,17 @@ def _list_new(run_id: str, source: str) -> str:
         return "Failed: layout changed: %s. The listing is saved in the inbox. This is not '0 new items'." % exc
     seen = ledger.load(SEEN_PATH)
     new = [it for it in items if (it.source, it.item_id) not in seen]
-    entry.update(listed=len(items), already_seen=len(items) - len(new),
-                 items=[dict(it.to_json(), document=None) for it in new])
+    # Deferred in an earlier accepted run, undecided since, and gone from the listing: carried forward, so a
+    # defer is never lost to a listing that moved on (2026-10-16). One still listed is simply new, once.
+    on_listing = {it.key for it in new}
+    carried = [c for c in deferred.deferred_items(RUNS_DIR).values()
+               if c["source"] == source and (c["source"], c["item_id"]) not in seen and c["key"] not in on_listing]
+    entry.update(listed=len(items), already_seen=len(items) - len(new), carried=len(carried),
+                 items=[dict(it.to_json(), document=None) for it in new] + [dict(c, document=None) for c in carried])
     inbox.save(run_id, state, INBOX_ROOT)
-    if not new:
+    if not new and not carried:
         return "No new items: %s listed %d, every one already decided." % (source, len(items))
-    return _new_items_reply(source, new, len(items))
+    return _new_items_reply(source, new, len(items), carried)
 
 
 def _describe(doc: dict) -> str:

@@ -151,15 +151,21 @@ def render(run_id: str, root: Path = inbox.INBOX_ROOT) -> str:
     if loud:
         out += loud + [""]
 
-    out += ["## Sources", "", "| source | status | listed | already decided | new |", "|---|---|---|---|---|"]
+    out += ["## Sources", "", "| source | status | listed | already decided | new | carried forward |",
+            "|---|---|---|---|---|---|"]
     for name in reconcile.SOURCES:
         st = rec["sources"].get(name)
         if st is None:
-            out.append("| %s | not listed | - | - | - |" % name)
+            out.append("| %s | not listed | - | - | - | - |" % name)
         else:
-            new = sum(1 for it in items.values() if it["source"] == name)
-            out.append("| %s | %s | %s | %s | %d |" % (name, st.get("status"), st.get("listed"), st.get("already_seen"),
-                                                      new))
+            new = sum(1 for it in items.values() if it["source"] == name and not it.get("carried_from"))
+            back = sum(1 for it in items.values() if it["source"] == name and it.get("carried_from"))
+            out.append("| %s | %s | %s | %s | %d | %d |" % (name, st.get("status"), st.get("listed"),
+                                                           st.get("already_seen"), new, back))
+    carried = sorted((k, it) for k, it in items.items() if it.get("carried_from"))
+    if carried:
+        out += ["", "## Carried forward: %d (deferred in an earlier run, no longer on the listing)" % len(carried), ""]
+        out += ["- `%s` %s -- deferred in %s" % (k, it.get("title", ""), it["carried_from"]) for k, it in carried]
     for title, keys in (("Kept by triage (relevant)", rec["relevant"]),
                         ("Dropped by triage (not relevant), with the reason and the quote", rec["not_relevant"])):
         out += ["", "## %s: %d" % (title, len(keys)), ""]

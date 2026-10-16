@@ -29,6 +29,8 @@ Usage:
     python evals/check_friday_run.py --mutate crash-catches-exception-only  # an interrupt bypasses the crash path
     python evals/check_friday_run.py --mutate no-sigterm-handler      # a SIGTERM is not converted into the crash path
     python evals/check_friday_run.py --mutate classify-ignores-extracted-nothing  # a crashed run that extracted nothing blocks
+    python evals/check_friday_run.py --mutate report-hides-carried    # a carried-forward item gets no Carried forward line
+    python evals/check_friday_run.py --mutate carried-counted-new     # a carried-forward item is counted as new in the Sources table
 
 WHAT IT HOLDS (spec sections 1, 2 and 5):
   budget       extractions start in queue order only while spend + US$1.00 <= US$5.00; the next is DEFERRED
@@ -205,6 +207,9 @@ MUTATIONS = {
                               '        return {"checked": 0, "off_page": 0, "first": None, "error": None}\n'),
     # warn fix round 1: the owner's ALERT (line 3) carries the warning, and the never-raises clause is pinned
     "no-alert-clause": ("report", "    counts += citation_clause(rec, outcomes or {})\n", "    pass\n"),
+    "report-hides-carried": ("report", '    carried = sorted((k, it) for k, it in items.items() if it.get("carried_from"))\n',
+                             "    carried = []\n"),
+    "carried-counted-new": ("report", ' and not it.get("carried_from"))\n', ")\n"),
     # C2 hardening (2026-10-11): an interrupt is a crash too, and a crash that extracted nothing never blocks.
     "crash-catches-exception-only": ("friday", "    except (KeyboardInterrupt, asyncio.CancelledError) as exc:  # the same crash path, then re-raised below\n",
                                      "    except ZeroDivisionError as exc:  # the same crash path, then re-raised below\n"),
@@ -712,6 +717,26 @@ def body(mutation) -> list:
                     "line 3's unfinished count equals the Unfinished section's, which names the deferral and its "
                     "spend; a reason ending in a full stop is not given a second",
                     "line 3 / header / rows %s" % (unfinished_counts(text),)))
+        # 2026-10-16: an item feeds_list_new carried forward (deferred in an earlier run, gone from the listing)
+        # is counted as carried, not new, and named with the run that deferred it.
+        items_path = inbox.run_dir(rid, box) / "items.json"
+        kept = items_path.read_bytes()
+        state = json.loads(kept)
+        src = next(n for n in sorted(state["sources"]) if state["sources"][n].get("items"))
+        block = state["sources"][src]
+        block["items"][-1]["carried_from"] = "feeds-2026-09-25-bbbbbb"
+        items_path.write_text(json.dumps(state), encoding="utf-8")
+        try:
+            ctext = m["report"].render(rid, box)
+        finally:
+            items_path.write_bytes(kept)
+        row = next((ln for ln in ctext.splitlines() if ln.startswith("| %s |" % src)), "")
+        want = "| %s | %s | %s | %s | %d | 1 |" % (src, block.get("status"), block.get("listed"), block.get("already_seen"),
+                                                 len(block["items"]) - 1)
+        out.append((row == want and "## Carried forward: 1 " in ctext
+                    and ("`%s` " % block["items"][-1]["key"]) in ctext and "deferred in feeds-2026-09-25-bbbbbb" in ctext,
+                    "a carried-forward item is counted as carried, not new, and named with the run that deferred it",
+                    row))
 
         rid = "feeds-2026-10-02-aaa016"
         run, keys, session = listed_run(m, box, rid, n_relevant=3, n_dropped=0, queue=3, cost=0.3, against_keys=True)

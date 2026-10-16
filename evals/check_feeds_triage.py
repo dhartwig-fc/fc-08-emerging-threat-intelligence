@@ -184,6 +184,7 @@ def checks(tri, fs) -> list:
     with tempfile.TemporaryDirectory() as tmp:
         tmp = Path(tmp)
         fs.HTTP_GET, fs.INBOX_ROOT, fs.SEEN_PATH = stub, tmp / "inbox", tmp / "ledger.json"
+        fs.RUNS_DIR = tmp / "runs"  # no accepted runs: the real deferrals are never carried into this fixture
         fs.SEEN_PATH.write_text(ledger.dump([]), encoding="utf-8")
         lines = lambda: [json.loads(l) for l in  # noqa: E731
                          (tmp / "inbox" / RUN / "triage.jsonl").read_text(encoding="utf-8").splitlines()
@@ -365,6 +366,7 @@ def catalogue_checks(tri, fs, stub) -> list:
         cat_path = tmp / "catalogue.json"
         cat_path.write_text(json.dumps(catalogue), encoding="utf-8")
         fs.INBOX_ROOT, fs.SEEN_PATH, fs.CATALOGUE_DOCS = tmp / "inbox", tmp / "ledger.json", tmp / "docs"
+        fs.RUNS_DIR = tmp / "runs"
         # The ledger has already decided the batch's first item: eval mode must list it anyway.
         fs.SEEN_PATH.write_text(ledger.dump([{"source": "ofsi", "item_id": items[0].item_id, "decision": "drop",
                                               "first_seen_run": "feeds-2026-09-25-000000",

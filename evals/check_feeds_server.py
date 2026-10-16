@@ -11,9 +11,16 @@ Usage:
     python evals/check_feeds_server.py --mutate swap-http-get     # the server's fetch is not feeds.http.get
     python evals/check_feeds_server.py --mutate narrow-transport  # feeds.http.get turns only URLError into FetchRefused
     python evals/check_feeds_server.py --mutate quiet-no-text     # a document with no text is reported as paged
+    python evals/check_feeds_server.py --mutate no-carry          # a deferred item gone from the listing is lost
+    python evals/check_feeds_server.py --mutate carry-decided     # an item decided since its deferral comes back
+    python evals/check_feeds_server.py --mutate carry-twice       # a deferred item still listed appears twice
+    python evals/check_feeds_server.py --mutate unmarked-carry    # a carried item does not say where it came from
 
 WHAT IT HOLDS (spec section 1, and definition-of-done box 2 for the two tools A builds):
   newness      an item in the seen-items ledger is never reported new;
+  carried      an item deferred in an accepted run and undecided since comes back even when its source no longer
+               lists it, once, tagged with the latest run that deferred it, and fetchable (2026-10-16: two OFAC
+               deferrals fell off a ten-item listing and were lost without a word);
   once         a source's listing is requested once per run, a document once per item;
   allowlist    every request goes to a URL the SERVER chose (a listing URL, or a URL this run listed)
                with the SOURCE's hosts and types, never anything a tool argument carries; extra
@@ -57,6 +64,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 from feeds import http as fh, ledger  # noqa: E402
+from feeds.model import FeedItem  # noqa: E402
 from feeds.sources import DOCUMENT_TYPES, SOURCES  # noqa: E402
 
 SERVER = ROOT / "mcp_server" / "feeds_server.py"
@@ -64,6 +72,7 @@ HTTP_PY = ROOT / "feeds" / "http.py"
 FIX = ROOT / "tests" / "fixtures"
 RUN = "feeds-2026-10-02-abc123"
 OTHER_RUN = "feeds-2026-10-02-def456"
+CARRY_RUN = "feeds-2026-10-02-ccc333"
 OFSI_DOC_URL = "https://www.gov.uk/government/publications/uk-financial-sanctions-faqs"
 FINCEN_DOC_URL = "https://www.fincen.gov/resources/advisories/fincen-advisory-fin-2026-a002"
 FINCEN_DOC = (b"<html><body><main><h1>FinCEN Advisory FIN-2026-A002</h1><p>Joint Advisory on synthetic risks.</p>"
@@ -81,6 +90,13 @@ MUTATIONS = {
                      'items\'." % exc\n', '        return "No new items."\n'),
     "swap-http-get": ("HTTP_GET = feeds_http.get\n", "HTTP_GET = __import__('urllib.request').request.urlopen\n"),
     "quiet-no-text": ("        if text_pages == 0:", "        if False:"),
+    "no-carry": ("    carried = [c for c in deferred.deferred_items(RUNS_DIR).values()\n",
+                 "    carried = [c for c in {}.values()\n"),
+    "carry-decided": (' and (c["source"], c["item_id"]) not in seen and c["key"] not in on_listing]\n',
+                      ' and c["key"] not in on_listing]\n'),
+    "carry-twice": (' and c["key"] not in on_listing]\n', ']\n'),
+    "unmarked-carry": ("[dict(c, document=None) for c in carried]",
+                       "[dict({k: v for k, v in c.items() if k != 'carried_from'}, document=None) for c in carried]"),
 }
 # Mutations of feeds/http.py, installed as feeds.http before the server is loaded.
 HTTP_MUTATIONS = {
@@ -188,6 +204,67 @@ def dropped_connection_check(fs, real_get, tmp: Path) -> tuple:
             "recorded as unreachable, and the source is not listed again in the run", said[:120])
 
 
+def carry_checks(fs, snap) -> list:
+    """A defer survives a listing that moved on: two accepted runs in a temporary runs directory, one FinCEN listing."""
+    out = []
+    listing = snap("fincen_advisories.html")
+    on_list = SOURCES["fincen"].parse(listing)[0]
+
+    def item(item_id, title):
+        fi = FeedItem("fincen", item_id, title, "https://www.fincen.gov/resources/advisories/%s" % item_id, "2026-09-20")
+        return dict(fi.to_json(), document=None)
+
+    gone, decided, twice = (item("fin-2099-a001", "Deferred, then gone from the listing"),
+                            item("fin-2099-a002", "Deferred, then dropped"), item("fin-2099-a003", "Deferred twice"))
+    still = dict(on_list.to_json(), document=None)
+    saved = fs.HTTP_GET, fs.INBOX_ROOT, fs.SEEN_PATH, fs.RUNS_DIR
+    try:
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp = Path(tmp)
+            for name, day, its in (("feeds-2026-09-18-aaaaaa", "2026-09-18", [twice]),
+                                   ("feeds-2026-09-25-bbbbbb", "2026-09-25", [gone, decided, still, twice])):
+                d = tmp / "runs" / name
+                d.mkdir(parents=True)
+                (d / "items.json").write_text(json.dumps({"run_id": name, "sources": {"fincen": {"items": its}}}),
+                                              encoding="utf-8")
+                (d / "accepted.json").write_text(json.dumps({"run_id": name, "decided_on": day,
+                                                             "deferred": sorted(i["key"] for i in its)}),
+                                                 encoding="utf-8")
+            stub = Stub({SOURCES["fincen"].listing_url: ("text/html", listing), gone["url"]: ("text/html", FINCEN_DOC)})
+            fs.HTTP_GET, fs.INBOX_ROOT, fs.SEEN_PATH, fs.RUNS_DIR = stub, tmp / "inbox", tmp / "seen.json", tmp / "runs"
+            fs.SEEN_PATH.write_text(ledger.dump([{"source": "fincen", "item_id": "fin-2099-a002", "decision": "drop",
+                                                  "first_seen_run": "feeds-2026-10-01-zzzzzz",
+                                                  "decided_on": "2026-10-01"}]), encoding="utf-8")
+            os.environ[fs.RUN_ENV] = CARRY_RUN
+            said = asyncio.run(fs.list_new(fs.ListNewInput(source="fincen")))
+            entry = json.loads((tmp / "inbox" / CARRY_RUN / "items.json").read_text(encoding="utf-8"))["sources"]["fincen"]
+            got = {}
+            for it in entry["items"]:
+                got.setdefault(it["key"], []).append(it)
+            g = got.get(gone["key"], [])
+            out.append((len(g) == 1 and g[0].get("carried_from") == "feeds-2026-09-25-bbbbbb" and g[0]["url"] == gone["url"],
+                        "an item deferred in an accepted run and gone from the listing comes back, tagged with that run",
+                        [i.get("carried_from") for i in g]))
+            t = got.get(twice["key"], [])
+            out.append((len(t) == 1 and t[0].get("carried_from") == "feeds-2026-09-25-bbbbbb",
+                        "an item deferred in two runs comes back once, from the later run", [i.get("carried_from") for i in t]))
+            out.append((decided["key"] not in got, "an item decided since its deferral is not carried", decided["key"]))
+            st = got.get(still["key"], [])
+            out.append((len(st) == 1 and not st[0].get("carried_from"),
+                        "an item deferred and still listed is new once, not carried as well", len(st)))
+            out.append((entry.get("carried") == 2 and entry["listed"] == len(SOURCES["fincen"].parse(listing))
+                        and "2 of these were deferred in an earlier run" in said and gone["key"] in said,
+                        "the reply names the carried items and items.json counts them", said.splitlines()[-1][:110]))
+            n = len(stub.calls)
+            fetched = asyncio.run(fs.fetch(fs.FetchInput(item_key=gone["key"])))
+            out.append(([c["url"] for c in stub.calls[n:]] == [gone["url"]] and not fetched.startswith("Rejected"),
+                        "a carried item can be fetched, from the url its deferring run recorded", fetched[:90]))
+    finally:
+        fs.HTTP_GET, fs.INBOX_ROOT, fs.SEEN_PATH, fs.RUNS_DIR = saved
+        os.environ.pop(fs.RUN_ENV, None)
+    return out
+
+
 def checks(fs) -> list:
     out = []
     # An exported FEEDS_CATALOGUE/FEEDS_CATALOGUE_BATCH must not turn these live-mode checks into an eval run.
@@ -208,6 +285,7 @@ def checks(fs) -> list:
     with tempfile.TemporaryDirectory() as tmp:
         tmp = Path(tmp)
         fs.HTTP_GET, fs.INBOX_ROOT, fs.SEEN_PATH = stub, tmp / "inbox", tmp / "seen.json"
+        fs.RUNS_DIR = tmp / "runs"  # no accepted runs: nothing is carried into these checks
         fs.SEEN_PATH.write_text(ledger.dump([]), encoding="utf-8")
 
         def list_new(source):
@@ -337,6 +415,7 @@ def checks(fs) -> list:
     out.append((git_status() == before, "the repository's git status is unchanged", ""))
 
     tools = {t.name: t for t in asyncio.run(fs.mcp.list_tools())}
+    out += carry_checks(fs, snap)
     hint = lambda t, a, b: getattr(t.annotations, a, getattr(t.annotations, b, None))  # noqa: E731
     ro = {n: hint(t, "readOnlyHint", "read_only_hint") for n, t in tools.items()}
     ow = {n: hint(t, "openWorldHint", "open_world_hint") for n, t in tools.items()}
