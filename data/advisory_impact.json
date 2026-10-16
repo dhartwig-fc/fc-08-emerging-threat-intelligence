@@ -1,10 +1,10 @@
 {
   "note": "Governed export from fc-10's advisory impact ledger. Regenerate with tools/import_fc10_impact.py; never hand-edit.",
   "source": {
-    "event_count": 18,
+    "event_count": 22,
     "file": "indexes/advisory_impact.json",
     "repository": "fc-10-intelligence-repository-layer",
-    "sha256": "1ae371a5e9f4eccc219a0199055ec1b7688ac317ab0bdbba7ba5f08a30f2a83a"
+    "sha256": "c11e58a42b33990724978aeca623051c8583a89a41937836a45571505421d87a"
   },
   "typologies": {
     "BA005": {
@@ -58,11 +58,11 @@
       "rereviews": [
         {
           "case_id": "PAT007-C001",
-          "closed_at": "",
+          "closed_at": "2026-10-16T17:00:00",
           "id": "RR-8",
-          "outcome": "",
+          "outcome": "unchanged",
           "raised_at": "2026-10-16T12:00:00",
-          "status": "open",
+          "status": "closed",
           "subject": "Alpha Trading Ltd"
         }
       ]
@@ -192,29 +192,29 @@
       "rereviews": [
         {
           "case_id": "SAN004-APEX",
-          "closed_at": "",
+          "closed_at": "2026-10-16T17:00:00",
           "id": "RR-4",
-          "outcome": "",
+          "outcome": "unchanged",
           "raised_at": "2026-10-15T17:30:00",
-          "status": "open",
+          "status": "closed",
           "subject": "Apex Logistics FZE"
         },
         {
           "case_id": "SAN004-APEX",
-          "closed_at": "",
+          "closed_at": "2026-10-16T17:00:00",
           "id": "RR-7",
-          "outcome": "",
+          "outcome": "unchanged",
           "raised_at": "2026-10-16T12:00:00",
-          "status": "open",
+          "status": "closed",
           "subject": "Apex Logistics FZE"
         },
         {
           "case_id": "SAN004-APEX",
-          "closed_at": "",
+          "closed_at": "2026-10-16T17:00:00",
           "id": "RR-9",
-          "outcome": "",
+          "outcome": "unchanged",
           "raised_at": "2026-10-16T12:00:00",
-          "status": "open",
+          "status": "closed",
           "subject": "Apex Logistics FZE"
         }
       ]
@@ -280,5 +280,5 @@
       ]
     }
   },
-  "version": "fc10-bcb6ce5a"
+  "version": "fc10-f452a8ad"
 }
