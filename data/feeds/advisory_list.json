@@ -22,12 +22,78 @@
         "listed_url": "https://ofac.treasury.gov/recent-actions/20261009",
         "extraction_run_id": "adv-2026-0026-extractor-3e5c8263f4"
       }
+    },
+    {
+      "advisory_id": "ADV-2026-0029",
+      "file": "adv-2026-0029-ofac.html",
+      "publisher": "OFAC (US Treasury)",
+      "source_type": "ofac",
+      "title": "Settlement Agreement between the U.S. Department of the Treasury's Office of Foreign Assets Control and Bank of America, N.A.",
+      "published_on": "2026-10-13",
+      "published_on_precision": "day",
+      "url": "https://ofac.treasury.gov/recent-actions/20261013_33",
+      "source_matrix_tier": "live feed",
+      "sha256": "1f959c22615cfdf6299eb68d73d9c3a6c7695b5a07844b513bb6af5f6244494f",
+      "bytes": 40632,
+      "pages": 1,
+      "selection_rationale": "live feed run feeds-2026-10-16-c88458, item ofac:5b0db35c6f75d3f9: triaged relevant: Enforcement case describing specific sanctions-compliance failures (processing payments via blocked banks, poor alert prioritization, slow watchlist updates, mishandled accounts) that led to violations.",
+      "feed": {
+        "run_id": "feeds-2026-10-16-c88458",
+        "key": "ofac:5b0db35c6f75d3f9",
+        "item_id": "20261013_33",
+        "listed_url": "https://ofac.treasury.gov/recent-actions/20261013_33",
+        "extraction_run_id": "adv-2026-0029-extractor-983efa3eb1"
+      }
+    },
+    {
+      "advisory_id": "ADV-2026-0028",
+      "file": "adv-2026-0028-ofac.html",
+      "publisher": "OFAC (US Treasury)",
+      "source_type": "ofac",
+      "title": "Iran-related Designations and Designations Updates; Transnational Criminal Organizations Designation; Publication of Iran-related Determination; Publication of Amended Iran-related Frequently Asked Question",
+      "published_on": "2026-10-01",
+      "published_on_precision": "day",
+      "url": "https://ofac.treasury.gov/recent-actions/20261001",
+      "source_matrix_tier": "live feed",
+      "sha256": "0cc2b787d8ea00bf3a8ba39c4617d1ea141074685fb1948461e0649f945331a8",
+      "bytes": 55236,
+      "pages": 5,
+      "selection_rationale": "live feed run feeds-2026-10-16-c88458, item ofac:94d34cd7226d01c2: triaged relevant: Iran sanctions-evasion network using Hong Kong/Shanghai shell and trading companies linked to Iranian heavy-equipment manufacturer to procure goods for Iran's automotive/rail sector, evading secondary sanctions.",
+      "feed": {
+        "run_id": "feeds-2026-10-16-c88458",
+        "key": "ofac:94d34cd7226d01c2",
+        "item_id": "20261001",
+        "listed_url": "https://ofac.treasury.gov/recent-actions/20261001",
+        "extraction_run_id": "adv-2026-0028-extractor-846449976d"
+      }
+    },
+    {
+      "advisory_id": "ADV-2026-0027",
+      "file": "adv-2026-0027-ofac.html",
+      "publisher": "OFAC (US Treasury)",
+      "source_type": "ofac",
+      "title": "Counter Narcotics and Counter Terrorism Designations",
+      "published_on": "2026-10-13",
+      "published_on_precision": "day",
+      "url": "https://ofac.treasury.gov/recent-actions/20261013",
+      "source_matrix_tier": "live feed",
+      "sha256": "d98f056dd5ac97a14e0724e749959a802721f2c470ff6fb026126da12e755fbd",
+      "bytes": 45230,
+      "pages": 3,
+      "selection_rationale": "live feed run feeds-2026-10-16-c88458, item ofac:a716c3bc129fae43: triaged relevant: Cartel del Noreste network laundering drug proceeds through front companies: construction firms, fuel distributors, a horse-racing track/stable and a transport logistics company, all linked to designated facilitators.",
+      "feed": {
+        "run_id": "feeds-2026-10-16-c88458",
+        "key": "ofac:a716c3bc129fae43",
+        "item_id": "20261013",
+        "listed_url": "https://ofac.treasury.gov/recent-actions/20261013",
+        "extraction_run_id": "adv-2026-0027-extractor-0cd9e5eb76"
+      }
     }
   ],
   "counts": {
-    "advisories": 1,
+    "advisories": 4,
     "by_source_type": {
-      "ofac": 1
+      "ofac": 4
     }
   }
 }

@@ -1,0 +1,178 @@
+{
+  "schema_version": "1.4.0",
+  "advisory_id": "ADV-2026-0029",
+  "source": {
+    "source_type": "ofac",
+    "publisher": "U.S. Department of the Treasury, Office of Foreign Assets Control",
+    "title": "Settlement Agreement between OFAC and Bank of America, N.A.",
+    "published_on": "2026-10-13",
+    "published_on_precision": "day",
+    "url": null,
+    "document_sha256": "1f959c22615cfdf6299eb68d73d9c3a6c7695b5a07844b513bb6af5f6244494f",
+    "page_count": 1
+  },
+  "summary": "OFAC announced an $11,662,930 settlement with Bank of America, N.A. for 475 apparent violations of multiple OFAC sanctions programs (Russia, Belarus, Iran, Burma, Somalia, narcotics, and global terrorism). The apparent violations arose from the bank processing payments involving blocked banks, failing to prioritize alerts for exact name- and date-of-birth matches to blocked persons, failing to promptly update watchlists after OFAC designations, and mishandling two business accounts tied to blocked persons due to human error. OFAC assessed the violations as non-egregious but largely not voluntarily self-disclosed.",
+  "jurisdictions": [
+    "US",
+    "RU",
+    "BY",
+    "IR",
+    "MM",
+    "SO"
+  ],
+  "typologies": [
+    {
+      "family": "sanctions",
+      "typology_id": null,
+      "label": "Sanctions Screening and List-Maintenance Program Failures",
+      "emergent": true,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 1,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "Bank of America processed payments involving blocked banks"
+        },
+        {
+          "page": 1,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "failed to appropriately prioritize alerts for customers who were exact name- and date of birth-matches to blocked persons"
+        },
+        {
+          "page": 1,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "failed to promptly update watchlists following OFAC designations"
+        },
+        {
+          "page": 1,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "mishandled two business accounts associated with blocked persons due to human error"
+        }
+      ],
+      "added_by": "extractor",
+      "review_justification": null
+    }
+  ],
+  "actors": [
+    {
+      "name": "Bank of America, N.A.",
+      "actor_type": "organisation",
+      "aliases": [],
+      "jurisdiction": "US",
+      "role": "Settling institution; bank that processed payments involving blocked banks and mishandled accounts of blocked persons",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 1,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "$11,662,930 settlement with Bank of America, N.A."
+        }
+      ]
+    },
+    {
+      "name": "blocked persons",
+      "actor_type": "category",
+      "aliases": [
+        "blocked persons"
+      ],
+      "jurisdiction": null,
+      "role": "Class of OFAC-designated persons whose accounts and screening alerts were mishandled",
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 1,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "mishandled two business accounts associated with blocked persons due to human error"
+        }
+      ]
+    },
+    {
+      "name": "blocked banks",
+      "actor_type": "category",
+      "aliases": [
+        "blocked banks"
+      ],
+      "jurisdiction": null,
+      "role": "Class of OFAC-designated financial institutions whose payments were processed by Bank of America",
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 1,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "Bank of America processed payments involving blocked banks"
+        }
+      ]
+    }
+  ],
+  "indicators": [
+    {
+      "indicator_type": "transactional",
+      "description": "Bank processed payments involving banks that were blocked under OFAC sanctions programs.",
+      "detectable_in_transaction_data": true,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 1,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "Bank of America processed payments involving blocked banks"
+        }
+      ]
+    },
+    {
+      "indicator_type": "behavioural",
+      "description": "Exact name- and date-of-birth screening matches to blocked persons were not appropriately prioritized for review.",
+      "detectable_in_transaction_data": false,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 1,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "failed to appropriately prioritize alerts for customers who were exact name- and date of birth-matches to blocked persons"
+        }
+      ]
+    },
+    {
+      "indicator_type": "behavioural",
+      "description": "Sanctions watchlists were not promptly updated following new OFAC designations, creating a window where newly listed parties would not be screened against.",
+      "detectable_in_transaction_data": false,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 1,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "failed to promptly update watchlists following OFAC designations"
+        }
+      ]
+    },
+    {
+      "indicator_type": "documentary",
+      "description": "Two business accounts associated with blocked persons were mishandled due to human error.",
+      "detectable_in_transaction_data": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 1,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "mishandled two business accounts associated with blocked persons due to human error"
+        }
+      ]
+    }
+  ],
+  "suggested_desks": [
+    "sanctions_desk",
+    "fiu_liaison"
+  ],
+  "overall_confidence": "high",
+  "extraction_notes": "Document is a one-page OFAC settlement press summary, not an indicator-list document; it describes Bank of America's own sanctions-compliance program failures rather than a third-party laundering technique, so a single emergent typology was proposed (no library match cleared the search floor; closest was SAN005 Name Screening Evasion at 0.37, which concerns a listed party disguising its name -- not applicable here since matches were exact). Actor resolution: 'Bank of America, N.A.' and 'Office of Foreign Assets Control' both returned Unresolved (not in actor register); OFAC was treated as the source publisher rather than a recorded actor. 'Blocked persons' and 'blocked banks' recorded as category actors per the document's framing of these as classes, not named entities; categories do not resolve in the register. Jurisdiction list reflects the named sanctions programs (Russia, Belarus, Iran, Burma/Myanmar, Somalia) plus the settling institution's home jurisdiction (US); narcotics and global terrorism programs are not jurisdiction-specific and have no ISO code."
+}
