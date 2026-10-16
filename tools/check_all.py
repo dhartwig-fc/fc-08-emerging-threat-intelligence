@@ -96,6 +96,7 @@ GUARDS = [
     ("check_impact_import", ["evals/check_impact_import.py"], "cold"),
     ("check_proposal_kind", ["evals/check_proposal_kind.py"], "cold"),
     ("check_draft_doctrine", ["evals/check_draft_doctrine.py"], "cold"),
+    ("check_compare_flags", ["evals/check_compare_flags.py"], "cold"),
     ("check_digest_proposals", ["evals/check_digest_proposals.py"], "cold"),
     # Static: every text --mutate anchor and rebound name still matches its source; this list never runs a mutation.
     ("check_mutation_anchors", ["evals/check_mutation_anchors.py"], "cold"),

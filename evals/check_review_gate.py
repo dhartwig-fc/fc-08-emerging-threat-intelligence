@@ -183,6 +183,7 @@ def decision_checks(w: dict) -> list:
     log = WORK / "review_decisions.jsonl"
     links_path, emergent_path = WORK / "approved_links.json", WORK / "approved_emergent.json"
     proposals_path = WORK / "approved_proposal_links.json"
+    flags_path = WORK / "approved_flag_links.json"
     proposals, _ = gp.load_queue(QUEUE_DIR)
     clean, quarantined = gp.recheck(proposals)
     links = gp.group(clean)
@@ -209,7 +210,7 @@ def decision_checks(w: dict) -> list:
                 "apply appends one line per decision, carrying runs, advisory and typology",
                 "%d lines" % len(rows)))
 
-    gd.write_approved(gd.load_log(log), links_path, emergent_path, proposals_path)
+    gd.write_approved(gd.load_log(log), links_path, emergent_path, proposals_path, flags_path)
     approved = json.loads(links_path.read_text(encoding="utf-8"))["approved"]
     emergent = json.loads(emergent_path.read_text(encoding="utf-8"))["approved"]
     out.append(([r["link_key"] for r in approved] == [w["a_key"]] and emergent == [],
@@ -254,12 +255,12 @@ def decision_checks(w: dict) -> list:
                 [r.decision for r in rows]))
     third.unlink()
 
-    gd.write_approved(gd.load_log(log), links_path, emergent_path, proposals_path)
-    out.append((gd.check_approved(gd.load_log(log), links_path, emergent_path, proposals_path) == [],
+    gd.write_approved(gd.load_log(log), links_path, emergent_path, proposals_path, flags_path)
+    out.append((gd.check_approved(gd.load_log(log), links_path, emergent_path, proposals_path, flags_path) == [],
                 "check_approved passes on files rebuilt from the log", ""))
     # One appended byte: the smallest hand edit, and never a no-op whatever the file holds.
     links_path.write_text(links_path.read_text(encoding="utf-8") + " ", encoding="utf-8")
-    problems = gd.check_approved(gd.load_log(log), links_path, emergent_path, proposals_path)
+    problems = gd.check_approved(gd.load_log(log), links_path, emergent_path, proposals_path, flags_path)
     out.append((bool(problems), "a HAND-EDITED approvals file is caught", "; ".join(problems)[:120]))
     out.append((gd.rebuild(gd.load_log(log)) == gd.rebuild(gd.load_log(log)), "rebuild is deterministic", ""))
     return out
@@ -271,7 +272,7 @@ def cli_checks(w: dict) -> list:
     cli.mkdir(exist_ok=True)
     paths = ["--queue-dir", str(QUEUE_DIR), "--log", str(cli / "log.jsonl"),
              "--approved-links", str(cli / "links.json"), "--approved-emergent", str(cli / "emergent.json"),
-             "--approved-proposals", str(cli / "proposals.json")]
+             "--approved-proposals", str(cli / "proposals.json"), "--approved-flags", str(cli / "flags.json")]
 
     def run(*args, stdin: str = "") -> subprocess.CompletedProcess:
         return subprocess.run([sys.executable, str(ROOT / "tools" / "review.py"), *args, *paths],
@@ -352,7 +353,8 @@ def cli_checks(w: dict) -> list:
 def _naming_the_record(root: Path) -> list:
     """Every .py/.sh under root, other than the gate and this guard, that names the decision log or an
     approvals file. Earlier this skipped ALL of evals/, read only .py, and ignored the log's own name."""
-    names = (gd.LOG.name, gd.APPROVED_LINKS.name, gd.APPROVED_EMERGENT.name, gd.APPROVED_PROPOSALS.name)
+    names = (gd.LOG.name, gd.APPROVED_LINKS.name, gd.APPROVED_EMERGENT.name, gd.APPROVED_PROPOSALS.name,
+             gd.APPROVED_FLAGS.name)
     allowed = {"governance/decisions.py", Path(__file__).resolve().relative_to(ROOT).as_posix()}
     hits = []
     for path in sorted(root.rglob("*")):
@@ -377,7 +379,7 @@ def parse_checks(w: dict) -> list:
         r = _review("--decisions", str(d / "decisions.txt"), "--queue-dir", str(QUEUE_DIR),
                     "--log", str(d / "log.jsonl"), "--approved-links", str(d / "links.json"),
                     "--approved-emergent", str(d / "emergent.json"),
-                    "--approved-proposals", str(d / "proposals.json"))
+                    "--approved-proposals", str(d / "proposals.json"), "--approved-flags", str(d / "flags.json"))
         return r, d
 
     r, d = run("markers", "FC08 decisions\n  * adv-2026-0002 %s: reject -- lowercase, starred\n"
@@ -448,19 +450,20 @@ def log_checks(w: dict) -> list:
     for n, (name, text, expect) in enumerate(witnesses):
         d = WORK / "logcheck" / ("w%02d" % n)
         d.mkdir(parents=True)
-        log, lk, em, pr = d / "log.jsonl", d / "links.json", d / "emergent.json", d / "proposals.json"
+        log, lk, em, pr, fl = (d / "log.jsonl", d / "links.json", d / "emergent.json", d / "proposals.json",
+                               d / "flags.json")
         if text is None:
             gd.apply([(w["a_key"], "approve", "made by the gate")], links, q_links, log_path=log,
                      now="2026-09-24T15:00:00+00:00")
         else:
             log.write_text(text, encoding="utf-8")
         try:
-            gd.write_approved(gd.load_log(log), lk, em, pr)
+            gd.write_approved(gd.load_log(log), lk, em, pr, fl)
         except Exception:  # a malformed log cannot be rebuilt from: no approvals files, so none to disagree
             pass
         r = _review("--check", "--queue-dir", str(QUEUE_DIR), "--log", str(log),
                     "--approved-links", str(lk), "--approved-emergent", str(em),
-                    "--approved-proposals", str(pr))
+                    "--approved-proposals", str(pr), "--approved-flags", str(fl))
         said = r.stdout + r.stderr
         if expect is None:
             ok, label = r.returncode == 0, "--check passes a log the gate wrote (the witnesses below are not vacuous)"
@@ -477,7 +480,7 @@ def log_checks(w: dict) -> list:
     # before writing: this check can never write the real record. It also asserts
     # the real files are untouched.
     real = [(p, p.read_bytes() if p.exists() else None) for p in (gd.LOG, gd.APPROVED_LINKS, gd.APPROVED_EMERGENT,
-                                                                    gd.APPROVED_PROPOSALS)]
+                                                                    gd.APPROVED_PROPOSALS, gd.APPROVED_FLAGS)]
     stray = WORK / "stray_decisions.txt"
     stray.write_text("%s NOPE999: approve -- must never reach the real log\n" % ADVISORY, encoding="utf-8")
     q, lg = ("--queue-dir", str(QUEUE_DIR)), ("--log", str(WORK / "stray_log.jsonl"))

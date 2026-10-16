@@ -40,7 +40,7 @@ from governance import decisions as gd  # noqa: E402
 from governance import proposals as gp  # noqa: E402
 
 MARKERS = re.compile(r"^[\s\-*\u2022]+")  # leading whitespace, -, * and the bullet a phone inserts
-LINE = re.compile(r"^(ADV-\d{4}-\d{4})\s+(?:([A-Z]{2,6}\d{3}[A-Z]?)|EMERGENT\[(.+?)\]|PROPOSAL\[\s*(TP-\d{4}-\d{3})\s*\]):\s*(approve|reject)"
+LINE = re.compile(r"^(ADV-\d{4}-\d{4})\s+(?:([A-Z]{2,6}\d{3}[A-Z]?)|EMERGENT\[(.+?)\]|PROPOSAL\[\s*(TP-\d{4}-\d{3})\s*\]|FLAG\[\s*([A-Z]{2,6}\d{3}[A-Z]?:[0-9a-f]{8})\s*\]):\s*(approve|reject)"
                   r"\s*(?:--\s*(.*))?$", re.I)
 
 
@@ -53,8 +53,11 @@ def parse_decisions(text: str) -> list:
         m = LINE.match(line)
         if not m:
             raise SystemExit("cannot read decision line, nothing written: %r" % raw.strip())
-        aid, tid, label, tp, decision, note = m.groups()
-        out.append((gp.link_key(aid.upper(), tid.upper() if tid else None, label, tp.upper() if tp else None),
+        aid, tid, label, tp, flag, decision, note = m.groups()
+        if flag:
+            typ, _, sha = flag.partition(":")
+            flag = "%s:%s" % (typ.upper(), sha.lower())
+        out.append((gp.link_key(aid.upper(), tid.upper() if tid else None, label, tp.upper() if tp else None, flag),
                     decision.lower(),
                     (note or "").strip()))
     return out
@@ -80,7 +83,8 @@ def _context():
 
 
 def _finish(args) -> None:
-    gd.write_approved(gd.load_log(args.log), args.approved_links, args.approved_emergent, args.approved_proposals)
+    gd.write_approved(gd.load_log(args.log), args.approved_links, args.approved_emergent, args.approved_proposals,
+                      args.approved_flags)
 
 
 def cmd_list(args) -> int:
@@ -121,7 +125,8 @@ def cmd_decisions(args) -> int:
 
 def cmd_check(args) -> int:
     decisions, problems = gd.load_log_checked(args.log)
-    problems += gd.check_approved(decisions, args.approved_links, args.approved_emergent, args.approved_proposals)
+    problems += gd.check_approved(decisions, args.approved_links, args.approved_emergent, args.approved_proposals,
+                                  args.approved_flags)
     known = {p.proposal_id: p.link_key for p in gp.load_queue(args.queue_dir)[0]}
     problems += gd.check_log(decisions, known)
     for p in problems:
@@ -142,7 +147,8 @@ def _mixed_record_paths(args) -> str:
     paths = (("--queue-dir", args.queue_dir, gp.QUEUE_DIR), ("--log", args.log, gd.LOG),
              ("--approved-links", args.approved_links, gd.APPROVED_LINKS),
              ("--approved-emergent", args.approved_emergent, gd.APPROVED_EMERGENT),
-             ("--approved-proposals", args.approved_proposals, gd.APPROVED_PROPOSALS))
+             ("--approved-proposals", args.approved_proposals, gd.APPROVED_PROPOSALS),
+             ("--approved-flags", args.approved_flags, gd.APPROVED_FLAGS))
     moved = [flag for flag, given, default in paths if Path(given).resolve() != Path(default).resolve()]
     if not moved or len(moved) == len(paths):
         return ""
@@ -199,6 +205,7 @@ def main(argv: list) -> int:
     ap.add_argument("--approved-links", type=Path, default=gd.APPROVED_LINKS)
     ap.add_argument("--approved-emergent", type=Path, default=gd.APPROVED_EMERGENT)
     ap.add_argument("--approved-proposals", type=Path, default=gd.APPROVED_PROPOSALS)
+    ap.add_argument("--approved-flags", type=Path, default=gd.APPROVED_FLAGS)
     args = ap.parse_args(argv)
     if args.list:
         return cmd_list(args)

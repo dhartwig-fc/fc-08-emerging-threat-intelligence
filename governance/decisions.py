@@ -38,6 +38,7 @@ LOG = ROOT / "data" / "review_decisions.jsonl"
 APPROVED_LINKS = ROOT / "data" / "approved_links.json"
 APPROVED_EMERGENT = ROOT / "data" / "approved_emergent.json"
 APPROVED_PROPOSALS = ROOT / "data" / "approved_proposal_links.json"   # Stage565 S2; read by fc-10
+APPROVED_FLAGS = ROOT / "data" / "approved_flag_links.json"   # Stage566 K3a; read by fc-10
 OPEN, DECIDED, NEW_EVIDENCE = "open", "decided", "new_evidence"
 DECISIONS = ("approve", "reject")
 
@@ -60,13 +61,18 @@ class Decision:
     run_ids: Tuple[str, ...]
     quotes_seen_sha256: Tuple[str, ...]
     typology_proposal: Optional[str] = None   # Stage565 S2; absent from every pre-S2 line
+    # Stage566 K3a: a FLAG decision records the flag ("TYP:sha8") and what was shown -- {text, quote, page} -- so
+    # approved_flag_links.json rebuilds from the log alone. Both absent from every other line.
+    flag: Optional[str] = None
+    flag_evidence: Optional[dict] = None
 
     def to_line(self) -> str:
         d = asdict(self)
         for k in ("proposal_ids", "run_ids", "quotes_seen_sha256"):
             d[k] = list(d[k])
-        if d["typology_proposal"] is None:
-            del d["typology_proposal"]           # governed and emergent lines serialise exactly as before S2
+        for k in ("typology_proposal", "flag", "flag_evidence"):
+            if d[k] is None:
+                del d[k]                         # older kinds serialise exactly as before S2 and K3a
         return json.dumps(d, sort_keys=True, ensure_ascii=False)
 
     @classmethod
@@ -178,7 +184,8 @@ def apply(requests, links: Dict[str, Link], quarantined: Dict[str, str], log_pat
                               "a change of mind needs its own dated record" % (key, p.decision, p.decided_at[:10]))
         out.append(Decision(decided_at=stamp, link_key=key, kind=link.kind, advisory_id=link.advisory_id,
                             typology_id=link.typology_id, emergent_label=link.emergent_label,
-                            typology_proposal=link.typology_proposal,
+                            typology_proposal=link.typology_proposal, flag=link.flag,
+                            flag_evidence=_flag_evidence(link),
                             decision=decision, note=(note or "").strip(), proposal_ids=link.proposal_ids,
                             run_ids=link.run_ids, quotes_seen_sha256=tuple(sorted(link.quote_hashes()))))
     log_path.parent.mkdir(parents=True, exist_ok=True)
@@ -188,7 +195,16 @@ def apply(requests, links: Dict[str, Link], quarantined: Dict[str, str], log_pat
     return out
 
 
-_TARGET = {"governed": "typology_id", "emergent": "emergent_label", "proposal": "typology_proposal"}
+def _flag_evidence(link: Link) -> Optional[dict]:
+    """What the owner was shown for a FLAG link: its text and first cited quote, from the earliest proposal."""
+    if not link.flag:
+        return None
+    first = link.proposals[0]
+    page, quote = first.citations[0]
+    return {"text": first.rationale, "quote": quote, "page": page}
+
+
+_TARGET = {"governed": "typology_id", "emergent": "emergent_label", "proposal": "typology_proposal", "flag": "flag"}
 
 
 def _rows(decisions, kind: str) -> list:
@@ -199,31 +215,35 @@ def _rows(decisions, kind: str) -> list:
         row = {"link_key": d.link_key, "advisory_id": d.advisory_id, "decided_at": d.decided_at,
                "note": d.note, "run_ids": list(d.run_ids), "proposal_ids": list(d.proposal_ids)}
         row[_TARGET[kind]] = getattr(d, _TARGET[kind])
+        if kind == "flag":
+            ev = d.flag_evidence or {}
+            row.update(typology_id=d.flag.split(":")[0], flag_text=ev.get("text"), quote=ev.get("quote"),
+                       page=ev.get("page"))
         rows.append(row)
     return rows
 
 
-def rebuild(decisions) -> Tuple[str, str, str]:
-    """(links, emergent, proposal links) file texts, byte-identical for the same log."""
+def rebuild(decisions) -> Tuple[str, str, str, str]:
+    """(links, emergent, proposal links, flag links) file texts, byte-identical for the same log."""
     def dump(rows) -> str:
         return json.dumps({"generated_from": "data/review_decisions.jsonl", "approved": rows},
                           indent=2, sort_keys=True, ensure_ascii=False) + "\n"
     decisions = list(decisions)
-    return tuple(dump(_rows(decisions, k)) for k in ("governed", "emergent", "proposal"))
+    return tuple(dump(_rows(decisions, k)) for k in ("governed", "emergent", "proposal", "flag"))
 
 
 def write_approved(decisions, links_path: Path = APPROVED_LINKS, emergent_path: Path = APPROVED_EMERGENT,
-                   proposals_path: Path = APPROVED_PROPOSALS) -> None:
-    for path, text in zip((links_path, emergent_path, proposals_path), rebuild(decisions)):
+                   proposals_path: Path = APPROVED_PROPOSALS, flags_path: Path = APPROVED_FLAGS) -> None:
+    for path, text in zip((links_path, emergent_path, proposals_path, flags_path), rebuild(decisions)):
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(text, encoding="utf-8")
 
 
 def check_approved(decisions, links_path: Path = APPROVED_LINKS, emergent_path: Path = APPROVED_EMERGENT,
-                   proposals_path: Path = APPROVED_PROPOSALS) -> List[str]:
+                   proposals_path: Path = APPROVED_PROPOSALS, flags_path: Path = APPROVED_FLAGS) -> List[str]:
     """Problems, empty when the files are exactly what the log rebuilds to."""
     decisions = list(decisions)
-    paths = (links_path, emergent_path, proposals_path)
+    paths = (links_path, emergent_path, proposals_path, flags_path)
     if not decisions and not any(p.exists() for p in paths):
         return []
     problems = []

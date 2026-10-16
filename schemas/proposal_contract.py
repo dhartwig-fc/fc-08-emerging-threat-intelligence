@@ -22,7 +22,8 @@ import hashlib
 import json
 
 SCHEMA = "proposal/2"
-STAGES = ("extractor", "reviewer")
+# "flags" (Stage566 K3a): agents/compare_flags.py, one line per new red flag for an approved governed link.
+STAGES = ("extractor", "reviewer", "flags")
 
 # Quote bounds, in characters. The server applies them as Field bounds on the
 # agent's input; the gate applies them to the quote after strip, so whitespace

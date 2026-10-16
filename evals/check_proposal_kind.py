@@ -91,7 +91,7 @@ def checks_decisions():
         "a pre-S2 decision line reads and re-serialises unchanged", d.link_key
     prop = _decision("proposal", link_key="ADV-2026-0030::PROPOSAL[TP-2026-001]", typology_proposal="TP-2026-001")
     emer = _decision("emergent", link_key="ADV-2026-0031::EMERGENT[x]", emergent_label="x")
-    links_t, emergent_t, proposals_t = gd.rebuild([prop, emer])
+    links_t, emergent_t, proposals_t, _flags_t = gd.rebuild([prop, emer])
     rows = json.loads(proposals_t)["approved"]
     yield [r.get("typology_proposal") for r in rows] == ["TP-2026-001"], \
         "a proposal approval lands in the proposals file", proposals_t.strip()[:80]

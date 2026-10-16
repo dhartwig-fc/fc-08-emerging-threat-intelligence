@@ -130,6 +130,7 @@ EXEMPT = {
     "check_impact_import.py": "--mutate perturbs a synthetic export or the converted dict in memory",
     "check_proposal_kind.py": "--mutate rebinds governance and server functions in memory",
     "check_draft_doctrine.py": "--mutate rebinds draft_doctrine and doctrine_draft functions in memory",
+    "check_compare_flags.py": "--mutate rebinds compare_flags and flag_comparison functions in memory",
     "check_digest_proposals.py": "--mutate rebinds digest.proposals_for in memory, or passes build_digests' --_mutate",
     "check_review_gate.py": "--mutate rebinds gate functions in memory",
     "check_scan_demo.py": "--mutate perturbs a deep copy of tools/build_scan_demo.py's inputs (or the built page) in memory",

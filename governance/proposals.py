@@ -24,6 +24,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import re
 import sys
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -33,6 +34,7 @@ ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
 from schemas.citation_match import PageIndex, file_sha256, norm  # noqa: E402
+from schemas.flag_comparison import flag_sha8  # noqa: E402
 from schemas.proposal_contract import QUOTE_MAX, QUOTE_MIN, SCHEMA, STAGES, proposal_id  # noqa: E402
 
 QUEUE_DIR = ROOT / "data" / "proposals"
@@ -44,6 +46,7 @@ FEED_ADVISORY_LIST = ROOT / "data" / "feeds" / "advisory_list.json"
 ADVISORIES_DIR = ROOT / "data" / "advisories"
 LIBRARY = ROOT / "data" / "typologies.json"
 TYPOLOGY_PROPOSALS = ROOT / "data" / "typology_proposals.json"   # the S1 import of fc-10's open proposals
+FLAG_RE = re.compile(r"^([A-Z]{2,6}\d{3}[A-Z]?):([0-9a-f]{8})$")
 
 
 def open_proposal_ids(path: Path = TYPOLOGY_PROPOSALS) -> set:
@@ -57,8 +60,15 @@ def quote_hash(page: int, quote: str) -> str:
     return hashlib.sha256(("%d|%s" % (page, norm(quote))).encode("utf-8")).hexdigest()[:16]
 
 
+def flag_key(advisory_id: str, flag: str) -> str:
+    """Stage566 K3a: ADV::FLAG[TYP:sha8], one new red flag proposed for an approved governed link."""
+    return "%s::FLAG[%s]" % (advisory_id, flag)
+
+
 def link_key(advisory_id: str, typology_id: Optional[str], emergent_label: Optional[str],
-             typology_proposal: Optional[str] = None) -> str:
+             typology_proposal: Optional[str] = None, flag: Optional[str] = None) -> str:
+    if flag:
+        return flag_key(advisory_id, flag)
     if typology_id:
         return "%s::%s" % (advisory_id, typology_id)
     if typology_proposal:
@@ -82,6 +92,9 @@ class Proposal:
     # Stage565 S2: the link names an open fc-10 typology proposal. Kept OUT of body() when unset so every
     # proposal written before S2 recomputes its id unchanged.
     typology_proposal: Optional[str] = None
+    # Stage566 K3a: "<TYP>:<sha8>", a new red flag for an approved governed link (agents/compare_flags.py); the
+    # flag text is the rationale. Kept OUT of body() when unset, like typology_proposal, so no earlier id moves.
+    flag: Optional[str] = None
     # The queue file the line was read from. Not part of the proposal: never in
     # body(), so never in the id. The re-check holds it against run_id.
     source_file: str = ""
@@ -93,7 +106,7 @@ class Proposal:
                    typology_id=d.get("typology_id"), emergent_label=d.get("emergent_label"),
                    rationale=d["rationale"], confidence=d["confidence"],
                    citations=tuple((int(c["page"]), c["quote"]) for c in d["citations"]),
-                   typology_proposal=d.get("typology_proposal"), source_file=source_file)
+                   typology_proposal=d.get("typology_proposal"), flag=d.get("flag"), source_file=source_file)
 
     def body(self) -> dict:
         """What the server hashed: the line minus proposal_id and proposed_at, rebuilt from the fields
@@ -105,15 +118,19 @@ class Proposal:
                "citations": [{"page": pg, "quote": q} for pg, q in self.citations]}
         if self.typology_proposal:
             out["typology_proposal"] = self.typology_proposal
+        if self.flag:
+            out["flag"] = self.flag
         return out
 
     @property
     def kind(self) -> str:
+        if self.flag:
+            return "flag"
         return "governed" if self.typology_id else "proposal" if self.typology_proposal else "emergent"
 
     @property
     def link_key(self) -> str:
-        return link_key(self.advisory_id, self.typology_id, self.emergent_label, self.typology_proposal)
+        return link_key(self.advisory_id, self.typology_id, self.emergent_label, self.typology_proposal, self.flag)
 
 
 @dataclass(frozen=True)
@@ -130,9 +147,12 @@ class Link:
     emergent_label: Optional[str]
     proposals: List[Proposal] = field(default_factory=list)
     typology_proposal: Optional[str] = None
+    flag: Optional[str] = None
 
     @property
     def kind(self) -> str:
+        if self.flag:
+            return "flag"
         return "governed" if self.typology_id else "proposal" if self.typology_proposal else "emergent"
 
     def quotes(self) -> List[Tuple[int, str, int]]:
@@ -214,12 +234,20 @@ def _contract_problem(p: Proposal) -> Optional[str]:
     if recomputed != p.proposal_id:
         return ("proposal_id %s does not recompute (the line hashes to %s): it was changed after the "
                 "server wrote it" % (p.proposal_id, recomputed))
-    named = [bool((v or "").strip()) for v in (p.typology_id, p.emergent_label, p.typology_proposal)]
+    named = [bool((v or "").strip()) for v in (p.typology_id, p.emergent_label, p.typology_proposal, p.flag)]
     if sum(named) != 1:
-        return ("names %s of typology_id, emergent_label and typology_proposal; a proposal names exactly one"
-                % {0: "neither", 2: "both", 3: "all three"}[sum(named)])
+        return ("names %s of typology_id, emergent_label, typology_proposal and flag; a proposal names exactly one"
+                % {0: "neither", 2: "both", 3: "three", 4: "all four"}[sum(named)])
     if p.stage not in STAGES:
         return "stage %r is not one of %s" % (p.stage, ", ".join(STAGES))
+    if p.flag:
+        m = FLAG_RE.match(p.flag)
+        if not m or p.stage != "flags":
+            return "flag %r is not <TYP>:<sha8> from the flags stage" % p.flag
+        if m.group(2) != flag_sha8(p.rationale):
+            return "flag %s does not recompute from its text (it hashes to %s)" % (p.flag, flag_sha8(p.rationale))
+    elif p.stage == "flags":
+        return "a flags-stage line names no flag"
     if Path(p.source_file).stem != p.run_id:
         return "run_id %s does not match its queue file %s" % (p.run_id, p.source_file or "(none)")
     for page, q in p.citations:
@@ -260,6 +288,8 @@ def recheck(proposals, advisory_list: Path = ADVISORY_LIST, advisories_dir: Path
                     % (p.document_sha256[:12], a["sha256"][:12]))
         if p.typology_id and p.typology_id not in known:
             return "%s is not in the library" % p.typology_id
+        if p.flag and FLAG_RE.match(p.flag).group(1) not in known:
+            return "flag %s names %s, which is not in the library" % (p.flag, p.flag.split(":")[0])
         if p.typology_proposal and p.typology_proposal not in open_ids:
             return "%s is not an open typology proposal (fc-10 may have closed or merged it)" % p.typology_proposal
         if not p.citations:
@@ -294,7 +324,7 @@ def group(proposals) -> Dict[str, Link]:
         link = links.get(p.link_key)
         if link is None:
             link = links[p.link_key] = Link(p.link_key, p.advisory_id, p.typology_id, p.emergent_label,
-                                            typology_proposal=p.typology_proposal)
+                                            typology_proposal=p.typology_proposal, flag=p.flag)
         link.proposals.append(p)
     return dict(sorted(links.items()))
 
