@@ -54,11 +54,14 @@ guard cannot be silently left out, and a deleted one cannot linger as a name.
 from __future__ import annotations
 
 import argparse
+import os
 import subprocess
 import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
+GIT_LOCATION = ("GIT_DIR", "GIT_WORK_TREE", "GIT_INDEX_FILE", "GIT_PREFIX", "GIT_COMMON_DIR",
+                "GIT_OBJECT_DIRECTORY", "GIT_ALTERNATE_OBJECT_DIRECTORIES")
 
 GUARDS = [
     # (name, argv after the interpreter, class) -- classes from the fresh-clone measurement
@@ -140,12 +143,18 @@ def main(argv: list) -> int:
             print("%-16s %s" % (cls, name))
         return 1 if problems else 0
 
+    # Git exports the repository's location to a hook (GIT_DIR, GIT_INDEX_FILE; in a worktree, GIT_DIR names
+    # .git/worktrees/<name>). Guards that build throwaway fixture repositories inherited them, so on
+    # 2026-10-16 a commit from a worktree got five fixture commits ("initial" ... "frozen") on its branch, and
+    # a `git commit -a` here fails its guards the same way. Each guard runs with cwd=ROOT and finds its own
+    # repository from there, so nothing needs them.
+    env = {k: v for k, v in os.environ.items() if k not in GIT_LOCATION}
     failed, not_run = list(problems), []
     for name, cmd, cls in GUARDS:
         if args.cold and cls != "cold":
             not_run.append("NOT RUN (%s): %s" % (cls, name))
             continue
-        r = subprocess.run([sys.executable] + cmd, cwd=ROOT, capture_output=True, text=True)
+        r = subprocess.run([sys.executable] + cmd, cwd=ROOT, capture_output=True, text=True, env=env)
         tail = (r.stdout.strip().splitlines() or [""])[-1]
         print("%-4s %-30s %s" % ("ok" if r.returncode == 0 else "FAIL", name, tail[:90]))
         if r.returncode != 0:
