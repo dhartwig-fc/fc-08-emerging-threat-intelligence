@@ -299,6 +299,7 @@ def impact_view(impact: dict) -> dict:
     mc = mine.get("corroborations") or []
     doc = next((c for c in mc if c["advisory_id"] == ADVISORY), mc[0] if mc else None)
     rr = (mine.get("rereviews") or [None])[0]
+    flags = [f for t in ts.values() for f in t.get("flags") or []]      # Stage566 K3c
     return {
         "built": bool(mc),
         "absorbed_on": max((c["absorbed_at"][:10] for c in corrs), default=""),
@@ -306,6 +307,8 @@ def impact_view(impact: dict) -> dict:
         "typologies": sum(1 for t in ts.values() if t.get("corroborations")),
         "rereviews": len(rrs),
         "open": sum(r["status"] == "open" for r in rrs),
+        "flags": sum(f["status"] == "approved" for f in flags),
+        "flags_in_doctrine": sum(f["status"] == "in_doctrine" for f in flags),
         "doctrine": {k: doc[k] for k in ("advisory_id", "publisher", "decided_at", "quotes")} if doc else None,
         "rereview": ({k: rr[k] for k in ("id", "subject", "case_id", "status", "outcome", "raised_at", "closed_at")}
                      if rr else None),
@@ -643,12 +646,13 @@ footer{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px;font-si
 <div class="dash" id="nowCase"></div>
 </div>
 <p class="note" id="nowTotals"></p>
+<p class="note" id="nowFlags"></p>
 </section>
 
 <section class="card" aria-label="Next capability">
 <div style="display:flex;flex-wrap:wrap;align-items:baseline;gap:8px 14px"><h2>Next</h2><span class="nb">NOT BUILT</span></div>
 <ul style="margin:8px 0 0;padding-left:18px;font-size:13px;color:var(--fg-2)">
-<li><b>New red flags:</b> an agent compares the advisory with the typology's red flags; a person approves genuinely new ones.</li>
+<li id="nextFlags"><b>New red flags:</b> an agent compares the advisory with the typology's red flags; a person approves genuinely new ones.</li>
 <li><b>Cases on the desk:</b> re-review the queue cases of the typology, not only its product.</li>
 </ul>
 </section>
@@ -795,6 +799,11 @@ footer{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px;font-si
     '<p style="margin:6px 0 0;font-size:12.5px;color:var(--muted)">' + esc(D.publisher) + ' · approved ' + esc(day(D.decided_at)) + ' · <a href="' + esc(F.doctrine_page) + '">' + esc(K.typology) + ' doctrine</a></p>' : NOT;
   $("nowCase").innerHTML = R ? HEAD + esc(K.typology) + ' → product re-review</div><b style="display:block;margin-top:4px">' + esc(R.id) + ' · <a href="' + esc(F.case_page) + '">' + esc(R.subject) + ' (' + esc(R.case_id) + ')</a></b>' +
     '<p style="margin:4px 0 0;font-size:12.5px;color:var(--muted)">requested ' + esc(day(R.raised_at)) + ' · ' + (R.status === "closed" ? "closed " + esc(day(R.closed_at)) + " · " + esc(R.outcome) : esc(R.status)) + '</p>' : NOT;
+  // Stage566 K3c: once a red flag is approved, "New red flags" leaves Next and is counted here.
+  if (I.flags + I.flags_in_doctrine > 0) {
+    var nf = $("nextFlags"); nf.parentNode.removeChild(nf);
+    $("nowFlags").textContent = "New red flags: " + I.flags + " approved, awaiting doctrine · " + I.flags_in_doctrine + " in doctrine. An agent compares each advisory with its typology's red flags; a person approves the genuinely new ones.";
+  }
   $("nowTotals").textContent = I.built ? "Across NEXUS: " + I.typologies + " typologies corroborated · " + I.rereviews + " re-reviews (" + I.open + " open)" : "";
   render();
 })();

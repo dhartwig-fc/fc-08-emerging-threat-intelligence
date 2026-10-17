@@ -17,6 +17,7 @@ Usage:
     python evals/check_scan_demo.py --mutate show-cost       # a cost figure reaches the page
     python evals/check_scan_demo.py --mutate built-without-import  # the Now block claims BUILT from an empty import
     python evals/check_scan_demo.py --mutate wrong-rereview  # the Now block shows a re-review the import does not hold
+    python evals/check_scan_demo.py --mutate flags-lie       # the Now block counts a red flag the import does not hold
     python evals/check_scan_demo.py --mutate built-lie       # a step shows BUILT naming a file that does not exist
     python evals/check_scan_demo.py --mutate drop-decision   # the step counts lose the decided emergent patterns
     python evals/check_scan_demo.py --mutate fake-proposal   # an invented open proposal reaches the step counts
@@ -81,7 +82,7 @@ from publish_scan_demo import DEFAULT_PORTFOLIO  # noqa: E402
 MUTATIONS = ("drop-notice", "flip-verdict", "move-fate", "edit-quote", "reverse-decision", "citation-count",
              "wrong-model", "extra-tool", "eval-number", "drop-coverage", "leak-path", "show-cost",
              "built-lie", "drop-decision", "fake-proposal", "built-without-import", "wrong-rereview",
-             "unpinned-log")
+             "unpinned-log", "flags-lie")
 MUTATION = None
 NOT_RUN = object()
 SEEDS = ("0", "1", "42", "4242")
@@ -129,6 +130,10 @@ def _mutated_inputs() -> dict:
                                                 "family": "sanctions", "stage": "open", "evidence": []}]
     elif m == "built-without-import":
         inp["impact"] = {"typologies": {}}
+    elif m == "flags-lie":
+        inp["impact"]["typologies"][bs.CORROBORATES[0]]["flags"] = [{
+            "id": "FLG-99", "text": "Invented", "advisory_id": bs.ADVISORY, "quote": "x", "page": 1,
+            "status": "approved", "in_doctrine_commit": ""}]
     elif m == "wrong-rereview":
         inp["impact"]["typologies"][bs.CORROBORATES[0]]["rereviews"][0]["subject"] = "Someone Else Ltd"
     elif m == "unpinned-log":
@@ -347,6 +352,18 @@ def checks():
                 "rereviews": len(rrs), "open": sum(r["status"] == "open" for r in rrs),
                 "absorbed_on": max((c["absorbed_at"][:10] for c in corrs), default="")}
     yield {k: I.get(k) for k in want_tot} == want_tot, "the Now block's totals are the import's", want_tot
+    # Stage566 K3c: the red-flag counts are the import's, and "New red flags" leaves Next only when one exists.
+    fl = [f for t in TI.values() for f in t.get("flags", [])]
+    want_fl = {"flags": sum(f["status"] == "approved" for f in fl),
+               "flags_in_doctrine": sum(f["status"] == "in_doctrine" for f in fl)}
+    yield {k: I.get(k) for k in want_fl} == want_fl, "the Now block's red-flag counts are the import's", want_fl
+    yield 'id="nextFlags"' in page and "New red flags:" in page, \
+        "the Next block still lists New red flags for the page to move", ""
+    fv = bs.impact_view({"typologies": {"SAN006": {"corroborations": [], "rereviews": [], "flags": [
+        {"id": "FLG-1", "status": "approved"}, {"id": "FLG-2", "status": "in_doctrine"},
+        {"id": "FLG-3", "status": "withdrawn"}]}}})
+    yield (fv["flags"], fv["flags_in_doctrine"]) == (1, 1), "impact_view counts approved and in-doctrine flags, " \
+        "not withdrawn ones", (fv["flags"], fv["flags_in_doctrine"])
     yield bool(want_rr) and (bs.FC10["subject"], bs.FC10["case_id"]) == (want_rr["subject"], want_rr["case_id"]), \
         "the declared FC10 case is the import's SAN006 re-review", bs.FC10["case_id"]
     closed = copy.deepcopy(T["impact"])

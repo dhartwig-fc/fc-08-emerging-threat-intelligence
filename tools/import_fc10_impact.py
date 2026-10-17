@@ -20,6 +20,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 OUT = ROOT / "data" / "advisory_impact.json"
 RR_ID = re.compile(r"^RR-\d+$")
+FLG_ID = re.compile(r"^FLG-\d+$")   # Stage566 K3c: approved red flags, carried unchanged
 
 
 def _commit(path: Path) -> str:
@@ -37,14 +38,24 @@ def convert(path: Path) -> dict:
             "corroborations": sorted(entry.get("corroborations") or [], key=lambda c: c["advisory_id"]),
             "rereviews": entry.get("rereviews") or [],
         }
+        if entry.get("flags"):              # only when present, so an export with none imports byte-unchanged
+            typologies[code]["flags"] = entry["flags"]
     bad = sorted(r["id"] for t in typologies.values() for r in t["rereviews"] if not RR_ID.match(r["id"]))
     if bad:
         raise SystemExit("not re-review ids: %s" % bad)
     orphans = sorted(code for code, t in typologies.items() if t["rereviews"] and not t["corroborations"])
     if orphans:
         raise SystemExit("re-reviews with no corroboration: %s" % orphans)
+    bad = sorted(f["id"] for t in typologies.values() for f in t.get("flags", []) if not FLG_ID.match(f["id"]))
+    if bad:
+        raise SystemExit("not flag ids: %s" % bad)
+    orphans = sorted(code for code, t in typologies.items() if t.get("flags") and not t["corroborations"])
+    if orphans:
+        raise SystemExit("flags with no corroboration: %s" % orphans)
     for t in typologies.values():
         t["rereviews"] = sorted(t["rereviews"], key=lambda r: int(r["id"][3:]))
+        if "flags" in t:
+            t["flags"] = sorted(t["flags"], key=lambda f: int(f["id"][4:]))
     return {
         "version": "fc10-%s" % _commit(path),
         "source": {"repository": "fc-10-intelligence-repository-layer", "file": "indexes/advisory_impact.json",
