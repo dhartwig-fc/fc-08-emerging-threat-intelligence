@@ -137,6 +137,7 @@ EXEMPT = {
     "check_tool_surface.py": "--mutate* replace the options object or QUEUE_DIR in memory",
     "check_twin_pairs.py": "--mutate empties the twin map in memory",
     "check_walkthrough.py": "--mutate sets tools/build_walkthrough.py's _MUTATE (or a guard-side read), a code switch",
+    "check_measure_slice2.py": "--mutate sets tools/measure_slice2.py's _MUTATE, a code switch",
     SELF: "its own labels plant temporary copies in code; it has no text table",
 }
 NO_MUTATIONS = ("check_citations.py", "check_published_scan_demo.py", "check_published_walkthrough.py")

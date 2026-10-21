@@ -1,0 +1,13 @@
+{
+ "ceiling_usd": 5.0,
+ "crash": null,
+ "ended_at": "2026-01-02T08:10:00Z",
+ "failure": null,
+ "limit": null,
+ "model": "synthetic-model",
+ "orchestrator_cost_usd": 0.1,
+ "run_id": "feeds-2026-01-02-aaaaaa",
+ "spent_usd": 1.0,
+ "started_at": "2026-01-02T08:00:00Z",
+ "unrecorded": null
+}

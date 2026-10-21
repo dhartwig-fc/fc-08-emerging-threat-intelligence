@@ -1,0 +1,7 @@
+{
+ "reasons": [
+  "the checkout is on 'synthetic-rehearsal', not main"
+ ],
+ "refused_at": "2026-01-09T08:00:00Z",
+ "run_id": "feeds-2026-01-09-cccccc"
+}
