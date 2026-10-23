@@ -88,12 +88,78 @@
         "listed_url": "https://ofac.treasury.gov/recent-actions/20261013",
         "extraction_run_id": "adv-2026-0027-extractor-0cd9e5eb76"
       }
+    },
+    {
+      "advisory_id": "ADV-2026-0032",
+      "file": "adv-2026-0032-ofac.html",
+      "publisher": "OFAC (US Treasury)",
+      "source_type": "ofac",
+      "title": "Iran-related Designations; Cuba Designation; Issuance of New and Amended General Licenses and Frequently Asked Questions",
+      "published_on": "2026-10-15",
+      "published_on_precision": "day",
+      "url": "https://ofac.treasury.gov/recent-actions/20261015",
+      "source_matrix_tier": "live feed",
+      "sha256": "011bfae04e29f9d09705ca33e235c050d9e6223f9d5ffdd7914dbd56d224be34",
+      "bytes": 53595,
+      "pages": 4,
+      "selection_rationale": "live feed run feeds-2026-10-23-3d940e, item ofac:17287d3622d0d858: triaged relevant: Designates Iranian exchange/money-service companies and a Cuban state bank as part of Iran's shadow banking network used to move funds for sanctioned individuals, evading sanctions.",
+      "feed": {
+        "run_id": "feeds-2026-10-23-3d940e",
+        "key": "ofac:17287d3622d0d858",
+        "item_id": "20261015",
+        "listed_url": "https://ofac.treasury.gov/recent-actions/20261015",
+        "extraction_run_id": "adv-2026-0032-extractor-157e111999"
+      }
+    },
+    {
+      "advisory_id": "ADV-2026-0030",
+      "file": "adv-2026-0030-ofac.html",
+      "publisher": "OFAC (US Treasury)",
+      "source_type": "ofac",
+      "title": "Counter Narcotics, Counter Terrorism, Iran-related, and Non-Proliferation Designations",
+      "published_on": "2026-09-29",
+      "published_on_precision": "day",
+      "url": "https://ofac.treasury.gov/recent-actions/20260929",
+      "source_matrix_tier": "live feed",
+      "sha256": "4e8621b74fca22e74e676f4f9496ea37daadf36715c63b5e310c2cfefe9d5f14",
+      "bytes": 69700,
+      "pages": 11,
+      "selection_rationale": "live feed run feeds-2026-10-23-3d940e, item ofac:528a733c96bd988a: triaged relevant: Designates Sinaloa Cartel leadership and a narco-corruption network in Baja California, describing cartel hierarchy and corruption roles tied to drug trafficking.",
+      "feed": {
+        "run_id": "feeds-2026-10-23-3d940e",
+        "key": "ofac:528a733c96bd988a",
+        "item_id": "20260929",
+        "listed_url": "https://ofac.treasury.gov/recent-actions/20260929",
+        "extraction_run_id": "adv-2026-0030-extractor-c15deb8448"
+      }
+    },
+    {
+      "advisory_id": "ADV-2026-0031",
+      "file": "adv-2026-0031-ofac.html",
+      "publisher": "OFAC (US Treasury)",
+      "source_type": "ofac",
+      "title": "Counter Terrorism and Transnational Criminal Organizations Designations; Belarus, Counter Narcotics, and Libya Designations Removals",
+      "published_on": "2026-09-30",
+      "published_on_precision": "day",
+      "url": "https://ofac.treasury.gov/recent-actions/20260930",
+      "source_matrix_tier": "live feed",
+      "sha256": "17dd70539a1a0ceaec02e6b583c2cb5b911c0fea4917f8b060b0ba720ecb2181",
+      "bytes": 47750,
+      "pages": 4,
+      "selection_rationale": "live feed run feeds-2026-10-23-3d940e, item ofac:dc63a1c2b84a58f7: triaged relevant: Designates Tren de Aragua members tied to theft of millions from US banks, listing TRX digital-currency addresses used to launder stolen funds plus shell entities.",
+      "feed": {
+        "run_id": "feeds-2026-10-23-3d940e",
+        "key": "ofac:dc63a1c2b84a58f7",
+        "item_id": "20260930",
+        "listed_url": "https://ofac.treasury.gov/recent-actions/20260930",
+        "extraction_run_id": "adv-2026-0031-extractor-ecb11dbd4f"
+      }
     }
   ],
   "counts": {
-    "advisories": 4,
+    "advisories": 7,
     "by_source_type": {
-      "ofac": 4
+      "ofac": 7
     }
   }
 }

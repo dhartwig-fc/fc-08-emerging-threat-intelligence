@@ -1,0 +1,170 @@
+{
+  "run_id": "feeds-2026-10-23-3d940e",
+  "sources": {
+    "fincen": {
+      "already_seen": 15,
+      "carried": 0,
+      "error": null,
+      "items": [],
+      "listed": 15,
+      "listed_at": "2026-10-23T08:29:00Z",
+      "listing": "listings/fincen.html",
+      "listing_sha256": "618939f4bc282c4d23a61bc14e75366177fc651f165c34f9ee70d38bbbe9fb9d",
+      "listing_url": "https://www.fincen.gov/resources/advisoriesbulletinsfact-sheets/advisories",
+      "status": "ok"
+    },
+    "ofac": {
+      "already_seen": 6,
+      "carried": 2,
+      "error": null,
+      "items": [
+        {
+          "document": {
+            "bytes": 50533,
+            "content_type": "text/html",
+            "fetched_at": "2026-10-23T08:29:34Z",
+            "final_url": "https://ofac.treasury.gov/recent-actions/20261021",
+            "linked_pdfs": [],
+            "page_error": null,
+            "pages": 4,
+            "path": "docs/6981c429e00343b137fbe28ee799ecdcaca9355809a1806442cd91915f159d07.html",
+            "sha256": "6981c429e00343b137fbe28ee799ecdcaca9355809a1806442cd91915f159d07",
+            "text_pages": 4
+          },
+          "item_id": "20261021",
+          "key": "ofac:6a05e5175268a818",
+          "published": "2026-10-21",
+          "source": "ofac",
+          "summary": "",
+          "title": "Iran-related Designations; Belarus and North Korea Designations Removals; Issuance of Iran-related and Russia-related General Licenses and Amended Frequently Asked Questions",
+          "url": "https://ofac.treasury.gov/recent-actions/20261021"
+        },
+        {
+          "document": {
+            "bytes": 49592,
+            "content_type": "text/html",
+            "fetched_at": "2026-10-23T08:29:47Z",
+            "final_url": "https://ofac.treasury.gov/recent-actions/20261019",
+            "linked_pdfs": [],
+            "page_error": null,
+            "pages": 5,
+            "path": "docs/186b3544d66878b1c94057fe708b683f23890089a4240191971151d2410c321d.html",
+            "sha256": "186b3544d66878b1c94057fe708b683f23890089a4240191971151d2410c321d",
+            "text_pages": 5
+          },
+          "item_id": "20261019",
+          "key": "ofac:a1a5b81d7d18cf50",
+          "published": "2026-10-19",
+          "source": "ofac",
+          "summary": "",
+          "title": "Protecting American Intellectual Property Act of 2022 (PAIPA) Designations; Issuance of Associated General Licenses",
+          "url": "https://ofac.treasury.gov/recent-actions/20261019"
+        },
+        {
+          "document": {
+            "bytes": 39468,
+            "content_type": "text/html",
+            "fetched_at": "2026-10-23T08:29:57Z",
+            "final_url": "https://ofac.treasury.gov/recent-actions/20261016",
+            "linked_pdfs": [],
+            "page_error": null,
+            "pages": 1,
+            "path": "docs/deceadab2c20267d09f677a097a54725258cc5400d24b2b281e13c1b63a28194.html",
+            "sha256": "deceadab2c20267d09f677a097a54725258cc5400d24b2b281e13c1b63a28194",
+            "text_pages": 1
+          },
+          "item_id": "20261016",
+          "key": "ofac:5296f6b0f92e0c28",
+          "published": "2026-10-16",
+          "source": "ofac",
+          "summary": "",
+          "title": "Issuance of Amended Venezuela-related General License and Frequently Asked Question",
+          "url": "https://ofac.treasury.gov/recent-actions/20261016"
+        },
+        {
+          "document": {
+            "bytes": 53595,
+            "content_type": "text/html",
+            "fetched_at": "2026-10-23T08:30:08Z",
+            "final_url": "https://ofac.treasury.gov/recent-actions/20261015",
+            "linked_pdfs": [],
+            "page_error": null,
+            "pages": 4,
+            "path": "docs/011bfae04e29f9d09705ca33e235c050d9e6223f9d5ffdd7914dbd56d224be34.html",
+            "sha256": "011bfae04e29f9d09705ca33e235c050d9e6223f9d5ffdd7914dbd56d224be34",
+            "text_pages": 4
+          },
+          "item_id": "20261015",
+          "key": "ofac:17287d3622d0d858",
+          "published": "2026-10-15",
+          "source": "ofac",
+          "summary": "",
+          "title": "Iran-related Designations; Cuba Designation; Issuance of New and Amended General Licenses and Frequently Asked Questions",
+          "url": "https://ofac.treasury.gov/recent-actions/20261015"
+        },
+        {
+          "carried_from": "feeds-2026-10-11-e7ad24",
+          "document": {
+            "bytes": 69700,
+            "content_type": "text/html",
+            "fetched_at": "2026-10-23T08:30:18Z",
+            "final_url": "https://ofac.treasury.gov/recent-actions/20260929",
+            "linked_pdfs": [],
+            "page_error": null,
+            "pages": 11,
+            "path": "docs/4e8621b74fca22e74e676f4f9496ea37daadf36715c63b5e310c2cfefe9d5f14.html",
+            "sha256": "4e8621b74fca22e74e676f4f9496ea37daadf36715c63b5e310c2cfefe9d5f14",
+            "text_pages": 11
+          },
+          "item_id": "20260929",
+          "key": "ofac:528a733c96bd988a",
+          "published": "2026-09-29",
+          "source": "ofac",
+          "summary": "",
+          "title": "Counter Narcotics, Counter Terrorism, Iran-related, and Non-Proliferation Designations",
+          "url": "https://ofac.treasury.gov/recent-actions/20260929"
+        },
+        {
+          "carried_from": "feeds-2026-10-11-e7ad24",
+          "document": {
+            "bytes": 47750,
+            "content_type": "text/html",
+            "fetched_at": "2026-10-23T08:30:31Z",
+            "final_url": "https://ofac.treasury.gov/recent-actions/20260930",
+            "linked_pdfs": [],
+            "page_error": null,
+            "pages": 4,
+            "path": "docs/17dd70539a1a0ceaec02e6b583c2cb5b911c0fea4917f8b060b0ba720ecb2181.html",
+            "sha256": "17dd70539a1a0ceaec02e6b583c2cb5b911c0fea4917f8b060b0ba720ecb2181",
+            "text_pages": 4
+          },
+          "item_id": "20260930",
+          "key": "ofac:dc63a1c2b84a58f7",
+          "published": "2026-09-30",
+          "source": "ofac",
+          "summary": "",
+          "title": "Counter Terrorism and Transnational Criminal Organizations Designations; Belarus, Counter Narcotics, and Libya Designations Removals",
+          "url": "https://ofac.treasury.gov/recent-actions/20260930"
+        }
+      ],
+      "listed": 10,
+      "listed_at": "2026-10-23T08:29:11Z",
+      "listing": "listings/ofac.html",
+      "listing_sha256": "1623132dd6fa776b59467fc1da2758c9cf994af5c6144b4c945d3b181b1ff455",
+      "listing_url": "https://ofac.treasury.gov/recent-actions",
+      "status": "ok"
+    },
+    "ofsi": {
+      "already_seen": 20,
+      "carried": 0,
+      "error": null,
+      "items": [],
+      "listed": 20,
+      "listed_at": "2026-10-23T08:29:00Z",
+      "listing": "listings/ofsi.atom",
+      "listing_sha256": "33555d99266a49f328f73ad729f6b254aebefac9ad5ed9edbf960c8a38954f84",
+      "listing_url": "https://www.gov.uk/government/organisations/office-of-financial-sanctions-implementation.atom",
+      "status": "ok"
+    }
+  }
+}

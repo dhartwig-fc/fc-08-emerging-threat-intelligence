@@ -288,10 +288,24 @@
       "source": "ofac"
     },
     {
+      "decided_on": "2026-10-23",
+      "decision": "accept",
+      "first_seen_run": "feeds-2026-10-23-3d940e",
+      "item_id": "20260929",
+      "source": "ofac"
+    },
+    {
       "decided_on": "2026-09-30",
       "decision": "drop",
       "first_seen_run": "feeds-2026-09-30-bd1185",
       "item_id": "20260929_33",
+      "source": "ofac"
+    },
+    {
+      "decided_on": "2026-10-23",
+      "decision": "accept",
+      "first_seen_run": "feeds-2026-10-23-3d940e",
+      "item_id": "20260930",
       "source": "ofac"
     },
     {
@@ -355,6 +369,27 @@
       "decision": "drop",
       "first_seen_run": "feeds-2026-10-16-c88458",
       "item_id": "20261014",
+      "source": "ofac"
+    },
+    {
+      "decided_on": "2026-10-23",
+      "decision": "accept",
+      "first_seen_run": "feeds-2026-10-23-3d940e",
+      "item_id": "20261015",
+      "source": "ofac"
+    },
+    {
+      "decided_on": "2026-10-23",
+      "decision": "drop",
+      "first_seen_run": "feeds-2026-10-23-3d940e",
+      "item_id": "20261016",
+      "source": "ofac"
+    },
+    {
+      "decided_on": "2026-10-23",
+      "decision": "drop",
+      "first_seen_run": "feeds-2026-10-23-3d940e",
+      "item_id": "20261019",
       "source": "ofac"
     },
     {

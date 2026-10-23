@@ -1,0 +1,597 @@
+{
+  "schema_version": "1.4.0",
+  "advisory_id": "ADV-2026-0032",
+  "source": {
+    "source_type": "ofac",
+    "publisher": "U.S. Department of the Treasury, Office of Foreign Assets Control",
+    "title": "Iran-related Designations; Cuba Designation; Issuance of New and Amended General Licenses and Frequently Asked Questions",
+    "published_on": "2026-10-15",
+    "published_on_precision": "day",
+    "url": null,
+    "document_sha256": "011bfae04e29f9d09705ca33e235c050d9e6223f9d5ffdd7914dbd56d224be34",
+    "page_count": 4
+  },
+  "summary": "OFAC announced 'Operation Economic Outcast,' adding 16 Iran-connected individuals and 10 Iran-linked entities to the SDN List under E.O. 13902, plus Cuba's state-owned Banco Internacional de Comercio S.A. (BICSA) under E.O. 14404. The Iran designations target a cluster of recently-formed Iranian 'exchange' and partnership companies registered as 'Other monetary intermediation' businesses in Qeshm, Kish and Tehran, several Iranian and Iraqi banks, a Hong Kong trading company, and individuals linked to these entities, framed by Treasury as action against Iran's international financial networks and shadow-banking architecture. OFAC also issued Russia-related General Licenses 128D and 130B (Lukoil-related wind-downs), Iran-related General License FF (wind-down of transactions with International Development Bank for Investment and Finance), and new/amended FAQs 1276 (Cuba) and 1225 (Russia).",
+  "jurisdictions": [
+    "IR",
+    "CU",
+    "AE",
+    "HK",
+    "IQ",
+    "US"
+  ],
+  "typologies": [
+    {
+      "family": "sanctions",
+      "typology_id": "SAN004",
+      "label": "Front Companies",
+      "emergent": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 1,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "Operation Economic Outcast Targets Iran’s International Financial Networks and Shadow Banking Architecture"
+        },
+        {
+          "page": 3,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "Organization Established Date 04 May 2016; Organization Type: Other monetary intermediation; National ID No. 14005814280 (Iran); Registration Number 14150 (Iran) [IRAN-EO13902]."
+        },
+        {
+          "page": 4,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "Organization Established Date 07 Apr 2015; Organization Type: Other monetary intermediation; National ID No. 14004832696 (Iran); Registration Number 470601 (Iran) [IRAN-EO13902]."
+        }
+      ],
+      "added_by": "extractor",
+      "review_justification": null
+    }
+  ],
+  "actors": [
+    {
+      "name": "ABDOLALIPUR, Azadeh",
+      "actor_type": "person",
+      "aliases": [
+        "ALIPUR, Azadeh"
+      ],
+      "jurisdiction": "IR",
+      "role": "Designated individual linked to Farab Soroush Afagh Qeshm Company",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 1,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "DOB 11 Sep 1988; POB Shiraz, Iran; nationality Iran; Additional Sanctions Information - Subject to Secondary Sanctions; Gender Female; National ID No. 2300151421 (Iran) (individual) [IRAN-EO13902] (Linked To: FARAB SOROUSH AFAGH QESHM COMPANY)."
+        }
+      ]
+    },
+    {
+      "name": "ALLAHYAR, Farzad",
+      "actor_type": "person",
+      "aliases": [],
+      "jurisdiction": "IR",
+      "role": "Designated individual linked to Farab Soroush Afagh Qeshm Company",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 1,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "DOB 12 Aug 2001; POB Tehran, Iran; nationality Iran; Additional Sanctions Information - Subject to Secondary Sanctions; Gender Male; National ID No. 0024557455 (Iran) (individual) [IRAN-EO13902] (Linked To: FARAB SOROUSH AFAGH QESHM COMPANY)."
+        }
+      ]
+    },
+    {
+      "name": "BAVI, Sadegh",
+      "actor_type": "person",
+      "aliases": [],
+      "jurisdiction": "AE",
+      "role": "Designated individual, Dubai-based, dual Iran/Dominica nationality",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 1,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "Dubai, United Arab Emirates; DOB 21 Mar 1964; POB Ahvaz, Iran; nationality Iran; alt. nationality Dominica; Additional Sanctions Information - Subject to Secondary Sanctions; Gender Male; Passport N97128850 (Iran) expires 11 May 2027; alt. Passport RA045652 (Dominica) expires 26 Sep 2032 (individual) [IRAN-EO13902]."
+        }
+      ]
+    },
+    {
+      "name": "BORJI, Nazanin",
+      "actor_type": "person",
+      "aliases": [],
+      "jurisdiction": "IR",
+      "role": "Designated individual linked to Farab Soroush Afagh Qeshm Company",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 1,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "DOB 10 Jun 1996; POB Tehran, Iran; nationality Iran; Additional Sanctions Information - Subject to Secondary Sanctions; Gender Female; National ID No. 0019123337 (Iran) (individual) [IRAN-EO13902] (Linked To: FARAB SOROUSH AFAGH QESHM COMPANY)."
+        }
+      ]
+    },
+    {
+      "name": "HOSSEINI PARSA, Seyyed Abbas",
+      "actor_type": "person",
+      "aliases": [],
+      "jurisdiction": "IR",
+      "role": "Designated individual linked to Seyyed Abbas Hosseini Parsa and Partners Qeshm General Partnership Company",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 1,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "DOB 15 Jul 1956; POB Tehran, Iran; nationality Iran; Additional Sanctions Information - Subject to Secondary Sanctions; Gender Male; National ID No. 0083131019 (Iran) (individual) [IRAN-EO13902] (Linked To: SEYYED ABBAS HOSSEINI PARSA AND PARTNERS QESHM GENERAL PARTNERSHIP COMPANY)."
+        }
+      ]
+    },
+    {
+      "name": "JALALI, Abolhasan",
+      "actor_type": "person",
+      "aliases": [],
+      "jurisdiction": "IR",
+      "role": "Designated individual, namesake of Abolhasan Jalali and Partners Exchange Company",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 2,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "DOB 01 Sep 1966; POB Maragheh, Iran; nationality Iran; Additional Sanctions Information - Subject to Secondary Sanctions; Gender Male; National ID No. 1550929674 (Iran) (individual) [IRAN-EO13902]."
+        }
+      ]
+    },
+    {
+      "name": "KATEBI, Milad",
+      "actor_type": "person",
+      "aliases": [],
+      "jurisdiction": "IR",
+      "role": "Designated individual linked to Farab Soroush Afagh Qeshm Company",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 2,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "DOB 31 Dec 1989; POB Tehran, Iran; nationality Iran; Additional Sanctions Information - Subject to Secondary Sanctions; Gender Male; National ID No. 0011436913 (Iran) (individual) [IRAN-EO13902] (Linked To: FARAB SOROUSH AFAGH QESHM COMPANY)."
+        }
+      ]
+    },
+    {
+      "name": "MIRMOHAMMADI, Mansureh",
+      "actor_type": "person",
+      "aliases": [],
+      "jurisdiction": "IR",
+      "role": "Designated individual linked to Soheil and Sorush Najafzadeh and Partners Company",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 2,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "DOB 13 May 1982; POB Golpayegan, Iran; nationality Iran; Additional Sanctions Information - Subject to Secondary Sanctions; Gender Female; National ID No. 1219437239 (Iran) (individual) [IRAN-EO13902] (Linked To: SOHEIL AND SORUSH NAJAFZADEH AND PARTNERS COMPANY)."
+        }
+      ]
+    },
+    {
+      "name": "MOHAMMADI, Zhila",
+      "actor_type": "person",
+      "aliases": [
+        "MOHAMADI, Jela",
+        "MOHAMMADI ALIABAD, Zhila"
+      ],
+      "jurisdiction": "IR",
+      "role": "Designated individual linked to Farab Soroush Afagh Qeshm Company",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 2,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "DOB 28 Jun 1991; POB Iran; nationality Iran; Additional Sanctions Information - Subject to Secondary Sanctions; Gender Female; National ID No. 5660004288 (Iran) (individual) [IRAN-EO13902] (Linked To: FARAB SOROUSH AFAGH QESHM COMPANY)."
+        }
+      ]
+    },
+    {
+      "name": "MOHIESNEJAD, Khaled",
+      "actor_type": "person",
+      "aliases": [],
+      "jurisdiction": "IR",
+      "role": "Designated individual linked to Seyyed Abbas Hosseini Parsa and Partners Qeshm General Partnership Company",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 2,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "DOB 21 Sep 1982; POB Ahvaz, Iran; nationality Iran; Additional Sanctions Information - Subject to Secondary Sanctions; Gender Male; National ID No. 1754430317 (Iran) (individual) [IRAN-EO13902] (Linked To: SEYYED ABBAS HOSSEINI PARSA AND PARTNERS QESHM GENERAL PARTNERSHIP COMPANY)."
+        }
+      ]
+    },
+    {
+      "name": "MULLAH MOHAMMADI, Ensiyeh",
+      "actor_type": "person",
+      "aliases": [],
+      "jurisdiction": "IR",
+      "role": "Designated individual",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 2,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "DOB 18 May 1976; POB Qom, Iran; nationality Iran; Additional Sanctions Information - Subject to Secondary Sanctions; Gender Female; National ID No. 0381750760 (Iran) (individual) [IRAN-EO13902]."
+        }
+      ]
+    },
+    {
+      "name": "NAJAFZADEH, Soheil",
+      "actor_type": "person",
+      "aliases": [
+        "NAJAFZADEH, Suhail"
+      ],
+      "jurisdiction": "IR",
+      "role": "Designated individual, namesake of Soheil and Sorush Najafzadeh and Partners Company",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 2,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "DOB 12 Apr 1976; POB Tehran, Iran; nationality Iran; Additional Sanctions Information - Subject to Secondary Sanctions; Gender Male; National ID No. 0069004250 (Iran) (individual) [IRAN-EO13902]."
+        }
+      ]
+    },
+    {
+      "name": "NAJAFZADEH, Sorush",
+      "actor_type": "person",
+      "aliases": [
+        "NAJAFZADEH, Sorosh"
+      ],
+      "jurisdiction": "IR",
+      "role": "Designated individual, namesake of Soheil and Sorush Najafzadeh and Partners Company",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 2,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "DOB 27 Aug 1982; POB Tehran, Iran; nationality Iran; Additional Sanctions Information - Subject to Secondary Sanctions; Gender Male; National ID No. 0069940177 (Iran) (individual) [IRAN-EO13902]."
+        }
+      ]
+    },
+    {
+      "name": "RAZAVI, Sayyed Ruhollah",
+      "actor_type": "person",
+      "aliases": [
+        "RAZAVI, Rouhollah",
+        "RAZAVI, Ruhollah",
+        "ROOHULLAH RAZAVI, Seyed"
+      ],
+      "jurisdiction": "AE",
+      "role": "Designated individual, Dubai-based, linked to Farzanegan Energy Pars Company and Tejarat Gostar Atlas Parsian Kish Company",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 2,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "Dubai, United Arab Emirates; DOB 19 Sep 1981; POB Qom, Iran; nationality Iran; citizen Dominica; alt. citizen Turkey; Additional Sanctions Information - Subject to Secondary Sanctions; Gender Male; National ID No. 0381818969 (Iran) (individual) [IRAN-EO13902]."
+        }
+      ]
+    },
+    {
+      "name": "SABETI, Amir",
+      "actor_type": "person",
+      "aliases": [],
+      "jurisdiction": "IR",
+      "role": "Designated individual linked to Farab Soroush Afagh Qeshm Company",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 3,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "DOB 30 Aug 1981; POB Shemiran, Iran; nationality Iran; Additional Sanctions Information - Subject to Secondary Sanctions; Gender Male; National ID No. 0451397711 (Iran) (individual) [IRAN-EO13902] (Linked To: FARAB SOROUSH AFAGH QESHM COMPANY)."
+        }
+      ]
+    },
+    {
+      "name": "VASIGHI MERAJI, Fatemeh",
+      "actor_type": "person",
+      "aliases": [
+        "VASIGHI, Fatemeh"
+      ],
+      "jurisdiction": "IR",
+      "role": "Designated individual linked to Farab Soroush Afagh Qeshm Company",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 3,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "DOB 21 Aug 1987; POB Qom, Iran; nationality Iran; Additional Sanctions Information - Subject to Secondary Sanctions; Gender Female; National ID No. 0386128804 (Iran) (individual) [IRAN-EO13902] (Linked To: FARAB SOROUSH AFAGH QESHM COMPANY)."
+        }
+      ]
+    },
+    {
+      "name": "FARAB SOROUSH AFAGH QESHM COMPANY",
+      "actor_type": "organisation",
+      "aliases": [],
+      "jurisdiction": "IR",
+      "role": "Entity referenced as the linked company for seven designated individuals; not itself listed among the newly added entities in this notice",
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 1,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "(Linked To: FARAB SOROUSH AFAGH QESHM COMPANY)."
+        }
+      ]
+    },
+    {
+      "name": "ABOLHASAN JALALI AND PARTNERS EXCHANGE COMPANY",
+      "actor_type": "organisation",
+      "aliases": [
+        "JALALI AND PARTNERS GENERAL PARTNERSHIP COMPANY"
+      ],
+      "jurisdiction": "IR",
+      "role": "Newly designated Iranian exchange/monetary-intermediation company",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 3,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "Organization Established Date 04 May 2016; Organization Type: Other monetary intermediation; National ID No. 14005814280 (Iran); Registration Number 14150 (Iran) [IRAN-EO13902]."
+        }
+      ]
+    },
+    {
+      "name": "BANCO INTERNACIONAL DE COMERCIO S.A.",
+      "actor_type": "organisation",
+      "aliases": [
+        "BICSA"
+      ],
+      "jurisdiction": "CU",
+      "role": "Cuban state-owned bank newly designated under Cuba sanctions",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 3,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "SWIFT/BIC BIDCCUHH; Organization Established Date 23 Oct 1993; Target Type Financial Institution; alt. Target Type State-Owned Enterprise; Entity Code 60290 (Cuba) [CUBA-EO14404]."
+        }
+      ]
+    },
+    {
+      "name": "BAVI AND PARTNERS EXCHANGE COMPANY",
+      "actor_type": "organisation",
+      "aliases": [],
+      "jurisdiction": "IR",
+      "role": "Newly designated Iranian exchange/monetary-intermediation company",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 3,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "Organization Established Date 18 Nov 2024; Organization Type: Other monetary intermediation; National ID No. 14013961908 (Iran); Registration Number 641804 (Iran) [IRAN-EO13902]."
+        }
+      ]
+    },
+    {
+      "name": "CHABAHAR INTERNATIONAL BANK OVERSEAS COMPANY",
+      "actor_type": "organisation",
+      "aliases": [],
+      "jurisdiction": "IR",
+      "role": "Newly designated Iranian financial institution",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 3,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "Organization Established Date 17 Jan 2022; Target Type Financial Institution; National ID No. 14010705831 (Iran); Registration Number 4060 (Iran) [IRAN-EO13902]."
+        }
+      ]
+    },
+    {
+      "name": "ELITESPHERE TRADING CO., LIMITED",
+      "actor_type": "organisation",
+      "aliases": [],
+      "jurisdiction": "HK",
+      "role": "Newly designated Hong Kong trading company",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 3,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "Organization Established Date 20 Aug 2024; Business Registration Number 76961842 (Hong Kong) [IRAN-EO13902]."
+        }
+      ]
+    },
+    {
+      "name": "FARZANEGAN ENERGY PARS COMPANY",
+      "actor_type": "organisation",
+      "aliases": [],
+      "jurisdiction": "IR",
+      "role": "Newly designated Iranian company, linked to Sayyed Ruhollah Razavi",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 4,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "Organization Established Date 26 Oct 2015; National ID No. 14005314445 (Iran) [IRAN-EO13902] (Linked To: RAZAVI, Sayyed Ruhollah)."
+        }
+      ]
+    },
+    {
+      "name": "INTERNATIONAL DEVELOPMENT BANK FOR INVESTMENT AND FINANCE",
+      "actor_type": "organisation",
+      "aliases": [
+        "IRAQ DEVELOPMENT BANK",
+        "INTERNATIONAL DEVELOPMENT BANK"
+      ],
+      "jurisdiction": "IQ",
+      "role": "Newly designated Iraqi financial institution; also subject of new Iran-related wind-down General License FF",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 4,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "SWIFT/BIC IDBQIQBA; Website https://www.idb.iq; Organization Established Date 11 Jan 2011; Target Type Financial Institution; Legal Entity Number 2549001T72VRU0W37E62 [IRAN-EO13902]."
+        }
+      ]
+    },
+    {
+      "name": "JAZIREH INTERNATIONAL BANK COMPANY",
+      "actor_type": "organisation",
+      "aliases": [
+        "BANK-E BEINAMELALI JAZIREH"
+      ],
+      "jurisdiction": "IR",
+      "role": "Newly designated Iranian financial institution",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 4,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "Organization Established Date 03 Jan 2022; Target Type Financial Institution; National ID No. 14010665053 (Iran); Registration Number 14485 (Iran) [IRAN-EO13902]."
+        }
+      ]
+    },
+    {
+      "name": "SEYYED ABBAS HOSSEINI PARSA AND PARTNERS QESHM GENERAL PARTNERSHIP COMPANY",
+      "actor_type": "organisation",
+      "aliases": [],
+      "jurisdiction": "IR",
+      "role": "Newly designated Iranian exchange/monetary-intermediation company",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 4,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "Organization Established Date 14 Jun 2016; Organization Type: Other monetary intermediation; National ID No. 14005927381 (Iran); Registration Number 5549 (Iran) [IRAN-EO13902]."
+        }
+      ]
+    },
+    {
+      "name": "SOHEIL AND SORUSH NAJAFZADEH AND PARTNERS COMPANY",
+      "actor_type": "organisation",
+      "aliases": [],
+      "jurisdiction": "IR",
+      "role": "Newly designated Iranian exchange/monetary-intermediation company",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 4,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "Organization Established Date 07 Apr 2015; Organization Type: Other monetary intermediation; National ID No. 14004832696 (Iran); Registration Number 470601 (Iran) [IRAN-EO13902]."
+        }
+      ]
+    },
+    {
+      "name": "TEJARAT GOSTAR ATLAS PARSIAN KISH COMPANY",
+      "actor_type": "organisation",
+      "aliases": [],
+      "jurisdiction": "IR",
+      "role": "Newly designated Iranian company, linked to Sayyed Ruhollah Razavi",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 4,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "Organization Established Date 24 Feb 2015; National ID No. 14004757110 (Iran) [IRAN-EO13902] (Linked To: RAZAVI, Sayyed Ruhollah)."
+        }
+      ]
+    }
+  ],
+  "indicators": [
+    {
+      "indicator_type": "documentary",
+      "description": "Cluster of recently-incorporated Iranian 'exchange' and 'partnership' companies formally registered under the business type 'Other monetary intermediation', each tied by name and registration details to a designated individual owner/partner.",
+      "detectable_in_transaction_data": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 3,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "Organization Established Date 18 Nov 2024; Organization Type: Other monetary intermediation; National ID No. 14013961908 (Iran); Registration Number 641804 (Iran) [IRAN-EO13902]."
+        },
+        {
+          "page": 4,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "Organization Established Date 14 Jun 2016; Organization Type: Other monetary intermediation; National ID No. 14005927381 (Iran); Registration Number 5549 (Iran) [IRAN-EO13902]."
+        }
+      ]
+    },
+    {
+      "indicator_type": "network",
+      "description": "Seven separately designated individuals (Abdolalipur, Allahyar, Borji, Katebi, Mohammadi, Sabeti, Vasighi Meraji) are each marked 'Linked To' the same entity, Farab Soroush Afagh Qeshm Company, indicating a single hub company tying multiple designated individuals together.",
+      "detectable_in_transaction_data": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 1,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "(Linked To: FARAB SOROUSH AFAGH QESHM COMPANY)."
+        },
+        {
+          "page": 3,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "DOB 30 Aug 1981; POB Shemiran, Iran; nationality Iran; Additional Sanctions Information - Subject to Secondary Sanctions; Gender Male; National ID No. 0451397711 (Iran) (individual) [IRAN-EO13902] (Linked To: FARAB SOROUSH AFAGH QESHM COMPANY)."
+        }
+      ]
+    },
+    {
+      "indicator_type": "documentary",
+      "description": "Designated Iran-connected individuals hold alternate nationality and passports from a Caribbean citizenship-by-investment jurisdiction (Dominica) and Turkey, alongside Iranian documents, and are based outside Iran in Dubai.",
+      "detectable_in_transaction_data": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 1,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "Dubai, United Arab Emirates; DOB 21 Mar 1964; POB Ahvaz, Iran; nationality Iran; alt. nationality Dominica; Additional Sanctions Information - Subject to Secondary Sanctions; Gender Male; Passport N97128850 (Iran) expires 11 May 2027; alt. Passport RA045652 (Dominica) expires 26 Sep 2032 (individual) [IRAN-EO13902]."
+        },
+        {
+          "page": 2,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "Dubai, United Arab Emirates; DOB 19 Sep 1981; POB Qom, Iran; nationality Iran; citizen Dominica; alt. citizen Turkey; Additional Sanctions Information - Subject to Secondary Sanctions; Gender Male; National ID No. 0381818969 (Iran) (individual) [IRAN-EO13902]."
+        }
+      ]
+    }
+  ],
+  "suggested_desks": [
+    "sanctions_desk",
+    "correspondent_desk",
+    "fiu_liaison"
+  ],
+  "overall_confidence": "medium",
+  "extraction_notes": "This is a raw OFAC SDN-list update notice, not a narrative typology report: the SAN004 Front Companies link rests on the structural pattern of the designations (multiple newly-formed 'Other monetary intermediation' exchange/partnership companies tied to designated individuals) rather than an explicit description of the mechanism, hence medium rather than high confidence. None of the 28 named actors (16 individuals, 12 entities including Farab Soroush Afagh Qeshm Company, which is referenced as a Linked-To party but is not itself in this notice's list of newly added entities) resolved against the governed actor register -- all resolve_actor calls returned 'Unresolved', so no actor_id mappings are recorded; a human reviewer should check these against the register separately. Lukoil entities referenced in connection with GL 128D/130B are not designations in this document (they are the subject of authorizing general licenses) and were not extracted as actors. The Iranian Arabic-script name variants given in the source for each individual/entity were omitted from citation quotes per instruction to avoid non-Latin spans; the Latin-script biographic fields were cited instead. The BICSA (Cuba) designation and the International Development Bank for Investment and Finance (Iraq) designation do not independently support a distinct typology beyond SAN004/general sanctions-list activity on the evidence given, and are recorded as actors only."
+}

@@ -1,0 +1,447 @@
+{
+  "schema_version": "1.4.0",
+  "advisory_id": "ADV-2026-0031",
+  "source": {
+    "source_type": "ofac",
+    "publisher": "U.S. Department of the Treasury, Office of Foreign Assets Control (OFAC)",
+    "title": "Counter Terrorism and Transnational Criminal Organizations Designations; Belarus, Counter Narcotics, and Libya Designations Removals",
+    "published_on": "2026-09-30",
+    "published_on_precision": "day",
+    "url": null,
+    "document_sha256": "17dd70539a1a0ceaec02e6b583c2cb5b911c0fea4917f8b060b0ba720ecb2181",
+    "page_count": 4
+  },
+  "summary": "OFAC SDN List update dated 30 September 2026. Treasury designated ten individuals and two Mexican entities as part of the financial network of the Foreign Terrorist Organization / Transnational Criminal Organization Tren de Aragua, following the theft of millions of dollars from U.S. banks. Most designated individuals carry TRX (Tron) digital currency wallet addresses among their identifiers, and two Mexican companies (Enigma Community S. de R.L. de C.V. and Soluciones Integrales Toluca S.A. de C.V.) were designated solely on the basis of being linked to two of the individuals. Separately, the release records delistings unrelated to the Tren de Aragua action: the entity Patraca S.A. de C.V. / Boutique Patraca (narcotics trafficking program), the vessel Maraya (f.k.a. Med Patron, linked to Alwefaq Ltd, Libya program), and individual Tatyana/Tayuana Protopovich (linked to Centuronic Ltd, Belarus program) were removed from the SDN List.",
+  "jurisdictions": [
+    "VE",
+    "MX",
+    "US",
+    "BY",
+    "LY"
+  ],
+  "typologies": [
+    {
+      "family": "sanctions",
+      "typology_id": "CMI010",
+      "label": "Cryptocurrency Evasion",
+      "emergent": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 1,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "Treasury Sanctions Financial Network of Foreign Terrorist Organization, Tren de Aragua, After Theft of Millions from U.S. Banks"
+        },
+        {
+          "page": 1,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "Digital Currency Address - TRX TJjRAn9kLiyh8h6gjBjaYjkfDkskgZfyW9"
+        }
+      ],
+      "added_by": "extractor",
+      "review_justification": null
+    },
+    {
+      "family": "sanctions",
+      "typology_id": "SAN004",
+      "label": "Front Companies",
+      "emergent": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 2,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "ENIGMA COMMUNITY, S. DE R.L. DE C.V. (a.k.a. ENIGMA COMMUNITY, SOCIEDAD DE RESPONSABILIDAD LIMITADA DE CAPITAL VARIABLE), Tlalnepantla de Baz, Mexico, Mexico"
+        },
+        {
+          "page": 2,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "Organization Type: Other education n.e.c."
+        },
+        {
+          "page": 2,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "(Linked To: MARTINEZ PIRONA, Oscar Leonardo)"
+        }
+      ],
+      "added_by": "extractor",
+      "review_justification": null
+    }
+  ],
+  "actors": [
+    {
+      "name": "Tren de Aragua",
+      "actor_type": "organisation",
+      "aliases": [],
+      "jurisdiction": "VE",
+      "role": "Foreign Terrorist Organization / Transnational Criminal Organization; designated individuals and entities are linked to its financial network",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 1,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "Treasury Sanctions Financial Network of Foreign Terrorist Organization, Tren de Aragua, After Theft of Millions from U.S. Banks"
+        }
+      ]
+    },
+    {
+      "name": "CANELON AGUIRRE, Anibal Alexander",
+      "actor_type": "person",
+      "aliases": [
+        "Prometheus",
+        "The Engineer"
+      ],
+      "jurisdiction": "VE",
+      "role": "SDGT/TCO-designated individual linked to Tren de Aragua; holds TRX digital currency address",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 1,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "CANELON AGUIRRE, Anibal Alexander (a.k.a. \"Prometheus\"; a.k.a. \"The Engineer\"), Venezuela; DOB 15 May 1976"
+        },
+        {
+          "page": 1,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "[SDGT] [TCO] (Linked To: TREN DE ARAGUA)"
+        }
+      ]
+    },
+    {
+      "name": "CARDENAS ARZOLA, Eric Gabriel",
+      "actor_type": "person",
+      "aliases": [],
+      "jurisdiction": "VE",
+      "role": "SDGT/TCO-designated individual linked to Tren de Aragua; holds TRX digital currency address",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 1,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "CARDENAS ARZOLA, Eric Gabriel, Venezuela; DOB 24 Feb 1991"
+        }
+      ]
+    },
+    {
+      "name": "GALEANO BASURTO, Aslhy Javier",
+      "actor_type": "person",
+      "aliases": [],
+      "jurisdiction": "VE",
+      "role": "SDGT/TCO-designated individual linked to Tren de Aragua",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 1,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "GALEANO BASURTO, Aslhy Javier, Venezuela; DOB 09 May 1984; POB Barinas, Barinas, Venezuela"
+        }
+      ]
+    },
+    {
+      "name": "GALEANO BAZURTO, Jose Dario",
+      "actor_type": "person",
+      "aliases": [],
+      "jurisdiction": "VE",
+      "role": "SDGT/TCO-designated individual linked to Tren de Aragua; holds TRX digital currency address",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 1,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "GALEANO BAZURTO, Jose Dario, Venezuela; DOB 26 Mar 1993"
+        }
+      ]
+    },
+    {
+      "name": "HERNANDEZ GUERRERO, Anthony Wuiliam",
+      "actor_type": "person",
+      "aliases": [],
+      "jurisdiction": "MX",
+      "role": "SDGT/TCO-designated individual linked to Tren de Aragua; holds TRX digital currency address",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 1,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "HERNANDEZ GUERRERO, Anthony Wuiliam, Mexico; DOB 25 Nov 1992; nationality Colombia"
+        }
+      ]
+    },
+    {
+      "name": "MARTINEZ ARMENTA, Carlos Javier",
+      "actor_type": "person",
+      "aliases": [],
+      "jurisdiction": "MX",
+      "role": "SDGT/TCO-designated individual linked to Tren de Aragua; holds TRX digital currency address",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 1,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "MARTINEZ ARMENTA, Carlos Javier, Mexico; DOB 31 Mar 1991; POB Mexico City, Mexico"
+        }
+      ]
+    },
+    {
+      "name": "MARTINEZ PIRONA, Oscar Leonardo",
+      "actor_type": "person",
+      "aliases": [],
+      "jurisdiction": "VE",
+      "role": "SDGT/TCO-designated individual linked to Tren de Aragua; holds TRX digital currency address; Enigma Community S. de R.L. de C.V. designated as linked to him",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 1,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "MARTINEZ PIRONA, Oscar Leonardo, Venezuela; Mexico; DOB 26 Oct 1984"
+        }
+      ]
+    },
+    {
+      "name": "MEJIA CASTILLO, Alejandro",
+      "actor_type": "person",
+      "aliases": [],
+      "jurisdiction": "MX",
+      "role": "SDGT/TCO-designated individual linked to Tren de Aragua; holds TRX digital currency address; Soluciones Integrales Toluca S.A. de C.V. designated as linked to him",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 2,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "MEJIA CASTILLO, Alejandro, Mexico; DOB 03 Dec 1970; POB Mexico City, Mexico"
+        }
+      ]
+    },
+    {
+      "name": "RIVAS NUNEZ, Juan Gabriel",
+      "actor_type": "person",
+      "aliases": [
+        "APONTE RODRIGUEZ, Wilson Stalyn",
+        "APONTE RODRIGUEZ, Wilson Starling",
+        "Juancho",
+        "Negro Juancho"
+      ],
+      "jurisdiction": "VE",
+      "role": "SDGT/TCO-designated individual linked to Tren de Aragua",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 2,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "RIVAS NUNEZ, Juan Gabriel (Latin: RIVAS NUÑEZ, Juan Gabriel) (a.k.a. APONTE RODRIGUEZ, Wilson Stalyn; a.k.a. APONTE RODRIGUEZ, Wilson Starling; a.k.a. \"Juancho\"; a.k.a. \"Negro Juancho\")"
+        }
+      ]
+    },
+    {
+      "name": "ENIGMA COMMUNITY, S. DE R.L. DE C.V.",
+      "actor_type": "organisation",
+      "aliases": [
+        "ENIGMA COMMUNITY, SOCIEDAD DE RESPONSABILIDAD LIMITADA DE CAPITAL VARIABLE"
+      ],
+      "jurisdiction": "MX",
+      "role": "Newly designated entity, linked to designated individual Martinez Pirona; functions consistent with a front company",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 2,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "ENIGMA COMMUNITY, S. DE R.L. DE C.V. (a.k.a. ENIGMA COMMUNITY, SOCIEDAD DE RESPONSABILIDAD LIMITADA DE CAPITAL VARIABLE), Tlalnepantla de Baz, Mexico, Mexico"
+        },
+        {
+          "page": 2,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "(Linked To: MARTINEZ PIRONA, Oscar Leonardo)"
+        }
+      ]
+    },
+    {
+      "name": "SOLUCIONES INTEGRALES TOLUCA, S.A. DE C.V.",
+      "actor_type": "organisation",
+      "aliases": [],
+      "jurisdiction": "MX",
+      "role": "Newly designated entity, linked to designated individual Mejia Castillo; functions consistent with a front company",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 2,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "SOLUCIONES INTEGRALES TOLUCA, S.A. DE C.V., Toluca, Mexico, Mexico"
+        },
+        {
+          "page": 2,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "(Linked To: MEJIA CASTILLO, Alejandro)"
+        }
+      ]
+    },
+    {
+      "name": "PATRACA, S.A. DE C.V.",
+      "actor_type": "organisation",
+      "aliases": [
+        "BOUTIQUE PATRACA"
+      ],
+      "jurisdiction": "MX",
+      "role": "Delisted entity (narcotics trafficking program); unrelated to the Tren de Aragua action",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 3,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "PATRACA, S.A. DE C.V. (a.k.a. BOUTIQUE PATRACA)"
+        }
+      ]
+    },
+    {
+      "name": "MARAYA",
+      "actor_type": "vessel",
+      "aliases": [
+        "MED PATRON"
+      ],
+      "jurisdiction": null,
+      "role": "Delisted vessel (Libya program), linked to Alwefaq Ltd; unrelated to the Tren de Aragua action",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 3,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "MARAYA (f.k.a. MED PATRON) Palletized Cargo Ship Samoa flag"
+        },
+        {
+          "page": 3,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "[LIBYA3] (Linked To: ALWEFAQ LTD)"
+        }
+      ]
+    },
+    {
+      "name": "ALWEFAQ LTD",
+      "actor_type": "organisation",
+      "aliases": [],
+      "jurisdiction": null,
+      "role": "Entity to which the delisted vessel Maraya/Med Patron was linked (Libya program)",
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 3,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "[LIBYA3] (Linked To: ALWEFAQ LTD)"
+        }
+      ]
+    },
+    {
+      "name": "PROTOPOVICH, Tatyana",
+      "actor_type": "person",
+      "aliases": [
+        "PROTOPOVICH, Tayuana"
+      ],
+      "jurisdiction": "BY",
+      "role": "Delisted individual (Belarus program), linked to Centuronic Ltd; unrelated to the Tren de Aragua action",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 4,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "PROTOPOVICH, Tatyana (a.k.a. PROTOPOVICH, Tayuana), Praspiekt Dziarzynsakaha, 82, Flat 227, Minsk 22089, Belarus"
+        }
+      ]
+    },
+    {
+      "name": "CENTURONIC LTD",
+      "actor_type": "organisation",
+      "aliases": [],
+      "jurisdiction": "BY",
+      "role": "Entity to which the delisted individual Protopovich was linked (Belarus program)",
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 4,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "[BELARUS-EO14038] (Linked To: CENTURONIC LTD)"
+        }
+      ]
+    }
+  ],
+  "indicators": [
+    {
+      "indicator_type": "product",
+      "description": "Nearly all newly designated Tren de Aragua network individuals carry a TRX (Tron blockchain) digital currency wallet address as a listed identifier, consistent with use of virtual-asset rails to move value for a sanctioned network.",
+      "detectable_in_transaction_data": true,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 1,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "Digital Currency Address - TRX TJjRAn9kLiyh8h6gjBjaYjkfDkskgZfyW9"
+        }
+      ]
+    },
+    {
+      "indicator_type": "documentary",
+      "description": "A newly designated Mexican entity's registered business activity (education) bears no apparent relation to its role as a designated counter-terrorism/TCO target, a generic/mismatched business description typical of a front company.",
+      "detectable_in_transaction_data": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 2,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "Organization Type: Other education n.e.c."
+        }
+      ]
+    },
+    {
+      "indicator_type": "network",
+      "description": "Entities were designated solely on the basis of a stated link to a specific sanctioned individual, rather than independent conduct, consistent with a front-company structure shielding the real party.",
+      "detectable_in_transaction_data": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 2,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "(Linked To: MARTINEZ PIRONA, Oscar Leonardo)"
+        },
+        {
+          "page": 2,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "(Linked To: MEJIA CASTILLO, Alejandro)"
+        }
+      ]
+    }
+  ],
+  "suggested_desks": [
+    "sanctions_desk",
+    "fraud_desk",
+    "fiu_liaison"
+  ],
+  "overall_confidence": "medium",
+  "extraction_notes": "This is an OFAC SDN List update, not a narrative advisory: most content is designation-list data (names, DOBs, identifiers) rather than a described mechanism. The title's reference to 'Theft of Millions from U.S. Banks' is not elaborated with a laundering mechanism in the body text, so no fraud/mule-account typology was asserted beyond the crypto and front-company patterns the identifiers themselves evidence; CMI010 and SAN004 confidence is accordingly medium, not high. The Belarus (Protopovich/Centuronic Ltd), Libya (Maraya/Med Patron/Alwefaq Ltd) and Counter Narcotics (Patraca S.A. de C.V.) entries are DELISTINGS unconnected to the Tren de Aragua designations and carry no typology evidence in this document; they are included for actor completeness only. None of the named actors resolved against the governed actor register (all returned 'Unresolved'); any actor_ids a human reviewer identifies would need separate confirmation. RIVAS NUNEZ, Juan Gabriel and GALEANO BASURTO, Aslhy Javier are not shown with digital currency addresses in the source text, unlike the other eight Tren de Aragua individuals."
+}

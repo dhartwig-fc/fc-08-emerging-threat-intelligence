@@ -1,0 +1,403 @@
+{
+  "schema_version": "1.4.0",
+  "advisory_id": "ADV-2026-0030",
+  "source": {
+    "source_type": "ofac",
+    "publisher": "U.S. Department of the Treasury, Office of Foreign Assets Control (OFAC)",
+    "title": "Counter Narcotics, Counter Terrorism, Iran-related, and Non-Proliferation Designations",
+    "published_on": "2026-09-29",
+    "published_on_precision": "day",
+    "url": null,
+    "document_sha256": "4e8621b74fca22e74e676f4f9496ea37daadf36715c63b5e310c2cfefe9d5f14",
+    "page_count": 11
+  },
+  "summary": "OFAC SDN list update of 29 September 2026 adding and amending designations across three programs: (1) 'Operation Economic Outcast', targeting an Iranian military procurement network built around KAVOSHCOM ASIA R AND D GROUP and Iran's Ministry of Defense and Armed Forces Logistics, using identically-branded front companies incorporated in Saudi Arabia, Pakistan and Turkey plus a Hong Kong trading company under multiple aliases, and designating associated Iranian, Chinese and Pakistani nationals; (2) Sinaloa Cartel leadership from the 'Los Mayos' faction and a large cluster of Baja California and Sinaloa businesses (real estate, entertainment, fuel retail, private security, currency exchange houses) each tied to a specific designated individual, reflecting narco-corruption and front-company money laundering; (3) administrative updates to existing Russia-related (Yakovlev design bureau, MG-FLOT) and Iran-related (Saha Airlines) listings adding an Iran conventional-arms sanctions tag, and minor amendments to two previously listed Sinaloa Cartel individuals.",
+  "jurisdictions": [
+    "IR",
+    "MX",
+    "US",
+    "PK",
+    "CN",
+    "HK",
+    "SA",
+    "TR",
+    "RU",
+    "CU",
+    "SV"
+  ],
+  "typologies": [
+    {
+      "family": "sanctions",
+      "typology_id": "SAN004",
+      "label": "Front Companies",
+      "emergent": false,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 4,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "BAJA FIXER GROUP, S.A. DE C.V., Tijuana, Baja California, Mexico"
+        },
+        {
+          "page": 4,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "(Linked To: MORENO GOMEZ SANTELICES, Marco Antonio)"
+        },
+        {
+          "page": 4,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "(a.k.a. CAVALIER DYNAMICS TECHNOLOGIES COMPANY), Riyadh, Riyadh, Saudi Arabia"
+        },
+        {
+          "page": 4,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "CAVALIER DYNAMICS PRIVATE LIMITED, Plot 101-103, Humak Industrial Area, Sihala Road, Islamabad, Pakistan"
+        },
+        {
+          "page": 3,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "(Linked To: MINISTRY OF DEFENSE AND ARMED FORCES LOGISTICS)"
+        }
+      ],
+      "added_by": "extractor",
+      "review_justification": null
+    }
+  ],
+  "actors": [
+    {
+      "name": "SINALOA CARTEL",
+      "actor_type": "network",
+      "aliases": [],
+      "jurisdiction": null,
+      "role": "Drug trafficking organisation whose leadership and associated front-company network are designated throughout the document",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 1,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "(Linked To: SINALOA CARTEL)"
+        }
+      ]
+    },
+    {
+      "name": "KAVOSHCOM ASIA R AND D GROUP",
+      "actor_type": "organisation",
+      "aliases": [
+        "KAVOSHCOM R AND D GROUP"
+      ],
+      "jurisdiction": "IR",
+      "role": "Iranian entity linked to the Ministry of Defense and Armed Forces Logistics, hub of the designated procurement network",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 6,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "(a.k.a. KAVOSHCOM R AND D GROUP), No. 22, 4th Alley, Qanbarzadeh Street, Shahid Beheshti Street, Tehran, Iran"
+        }
+      ]
+    },
+    {
+      "name": "MINISTRY OF DEFENSE AND ARMED FORCES LOGISTICS",
+      "actor_type": "organisation",
+      "aliases": [],
+      "jurisdiction": "IR",
+      "role": "Iranian defense ministry to which procurement network individuals and Kavoshcom are linked",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 3,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "(Linked To: MINISTRY OF DEFENSE AND ARMED FORCES LOGISTICS)"
+        }
+      ]
+    },
+    {
+      "name": "CAVALIER DYNAMICS",
+      "actor_type": "network",
+      "aliases": [
+        "CAVALIER DYNAMICS FOR TECHNOLOGIES COMPANY",
+        "CAVALIER DYNAMICS TECHNOLOGIES COMPANY",
+        "CAVALIER DYNAMICS PRIVATE LIMITED",
+        "CAVALIER DYNAMICS TEKNOLOJI TICARET ANONIM SIRKETI"
+      ],
+      "jurisdiction": null,
+      "role": "Identically-branded front company incorporated separately in Saudi Arabia, Pakistan and Turkey, linked to Waseem Pasha Tajammal",
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 4,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "(a.k.a. CAVALIER DYNAMICS TECHNOLOGIES COMPANY), Riyadh, Riyadh, Saudi Arabia"
+        },
+        {
+          "page": 4,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "CAVALIER DYNAMICS PRIVATE LIMITED, Plot 101-103, Humak Industrial Area, Sihala Road, Islamabad, Pakistan"
+        },
+        {
+          "page": 4,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "CAVALIER DYNAMICS TEKNOLOJI TICARET ANONIM SIRKETI (Latin: CAVALIER DYNAMICS TEKNOLOJI TICARET ANONIM ŞIRKETI)"
+        }
+      ]
+    },
+    {
+      "name": "TAJAMMAL, Waseem Pasha",
+      "actor_type": "person",
+      "aliases": [],
+      "jurisdiction": "PK",
+      "role": "Pakistani national linked to the Ministry of Defense and Armed Forces Logistics and to the Cavalier Dynamics front companies",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 3,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "TAJAMMAL, Waseem Pasha, Rawalpindi, Punjab, Pakistan"
+        }
+      ]
+    },
+    {
+      "name": "AHMADY, Ali Fotowat",
+      "actor_type": "person",
+      "aliases": [
+        "AHMADI, Ali Fotovat",
+        "AHMADI, Ali Fotowat"
+      ],
+      "jurisdiction": "IR",
+      "role": "Iranian/US dual national linked to Kavoshcom Asia R and D Group",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 1,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "AHMADY, Ali Fotowat (a.k.a. AHMADI, Ali Fotovat; a.k.a. AHMADI, Ali Fotowat), Tehran, Iran"
+        },
+        {
+          "page": 1,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "(Linked To: KAVOSHCOM ASIA R AND D GROUP)"
+        }
+      ]
+    },
+    {
+      "name": "MORENO GOMEZ SANTELICES, Marco Antonio",
+      "actor_type": "person",
+      "aliases": [],
+      "jurisdiction": "MX",
+      "role": "Sinaloa Cartel-linked individual to whom at least eight Baja California front companies (real estate, entertainment, private security, financial services) are tied",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 2,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "MORENO GOMEZ SANTELICES, Marco Antonio, Tijuana, Baja California, Mexico"
+        }
+      ]
+    },
+    {
+      "name": "BUENROSTRO MARTIN, Rafael",
+      "actor_type": "person",
+      "aliases": [],
+      "jurisdiction": "MX",
+      "role": "Sinaloa Cartel-linked individual, Los Mayos faction",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 1,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "BUENROSTRO MARTIN, Rafael, Mexicali, Baja California, Mexico"
+        }
+      ]
+    },
+    {
+      "name": "RIVERA ZAZUETA, Jose Angel",
+      "actor_type": "person",
+      "aliases": [
+        "RIVERA SALAS, Miguel Angel",
+        "El Flaco"
+      ],
+      "jurisdiction": "MX",
+      "role": "Sinaloa Cartel-linked individual to whom two currency-exchange and transportation front companies are tied",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 10,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "RIVERA ZAZUETA, Jose Angel (a.k.a. RIVERA SALAS, Miguel Angel; a.k.a. \"El Flaco\")"
+        }
+      ]
+    },
+    {
+      "name": "ZAMBADA SICAIROS, Ismael",
+      "actor_type": "person",
+      "aliases": [
+        "CICAIROS ZAMBADA, Ismael",
+        "SICAIROS AISPURO, Fernando",
+        "Mayito Flaco"
+      ],
+      "jurisdiction": "MX",
+      "role": "Sinaloa Cartel leadership figure",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 4,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "ZAMBADA SICAIROS, Ismael (a.k.a. CICAIROS ZAMBADA, Ismael; a.k.a. SICAIROS AISPURO, Fernando; a.k.a. \"Mayito Flaco\")"
+        }
+      ]
+    },
+    {
+      "name": "BAJA FIXER GROUP, S.A. DE C.V.",
+      "actor_type": "organisation",
+      "aliases": [],
+      "jurisdiction": "MX",
+      "role": "Tijuana real estate front company linked to Marco Antonio Moreno Gomez Santelices",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 4,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "BAJA FIXER GROUP, S.A. DE C.V., Tijuana, Baja California, Mexico"
+        },
+        {
+          "page": 4,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "(Linked To: MORENO GOMEZ SANTELICES, Marco Antonio)"
+        }
+      ]
+    },
+    {
+      "name": "GALERIAS CENTRO CAMBIARIO, S.A. DE C.V.",
+      "actor_type": "organisation",
+      "aliases": [
+        "MAGIC CASA DE CAMBIO"
+      ],
+      "jurisdiction": "MX",
+      "role": "Tijuana currency exchange house (casa de cambio) linked to Ilia Elizabeth Felix Rivera",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 5,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "GALERIAS CENTRO CAMBIARIO, S.A. DE C.V. (a.k.a. MAGIC CASA DE CAMBIO), Tijuana, Baja California, Mexico"
+        },
+        {
+          "page": 5,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "(Linked To: FELIX RIVERA, Ilia Elizabeth)"
+        }
+      ]
+    }
+  ],
+  "indicators": [
+    {
+      "indicator_type": "network",
+      "description": "Dozens of operating Mexican companies across unrelated sectors (real estate, entertainment, fuel retail, private security, textiles, restaurants) are each tied by beneficial-ownership/registration links to a single named Sinaloa Cartel-linked individual, consistent with front-company ownership screening a drug-trafficking beneficiary.",
+      "detectable_in_transaction_data": true,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 4,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "BAJA FIXER GROUP, S.A. DE C.V., Tijuana, Baja California, Mexico"
+        },
+        {
+          "page": 6,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "LTHINGS MEXICO, S. DE R.L. DE C.V., Tijuana, Baja California, Mexico"
+        }
+      ]
+    },
+    {
+      "indicator_type": "product",
+      "description": "Two Mexican 'centro cambiario' currency-exchange businesses were designated as linked to specific Sinaloa Cartel members, indicating use of money-exchange houses in the cartel's financial network.",
+      "detectable_in_transaction_data": true,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 5,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "GALERIAS CENTRO CAMBIARIO, S.A. DE C.V. (a.k.a. MAGIC CASA DE CAMBIO), Tijuana, Baja California, Mexico"
+        },
+        {
+          "page": 7,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "MIA CENTRO CAMBIARIO, S.A. DE C.V., Mexicali, Baja California, Mexico"
+        }
+      ]
+    },
+    {
+      "indicator_type": "network",
+      "description": "An identically-branded company name was incorporated separately in three different jurisdictions (Saudi Arabia, Pakistan, Turkey) and tied to the same individual, who is in turn linked to Iran's Ministry of Defense and Armed Forces Logistics.",
+      "detectable_in_transaction_data": true,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 4,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "(a.k.a. CAVALIER DYNAMICS TECHNOLOGIES COMPANY), Riyadh, Riyadh, Saudi Arabia"
+        },
+        {
+          "page": 4,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "CAVALIER DYNAMICS PRIVATE LIMITED, Plot 101-103, Humak Industrial Area, Sihala Road, Islamabad, Pakistan"
+        },
+        {
+          "page": 4,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "CAVALIER DYNAMICS TEKNOLOJI TICARET ANONIM SIRKETI (Latin: CAVALIER DYNAMICS TEKNOLOJI TICARET ANONIM ŞIRKETI)"
+        }
+      ]
+    },
+    {
+      "indicator_type": "documentary",
+      "description": "A Hong Kong trading company tied to the Iranian procurement network operates under at least two further aliases ('Chengzi Trading Co Ltd', 'Sunrise Electronics Co Ltd') in addition to its registered name, obscuring the ultimate Iranian end-user.",
+      "detectable_in_transaction_data": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 5,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "(a.k.a. CHENGZI TRADING CO LTD; a.k.a. SUNRISE ELECTRONICS CO LTD), Rm 811, Beverley Commercial Centre, 87-105 Chatham Rd S, Tsim Sha Tsui, Hong Kong, China"
+        }
+      ]
+    }
+  ],
+  "suggested_desks": [
+    "sanctions_desk",
+    "fraud_desk",
+    "fiu_liaison"
+  ],
+  "overall_confidence": "high",
+  "extraction_notes": "This is an OFAC SDN list press release, not a narrative advisory; typology assignment reflects the document's own structure (designated individuals each linked to a cluster of nominee/front businesses). Only one typology (SAN004 Front Companies) was found in the Knowledge Centre that matches; it covers both the Iran procurement network and the Sinaloa Cartel business cluster, which are otherwise unrelated schemes bundled in the same press release. Actor resolution results: 'SINALOA CARTEL' -> ACT-0595f0cfc4 (Resolved); 'MINISTRY OF DEFENSE AND ARMED FORCES LOGISTICS' -> ACT-667e720a51 (Resolved). All other named actors in this record (KAVOSHCOM ASIA R AND D GROUP, CAVALIER DYNAMICS, TAJAMMAL, AHMADY, MORENO GOMEZ SANTELICES, BUENROSTRO MARTIN, RIVERA ZAZUETA, ZAMBADA SICAIROS, BAJA FIXER GROUP, GALERIAS CENTRO CAMBIARIO) returned 'Unresolved' from the actor register -- treat as unconfirmed identities pending human review. The document lists roughly 20 additional individuals and 20 additional companies designated under the same two schemes that were not individually added to the actors list for brevity; full detail is in the source pages. The administrative amendments on pages 8-10 (Yakovlev design bureau, MG-FLOT, Saha Airlines gaining an Iran conventional-arms tag; two Arzate Garcia entries gaining secondary-sanctions language) are tag/list-maintenance changes with no narrative description of mechanism and were not elevated to a typology or indicator."
+}
