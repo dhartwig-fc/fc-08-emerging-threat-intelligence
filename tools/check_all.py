@@ -92,6 +92,7 @@ GUARDS = [
     ("check_friday_run", ["evals/check_friday_run.py"], "cold"),
     ("check_accept_run", ["evals/check_accept_run.py"], "cold"),
     ("check_schedule", ["evals/check_schedule.py"], "cold"),
+    ("check_measure_slice2", ["evals/check_measure_slice2.py"], "cold"),
     ("check_proposals_import", ["evals/check_proposals_import.py"], "cold"),
     ("check_impact_import", ["evals/check_impact_import.py"], "cold"),
     ("check_proposal_kind", ["evals/check_proposal_kind.py"], "cold"),

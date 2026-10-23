@@ -1,0 +1,4 @@
+{"item_id": "ofsi:0000000000000001", "key": "ofsi:0000000000000001", "run_id": "feeds-2026-01-07-bbbbbb", "verdict": "relevant", "quote": "synthetic", "reason": "synthetic"}
+{"item_id": "ofac:0000000000000002", "key": "ofac:0000000000000002", "run_id": "feeds-2026-01-07-bbbbbb", "verdict": "relevant", "quote": "synthetic", "reason": "synthetic"}
+{"item_id": "ofac:0000000000000003", "key": "ofac:0000000000000003", "run_id": "feeds-2026-01-07-bbbbbb", "verdict": "not_relevant", "quote": "synthetic", "reason": "synthetic"}
+{"item_id": "ofac:0000000000000004", "key": "ofac:0000000000000004", "run_id": "feeds-2026-01-07-bbbbbb", "verdict": "not_relevant", "quote": "synthetic", "reason": "synthetic"}

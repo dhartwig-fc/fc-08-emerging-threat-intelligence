@@ -1,0 +1,64 @@
+{
+ "run_id": "feeds-2026-01-07-bbbbbb",
+ "sources": {
+  "fincen": {
+   "already_seen": 0,
+   "error": null,
+   "items": [],
+   "listed": 0,
+   "status": "ok"
+  },
+  "ofac": {
+   "already_seen": 0,
+   "error": null,
+   "items": [
+    {
+     "item_id": "synthetic-2",
+     "key": "ofac:0000000000000002",
+     "published": "2026-01-01",
+     "source": "ofac",
+     "summary": "",
+     "title": "Synthetic item 2",
+     "url": "https://example.invalid/2"
+    },
+    {
+     "item_id": "synthetic-3",
+     "key": "ofac:0000000000000003",
+     "published": "2026-01-01",
+     "source": "ofac",
+     "summary": "",
+     "title": "Synthetic item 3",
+     "url": "https://example.invalid/3"
+    },
+    {
+     "item_id": "synthetic-4",
+     "key": "ofac:0000000000000004",
+     "published": "2026-01-01",
+     "source": "ofac",
+     "summary": "",
+     "title": "Synthetic item 4",
+     "url": "https://example.invalid/4"
+    }
+   ],
+   "listed": 3,
+   "status": "ok"
+  },
+  "ofsi": {
+   "already_seen": 0,
+   "error": null,
+   "items": [
+    {
+     "item_id": "synthetic-1",
+     "key": "ofsi:0000000000000001",
+     "published": "2026-01-01",
+     "source": "ofsi",
+     "summary": "",
+     "title": "Synthetic item 1",
+     "url": "https://example.invalid/1"
+    }
+   ],
+   "listed": 1,
+   "status": "ok"
+  }
+ }
+}
