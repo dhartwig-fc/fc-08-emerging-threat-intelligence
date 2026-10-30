@@ -1,0 +1,138 @@
+{
+  "schema_version": "1.4.0",
+  "advisory_id": "ADV-2026-0035",
+  "source": {
+    "source_type": "ofac",
+    "publisher": "U.S. Department of the Treasury, Office of Foreign Assets Control",
+    "title": "Settlement Agreement between OFAC and Extreme Networks, Inc.",
+    "published_on": "2026-10-27",
+    "published_on_precision": "day",
+    "url": null,
+    "document_sha256": "d80661ae39aef51766cf1250e43ba9b6d1ee3314e94c8cb35bd53ee9629e52e5",
+    "page_count": 1
+  },
+  "summary": "OFAC announced a $1,529,685 settlement with Extreme Networks, Inc., a North Carolina-headquartered cloud networking solutions provider, over apparent sanctions violations. Between September 2018 and March 2022, Extreme exported networking equipment and related services on nine occasions from the United States to JSC Moskovskiy Mashinostroitelniy Zavod Avangard, a Russian defense manufacturer blocked by operation of law because it is majority owned by the designated entity JSC Concern Almaz Antey. OFAC determined the apparent violations were voluntarily self-disclosed and egregious.",
+  "jurisdictions": [
+    "US",
+    "RU"
+  ],
+  "typologies": [
+    {
+      "family": "sanctions",
+      "typology_id": "SAN001",
+      "label": "Ownership Evasion",
+      "emergent": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 1,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "a Russian defense manufacturer that is blocked by operation of law and majority owned by designated JSC Concern Almaz Antey"
+        }
+      ],
+      "added_by": "extractor",
+      "review_justification": null
+    }
+  ],
+  "actors": [
+    {
+      "name": "Extreme Networks, Inc.",
+      "actor_type": "organisation",
+      "aliases": [],
+      "jurisdiction": "US",
+      "role": "Exporter; settling party",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 1,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "a North Carolina headquartered cloud networking solutions provider"
+        }
+      ]
+    },
+    {
+      "name": "Joint Stock Company (JSC) Moskovskiy Mashinostroitelniy Zavod Avangard",
+      "actor_type": "organisation",
+      "aliases": [],
+      "jurisdiction": "RU",
+      "role": "Russian defense manufacturer; end-user blocked by operation of law",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 1,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "a Russian defense manufacturer that is blocked by operation of law and majority owned by designated JSC Concern Almaz Antey"
+        }
+      ]
+    },
+    {
+      "name": "JSC Concern Almaz Antey",
+      "actor_type": "organisation",
+      "aliases": [],
+      "jurisdiction": "RU",
+      "role": "Designated party; majority owner of the blocked end-user",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 1,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "a Russian defense manufacturer that is blocked by operation of law and majority owned by designated JSC Concern Almaz Antey"
+        }
+      ]
+    }
+  ],
+  "indicators": [
+    {
+      "indicator_type": "network",
+      "description": "End-user is not itself listed but is blocked by operation of law because it is majority owned by a designated party (the 50% rule).",
+      "detectable_in_transaction_data": false,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 1,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "a Russian defense manufacturer that is blocked by operation of law and majority owned by designated JSC Concern Almaz Antey"
+        }
+      ]
+    },
+    {
+      "indicator_type": "transactional",
+      "description": "Repeated exports (nine occasions over roughly three and a half years) to the same Russian counterparty.",
+      "detectable_in_transaction_data": true,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 1,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "Extreme exported networking equipment and related services on nine occasions from the United States to Joint Stock Company (JSC) Moskovskiy Mashinostroitelniy Zavod Avangard"
+        }
+      ]
+    },
+    {
+      "indicator_type": "geographic",
+      "description": "End-use customer is a Russian defense-sector manufacturer, a high-risk end-user category for export of networking equipment.",
+      "detectable_in_transaction_data": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 1,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "a Russian defense manufacturer that is blocked by operation of law and majority owned by designated JSC Concern Almaz Antey"
+        }
+      ]
+    }
+  ],
+  "suggested_desks": [
+    "sanctions_desk",
+    "trade_desk"
+  ],
+  "overall_confidence": "medium",
+  "extraction_notes": "Actor resolution: all three named organisations (Extreme Networks, Inc.; JSC Moskovskiy Mashinostroitelniy Zavod Avangard; JSC Concern Almaz Antey) returned 'Unresolved' from knowledge_centre_resolve_actor -- none are in the governed actor register, so no actor_id identities are recorded; a human may wish to add them. OFAC itself is the enforcing regulator named in the document and was not recorded as a scheme actor. Typology SAN001 (Ownership Evasion) was the best available library match (search score 0.36); its doctrine summary frames the pattern as deliberate concealment via layered/nominee structures, whereas this advisory describes an openly-stated 50%-rule-blocked entity with no concealment alleged -- confidence set to medium to reflect that mismatch in framing despite the determinative ownership indicator being squarely met. No dual-use-goods or jurisdiction-exposure typology was linked because the document does not frame the goods as dual-use controlled items nor the jurisdiction exposure as the primary finding; the core finding is the ownership-triggered blocked status."
+}

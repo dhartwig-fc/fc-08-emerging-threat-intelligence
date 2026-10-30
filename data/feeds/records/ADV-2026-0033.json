@@ -1,0 +1,493 @@
+{
+  "schema_version": "1.4.0",
+  "advisory_id": "ADV-2026-0033",
+  "source": {
+    "source_type": "ofac",
+    "publisher": "OFAC",
+    "title": "North Korea Designations; Democratic Republic of the Congo-related Designations (Recent Actions)",
+    "published_on": "2026-10-28",
+    "published_on_precision": "day",
+    "url": null,
+    "document_sha256": "67b8916dcc300562421b33e9032152cabcc7c1aabb246abe7e89fedcaefbf151",
+    "page_count": 3
+  },
+  "summary": "OFAC SDN List update of 28 October 2026 covering two separate actions. First, 'Treasury Sanctions Facilitators of DPRK IT Worker Fraud Targeting U.S. Businesses' designates ten individuals (eight North Korean nationals and two Russian nationals) based in Russia/Laos under DPRK sanctions programs [DPRK2]/[DPRK3], most linked to two named entities -- FIRST FINANCIAL AND TECHNICAL DEVELOPMENT CENTER and CHINYONG INFORMATION TECHNOLOGY COOPERATION COMPANY -- or to LLC ALIS, and several carrying listed ETH/TRX digital currency addresses. Second, 'Treasury Sanctions Rwandan Ministry of Defence and Financial Institution Supporting M23' designates the Ministry of Defence of the Republic of Rwanda and Zigama Credit and Savings Society under the DRC-related program [DRCONGO] for supporting the M23 armed group. All listings carry standard secondary-sanctions-risk and U.S.-financial-institution-transaction-prohibition language under the North Korea Sanctions Regulations.",
+  "jurisdictions": [
+    "RU",
+    "KP",
+    "LA",
+    "RW",
+    "CD",
+    "US"
+  ],
+  "typologies": [
+    {
+      "family": "sanctions",
+      "typology_id": "SAN004",
+      "label": "Front Companies",
+      "emergent": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 3,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "FIRST FINANCIAL AND TECHNICAL DEVELOPMENT CENTER, Korea, North; Vladivostok, Russia; Secondary sanctions risk: North Korea Sanctions Regulations, sections 510.201 and 510.210; Transactions Prohibited For Persons Owned or Controlled By U.S. Financial Institutions: North Korea Sanctions Regulations section 510.214; Organization Established Date Jan 2024; Organization Type: Financial and Insurance Activities [DPRK3]."
+        },
+        {
+          "page": 1,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "(individual) [DPRK3] (Linked To: FIRST FINANCIAL AND TECHNICAL DEVELOPMENT CENTER)."
+        }
+      ],
+      "added_by": "extractor",
+      "review_justification": null
+    },
+    {
+      "family": "sanctions",
+      "typology_id": "CMI010",
+      "label": "Cryptocurrency Evasion",
+      "emergent": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 1,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "Digital Currency Address - ETH 0x12Ea80238C7d805D003ce793594e92d84A6f4E8d; alt. Digital Currency Address - ETH 0x761edd5e4546229a0bd35ae99b4d3d01cf4a3510"
+        },
+        {
+          "page": 2,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "OBERTAS, Vitold Viktorovich (Cyrillic: ОБЕРТАС, Витольд Викторович), Russia; DOB 18 Nov 1968; POB Vladivostok, Russia; nationality Russia; citizen Russia; Gender Male; Digital Currency Address - ETH 0x761edd5e4546229a0bd35ae99b4d3d01cf4a3510"
+        }
+      ],
+      "added_by": "extractor",
+      "review_justification": null
+    },
+    {
+      "family": "sanctions",
+      "typology_id": null,
+      "label": "DPRK IT Worker Fraud Facilitation Network",
+      "emergent": true,
+      "confidence": "low",
+      "citations": [
+        {
+          "page": 1,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "Treasury Sanctions Facilitators of DPRK IT Worker Fraud Targeting U.S. Businesses"
+        }
+      ],
+      "added_by": "extractor",
+      "review_justification": null
+    },
+    {
+      "family": "sanctions",
+      "typology_id": null,
+      "label": "State Ministry and Financial Institution Designated for Supporting Armed Group (M23)",
+      "emergent": true,
+      "confidence": "low",
+      "citations": [
+        {
+          "page": 1,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "Treasury Sanctions Rwandan Ministry of Defence and Financial Institution Supporting M23"
+        },
+        {
+          "page": 3,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "MINISTRY OF DEFENCE OF THE REPUBLIC OF RWANDA (a.k.a. MINADEF OF THE REPUBLIC OF RWANDA; a.k.a. MOD OF THE REPUBLIC OF RWANDA; a.k.a. RWANDAN MINISTRY OF DEFENCE), Ministry of Defence, KG 1 Roundabout, Kigali, Rwanda; Website https://www.mod.gov.rw; Organization Established Date 1962; Organization Type: Defense activities; Target Type Government Entity [DRCONGO]."
+        }
+      ],
+      "added_by": "extractor",
+      "review_justification": null
+    }
+  ],
+  "actors": [
+    {
+      "name": "BOYKOV, Ilya Aleksandrovich",
+      "actor_type": "person",
+      "aliases": [],
+      "jurisdiction": "RU",
+      "role": "Designated facilitator; linked to Limited Liability Company Alis",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 1,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "BOYKOV, Ilya Aleksandrovich (Cyrillic: БОЙКОВ, Илья Александрович), Russia; DOB 30 May 1994; nationality Russia; Gender Male"
+        }
+      ]
+    },
+    {
+      "name": "HAN, Yu Song",
+      "actor_type": "person",
+      "aliases": [
+        "HAN, Yu-so'ng"
+      ],
+      "jurisdiction": "KP",
+      "role": "Designated individual, linked to First Financial and Technical Development Center",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 1,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "HAN, Yu Song (a.k.a. HAN, Yu-so'ng), Russia; DOB 20 May 2000; POB Pyongyang, North Korea; nationality Korea, North; Gender Male"
+        }
+      ]
+    },
+    {
+      "name": "HYON, Se Il",
+      "actor_type": "person",
+      "aliases": [
+        "HYO'N, Se-il"
+      ],
+      "jurisdiction": "KP",
+      "role": "Designated individual, linked to First Financial and Technical Development Center",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 1,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "HYON, Se Il (a.k.a. HYO'N, Se-il), Russia; DOB 08 Sep 2002; POB Pyongyang, North Korea; nationality Korea, North; Gender Male"
+        }
+      ]
+    },
+    {
+      "name": "KIM, Hyo Dong",
+      "actor_type": "person",
+      "aliases": [
+        "KIM, Hyo-tong"
+      ],
+      "jurisdiction": "KP",
+      "role": "Designated individual, linked to Chinyong Information Technology Cooperation Company",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 1,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "KIM, Hyo Dong (Hangul: 김효동) (a.k.a. KIM, Hyo-tong), Russia; Laos; DOB 28 Dec 1989; nationality Korea, North; Gender Male"
+        }
+      ]
+    },
+    {
+      "name": "KIM, Ki Hyok",
+      "actor_type": "person",
+      "aliases": [
+        "KIM, Ki-hyo'k"
+      ],
+      "jurisdiction": "KP",
+      "role": "Designated individual, linked to Chinyong Information Technology Cooperation Company",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 2,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "KIM, Ki Hyok (Hangul: 김기혁) (a.k.a. KIM, Ki-hyo'k), Russia; DOB 30 May 1980; nationality Korea, North; Gender Male; Digital Currency Address - ETH 0xE4C9a7F68B1EbA4508f54f07f7378847318dD1A3"
+        }
+      ]
+    },
+    {
+      "name": "KIM, Kyong Ju",
+      "actor_type": "person",
+      "aliases": [
+        "KIM, Kyo'ng-chu"
+      ],
+      "jurisdiction": "KP",
+      "role": "Designated individual, linked to First Financial and Technical Development Center",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 2,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "KIM, Kyong Ju (a.k.a. KIM, Kyo'ng-chu), Russia; DOB 02 Jan 2001; POB Pyongyang, North Korea; nationality Korea, North; Gender Male"
+        }
+      ]
+    },
+    {
+      "name": "KIM, Sung Gwan",
+      "actor_type": "person",
+      "aliases": [
+        "KIM, Su'ng-kwan"
+      ],
+      "jurisdiction": "KP",
+      "role": "Designated individual, linked to First Financial and Technical Development Center",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 2,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "KIM, Sung Gwan (a.k.a. KIM, Su'ng-kwan), Russia; DOB 07 Jan 1999; POB Pyongyang, North Korea; nationality Korea, North; Gender Male"
+        }
+      ]
+    },
+    {
+      "name": "OBERTAS, Vitold Viktorovich",
+      "actor_type": "person",
+      "aliases": [],
+      "jurisdiction": "RU",
+      "role": "Designated facilitator; holds ETH wallet shared with Boykov",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 2,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "OBERTAS, Vitold Viktorovich (Cyrillic: ОБЕРТАС, Витольд Викторович), Russia; DOB 18 Nov 1968; POB Vladivostok, Russia; nationality Russia; citizen Russia; Gender Male; Digital Currency Address - ETH 0x761edd5e4546229a0bd35ae99b4d3d01cf4a3510"
+        }
+      ]
+    },
+    {
+      "name": "RI, Thae Chol",
+      "actor_type": "person",
+      "aliases": [
+        "RI, T'ae-ch'o'l"
+      ],
+      "jurisdiction": "KP",
+      "role": "Designated individual, linked to First Financial and Technical Development Center",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 2,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "RI, Thae Chol (a.k.a. RI, T'ae-ch'o'l), Russia; DOB 24 Feb 1999; POB Pyongyang, North Korea; nationality Korea, North; Gender Male"
+        }
+      ]
+    },
+    {
+      "name": "SO, Hyong Jin",
+      "actor_type": "person",
+      "aliases": [
+        "SO', Hyo'n-chin"
+      ],
+      "jurisdiction": "KP",
+      "role": "Designated individual, linked to First Financial and Technical Development Center",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 3,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "SO, Hyong Jin (a.k.a. SO', Hyo'n-chin), Russia; DOB 03 Feb 2002; POB Pyongyang, North Korea; nationality Korea, North; Gender Male"
+        }
+      ]
+    },
+    {
+      "name": "FIRST FINANCIAL AND TECHNICAL DEVELOPMENT CENTER",
+      "actor_type": "organisation",
+      "aliases": [],
+      "jurisdiction": "KP",
+      "role": "Designated entity; front/employer entity to which six individuals are linked",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 3,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "FIRST FINANCIAL AND TECHNICAL DEVELOPMENT CENTER, Korea, North; Vladivostok, Russia; Secondary sanctions risk: North Korea Sanctions Regulations, sections 510.201 and 510.210; Transactions Prohibited For Persons Owned or Controlled By U.S. Financial Institutions: North Korea Sanctions Regulations section 510.214; Organization Established Date Jan 2024; Organization Type: Financial and Insurance Activities [DPRK3]."
+        }
+      ]
+    },
+    {
+      "name": "CHINYONG INFORMATION TECHNOLOGY COOPERATION COMPANY",
+      "actor_type": "organisation",
+      "aliases": [],
+      "jurisdiction": null,
+      "role": "Entity to which two individuals (Kim Hyo Dong, Kim Ki Hyok) are linked",
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 1,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "(individual) [DPRK2] (Linked To: CHINYONG INFORMATION TECHNOLOGY COOPERATION COMPANY)."
+        }
+      ]
+    },
+    {
+      "name": "LIMITED LIABILITY COMPANY ALIS",
+      "actor_type": "organisation",
+      "aliases": [],
+      "jurisdiction": null,
+      "role": "Entity to which Boykov is linked",
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 1,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "(individual) [DPRK2] (Linked To: LIMITED LIABILITY COMPANY ALIS)."
+        }
+      ]
+    },
+    {
+      "name": "MINISTRY OF DEFENCE OF THE REPUBLIC OF RWANDA",
+      "actor_type": "organisation",
+      "aliases": [
+        "MINADEF OF THE REPUBLIC OF RWANDA",
+        "MOD OF THE REPUBLIC OF RWANDA",
+        "RWANDAN MINISTRY OF DEFENCE"
+      ],
+      "jurisdiction": "RW",
+      "role": "Designated government entity, supporting M23",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 3,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "MINISTRY OF DEFENCE OF THE REPUBLIC OF RWANDA (a.k.a. MINADEF OF THE REPUBLIC OF RWANDA; a.k.a. MOD OF THE REPUBLIC OF RWANDA; a.k.a. RWANDAN MINISTRY OF DEFENCE), Ministry of Defence, KG 1 Roundabout, Kigali, Rwanda; Website https://www.mod.gov.rw; Organization Established Date 1962; Organization Type: Defense activities; Target Type Government Entity [DRCONGO]."
+        }
+      ]
+    },
+    {
+      "name": "ZIGAMA CREDIT AND SAVINGS SOCIETY",
+      "actor_type": "organisation",
+      "aliases": [
+        "ZIGAMA CREDIT AND SAVINGS BANK",
+        "ZIGAMA CSS"
+      ],
+      "jurisdiction": "RW",
+      "role": "Designated financial institution, supporting M23",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 3,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "ZIGAMA CREDIT AND SAVINGS SOCIETY (a.k.a. ZIGAMA CREDIT AND SAVINGS BANK; a.k.a. \"ZIGAMA CSS\"), KG 178 Street 3, P.O. Box 4772, Kigali, Rwanda; Website https://zigamacss.rw; Organization Established Date 1997; alt. Organization Established Date 19 Apr 2010; Target Type Financial Institution; Business Registration Number RCA/546/2010 (Rwanda) [DRCONGO]."
+        }
+      ]
+    },
+    {
+      "name": "M23",
+      "actor_type": "network",
+      "aliases": [],
+      "jurisdiction": "CD",
+      "role": "Armed group supported by the designated Rwandan Ministry of Defence and Zigama Credit and Savings Society",
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 1,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "Treasury Sanctions Rwandan Ministry of Defence and Financial Institution Supporting M23"
+        }
+      ]
+    }
+  ],
+  "indicators": [
+    {
+      "indicator_type": "transactional",
+      "description": "Two separately designated individuals (Boykov and Obertas) are listed with the identical ETH wallet address 0x761edd5e4546229a0bd35ae99b4d3d01cf4a3510, indicating shared control or use of the same crypto-asset infrastructure.",
+      "detectable_in_transaction_data": true,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 1,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "Digital Currency Address - ETH 0x12Ea80238C7d805D003ce793594e92d84A6f4E8d; alt. Digital Currency Address - ETH 0x761edd5e4546229a0bd35ae99b4d3d01cf4a3510"
+        },
+        {
+          "page": 2,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "OBERTAS, Vitold Viktorovich (Cyrillic: ОБЕРТАС, Витольд Викторович), Russia; DOB 18 Nov 1968; POB Vladivostok, Russia; nationality Russia; citizen Russia; Gender Male; Digital Currency Address - ETH 0x761edd5e4546229a0bd35ae99b4d3d01cf4a3510"
+        }
+      ]
+    },
+    {
+      "indicator_type": "documentary",
+      "description": "Multiple North Korean nationals linked to the same entity (First Financial and Technical Development Center) hold passports with closely sequential numbers issued on the same two dates (01 Sep 2025 for four individuals; 18 Feb 2025 for two others), consistent with batch issuance to members of the same scheme.",
+      "detectable_in_transaction_data": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 1,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "Passport 845349261 (Korea, North) issued 01 Sep 2025 expires 30 Sep 2030"
+        },
+        {
+          "page": 2,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "Passport 845349260 (Korea, North) issued 01 Sep 2025 expires 01 Sep 2030"
+        },
+        {
+          "page": 1,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "Passport 845349266 (Korea, North) issued 01 Sep 2025 expires 01 Sep 2030"
+        },
+        {
+          "page": 2,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "Passport 845349262 (Korea, North) issued 01 Sep 2025 expires 01 Sep 2030"
+        },
+        {
+          "page": 2,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "Passport 845136774 (Korea, North) issued 18 Feb 2025 expires 18 Feb 2030"
+        }
+      ]
+    },
+    {
+      "indicator_type": "network",
+      "description": "Six of the ten designated individuals are formally recorded as 'Linked To' First Financial and Technical Development Center, a Russia/North Korea entity established only in January 2024, concentrating a large facilitator cluster around one recently-formed entity.",
+      "detectable_in_transaction_data": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 1,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "(individual) [DPRK3] (Linked To: FIRST FINANCIAL AND TECHNICAL DEVELOPMENT CENTER)."
+        },
+        {
+          "page": 3,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "FIRST FINANCIAL AND TECHNICAL DEVELOPMENT CENTER, Korea, North; Vladivostok, Russia; Secondary sanctions risk: North Korea Sanctions Regulations, sections 510.201 and 510.210; Transactions Prohibited For Persons Owned or Controlled By U.S. Financial Institutions: North Korea Sanctions Regulations section 510.214; Organization Established Date Jan 2024; Organization Type: Financial and Insurance Activities [DPRK3]."
+        }
+      ]
+    },
+    {
+      "indicator_type": "documentary",
+      "description": "Multiple designated individuals carry alternate romanized name spellings (e.g. HAN, Yu-so'ng for HAN, Yu Song) alongside Cyrillic/Hangul native-script renderings, consistent with name-variant complexity that can defeat simple string-matching screening.",
+      "detectable_in_transaction_data": false,
+      "confidence": "low",
+      "citations": [
+        {
+          "page": 1,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "HAN, Yu Song (a.k.a. HAN, Yu-so'ng), Russia; DOB 20 May 2000; POB Pyongyang, North Korea; nationality Korea, North; Gender Male"
+        }
+      ]
+    }
+  ],
+  "suggested_desks": [
+    "sanctions_desk",
+    "fiu_liaison",
+    "correspondent_desk"
+  ],
+  "overall_confidence": "medium",
+  "extraction_notes": "This is an OFAC SDN List 'Recent Actions' bulletin covering two unrelated designation actions (DPRK IT worker fraud facilitators, and Rwanda/DRC M23 support) bundled in one release. No actors resolved against the governed register (all returned 'Unresolved'); for LIMITED LIABILITY COMPANY ALIS the resolver surfaced a similar name (ACT-d4e7ed33b5, 'Technological Company Fly Bridge LLC', score 0.75) as a suggestion only -- not treated as an identity. CHINYONG INFORMATION TECHNOLOGY COOPERATION COMPANY and LIMITED LIABILITY COMPANY ALIS appear in the source only as 'Linked To' tags on individual entries; the document does not give them their own full SDN entity record, so their actor citations are necessarily thin. The two emergent typologies (DPRK IT Worker Fraud Facilitation Network; Rwanda/Zigama support for M23) reflect named schemes in the press-release headers that the document does not otherwise narrate mechanically -- flagged low confidence for human review and possible consolidation with existing or future Knowledge Centre entries."
+}

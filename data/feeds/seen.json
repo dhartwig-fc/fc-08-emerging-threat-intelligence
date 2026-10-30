@@ -393,6 +393,41 @@
       "source": "ofac"
     },
     {
+      "decided_on": "2026-10-30",
+      "decision": "accept",
+      "first_seen_run": "feeds-2026-10-30-b2a3cf",
+      "item_id": "20261021",
+      "source": "ofac"
+    },
+    {
+      "decided_on": "2026-10-30",
+      "decision": "drop",
+      "first_seen_run": "feeds-2026-10-30-b2a3cf",
+      "item_id": "20261026",
+      "source": "ofac"
+    },
+    {
+      "decided_on": "2026-10-30",
+      "decision": "accept",
+      "first_seen_run": "feeds-2026-10-30-b2a3cf",
+      "item_id": "20261027",
+      "source": "ofac"
+    },
+    {
+      "decided_on": "2026-10-30",
+      "decision": "accept",
+      "first_seen_run": "feeds-2026-10-30-b2a3cf",
+      "item_id": "20261028",
+      "source": "ofac"
+    },
+    {
+      "decided_on": "2026-10-30",
+      "decision": "drop",
+      "first_seen_run": "feeds-2026-10-30-b2a3cf",
+      "item_id": "20261029",
+      "source": "ofac"
+    },
+    {
       "decided_on": "2026-09-29",
       "decision": "drop",
       "first_seen_run": "catalogue:90b57e8ba022",
@@ -456,6 +491,13 @@
       "source": "ofsi"
     },
     {
+      "decided_on": "2026-10-30",
+      "decision": "drop",
+      "first_seen_run": "feeds-2026-10-30-b2a3cf",
+      "item_id": "https://www.gov.uk/government/publications/legal-services-general-licence#2026-10-26T15:18:45Z",
+      "source": "ofsi"
+    },
+    {
       "decided_on": "2026-09-29",
       "decision": "drop",
       "first_seen_run": "catalogue:90b57e8ba022",
@@ -505,6 +547,13 @@
       "source": "ofsi"
     },
     {
+      "decided_on": "2026-10-30",
+      "decision": "drop",
+      "first_seen_run": "feeds-2026-10-30-b2a3cf",
+      "item_id": "https://www.gov.uk/government/publications/ofsi-general-licence-int20257895596#2026-10-28T11:50:21Z",
+      "source": "ofsi"
+    },
+    {
       "decided_on": "2026-09-29",
       "decision": "drop",
       "first_seen_run": "catalogue:90b57e8ba022",
@@ -523,6 +572,13 @@
       "decision": "drop",
       "first_seen_run": "feeds-2026-10-11-e7ad24",
       "item_id": "https://www.gov.uk/government/publications/ofsi-general-licence-int202611080040#2026-10-08T11:10:36Z",
+      "source": "ofsi"
+    },
+    {
+      "decided_on": "2026-10-30",
+      "decision": "drop",
+      "first_seen_run": "feeds-2026-10-30-b2a3cf",
+      "item_id": "https://www.gov.uk/government/publications/ofsi-general-licence-int202611112108#2026-10-26T15:18:34Z",
       "source": "ofsi"
     },
     {
@@ -593,6 +649,13 @@
       "decision": "drop",
       "first_seen_run": "feeds-2026-10-11-e7ad24",
       "item_id": "https://www.gov.uk/government/publications/uk-financial-sanctions-faqs#2026-10-09T09:50:21Z",
+      "source": "ofsi"
+    },
+    {
+      "decided_on": "2026-10-30",
+      "decision": "drop",
+      "first_seen_run": "feeds-2026-10-30-b2a3cf",
+      "item_id": "https://www.gov.uk/government/publications/uk-financial-sanctions-faqs#2026-10-26T15:19:05Z",
       "source": "ofsi"
     },
     {

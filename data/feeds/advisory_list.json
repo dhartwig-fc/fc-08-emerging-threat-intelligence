@@ -154,12 +154,78 @@
         "listed_url": "https://ofac.treasury.gov/recent-actions/20260930",
         "extraction_run_id": "adv-2026-0031-extractor-ecb11dbd4f"
       }
+    },
+    {
+      "advisory_id": "ADV-2026-0033",
+      "file": "adv-2026-0033-ofac.html",
+      "publisher": "OFAC (US Treasury)",
+      "source_type": "ofac",
+      "title": "North Korea Designations; Democratic Republic of the Congo-related Designations",
+      "published_on": "2026-10-28",
+      "published_on_precision": "day",
+      "url": "https://ofac.treasury.gov/recent-actions/20261028",
+      "source_matrix_tier": "live feed",
+      "sha256": "67b8916dcc300562421b33e9032152cabcc7c1aabb246abe7e89fedcaefbf151",
+      "bytes": 46416,
+      "pages": 3,
+      "selection_rationale": "live feed run feeds-2026-10-30-b2a3cf, item ofac:37c7a48086d7a376: triaged relevant: Designates DPRK IT-worker fraud facilitation network and Rwandan MOD/bank supporting M23, listing digital currency wallet addresses used by facilitators moving illicit IT-worker proceeds.",
+      "feed": {
+        "run_id": "feeds-2026-10-30-b2a3cf",
+        "key": "ofac:37c7a48086d7a376",
+        "item_id": "20261028",
+        "listed_url": "https://ofac.treasury.gov/recent-actions/20261028",
+        "extraction_run_id": "adv-2026-0033-extractor-a09f2f0d33"
+      }
+    },
+    {
+      "advisory_id": "ADV-2026-0035",
+      "file": "adv-2026-0035-ofac.html",
+      "publisher": "OFAC (US Treasury)",
+      "source_type": "ofac",
+      "title": "Settlement Agreement between the U.S. Department of the Treasury's Office of Foreign Assets Control and Extreme Networks, Inc.",
+      "published_on": "2026-10-27",
+      "published_on_precision": "day",
+      "url": "https://ofac.treasury.gov/recent-actions/20261027",
+      "source_matrix_tier": "live feed",
+      "sha256": "d80661ae39aef51766cf1250e43ba9b6d1ee3314e94c8cb35bd53ee9629e52e5",
+      "bytes": 39993,
+      "pages": 1,
+      "selection_rationale": "live feed run feeds-2026-10-30-b2a3cf, item ofac:69dba911486675f1: triaged relevant: Settlement describes how Extreme Networks exported networking equipment to a blocked Russian defense manufacturer over multiple shipments, a sanctions evasion/export control case.",
+      "feed": {
+        "run_id": "feeds-2026-10-30-b2a3cf",
+        "key": "ofac:69dba911486675f1",
+        "item_id": "20261027",
+        "listed_url": "https://ofac.treasury.gov/recent-actions/20261027",
+        "extraction_run_id": "adv-2026-0035-extractor-e0a757ac2c"
+      }
+    },
+    {
+      "advisory_id": "ADV-2026-0034",
+      "file": "adv-2026-0034-ofac.html",
+      "publisher": "OFAC (US Treasury)",
+      "source_type": "ofac",
+      "title": "Iran-related Designations; Belarus and North Korea Designations Removals; Issuance of Iran-related and Russia-related General Licenses and Amended Frequently Asked Questions",
+      "published_on": "2026-10-21",
+      "published_on_precision": "day",
+      "url": "https://ofac.treasury.gov/recent-actions/20261021",
+      "source_matrix_tier": "live feed",
+      "sha256": "dbff5acd829f2e1a6545b8eb308f9511b0abcf6f4e10b2ebdde6192217a2cd80",
+      "bytes": 50239,
+      "pages": 4,
+      "selection_rationale": "live feed run feeds-2026-10-30-b2a3cf, item ofac:6a05e5175268a818: triaged relevant: Designates an Iran shadow-fleet sanctions-evasion network of shipping/legal front companies and flagged vessels used to move Iranian petroleum, describing the structure and roles used to evade sanctions.",
+      "feed": {
+        "run_id": "feeds-2026-10-30-b2a3cf",
+        "key": "ofac:6a05e5175268a818",
+        "item_id": "20261021",
+        "listed_url": "https://ofac.treasury.gov/recent-actions/20261021",
+        "extraction_run_id": "adv-2026-0034-extractor-86f8c3e32a"
+      }
     }
   ],
   "counts": {
-    "advisories": 7,
+    "advisories": 10,
     "by_source_type": {
-      "ofac": 7
+      "ofac": 10
     }
   }
 }

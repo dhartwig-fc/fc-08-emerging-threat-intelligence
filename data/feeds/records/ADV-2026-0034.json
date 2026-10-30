@@ -1,0 +1,403 @@
+{
+  "schema_version": "1.4.0",
+  "advisory_id": "ADV-2026-0034",
+  "source": {
+    "source_type": "ofac",
+    "publisher": "U.S. Department of the Treasury, Office of Foreign Assets Control (OFAC)",
+    "title": "Iran-related Designations; Belarus and North Korea Designations Removals; Issuance of Iran-related and Russia-related General Licenses and Amended Frequently Asked Questions",
+    "published_on": "2026-10-21",
+    "published_on_precision": "day",
+    "url": null,
+    "document_sha256": "dbff5acd829f2e1a6545b8eb308f9511b0abcf6f4e10b2ebdde6192217a2cd80",
+    "page_count": 4
+  },
+  "summary": "OFAC announced Iran-related sanctions designations on 21 October 2026 under the press title 'Operation Economic Outcast Targets Iran's Shadow Fleet Networks,' adding five Panamanian individuals (three sharing the surname Karnakis Kosmas, two sharing Ortega Jones), the Panama/Greece-registered entity Karnakis and Karnakis, a Singapore entity (Amigoz Singapore Pte. Ltd.), a UAE shipping line (Whales Shipping Line LLC), a Panama-flagged vessel owner (Roxette Maritime Shipping and Trading S.A.) and nine vessels, all designated under IRAN-EO13902 and linked to one another through shared ownership, addresses and corporate structures consistent with shadow-fleet operations. The same action issued Iran General Licenses GG and HH, Russia-related General License 131K concerning the sale of Lukoil International GmbH, and amended FAQs 1224 and 1225. It also recorded the deletion from the SDN List of several North Korea-linked (DPRK3) Chinese animation-studio entities and an individual (Lu, Hezheng) tied to SEK Studio, and listed three name variants for one Belarus-designated individual (Andrei Rybakou/Rybakov). No scheme mechanics are described for the Belarus or North Korea entries; they are administrative delisting/listing notices only.",
+  "jurisdictions": [
+    "PA",
+    "GR",
+    "SG",
+    "AE",
+    "IR",
+    "CN",
+    "BY",
+    "KP",
+    "US"
+  ],
+  "typologies": [
+    {
+      "family": "sanctions",
+      "typology_id": "SAN002",
+      "label": "Shadow Fleet",
+      "emergent": false,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 1,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "Operation Economic Outcast Targets Iran's Shadow Fleet Networks"
+        },
+        {
+          "page": 2,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "KARNAKIS AND KARNAKIS, Global Plaza Building, Calle 50, Floor 21, Panama City, Panama; 158 II Merachias and Alkiviadou, Piraeus 185 35, Greece; Website karnakiskarnakis.com; Organization Established Date 13 Mar 2006; Organization Type: Legal activities; RUC # 921299-2-23411 (Panama) [IRAN-EO13902]."
+        },
+        {
+          "page": 2,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "ANEMOS (3E2064) General Cargo Panama flag; Vessel Year of Build 1999; Vessel Registration Identification IMO 9205952; MMSI 352898798 (vessel) [IRAN-EO13902] (Linked To: ROXETTE MARITIME SHIPPING AND TRADING S.A.)."
+        },
+        {
+          "page": 3,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "WHALES PEARL Crew/Supply Vessel United Arab Emirates flag; Vessel Year of Build 2008; Vessel Registration Identification IMO 9483114; MMSI 470034000 (vessel) [IRAN-EO13902] (Linked To: WHALES SHIPPING LINE LLC)."
+        }
+      ],
+      "added_by": "extractor",
+      "review_justification": null
+    }
+  ],
+  "actors": [
+    {
+      "name": "KARNAKIS KOSMAS, Ioanis",
+      "actor_type": "person",
+      "aliases": [],
+      "jurisdiction": "PA",
+      "role": "Designated individual linked to Karnakis and Karnakis",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 1,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "KARNAKIS KOSMAS, Ioanis, Panama City, Panama; DOB 20 Aug 1982; POB Panama; nationality Panama; Gender Male; Passport PA1335855 (Panama) expires 05 Feb 2030 (individual) [IRAN-EO13902] (Linked To: KARNAKIS AND KARNAKIS)."
+        }
+      ]
+    },
+    {
+      "name": "KARNAKIS KOSMAS, Konstantinos",
+      "actor_type": "person",
+      "aliases": [],
+      "jurisdiction": "PA",
+      "role": "Designated individual linked to Karnakis and Karnakis",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 1,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "KARNAKIS KOSMAS, Konstantinos, Panama; DOB 22 Feb 1981; POB Panama; nationality Panama; alt. nationality Greece; Gender Male; Cedula No. 8-744-805 (Panama); Passport PA1035491 (Panama) expires 04 Apr 2028 (individual) [IRAN-EO13902] (Linked To: KARNAKIS AND KARNAKIS)."
+        }
+      ]
+    },
+    {
+      "name": "KARNAKIS KOSMAS, Sofianos",
+      "actor_type": "person",
+      "aliases": [],
+      "jurisdiction": "PA",
+      "role": "Designated individual linked to Karnakis and Karnakis",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 1,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "KARNAKIS KOSMAS, Sofianos, Panama City, Panama; DOB 06 Jan 1975; POB Panama; nationality Panama; alt. nationality Greece; Gender Male; Cedula No. 8-708-550 (Panama); Passport PA1335856 (Panama) expires 05 Feb 2030 (individual) [IRAN-EO13902] (Linked To: KARNAKIS AND KARNAKIS)."
+        }
+      ]
+    },
+    {
+      "name": "ORTEGA JONES, Pedro",
+      "actor_type": "person",
+      "aliases": [],
+      "jurisdiction": "PA",
+      "role": "Designated individual linked to Karnakis and Karnakis",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 1,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "ORTEGA JONES, Pedro, Panama City, Panama; DOB 31 Jan 1976; nationality Panama; Gender Male; Cedula No. 8-505-139 (Panama); Passport PA0865191 (Panama) expires 10 Mar 2027 (individual) [IRAN-EO13902] (Linked To: KARNAKIS AND KARNAKIS)."
+        }
+      ]
+    },
+    {
+      "name": "ORTEGA JONES, Roberto",
+      "actor_type": "person",
+      "aliases": [],
+      "jurisdiction": "PA",
+      "role": "Designated individual linked to Karnakis and Karnakis",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 1,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "ORTEGA JONES, Roberto, Panama City, Panama; DOB 24 Dec 1972; nationality Panama; Gender Male; Identification Number PE-7-925 (Panama) (individual) [IRAN-EO13902] (Linked To: KARNAKIS AND KARNAKIS)."
+        }
+      ]
+    },
+    {
+      "name": "AMIGOZ SINGAPORE PTE. LTD.",
+      "actor_type": "organisation",
+      "aliases": [],
+      "jurisdiction": "SG",
+      "role": "Designated entity",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 1,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "AMIGOZ SINGAPORE PTE. LTD., 2 Leng Kee Road, #02-10, Thye Hong Centre, Singapore 159086, Singapore; Website https://amigozsg.com; Organization Established Date 27 Nov 2019; Business Number 201940121Z (Singapore) [IRAN-EO13902]."
+        }
+      ]
+    },
+    {
+      "name": "KARNAKIS AND KARNAKIS",
+      "actor_type": "organisation",
+      "aliases": [],
+      "jurisdiction": "PA",
+      "role": "Designated entity to which the five individuals are linked",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 2,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "KARNAKIS AND KARNAKIS, Global Plaza Building, Calle 50, Floor 21, Panama City, Panama; 158 II Merachias and Alkiviadou, Piraeus 185 35, Greece; Website karnakiskarnakis.com; Organization Established Date 13 Mar 2006; Organization Type: Legal activities; RUC # 921299-2-23411 (Panama) [IRAN-EO13902]."
+        }
+      ]
+    },
+    {
+      "name": "ROXETTE MARITIME SHIPPING AND TRADING S.A.",
+      "actor_type": "organisation",
+      "aliases": [],
+      "jurisdiction": "PA",
+      "role": "Designated vessel-owning entity, linked to seven vessels",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 2,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "ROXETTE MARITIME SHIPPING AND TRADING S.A., Panama; 5th Floor, 90 Iroon Politechneiou Avenue, Piraeus 185 36, Greece; Organization Established Date 03 Jan 2023; RUC # 155731846-2-2023 (Panama); Identification Number IMO 6385886 [IRAN-EO13902]."
+        }
+      ]
+    },
+    {
+      "name": "WHALES SHIPPING LINE LLC",
+      "actor_type": "organisation",
+      "aliases": [],
+      "jurisdiction": "AE",
+      "role": "Designated shipping line, linked to Amigoz Singapore and two vessels",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 2,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "WHALES SHIPPING LINE LLC (Arabic: وايلس شيبينغ لاين ذ م م), Office 412, Parcel 243-210, Al Qusais Industrial Second, Deira, Dubai, United Arab Emirates"
+        }
+      ]
+    },
+    {
+      "name": "ANEMOS",
+      "actor_type": "vessel",
+      "aliases": [],
+      "jurisdiction": "PA",
+      "role": "Designated vessel linked to Roxette Maritime",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 2,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "ANEMOS (3E2064) General Cargo Panama flag; Vessel Year of Build 1999; Vessel Registration Identification IMO 9205952; MMSI 352898798 (vessel) [IRAN-EO13902] (Linked To: ROXETTE MARITIME SHIPPING AND TRADING S.A.)."
+        }
+      ]
+    },
+    {
+      "name": "DESTINY",
+      "actor_type": "vessel",
+      "aliases": [],
+      "jurisdiction": "PA",
+      "role": "Designated vessel linked to Roxette Maritime",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 2,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "DESTINY (3FRG6) General Cargo Panama flag; Vessel Year of Build 2009; Vessel Registration Identification IMO 9385491; MMSI 370662000 (vessel) [IRAN-EO13902] (Linked To: ROXETTE MARITIME SHIPPING AND TRADING S.A.)."
+        }
+      ]
+    },
+    {
+      "name": "FLAMINGO 1",
+      "actor_type": "vessel",
+      "aliases": [],
+      "jurisdiction": "PA",
+      "role": "Designated vessel linked to Roxette Maritime",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 2,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "FLAMINGO 1 (3E2656) Bulk Carrier Panama flag; Vessel Year of Build 2010; Vessel Registration Identification IMO 9474199; MMSI 352002503 (vessel) [IRAN-EO13902] (Linked To: ROXETTE MARITIME SHIPPING AND TRADING S.A.)."
+        }
+      ]
+    },
+    {
+      "name": "GLORIS",
+      "actor_type": "vessel",
+      "aliases": [],
+      "jurisdiction": "PA",
+      "role": "Designated vessel linked to Roxette Maritime",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 2,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "GLORIS (3E6032) Bulk Carrier Panama flag; Vessel Year of Build 2010; Vessel Registration Identification IMO 9449510; MMSI 352003155 (vessel) [IRAN-EO13902] (Linked To: ROXETTE MARITIME SHIPPING AND TRADING S.A.)."
+        }
+      ]
+    },
+    {
+      "name": "HARMONY",
+      "actor_type": "vessel",
+      "aliases": [],
+      "jurisdiction": "PA",
+      "role": "Designated vessel linked to Roxette Maritime",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 2,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "HARMONY (3E7470) General Cargo Panama flag; Vessel Year of Build 2010; Vessel Registration Identification IMO 9449522; MMSI 352003307 (vessel) [IRAN-EO13902] (Linked To: ROXETTE MARITIME SHIPPING AND TRADING S.A.)."
+        }
+      ]
+    },
+    {
+      "name": "PRIDE",
+      "actor_type": "vessel",
+      "aliases": [],
+      "jurisdiction": "PA",
+      "role": "Designated vessel linked to Roxette Maritime",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 2,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "PRIDE (3E5229) Bulk Carrier Panama flag; Vessel Year of Build 2011; Vessel Registration Identification IMO 9487407; MMSI 352003589 (vessel) [IRAN-EO13902] (Linked To: ROXETTE MARITIME SHIPPING AND TRADING S.A.)."
+        }
+      ]
+    },
+    {
+      "name": "PRINCE",
+      "actor_type": "vessel",
+      "aliases": [],
+      "jurisdiction": "PA",
+      "role": "Designated vessel linked to Roxette Maritime",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 2,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "PRINCE (3E8283) Bulk Carrier Panama flag; Vessel Year of Build 2010; Vessel Registration Identification IMO 9548316; MMSI 352005105 (vessel) [IRAN-EO13902] (Linked To: ROXETTE MARITIME SHIPPING AND TRADING S.A.)."
+        }
+      ]
+    },
+    {
+      "name": "WHALES DIAMOND",
+      "actor_type": "vessel",
+      "aliases": [],
+      "jurisdiction": "AE",
+      "role": "Designated vessel linked to Whales Shipping Line LLC",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 2,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "WHALES DIAMOND (A6E2076) Crew/Supply Vessel United Arab Emirates flag; Vessel Year of Build 2006; Vessel Registration Identification IMO 9375032; MMSI 470132000 (vessel) [IRAN-EO13902] (Linked To: WHALES SHIPPING LINE LLC)."
+        }
+      ]
+    },
+    {
+      "name": "WHALES PEARL",
+      "actor_type": "vessel",
+      "aliases": [],
+      "jurisdiction": "AE",
+      "role": "Designated vessel linked to Whales Shipping Line LLC",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 3,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "WHALES PEARL Crew/Supply Vessel United Arab Emirates flag; Vessel Year of Build 2008; Vessel Registration Identification IMO 9483114; MMSI 470034000 (vessel) [IRAN-EO13902] (Linked To: WHALES SHIPPING LINE LLC)."
+        }
+      ]
+    }
+  ],
+  "indicators": [
+    {
+      "indicator_type": "network",
+      "description": "Multiple designated individuals share surnames and near-identical identity profiles (three Karnakis Kosmas, two Ortega Jones), all 'Linked To' a single Panama/Greece-registered entity, Karnakis and Karnakis.",
+      "detectable_in_transaction_data": false,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 1,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "KARNAKIS KOSMAS, Ioanis, Panama City, Panama; DOB 20 Aug 1982; POB Panama; nationality Panama; Gender Male; Passport PA1335855 (Panama) expires 05 Feb 2030 (individual) [IRAN-EO13902] (Linked To: KARNAKIS AND KARNAKIS)."
+        }
+      ]
+    },
+    {
+      "indicator_type": "network",
+      "description": "A single Panama-flagged, Piraeus-connected maritime entity (Roxette Maritime Shipping and Trading S.A.) controls a fleet of seven bulk carrier and general cargo vessels, all designated together.",
+      "detectable_in_transaction_data": false,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 2,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "ANEMOS (3E2064) General Cargo Panama flag; Vessel Year of Build 1999; Vessel Registration Identification IMO 9205952; MMSI 352898798 (vessel) [IRAN-EO13902] (Linked To: ROXETTE MARITIME SHIPPING AND TRADING S.A.)."
+        }
+      ]
+    },
+    {
+      "indicator_type": "geographic",
+      "description": "Designated entities and individuals span Panama, Greece, Singapore and the UAE -- jurisdictions distant from Iran -- used as the corporate and vessel-ownership layer for an Iran-linked shadow fleet.",
+      "detectable_in_transaction_data": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 2,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "WHALES SHIPPING LINE LLC (Arabic: وايلس شيبينغ لاين ذ م م), Office 412, Parcel 243-210, Al Qusais Industrial Second, Deira, Dubai, United Arab Emirates"
+        }
+      ]
+    }
+  ],
+  "suggested_desks": [
+    "sanctions_desk",
+    "fiu_liaison"
+  ],
+  "overall_confidence": "high",
+  "extraction_notes": "1) knowledge_centre_resolve_actor returned 'Unresolved' (not in register) for every actor extracted -- Ioanis, Konstantinos and Sofianos Karnakis Kosmas, Pedro and Roberto Ortega Jones, Amigoz Singapore Pte. Ltd., Karnakis and Karnakis, Roxette Maritime Shipping and Trading S.A., Whales Shipping Line LLC, and all nine vessels (Anemos, Destiny, Flamingo 1, Gloris, Harmony, Pride, Prince, Whales Diamond, Whales Pearl) -- so none carry a prior actor_id; all are new to the governed register. 2) SAN004 (Front Companies) was considered for Karnakis and Karnakis / Roxette / Whales Shipping Line but not recorded: the document gives corporate registration data, not the no-substance indicators (no employees, no premises, dormancy) the doctrine requires, so the link would be speculative. A human reviewer may wish to add it if corroborating open-source data on these entities exists. 3) The Belarus (Rybakov/Rybakou, Andrei) and North Korea/DPRK3 (Moxing Cartoon, Shanghai Moxing, Lu Hezheng, Shanghai Hongman) entries are pure list changes (three name-variant listings for one Belarus individual; deletions for the DPRK3 group) with no scheme narrative, so no typology or actor records were created for them -- flagged here only for completeness of the SDN List changes this advisory reports. 4) General Licenses GG, HH and 131K and FAQs 1224/1225 are administrative/licensing actions, not typology evidence, and are noted in the summary only."
+}

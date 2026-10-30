@@ -1,0 +1,28 @@
+{
+  "accepted": {
+    "ofac:37c7a48086d7a376": "ADV-2026-0033",
+    "ofac:69dba911486675f1": "ADV-2026-0035",
+    "ofac:6a05e5175268a818": "ADV-2026-0034"
+  },
+  "allocated_not_accepted": {},
+  "allocated_not_accepted_note": "allocated when an extraction started and carried by no accepted record: never reused (owner decision 11)",
+  "already_decided": {},
+  "already_decided_note": "decided in an earlier run, named here by that run's id: never re-recorded and not a decision of this run (owner ruling A, 2026-09-29)",
+  "decided_on": "2026-10-30",
+  "deferred": [],
+  "dropped": [
+    "ofac:20261026",
+    "ofac:20261029",
+    "ofsi:https://www.gov.uk/government/publications/legal-services-general-licence#2026-10-26T15:18:45Z",
+    "ofsi:https://www.gov.uk/government/publications/ofsi-general-licence-int20257895596#2026-10-28T11:50:21Z",
+    "ofsi:https://www.gov.uk/government/publications/ofsi-general-licence-int202611112108#2026-10-26T15:18:34Z",
+    "ofsi:https://www.gov.uk/government/publications/uk-financial-sanctions-faqs#2026-10-26T15:19:05Z"
+  ],
+  "override_reconciliation": null,
+  "reconciliation": {
+    "crash": null,
+    "problems": []
+  },
+  "run_id": "feeds-2026-10-30-b2a3cf",
+  "status": "COMPLETE"
+}

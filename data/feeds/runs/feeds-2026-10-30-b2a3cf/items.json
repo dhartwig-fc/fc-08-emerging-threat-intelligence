@@ -1,0 +1,249 @@
+{
+  "run_id": "feeds-2026-10-30-b2a3cf",
+  "sources": {
+    "fincen": {
+      "already_seen": 15,
+      "carried": 0,
+      "error": null,
+      "items": [],
+      "listed": 15,
+      "listed_at": "2026-10-30T09:00:12Z",
+      "listing": "listings/fincen.html",
+      "listing_sha256": "1b51354af2f14a0571b3ee10dad819888724bdaf32796cfc2bd207a24422d7bc",
+      "listing_url": "https://www.fincen.gov/resources/advisoriesbulletinsfact-sheets/advisories",
+      "status": "ok"
+    },
+    "ofac": {
+      "already_seen": 5,
+      "carried": 0,
+      "error": null,
+      "items": [
+        {
+          "document": {
+            "bytes": 38752,
+            "content_type": "text/html",
+            "fetched_at": "2026-10-30T09:00:57Z",
+            "final_url": "https://ofac.treasury.gov/recent-actions/20261029",
+            "linked_pdfs": [],
+            "page_error": null,
+            "pages": 1,
+            "path": "docs/facf8d2550bc9eadad5acd763cf7a9805c38062cb66332df51a01fab9c065d92.html",
+            "sha256": "facf8d2550bc9eadad5acd763cf7a9805c38062cb66332df51a01fab9c065d92",
+            "text_pages": 1
+          },
+          "item_id": "20261029",
+          "key": "ofac:2d4eaee2ca90d6ef",
+          "published": "2026-10-29",
+          "source": "ofac",
+          "summary": "",
+          "title": "Issuance of Amended Iran-related General License",
+          "url": "https://ofac.treasury.gov/recent-actions/20261029"
+        },
+        {
+          "document": {
+            "bytes": 46416,
+            "content_type": "text/html",
+            "fetched_at": "2026-10-30T09:01:07Z",
+            "final_url": "https://ofac.treasury.gov/recent-actions/20261028",
+            "linked_pdfs": [],
+            "page_error": null,
+            "pages": 3,
+            "path": "docs/67b8916dcc300562421b33e9032152cabcc7c1aabb246abe7e89fedcaefbf151.html",
+            "sha256": "67b8916dcc300562421b33e9032152cabcc7c1aabb246abe7e89fedcaefbf151",
+            "text_pages": 3
+          },
+          "item_id": "20261028",
+          "key": "ofac:37c7a48086d7a376",
+          "published": "2026-10-28",
+          "source": "ofac",
+          "summary": "",
+          "title": "North Korea Designations; Democratic Republic of the Congo-related Designations",
+          "url": "https://ofac.treasury.gov/recent-actions/20261028"
+        },
+        {
+          "document": {
+            "bytes": 39993,
+            "content_type": "text/html",
+            "fetched_at": "2026-10-30T09:01:19Z",
+            "final_url": "https://ofac.treasury.gov/recent-actions/20261027",
+            "linked_pdfs": [],
+            "page_error": null,
+            "pages": 1,
+            "path": "docs/d80661ae39aef51766cf1250e43ba9b6d1ee3314e94c8cb35bd53ee9629e52e5.html",
+            "sha256": "d80661ae39aef51766cf1250e43ba9b6d1ee3314e94c8cb35bd53ee9629e52e5",
+            "text_pages": 1
+          },
+          "item_id": "20261027",
+          "key": "ofac:69dba911486675f1",
+          "published": "2026-10-27",
+          "source": "ofac",
+          "summary": "",
+          "title": "Settlement Agreement between the U.S. Department of the Treasury's Office of Foreign Assets Control and Extreme Networks, Inc.",
+          "url": "https://ofac.treasury.gov/recent-actions/20261027"
+        },
+        {
+          "document": {
+            "bytes": 39197,
+            "content_type": "text/html",
+            "fetched_at": "2026-10-30T09:01:29Z",
+            "final_url": "https://ofac.treasury.gov/recent-actions/20261026",
+            "linked_pdfs": [],
+            "page_error": null,
+            "pages": 1,
+            "path": "docs/8a11079827d438f21d4c9be72ea9d565cfed2f5781c6439c767cd66aa37a4f10.html",
+            "sha256": "8a11079827d438f21d4c9be72ea9d565cfed2f5781c6439c767cd66aa37a4f10",
+            "text_pages": 1
+          },
+          "item_id": "20261026",
+          "key": "ofac:1e6fd612bca589c8",
+          "published": "2026-10-26",
+          "source": "ofac",
+          "summary": "",
+          "title": "Issuance of Amended Frequently Asked Questions Regarding Blocking and Rejecting Transactions and Filing Reports with OFAC",
+          "url": "https://ofac.treasury.gov/recent-actions/20261026"
+        },
+        {
+          "document": {
+            "bytes": 50239,
+            "content_type": "text/html",
+            "fetched_at": "2026-10-30T09:01:40Z",
+            "final_url": "https://ofac.treasury.gov/recent-actions/20261021",
+            "linked_pdfs": [],
+            "page_error": null,
+            "pages": 4,
+            "path": "docs/dbff5acd829f2e1a6545b8eb308f9511b0abcf6f4e10b2ebdde6192217a2cd80.html",
+            "sha256": "dbff5acd829f2e1a6545b8eb308f9511b0abcf6f4e10b2ebdde6192217a2cd80",
+            "text_pages": 4
+          },
+          "item_id": "20261021",
+          "key": "ofac:6a05e5175268a818",
+          "published": "2026-10-21",
+          "source": "ofac",
+          "summary": "",
+          "title": "Iran-related Designations; Belarus and North Korea Designations Removals; Issuance of Iran-related and Russia-related General Licenses and Amended Frequently Asked Questions",
+          "url": "https://ofac.treasury.gov/recent-actions/20261021"
+        }
+      ],
+      "listed": 10,
+      "listed_at": "2026-10-30T09:00:23Z",
+      "listing": "listings/ofac.html",
+      "listing_sha256": "55fbf30cb9a361fd559fa0bf21cb562453acbbd3e72e05d33639da498bd1f9d9",
+      "listing_url": "https://ofac.treasury.gov/recent-actions",
+      "status": "ok"
+    },
+    "ofsi": {
+      "already_seen": 16,
+      "carried": 0,
+      "error": null,
+      "items": [
+        {
+          "document": {
+            "bytes": 75124,
+            "content_type": "text/html",
+            "fetched_at": "2026-10-30T09:00:38Z",
+            "final_url": "https://www.gov.uk/government/publications/ofsi-general-licence-int20257895596",
+            "linked_pdfs": [
+              "https://assets.publishing.service.gov.uk/media/6ae1dcbd7fe45a08a4036e6a/General_Licence_Lukoil_Bulgaria_INT.2025.7895596_October__2026.pdf",
+              "https://assets.publishing.service.gov.uk/media/6ae1dcd2bdb574cf1c9b3efe/Publication_Notice_Lukoil_Bulgaria_INT.2025.7895596_October_2026.pdf"
+            ],
+            "page_error": null,
+            "pages": 1,
+            "path": "docs/cb90de3c2fdb0ab23fe48f544cf537d7eabb32576eaf9653a9329514727e3b86.html",
+            "sha256": "cb90de3c2fdb0ab23fe48f544cf537d7eabb32576eaf9653a9329514727e3b86",
+            "text_pages": 1
+          },
+          "item_id": "https://www.gov.uk/government/publications/ofsi-general-licence-int20257895596#2026-10-28T11:50:21Z",
+          "key": "ofsi:31cead5f20d59e51",
+          "published": "2026-10-28",
+          "source": "ofsi",
+          "summary": "Details for OFSI General Licence INT/2025/7895596, Continuation of Business of Lukoil Bulgaria Entities",
+          "title": "Guidance: OFSI General Licence INT/2025/7895596",
+          "url": "https://www.gov.uk/government/publications/ofsi-general-licence-int20257895596"
+        },
+        {
+          "document": {
+            "bytes": 89157,
+            "content_type": "text/html",
+            "fetched_at": "2026-10-30T09:00:40Z",
+            "final_url": "https://www.gov.uk/government/publications/uk-financial-sanctions-faqs",
+            "linked_pdfs": [],
+            "page_error": null,
+            "pages": 2,
+            "path": "docs/cc0357c590e80148961e2a170caf13074bfa8cc5c579b4815a0248435f3d0f4f.html",
+            "sha256": "cc0357c590e80148961e2a170caf13074bfa8cc5c579b4815a0248435f3d0f4f",
+            "text_pages": 2
+          },
+          "item_id": "https://www.gov.uk/government/publications/uk-financial-sanctions-faqs#2026-10-26T15:19:05Z",
+          "key": "ofsi:d19286cea6e47ab5",
+          "published": "2026-10-26",
+          "source": "ofsi",
+          "summary": "OFSI publishes FAQs providing short-form guidance and technical information on financial sanctions.",
+          "title": "Guidance: UK Financial Sanctions FAQs",
+          "url": "https://www.gov.uk/government/publications/uk-financial-sanctions-faqs"
+        },
+        {
+          "document": {
+            "bytes": 140937,
+            "content_type": "text/html",
+            "fetched_at": "2026-10-30T09:00:42Z",
+            "final_url": "https://www.gov.uk/government/publications/legal-services-general-licence",
+            "linked_pdfs": [
+              "https://assets.publishing.service.gov.uk/media/680f5a735072e9b7db83ccf7/INT.2025.6160920_GL.pdf",
+              "https://assets.publishing.service.gov.uk/media/680f5a8f11d566056bcae92f/INT.2025.6160920_PN.pdf",
+              "https://assets.publishing.service.gov.uk/media/67e6bb7796745eff958ca030/Legal_Services_GL_-_INT-2024-5334756_-_Amendment_28.03.25.pdf",
+              "https://assets.publishing.service.gov.uk/media/67e6bb8a96745eff958ca031/Legal_Services_-_INT-2024-5334756_-_PN_Amendment_28_March_2025.pdf",
+              "https://assets.publishing.service.gov.uk/media/662ba56d5b89e6a356bf9357/Legal_services_GL_INT.2024.4671884.pdf",
+              "https://assets.publishing.service.gov.uk/media/663202a369098ded31fca71d/INT.2024.4671884_PN_no_FAQs.pdf",
+              "https://assets.publishing.service.gov.uk/media/657c815d95bf6500107190da/Legal_Services_GL_INT.2023.3744968.pdf",
+              "https://assets.publishing.service.gov.uk/media/657c816f83ba380013e1b661/Legal_Services_GL_Publication_Notice_INT.2023.3744968.pdf",
+              "https://assets.publishing.service.gov.uk/media/644bce2cfaf4aa0012e13098/Legal_Services_GL_INT20232954852.pdf",
+              "https://assets.publishing.service.gov.uk/media/644bce52faf4aa0012e13099/Legal_Services_GL_Publication_Notice_INT20232954852.pdf"
+            ],
+            "page_error": null,
+            "pages": 5,
+            "path": "docs/521c043b4bf16528d8047b154179429de8321967de3054d220f3c0d90228e52c.html",
+            "sha256": "521c043b4bf16528d8047b154179429de8321967de3054d220f3c0d90228e52c",
+            "text_pages": 5
+          },
+          "item_id": "https://www.gov.uk/government/publications/legal-services-general-licence#2026-10-26T15:18:45Z",
+          "key": "ofsi:8b4ab1b458a2d282",
+          "published": "2026-10-26",
+          "source": "ofsi",
+          "summary": "Legal Services General Licence INT/2026/11112108 and Legal Fees General Licence Reporting form",
+          "title": "Guidance: Legal Services General Licence",
+          "url": "https://www.gov.uk/government/publications/legal-services-general-licence"
+        },
+        {
+          "document": {
+            "bytes": 71291,
+            "content_type": "text/html",
+            "fetched_at": "2026-10-30T09:00:45Z",
+            "final_url": "https://www.gov.uk/government/publications/ofsi-general-licence-int202611112108",
+            "linked_pdfs": [
+              "https://assets.publishing.service.gov.uk/media/6adf6194d798ae11e9bc5d04/INT.2026.11112108__GL.pdf",
+              "https://assets.publishing.service.gov.uk/media/6adf61abd798ae11e9bc5d05/INT.2026.11112108__PN.pdf"
+            ],
+            "page_error": null,
+            "pages": 1,
+            "path": "docs/811ac7f62ae30f7ce58b7f0b9cf1d885471f298ea40d33690eb5e578ad75ff0e.html",
+            "sha256": "811ac7f62ae30f7ce58b7f0b9cf1d885471f298ea40d33690eb5e578ad75ff0e",
+            "text_pages": 1
+          },
+          "item_id": "https://www.gov.uk/government/publications/ofsi-general-licence-int202611112108#2026-10-26T15:18:34Z",
+          "key": "ofsi:b449a79412985cef",
+          "published": "2026-10-26",
+          "source": "ofsi",
+          "summary": "Details for OFSI General Licence INT/2026/11112108, legal services",
+          "title": "Guidance: OFSI General Licence INT/2026/11112108",
+          "url": "https://www.gov.uk/government/publications/ofsi-general-licence-int202611112108"
+        }
+      ],
+      "listed": 20,
+      "listed_at": "2026-10-30T09:00:12Z",
+      "listing": "listings/ofsi.atom",
+      "listing_sha256": "dcb9bff9bac2a45562d24461b429ff1d1298be7f0b5578274c815a90b8153c1c",
+      "listing_url": "https://www.gov.uk/government/organisations/office-of-financial-sanctions-implementation.atom",
+      "status": "ok"
+    }
+  }
+}
