@@ -226,6 +226,58 @@
         "adv-2026-0032-extractor-157e111999"
       ],
       "typology_id": "SAN004"
+    },
+    {
+      "advisory_id": "ADV-2026-0033",
+      "decided_at": "2026-10-30T15:46:37+00:00",
+      "link_key": "ADV-2026-0033::CMI010",
+      "note": "owner 2026-10-30: approved on review of the 2026-10-30 run",
+      "proposal_ids": [
+        "a32978b7b51f04f3"
+      ],
+      "run_ids": [
+        "adv-2026-0033-extractor-a09f2f0d33"
+      ],
+      "typology_id": "CMI010"
+    },
+    {
+      "advisory_id": "ADV-2026-0033",
+      "decided_at": "2026-10-30T15:46:37+00:00",
+      "link_key": "ADV-2026-0033::SAN004",
+      "note": "owner 2026-10-30: approved on review of the 2026-10-30 run",
+      "proposal_ids": [
+        "a605ce85725073bf"
+      ],
+      "run_ids": [
+        "adv-2026-0033-extractor-a09f2f0d33"
+      ],
+      "typology_id": "SAN004"
+    },
+    {
+      "advisory_id": "ADV-2026-0034",
+      "decided_at": "2026-10-30T15:46:37+00:00",
+      "link_key": "ADV-2026-0034::SAN002",
+      "note": "owner 2026-10-30: approved on review of the 2026-10-30 run",
+      "proposal_ids": [
+        "3a97b351b6f436e1"
+      ],
+      "run_ids": [
+        "adv-2026-0034-extractor-86f8c3e32a"
+      ],
+      "typology_id": "SAN002"
+    },
+    {
+      "advisory_id": "ADV-2026-0035",
+      "decided_at": "2026-10-30T15:46:37+00:00",
+      "link_key": "ADV-2026-0035::SAN001",
+      "note": "owner 2026-10-30: approved on review of the 2026-10-30 run",
+      "proposal_ids": [
+        "74990be7aa4fe7ac"
+      ],
+      "run_ids": [
+        "adv-2026-0035-extractor-e0a757ac2c"
+      ],
+      "typology_id": "SAN001"
     }
   ],
   "generated_from": "data/review_decisions.jsonl"

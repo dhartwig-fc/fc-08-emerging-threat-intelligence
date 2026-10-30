@@ -1,4 +1,18 @@
 {
-  "approved": [],
+  "approved": [
+    {
+      "advisory_id": "ADV-2026-0033",
+      "decided_at": "2026-10-30T15:46:37+00:00",
+      "emergent_label": "DPRK IT Worker Fraud Facilitation Network",
+      "link_key": "ADV-2026-0033::EMERGENT[dprk it worker fraud facilitation network]",
+      "note": "owner 2026-10-30: a distinct technique no existing typology covers",
+      "proposal_ids": [
+        "8f390138c0508f19"
+      ],
+      "run_ids": [
+        "adv-2026-0033-extractor-a09f2f0d33"
+      ]
+    }
+  ],
   "generated_from": "data/review_decisions.jsonl"
 }
