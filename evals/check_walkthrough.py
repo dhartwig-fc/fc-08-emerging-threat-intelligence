@@ -39,6 +39,8 @@ Usage:
                                                                   # pinned corpus's; MUST fail
     python evals/check_walkthrough.py --mutate snapshot-undercount  # the ledger (read in memory) holds one more accept
                                                                     # decided by taken_on than the snapshot counts; MUST fail
+    python evals/check_walkthrough.py --mutate banner-date        # the banner dates the page 2026-01-01, not by its
+                                                                  # snapshot; MUST fail
 
 SECTION 10 IS PINNED TO site/walkthrough_snapshot.json. Three of its inputs move every Friday once
 live runs are accepted: extraction queue files, accepted feed items in the seen-items ledger, and
@@ -117,7 +119,7 @@ MUTATIONS = ("drop-citation", "unpinned-log", "wrong-page", "swap-notes", "wrong
              "typed-score", "actor-id", "digest-header", "telemetry-count", "attested-count", "swap-moves",
              "resolver-runs", "resolver-prompt", "feed-accepted", "desk-total", "register-unresolved",
              "corpus-count", "emergent-undecided", "legacy-count", "snapshot-count", "snapshot-evidence",
-             "unpinned-advisory", "unpinned-golden", "snapshot-undercount")
+             "unpinned-advisory", "unpinned-golden", "snapshot-undercount", "banner-date")
 # The guard-side mutations: they change what THIS guard reads, not the builder. Every other mutation
 # is the builder's own, passed through --_mutate.
 GUARD_MUTATIONS = ("snapshot-evidence", "snapshot-undercount")
@@ -511,6 +513,18 @@ def _plant_checks(bw, page: str, snapshot: dict) -> list:
                         "snapshot's" % name,
                         "identical" if built == page else ("the page CHANGED" if corpus is not None else built)[:300]))
     return out
+
+
+def checks_banner(page: str, snapshot: dict) -> list:
+    """2026-10-31 (spec §6-7): the page says it is pinned, by its snapshot's date, and links the three paths."""
+    m = re.search(r'<p class="pinned" id="pinned"[^>]*>(.*?)</p>', page, re.S)
+    text = html.unescape(re.sub(r"<[^>]+>", "", m.group(1))) if m else ""
+    return [
+        (bool(m) and ("snapshot of %s" % snapshot["taken_on"]) in text and 'href="scan.html#paths"' in m.group(1),
+         "the banner dates the page by its snapshot and links the scan page's three paths", text[:120]),
+        (("at the snapshot of %s" % snapshot["taken_on"]) in section(page, "limits"),
+         "section 10 is dated by its snapshot", snapshot["taken_on"]),
+    ]
 
 
 def checks_sections_6_to_10(bw, page: str, record: dict, pinned: list, snapshot: dict) -> list:
@@ -989,6 +1003,7 @@ def checks() -> list:
                 "misplaced: %s" % misplaced))
 
     out += checks_sections_6_to_10(bw, page, record, pinned, snapshot)
+    out += checks_banner(page, snapshot)
     out += _plant_checks(bw, page, snapshot)
     out += _resolver_counts_fixture_checks(bw)
     out += _snapshot_self_checks(bw)

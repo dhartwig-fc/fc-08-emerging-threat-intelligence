@@ -19,6 +19,11 @@ Usage:
     python evals/check_scan_demo.py --mutate wrong-rereview  # the Now block shows a re-review the import does not hold
     python evals/check_scan_demo.py --mutate flags-lie       # the Now block counts a red flag the import does not hold
     python evals/check_scan_demo.py --mutate built-lie       # a step shows BUILT naming a file that does not exist
+    python evals/check_scan_demo.py --mutate drop-path-b     # path B vanishes from the page
+    python evals/check_scan_demo.py --mutate built-lie-a     # a path A step shows BUILT naming a file that does not exist
+    python evals/check_scan_demo.py --mutate path-figure     # a path figure is not the imported export's count
+    python evals/check_scan_demo.py --mutate no-paths-anchor # the page loses its #paths anchor
+    python evals/check_scan_demo.py --mutate python-on-a     # the changes table says path A changes Python
     python evals/check_scan_demo.py --mutate drop-decision   # the step counts lose the decided emergent patterns
     python evals/check_scan_demo.py --mutate fake-proposal   # an invented open proposal reaches the step counts
     python evals/check_scan_demo.py --mutate unpinned-log    # the builder counts a decision made after the pin
@@ -59,6 +64,7 @@ from __future__ import annotations
 import argparse
 import copy
 import hashlib
+import html
 import json
 import os
 import re
@@ -82,7 +88,8 @@ from publish_scan_demo import DEFAULT_PORTFOLIO  # noqa: E402
 MUTATIONS = ("drop-notice", "flip-verdict", "move-fate", "edit-quote", "reverse-decision", "citation-count",
              "wrong-model", "extra-tool", "eval-number", "drop-coverage", "leak-path", "show-cost",
              "built-lie", "drop-decision", "fake-proposal", "built-without-import", "wrong-rereview",
-             "unpinned-log", "flags-lie")
+             "unpinned-log", "flags-lie", "drop-path-b", "built-lie-a", "path-figure",
+             "no-paths-anchor", "python-on-a")
 MUTATION = None
 NOT_RUN = object()
 SEEDS = ("0", "1", "42", "4242")
@@ -123,6 +130,10 @@ def _mutated_inputs() -> dict:
         inp["live"] = [s for s in inp["live"] if s != "ofsi"]
     elif m == "built-lie":
         inp["pipeline"][3]["evidence"] = ["agents/no_such_drafter.py"]
+    elif m == "drop-path-b":
+        inp["paths"].pop("B")
+    elif m == "built-lie-a":
+        inp["paths"]["A"]["steps"][0]["evidence"] = ["tools/no_such_import.py"]
     elif m == "drop-decision":
         inp["log"] = [d for d in inp["log"] if d.get("kind") != "emergent"]
     elif m == "fake-proposal":
@@ -147,6 +158,14 @@ def _mutated_inputs() -> dict:
 
 
 def _page() -> str:
+    if MUTATION == "path-figure":
+        real = bs._figures
+        bs._figures = lambda iv: dict(real(iv), A1="99 corroborations across 1 typologies")
+    if MUTATION == "python-on-a":
+        bs.CHANGES = [bs.CHANGES[0][:4] + ("Yes",)] + bs.CHANGES[1:]
+    if MUTATION == "no-paths-anchor":
+        real_build = bs.build
+        bs.build = lambda inp: real_build(inp).replace('id="paths"', 'id="routes"')
     page = bs.build(_mutated_inputs())
     if MUTATION == "leak-path":
         page = page.replace("Friday run ", "Friday run /Users/someone/runs ", 1)
@@ -319,6 +338,53 @@ def checks():
     shown = [(s["name"], s["built"]) for s in PL.get("steps", [])]
     yield bool(used) and not missing and shown == [(s["name"], s["built"]) for s in used], \
         "every step marked BUILT names fc-08 files that exist", missing or shown
+    # 2026-10-31 (spec §2-3): paths A and B, their steps, and their live figures.
+    PA = P.get("paths", {})
+    yield sorted(PA) == ["A", "B"] and [s["name"] for s in PA["A"]["steps"]] == \
+        ["Absorb", "Product re-review", "Queue re-review", "Close", "Publish"] and \
+        [s["name"] for s in PA["B"]["steps"]] == \
+        ["Compare the warning signs", "Review the flag", "Absorb the flag", "Write it into doctrine"], \
+        "paths A and B lay out their steps, in order", {k: [s["name"] for s in v["steps"]] for k, v in PA.items()}
+    used_p = _mutated_inputs()["paths"]
+    bad = ["%s%d: %s" % (k, s["n"], f) for k, p in used_p.items() for s in p["steps"] if s["built"]
+           for f in s["evidence"] if not (ROOT / f).exists()]
+    no_ev = ["%s%d" % (k, s["n"]) for k, p in used_p.items() for s in p["steps"]
+             if (s["built"] is None) != (s["evidence"] == [])]
+    yield bool(used_p) and not bad and not no_ev, \
+        "a path step is BUILT only on fc-08 files that exist, and IN NEXUS only with no evidence", bad + no_ev
+    secs = re.findall(r'<section class="card" id="(path-[abc])"[^>]*>\s*<h2>([^<]*)</h2>', page)
+    yield 'id="paths"' in page and [s[0] for s in secs] == ["path-a", "path-b", "path-c"] and \
+        [s[1][:6] for s in secs] == ["Path A", "Path B", "Path C"], \
+        "the page anchors #paths and heads the three paths A, B, C, in order", secs
+    rows = re.findall(r'<tr data-path="([A-Z])">(.*?)</tr>', page, re.S)
+    keys = [p for p, _ in rows]
+    cells = {p: [html.unescape(re.sub(r"<[^>]+>", "", c)).strip() for c in re.findall(r"<td>(.*?)</td>", body, re.S)]
+             for p, body in rows}
+    yield keys == ["A", "B", "C", "X"] and cells["A"][-1] == "No" and cells["B"][-1] == "No" \
+        and cells["C"][-1] != "No", \
+        "the changes table has a row per path, and paths A and B change no Python or score", cells
+    yield 'id="limits"' in page and 'aria-label="Next capability"' not in page, \
+        "the limits section replaces the old Next list", 'id="limits"' in page
+    raw = json.loads((ROOT / "data" / "advisory_impact.json").read_text(encoding="utf-8")) \
+        if (ROOT / "data" / "advisory_impact.json").exists() else {}
+    ts = raw.get("typologies") or {}
+    corr = [c for t in ts.values() for c in t.get("corroborations") or []]
+    rr = [r for t in ts.values() for r in t.get("rereviews") or []]
+    fl = [f for t in ts.values() for f in t.get("flags") or []]
+    n_open, n_fl = sum(r["status"] == "open" for r in rr), sum(f["status"] == "approved" for f in fl)
+    n_fid = sum(f["status"] == "in_doctrine" for f in fl)
+    last = max((c["absorbed_at"][:10] for c in corr), default="")
+    b12 = "Built, not yet used" if n_fl + n_fid == 0 else "%d flag(s) approved" % (n_fl + n_fid)
+    want_fig = {
+        "A1": "%d corroborations across %d typologies" % (len(corr), sum(1 for t in ts.values() if t.get("corroborations"))),
+        "A2": "%d product re-reviews raised" % len(rr),
+        "A3": "The rule only: the export does not carry queue re-reviews",
+        "A4": "%d closed · %d open" % (len(rr) - n_open, n_open),
+        "A5": ("Absorbed through %s" % last) if last else "Not yet absorbed",
+        "B1": b12, "B2": b12, "B3": "%d awaiting doctrine" % n_fl, "B4": "%d in doctrine" % n_fid}
+    got_fig = {s["label"]: s["figure"] for p in PA.values() for s in p["steps"]}
+    yield got_fig == want_fig, "every path figure equals the imported impact export, counted here", \
+        {k: (got_fig.get(k), v) for k, v in want_fig.items() if got_fig.get(k) != v} or len(got_fig)
     latest = {}
     for d in T["log"]:
         latest[d["link_key"]] = d
@@ -352,13 +418,13 @@ def checks():
                 "rereviews": len(rrs), "open": sum(r["status"] == "open" for r in rrs),
                 "absorbed_on": max((c["absorbed_at"][:10] for c in corrs), default="")}
     yield {k: I.get(k) for k in want_tot} == want_tot, "the Now block's totals are the import's", want_tot
-    # Stage566 K3c: the red-flag counts are the import's, and "New red flags" leaves Next only when one exists.
+    # Stage566 K3c: the red-flag counts are the import's, and the Now block's red-flag line is filled once one exists.
     fl = [f for t in TI.values() for f in t.get("flags", [])]
     want_fl = {"flags": sum(f["status"] == "approved" for f in fl),
                "flags_in_doctrine": sum(f["status"] == "in_doctrine" for f in fl)}
     yield {k: I.get(k) for k in want_fl} == want_fl, "the Now block's red-flag counts are the import's", want_fl
-    yield 'id="nextFlags"' in page and "New red flags:" in page, \
-        "the Next block still lists New red flags for the page to move", ""
+    yield 'id="nowFlags"' in page and "New red flags:" in page, \
+        "the Now block carries the New red flags line for the page to fill", ""
     fv = bs.impact_view({"typologies": {"SAN006": {"corroborations": [], "rereviews": [], "flags": [
         {"id": "FLG-1", "status": "approved"}, {"id": "FLG-2", "status": "in_doctrine"},
         {"id": "FLG-3", "status": "withdrawn"}]}}})

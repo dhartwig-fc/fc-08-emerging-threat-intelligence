@@ -99,7 +99,7 @@ MUTATIONS = ("drop-citation", "unpinned-log", "wrong-page", "swap-notes", "wrong
              "typed-score", "actor-id", "digest-header", "telemetry-count", "attested-count", "swap-moves",
              "resolver-runs", "resolver-prompt", "feed-accepted", "desk-total", "register-unresolved",
              "corpus-count", "emergent-undecided", "legacy-count", "snapshot-count", "unpinned-advisory",
-             "unpinned-golden")
+             "unpinned-golden", "banner-date")
 
 e = html.escape
 PAST = {"approve": "approved", "reject": "rejected"}
@@ -995,7 +995,7 @@ def section_limits(inp: dict) -> str:
     undecided = [t["label"] for t in inp["record"]["typologies"] if not t.get("typology_id")
                  and ((_key(t) in decided) if _MUTATE == "emergent-undecided" else (_key(t) not in decided))]
     return """<section id="limits">
-  <h2><span class="n">10</span> What this slice does not do yet</h2>
+  <h2><span class="n">10</span> What this slice did not do yet, at the snapshot of %s</h2>
   <ul class="limits">
     <li><strong>Nothing enters the corpus without a person.</strong> At the snapshot of <span data-date="snapshot">%s</span>, the corpus held <span data-count="advisories">%d</span> advisories, each pinned by its sha256; every one was added by a person. Live ingestion is being built: a feeds server lists and fetches new publications into a local inbox, and by that date <span data-count="feed-accepted">%d</span> feed %s had been accepted into the corpus.</li>
     <li><strong>Nothing flows into detection yet.</strong> An approved link reaches a desk&rsquo;s digest; no typology link, indicator or actor is fed to the platform&rsquo;s detection.</li>
@@ -1009,7 +1009,7 @@ def section_limits(inp: dict) -> str:
     <li><strong>The scores are single runs.</strong> Section 9 shows one extraction per advisory; its figures have no bands of their own.</li>
   </ul>
 </section>
-""" % (taken_on, n_corpus, feed_accepted, feed_item_word, taken_on, len(rr["runs"]), run_word,
+""" % (taken_on, taken_on, n_corpus, feed_accepted, feed_item_word, taken_on, len(rr["runs"]), run_word,
        len(rr["with_tool"]), RESOLVER, len(rr["no_record"]), len(rr["resolved"]), prompt, lq["count"],
        "proposal sits" if lq["count"] == 1 else "proposals sit", lq["first"], lq["last"], keyed,
        len(register), emergent_ok,
@@ -1161,10 +1161,12 @@ TAIL = """</div>
 
 
 def build(inp: dict) -> str:
+    taken = "2026-01-01" if _MUTATE == "banner-date" else inp["snapshot"]["taken_on"]
     intro = """
   <h1>One advisory, from PDF to owner-approved typology links</h1>
+  <p class="pinned" id="pinned" style="border-left:3px solid #c9a227;padding:6px 10px;font-size:13px">Pinned at the snapshot of %s. The scan page shows how the system runs now: <a href="scan.html#paths">the three paths &rarr;</a></p>
   <p class="lede">%s, followed through extraction, grounding and review to the desks it reaches, with the actors it names, what the agent did, how the extraction scores and what this slice does not do yet. Every figure and quote on this page is read from a governed file when the page is built.</p>
-""" % e(ADVISORY)
+""" % (e(taken), e(ADVISORY))
     sections = [section_question(inp), section_source(inp), section_extraction(inp),
                 section_grounding(inp), section_review(inp), section_actors(inp), section_digest(inp),
                 section_telemetry(inp), section_score(inp), section_limits(inp)]

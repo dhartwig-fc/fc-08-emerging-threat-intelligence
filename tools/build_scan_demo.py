@@ -107,6 +107,125 @@ PIPELINE = [
              "as a governed typology, not proposed as something new."},
 ]
 
+# 2026-10-31 (spec §2): the steps after a person decides, for the two paths that are not PIPELINE. Same shape and
+# the same rule as PIPELINE: built True only on fc-08 files that exist; built None ("IN NEXUS") when the step
+# happens in fc-10 or a toolkit and fc-08 holds no file that shows it (plan R3). Path C is PIPELINE itself.
+PATHS = {
+    "A": {"title": "Path A · A notice confirms a typology NEXUS already has",
+          "question": "The common path. It puts new evidence in front of the people responsible for the typology "
+                      "and its cases, and changes no score, threshold, case state, doctrine or Python.",
+          "steps": [
+              {"n": 1, "name": "Absorb", "actor": "PERSON", "built": True,
+               "evidence": ["tools/import_fc10_impact.py", "data/advisory_impact.json"],
+               "what": "The owner runs absorb in NEXUS. Every approved link not yet taken is filed as a "
+                       "corroboration of its typology: the quotes, the publisher, and fc-08's commit and file "
+                       "hashes, so the evidence traces back. Running it twice records nothing new."},
+              {"n": 2, "name": "Product re-review", "actor": "NEXUS", "built": True,
+               "evidence": ["tools/import_fc10_impact.py", "data/advisory_impact.json"],
+               "what": "Absorb raises a re-review of the typology's manufactured product: given this advisory, is "
+                       "the product still right, or does the advisory show something it misses?"},
+              {"n": 3, "name": "Queue re-review", "actor": "PERSON", "built": None, "evidence": [],
+               "what": "A sweep finds live queue cases that alerted on the typology and were opened before the "
+                       "advisory was absorbed, and asks for each to be re-reviewed. The case's state is not touched."},
+              {"n": 4, "name": "Close", "actor": "PERSON", "built": True,
+               "evidence": ["tools/import_fc10_impact.py", "data/advisory_impact.json"],
+               "what": "Each re-review closes as unchanged or action taken, with a note. The note is where a "
+                       "person records anything the analytic misses."},
+              {"n": 5, "name": "Publish", "actor": "PERSON", "built": True,
+               "evidence": ["tools/import_fc10_impact.py", "tools/publish_scan_demo.py"],
+               "what": "The typology's Knowledge Centre page gains an Advisory corroboration section, and fc-08 "
+                       "imports the result for this page."}]},
+    "B": {"title": "Path B · A notice shows a new warning sign for a known typology",
+          "question": "It starts from a link already approved on path A and carries a new indicator into the "
+                      "typology's written doctrine. It does not change the engine.",
+          "steps": [
+              {"n": 1, "name": "Compare the warning signs", "actor": "AGENT", "built": True,
+               "evidence": ["agents/compare_flags.py"],
+               "what": "An agent reads the advisory's warning signs and the typology's own indicators. Each sign "
+                       "either matches one, or is proposed as a new red flag in one line, citing a quote already "
+                       "in the record."},
+              {"n": 2, "name": "Review the flag", "actor": "PERSON", "built": True, "evidence": ["tools/review.py"],
+               "what": "A flag is a link kind of its own in the review gate. A person approves or rejects each one."},
+              {"n": 3, "name": "Absorb the flag", "actor": "PERSON", "built": None, "evidence": [],
+               "what": "The same absorb records each approved flag in NEXUS, and the typology's page shows it "
+                       "under Proposed red flags."},
+              {"n": 4, "name": "Write it into doctrine", "actor": "PERSON", "built": None, "evidence": [],
+               "what": "The owner adds the flag as one bullet under Risk Drivers in the typology's doctrine, "
+                       "commits it, and records it. NEXUS refuses unless the committed file really contains it."}]},
+}
+PATH_C = {"title": "Path C · A notice describes a method NEXUS does not have",
+          "question": "The only path that can end in new detection code. Six stages, each an owner command that "
+                      "refuses to run until the one before is complete."}
+
+
+# 2026-10-31 (spec §4-5). The last column is the one the owner asked about: only path C changes Python.
+CHANGES_COLS = ("Path", "Evidence and pages", "Case review", "Doctrine text", "Python and scores")
+CHANGES = [
+    ("A · Known typology", "Corroboration filed, page updated", "Product and queue re-reviews raised", "No", "No"),
+    ("B · New red flag", "Flag shown as proposed", "No", "One bullet under Risk Drivers", "No"),
+    ("C · New method", "Evidence gathered on the proposal", "No", "New doctrine, new id",
+     "New engine, built by engineers, then released"),
+    ("Rejected or dropped", "Decision recorded only", "No", "No", "No"),
+]
+CHANGES_KEYS = ("A", "B", "C", "X")
+TRUST = [
+    ("One writer per record", "Each log has exactly one program allowed to write it, and a guard fails if any other "
+                              "code tries."),
+    ("Append-only, hash-chained logs", "History is never edited; each event carries the hash of the one before it, "
+                                       "so tampering is detectable. Tables and pages are rebuilt from the logs."),
+    ("No clock", "Every owner command takes an explicit time and refuses one earlier than the last event, so a "
+                 "replay gives the same result."),
+    ("Quotes must be on the page", "A claim whose quote cannot be found word for word on its source page blocks "
+                                   "acceptance."),
+    ("One-way crossings", "NEXUS reads fc-08's approvals; fc-08 imports NEXUS's library, proposals and impact. Each "
+                          "import records the other side's commit and file hash."),
+]
+LIMITS = [
+    ("Engine built is the owner's word", "The command records the commit it is given but does not inspect it. The "
+                                         "real gate is live, which checks the product and the release record."),
+    ("Absorb takes every approved link at once", "It cannot take a single advisory."),
+    ("One re-review per link, not per case", "Three advisories linked to one typology give its case three separate "
+                                             "re-reviews."),
+    ("Actor names are labels", "The owner and supervisor names are written by the command, not checked against a "
+                               "login."),
+]
+
+
+def _changes_html() -> str:
+    head = "".join("<th>%s</th>" % html.escape(c) for c in CHANGES_COLS)
+    body = "".join('<tr data-path="%s">%s</tr>' % (k, "".join("<td>%s</td>" % html.escape(c) for c in row))
+                   for k, row in zip(CHANGES_KEYS, CHANGES))
+    return ('<div style="overflow-x:auto"><table class="changes"><thead><tr>%s</tr></thead><tbody>%s</tbody>'
+            '</table></div>' % (head, body))
+
+
+def _list_html(items: list) -> str:
+    return '<ul style="margin:8px 0 0;padding-left:18px;font-size:13px;color:var(--fg-2)">%s</ul>' % "".join(
+        "<li><b>%s.</b> %s</li>" % (html.escape(t), html.escape(d)) for t, d in items)
+
+
+def _figures(iv: dict) -> dict:
+    """The live figure under each path step, from impact_view alone (spec §3). Never typed."""
+    n_b = iv["flags"] + iv["flags_in_doctrine"]
+    b12 = "Built, not yet used" if n_b == 0 else "%d flag(s) approved" % n_b
+    return {
+        "A1": "%d corroborations across %d typologies" % (iv["corroborations"], iv["typologies"]),
+        "A2": "%d product re-reviews raised" % iv["rereviews"],
+        "A3": "The rule only: the export does not carry queue re-reviews",
+        "A4": "%d closed · %d open" % (iv["rereviews"] - iv["open"], iv["open"]),
+        "A5": ("Absorbed through %s" % iv["absorbed_on"]) if iv["absorbed_on"] else "Not yet absorbed",
+        "B1": b12, "B2": b12,
+        "B3": "%d awaiting doctrine" % iv["flags"],
+        "B4": "%d in doctrine" % iv["flags_in_doctrine"],
+    }
+
+
+def _paths(inp: dict) -> dict:
+    fig = _figures(impact_view(inp["impact"]))
+    return {k: {"steps": [dict({x: v for x, v in s.items() if x != "evidence"},
+                               label="%s%d" % (k, s["n"]), figure=fig["%s%d" % (k, s["n"])]) for s in p["steps"]]}
+            for k, p in inp["paths"].items()}
+
 # Source types that are not regulators or agencies: never shown as "not yet scanned".
 NOT_A_FEED = ("industry", "press", "other")
 DISPLAY = {"fincen": "FinCEN", "ofac": "OFAC", "ofsi": "OFSI", "fatf": "FATF", "fca": "FCA", "nca": "NCA",
@@ -248,6 +367,7 @@ def inputs() -> dict:
         "impact": (json.loads(IMPACT_IMPORT.read_text(encoding="utf-8")) if IMPACT_IMPORT.exists()
                    else {"typologies": {}}),
         "pipeline": copy.deepcopy(PIPELINE),
+        "paths": copy.deepcopy(PATHS),
     }
 
 
@@ -380,6 +500,7 @@ def payload(inp: dict) -> dict:
                      "desks": rec["suggested_desks"], "links": links},
         "corroborates": {"typology": CORROBORATES[0], "name": san["label"], "indicator": CORROBORATES[1]},
         "pipeline": _pipeline(inp, links),
+        "paths": _paths(inp),
         "fc10": FC10,
         "impact": impact_view(inp["impact"]),
         "coverage": {"live": [DISPLAY[s] for s in inp["live"]], "manual": [DISPLAY[s] for s in inp["manual"]],
@@ -409,32 +530,38 @@ def _fig_open(mid: str, height: int, title: str, desc: str) -> str:
             % (height, html.escape(title), html.escape(desc), mid))
 
 
-def two_paths_svg() -> str:
-    """The fork after a person's decision: a link to a known typology, or a pattern that matches nothing.
-    The known path is absorbed into NEXUS (Stage566 K4b): corroboration and a product re-review."""
+def three_paths_svg() -> str:
+    """The fork after a person's decision, three ways (spec §1): a known typology is absorbed (A); a new warning
+    sign for it goes to doctrine (B); a pattern matching nothing becomes a proposal and, once live, joins the
+    library, so the next advisory on it takes path A."""
     arr = ' class="arr" marker-end="url(#figA)"'
-    parts = [_fig_open("figA", 580, "After a person decides: two paths",
+    parts = [_fig_open("figA", 580, "After a person decides: three paths",
                        "A scan reads advisories, an agent proposes links, a person reviews each one. A link to a "
-                       "known typology is routed to its desk; a pattern matching nothing becomes a typology "
-                       "proposal that, once live, joins the library so the next advisory takes the known path."),
+                       "known typology is absorbed into NEXUS; a new warning sign for it is written into its "
+                       "doctrine; a pattern matching nothing becomes a typology proposal that, once live, joins "
+                       "the library so the next advisory takes the known path."),
              _fig_box(190, 30, 300, "Weekly scan", "Fridays: fetch and triage advisories"),
              '<line x1="340" y1="86" x2="340" y2="114"%s/>' % arr,
              _fig_box(190, 116, 300, "An agent reads the advisory", "Indicators, quotes, proposed links", "agent"),
              '<line x1="340" y1="172" x2="340" y2="200"%s/>' % arr,
              _fig_box(190, 202, 300, "A person reviews each link", "Approve or reject, with a reason", "person"),
-             '<path d="M340 258 L340 272 L190 272 L190 286"%s/>' % arr,
-             '<path d="M340 258 L340 272 L490 272 L490 286"%s/>' % arr,
-             _fig_box(60, 288, 260, "Links a known typology", "e.g. %s to %s" % (ADVISORY, CORROBORATES[0])),
-             _fig_box(360, 288, 260, "Matches nothing known", "An emergent pattern"),
-             '<line x1="190" y1="344" x2="190" y2="382"%s/>' % arr,
-             '<line x1="490" y1="344" x2="490" y2="382"%s/>' % arr,
-             _fig_box(60, 384, 260, "Absorbed into NEXUS", "Corroborate + re-review"),
-             _fig_box(360, 384, 260, "Typology proposal", "Opened by the owner in NEXUS"),
-             '<line x1="490" y1="440" x2="490" y2="478"%s/>' % arr,
-             _fig_box(360, 480, 260, "Goes live", "Joins the typology library"),
-             '<path class="arr loop" d="M360 508 L190 508 L190 442" marker-end="url(#figA)"/>',
-             '<text x="275" y="528" text-anchor="middle">The next advisory on it</text>',
-             '<text x="275" y="546" text-anchor="middle">takes the known path</text>',
+             '<path d="M340 258 L340 272 L120 272 L120 286"%s/>' % arr,
+             '<line x1="340" y1="258" x2="340" y2="286"%s/>' % arr,
+             '<path d="M340 258 L340 272 L560 272 L560 286"%s/>' % arr,
+             _fig_box(20, 288, 200, "A · Known typology", "Corroborate + re-review"),
+             _fig_box(240, 288, 200, "B · New warning sign", "A proposed red flag", "agent"),
+             _fig_box(460, 288, 200, "C · Matches nothing", "An emergent pattern"),
+             '<line x1="120" y1="344" x2="120" y2="382"%s/>' % arr,
+             '<line x1="340" y1="344" x2="340" y2="382"%s/>' % arr,
+             '<line x1="560" y1="344" x2="560" y2="382"%s/>' % arr,
+             _fig_box(20, 384, 200, "Absorbed into NEXUS", "Evidence + re-reviews"),
+             _fig_box(240, 384, 200, "Written into doctrine", "One bullet, Risk Drivers", "person"),
+             _fig_box(460, 384, 200, "Typology proposal", "Opened by the owner"),
+             '<line x1="560" y1="440" x2="560" y2="478"%s/>' % arr,
+             _fig_box(460, 480, 200, "Goes live", "Joins the typology library"),
+             '<path class="arr loop" d="M460 508 L120 508 L120 442" marker-end="url(#figA)"/>',
+             '<text x="290" y="528" text-anchor="middle">The next advisory on it</text>',
+             '<text x="290" y="546" text-anchor="middle">takes path A</text>',
              "</svg>"]
     return "".join(parts)
 
@@ -463,10 +590,19 @@ def steps_svg() -> str:
     return "".join(parts)
 
 
+def _head(p: dict) -> str:
+    return '<h2>%s</h2>\n<p class="sub" style="font-size:13px;color:var(--muted)">%s</p>' % (
+        html.escape(p["title"]), html.escape(p["question"]))
+
+
 def build(inp: dict) -> str:
     data = json.dumps(payload(inp), ensure_ascii=False, sort_keys=True, separators=(",", ":")).replace("</", "<\\/")
+    heads = {k: _head(p) for k, p in inp["paths"].items()}
     return (TEMPLATE.replace("__PAYLOAD__", data).replace("__RUN__", html.escape(RUN_ID))
-            .replace("__FIG_PATHS__", two_paths_svg()).replace("__FIG_STEPS__", steps_svg()))
+            .replace("__FIG_PATHS__", three_paths_svg()).replace("__FIG_STEPS__", steps_svg())
+            .replace("__PATH_A__", heads.get("A", "")).replace("__PATH_B__", heads.get("B", ""))
+            .replace("__PATH_C__", _head(PATH_C)).replace("__CHANGES__", _changes_html())
+            .replace("__TRUST__", _list_html(TRUST)).replace("__LIMITS__", _list_html(LIMITS)))
 
 
 TEMPLATE = r"""<!doctype html>
@@ -568,6 +704,7 @@ h2{margin:0;font-size:16px}
 .fig rect.agent{stroke:var(--blue)}.fig rect.person{stroke:var(--gold)}
 .fig .arr{fill:none;stroke:#8d9db3;stroke-width:1.2}.fig .loop{stroke:var(--ok);stroke-dasharray:4 3}
 footer{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px;font-size:12px;color:var(--faint);border-top:1px solid var(--line);padding-top:12px}
+.changes{width:100%;border-collapse:collapse;font-size:12.5px}.changes th,.changes td{text-align:left;vertical-align:top;padding:6px 8px;border-top:1px solid rgba(141,157,179,.25)}.changes th{color:var(--muted);font-weight:600}
 </style>
 </head>
 <body>
@@ -624,18 +761,33 @@ footer{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px;font-si
 <div class="card"><div class="label">Typology links, decided by a person</div><div id="links"></div></div>
 </section>
 
-<section class="card" aria-label="Two paths after a decision">
-<h2>After a person decides: two paths</h2>
-<p class="sub" style="font-size:13px;color:var(--muted)">The scan never creates a typology. A person's decision on each link sends it one of two ways: a link to a typology NEXUS already governs goes to that typology's desk; a pattern that matches nothing can become a new typology, and once live it is one the next advisory links to directly.</p>
+<section class="card" id="paths" aria-label="Three paths after a decision">
+<h2>After a person decides: three paths</h2>
+<p class="sub" style="font-size:13px;color:var(--muted)">The scan never creates a typology and never changes a score. A person's decision on each link sends it one of three ways: a link to a typology NEXUS already governs is absorbed as evidence; a new warning sign for that typology can be written into its doctrine; a pattern that matches nothing can become a new typology, and once live it is one the next advisory links to directly.</p>
 <div class="figwrap">__FIG_PATHS__</div>
 </section>
 
-<section class="card" aria-label="When the agent finds something new">
-<div style="display:flex;flex-wrap:wrap;align-items:baseline;gap:8px 14px"><h2>When the agent finds something new</h2></div>
+<section class="card" id="path-a" aria-label="Path A">
+__PATH_A__
+<div class="grid3" id="pathASteps"></div>
+</section>
+
+<section class="card" id="path-b" aria-label="Path B">
+__PATH_B__
+<div class="grid3" id="pathBSteps"></div>
+</section>
+
+<section class="card" id="path-c" aria-label="Path C">
+__PATH_C__
 <p class="sub" id="newHeadline"></p>
 <div class="figwrap">__FIG_STEPS__</div>
 <div class="grid3" id="newSteps"></div>
 <div class="dash" id="newExample" style="margin-top:12px"></div>
+</section>
+
+<section class="card" id="changes" aria-label="What each path changes">
+<h2>What each path changes</h2>
+__CHANGES__
 </section>
 
 <section class="next" aria-label="Now: the advisory acts inside NEXUS">
@@ -649,12 +801,12 @@ footer{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px;font-si
 <p class="note" id="nowFlags"></p>
 </section>
 
-<section class="card" aria-label="Next capability">
-<div style="display:flex;flex-wrap:wrap;align-items:baseline;gap:8px 14px"><h2>Next</h2><span class="nb">NOT BUILT</span></div>
-<ul style="margin:8px 0 0;padding-left:18px;font-size:13px;color:var(--fg-2)">
-<li id="nextFlags"><b>New red flags:</b> an agent compares the advisory with the typology's red flags; a person approves genuinely new ones.</li>
-<li><b>Cases on the desk:</b> re-review the queue cases of the typology, not only its product.</li>
-</ul>
+<section class="card" id="limits" aria-label="Known limits">
+<h2>Known limits, and why it can be trusted</h2>
+<div class="label">Why it can be trusted</div>
+__TRUST__
+<div class="label" style="margin-top:12px">Known limits</div>
+__LIMITS__
 </section>
 
 <footer><span>Deep-dive on one advisory, from PDF to approved links: <a href="index.html">the threat-intelligence walkthrough</a> · <a href="../index.html">NEXUS</a></span><span>Public regulator notices; NEXUS case data is synthetic</span></footer>
@@ -781,6 +933,16 @@ footer{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px;font-si
       '<b style="display:block;margin-top:4px">' + esc(s.name) + '</b><p style="margin:6px 0 0;font-size:12.5px;color:var(--fg-2)">' + esc(s.what) + '</p>' +
       '<div class="tech">' + esc(COUNT[i]) + '</div></div>';
   }).join("");
+  function pathSteps(id, path) {
+    $(id).innerHTML = (path ? path.steps : []).map(function (s) {
+      var badge = s.built ? '<span class="built">BUILT</span>' : '<span class="kind">IN NEXUS</span>';
+      return '<div class="step"><div class="top"><span class="n">' + esc(s.label) + '</span> <span class="kind">' + esc(s.actor) + '</span> ' + badge + '</div>' +
+        '<b style="display:block;margin-top:4px">' + esc(s.name) + '</b><p style="margin:6px 0 0;font-size:12.5px;color:var(--fg-2)">' + esc(s.what) + '</p>' +
+        '<div class="tech">' + esc(s.figure) + '</div></div>';
+    }).join("");
+  }
+  pathSteps("pathASteps", P.paths.A);
+  pathSteps("pathBSteps", P.paths.B);
   var X = N.example;
   $("newExample").innerHTML = X.kind === "proposal"
     ? '<div class="label">In development now</div><b>' + esc(X.ref) + ' · ' + esc(X.name) + '</b> — stage ' + esc(X.stage) + ', ' + X.advisories.length + ' advisory(ies): ' + X.advisories.map(esc).join(", ")
@@ -799,9 +961,8 @@ footer{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px;font-si
     '<p style="margin:6px 0 0;font-size:12.5px;color:var(--muted)">' + esc(D.publisher) + ' · approved ' + esc(day(D.decided_at)) + ' · <a href="' + esc(F.doctrine_page) + '">' + esc(K.typology) + ' doctrine</a></p>' : NOT;
   $("nowCase").innerHTML = R ? HEAD + esc(K.typology) + ' → product re-review</div><b style="display:block;margin-top:4px">' + esc(R.id) + ' · <a href="' + esc(F.case_page) + '">' + esc(R.subject) + ' (' + esc(R.case_id) + ')</a></b>' +
     '<p style="margin:4px 0 0;font-size:12.5px;color:var(--muted)">requested ' + esc(day(R.raised_at)) + ' · ' + (R.status === "closed" ? "closed " + esc(day(R.closed_at)) + " · " + esc(R.outcome) : esc(R.status)) + '</p>' : NOT;
-  // Stage566 K3c: once a red flag is approved, "New red flags" leaves Next and is counted here.
+  // Stage566 K3c: the count of approved red flags, shown once one exists.
   if (I.flags + I.flags_in_doctrine > 0) {
-    var nf = $("nextFlags"); nf.parentNode.removeChild(nf);
     $("nowFlags").textContent = "New red flags: " + I.flags + " approved, awaiting doctrine · " + I.flags_in_doctrine + " in doctrine. An agent compares each advisory with its typology's red flags; a person approves the genuinely new ones.";
   }
   $("nowTotals").textContent = I.built ? "Across NEXUS: " + I.typologies + " typologies corroborated · " + I.rereviews + " re-reviews (" + I.open + " open)" : "";
