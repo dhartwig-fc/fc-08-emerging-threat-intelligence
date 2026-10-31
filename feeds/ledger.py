@@ -20,7 +20,9 @@ from typing import Dict, Iterable, List, Tuple
 ROOT = Path(__file__).resolve().parent.parent
 SEEN_PATH = ROOT / "data" / "feeds" / "seen.json"
 SCHEMA = "fc08-seen-items/1"
-DECISIONS = ("accept", "drop")
+# "baseline" is neither: nobody judged those items. tools/accept_run.py --baseline records a newly added source's
+# first listing so only items published after go-live are triaged; no reader counts it as accepted or dropped.
+DECISIONS = ("accept", "drop", "baseline")
 DAY = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 
 Key = Tuple[str, str]
@@ -36,6 +38,14 @@ def load(path: Path = SEEN_PATH) -> Dict[Key, dict]:
         if key in out:
             raise ValueError("%s: %s:%s is recorded twice" % (path, key[0], key[1]))
         out[key] = entry
+    return out
+
+
+def tally(entries: Iterable[dict]) -> Dict[str, int]:
+    """How many entries carry each decision. A baseline is its own count, never an accept or a drop."""
+    out = {d: 0 for d in DECISIONS}
+    for e in entries:
+        out[e["decision"]] += 1
     return out
 
 

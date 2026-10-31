@@ -18,6 +18,12 @@ REPORT = "report.md"
 CEILING_NOTE = "US$%.2f ceiling"
 
 
+def _ceiling(rec: dict) -> float:
+    """The ceiling THIS run was held to (run.json records it), so an old run's report stays true to that run;
+    a run from before it was recorded was held to US$5.00."""
+    return rec.get("ceiling_usd") or 5.0
+
+
 def _usd(x) -> str:
     return "unknown" if x is None else "US$%.2f" % x
 
@@ -72,7 +78,7 @@ def summary_line(rec: dict, outcomes: dict = None) -> str:
     counts = "%d new item(s), %d kept, %d dropped by triage, %d extracted, %d unfinished; %s spent of the %s" % (
         len(rec["listed"]), len(rec["relevant"]), len(rec["not_relevant"]), len(rec["extracted"]),
         len(rec["unfinished"]) + len(rec["not_queued"]) + len(rec["failed"]) + len(rec["deferred_budget"]),
-        _usd(rec["spent_usd"]), CEILING_NOTE % 5.0)
+        _usd(rec["spent_usd"]), CEILING_NOTE % _ceiling(rec))
     # AFTER every count, never between them: line 3's "N unfinished" still equals ## Unfinished.
     counts += citation_clause(rec, outcomes or {})
     if rec["status"] == reconcile.FAILED:
@@ -217,7 +223,7 @@ def render(run_id: str, root: Path = inbox.INBOX_ROOT) -> str:
             len(s["duplicated"]), s["from_transcript"]))
     out += ["", "## Cost", "",
             "%s counted against the %s (a session whose cost never arrived is counted at its cap); %s reported by the "
-            "sessions' own telemetry." % (_usd(rec["spent_usd"]), CEILING_NOTE % 5.0, _usd(rec["known_cost_usd"])), ""]
+            "sessions' own telemetry." % (_usd(rec["spent_usd"]), CEILING_NOTE % _ceiling(rec), _usd(rec["known_cost_usd"])), ""]
     if rec["status"] in reconcile.ACCEPTABLE and rec["listed"]:
         out += ["## Next", "", "`python tools/accept_run.py %s` -- accept, drop or defer each item." % run_id, ""]
     elif rec["status"] == reconcile.RECON_FAILED:

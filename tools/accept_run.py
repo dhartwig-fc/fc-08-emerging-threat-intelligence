@@ -7,6 +7,7 @@ Usage:
     python tools/accept_run.py --pending                  # every run in the inbox and what it is waiting for
     python tools/accept_run.py --expire [RUN_ID]          # move pending runs 14+ days old to inbox/expired/
     python tools/accept_run.py --seed-catalogue [--dry-run]  # ONE-TIME: the back-catalogue's items, as drops
+    python tools/accept_run.py --baseline SOURCE ... --on YYYY-MM-DD [--dry-run]  # a new source's listing, as baseline
 
 FILE is JSON, {"<item key>": "accept" | "drop" | "defer"}, one entry for EVERY item the run listed as new.
   accept  only an item the run EXTRACTED. It gets the advisory id its extraction was allocated (the id its
@@ -105,6 +106,8 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 from feeds import extraction, inbox, ledger, reconcile, runs  # noqa: E402
+from feeds.sources import SOURCES  # noqa: E402
+from tools import count_new  # noqa: E402
 
 DATA = ROOT / "data"
 GOLDEN_LIST = ROOT / "evals" / "golden" / "advisory_list.json"
@@ -112,7 +115,11 @@ ADVISORY_LIST = DATA / "feeds" / "advisory_list.json"   # the live-feed list: th
 FEED_LIST_SCHEMA = "fc08-feed-advisories/1"
 CATALOGUE = ROOT / "evals" / "feeds" / "catalogue.json"
 DECISIONS = ("accept", "drop", "defer")
-PUBLISHERS = {"fincen": "FinCEN (US Treasury)", "ofsi": "OFSI (HM Treasury)", "ofac": "OFAC (US Treasury)"}
+PUBLISHERS = {"fincen": "FinCEN (US Treasury)", "ofsi": "OFSI (HM Treasury)", "ofac": "OFAC (US Treasury)",
+              "otsi": "OTSI (HM Treasury)", "fca": "Financial Conduct Authority (FCA)",
+              "nca": "National Crime Agency (NCA)", "eu_council": "Council of the European Union",
+              "eba": "European Banking Authority (EBA)",
+              "amla": "Authority for Anti-Money Laundering and Countering the Financing of Terrorism (AMLA)"}
 OVERRIDE_MIN = 10
 RUN_FILES = ("items.json", "triage.jsonl", extraction.REQUESTS, extraction.ALLOCATIONS, extraction.OUTCOMES,
              reconcile.RUN_JSON, "report.md")
@@ -475,6 +482,31 @@ def seed_catalogue(today: date, seen_path: Path, catalogue: Path = CATALOGUE, dr
     return 0
 
 
+def baseline(sources: list, on: str, seen_path: Path, dry_run: bool = False, fetch=count_new.current_items) -> dict:
+    """Record every item each named source lists NOW as `baseline` (decided by nobody), so only items published
+    after go-live are triaged. Raises ValueError, writing nothing, for an unknown source, a source that already
+    holds any ledger entry, or a date that is not YYYY-MM-DD. Returns source -> items recorded."""
+    if not ledger.DAY.match(on or ""):
+        raise ValueError("--on %r is not YYYY-MM-DD" % on)
+    unknown = sorted(set(sources) - set(SOURCES))
+    if unknown:
+        raise ValueError("unknown source(s): %s" % ", ".join(unknown))
+    seen = ledger.load(seen_path)
+    holding = sorted({s for s in sources if any(k[0] == s for k in seen)})
+    if holding:
+        raise ValueError("%s already hold(s) ledger entries; a baseline is only for a source with none"
+                         % ", ".join(holding))
+    entries, counts = [], {}
+    for s in sources:
+        new = [{"source": s, "item_id": it.item_id, "decision": "baseline"} for it in fetch(s)
+               if (it.source, it.item_id) not in seen]
+        counts[s] = len(new)
+        entries += new
+    if not dry_run:
+        ledger.record_decisions("baseline-%s" % on, on, entries, path=seen_path)
+    return counts
+
+
 def main(argv: list, *, inbox_root: Path = inbox.INBOX_ROOT, seen_path: Path = ledger.SEEN_PATH,
          today: date = None, data: Path = DATA, advisory_list: Path = ADVISORY_LIST, golden_list: Path = GOLDEN_LIST,
          catalogue: Path = CATALOGUE) -> int:
@@ -486,8 +518,21 @@ def main(argv: list, *, inbox_root: Path = inbox.INBOX_ROOT, seen_path: Path = l
     ap.add_argument("--pending", action="store_true")
     ap.add_argument("--expire", action="store_true")
     ap.add_argument("--seed-catalogue", action="store_true")
+    ap.add_argument("--baseline", nargs="+", metavar="SOURCE", help="record these sources' current listing as baseline")
+    ap.add_argument("--on", help="the baseline's date, YYYY-MM-DD")
     args = ap.parse_args(argv)
     today = today or date.today()
+    if args.baseline:
+        try:
+            counts = baseline(args.baseline, args.on, seen_path, args.dry_run)
+        except (ValueError, OSError) as exc:
+            print("REFUSED: %s" % exc)
+            return 1
+        for s, n in counts.items():
+            print("%-11s baseline %3d" % (s, n))
+        print("%s: %d item(s) as baseline-%s" % ("DRY RUN, nothing written" if args.dry_run else "RECORDED",
+                                                sum(counts.values()), args.on))
+        return 0
     if args.seed_catalogue:
         return seed_catalogue(today, seen_path, catalogue, args.dry_run)
     if args.pending:

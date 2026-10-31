@@ -39,8 +39,12 @@ ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 from feeds import http as feeds_http  # noqa: E402
 from feeds.model import LayoutChanged  # noqa: E402
-from feeds.sources import DOCUMENT_TYPES, MAX_DOCUMENT_BYTES, MAX_LISTING_BYTES, ORDER, SOURCES, linked_pdfs  # noqa: E402
+from feeds.sources import DOCUMENT_TYPES, MAX_DOCUMENT_BYTES, MAX_LISTING_BYTES, ORDER as LIVE_ORDER, SOURCES, linked_pdfs  # noqa: E402
 from schemas.citation_match import PageIndex  # noqa: E402
+
+# The catalogue is the frozen, hash-pinned set the triage band was measured on: the first three sources, not the live
+# ones (plan R3). A source added to the live list is not in it until the catalogue is deliberately rebuilt and re-measured.
+ORDER = LIVE_ORDER[:3]
 
 EVAL_DIR = ROOT / "evals" / "feeds"
 CATALOGUE = EVAL_DIR / "catalogue.json"

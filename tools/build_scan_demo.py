@@ -229,7 +229,13 @@ def _paths(inp: dict) -> dict:
 # Source types that are not regulators or agencies: never shown as "not yet scanned".
 NOT_A_FEED = ("industry", "press", "other")
 DISPLAY = {"fincen": "FinCEN", "ofac": "OFAC", "ofsi": "OFSI", "fatf": "FATF", "fca": "FCA", "nca": "NCA",
+           "otsi": "OTSI", "eu_council": "EU Council", "eba": "EBA", "amla": "AMLA",
            "europol": "Europol", "wolfsberg": "Wolfsberg"}
+# Why a listed source is not scanned yet, where there is a reason to give (the guard pins that it is shown).
+NOT_YET_REASON = {"europol": "its articles render only with JavaScript"}
+# CLAUDE.md's triage band records no prompt hash, so the page cannot compare hashes; it states the band's date
+# and that the sources were added after it (plan R3). The band is NOT re-measured here: an owner decision.
+TRIAGE_NOTE = "measured %s, before the 2026-10-31 sources were added"
 DAYS = {0: "Sunday", 1: "Monday", 2: "Tuesday", 3: "Wednesday", 4: "Thursday", 5: "Friday", 6: "Saturday", 7: "Sunday"}
 
 # The SAN006 indicator the advisory's network finding corroborates: must be one SAN006 actually lists.
@@ -504,11 +510,12 @@ def payload(inp: dict) -> dict:
         "fc10": FC10,
         "impact": impact_view(inp["impact"]),
         "coverage": {"live": [DISPLAY[s] for s in inp["live"]], "manual": [DISPLAY[s] for s in inp["manual"]],
-                     "not_yet": [DISPLAY.get(s, s) for s in inp["source_types"] if s not in taken]},
+                     "not_yet": [{"name": DISPLAY.get(s, s), "why": NOT_YET_REASON.get(s, "")}
+                                 for s in inp["source_types"] if s not in taken]},
         "agents": {"model": inp["model"], "triage_tools": inp["triage_tools"], "kc_tools": inp["kc_tools"],
                    "typologies": len(inp["typologies"]), "schema_version": inp["schema_version"],
                    "schedule": inp["schedule"]},
-        "quality": {"triage": inp["triage_band"], "reviewer": inp["reviewer"],
+        "quality": {"triage": dict(inp["triage_band"], note=TRIAGE_NOTE % inp["triage_band"]["date"]), "reviewer": inp["reviewer"],
                     "extraction": {"precision": "%.3f" % inp["score"]["precision"],
                                    "recall": "%.3f" % inp["score"]["recall"]}},
     }
@@ -826,7 +833,7 @@ __LIMITS__
 
   $("coverage").innerHTML = P.coverage.live.map(function (s) { return '<span class="chip live">' + esc(s) + ' · live</span>'; }).join("") +
     P.coverage.manual.map(function (s) { return '<span class="chip manual">' + esc(s) + ' · manual</span>'; }).join("") +
-    P.coverage.not_yet.map(function (s) { return '<span class="chip notyet">' + esc(s) + ' · not yet</span>'; }).join("");
+    P.coverage.not_yet.map(function (s) { return '<span class="chip notyet"' + (s.why ? ' title="' + esc(s.why) + '"' : '') + '>' + esc(s.name) + ' · not yet' + (s.why ? ' (' + esc(s.why) + ')' : '') + '</span>'; }).join("");
   $("coverageNote").textContent = n(P.coverage.live.length) + " feeds are scanned automatically every " + G.schedule.day + ". " +
     (P.coverage.manual.length ? P.coverage.manual.join(", ") + " is read by hand because its site blocks automated fetching. " : "") +
     "The rest are in the record schema but not yet scanned.";
@@ -835,7 +842,7 @@ __LIMITS__
   $("qTriageSub").textContent = "triage recall (precision " + Q.triage.precision[0] + "–" + Q.triage.precision[1] + ")";
   $("qTyp").textContent = Q.extraction.recall + " → " + Q.reviewer.recall;
   $("qualityNote").textContent = "Triage: " + Q.triage.items + " owner-labelled notices, " + Q.triage.repeats + " repeats, " + Q.triage.date +
-    ". Typologies: " + Q.reviewer.advisories + " golden advisories, " + Q.reviewer.date + " (precision " + Q.extraction.precision + " alone). The weak number is shown on purpose.";
+    " (" + Q.triage.note + "). Typologies: " + Q.reviewer.advisories + " golden advisories, " + Q.reviewer.date + " (precision " + Q.extraction.precision + " alone). The weak number is shown on purpose.";
 
   $("listing").innerHTML = P.listings.map(function (l) {
     return '<div><b class="mono">' + esc(l.source) + '</b> · ' + l.listed + ' listed · ' + l.already_seen + ' already read · <b>' + l.new + ' new</b></div>';

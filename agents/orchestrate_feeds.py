@@ -28,6 +28,7 @@ verdict as unfinished. A session is `validated` only when it failed nothing and 
 from __future__ import annotations
 
 import hashlib
+import json
 import sys
 from collections import Counter
 from dataclasses import dataclass
@@ -48,7 +49,7 @@ from agents.permissions import (  # noqa: E402
     permission_callback,
 )
 from feeds import extraction as feeds_extraction, inbox, triage as feeds_triage  # noqa: E402
-from feeds.sources import named  # noqa: E402
+from feeds.sources import ORDER, named  # noqa: E402
 
 SERVER_PATH = ROOT / "mcp_server" / "feeds_server.py"
 TRIAGE_TOOLS = ("feeds_list_new", "feeds_fetch", "feeds_read_page", "feeds_triage")
@@ -59,10 +60,10 @@ MODEL = "claude-sonnet-5"
 # Per orchestrator session. PINNED by evals/check_feeds_orchestrator.py since slice 2 C (B's carry-forward:
 # they were unguarded). B measured US$0.12-0.33 for a 10-item triage session; the cap leaves room for the
 # extraction requests and for one turn's overshoot inside the run's ceiling below.
-MAX_BUDGET_USD = 1.50
-MAX_TURNS = 80
+MAX_BUDGET_USD = 3.00     # doubled with the item cap, plan R2, 2026-10-31
+MAX_TURNS = 160
 # THE FRIDAY RUN'S BUDGET (spec section 1, owner decisions 2026-09-26), in the one place a guard reads it.
-RUN_CEILING_USD = 5.00        # the whole run: orchestrator session plus every extraction
+RUN_CEILING_USD = 10.00       # the whole run: orchestrator session plus every extraction
 EXTRACTION_BUDGET_USD = 1.00  # each extraction's own max_budget_usd
 EXTRACTION_MAX_TURNS = 60     # slice 1's extractor default
 # A session stopped by its own turn or budget cap COMPLETED: what it left is unfinished, and measured.
@@ -96,9 +97,11 @@ EXTRACTION_SECTION = """Before your final message, queue extraction. This run ex
 # Owner rule (2026-10-11), LIVE only: OFAC designation-page verdicts flipped from run to run
 # (ofac:94d34cd7226d01c2, ofac:dc63a1c2b84a58f7: kept 2026-09-30 and 10-02, dropped 10-11). It is appended, not
 # woven into TRIAGE_PROMPT, so an eval run's bytes (PROMPT_SHA256) stay the ones B measured.
-OFAC_DESIGNATION_RULE = """An OFAC designation page is relevant when it names a network AND says how that network moved money or evaded sanctions: front or shell companies, crypto or digital-currency addresses, or a laundering, procurement or financing role. A bare list of names with no such line, or a page of only removals and updates, is not relevant. When you mark such a page relevant, quote that network-and-method line as your evidence."""
-
-FULL_PROMPT = TRIAGE_PROMPT + "\n\n" + OFAC_DESIGNATION_RULE + "\n\n" + EXTRACTION_SECTION
+RULES_FILE = ROOT / "feeds" / "triage_rules.json"
+_RULES = json.loads(RULES_FILE.read_text(encoding="utf-8"))
+OFAC_DESIGNATION_RULE = _RULES["ofac"]   # the evals name it; the text lives in the JSON
+SOURCE_RULES = "\n\n".join(r for r in (_RULES[s] for s in ORDER) if r)
+FULL_PROMPT = TRIAGE_PROMPT + "\n\n" + SOURCE_RULES + "\n\n" + EXTRACTION_SECTION
 PROMPT_SHA256 = hashlib.sha256(TRIAGE_PROMPT.encode("utf-8")).hexdigest()
 FULL_PROMPT_SHA256 = hashlib.sha256(FULL_PROMPT.encode("utf-8")).hexdigest()
 

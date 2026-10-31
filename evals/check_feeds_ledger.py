@@ -11,6 +11,8 @@ Usage:
     python evals/check_feeds_ledger.py --mutate accept-allowed  # accept_run accepts an item that was never extracted
     python evals/check_feeds_ledger.py --mutate newline-run-id  # a run id with a trailing newline is accepted
     python evals/check_feeds_ledger.py --mutate accept-eval-run # accept_run lets an eval run reach the ledger
+    python evals/check_feeds_ledger.py --mutate baseline-counts-as-drop  # the tally counts a baseline as a drop
+    python evals/check_feeds_ledger.py --mutate baseline-twice  # --baseline runs on a source that already holds entries
 
 WHAT IT HOLDS. "New" is decided by data/feeds/seen.json and nothing else, so that file must be
 canonical (the same decisions give the same bytes), must never decide an item twice, and must be
@@ -71,6 +73,9 @@ MUTATIONS = {
                        '    if not re.match(r"^feeds-\\d{4}-\\d{2}-\\d{2}-[0-9a-f]{6}$", run_id or ""):\n'),
     "accept-eval-run": (ACCEPT, '    if state.get("eval"):\n        raise ValueError("run %s is an eval run; '
                                 'eval runs never reach the ledger" % run_id)\n', ""),
+    "baseline-counts-as-drop": (LEDGER, '        out[e["decision"]] += 1\n',
+                                '        out["drop" if e["decision"] == "baseline" else e["decision"]] += 1\n'),
+    "baseline-twice": (ACCEPT, "    if holding:\n", "    if False:\n"),
 }
 
 
@@ -123,6 +128,51 @@ def item(source: str, item_id: str) -> dict:
 def git_status() -> str:
     return subprocess.run(["git", "status", "--porcelain", "--untracked-files=all"], cwd=ROOT,
                           capture_output=True, text=True).stdout
+
+
+def baseline_checks(ledger, accept) -> list:
+    """Task 6a: a third decision, `baseline`, written only by accept_run --baseline, counted as neither accept nor drop."""
+    out = []
+    listing = {"otsi": ["o1", "o2"], "fca": ["f1"]}
+    fetch = lambda name, extra=(): [FeedItem(name, i, "T " + i, "https://example.invalid/" + i, "2026-10-01")
+                                    for i in listing[name] + list(extra)]
+    with tempfile.TemporaryDirectory() as tmp:
+        path = Path(tmp) / "s.json"
+        path.write_text(ledger.dump([]), encoding="utf-8")
+        ledger.record_decisions(RUN, "2026-10-02", [item_decision("ofac", "a", "accept"), item_decision("fincen", "d", "drop")],
+                                path=path)
+        counts = accept.baseline(["otsi", "fca"], "2026-10-31", path, fetch=fetch)
+        loaded = ledger.load(path)
+        base = [e for e in loaded.values() if e["decision"] == "baseline"]
+        out.append((counts == {"otsi": 2, "fca": 1} and len(base) == 3
+                    and all(e["first_seen_run"] == "baseline-2026-10-31" and e["decided_on"] == "2026-10-31" for e in base)
+                    and path.read_text(encoding="utf-8") == ledger.dump(loaded.values()),
+                    "--baseline records each listed item as a baseline, first_seen_run baseline-DATE, in canonical form",
+                    str(counts)))
+        out.append((ledger.tally(loaded.values()) == {"accept": 1, "drop": 1, "baseline": 3},
+                    "a baseline is its own count: neither an accept nor a drop", str(ledger.tally(loaded.values()))))
+        for label, call in (
+                ("a source that already holds entries (nothing written)",
+                 lambda: accept.baseline(["otsi"], "2026-11-01", path, fetch=lambda n: fetch(n, ["o3"]))),
+                ("an unknown source", lambda: accept.baseline(["nosuch"], "2026-11-01", path, fetch=fetch)),
+                ("an --on that is not a date", lambda: accept.baseline(["otsi"], "1 Nov", path, fetch=fetch))):
+            before = path.read_bytes()
+            try:
+                call()
+                refused = False
+            except ValueError:
+                refused = True
+            out.append((refused and path.read_bytes() == before, "--baseline refuses %s" % label, ""))
+        dry = Path(tmp) / "d.json"
+        dry.write_text(ledger.dump([]), encoding="utf-8")
+        got = accept.baseline(["otsi"], "2026-10-31", dry, dry_run=True, fetch=fetch)
+        out.append((got == {"otsi": 2} and dry.read_text(encoding="utf-8") == ledger.dump([]),
+                    "--baseline --dry-run reports the count and writes nothing", str(got)))
+    return out
+
+
+def item_decision(source: str, item_id: str, decision: str) -> dict:
+    return {"source": source, "item_id": item_id, "decision": decision}
 
 
 def checks(ledger, inbox, accept) -> list:
@@ -253,6 +303,7 @@ def checks(ledger, inbox, accept) -> list:
 
     out.append((git_status() == status_before, "the repository's git status is unchanged (every accept_run call wrote to "
                 "temporary paths)", ""))
+    out += baseline_checks(ledger, accept)
     scanned = repo_python()
     real = writer_violations(scanned)
     has_writers = "feeds/ledger.py" in scanned and "tools/accept_run.py" in scanned and len(scanned) >= 20

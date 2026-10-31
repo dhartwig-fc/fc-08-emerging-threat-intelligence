@@ -147,5 +147,5 @@ def reconcile_run(run_id: str, root: Path = inbox.INBOX_ROOT) -> dict:
             "not_relevant": sorted(k for k, v in verdicts.items() if v["verdict"] == feeds_triage.NOT_RELEVANT),
             "queued": list(requests), "extracted": extracted, "failed": failed, "deferred_budget": deferred,
             "not_queued": not_queued, "allocations": allocations, "sessions": sessions, "problems": problems,
-            "spent_usd": run.get("spent_usd"), "known_cost_usd": round(sum(known), 6),
+            "spent_usd": run.get("spent_usd"), "ceiling_usd": run.get("ceiling_usd"), "known_cost_usd": round(sum(known), 6),
             "unknown_cost_sessions": sum(1 for s in sessions if s["cost_usd"] is None)}

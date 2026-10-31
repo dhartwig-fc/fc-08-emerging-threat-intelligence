@@ -1,12 +1,13 @@
 """
-The three automated sources and their adapters: raw listing bytes in, FeedItems out.
+The automated sources and their adapters: raw listing bytes in, FeedItems out.
 
 Each adapter checks the structural MARKER it depends on and raises LayoutChanged when it is
 missing, when the marker is present but no item parses, or when an item lacks its link, its date or
 its title (the field the agent actually reads). OFAC also raises when the body ends inside an open
 row, which is what a truncated body looks like.
 An empty result is never returned: each of these listings always shows its latest entries
-(measured 2026-09-26: OFSI 20, FinCEN 15, OFAC 10), so "nothing parsed" means the page changed.
+(measured 2026-09-26: OFSI 20, FinCEN 15, OFAC 10; 2026-10-31: OTSI 20, FCA 20, NCA 20, EU Council 20,
+EBA 10, AMLA 30), so "nothing parsed" means the page changed.
 
 Measured 2026-09-26, and why fetch pins LANDING pages in sub-project A: the URL a FinCEN or OFSI
 item lists is an HTML landing page; the advisory itself is a PDF linked from it (FinCEN on
@@ -19,6 +20,7 @@ from __future__ import annotations
 import re
 import xml.etree.ElementTree as ET
 from dataclasses import dataclass
+from datetime import datetime
 from html.parser import HTMLParser
 from typing import Callable, FrozenSet, List
 from urllib.parse import urljoin, urlsplit
@@ -29,6 +31,7 @@ MAX_LISTING_BYTES = 2_000_000
 MAX_DOCUMENT_BYTES = 20_000_000
 DOCUMENT_TYPES = frozenset({"text/html", "application/pdf"})
 ISO_DATE = re.compile(r"^\d{4}-\d{2}-\d{2}T")
+DATE_FIELD = "published"  # FeedItem's date field (feeds/model.py)
 
 
 def _title(source: str, parts: List[str], where: str) -> str:
@@ -43,26 +46,90 @@ def _title(source: str, parts: List[str], where: str) -> str:
 ATOM = "{http://www.w3.org/2005/Atom}"
 
 
-def parse_ofsi(raw: bytes) -> List[FeedItem]:
+def _parse_govuk_atom(source: str, raw: bytes) -> List[FeedItem]:
     try:
         root = ET.fromstring(raw)
     except ET.ParseError as exc:
-        raise LayoutChanged("ofsi: not well-formed XML (%s)" % exc)
+        raise LayoutChanged("%s: not well-formed XML (%s)" % (source, exc))
     if root.tag != ATOM + "feed":
-        raise LayoutChanged("ofsi: the root element is %r, not an Atom feed" % root.tag)
+        raise LayoutChanged("%s: the root element is %r, not an Atom feed" % (source, root.tag))
     items = []
     for entry in root.findall(ATOM + "entry"):
         eid, updated, title = (entry.findtext(ATOM + t) for t in ("id", "updated", "title"))
         link = entry.find(ATOM + "link[@rel='alternate']")
         if not (eid and updated and title and link is not None and link.get("href")):
-            raise LayoutChanged("ofsi: an entry lacks its id, updated, title or alternate link")
+            raise LayoutChanged("%s: an entry lacks its id, updated, title or alternate link" % source)
         if not ISO_DATE.match(updated):
-            raise LayoutChanged("ofsi: updated %r is not an ISO timestamp" % updated)
-        items.append(FeedItem("ofsi", eid.strip(), _title("ofsi", [title], eid.strip()), link.get("href"), updated[:10],
+            raise LayoutChanged("%s: updated %r is not an ISO timestamp" % (source, updated))
+        items.append(FeedItem(source, eid.strip(), _title(source, [title], eid.strip()), link.get("href"), updated[:10],
                               " ".join((entry.findtext(ATOM + "summary") or "").split())))
     if not items:
-        raise LayoutChanged("ofsi: the feed parsed but holds no entries")
+        raise LayoutChanged("%s: the feed parsed but holds no entries" % source)
     return items
+
+
+def parse_ofsi(raw: bytes) -> List[FeedItem]:
+    return _parse_govuk_atom("ofsi", raw)
+
+
+def parse_otsi(raw: bytes) -> List[FeedItem]:
+    return _parse_govuk_atom("otsi", raw)
+
+# ---------------------------------------------------------------------------- RSS 2.0 (FCA, NCA, EU Council, EBA, AMLA)
+
+RSS_DATE_FORMATS = ("%a, %d %b %Y %H:%M:%S %z",   # RFC 822 with a numeric zone (NCA, EBA, AMLA)
+                    "%a, %d %b %Y %H:%M:%S %Z",   # RFC 822 with GMT/UTC
+                    "%A, %B %d, %Y - %H:%M")      # FCA: "Friday, October 30, 2026 - 09:00", London wall-clock
+
+
+def _rss_date(source: str, item, where: str) -> str:
+    """An item's publication DATE, YYYY-MM-DD, in the publisher's own stated zone (plan R6): what OFSI
+    (updated[:10]) and OFAC give, and what accept_run writes into published_on, which the schema types as a date.
+    pubDate first, then a10:/atom:updated (EU Council). Never today."""
+    raw = (item.findtext("pubDate") or "").strip()
+    if raw:
+        for fmt in RSS_DATE_FORMATS:
+            try:
+                return datetime.strptime(raw, fmt).date().isoformat()
+            except ValueError:
+                continue
+        raise LayoutChanged("%s: the item %s has a pubDate %r in no known format" % (source, where, raw))
+    updated = (item.findtext(ATOM + "updated") or "").strip()
+    if ISO_DATE.match(updated):
+        return updated[:10]
+    raise LayoutChanged("%s: the item %s has no date" % (source, where))
+
+
+def _parse_rss(source: str, raw: bytes) -> List[FeedItem]:
+    try:
+        root = ET.fromstring(raw)
+    except ET.ParseError as exc:
+        raise LayoutChanged("%s: not well-formed XML (%s)" % (source, exc))
+    channel = root.find("channel")
+    if root.tag != "rss" or channel is None:
+        raise LayoutChanged("%s: the root element is %r, not an RSS channel" % (source, root.tag))
+    items = []
+    for item in channel.findall("item"):
+        link = (item.findtext("link") or "").strip()
+        if not link:
+            raise LayoutChanged("%s: an item lacks its link" % source)
+        title = _title(source, [item.findtext("title") or ""], link)
+        guid = (item.findtext("guid") or "").strip() or link
+        items.append(FeedItem(source, guid, title, link, _rss_date(source, item, link)))
+    if not items:
+        raise LayoutChanged("%s: the channel is present but no item parsed" % source)
+    return sorted(items, key=lambda i: getattr(i, DATE_FIELD), reverse=True)
+
+
+def _rss(source: str) -> Callable[[bytes], List[FeedItem]]:
+    def parse(raw: bytes) -> List[FeedItem]:
+        return _parse_rss(source, raw)
+    parse.__name__ = "parse_" + source
+    return parse
+
+
+parse_fca, parse_nca, parse_eu_council, parse_eba, parse_amla = (
+    _rss(s) for s in ("fca", "nca", "eu_council", "eba", "amla"))
 
 # ---------------------------------------------------------------------------- the HTML listings
 
@@ -220,11 +287,26 @@ SOURCES = {
     "ofsi": Source("ofsi", "https://www.gov.uk/government/organisations/office-of-financial-sanctions-implementation.atom",
                    "atom", frozenset({"application/atom+xml"}), frozenset({"www.gov.uk"}), parse_ofsi,
                    frozenset({"assets.publishing.service.gov.uk"})),
+    "otsi": Source("otsi", "https://www.gov.uk/government/organisations/office-of-trade-sanctions-implementation.atom",
+                   "atom", frozenset({"application/atom+xml"}), frozenset({"www.gov.uk"}), parse_otsi,
+                   frozenset({"assets.publishing.service.gov.uk"})),
+    "fca": Source("fca", "https://www.fca.org.uk/news/rss.xml", "rss", frozenset({"application/rss+xml"}),
+                  frozenset({"www.fca.org.uk"}), parse_fca, frozenset({"www.fca.org.uk"})),
+    "nca": Source("nca", "https://www.nationalcrimeagency.gov.uk/news?format=feed&type=rss", "rss",
+                  frozenset({"application/rss+xml"}), frozenset({"www.nationalcrimeagency.gov.uk"}), parse_nca,
+                  frozenset({"www.nationalcrimeagency.gov.uk"})),
+    "eu_council": Source("eu_council", "https://www.consilium.europa.eu/en/rss/pressreleases.ashx", "rss",
+                         frozenset({"text/xml", "application/rss+xml"}), frozenset({"www.consilium.europa.eu"}),
+                         parse_eu_council, frozenset({"www.consilium.europa.eu"})),
+    "eba": Source("eba", "https://www.eba.europa.eu/news-press/news/rss.xml", "rss", frozenset({"application/rss+xml"}),
+                  frozenset({"www.eba.europa.eu"}), parse_eba, frozenset({"www.eba.europa.eu"})),
+    "amla": Source("amla", "https://www.amla.europa.eu/node/19/rss_en", "rss", frozenset({"application/rss+xml"}),
+                   frozenset({"www.amla.europa.eu"}), parse_amla, frozenset({"www.amla.europa.eu"})),
 }
 
 # The order sources are named in the triage prompt and listed in a run. Appending keeps every earlier prompt's
 # bytes (plan R5); a source missing here, or one here but not in SOURCES, is refused at import.
-ORDER = ("ofsi", "fincen", "ofac")
+ORDER = ("ofsi", "fincen", "ofac", "otsi", "fca", "nca", "eu_council", "eba", "amla")
 if set(ORDER) != set(SOURCES) or len(ORDER) != len(SOURCES):
     raise RuntimeError("feeds.sources: ORDER %r and SOURCES %r disagree" % (ORDER, sorted(SOURCES)))
 SOURCE_PATTERN = r"^(%s)$" % "|".join(ORDER)

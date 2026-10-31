@@ -9,6 +9,7 @@ Usage:
     python evals/check_friday_run.py --mutate validated-empty         # a session leaving items unfinished is validated
     python evals/check_friday_run.py --mutate quiet-reconcile         # an unterminated call does not fail reconciliation
     python evals/check_friday_run.py --mutate report-hides-drops      # the report omits what triage dropped
+    python evals/check_friday_run.py --mutate report-literal-ceiling  # the report states a hardcoded US$5.00 ceiling
     python evals/check_friday_run.py --mutate transcript-duplicates   # a call a hook recorded is terminated again
     python evals/check_friday_run.py --mutate invent-terminal         # a call with no hook and no result is terminated
     python evals/check_friday_run.py --mutate refused-extracted       # a refused request gets an id and an extraction
@@ -139,13 +140,14 @@ import agents  # noqa: E402
 import feeds  # noqa: E402
 from feeds import extraction, http as fh, inbox, notify, triage as feeds_triage  # noqa: E402
 from feeds.model import FeedItem  # noqa: E402
-from feeds.sources import linked_pdfs  # noqa: E402
+from feeds.sources import ORDER, linked_pdfs  # noqa: E402
 from check_document_pages import tiny_pdf  # noqa: E402
 
 FILES = {"telemetry": ROOT / "agents" / "telemetry.py", "of": ROOT / "agents" / "orchestrate_feeds.py",
          "reconcile": ROOT / "feeds" / "reconcile.py", "runs": ROOT / "feeds" / "runs.py", "report": ROOT / "feeds" / "report.py",
          "friday": ROOT / "tools" / "friday_run.py"}
 MUTATIONS = {
+    "report-literal-ceiling": ("report", "    return rec.get(\"ceiling_usd\") or 5.0\n", "    return 5.0\n"),
     "no-budget-check": ("friday", "    return spent + of.EXTRACTION_BUDGET_USD <= of.RUN_CEILING_USD + 1e-9\n",
                         "    return True\n"),
     "unknown-cost-free": ("friday", "    return cap if cost is None else cost\n", "    return cost or 0.0\n"),
@@ -246,6 +248,10 @@ def load_all(mutation):
         if pkg is not None:
             setattr(pkg, attr, module)
         exec(compile(source, str(path), "exec"), module.__dict__)
+        if name == "of":
+            # These fixtures' costs (US$2.50 sessions, US$1.30 extractions) are arranged around the 2026-09 budget.
+            # The mechanism is what is tested here; the live budget is pinned by check_feeds_orchestrator (plan R2).
+            module.MAX_BUDGET_USD, module.RUN_CEILING_USD = 1.50, 5.00
         mods[name] = module
     return mods
 
@@ -271,7 +277,7 @@ def listed_run(m, root: Path, run_id: str, n_relevant: int, n_dropped: int, queu
     run = m["of"].FeedsRun(run_id)
     m["telemetry"].TELEMETRY_DIR = inbox.run_dir(run_id, root) / inbox.TELEMETRY
     state = {"run_id": run_id, "sources": {s: {"status": "ok", "error": None, "listed": 0, "already_seen": 0,
-                                               "items": []} for s in ("ofsi", "fincen", "ofac")}}
+                                               "items": []} for s in ORDER}}
     if layout_changed:
         state["sources"]["fincen"].update(status="layout_changed", error="fincen: the listing table is missing")
     keys = []
@@ -711,6 +717,19 @@ def body(mutation) -> list:
                     and "US$5.10 counted against the US$5.00 ceiling" in text and text == again,
                     "the report names every dropped item with its reason and quote, the deferral and the cost against "
                     "the ceiling, and renders the same bytes twice", text.splitlines()[0][:80] if text else "no report"))
+        rj = box / rid / "run.json"
+        saved = rj.read_text(encoding="utf-8")
+        try:
+            rj.write_text(json.dumps(dict(json.loads(saved), ceiling_usd=10.0)), encoding="utf-8")
+            ten = m["report"].render(rid, box)
+        finally:
+            rj.write_text(saved, encoding="utf-8")
+        out.append((json.loads(saved).get("ceiling_usd") == 5.00 and "against the US$5.00 ceiling" in text
+                    and "against the US$10.00 ceiling" in ten
+                    and "spent of the US$10.00 ceiling" in ten.splitlines()[2],
+                    "the report's ceiling is the one the run recorded in run.json, not a literal: a run recorded at "
+                    "US$5 says US$5.00 and the same run recorded at US$10 says US$10.00 (line 3 and ## Cost)",
+                    "%s | %s" % (json.loads(saved).get("ceiling_usd"), "US$10.00" in ten)))
         out.append((unfinished_counts(text) == (1, 1, 1)
                     and ("deferred for budget: US$5.10 spent; US$1.00 more would pass the US$5.00 ceiling") in text
                     and "notice.. Quote" not in text and "notice. Quote" in text,

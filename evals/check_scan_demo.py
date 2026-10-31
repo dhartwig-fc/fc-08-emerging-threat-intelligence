@@ -13,6 +13,8 @@ Usage:
     python evals/check_scan_demo.py --mutate extra-tool      # the page lists a tool the orchestrator does not have
     python evals/check_scan_demo.py --mutate eval-number     # the triage band is not the one recorded
     python evals/check_scan_demo.py --mutate drop-coverage   # a live feed is missing from the coverage strip
+    python evals/check_scan_demo.py --mutate europol-silent  # Europol's chip no longer says why it is not scanned
+    python evals/check_scan_demo.py --mutate no-triage-note  # the triage band no longer says what it was measured on
     python evals/check_scan_demo.py --mutate leak-path       # a local path reaches the page
     python evals/check_scan_demo.py --mutate show-cost       # a cost figure reaches the page
     python evals/check_scan_demo.py --mutate built-without-import  # the Now block claims BUILT from an empty import
@@ -81,6 +83,7 @@ import build_scan_demo as bs  # noqa: E402
 from agents.extract_advisory import KC_TOOLS  # noqa: E402
 from agents.orchestrate_feeds import MODEL, TRIAGE_TOOLS  # noqa: E402
 from feeds.sources import SOURCES  # noqa: E402
+from schemas.advisory import SourceType  # noqa: E402
 from governance import decisions as gd  # noqa: E402
 from governance import publish_boundary as pb  # noqa: E402
 from publish_scan_demo import DEFAULT_PORTFOLIO  # noqa: E402
@@ -89,7 +92,7 @@ MUTATIONS = ("drop-notice", "flip-verdict", "move-fate", "edit-quote", "reverse-
              "wrong-model", "extra-tool", "eval-number", "drop-coverage", "leak-path", "show-cost",
              "built-lie", "drop-decision", "fake-proposal", "built-without-import", "wrong-rereview",
              "unpinned-log", "flags-lie", "drop-path-b", "built-lie-a", "path-figure",
-             "no-paths-anchor", "python-on-a")
+             "no-paths-anchor", "python-on-a", "europol-silent", "no-triage-note")
 MUTATION = None
 NOT_RUN = object()
 SEEDS = ("0", "1", "42", "4242")
@@ -161,6 +164,10 @@ def _page() -> str:
     if MUTATION == "path-figure":
         real = bs._figures
         bs._figures = lambda iv: dict(real(iv), A1="99 corroborations across 1 typologies")
+    if MUTATION == "europol-silent":
+        bs.NOT_YET_REASON = {}
+    if MUTATION == "no-triage-note":
+        bs.TRIAGE_NOTE = "%s"
     if MUTATION == "python-on-a":
         bs.CHANGES = [bs.CHANGES[0][:4] + ("Yes",)] + bs.CHANGES[1:]
     if MUTATION == "no-paths-anchor":
@@ -315,6 +322,20 @@ def checks():
         ("%.3f" % T["score"]["precision"], "%.3f" % T["score"]["recall"]), \
         "typology quality is score_report's and CLAUDE.md's", \
         "%s -> %s" % (Q["extraction"]["recall"], Q["reviewer"]["recall"])
+
+    note = "measured %s, before the 2026-10-31 sources were added" % tri["date"]
+    yield tri["note"] == note and "Q.triage.note" in page, \
+        "the triage band states it was measured before the 2026-10-31 sources (CLAUDE.md records no prompt hash)", \
+        tri["note"]
+    live_types = {s for s in SOURCES}
+    want = sorted(bs.DISPLAY.get(t.value, t.value) for t in SourceType
+                  if t.value not in live_types | {"fatf"} | set(bs.NOT_A_FEED))
+    ny = P["coverage"]["not_yet"]
+    yield sorted(x["name"] for x in ny) == want and len(want) > 0, \
+        "the not-yet list is the SourceType values minus live, manual and not-a-feed", ", ".join(want)
+    eu = next((x for x in ny if x["name"] == "Europol"), {})
+    yield eu.get("why") == "its articles render only with JavaScript" and "s.why" in page, \
+        "Europol's chip carries its reason and the page renders it", eu.get("why", "no reason")
 
     yield sorted(P["coverage"]["live"]) == sorted(bs.DISPLAY[s] for s in SOURCES), \
         "the live feeds are exactly the configured sources", ", ".join(P["coverage"]["live"])

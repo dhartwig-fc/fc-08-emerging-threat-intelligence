@@ -67,7 +67,11 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
-from schemas.advisory import SCHEMA_VERSION, AdvisoryRecord  # noqa: E402
+from schemas.advisory import AdvisoryRecord  # noqa: E402
+
+# The version these merged records were written under (data/records_merged is frozen evidence): NOT the current
+# SCHEMA_VERSION, or every schema bump would make the merge differ from the committed records.
+MERGED_UNDER = "1.4.0"
 
 _spec = importlib.util.spec_from_file_location("fc08_score", ROOT / "evals" / "score.py")
 sc = importlib.util.module_from_spec(_spec)
@@ -89,7 +93,7 @@ def additions_for(advisory_id: str) -> tuple:
 def merge(record: dict, additions: list) -> tuple:
     """Return (merged record dict, kept, skipped_duplicate)."""
     out = json.loads(json.dumps(record))
-    out["schema_version"] = SCHEMA_VERSION
+    out["schema_version"] = MERGED_UNDER
 
     have_ids = {t.get("typology_id") for t in out["typologies"] if t.get("typology_id")}
     have_labels = {frozenset(sc.tokens(t["label"])) for t in out["typologies"]}
@@ -129,7 +133,7 @@ def merge(record: dict, additions: list) -> tuple:
     if kept:
         note = ("Merged %d reviewer addition(s) under schema %s; each carries its "
                 "review_justification. Extraction-only record retained at data/records/."
-                % (kept, SCHEMA_VERSION))
+                % (kept, MERGED_UNDER))
         existing = out.get("extraction_notes") or ""
         joined = (existing + " " + note).strip() if existing else note
         # The cap is 4000 and reviewer notes on long reports already sit near it.

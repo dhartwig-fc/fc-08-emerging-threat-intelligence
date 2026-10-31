@@ -10,7 +10,7 @@ Each rule is carried here, in code, whatever the agent intends (spec section 4 a
                 the one matcher every other caller uses;
   bounded       a reason of 1..REASON_MAX characters; a quote within the proposal contract's bounds
                 (after strip, so padding cannot lengthen a short quote); at most MAX_PER_RUN verdicts
-                in one run (spec section 1's cap of 10 triaged items).
+                in one run (spec section 1's cap, doubled from 10 to 20 on 2026-10-31).
 
 Every refusal starts "Rejected:", the prefix agents/telemetry.py classifies as REFUSED, so a refused
 triage call is counted as the governance working, never as a success.
@@ -36,7 +36,7 @@ TRIAGE = "triage.jsonl"
 RELEVANT, NOT_RELEVANT = "relevant", "not_relevant"
 VERDICTS = (RELEVANT, NOT_RELEVANT)
 REASON_MAX = 300
-MAX_PER_RUN = 10
+MAX_PER_RUN = 20
 REJECTED = "Rejected:"
 
 

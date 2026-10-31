@@ -38,6 +38,15 @@ already lists live sources from `SOURCES`, so it follows with a rebuild.
 - **R4, mutation targets follow the refactor.** `evals/check_feed_adapters.py` mutates `feeds/sources.py` by exact
   text replacement. Where a refactor moves a target's text, its old/new strings are updated, and each mutation is
   re-run and must still fail.
+- **R6, an RSS item's date is a calendar date (ruled during task 2).** `YYYY-MM-DD` in the publisher's own zone,
+  not an ISO-UTC timestamp: `tools/accept_run.py` writes `published` into `published_on`, typed `date`, which
+  rejects a timestamp with a time; OFSI already gives `updated[:10]`. FCA's zoneless pubDate is read as given.
+  `zoneinfo` and `timezone` are then not needed.
+- **R7, publishers (ruled during task 2).** `tools/accept_run.py` `PUBLISHERS` gains the six sources in its existing
+  style, official names: "HM Treasury, Office of Trade Sanctions Implementation (OTSI)" (match OFSI's entry's form),
+  "Financial Conduct Authority (FCA)", "National Crime Agency (NCA)", "Council of the European Union",
+  "European Banking Authority (EBA)", "Authority for Anti-Money Laundering and Countering the Financing of
+  Terrorism (AMLA)". Otherwise accepting the first advisory from a new source raises KeyError.
 - **R5, task 1 is byte-identical.** The prompt's source list is built from a tuple `ORDER` in `sources.py`
   (`("ofsi", "fincen", "ofac")` first), so task 1 renders today's exact prompt; `PROMPT_SHA256` and
   `FULL_PROMPT_SHA256` must not move in task 1.
@@ -232,21 +241,20 @@ RSS_DATE_FORMATS = ("%a, %d %b %Y %H:%M:%S %z",   # RFC 822 with a numeric zone 
 
 
 def _rss_date(source: str, item, where: str) -> str:
-    """An item's date as ISO 8601 UTC. pubDate first, then a10:/atom:updated (EU Council). Never today."""
+    """An item's publication DATE, YYYY-MM-DD, in the publisher's own stated zone (plan R6): what OFSI
+    (updated[:10]) and OFAC give, and what accept_run writes into published_on, which the schema types as a date.
+    pubDate first, then a10:/atom:updated (EU Council). Never today."""
     raw = (item.findtext("pubDate") or "").strip()
     if raw:
         for fmt in RSS_DATE_FORMATS:
             try:
-                when = datetime.strptime(raw, fmt)
+                return datetime.strptime(raw, fmt).date().isoformat()
             except ValueError:
                 continue
-            if when.tzinfo is None:
-                when = when.replace(tzinfo=ZoneInfo("Europe/London"))
-            return when.astimezone(timezone.utc).isoformat()
         raise LayoutChanged("%s: the item %s has a pubDate %r in no known format" % (source, where, raw))
     updated = (item.findtext(ATOM + "updated") or "").strip()
     if ISO_DATE.match(updated):
-        return datetime.fromisoformat(updated.replace("Z", "+00:00")).astimezone(timezone.utc).isoformat()
+        return updated[:10]
     raise LayoutChanged("%s: the item %s has no date" % (source, where))
 
 
@@ -466,6 +474,34 @@ if __name__ == "__main__":
   when the hashes differ.
 - [ ] **Step 4:** Rebuild; `evals/check_scan_demo.py` HELD; run the new mutation; run the scan page JS in node with the
   stub from the three-paths plan (task 5 step 1) and confirm the coverage block renders nine live chips.
+
+### Task 6a: start the new sources from today (owner decision 2026-10-31, option A)
+
+**Ruling R8.** The dry run listed 120 items as new, all from the six new sources: a first listing, some weeks old.
+The owner chose to start them from go-live, so only items published after it are triaged. `data/feeds/seen.json`
+has one writer, `tools/accept_run.py`, and `feeds/ledger.py` accepts only `accept` or `drop`. A baseline is neither
+(nobody judged those items), so the ledger gains a third decision, `baseline`, and `accept_run.py` a mode that writes
+it. The baseline RUNS at landing, in the schedule clone, so items published before then are still new.
+
+**Files:** `feeds/ledger.py`, `tools/accept_run.py`, `evals/check_feeds_ledger.py` (or the guard that pins the ledger),
+and any reader of `decision` (`grep -rn '"drop"\|"accept"\|decision' feeds tools mcp_server | grep -v ^evals`).
+
+- [ ] **Step 1: Failing clauses**: (a) `record_decisions` accepts `baseline` and writes it canonically; (b)
+  `accept_run.py --baseline SOURCE ... --on YYYY-MM-DD` lists each named source's CURRENT listing through its own
+  parser (`feeds.http.get` + `SOURCES[s].parse`), records every item not already in the ledger as `baseline`, with
+  `first_seen_run` = `baseline-YYYY-MM-DD`, and refuses: an unknown source, a source already holding any entry
+  (`ValueError`, nothing written), and `--on` not a date; `--dry-run` prints the counts and writes nothing; (c) every
+  reader that counts decisions (report, scan page, reconcile, digests) treats `baseline` as neither accepted nor
+  dropped. Mutations: `baseline-counts-as-drop` (a reader counts it as a drop); `baseline-twice` (the
+  already-holds-entries refusal removed).
+- [ ] **Step 2: Implement**: `DECISIONS = ("accept", "drop", "baseline")`; the mode in `accept_run.py`; the readers.
+  The ledger's `SCHEMA` stays `fc08-seen-items/1` only if no reader rejects an unknown decision; otherwise bump it
+  to `/2` and say why.
+- [ ] **Step 3: Verify** the clauses, both mutations, and `accept_run.py --baseline otsi fca nca eu_council eba amla
+  --on 2026-10-31 --dry-run` printing six counts and leaving `git status` unchanged. Do NOT run it without
+  `--dry-run`.
+- [ ] **At landing (owner-gated, in `~/fc-08-schedule` on `main`, Thursday 2026-11-05):** run the same command
+  without `--dry-run`, `--on` that day; commit `data/feeds/seen.json` with explicit staging; the owner pushes.
 
 ### Task 6: verify, publish, commit (owner's go)
 

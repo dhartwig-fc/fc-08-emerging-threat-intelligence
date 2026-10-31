@@ -8,7 +8,7 @@ Usage:
     python evals/check_feeds_triage.py --mutate drop-not-relevant  # a not_relevant verdict is never written
     python evals/check_feeds_triage.py --mutate long-reason        # the reason cap is 3000, not 300
     python evals/check_feeds_triage.py --mutate no-strip           # padding lengthens a short quote
-    python evals/check_feeds_triage.py --mutate no-cap             # more than 10 verdicts in one run
+    python evals/check_feeds_triage.py --mutate no-cap             # more than 20 verdicts in one run
     python evals/check_feeds_triage.py --mutate no-pin-check       # a changed pinned document is still quoted
     python evals/check_feeds_triage.py --mutate refused-prefix     # refusals read "Refused:", which telemetry calls SUCCESS
     python evals/check_feeds_triage.py --mutate wrong-document     # a quote is checked against another item's document
@@ -96,7 +96,7 @@ MUTATIONS = {
     "long-reason": (TRIAGE_SRC, "REASON_MAX = 300\n", "REASON_MAX = 3000\n"),
     "no-strip": (TRIAGE_SRC, '    reason, quote = (reason or "").strip(), (quote or "").strip()\n',
                  '    reason, quote = reason or "", quote or ""\n'),
-    "no-cap": (TRIAGE_SRC, "MAX_PER_RUN = 10\n", "MAX_PER_RUN = 100\n"),
+    "no-cap": (TRIAGE_SRC, "MAX_PER_RUN = 20\n", "MAX_PER_RUN = 100\n"),
     "no-pin-check": (TRIAGE_SRC, '    if not path.exists() or file_sha256(path) != doc["sha256"]:\n',
                      "    if not path.exists():\n"),
     "refused-prefix": (TRIAGE_SRC, 'REJECTED = "Rejected:"\n', 'REJECTED = "Refused:"\n'),
@@ -181,6 +181,10 @@ def checks(tri, fs) -> list:
     os.environ.pop(fs.BATCH_ENV, None)
     stub = Stub()
     before = git_status()
+    # The fixture lists 12 items, so the cap MECHANISM is exercised at a cap of 10 (the value before the
+    # 2026-10-31 doubling); the real cap's value is pinned by its own clause below.
+    real_cap, tri.MAX_PER_RUN = tri.MAX_PER_RUN, 10
+    out.append((real_cap == 20, "the triage cap is 20 verdicts per run (doubled 2026-10-31, plan R2)", real_cap))
     with tempfile.TemporaryDirectory() as tmp:
         tmp = Path(tmp)
         fs.HTTP_GET, fs.INBOX_ROOT, fs.SEEN_PATH = stub, tmp / "inbox", tmp / "ledger.json"
@@ -343,6 +347,7 @@ def checks(tri, fs) -> list:
         out.append((all(w == "ledger.json" or w.startswith("inbox/%s/" % RUN) for w in written)
                     and "inbox/%s/triage.jsonl" % RUN in written,
                     "every file written is inside this run's temporary inbox", "%d files" % len(written)))
+    tri.MAX_PER_RUN = real_cap
     os.environ.pop(fs.RUN_ENV, None)
     out += catalogue_checks(tri, fs, stub)
     out.append((git_status() == before, "the repository's git status is unchanged", ""))

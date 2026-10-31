@@ -15,7 +15,9 @@ from typing import List, Optional
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
-SCHEMA_VERSION = "1.4.0"
+SCHEMA_VERSION = "1.5.0"
+# 1.5.0 (2026-10-31, six more regulators): SourceType gains otsi, eu_council, eba, amla. Additive: every existing
+#   record validates unchanged.
 # 1.4.0 (2026-09-13, week 4 additive reviewer): TypologyReference gains `added_by`
 #   and `review_justification`. The reviewer (agents/review_advisory.py) finds
 #   typologies the extraction missed -- measured full-set F1 0.510 -> 0.665 -- and
@@ -45,9 +47,13 @@ class SourceType(str, Enum):
     FATF = "fatf"
     OFAC = "ofac"
     OFSI = "ofsi"
+    OTSI = "otsi"
     NCA = "nca"
     FCA = "fca"
     FINCEN = "fincen"
+    EU_COUNCIL = "eu_council"
+    EBA = "eba"
+    AMLA = "amla"
     EUROPOL = "europol"
     WOLFSBERG = "wolfsberg"
     INDUSTRY = "industry"

@@ -1,0 +1,11 @@
+{
+  "ofsi": "",
+  "fincen": "",
+  "ofac": "An OFAC designation page is relevant when it names a network AND says how that network moved money or evaded sanctions: front or shell companies, crypto or digital-currency addresses, or a laundering, procurement or financing role. A bare list of names with no such line, or a page of only removals and updates, is not relevant. When you mark such a page relevant, quote that network-and-method line as your evidence.",
+  "otsi": "An OTSI page is relevant when it describes how trade sanctions are evaded or breached. Licence notices and procedural updates are not relevant.",
+  "fca": "An FCA page is relevant when it is a final notice, an enforcement action or a fine that describes a control failure or a laundering or fraud method. Consultations, speeches and corporate news are not relevant.",
+  "nca": "An NCA page is relevant when it describes a laundering, fraud or sanctions-evasion method. An arrest or a sentence alone is not relevant.",
+  "eu_council": "An EU Council press release is relevant when it is in the Sanctions category or describes how sanctions are evaded. Other policy news is not relevant.",
+  "eba": "An EBA page is relevant when it is an AML/CFT guideline, risk opinion or peer review. Procedural, staffing and non-AML items are not relevant.",
+  "amla": "An AMLA page is relevant when it is a risk assessment, guidance or a supervisory finding. Institutional and recruitment news is not relevant."
+}

@@ -13,7 +13,7 @@ Usage:
     python evals/check_feeds_orchestrator.py --mutate inherit-catalogue  # a live server inherits FEEDS_CATALOGUE
     python evals/check_feeds_orchestrator.py --mutate triage-drift       # a live run's triage instructions differ from B's
     python evals/check_feeds_orchestrator.py --mutate unpinned-budget    # the session cap moves off US$1.50
-    python evals/check_feeds_orchestrator.py --mutate over-ceiling       # the caps no longer fit the US$5 ceiling
+    python evals/check_feeds_orchestrator.py --mutate over-ceiling       # the caps no longer fit the US$10 ceiling
     python evals/check_feeds_orchestrator.py --mutate stale-full-hash    # FULL_PROMPT_SHA256 no longer matches FULL_PROMPT
     python evals/check_feeds_orchestrator.py --mutate drop-ofac-rule     # the live prompt loses the OFAC designation rule
     python evals/check_feeds_orchestrator.py --mutate leak-ofac-rule     # the OFAC rule leaks into the eval (triage) prompt
@@ -28,7 +28,7 @@ WHAT IT HOLDS (spec sections 1 and 4; the questions evals/check_tool_surface.py 
                  both DENY propose_link and Bash;
   the lists      AGENT_TOOLS is exactly an EVAL server's tools and FULL_AGENT_TOOLS a LIVE server's, each split
                  into the mode's write allowlist and the read-only tools;
-  identity       FeedsRun refuses a malformed run id, a half-set eval mode and a batch over the cap of 10;
+  identity       FeedsRun refuses a malformed run id, a half-set eval mode and a batch over the cap of 20;
   telemetry      the Post hooks are installed; the shadowing advisory names only feeds_read_page;
   the prompts    triage-only states the asymmetry, offers no extraction, and PROMPT_SHA256 is its hash; the
                  LIVE prompt BEGINS with those exact bytes and adds the extraction step (at most 3);
@@ -36,8 +36,8 @@ WHAT IT HOLDS (spec sections 1 and 4; the questions evals/check_tool_surface.py 
                  telemetry.run_started for a live run (prompt-sha brief, 2026-09-29). Neither this guard nor
                  check_friday_run.py drives run_session() far enough to reach that call without a model, so
                  this pins the constant, not the call site;
-  the budget     pinned: US$1.50 and 80 turns per session, US$1.00 and 60 turns per extraction, 3
-                 extractions and 10 verdicts per run, a US$5.00 ceiling -- and session + 3 extractions fits it.
+  the budget     pinned: US$3.00 and 160 turns per session, US$1.00 and 60 turns per extraction, 3
+                 extractions and 20 verdicts per run, a US$10.00 ceiling -- and session + 3 extractions fits it.
 
 STATIC. No model, no network. Each --mutate changes the options or a module constant in memory.
 """
@@ -75,8 +75,8 @@ EVAL_RUN = of.FeedsRun("feeds-2026-10-02-fff666", catalogue=ROOT / "evals" / "fe
 TRIAGE = "mcp__feeds__feeds_triage"
 EXTRACT = "mcp__feeds__feeds_extract"
 SERVER = ROOT / "mcp_server" / "feeds_server.py"
-EVAL_PROMPT_SHA256 = "58333bd271470b94dc3ecd686c6a9e11938c515a3b33187be359eb47e1480378"  # B's measured bytes
-PINNED = {"MAX_BUDGET_USD": 1.50, "MAX_TURNS": 80, "RUN_CEILING_USD": 5.00, "EXTRACTION_BUDGET_USD": 1.00,
+EVAL_PROMPT_SHA256 = "402ebca9d6bdd620caf777f9b71a1aa71f7b5b42d108f325ccbab67e5b819063"  # re-pinned plan R3, 2026-10-31: the nine-source prompt (B measured 58333bd2 on three; re-measure is an owner decision)
+PINNED = {"MAX_BUDGET_USD": 3.00, "MAX_TURNS": 160, "RUN_CEILING_USD": 10.00, "EXTRACTION_BUDGET_USD": 1.00,
           "EXTRACTION_MAX_TURNS": 60}
 
 
@@ -157,10 +157,10 @@ def checks(mutation) -> list:
     if mutation == "triage-drift":
         of.FULL_PROMPT = of.FULL_PROMPT.replace("When in doubt, keep it", "When in doubt, keep it, always", 1)
     if mutation == "unpinned-budget":
-        of.MAX_BUDGET_USD = 3.00
+        of.MAX_BUDGET_USD = 6.00
     if mutation == "over-ceiling":
-        of.EXTRACTION_BUDGET_USD = 1.50
-        PINNED["EXTRACTION_BUDGET_USD"] = 1.50  # the pin moved WITH it: only the ceiling arithmetic can catch this
+        of.EXTRACTION_BUDGET_USD = 3.00
+        PINNED["EXTRACTION_BUDGET_USD"] = 3.00  # the pin moved WITH it: only the ceiling arithmetic can catch this
     if mutation == "stale-full-hash":
         of.FULL_PROMPT_SHA256 = "0" * 64
     if mutation == "drop-ofac-rule":
@@ -183,13 +183,13 @@ def checks(mutation) -> list:
     refused = []
     for kwargs in ({"run_id": "not-a-run"}, {"run_id": LIVE.run_id, "batch": ("ofsi:0123456789abcdef",)},
                    {"run_id": LIVE.run_id, "catalogue": Path("c.json"),
-                    "batch": tuple("ofsi:%016x" % i for i in range(11))}):
+                    "batch": tuple("ofsi:%016x" % i for i in range(21))}):
         try:
             of.FeedsRun(**kwargs)
         except ValueError:
             refused.append(True)
     out.append((len(refused) == 3 and LIVE.live and not EVAL_RUN.live,
-                "FeedsRun refuses a bad run id, a half-set eval mode and a batch over 10; live is decided by the run",
+                "FeedsRun refuses a bad run id, a half-set eval mode and a batch over 20; live is decided by the run",
                 "%d refused" % len(refused)))
 
     o = of.agent_options(EVAL_RUN)
@@ -221,7 +221,7 @@ def checks(mutation) -> list:
                                             of.OFAC_DESIGNATION_RULE in o.system_prompt)))
     out.append((hashlib.sha256(o.system_prompt.encode("utf-8")).hexdigest() == EVAL_PROMPT_SHA256
                 and of.PROMPT_SHA256 == EVAL_PROMPT_SHA256,
-                "the eval prompt is byte-identical to the bytes B measured (PROMPT_SHA256 unchanged)",
+                "the eval prompt is byte-identical to the pinned bytes (PROMPT_SHA256, nine-source prompt, plan R3)",
                 hashlib.sha256(o.system_prompt.encode("utf-8")).hexdigest()[:16]))
     # Prompt-sha brief (2026-09-29): run_session passes telemetry.run_started this exact constant for a
     # live run. Pinned here rather than at the call site -- see the docstring above.
@@ -231,9 +231,9 @@ def checks(mutation) -> list:
 
     got = {k: getattr(of, k) for k in PINNED}
     fits = of.MAX_BUDGET_USD + feeds_extraction.MAX_PER_RUN * of.EXTRACTION_BUDGET_USD <= of.RUN_CEILING_USD
-    out.append((got == PINNED and feeds_extraction.MAX_PER_RUN == 3 and feeds_triage.MAX_PER_RUN == 10 and fits,
-                "the budget is pinned (session US$1.50/80 turns, extraction US$1.00/60, 3 extractions, 10 verdicts, "
-                "US$5 ceiling) and session + 3 extractions fits the ceiling",
+    out.append((got == PINNED and feeds_extraction.MAX_PER_RUN == 3 and feeds_triage.MAX_PER_RUN == 20 and fits,
+                "the budget is pinned (session US$3.00/160 turns, extraction US$1.00/60, 3 extractions, 20 verdicts, "
+                "US$10 ceiling) and session + 3 extractions fits the ceiling",
                 "%s, fits %s" % (got, fits)))
     return out
 

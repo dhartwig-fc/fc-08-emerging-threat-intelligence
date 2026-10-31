@@ -1,5 +1,5 @@
 """
-Pin the three source adapters (feeds/sources.py) and the allowlisted fetch (feeds/http.py).
+Pin the source adapters (feeds/sources.py) and the allowlisted fetch (feeds/http.py).
 
 Usage:
     python evals/check_feed_adapters.py
@@ -17,6 +17,11 @@ Usage:
     python evals/check_feed_adapters.py --mutate ofac-truncated-ok  # an OFAC body ending inside a row drops the row
     python evals/check_feed_adapters.py --mutate narrow-except      # only URLError becomes FetchRefused
     python evals/check_feed_adapters.py --mutate hand-list          # a hand copy of the source list in reconcile.py
+    python evals/check_feed_adapters.py --mutate rule-missing        # a live source with no triage rule entry
+    python evals/check_feed_adapters.py --mutate rss-date-optional  # an undated RSS item is accepted
+    python evals/check_feed_adapters.py --mutate rss-unsorted       # an RSS feed comes back in document order
+    python evals/check_feed_adapters.py --mutate fca-host-open      # FCA's declared hosts gain an extra host
+    python evals/check_feed_adapters.py --mutate publisher-missing  # a source without a PUBLISHERS entry
 
 CONTRACT. Each adapter, run on the committed snapshot of its listing (tests/fixtures/feeds/, fetched
 2026-09-26, public government pages), must return the pinned items: count, the digest of their ids in
@@ -50,6 +55,7 @@ import argparse
 import hashlib
 import http.server
 import importlib
+import json
 import re
 import socketserver
 import sys
@@ -66,7 +72,13 @@ HTTP_PY = ROOT / "feeds" / "http.py"
 FIX = ROOT / "tests" / "fixtures" / "feeds"
 SNAPSHOTS = {"ofsi": ("ofsi.atom", "b63d891e06aceaaf42021a4637573ad16cedc7c6b84ab7082332903b4b6d31c9"),
              "fincen": ("fincen_advisories.html", "295483b8950e51cd839f1b0198c6b20d8a802180b55487ee6551412bcbd3b10b"),
-             "ofac": ("ofac_recent_actions.html", "9b2cdcdc61a65f954e3157d216ce154aa3ad1fddfea810f97d78ad6bb9f0e669")}
+             "ofac": ("ofac_recent_actions.html", "9b2cdcdc61a65f954e3157d216ce154aa3ad1fddfea810f97d78ad6bb9f0e669"),
+             "otsi": ("otsi.atom", "4989315d391a8e805fc54471a40d25be7ee8b33fe6db83bc991a1dcd55696737"),
+             "fca": ("fca.rss", "7bf89e542865addeaf14355f82eb77a54c64466e9ecd8fc55cb0ffcaed99ee0b"),
+             "nca": ("nca.rss", "50a3328fafc35dd918f03d6488d5a21b15114b3719a947961fa5068788d9da3b"),
+             "eu_council": ("eu_council.rss", "8ad8d9da81a433c4e91c6205f3b4c33fd655528517c993ac0f6a58eb2fbfef44"),
+             "eba": ("eba.rss", "550eb52f4e5b25afec8fda7dc8137578ac1a581d0690a491223da56d83677b47"),
+             "amla": ("amla.rss", "91e9ba1e45b2719bc2547d4fb61f57b5740daf441c8ad37376442868964eb57c"),}
 EXPECTED = {
     "ofsi": {"count": 20, "ids": "db1898e619e089de7649a2443ffbe1ca707fa31d623ebae87729f76e5916067e",
              "first": {"item_id": "https://www.gov.uk/government/publications/uk-financial-sanctions-faqs#2026-09-24T08:49:08Z",
@@ -96,6 +108,24 @@ EXPECTED = {
              "last": {"item_id": "20260904", "url": "https://ofac.treasury.gov/recent-actions/20260904",
                       "published": "2026-09-04",
                       "title": "Iran-related Designations; Issuance of Iran-related General License"}},
+    'otsi': {"count": 20, "ids": '65cebafd4b83dd73bb4f26bd1838d7ef8f5cef5212f5e4e686aa647e9d74b898',
+      "first": {'item_id': 'https://www.gov.uk/government/publications/complying-with-trade-sanctions-relating-to-specified-ships#2026-10-27T10:00:00Z', 'title': 'Guidance: Complying with trade sanctions relating to specified ships', 'url': 'https://www.gov.uk/government/publications/complying-with-trade-sanctions-relating-to-specified-ships', 'published': '2026-10-27', 'summary': 'Guidance outlining obligations under trade sanctions relating to specified ships and the Office of Trade Sanction Implementation’s (OTSI) implementation and enforcement responsibilities.'},
+      "last": {'item_id': 'https://www.gov.uk/guidance/how-to-use-exceptions-and-licences-to-comply-with-sanctions#2026-04-23T11:26:39Z', 'title': 'How to use exceptions and licences to comply with sanctions', 'url': 'https://www.gov.uk/guidance/how-to-use-exceptions-and-licences-to-comply-with-sanctions', 'published': '2026-04-23'}},
+    'fca': {"count": 20, "ids": '5211f258013bd7d4edc034b43087d6f7d2e87ff49a604964a30c4963cfdf5e23',
+      "first": {'item_id': '177091', 'title': 'Brits nearly twice as likely to spot pressure tactics in horror films as investment red flags', 'url': 'https://www.fca.org.uk/news/press-releases/brits-nearly-twice-likely-spot-pressure-tactics-horror-films-investment-red-flags', 'published': '2026-10-30', 'summary': ''},
+      "last": {'item_id': '176576', 'title': 'Two plead guilty after clients lose £2m in fraud case', 'url': 'https://www.fca.org.uk/news/press-releases/two-plead-guilty-after-clients-lose-2m-fraud-case', 'published': '2026-10-13'}},
+    'nca': {"count": 20, "ids": '0f5e56574d689c27a8d85090f441e735e2f40364b8a21f62ec1791d10f96fb90',
+      "first": {'item_id': 'https://www.nationalcrimeagency.gov.uk/news/people-smuggling-network-get-combined-jail-terms-of-more-than-84-years-as-final-members-sentenced', 'title': 'People smuggling network get combined jail terms of more than 84 years as final members sentenced', 'url': 'https://www.nationalcrimeagency.gov.uk/news/people-smuggling-network-get-combined-jail-terms-of-more-than-84-years-as-final-members-sentenced', 'published': '2026-10-28', 'summary': ''},
+      "last": {'item_id': 'https://www.nationalcrimeagency.gov.uk/news/gang-ringleader-arrested-by-the-nca-convicted-over-channel-boat-deaths', 'title': 'Gang ringleader arrested by the NCA convicted over Channel boat deaths', 'url': 'https://www.nationalcrimeagency.gov.uk/news/gang-ringleader-arrested-by-the-nca-convicted-over-channel-boat-deaths', 'published': '2026-10-01'}},
+    'eu_council': {"count": 20, "ids": '7209e7d9900f8f877f792e6bf5d15088d05f56a82aaffa46402ec2daa2271e4e',
+      "first": {'item_id': '151917', 'title': 'Weekly schedule of President António Costa', 'url': 'https://www.consilium.europa.eu/en/press/press-releases/2026/10/30/weekly-schedule-of-president-antonio-costa/', 'published': '2026-10-30', 'summary': ''},
+      "last": {'item_id': '151695', 'title': 'Weekly schedule of President António Costa', 'url': 'https://www.consilium.europa.eu/en/press/press-releases/2026/10/23/weekly-schedule-of-president-antonio-costa/', 'published': '2026-10-23'}},
+    'eba': {"count": 10, "ids": '381810fb8f9f9ce7700ac8d7a8fe8c34c82824411cbd8b71b17661285969ec61',
+      "first": {'item_id': 'https://www.eba.europa.eu/publications-and-media/press-releases/eba-advises-targeted-simplifications-taxonomy-disclosures', 'title': 'The EBA advises on targeted simplifications to Taxonomy disclosures', 'url': 'https://www.eba.europa.eu/publications-and-media/press-releases/eba-advises-targeted-simplifications-taxonomy-disclosures', 'published': '2026-10-29', 'summary': ''},
+      "last": {'item_id': 'https://www.eba.europa.eu/publications-and-media/press-releases/eueea-banks-display-strength-amid-challenging-risk-environment', 'title': 'EU/EEA banks display strength amid a challenging risk environment', 'url': 'https://www.eba.europa.eu/publications-and-media/press-releases/eueea-banks-display-strength-amid-challenging-risk-environment', 'published': '2026-09-25'}},
+    'amla': {"count": 30, "ids": '57d5f3c96875e065467e2c33a9167cb82c275ecb99dfc929501e2e080a974682',
+      "first": {'item_id': 'https://www.amla.europa.eu/call-expression-interest-technology-providers-roundtable-partnerships-information-sharing_en', 'title': 'Call for expression of interest: technology providers roundtable on partnerships for information sharing', 'url': 'https://www.amla.europa.eu/call-expression-interest-technology-providers-roundtable-partnerships-information-sharing_en', 'published': '2026-10-30', 'summary': ''},
+      "last": {'item_id': 'https://www.amla.europa.eu/press-release-amla-consults-clear-rules-cross-border-fiu-information-exchanges_en', 'title': 'Press Release: AMLA consults on clear rules for cross-border FIU information exchanges', 'url': 'https://www.amla.europa.eu/press-release-amla-consults-clear-rules-cross-border-fiu-information-exchanges_en', 'published': '2026-07-06'}},
 }
 # (label, source, regex, replacement), applied to EVERY match: each must make the adapter raise LayoutChanged.
 BREAKS = [
@@ -114,6 +144,9 @@ BREAKS = [
     ("an item with an empty title", "fincen", r'hreflang="en">FinCEN Advisory FIN-2026-A002</a>', 'hreflang="en"></a>'),
     ("an item with an empty title", "ofac", r'hreflang="en">Democratic Republic of the Congo-related Designations '
      r'Removals</a>', 'hreflang="en"></a>'),
+    ("an item without a date", "nca", r"<pubDate>[^<]*</pubDate>", ""),
+    ("an item without a date", "eu_council", r"<a10:updated>[^<]*</a10:updated>", ""),
+    ("an item with a date in no known format", "fca", r"<pubDate>[^<]*</pubDate>", "<pubDate>yesterday</pubDate>"),
     # A body cut off inside the last row (the size cap, a dropped connection): nine rows parse, the
     # tenth is open when the input ends.
     ("a body ending inside an open views-row", "ofac", r'(?s)(<a href="/recent-actions/20260904" hreflang="en">).*',
@@ -124,7 +157,7 @@ MUTATIONS = {
     "no-marker-fincen": (SOURCES_PY, 'raise LayoutChanged("fincen: the listing table (th#view-title-table-column) is missing")',
                          "pass"),
     "empty-ok": (SOURCES_PY, 'raise LayoutChanged("ofac: the view is present but no views-row parsed")', "pass"),
-    "ofsi-link-id": (SOURCES_PY, 'FeedItem("ofsi", eid.strip(),', 'FeedItem("ofsi", link.get("href"),'),
+    "ofsi-link-id": (SOURCES_PY, 'FeedItem(source, eid.strip(),', 'FeedItem(source, link.get("href"),'),
     "relative-url": (SOURCES_PY, 'urljoin(FINCEN_BASE, row["href"])', 'row["href"]'),
     "ofac-date-optional": (SOURCES_PY, 'if not row["href"] or not row["date"]:', 'if not row["href"]:'),
     "follow-redirects": (HTTP_PY, "        _check_host(newurl, self.allowed_hosts)\n", ""),
@@ -136,6 +169,10 @@ MUTATIONS = {
                     "        pass\n"),
     "ofac-truncated-ok": (SOURCES_PY, '        raise LayoutChanged("ofac: the listing ends inside an open views-row (a '
                           'truncated body)")\n', "        pass\n"),
+    "rss-date-optional": (SOURCES_PY, 'raise LayoutChanged("%s: the item %s has no date" % (source, where))', 'return ""'),
+    "rss-unsorted": (SOURCES_PY, "return sorted(items, key=", "return list(items) or sorted(items, key="),
+    "fca-host-open": (SOURCES_PY, 'frozenset({"www.fca.org.uk"}), parse_fca',
+                      'frozenset({"www.fca.org.uk", "evil.example"}), parse_fca'),
     "narrow-except": (HTTP_PY, "    except (OSError, http.client.HTTPException) as exc:\n", "    except () as exc:\n"),
 }
 
@@ -198,6 +235,37 @@ def adapter_checks(sources) -> list:
     out.append((len(items) == 21 and len({i.key for i in items}) == 21 and items[0].url == items[1].url,
                 "ofsi: a revised publication (same link, new <id> timestamp) is a new item", "%d items" % len(items)))
     return out
+
+
+# The spec's table: each new source's listing hosts and the hosts a document linked from an item may come from.
+NEW_HOSTS = {"otsi": ({"www.gov.uk"}, {"assets.publishing.service.gov.uk"}),
+             "fca": ({"www.fca.org.uk"}, {"www.fca.org.uk"}),
+             "nca": ({"www.nationalcrimeagency.gov.uk"}, {"www.nationalcrimeagency.gov.uk"}),
+             "eu_council": ({"www.consilium.europa.eu"}, {"www.consilium.europa.eu"}),
+             "eba": ({"www.eba.europa.eu"}, {"www.eba.europa.eu"}),
+             "amla": ({"www.amla.europa.eu"}, {"www.amla.europa.eu"})}
+
+
+def host_checks(sources) -> list:
+    return [(set(sources.SOURCES[n].hosts) == h and set(sources.SOURCES[n].document_hosts) == d,
+             "%s: hosts and document_hosts are exactly the spec's table" % n,
+             "got %s / %s" % (sorted(sources.SOURCES[n].hosts), sorted(sources.SOURCES[n].document_hosts)))
+            for n, (h, d) in NEW_HOSTS.items()]
+
+
+def publisher_checks(sources, mutation) -> list:
+    """tools/accept_run.py PUBLISHERS names every source: accepting an item from one without an entry is a KeyError."""
+    import ast
+    tree = ast.parse((ROOT / "tools" / "accept_run.py").read_text(encoding="utf-8"))
+    names = {}
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Assign) and any(getattr(t, "id", "") == "PUBLISHERS" for t in node.targets):
+            names = ast.literal_eval(node.value)
+    if mutation == "publisher-missing":
+        names.pop("amla", None)
+    missing = sorted(set(sources.SOURCES) - set(names))
+    return [(bool(names) and not missing, "every source has a publisher name in tools/accept_run.py PUBLISHERS",
+             "missing: %s" % missing)]
 
 
 def boundary_checks(fh) -> list:
@@ -346,9 +414,20 @@ def one_list_checks(mutation) -> list:
     return [(not copies, "no runtime module outside feeds/sources.py names the live sources together", copies)]
 
 
+def rules_checks(mutation) -> list:
+    """Spec §3: every live source has a triage rule entry (the empty string written explicitly means none)."""
+    from feeds.sources import SOURCES
+    rules = json.loads((ROOT / "feeds" / "triage_rules.json").read_text(encoding="utf-8"))
+    if mutation == "rule-missing":
+        rules.pop("fca", None)
+    ok = set(rules) == set(SOURCES) and all(isinstance(v, str) for v in rules.values())
+    return [(ok, "feeds/triage_rules.json has exactly one string rule per live source",
+             sorted(set(SOURCES) ^ set(rules)))]
+
+
 def main(argv: list) -> int:
     ap = argparse.ArgumentParser(description="Pin the feed adapters and the allowlisted fetch")
-    ap.add_argument("--mutate", choices=sorted(MUTATIONS) + ["hand-list"],
+    ap.add_argument("--mutate", choices=sorted(MUTATIONS) + ["hand-list", "publisher-missing", "rule-missing"],
                     help="break one rule; a check MUST fail")
     args = ap.parse_args(argv)
     fh = load("feeds.http", HTTP_PY, args.mutate)
@@ -357,7 +436,8 @@ def main(argv: list) -> int:
         print("MUTATED: %s\n" % args.mutate)
     failures = 0
     for ok, label, detail in adapter_checks(sources) + boundary_checks(fh) + transport_checks(fh) \
-            + one_list_checks(args.mutate):
+            + one_list_checks(args.mutate) \
+            + host_checks(sources) + publisher_checks(sources, args.mutate) + rules_checks(args.mutate):
         print("  %-4s %s\n         %s" % ("PASS" if ok else "FAIL", label, detail))
         failures += 0 if ok else 1
     if args.mutate:
