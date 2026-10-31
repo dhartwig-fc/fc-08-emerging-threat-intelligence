@@ -222,6 +222,19 @@ SOURCES = {
                    frozenset({"assets.publishing.service.gov.uk"})),
 }
 
+# The order sources are named in the triage prompt and listed in a run. Appending keeps every earlier prompt's
+# bytes (plan R5); a source missing here, or one here but not in SOURCES, is refused at import.
+ORDER = ("ofsi", "fincen", "ofac")
+if set(ORDER) != set(SOURCES) or len(ORDER) != len(SOURCES):
+    raise RuntimeError("feeds.sources: ORDER %r and SOURCES %r disagree" % (ORDER, sorted(SOURCES)))
+SOURCE_PATTERN = r"^(%s)$" % "|".join(ORDER)
+KEY_PATTERN = r"^(%s):[0-9a-f]{16}$" % "|".join(ORDER)
+
+
+def named() -> str:
+    """'ofsi, fincen and ofac': the sources in ORDER, as the prompt names them."""
+    return ORDER[0] if len(ORDER) == 1 else ", ".join(ORDER[:-1]) + " and " + ORDER[-1]
+
 
 class _Links(HTMLParser):
     def __init__(self) -> None:

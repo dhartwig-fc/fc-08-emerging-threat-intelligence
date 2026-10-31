@@ -48,6 +48,7 @@ from agents.permissions import (  # noqa: E402
     permission_callback,
 )
 from feeds import extraction as feeds_extraction, inbox, triage as feeds_triage  # noqa: E402
+from feeds.sources import named  # noqa: E402
 
 SERVER_PATH = ROOT / "mcp_server" / "feeds_server.py"
 TRIAGE_TOOLS = ("feeds_list_new", "feeds_fetch", "feeds_read_page", "feeds_triage")
@@ -77,13 +78,13 @@ Not relevant: a bare designation or delisting list, a licence or general licence
 When in doubt, keep it: mark it relevant. A relevant publication missed here is lost to the desk; an irrelevant one kept costs a reviewer a minute.
 
 How to work:
-1. Call feeds_list_new once each for ofsi, fincen and ofac.
+1. Call feeds_list_new once each for __SOURCES__.
 2. For every item listed, call feeds_fetch, then read the document with feeds_read_page. Start at page 1 and read on while the question is not settled.
 3. Call feeds_triage exactly once per item: verdict relevant or not_relevant; a reason of at most 300 characters; one verbatim quote, copied from the pages feeds_read_page returned, that supports the verdict.
 4. Triage every item. If an item cannot be fetched or read, do not guess a verdict: say so in your final message.
 5. Finish with one line per item: key, verdict.
 
-Tool replies that start "Rejected:" are refusals; read the reason and correct the call (a quote the tool cannot find must be copied again, exactly). You only ever pass keys the tools gave you, never a URL."""
+Tool replies that start "Rejected:" are refusals; read the reason and correct the call (a quote the tool cannot find must be copied again, exactly). You only ever pass keys the tools gave you, never a URL.""".replace("__SOURCES__", named())
 
 # Appended, never interleaved: the triage instructions a live run follows are byte-for-byte the ones B's
 # band measured (PROMPT_SHA256), and the extraction request is one step after them.
@@ -163,8 +164,8 @@ def agent_options(run: FeedsRun, model: str = MODEL, max_budget_usd: float = MAX
 
 def _prompt(run: FeedsRun) -> str:
     if run.live:
-        return "Run %s. Triage every new item from ofsi, fincen and ofac, then queue extraction." % run.run_id
-    return "Run %s. Triage every new item from ofsi, fincen and ofac." % run.run_id
+        return "Run %s. Triage every new item from %s, then queue extraction." % (run.run_id, named())
+    return "Run %s. Triage every new item from %s." % (run.run_id, named())
 
 
 def _result_text(content) -> str:

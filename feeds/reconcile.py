@@ -25,11 +25,12 @@ from pathlib import Path
 from typing import Dict, List, Optional
 
 from feeds import extraction, inbox, triage as feeds_triage
+from feeds.sources import ORDER
 
 RUN_JSON = "run.json"
 REFUSAL = "refusal.json"
 RESOLVER = "knowledge_centre_resolve_actor"
-SOURCES = ("ofsi", "fincen", "ofac")
+SOURCES = ORDER
 REFUSED, FAILED, RECON_FAILED, UNFINISHED, NOTHING_NEW, COMPLETE = (
     "REFUSED", "FAILED", "RECONCILIATION_FAILED", "UNFINISHED", "NOTHING_NEW", "COMPLETE")
 ACCEPTABLE = (UNFINISHED, NOTHING_NEW, COMPLETE)

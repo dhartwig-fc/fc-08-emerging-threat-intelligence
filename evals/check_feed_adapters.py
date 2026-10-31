@@ -16,6 +16,7 @@ Usage:
     python evals/check_feed_adapters.py --mutate untitled-ok        # an item with an empty title is accepted
     python evals/check_feed_adapters.py --mutate ofac-truncated-ok  # an OFAC body ending inside a row drops the row
     python evals/check_feed_adapters.py --mutate narrow-except      # only URLError becomes FetchRefused
+    python evals/check_feed_adapters.py --mutate hand-list          # a hand copy of the source list in reconcile.py
 
 CONTRACT. Each adapter, run on the committed snapshot of its listing (tests/fixtures/feeds/, fetched
 2026-09-26, public government pages), must return the pinned items: count, the digest of their ids in
@@ -141,7 +142,7 @@ MUTATIONS = {
 
 def load(name: str, path: Path, mutation) -> types.ModuleType:
     source = path.read_text(encoding="utf-8")
-    if mutation and MUTATIONS[mutation][0] == path:
+    if mutation in MUTATIONS and MUTATIONS[mutation][0] == path:
         old, new = MUTATIONS[mutation][1:]
         if source.count(old) != 1:
             raise SystemExit("MUTATION TARGET MISSING: %r is not in %s exactly once" % (old, path))
@@ -311,16 +312,52 @@ def transport_checks(fh) -> list:
     return out
 
 
+RUNTIME_DIRS = ("feeds", "mcp_server", "agents", "tools")
+
+
+def one_list_checks(mutation) -> list:
+    """Spec §1: feeds/sources.py is the only place that names the live sources together. A string or tuple naming
+    two or more source ids anywhere else in the runtime is a hand copy, which drifts the day a source is added."""
+    import ast
+    sys.path.insert(0, str(ROOT))
+    from feeds.sources import SOURCES
+    ids = set(SOURCES)
+    copies = []
+    for d in RUNTIME_DIRS:
+        for path in sorted((ROOT / d).rglob("*.py")):
+            rel = path.relative_to(ROOT).as_posix()
+            if rel == "feeds/sources.py":
+                continue
+            text = path.read_text(encoding="utf-8")
+            if mutation == "hand-list" and rel == "feeds/reconcile.py":
+                text += '\nHAND = ("ofsi", "fincen", "ofac")\n'
+            tree = ast.parse(text)
+            docs = {id(n.body[0].value) for n in ast.walk(tree)
+                    if isinstance(n, (ast.Module, ast.FunctionDef, ast.ClassDef, ast.AsyncFunctionDef))
+                    and n.body and isinstance(n.body[0], ast.Expr) and isinstance(n.body[0].value, ast.Constant)}
+            for node in ast.walk(tree):
+                if isinstance(node, ast.Tuple) and all(isinstance(e, ast.Constant) and e.value in ids for e in node.elts) \
+                        and len(node.elts) >= 2:
+                    copies.append("%s:%d tuple" % (rel, node.lineno))
+                elif isinstance(node, ast.Constant) and isinstance(node.value, str) and id(node) not in docs:
+                    named = {t for t in re.findall(r"[a-z_]+", node.value) if t in ids}
+                    if len(named) >= 2:
+                        copies.append("%s:%d %r" % (rel, node.lineno, node.value[:60]))
+    return [(not copies, "no runtime module outside feeds/sources.py names the live sources together", copies)]
+
+
 def main(argv: list) -> int:
     ap = argparse.ArgumentParser(description="Pin the feed adapters and the allowlisted fetch")
-    ap.add_argument("--mutate", choices=sorted(MUTATIONS), help="break one rule; a check MUST fail")
+    ap.add_argument("--mutate", choices=sorted(MUTATIONS) + ["hand-list"],
+                    help="break one rule; a check MUST fail")
     args = ap.parse_args(argv)
     fh = load("feeds.http", HTTP_PY, args.mutate)
     sources = load("feeds.sources", SOURCES_PY, args.mutate)
     if args.mutate:
         print("MUTATED: %s\n" % args.mutate)
     failures = 0
-    for ok, label, detail in adapter_checks(sources) + boundary_checks(fh) + transport_checks(fh):
+    for ok, label, detail in adapter_checks(sources) + boundary_checks(fh) + transport_checks(fh) \
+            + one_list_checks(args.mutate):
         print("  %-4s %s\n         %s" % ("PASS" if ok else "FAIL", label, detail))
         failures += 0 if ok else 1
     if args.mutate:

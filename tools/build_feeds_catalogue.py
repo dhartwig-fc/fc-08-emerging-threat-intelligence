@@ -39,7 +39,7 @@ ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 from feeds import http as feeds_http  # noqa: E402
 from feeds.model import LayoutChanged  # noqa: E402
-from feeds.sources import DOCUMENT_TYPES, MAX_DOCUMENT_BYTES, MAX_LISTING_BYTES, SOURCES, linked_pdfs  # noqa: E402
+from feeds.sources import DOCUMENT_TYPES, MAX_DOCUMENT_BYTES, MAX_LISTING_BYTES, ORDER, SOURCES, linked_pdfs  # noqa: E402
 from schemas.citation_match import PageIndex  # noqa: E402
 
 EVAL_DIR = ROOT / "evals" / "feeds"
@@ -47,7 +47,6 @@ CATALOGUE = EVAL_DIR / "catalogue.json"
 DOCS = EVAL_DIR / "docs"
 SCHEMA = "fc08-triage-catalogue/1"
 PER_SOURCE = 20
-ORDER = ("ofsi", "fincen", "ofac")
 PAGES = {"ofsi": ("",), "fincen": ("", "?page=1"), "ofac": ("", "?page=1")}
 
 

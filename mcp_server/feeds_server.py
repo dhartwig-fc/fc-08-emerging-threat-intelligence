@@ -52,7 +52,8 @@ ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 from feeds import deferred, extraction as feeds_extraction, http as feeds_http, inbox, ledger, triage as feeds_triage  # noqa: E402
 from feeds.model import FeedItem, LayoutChanged  # noqa: E402
-from feeds.sources import DOCUMENT_TYPES, MAX_DOCUMENT_BYTES, MAX_LISTING_BYTES, SOURCES, linked_pdfs  # noqa: E402
+from feeds.sources import (DOCUMENT_TYPES, KEY_PATTERN, MAX_DOCUMENT_BYTES, MAX_LISTING_BYTES, SOURCES,  # noqa: E402
+                           SOURCE_PATTERN, linked_pdfs, named)
 from schemas.citation_match import PageIndex  # noqa: E402
 
 RUN_ENV = "FEEDS_RUN_ID"
@@ -77,13 +78,13 @@ NO_TEXT = "no text; not citable"
 class ListNewInput(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
-    source: str = Field(..., pattern=r"^(ofsi|fincen|ofac)$", description="ofsi, fincen or ofac")
+    source: str = Field(..., pattern=SOURCE_PATTERN, description=named())
 
 
 class FetchInput(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
-    item_key: str = Field(..., pattern=r"^(ofsi|fincen|ofac):[0-9a-f]{16}$",
+    item_key: str = Field(..., pattern=KEY_PATTERN,
                           description="A key feeds_list_new returned in this run")
 
 
@@ -323,7 +324,7 @@ def _fetch(run_id: str, item_key: str) -> str:
 class ReadPageInput(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
-    item_key: str = Field(..., pattern=r"^(ofsi|fincen|ofac):[0-9a-f]{16}$",
+    item_key: str = Field(..., pattern=KEY_PATTERN,
                           description="A key feeds_list_new returned in this run, already fetched")
     page: int = Field(..., ge=1, description="1-based page number")
 
@@ -366,7 +367,7 @@ def _read_page(run_id: str, item_key: str, page: int) -> str:
 class TriageInput(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
-    item_key: str = Field(..., pattern=r"^(ofsi|fincen|ofac):[0-9a-f]{16}$",
+    item_key: str = Field(..., pattern=KEY_PATTERN,
                           description="A key feeds_list_new returned in this run, already fetched")
     verdict: str = Field(..., description="relevant or not_relevant")
     reason: str = Field(..., description="Why, in at most 300 characters")
@@ -399,7 +400,7 @@ async def triage(params: TriageInput) -> str:
 class ExtractInput(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
-    item_key: str = Field(..., pattern=r"^(ofsi|fincen|ofac):[0-9a-f]{16}$",
+    item_key: str = Field(..., pattern=KEY_PATTERN,
                           description="A key triaged relevant in this run")
 
 
