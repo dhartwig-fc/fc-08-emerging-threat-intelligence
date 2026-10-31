@@ -119,7 +119,9 @@ PUBLISHERS = {"fincen": "FinCEN (US Treasury)", "ofsi": "OFSI (HM Treasury)", "o
               "otsi": "OTSI (HM Treasury)", "fca": "Financial Conduct Authority (FCA)",
               "nca": "National Crime Agency (NCA)", "eu_council": "Council of the European Union",
               "eba": "European Banking Authority (EBA)",
-              "amla": "Authority for Anti-Money Laundering and Countering the Financing of Terrorism (AMLA)"}
+              "amla": "Authority for Anti-Money Laundering and Countering the Financing of Terrorism (AMLA)",
+              "wolfsberg": "The Wolfsberg Group",
+              "fatf": "Financial Action Task Force (FATF)"}
 OVERRIDE_MIN = 10
 RUN_FILES = ("items.json", "triage.jsonl", extraction.REQUESTS, extraction.ALLOCATIONS, extraction.OUTCOMES,
              reconcile.RUN_JSON, "report.md")
@@ -141,6 +143,14 @@ class _Unreadable:
 
     def __init__(self, reason):
         self.reason = "unreadable queue line: %s" % reason
+
+
+def _provenance(verdict: dict, run_id: str, key: str):
+    """(source_matrix_tier, selection_rationale): an owner-selected verdict is an owner intake, never a live feed
+    (plan R6); every other verdict keeps the live-feed strings byte for byte."""
+    if verdict.get("by") == "owner":
+        return "owner intake", "owner intake run %s, item %s: %s" % (run_id, key, verdict["reason"])
+    return "live feed", "live feed run %s, item %s: triaged relevant: %s" % (run_id, key, verdict["reason"])
 
 
 def _check_accepted(run_id, key, item, verdict, outcome, request, alloc, folder, data, alist_entries, override):
@@ -187,12 +197,13 @@ def _check_accepted(run_id, key, item, verdict, outcome, request, alloc, folder,
     if bad:
         problems.append("%s: %d citation(s) are not on the page they name, first: %s p%s (%s)" % (
             key, len(bad), bad[0]["section"], bad[0]["page"], bad[0]["kind"]))
+    how, rationale = _provenance(verdict, run_id, key)
     entry = {"advisory_id": adv, "file": t["document"].name, "publisher": PUBLISHERS[item["source"]],
              "source_type": item["source"], "title": item["title"], "published_on": item["published"],
              "published_on_precision": "day", "url": request["document"].get("url") or item["url"],
-             "source_matrix_tier": "live feed", "sha256": request["document"]["sha256"],
+             "source_matrix_tier": how, "sha256": request["document"]["sha256"],
              "bytes": doc.stat().st_size, "pages": len(index),
-             "selection_rationale": "live feed run %s, item %s: triaged relevant: %s" % (run_id, key, verdict["reason"]),
+             "selection_rationale": rationale,
              "feed": {"run_id": run_id, "key": key, "item_id": item["item_id"], "listed_url": item["url"],
                       "extraction_run_id": xrun}}
     queue = folder / inbox.PROPOSALS / ("%s.jsonl" % xrun)

@@ -68,6 +68,7 @@ def reconcile_run(run_id: str, root: Path = inbox.INBOX_ROOT) -> dict:
     refusal = _json(folder / REFUSAL)
     run = _json(folder / RUN_JSON) or {}
     state = inbox.load(run_id, root)
+    manual = bool(state.get("manual"))  # tools/intake_document.py: no orchestrator, by design
     listed = {it["key"]: it for it in inbox.items(state)}
     verdicts = feeds_triage.load(run_id, root) if (folder / feeds_triage.TRIAGE).exists() else {}
     requests = {r["key"]: r for r in extraction.load_requests(run_id, root)}
@@ -83,10 +84,10 @@ def reconcile_run(run_id: str, root: Path = inbox.INBOX_ROOT) -> dict:
     for k in sorted(set(requests) - set(relevant)):
         problems.append("an extraction request for %s, which has no relevant verdict" % k)
     orchestrator = next((s for s in sessions if s["run_id"] == run_id), None)
-    ended = orchestrator is not None and orchestrator["completed"]
+    ended = manual or (orchestrator is not None and orchestrator["completed"])
     for k in sorted(set(outcomes) - set(requests)):
         problems.append("an extraction outcome for %s, which was never requested" % k)
-    if ended and orchestrator["status"] != "FAILURE":
+    if ended and (manual or orchestrator["status"] != "FAILURE"):
         for k in sorted(set(requests) - set(outcomes)):
             problems.append("the extraction request for %s has no outcome" % k)
     extracted, failed, deferred = [], {}, []
@@ -115,7 +116,7 @@ def reconcile_run(run_id: str, root: Path = inbox.INBOX_ROOT) -> dict:
         if s["unterminated"] or s["duplicated"]:
             problems.append("session %s: %d tool call(s) with no terminal event, %d with more than one" % (
                 s["run_id"], len(s["unterminated"]), len(s["duplicated"])))
-    if refusal is None and run and orchestrator is None:
+    if refusal is None and run and orchestrator is None and not manual:
         problems.append("the orchestrator session left no telemetry")
     if run.get("unrecorded"):
         problems.append("after the crash, the unfinished requests' outcomes could not be recorded: %s"
@@ -123,14 +124,14 @@ def reconcile_run(run_id: str, root: Path = inbox.INBOX_ROOT) -> dict:
 
     source_state = {name: {k: v for k, v in st.items() if k in ("status", "error", "listed", "already_seen")}
                     for name, st in state["sources"].items()}
-    never_listed = [s for s in SOURCES if s not in state["sources"]]
+    never_listed = [] if manual else [s for s in SOURCES if s not in state["sources"]]
     source_failures = sorted(n for n, st in source_state.items() if st.get("status") not in (None, "ok"))
     unfinished = sorted(k for k in listed if k not in verdicts)
     not_queued = [k for k in relevant if k not in requests]
     known = [s["cost_usd"] for s in sessions if s["cost_usd"] is not None]
     if refusal is not None:
         status = REFUSED
-    elif orchestrator is None or orchestrator["status"] == "FAILURE" or run.get("failure"):
+    elif (orchestrator is None and not manual) or (orchestrator is not None and orchestrator["status"] == "FAILURE") or run.get("failure"):
         status = FAILED
     elif problems:
         status = RECON_FAILED

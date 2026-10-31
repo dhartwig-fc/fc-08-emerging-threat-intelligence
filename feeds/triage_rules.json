@@ -7,5 +7,6 @@
   "nca": "An NCA page is relevant when it describes a laundering, fraud or sanctions-evasion method. An arrest or a sentence alone is not relevant.",
   "eu_council": "An EU Council press release is relevant when it is in the Sanctions category or describes how sanctions are evaded. Other policy news is not relevant.",
   "eba": "An EBA page is relevant when it is an AML/CFT guideline, risk opinion or peer review. Procedural, staffing and non-AML items are not relevant.",
-  "amla": "An AMLA page is relevant when it is a risk assessment, guidance or a supervisory finding. Institutional and recruitment news is not relevant."
+  "amla": "An AMLA page is relevant when it is a risk assessment, guidance or a supervisory finding. Institutional and recruitment news is not relevant.",
+  "wolfsberg": "A Wolfsberg Group page is relevant when it is guidance, a statement, principles or FAQs on financial crime controls or typologies, or a note on a specific crime. Governance news (appointments, anniversaries, membership and forum announcements) is not relevant."
 }

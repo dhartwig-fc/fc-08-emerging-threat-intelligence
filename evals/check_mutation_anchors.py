@@ -33,7 +33,7 @@ WHAT IT HOLDS:
             and yields at least one anchor; no OTHER dict named *MUTATIONS*, at any level, goes unread;
   rule      each table's LOADER -- every function that indexes the table and calls .replace -- carries the
             guard's own exactly-once predicate (`source.count(old) != 1`, `src.count(anchor) == 1`, ...). Per
-            loader, not per file: check_accept_run and check_feeds_server have two loaders each. All 13 checked
+            loader, not per file: check_accept_run and check_feeds_server have two loaders each. All 15 checked
             guards require EXACTLY ONCE, read from each loader;
   anchors   for every (target, old) of every table, the target exists and `old` occurs in it exactly once;
   rebinds   in every EXEMPT guard, every attribute rebound by name -- `alias.attr = ...` (tuple targets and
@@ -93,6 +93,8 @@ CHECKED = {
     "check_document_pages.py": (("MUTATIONS", PATH_OLD, None, (ONCE,)),),
     "check_feed_adapters.py": (("MUTATIONS", PATH_OLD, None, (ONCE,)),),
     "check_feeds_extract.py": (("MUTATIONS", PATH_OLD, None, (ONCE,)),),
+    "check_document_hop.py": (("MUTATIONS", PATH_OLD, None, (ONCE,)),),
+    "check_intake.py": (("MUTATIONS", PATH_OLD, None, (ONCE,)),),
     "check_feeds_ledger.py": (("MUTATIONS", PATH_OLD, None, (ONCE,)),),
     "check_feeds_score.py": (("MUTATIONS", OLD_ONLY, "SCORER", (ONCE,)),),
     "check_feeds_server.py": (("MUTATIONS", OLD_ONLY, "SERVER", (ONCE,)),
@@ -112,6 +114,7 @@ LOCAL_LABELS = {"_recompile_unhooked": "unhooked-success|unhooked-none", "_recom
 LOCAL_IMPORT = "from agents import telemetry"  # check_telemetry's binding of the module its anchors target
 
 EXEMPT = {
+    "check_no_disguised_automation.py": "--mutate adds a planted file to the scanned set in memory",
     "check_actor_resolution.py": "--mutate sets resolver/builder FLAGS or rebinds kc.resolve_names in memory",
     "check_added_by.py": "--mutate pops the pydantic model validator in memory",
     "check_attestations.py": "--mutate sets check_citations._MUTATE, a code switch",

@@ -95,9 +95,11 @@ def _append(run_id: str, entry: dict, root: Path) -> None:
 
 
 def decide(run_id: str, key: str, verdict: str, reason: str, quote: str,
-           root: Path = inbox.INBOX_ROOT) -> Tuple[bool, str]:
+           root: Path = inbox.INBOX_ROOT, *, by: str = "agent") -> Tuple[bool, str]:
     """Record one verdict, or refuse it. Returns (recorded, the message the agent sees)."""
     reason, quote = (reason or "").strip(), (quote or "").strip()
+    if by not in ("agent", "owner"):
+        return False, "%s by %r is not agent or owner." % (REJECTED, by)
     if verdict not in VERDICTS:
         return False, "%s verdict %r is not one of %s." % (REJECTED, verdict, ", ".join(VERDICTS))
     if not reason or len(reason) > REASON_MAX:
@@ -125,6 +127,8 @@ def decide(run_id: str, key: str, verdict: str, reason: str, quote: str,
     entry = {"key": key, "source": item["source"], "item_id": item["item_id"], "verdict": verdict,
              "reason": reason, "quote": quote, "found_on": pages, "match": match,
              "document_sha256": item["document"]["sha256"], "run_id": run_id, "decided_at": _now()}
+    if by != "agent":  # the owner's selection at intake (plan R4); an agent's line stays byte-identical
+        entry["by"] = by
     _append(run_id, entry, root)
     return True, "Recorded: %s is %s (quote found on page %s)." % (key, verdict, ", ".join(map(str, pages)))
 

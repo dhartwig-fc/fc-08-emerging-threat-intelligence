@@ -78,7 +78,8 @@ SNAPSHOTS = {"ofsi": ("ofsi.atom", "b63d891e06aceaaf42021a4637573ad16cedc7c6b84a
              "nca": ("nca.rss", "50a3328fafc35dd918f03d6488d5a21b15114b3719a947961fa5068788d9da3b"),
              "eu_council": ("eu_council.rss", "8ad8d9da81a433c4e91c6205f3b4c33fd655528517c993ac0f6a58eb2fbfef44"),
              "eba": ("eba.rss", "550eb52f4e5b25afec8fda7dc8137578ac1a581d0690a491223da56d83677b47"),
-             "amla": ("amla.rss", "91e9ba1e45b2719bc2547d4fb61f57b5740daf441c8ad37376442868964eb57c"),}
+             "amla": ("amla.rss", "91e9ba1e45b2719bc2547d4fb61f57b5740daf441c8ad37376442868964eb57c"),
+             "wolfsberg": ("wolfsberg_news.html", "0f8707eb271f1de4f61c5e77904490bf382a49852ed8e712e731516c5b47e2a1"),}
 EXPECTED = {
     "ofsi": {"count": 20, "ids": "db1898e619e089de7649a2443ffbe1ca707fa31d623ebae87729f76e5916067e",
              "first": {"item_id": "https://www.gov.uk/government/publications/uk-financial-sanctions-faqs#2026-09-24T08:49:08Z",
@@ -126,9 +127,29 @@ EXPECTED = {
     'amla': {"count": 30, "ids": '57d5f3c96875e065467e2c33a9167cb82c275ecb99dfc929501e2e080a974682',
       "first": {'item_id': 'https://www.amla.europa.eu/call-expression-interest-technology-providers-roundtable-partnerships-information-sharing_en', 'title': 'Call for expression of interest: technology providers roundtable on partnerships for information sharing', 'url': 'https://www.amla.europa.eu/call-expression-interest-technology-providers-roundtable-partnerships-information-sharing_en', 'published': '2026-10-30', 'summary': ''},
       "last": {'item_id': 'https://www.amla.europa.eu/press-release-amla-consults-clear-rules-cross-border-fiu-information-exchanges_en', 'title': 'Press Release: AMLA consults on clear rules for cross-border FIU information exchanges', 'url': 'https://www.amla.europa.eu/press-release-amla-consults-clear-rules-cross-border-fiu-information-exchanges_en', 'published': '2026-07-06'}},
+    "wolfsberg": {"count": 10, "ids": "bbc59c6928669e73331f92a7b93835e6567f1c18a9ad5036e126eb7f8c7e1618",
+                  "first": {"item_id": "guidance-on-the-provision-of-banking-services",
+                            "title": "The Wolfsberg Group publishes Guidance on the provision of banking services to "
+                                     "non-bank payment service providers (PSPs)",
+                            "url": "https://wolfsberg-group.org/news/guidance-on-the-provision-of-banking-services",
+                            "published": "2026-07-15", "summary": ""},
+                  "last": {"item_id": "the-wolfsberg-group-celebrates-its-25th-anniversary-and-welcomes-new-management-"
+                                      "committee-members",
+                           "title": "The Wolfsberg Group Celebrates its 25th Anniversary and Welcomes New Management "
+                                    "Committee Members",
+                           "url": "https://wolfsberg-group.org/news/the-wolfsberg-group-celebrates-its-25th-anniversary-"
+                                  "and-welcomes-new-management-committee-members",
+                           "published": "2025-06-17"}},
 }
 # (label, source, regex, replacement), applied to EVERY match: each must make the adapter raise LayoutChanged.
 BREAKS = [
+    ("marker gone", "wolfsberg", r'class="news-item', 'class="renamed-item'),
+    ("an item without a date", "wolfsberg", r"<!--\[-->2026-07-15<!--\]-->", "<!--[-->soon<!--]-->"),
+    ("an item with an empty title", "wolfsberg",
+     r"<!--\[-->The Wolfsberg Group publishes Guidance on the provision of banking services to non-bank payment service "
+     r"providers \(PSPs\)<!--\]-->", "<!--[--> <!--]-->"),
+    ("a body ending inside an open news card", "wolfsberg",
+     r'(?s)(<a href="/news/the-wolfsberg-group-celebrates[^"]*"[^>]*></a>).*', r"\1"),
     ("marker gone", "ofsi", r"<feed ", "<rss "),
     ("marker gone", "fincen", r'id="view-title-table-column"', 'id="view-renamed"'),
     ("marker gone", "ofac", r"view-recent-actions-search", "view-renamed"),
@@ -243,7 +264,8 @@ NEW_HOSTS = {"otsi": ({"www.gov.uk"}, {"assets.publishing.service.gov.uk"}),
              "nca": ({"www.nationalcrimeagency.gov.uk"}, {"www.nationalcrimeagency.gov.uk"}),
              "eu_council": ({"www.consilium.europa.eu"}, {"www.consilium.europa.eu"}),
              "eba": ({"www.eba.europa.eu"}, {"www.eba.europa.eu"}),
-             "amla": ({"www.amla.europa.eu"}, {"www.amla.europa.eu"})}
+             "amla": ({"www.amla.europa.eu"}, {"www.amla.europa.eu"}),
+             "wolfsberg": ({"wolfsberg-group.org"}, {"db.wolfsberg-group.org"})}
 
 
 def host_checks(sources) -> list:
@@ -263,7 +285,7 @@ def publisher_checks(sources, mutation) -> list:
             names = ast.literal_eval(node.value)
     if mutation == "publisher-missing":
         names.pop("amla", None)
-    missing = sorted(set(sources.SOURCES) - set(names))
+    missing = sorted((set(sources.SOURCES) | set(sources.MANUAL_SOURCES)) - set(names))
     return [(bool(names) and not missing, "every source has a publisher name in tools/accept_run.py PUBLISHERS",
              "missing: %s" % missing)]
 

@@ -23,7 +23,7 @@ NEXUS case page when that checkout is present):
   citation check              the run's extraction-runs row (checked / off_page)
   advisory, indicators        data/feeds/records/<ADVISORY>.json
   owner decisions             the decision log rows whose advisory_id is ADVISORY
-  coverage                    feeds.sources.SOURCES (live), tools/fetch_fatf_via_chrome.js (manual), and
+  coverage                    feeds.sources.SOURCES (live), feeds.sources.MANUAL_SOURCES (manual: taken in by tools/intake_document.py), and
                               schemas.advisory.SourceType for what is not yet scanned
   tool surface, model         agents.orchestrate_feeds and agents.extract_advisory constants
   schedule                    scripts/schedule/uk.fc08.friday-run.plist
@@ -63,7 +63,7 @@ sys.path.insert(0, str(ROOT / "tools"))
 
 from agents.extract_advisory import KC_TOOLS  # noqa: E402
 from agents.orchestrate_feeds import MODEL, TRIAGE_TOOLS  # noqa: E402
-from feeds.sources import SOURCES  # noqa: E402
+from feeds.sources import MANUAL_SOURCES, SOURCES  # noqa: E402
 from governance import decisions as gd  # noqa: E402
 from schemas.advisory import SCHEMA_VERSION, SourceType  # noqa: E402
 
@@ -75,7 +75,6 @@ TYPOLOGIES = ROOT / "data" / "typologies.json"
 SCORE_REPORT = ROOT / "evals" / "score_report.json"
 CLAUDE_MD = ROOT / "CLAUDE.md"
 PLIST = ROOT / "scripts" / "schedule" / "uk.fc08.friday-run.plist"
-FATF_MANUAL = ROOT / "tools" / "fetch_fatf_via_chrome.js"
 OUT = ROOT / "site" / "scan-demo" / "index.html"
 PROPOSALS_IMPORT = ROOT / "data" / "typology_proposals.json"
 IMPACT_IMPORT = ROOT / "data" / "advisory_impact.json"   # Stage566 K4b: fc-10's advisory impact, imported
@@ -360,7 +359,7 @@ def inputs() -> dict:
                         "items": int(t.group(6)), "repeats": t.group(7)},
         "reviewer": {"advisories": int(r.group(1)), "date": r.group(2), "recall": r.group(7)},
         "live": sorted(SOURCES),
-        "manual": ["fatf"] if FATF_MANUAL.exists() else [],
+        "manual": sorted(MANUAL_SOURCES),
         "source_types": [s.value for s in SourceType],
         "model": MODEL,
         "triage_tools": list(TRIAGE_TOOLS),

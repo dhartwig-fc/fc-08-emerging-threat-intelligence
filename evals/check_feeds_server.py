@@ -11,6 +11,8 @@ Usage:
     python evals/check_feeds_server.py --mutate swap-http-get     # the server's fetch is not feeds.http.get
     python evals/check_feeds_server.py --mutate narrow-transport  # feeds.http.get turns only URLError into FetchRefused
     python evals/check_feeds_server.py --mutate quiet-no-text     # a document with no text is reported as paged
+    python evals/check_feeds_server.py --mutate no-linked-pages    # a declaring source's links to its resource page are not recorded
+    python evals/check_feeds_server.py --mutate ungated-linked-pages  # a source with no document_via gains the key
     python evals/check_feeds_server.py --mutate no-carry          # a deferred item gone from the listing is lost
     python evals/check_feeds_server.py --mutate carry-decided     # an item decided since its deferral comes back
     python evals/check_feeds_server.py --mutate carry-twice       # a deferred item still listed appears twice
@@ -63,7 +65,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
-from feeds import http as fh, ledger  # noqa: E402
+from feeds import http as fh, inbox, ledger  # noqa: E402
 from feeds.model import FeedItem  # noqa: E402
 from feeds.sources import DOCUMENT_TYPES, SOURCES  # noqa: E402
 
@@ -95,6 +97,10 @@ MUTATIONS = {
     "carry-decided": (' and (c["source"], c["item_id"]) not in seen and c["key"] not in on_listing]\n',
                       ' and c["key"] not in on_listing]\n'),
     "carry-twice": (' and c["key"] not in on_listing]\n', ']\n'),
+    "no-linked-pages": ('    if src.document_via and not is_pdf:  # only a declaring source\'s documents gain the key; no other bytes move\n'
+                        '        item["document"]["linked_pages"] = linked_pages(got.body, got.final_url, src.document_via)\n',
+                        ""),
+    "ungated-linked-pages": ("    if src.document_via and not is_pdf:", "    if not is_pdf:"),
     "unmarked-carry": ("[dict(c, document=None) for c in carried]",
                        "[dict({k: v for k, v in c.items() if k != 'carried_from'}, document=None) for c in carried]"),
 }
@@ -202,6 +208,40 @@ def dropped_connection_check(fs, real_get, tmp: Path) -> tuple:
           and isinstance(again, str) and again.startswith("Rejected") and len(requested) == 1)
     return (ok, "a dropped connection (RemoteDisconnected, not a URLError) through the REAL feeds.http.get is "
             "recorded as unreachable, and the source is not listed again in the run", said[:120])
+
+
+def via_checks(fs) -> list:
+    """feeds_fetch records the pages a declaring source's item links under document_via, and only for such a source."""
+    out = []
+    page = (FIX / "feeds" / "wolfsberg_item_rba.html").read_bytes()
+    res = "https://wolfsberg-group.org/resources/rba/205"
+    saved = fs.HTTP_GET, fs.INBOX_ROOT, fs.SEEN_PATH, fs.RUNS_DIR
+    try:
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp = Path(tmp)
+            fs.INBOX_ROOT, fs.SEEN_PATH, fs.RUNS_DIR = tmp / "inbox", tmp / "seen.json", tmp / "runs"
+            wb = FeedItem("wolfsberg", "rba", "Guidance on the Risk-Based Approach",
+                          "https://wolfsberg-group.org/news/guidance-on-the-risk-based-approach", "2026-06-23")
+            fc = FeedItem("fincen", "rba", "Some advisory", "https://www.fincen.gov/news/some-advisory", "2026-06-23")
+            fs.HTTP_GET = Stub({wb.url: ("text/html", page), fc.url: ("text/html", page)})
+            os.environ[fs.RUN_ENV] = RUN
+            inbox.save(RUN, {"run_id": RUN, "sources": {
+                "wolfsberg": {"status": "ok", "items": [dict(wb.to_json(), document=None)]},
+                "fincen": {"status": "ok", "items": [dict(fc.to_json(), document=None)]}}}, tmp / "inbox")
+            for it in (wb, fc):
+                asyncio.run(fs.fetch(fs.FetchInput(item_key=it.key)))
+            docs = {i["source"]: i["document"] for src in inbox.load(RUN, tmp / "inbox")["sources"].values()
+                    for i in src["items"]}
+            out.append((docs["wolfsberg"].get("linked_pages") == [res],
+                        "a declaring source's fetched page records the pages it links under document_via",
+                        docs["wolfsberg"].get("linked_pages")))
+            out.append(("linked_pages" not in docs["fincen"],
+                        "a source with no document_via gains no linked_pages key: no other bytes move",
+                        sorted(docs["fincen"])))
+    finally:
+        fs.HTTP_GET, fs.INBOX_ROOT, fs.SEEN_PATH, fs.RUNS_DIR = saved
+        os.environ.pop(fs.RUN_ENV, None)
+    return out
 
 
 def carry_checks(fs, snap) -> list:
@@ -416,6 +456,7 @@ def checks(fs) -> list:
 
     tools = {t.name: t for t in asyncio.run(fs.mcp.list_tools())}
     out += carry_checks(fs, snap)
+    out += via_checks(fs)
     hint = lambda t, a, b: getattr(t.annotations, a, getattr(t.annotations, b, None))  # noqa: E731
     ro = {n: hint(t, "readOnlyHint", "read_only_hint") for n, t in tools.items()}
     ow = {n: hint(t, "openWorldHint", "open_world_hint") for n, t in tools.items()}

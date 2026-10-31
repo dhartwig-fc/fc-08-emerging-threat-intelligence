@@ -82,7 +82,7 @@ sys.path.insert(0, str(ROOT / "tools"))
 import build_scan_demo as bs  # noqa: E402
 from agents.extract_advisory import KC_TOOLS  # noqa: E402
 from agents.orchestrate_feeds import MODEL, TRIAGE_TOOLS  # noqa: E402
-from feeds.sources import SOURCES  # noqa: E402
+from feeds.sources import MANUAL_SOURCES, SOURCES  # noqa: E402
 from schemas.advisory import SourceType  # noqa: E402
 from governance import decisions as gd  # noqa: E402
 from governance import publish_boundary as pb  # noqa: E402
@@ -329,7 +329,7 @@ def checks():
         tri["note"]
     live_types = {s for s in SOURCES}
     want = sorted(bs.DISPLAY.get(t.value, t.value) for t in SourceType
-                  if t.value not in live_types | {"fatf"} | set(bs.NOT_A_FEED))
+                  if t.value not in live_types | set(MANUAL_SOURCES) | set(bs.NOT_A_FEED))
     ny = P["coverage"]["not_yet"]
     yield sorted(x["name"] for x in ny) == want and len(want) > 0, \
         "the not-yet list is the SourceType values minus live, manual and not-a-feed", ", ".join(want)

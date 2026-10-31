@@ -53,7 +53,7 @@ sys.path.insert(0, str(ROOT))
 from feeds import deferred, extraction as feeds_extraction, http as feeds_http, inbox, ledger, triage as feeds_triage  # noqa: E402
 from feeds.model import FeedItem, LayoutChanged  # noqa: E402
 from feeds.sources import (DOCUMENT_TYPES, KEY_PATTERN, MAX_DOCUMENT_BYTES, MAX_LISTING_BYTES, SOURCES,  # noqa: E402
-                           SOURCE_PATTERN, linked_pdfs, named)
+                           SOURCE_PATTERN, linked_pages, linked_pdfs, named)
 from schemas.citation_match import PageIndex  # noqa: E402
 
 RUN_ENV = "FEEDS_RUN_ID"
@@ -317,6 +317,8 @@ def _fetch(run_id: str, item_key: str) -> str:
                         "final_url": got.final_url, "fetched_at": _now(), "pages": pages,
                         "text_pages": text_pages, "page_error": error,
                         "linked_pdfs": [] if is_pdf else linked_pdfs(got.body, got.final_url)}
+    if src.document_via and not is_pdf:  # only a declaring source's documents gain the key; no other bytes move
+        item["document"]["linked_pages"] = linked_pages(got.body, got.final_url, src.document_via)
     inbox.save(run_id, state, INBOX_ROOT)
     return "Fetched: %s" % _describe(item["document"])
 

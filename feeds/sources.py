@@ -7,7 +7,7 @@ its title (the field the agent actually reads). OFAC also raises when the body e
 row, which is what a truncated body looks like.
 An empty result is never returned: each of these listings always shows its latest entries
 (measured 2026-09-26: OFSI 20, FinCEN 15, OFAC 10; 2026-10-31: OTSI 20, FCA 20, NCA 20, EU Council 20,
-EBA 10, AMLA 30), so "nothing parsed" means the page changed.
+EBA 10, AMLA 30; 2026-10-31: Wolfsberg 10), so "nothing parsed" means the page changed.
 
 Measured 2026-09-26, and why fetch pins LANDING pages in sub-project A: the URL a FinCEN or OFSI
 item lists is an HTML landing page; the advisory itself is a PDF linked from it (FinCEN on
@@ -260,6 +260,50 @@ def parse_ofac(raw: bytes) -> List[FeedItem]:
         raise LayoutChanged("ofac: the view is present but no views-row parsed")
     return items
 
+
+WOLFSBERG_BASE = "https://wolfsberg-group.org"
+DAY_ONLY = re.compile(r"^\d{4}-\d{2}-\d{2}$")
+
+
+def parse_wolfsberg(raw: bytes) -> List[FeedItem]:
+    """The Wolfsberg Group's /news page, server-rendered (measured 2026-10-31): one <article class="news-item"> per
+    item, holding a /news/<slug> link, the date in its first <span> as YYYY-MM-DD and the title in its <h3>."""
+    events = _events("wolfsberg", raw)
+    if not any(k == "start" and t == "article" and "news-item" in _classes(a) for k, t, a in events):
+        raise LayoutChanged("wolfsberg: the news cards (article.news-item) are missing")
+    items, card = [], None
+    for kind, tag, attrs in events:
+        if kind == "start" and tag == "article" and "news-item" in _classes(attrs):
+            card = {"href": None, "date": [], "title": [], "in": None}
+        elif card is None:
+            continue
+        elif kind == "start" and tag == "a" and card["href"] is None \
+                and (attrs.get("href") or "").startswith("/news/"):
+            card["href"] = attrs["href"]
+        elif kind == "start" and tag == "span" and not card["date"] and card["in"] is None:
+            card["in"] = "date"
+        elif kind == "start" and tag == "h3" and not card["title"] and card["in"] is None:
+            card["in"] = "title"
+        elif kind == "end" and tag in ("span", "h3"):
+            card["in"] = None
+        elif kind == "text" and card["in"]:
+            card[card["in"]].append(tag)
+        elif kind == "end" and tag == "article":
+            if not card["href"]:
+                raise LayoutChanged("wolfsberg: a news card has no /news/ link")
+            date = "".join(card["date"]).strip()
+            if not DAY_ONLY.match(date):
+                raise LayoutChanged("wolfsberg: the card for %s has no date" % card["href"])
+            items.append(FeedItem("wolfsberg", card["href"].rstrip("/").rsplit("/", 1)[1],
+                                  _title("wolfsberg", card["title"], card["href"]),
+                                  urljoin(WOLFSBERG_BASE, card["href"]), date))
+            card = None
+    if card is not None:  # the body ended inside a card: truncated, never a card to drop
+        raise LayoutChanged("wolfsberg: the listing ends inside an open news card (a truncated body)")
+    if not items:
+        raise LayoutChanged("wolfsberg: the cards are present but none parsed")
+    return items
+
 # ---------------------------------------------------------------------------- the registry
 
 
@@ -276,6 +320,10 @@ class Source:
     # on assets.publishing.service.gov.uk; OFAC's action IS the page, and its /media/ downloads are not
     # followed (every OFAC page links /media/935656, so "the" document is not identifiable by rule).
     document_hosts: FrozenSet[str] = frozenset()
+    # One page between an item and its PDF (Wolfsberg, measured 2026-10-31): a path prefix on the source's own hosts.
+    # When an item's page links no PDF on document_hosts, exactly ONE link under this prefix is followed to the page
+    # that does (feeds/extraction.py). Empty: no hop -- the behaviour of every source before it.
+    document_via: str = ""
 
 
 SOURCES = {
@@ -302,15 +350,32 @@ SOURCES = {
                   frozenset({"www.eba.europa.eu"}), parse_eba, frozenset({"www.eba.europa.eu"})),
     "amla": Source("amla", "https://www.amla.europa.eu/node/19/rss_en", "rss", frozenset({"application/rss+xml"}),
                    frozenset({"www.amla.europa.eu"}), parse_amla, frozenset({"www.amla.europa.eu"})),
+    "wolfsberg": Source("wolfsberg", "https://wolfsberg-group.org/news", "html", frozenset({"text/html"}),
+                        frozenset({"wolfsberg-group.org"}), parse_wolfsberg, frozenset({"db.wolfsberg-group.org"}),
+                        "/resources/"),
 }
 
 # The order sources are named in the triage prompt and listed in a run. Appending keeps every earlier prompt's
 # bytes (plan R5); a source missing here, or one here but not in SOURCES, is refused at import.
-ORDER = ("ofsi", "fincen", "ofac", "otsi", "fca", "nca", "eu_council", "eba", "amla")
+ORDER = ("ofsi", "fincen", "ofac", "otsi", "fca", "nca", "eu_council", "eba", "amla", "wolfsberg")
 if set(ORDER) != set(SOURCES) or len(ORDER) != len(SOURCES):
     raise RuntimeError("feeds.sources: ORDER %r and SOURCES %r disagree" % (ORDER, sorted(SOURCES)))
 SOURCE_PATTERN = r"^(%s)$" % "|".join(ORDER)
 KEY_PATTERN = r"^(%s):[0-9a-f]{16}$" % "|".join(ORDER)
+
+
+@dataclass(frozen=True)
+class ManualSource:
+    """A source whose site blocks automated fetching (FATF, measured 2026-10-31: Cloudflare's bot check on every URL).
+    The owner downloads a document and tools/intake_document.py takes it in. Nothing in fc-08 fetches these hosts;
+    they bound the provenance URL the owner records."""
+    name: str
+    hosts: FrozenSet[str]
+
+
+MANUAL_SOURCES = {"fatf": ManualSource("fatf", frozenset({"www.fatf-gafi.org"}))}
+if set(MANUAL_SOURCES) & set(SOURCES):
+    raise RuntimeError("feeds.sources: %s are declared both live and manual" % sorted(set(MANUAL_SOURCES) & set(SOURCES)))
 
 
 def named() -> str:
@@ -342,5 +407,25 @@ def linked_pdfs(raw: bytes, base_url: str) -> List[str]:
     for href in parser.hrefs:
         url = urljoin(base_url, href)
         if urlsplit(url).path.lower().endswith(".pdf") and url not in out:
+            out.append(url)
+    return out
+
+
+def linked_pages(raw: bytes, base_url: str, prefix: str) -> List[str]:
+    """Absolute URLs an HTML page links to whose path starts with `prefix`, first occurrence order. Listed, never
+    fetched; the host is NOT checked here -- extraction asks feeds.http's one allowlist predicate (plan R8)."""
+    if not prefix:
+        return []
+    try:
+        text = raw.decode("utf-8")
+    except UnicodeDecodeError:
+        return []
+    parser = _Links()
+    parser.feed(text)
+    parser.close()
+    out: List[str] = []
+    for href in parser.hrefs:
+        url = urljoin(base_url, href)
+        if urlsplit(url).path.startswith(prefix) and url not in out:
             out.append(url)
     return out

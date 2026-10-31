@@ -44,9 +44,10 @@ import re
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Dict, List, Tuple
+from urllib.parse import quote, urlsplit, urlunsplit
 
 from feeds import inbox, triage as feeds_triage
-from feeds.sources import MAX_DOCUMENT_BYTES, SOURCES
+from feeds.sources import MAX_DOCUMENT_BYTES, SOURCES, linked_pdfs
 from feeds.http import FetchRefused, _check_host
 
 REQUESTS = "extractions.jsonl"
@@ -55,6 +56,7 @@ ALLOCATIONS = "advisory_ids.jsonl"
 TRACKED_RUNS = inbox.ROOT / "data" / "feeds" / "runs"   # accept_run copies each accepted run's files here
 MAX_PER_RUN = 3
 PDF_TYPES = frozenset({"application/pdf"})
+HTML_TYPES = frozenset({"text/html"})
 ADVISORY_ID = re.compile(r"\AADV-(\d{4})-(\d{4})\Z")
 REJECTED = feeds_triage.REJECTED
 
@@ -112,18 +114,32 @@ def _on_hosts(url: str, hosts) -> bool:
     return True
 
 
+def _encoded(url: str) -> str:
+    """A link as a page writes it ("…/Risk Based Approach Guidance _June2026.pdf", Wolfsberg, measured 2026-10-31),
+    made fetchable: http.client refuses a URL with a space, so the path is percent-encoded; an encoded one is
+    unchanged (plan R7)."""
+    parts = urlsplit(url)
+    return urlunsplit(parts._replace(path=quote(parts.path, safe="/%")))
+
+
 def document_choice(item: dict) -> Tuple[str, List[str], List[str]]:
-    """(kind, candidate URLs, ignored URLs) for an item's pinned document; kind is pinned|linked|ambiguous."""
+    """(kind, candidate URLs, ignored URLs) for an item's pinned document; kind is pinned|linked|ambiguous|via|
+    ambiguous_via. "via": the page links no PDF on the document hosts but exactly one page under the source's
+    document_via on its own hosts, which request() follows to the PDF (spec 2026-10-31 §1)."""
     doc = item["document"]
     if doc["content_type"] == "application/pdf":
         return "pinned", [], []
-    hosts = SOURCES[item["source"]].document_hosts
+    src = SOURCES[item["source"]]
+    hosts = src.document_hosts
     links = doc.get("linked_pdfs") or []
     ok = [u for u in links if _on_hosts(u, hosts)]
     ignored = [u for u in links if u not in ok]
-    if not ok:
-        return "pinned", [], ignored
-    return ("linked" if len(ok) == 1 else "ambiguous"), ok, ignored
+    if ok:
+        return ("linked" if len(ok) == 1 else "ambiguous"), ok, ignored
+    via = [u for u in (doc.get("linked_pages") or []) if src.document_via and _on_hosts(u, src.hosts)]
+    if via:
+        return ("via" if len(via) == 1 else "ambiguous_via"), via, ignored
+    return "pinned", [], ignored
 
 
 def request(run_id: str, key: str, http_get, root: Path = inbox.INBOX_ROOT) -> Tuple[bool, str]:
@@ -156,8 +172,33 @@ def request(run_id: str, key: str, http_get, root: Path = inbox.INBOX_ROOT) -> T
     if kind == "ambiguous":
         return False, ("%s %s's page links %d PDFs on %s's document hosts (%s); which one is the publication is a "
                        "person's call, not this run's." % (REJECTED, key, len(urls), item["source"], ", ".join(urls)))
+    if kind == "ambiguous_via":
+        return False, ("%s %s's page links %d pages under %s on %s's hosts (%s); which one holds the publication is "
+                       "a person's call, not this run's." % (REJECTED, key, len(urls), SOURCES[item["source"]].document_via,
+                                                             item["source"], ", ".join(urls)))
     entry = {"key": key, "source": item["source"], "item_id": item["item_id"], "run_id": run_id,
              "requested_at": _now(), "chosen": kind, "ignored_links": ignored, "document": None, "error": None}
+    if kind == "via":
+        src = SOURCES[item["source"]]
+        try:
+            hop = http_get(urls[0], allowed_hosts=src.hosts, allowed_types=HTML_TYPES, max_bytes=MAX_DOCUMENT_BYTES)
+        except FetchRefused as exc:
+            entry["error"] = "the resource page could not be fetched: %s" % exc
+            _append(run_id, REQUESTS, entry, root)
+            return True, "Failed: %s is queued but its resource page could not be fetched (%s); it will be reported." % (
+                key, exc)
+        hop_sha = hashlib.sha256(hop.body).hexdigest()
+        entry["via"] = {"requested": urls[0], "url": hop.final_url, "sha256": hop_sha,
+                        "path": inbox.write_file(run_id, "docs/%s.html" % hop_sha, hop.body, root)}
+        pdfs = [u for u in linked_pdfs(hop.body, hop.final_url)
+                if _on_hosts(u, src.document_hosts)]
+        if len(pdfs) != 1:
+            entry["error"] = ("%s %s's resource page %s links %d PDFs on %s's document hosts; the publication is "
+                              "identified only by exactly one." % (REJECTED, key, hop.final_url, len(pdfs),
+                                                                    item["source"]))
+            _append(run_id, REQUESTS, entry, root)
+            return True, entry["error"]
+        urls = [_encoded(pdfs[0])]
     if kind == "pinned":
         entry["document"] = dict(item["document"], url=item["document"]["final_url"])
     else:
@@ -194,7 +235,7 @@ def request(run_id: str, key: str, http_get, root: Path = inbox.INBOX_ROOT) -> T
         return True, entry["error"]
     doc = entry["document"]
     return True, "Queued: %s will be extracted after this session, from %s (%d page(s))." % (
-        key, "its linked PDF %s" % doc["url"] if kind == "linked" else "the page itself", doc["pages"])
+        key, "its linked PDF %s" % doc["url"] if kind in ("linked", "via") else "the page itself", doc["pages"])
 
 
 def _ids_in(path: Path) -> List[str]:
