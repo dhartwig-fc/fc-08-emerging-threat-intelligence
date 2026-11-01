@@ -1,6 +1,566 @@
 {
   "items": [
     {
+      "decided_on": "2026-11-05",
+      "decision": "baseline",
+      "first_seen_run": "baseline-2026-11-05",
+      "item_id": "https://www.amla.europa.eu/amla-chair-bruna-szego-interview-money-laundering-bulletin_en",
+      "source": "amla"
+    },
+    {
+      "decided_on": "2026-11-05",
+      "decision": "baseline",
+      "first_seen_run": "baseline-2026-11-05",
+      "item_id": "https://www.amla.europa.eu/amla-identifies-amlcft-priorities-review-mica_en",
+      "source": "amla"
+    },
+    {
+      "decided_on": "2026-11-05",
+      "decision": "baseline",
+      "first_seen_run": "baseline-2026-11-05",
+      "item_id": "https://www.amla.europa.eu/amla-invites-stakeholders-sectoral-roundtables-simplified-customer-due-diligence_en",
+      "source": "amla"
+    },
+    {
+      "decided_on": "2026-11-05",
+      "decision": "baseline",
+      "first_seen_run": "baseline-2026-11-05",
+      "item_id": "https://www.amla.europa.eu/amla-takes-next-step-toward-2027-selection-entities-direct-supervision_en",
+      "source": "amla"
+    },
+    {
+      "decided_on": "2026-11-05",
+      "decision": "baseline",
+      "first_seen_run": "baseline-2026-11-05",
+      "item_id": "https://www.amla.europa.eu/call-expression-interest-technology-providers-roundtable-partnerships-information-sharing_en",
+      "source": "amla"
+    },
+    {
+      "decided_on": "2026-11-05",
+      "decision": "baseline",
+      "first_seen_run": "baseline-2026-11-05",
+      "item_id": "https://www.amla.europa.eu/news-media/news-articles/amla-chair-bruna-szego-delivers-speech-central-bank-montenegro-25th-anniversary-conference_en",
+      "source": "amla"
+    },
+    {
+      "decided_on": "2026-11-05",
+      "decision": "baseline",
+      "first_seen_run": "baseline-2026-11-05",
+      "item_id": "https://www.amla.europa.eu/news-media/news-articles/amla-chair-presents-2025-consolidated-annual-activity-report-european-parliament_en",
+      "source": "amla"
+    },
+    {
+      "decided_on": "2026-11-05",
+      "decision": "baseline",
+      "first_seen_run": "baseline-2026-11-05",
+      "item_id": "https://www.amla.europa.eu/news-media/news-articles/amla-executive-board-member-derville-rowland-corporate-crime-regulation-summit_en",
+      "source": "amla"
+    },
+    {
+      "decided_on": "2026-11-05",
+      "decision": "baseline",
+      "first_seen_run": "baseline-2026-11-05",
+      "item_id": "https://www.amla.europa.eu/news-media/news-articles/amla-executive-board-member-derville-rowland-meets-ebf-financial-crime-strategic-group_en",
+      "source": "amla"
+    },
+    {
+      "decided_on": "2026-11-05",
+      "decision": "baseline",
+      "first_seen_run": "baseline-2026-11-05",
+      "item_id": "https://www.amla.europa.eu/news-media/news-articles/amla-executive-board-member-hennie-verbeek-kusters-speaks-10th-austrian-anti-money-laundering_en",
+      "source": "amla"
+    },
+    {
+      "decided_on": "2026-11-05",
+      "decision": "baseline",
+      "first_seen_run": "baseline-2026-11-05",
+      "item_id": "https://www.amla.europa.eu/news-media/news-articles/amla-executive-board-member-hennie-verbeek-kusters-speaks-ibsa-meeting-brussels_en",
+      "source": "amla"
+    },
+    {
+      "decided_on": "2026-11-05",
+      "decision": "baseline",
+      "first_seen_run": "baseline-2026-11-05",
+      "item_id": "https://www.amla.europa.eu/news-media/news-articles/amla-executive-board-member-simonas-krepsta-addresses-global-conference-criminal-finances-and_en",
+      "source": "amla"
+    },
+    {
+      "decided_on": "2026-11-05",
+      "decision": "baseline",
+      "first_seen_run": "baseline-2026-11-05",
+      "item_id": "https://www.amla.europa.eu/news-media/news-articles/amla-launches-survey-central-contact-points_en",
+      "source": "amla"
+    },
+    {
+      "decided_on": "2026-11-05",
+      "decision": "baseline",
+      "first_seen_run": "baseline-2026-11-05",
+      "item_id": "https://www.amla.europa.eu/news-media/news-articles/amla-vice-chair-juan-manuel-vega-serrano-takes-part-panel-foro-la-toja_en",
+      "source": "amla"
+    },
+    {
+      "decided_on": "2026-11-05",
+      "decision": "baseline",
+      "first_seen_run": "baseline-2026-11-05",
+      "item_id": "https://www.amla.europa.eu/news-media/news-articles/connecting-intelligence-and-supervision-rikke-louise-petersen-speaks-nordic-financial-crime_en",
+      "source": "amla"
+    },
+    {
+      "decided_on": "2026-11-05",
+      "decision": "baseline",
+      "first_seen_run": "baseline-2026-11-05",
+      "item_id": "https://www.amla.europa.eu/news-media/news-articles/eba-publishes-draft-reporting-framework-2027-eligibility-data-collection_en",
+      "source": "amla"
+    },
+    {
+      "decided_on": "2026-11-05",
+      "decision": "baseline",
+      "first_seen_run": "baseline-2026-11-05",
+      "item_id": "https://www.amla.europa.eu/news-media/news-articles/frequently-asked-questions-reporting-package-identifying-provisionally-eligible-entities_en",
+      "source": "amla"
+    },
+    {
+      "decided_on": "2026-11-05",
+      "decision": "baseline",
+      "first_seen_run": "baseline-2026-11-05",
+      "item_id": "https://www.amla.europa.eu/news-media/news-articles/hennie-verbeek-kusters-highlights-importance-prevention-amlcft-international-anti-financial-crime_en",
+      "source": "amla"
+    },
+    {
+      "decided_on": "2026-11-05",
+      "decision": "baseline",
+      "first_seen_run": "baseline-2026-11-05",
+      "item_id": "https://www.amla.europa.eu/news-media/news-articles/updated-taxonomy-2027-risk-assessment-data-collection_en",
+      "source": "amla"
+    },
+    {
+      "decided_on": "2026-11-05",
+      "decision": "baseline",
+      "first_seen_run": "baseline-2026-11-05",
+      "item_id": "https://www.amla.europa.eu/press-release-amla-and-olaf-strengthen-cooperation-fight-against-financial-crime_en",
+      "source": "amla"
+    },
+    {
+      "decided_on": "2026-11-05",
+      "decision": "baseline",
+      "first_seen_run": "baseline-2026-11-05",
+      "item_id": "https://www.amla.europa.eu/press-release-amla-concludes-public-hearing-draft-guidelines-ongoing-monitoring-business_en",
+      "source": "amla"
+    },
+    {
+      "decided_on": "2026-11-05",
+      "decision": "baseline",
+      "first_seen_run": "baseline-2026-11-05",
+      "item_id": "https://www.amla.europa.eu/press-release-amla-consults-clear-rules-cross-border-fiu-information-exchanges_en",
+      "source": "amla"
+    },
+    {
+      "decided_on": "2026-11-05",
+      "decision": "baseline",
+      "first_seen_run": "baseline-2026-11-05",
+      "item_id": "https://www.amla.europa.eu/press-release-amla-consults-draft-standards-eu-wide-amlcft-database_en",
+      "source": "amla"
+    },
+    {
+      "decided_on": "2026-11-05",
+      "decision": "baseline",
+      "first_seen_run": "baseline-2026-11-05",
+      "item_id": "https://www.amla.europa.eu/press-release-amla-consults-harmonised-risk-assessments-non-financial-sector_en",
+      "source": "amla"
+    },
+    {
+      "decided_on": "2026-11-05",
+      "decision": "baseline",
+      "first_seen_run": "baseline-2026-11-05",
+      "item_id": "https://www.amla.europa.eu/press-release-amla-finalises-common-formats-fiu-cooperation-and-reporting-eppo_en",
+      "source": "amla"
+    },
+    {
+      "decided_on": "2026-11-05",
+      "decision": "baseline",
+      "first_seen_run": "baseline-2026-11-05",
+      "item_id": "https://www.amla.europa.eu/press-release-amla-finalises-key-standards-private-sector_en",
+      "source": "amla"
+    },
+    {
+      "decided_on": "2026-11-05",
+      "decision": "baseline",
+      "first_seen_run": "baseline-2026-11-05",
+      "item_id": "https://www.amla.europa.eu/press-release-amla-finalises-standards-home-host-supervisory-cooperation_en",
+      "source": "amla"
+    },
+    {
+      "decided_on": "2026-11-05",
+      "decision": "baseline",
+      "first_seen_run": "baseline-2026-11-05",
+      "item_id": "https://www.amla.europa.eu/press-release-amla-finalises-standards-supervisory-cooperation-direct-supervision_en",
+      "source": "amla"
+    },
+    {
+      "decided_on": "2026-11-05",
+      "decision": "baseline",
+      "first_seen_run": "baseline-2026-11-05",
+      "item_id": "https://www.amla.europa.eu/press-release-amla-introduces-common-eu-approach-enforcing-anti-money-laundering-rules_en",
+      "source": "amla"
+    },
+    {
+      "decided_on": "2026-11-05",
+      "decision": "baseline",
+      "first_seen_run": "baseline-2026-11-05",
+      "item_id": "https://www.amla.europa.eu/press-release-amla-launches-public-consultation-common-format-reporting-suspicions_en",
+      "source": "amla"
+    },
+    {
+      "decided_on": "2026-11-05",
+      "decision": "baseline",
+      "first_seen_run": "baseline-2026-11-05",
+      "item_id": "https://www.eba.europa.eu/publications-and-media/press-releases/eba-advises-targeted-simplifications-taxonomy-disclosures",
+      "source": "eba"
+    },
+    {
+      "decided_on": "2026-11-05",
+      "decision": "baseline",
+      "first_seen_run": "baseline-2026-11-05",
+      "item_id": "https://www.eba.europa.eu/publications-and-media/press-releases/eba-appoints-kristine-cernaja-mezmale-its-new-vice-chair",
+      "source": "eba"
+    },
+    {
+      "decided_on": "2026-11-05",
+      "decision": "baseline",
+      "first_seen_run": "baseline-2026-11-05",
+      "item_id": "https://www.eba.europa.eu/publications-and-media/press-releases/eba-classifies-usdc-first-significant-e-money-token-european-union",
+      "source": "eba"
+    },
+    {
+      "decided_on": "2026-11-05",
+      "decision": "baseline",
+      "first_seen_run": "baseline-2026-11-05",
+      "item_id": "https://www.eba.europa.eu/publications-and-media/press-releases/eba-crr3crd6-dashboard-shows-banks-maintain-capital-levels-well-above-minimum-requirements-under",
+      "source": "eba"
+    },
+    {
+      "decided_on": "2026-11-05",
+      "decision": "baseline",
+      "first_seen_run": "baseline-2026-11-05",
+      "item_id": "https://www.eba.europa.eu/publications-and-media/press-releases/eba-extends-some-consultation-deadlines-due-website-maintenance",
+      "source": "eba"
+    },
+    {
+      "decided_on": "2026-11-05",
+      "decision": "baseline",
+      "first_seen_run": "baseline-2026-11-05",
+      "item_id": "https://www.eba.europa.eu/publications-and-media/press-releases/eba-publishes-final-report-draft-amendments-technical-standards-prudential-requirements-central",
+      "source": "eba"
+    },
+    {
+      "decided_on": "2026-11-05",
+      "decision": "baseline",
+      "first_seen_run": "baseline-2026-11-05",
+      "item_id": "https://www.eba.europa.eu/publications-and-media/press-releases/eba-publishes-its-2027-work-programme",
+      "source": "eba"
+    },
+    {
+      "decided_on": "2026-11-05",
+      "decision": "baseline",
+      "first_seen_run": "baseline-2026-11-05",
+      "item_id": "https://www.eba.europa.eu/publications-and-media/press-releases/eba-releases-final-technical-package-release-44-its-reporting-and-pillar-3-disclosure-framework",
+      "source": "eba"
+    },
+    {
+      "decided_on": "2026-11-05",
+      "decision": "baseline",
+      "first_seen_run": "baseline-2026-11-05",
+      "item_id": "https://www.eba.europa.eu/publications-and-media/press-releases/eueea-banks-display-strength-amid-challenging-risk-environment",
+      "source": "eba"
+    },
+    {
+      "decided_on": "2026-11-05",
+      "decision": "baseline",
+      "first_seen_run": "baseline-2026-11-05",
+      "item_id": "https://www.eba.europa.eu/publications-and-media/press-releases/european-supervisory-authorities-set-priorities-2027",
+      "source": "eba"
+    },
+    {
+      "decided_on": "2026-11-05",
+      "decision": "baseline",
+      "first_seen_run": "baseline-2026-11-05",
+      "item_id": "139339",
+      "source": "eu_council"
+    },
+    {
+      "decided_on": "2026-11-05",
+      "decision": "baseline",
+      "first_seen_run": "baseline-2026-11-05",
+      "item_id": "151688",
+      "source": "eu_council"
+    },
+    {
+      "decided_on": "2026-11-05",
+      "decision": "baseline",
+      "first_seen_run": "baseline-2026-11-05",
+      "item_id": "151689",
+      "source": "eu_council"
+    },
+    {
+      "decided_on": "2026-11-05",
+      "decision": "baseline",
+      "first_seen_run": "baseline-2026-11-05",
+      "item_id": "151695",
+      "source": "eu_council"
+    },
+    {
+      "decided_on": "2026-11-05",
+      "decision": "baseline",
+      "first_seen_run": "baseline-2026-11-05",
+      "item_id": "151738",
+      "source": "eu_council"
+    },
+    {
+      "decided_on": "2026-11-05",
+      "decision": "baseline",
+      "first_seen_run": "baseline-2026-11-05",
+      "item_id": "151739",
+      "source": "eu_council"
+    },
+    {
+      "decided_on": "2026-11-05",
+      "decision": "baseline",
+      "first_seen_run": "baseline-2026-11-05",
+      "item_id": "151747",
+      "source": "eu_council"
+    },
+    {
+      "decided_on": "2026-11-05",
+      "decision": "baseline",
+      "first_seen_run": "baseline-2026-11-05",
+      "item_id": "151748",
+      "source": "eu_council"
+    },
+    {
+      "decided_on": "2026-11-05",
+      "decision": "baseline",
+      "first_seen_run": "baseline-2026-11-05",
+      "item_id": "151751",
+      "source": "eu_council"
+    },
+    {
+      "decided_on": "2026-11-05",
+      "decision": "baseline",
+      "first_seen_run": "baseline-2026-11-05",
+      "item_id": "151765",
+      "source": "eu_council"
+    },
+    {
+      "decided_on": "2026-11-05",
+      "decision": "baseline",
+      "first_seen_run": "baseline-2026-11-05",
+      "item_id": "151768",
+      "source": "eu_council"
+    },
+    {
+      "decided_on": "2026-11-05",
+      "decision": "baseline",
+      "first_seen_run": "baseline-2026-11-05",
+      "item_id": "151784",
+      "source": "eu_council"
+    },
+    {
+      "decided_on": "2026-11-05",
+      "decision": "baseline",
+      "first_seen_run": "baseline-2026-11-05",
+      "item_id": "151787",
+      "source": "eu_council"
+    },
+    {
+      "decided_on": "2026-11-05",
+      "decision": "baseline",
+      "first_seen_run": "baseline-2026-11-05",
+      "item_id": "151789",
+      "source": "eu_council"
+    },
+    {
+      "decided_on": "2026-11-05",
+      "decision": "baseline",
+      "first_seen_run": "baseline-2026-11-05",
+      "item_id": "151843",
+      "source": "eu_council"
+    },
+    {
+      "decided_on": "2026-11-05",
+      "decision": "baseline",
+      "first_seen_run": "baseline-2026-11-05",
+      "item_id": "151844",
+      "source": "eu_council"
+    },
+    {
+      "decided_on": "2026-11-05",
+      "decision": "baseline",
+      "first_seen_run": "baseline-2026-11-05",
+      "item_id": "151849",
+      "source": "eu_council"
+    },
+    {
+      "decided_on": "2026-11-05",
+      "decision": "baseline",
+      "first_seen_run": "baseline-2026-11-05",
+      "item_id": "151883",
+      "source": "eu_council"
+    },
+    {
+      "decided_on": "2026-11-05",
+      "decision": "baseline",
+      "first_seen_run": "baseline-2026-11-05",
+      "item_id": "151886",
+      "source": "eu_council"
+    },
+    {
+      "decided_on": "2026-11-05",
+      "decision": "baseline",
+      "first_seen_run": "baseline-2026-11-05",
+      "item_id": "151917",
+      "source": "eu_council"
+    },
+    {
+      "decided_on": "2026-11-05",
+      "decision": "baseline",
+      "first_seen_run": "baseline-2026-11-05",
+      "item_id": "174206",
+      "source": "fca"
+    },
+    {
+      "decided_on": "2026-11-05",
+      "decision": "baseline",
+      "first_seen_run": "baseline-2026-11-05",
+      "item_id": "176576",
+      "source": "fca"
+    },
+    {
+      "decided_on": "2026-11-05",
+      "decision": "baseline",
+      "first_seen_run": "baseline-2026-11-05",
+      "item_id": "176586",
+      "source": "fca"
+    },
+    {
+      "decided_on": "2026-11-05",
+      "decision": "baseline",
+      "first_seen_run": "baseline-2026-11-05",
+      "item_id": "176621",
+      "source": "fca"
+    },
+    {
+      "decided_on": "2026-11-05",
+      "decision": "baseline",
+      "first_seen_run": "baseline-2026-11-05",
+      "item_id": "176726",
+      "source": "fca"
+    },
+    {
+      "decided_on": "2026-11-05",
+      "decision": "baseline",
+      "first_seen_run": "baseline-2026-11-05",
+      "item_id": "176731",
+      "source": "fca"
+    },
+    {
+      "decided_on": "2026-11-05",
+      "decision": "baseline",
+      "first_seen_run": "baseline-2026-11-05",
+      "item_id": "176766",
+      "source": "fca"
+    },
+    {
+      "decided_on": "2026-11-05",
+      "decision": "baseline",
+      "first_seen_run": "baseline-2026-11-05",
+      "item_id": "176781",
+      "source": "fca"
+    },
+    {
+      "decided_on": "2026-11-05",
+      "decision": "baseline",
+      "first_seen_run": "baseline-2026-11-05",
+      "item_id": "176801",
+      "source": "fca"
+    },
+    {
+      "decided_on": "2026-11-05",
+      "decision": "baseline",
+      "first_seen_run": "baseline-2026-11-05",
+      "item_id": "176896",
+      "source": "fca"
+    },
+    {
+      "decided_on": "2026-11-05",
+      "decision": "baseline",
+      "first_seen_run": "baseline-2026-11-05",
+      "item_id": "176911",
+      "source": "fca"
+    },
+    {
+      "decided_on": "2026-11-05",
+      "decision": "baseline",
+      "first_seen_run": "baseline-2026-11-05",
+      "item_id": "176936",
+      "source": "fca"
+    },
+    {
+      "decided_on": "2026-11-05",
+      "decision": "baseline",
+      "first_seen_run": "baseline-2026-11-05",
+      "item_id": "176941",
+      "source": "fca"
+    },
+    {
+      "decided_on": "2026-11-05",
+      "decision": "baseline",
+      "first_seen_run": "baseline-2026-11-05",
+      "item_id": "176956",
+      "source": "fca"
+    },
+    {
+      "decided_on": "2026-11-05",
+      "decision": "baseline",
+      "first_seen_run": "baseline-2026-11-05",
+      "item_id": "176966",
+      "source": "fca"
+    },
+    {
+      "decided_on": "2026-11-05",
+      "decision": "baseline",
+      "first_seen_run": "baseline-2026-11-05",
+      "item_id": "176976",
+      "source": "fca"
+    },
+    {
+      "decided_on": "2026-11-05",
+      "decision": "baseline",
+      "first_seen_run": "baseline-2026-11-05",
+      "item_id": "176986",
+      "source": "fca"
+    },
+    {
+      "decided_on": "2026-11-05",
+      "decision": "baseline",
+      "first_seen_run": "baseline-2026-11-05",
+      "item_id": "176991",
+      "source": "fca"
+    },
+    {
+      "decided_on": "2026-11-05",
+      "decision": "baseline",
+      "first_seen_run": "baseline-2026-11-05",
+      "item_id": "177091",
+      "source": "fca"
+    },
+    {
+      "decided_on": "2026-11-05",
+      "decision": "baseline",
+      "first_seen_run": "baseline-2026-11-05",
+      "item_id": "177096",
+      "source": "fca"
+    },
+    {
       "decided_on": "2026-09-29",
       "decision": "drop",
       "first_seen_run": "catalogue:90b57e8ba022",
@@ -139,6 +699,146 @@
       "first_seen_run": "catalogue:90b57e8ba022",
       "item_id": "fincen-advisory-fin-2026-a002",
       "source": "fincen"
+    },
+    {
+      "decided_on": "2026-11-05",
+      "decision": "baseline",
+      "first_seen_run": "baseline-2026-11-05",
+      "item_id": "https://www.nationalcrimeagency.gov.uk/news/25-months-in-jail-for-woman-who-smuggled-thai-cannabis",
+      "source": "nca"
+    },
+    {
+      "decided_on": "2026-11-05",
+      "decision": "baseline",
+      "first_seen_run": "baseline-2026-11-05",
+      "item_id": "https://www.nationalcrimeagency.gov.uk/news/balkan-bridge-2-nca-officers-joined-by-international-partners-in-major-crackdown-targeting-cross-border-smuggling-of-people-and-commodities",
+      "source": "nca"
+    },
+    {
+      "decided_on": "2026-11-05",
+      "decision": "baseline",
+      "first_seen_run": "baseline-2026-11-05",
+      "item_id": "https://www.nationalcrimeagency.gov.uk/news/boats-destined-for-people-smugglers-seized-at-east-midlands-airport",
+      "source": "nca"
+    },
+    {
+      "decided_on": "2026-11-05",
+      "decision": "baseline",
+      "first_seen_run": "baseline-2026-11-05",
+      "item_id": "https://www.nationalcrimeagency.gov.uk/news/child-rapist-sentenced-after-eight-year-campaign-of-abuse",
+      "source": "nca"
+    },
+    {
+      "decided_on": "2026-11-05",
+      "decision": "baseline",
+      "first_seen_run": "baseline-2026-11-05",
+      "item_id": "https://www.nationalcrimeagency.gov.uk/news/crime-group-members-who-smuggled-large-amounts-of-cash-to-the-uae-are-sentenced",
+      "source": "nca"
+    },
+    {
+      "decided_on": "2026-11-05",
+      "decision": "baseline",
+      "first_seen_run": "baseline-2026-11-05",
+      "item_id": "https://www.nationalcrimeagency.gov.uk/news/fisherman-who-attempted-to-smuggle-17-migrants-into-the-uk-on-a-yacht-is-convicted",
+      "source": "nca"
+    },
+    {
+      "decided_on": "2026-11-05",
+      "decision": "baseline",
+      "first_seen_run": "baseline-2026-11-05",
+      "item_id": "https://www.nationalcrimeagency.gov.uk/news/five-jailed-over-nearly-half-a-tonne-of-cocaine-in-at-sea-smuggling-attempt",
+      "source": "nca"
+    },
+    {
+      "decided_on": "2026-11-05",
+      "decision": "baseline",
+      "first_seen_run": "baseline-2026-11-05",
+      "item_id": "https://www.nationalcrimeagency.gov.uk/news/four-more-men-charged-over-mexican-meth-conspiracy-plot",
+      "source": "nca"
+    },
+    {
+      "decided_on": "2026-11-05",
+      "decision": "baseline",
+      "first_seen_run": "baseline-2026-11-05",
+      "item_id": "https://www.nationalcrimeagency.gov.uk/news/gang-ringleader-arrested-by-the-nca-convicted-over-channel-boat-deaths",
+      "source": "nca"
+    },
+    {
+      "decided_on": "2026-11-05",
+      "decision": "baseline",
+      "first_seen_run": "baseline-2026-11-05",
+      "item_id": "https://www.nationalcrimeagency.gov.uk/news/hgv-people-smuggling-network-dismantled-by-nca-as-final-members-convicted",
+      "source": "nca"
+    },
+    {
+      "decided_on": "2026-11-05",
+      "decision": "baseline",
+      "first_seen_run": "baseline-2026-11-05",
+      "item_id": "https://www.nationalcrimeagency.gov.uk/news/liverpool-crime-group-guilty-of-australia-and-new-zealand-drug-smuggling-attempts",
+      "source": "nca"
+    },
+    {
+      "decided_on": "2026-11-05",
+      "decision": "baseline",
+      "first_seen_run": "baseline-2026-11-05",
+      "item_id": "https://www.nationalcrimeagency.gov.uk/news/lord-of-fraud-hugh-rodley-admits-child-sexual-abuse-offences",
+      "source": "nca"
+    },
+    {
+      "decided_on": "2026-11-05",
+      "decision": "baseline",
+      "first_seen_run": "baseline-2026-11-05",
+      "item_id": "https://www.nationalcrimeagency.gov.uk/news/more-couriers-sentenced-over-13-8-million-cannabis-importation-attempt",
+      "source": "nca"
+    },
+    {
+      "decided_on": "2026-11-05",
+      "decision": "baseline",
+      "first_seen_run": "baseline-2026-11-05",
+      "item_id": "https://www.nationalcrimeagency.gov.uk/news/nca-hosts-international-law-enforcement-and-tech-industry-crackdown-on-fraud-and-scams",
+      "source": "nca"
+    },
+    {
+      "decided_on": "2026-11-05",
+      "decision": "baseline",
+      "first_seen_run": "baseline-2026-11-05",
+      "item_id": "https://www.nationalcrimeagency.gov.uk/news/new-website-launched-for-victims-and-survivors-of-child-sexual-abuse-and-exploitation",
+      "source": "nca"
+    },
+    {
+      "decided_on": "2026-11-05",
+      "decision": "baseline",
+      "first_seen_run": "baseline-2026-11-05",
+      "item_id": "https://www.nationalcrimeagency.gov.uk/news/operation-venetic-drugs-and-firearms-suppliers-convicted",
+      "source": "nca"
+    },
+    {
+      "decided_on": "2026-11-05",
+      "decision": "baseline",
+      "first_seen_run": "baseline-2026-11-05",
+      "item_id": "https://www.nationalcrimeagency.gov.uk/news/organised-crime-group-sentenced-for-cocaine-stash-after-pctf-investigation",
+      "source": "nca"
+    },
+    {
+      "decided_on": "2026-11-05",
+      "decision": "baseline",
+      "first_seen_run": "baseline-2026-11-05",
+      "item_id": "https://www.nationalcrimeagency.gov.uk/news/people-smuggling-boss-hit-with-scpo-and-told-to-hand-over-290k-proceeds-of-crime-or-face-more-time-in-jail",
+      "source": "nca"
+    },
+    {
+      "decided_on": "2026-11-05",
+      "decision": "baseline",
+      "first_seen_run": "baseline-2026-11-05",
+      "item_id": "https://www.nationalcrimeagency.gov.uk/news/people-smuggling-network-get-combined-jail-terms-of-more-than-84-years-as-final-members-sentenced",
+      "source": "nca"
+    },
+    {
+      "decided_on": "2026-11-05",
+      "decision": "baseline",
+      "first_seen_run": "baseline-2026-11-05",
+      "item_id": "https://www.nationalcrimeagency.gov.uk/news/show-me-the-money-fraudsters-sentenced-after-spending-ppe-supply-money-on-luxury-car-and-house-renovations",
+      "source": "nca"
     },
     {
       "decided_on": "2026-09-29",
@@ -664,6 +1364,216 @@
       "first_seen_run": "catalogue:90b57e8ba022",
       "item_id": "https://www.gov.uk/guidance/financial-sanctions-webinars-and-events#2026-08-17T10:27:43Z",
       "source": "ofsi"
+    },
+    {
+      "decided_on": "2026-11-05",
+      "decision": "baseline",
+      "first_seen_run": "baseline-2026-11-05",
+      "item_id": "https://www.gov.uk/government/publications/complying-with-construction-services-prohibitions-related-to-russia#2026-10-27T10:00:00Z",
+      "source": "otsi"
+    },
+    {
+      "decided_on": "2026-11-05",
+      "decision": "baseline",
+      "first_seen_run": "baseline-2026-11-05",
+      "item_id": "https://www.gov.uk/government/publications/complying-with-sanctions-relating-to-banknotes#2026-08-03T11:30:01Z",
+      "source": "otsi"
+    },
+    {
+      "decided_on": "2026-11-05",
+      "decision": "baseline",
+      "first_seen_run": "baseline-2026-11-05",
+      "item_id": "https://www.gov.uk/government/publications/complying-with-trade-sanctions-relating-to-specified-ships#2026-10-27T10:00:00Z",
+      "source": "otsi"
+    },
+    {
+      "decided_on": "2026-11-05",
+      "decision": "baseline",
+      "first_seen_run": "baseline-2026-11-05",
+      "item_id": "https://www.gov.uk/government/publications/general-trade-licence-maritime-transportation-of-liquefied-natural-gas#2026-05-19T16:20:00Z",
+      "source": "otsi"
+    },
+    {
+      "decided_on": "2026-11-05",
+      "decision": "baseline",
+      "first_seen_run": "baseline-2026-11-05",
+      "item_id": "https://www.gov.uk/government/publications/general-trade-licence-maritime-transportation-of-liquefied-natural-gas-lng-japan#2026-10-01T09:06:48Z",
+      "source": "otsi"
+    },
+    {
+      "decided_on": "2026-11-05",
+      "decision": "baseline",
+      "first_seen_run": "baseline-2026-11-05",
+      "item_id": "https://www.gov.uk/government/publications/general-trade-licence-maritime-transportation-of-liquefied-natural-gas-south-korea#2026-10-01T09:06:00Z",
+      "source": "otsi"
+    },
+    {
+      "decided_on": "2026-11-05",
+      "decision": "baseline",
+      "first_seen_run": "baseline-2026-11-05",
+      "item_id": "https://www.gov.uk/government/publications/general-trade-licence-services-necessary-for-the-continued-operation-of-the-shah-deniz-project#2026-09-08T15:54:23Z",
+      "source": "otsi"
+    },
+    {
+      "decided_on": "2026-11-05",
+      "decision": "baseline",
+      "first_seen_run": "baseline-2026-11-05",
+      "item_id": "https://www.gov.uk/government/publications/iran-sanctions-guidance#2026-09-09T14:51:49Z",
+      "source": "otsi"
+    },
+    {
+      "decided_on": "2026-11-05",
+      "decision": "baseline",
+      "first_seen_run": "baseline-2026-11-05",
+      "item_id": "https://www.gov.uk/government/publications/myanmar-sanctions-guidance#2026-05-01T10:19:52Z",
+      "source": "otsi"
+    },
+    {
+      "decided_on": "2026-11-05",
+      "decision": "baseline",
+      "first_seen_run": "baseline-2026-11-05",
+      "item_id": "https://www.gov.uk/government/publications/notice-to-exporters-202618-iran-sanctions-amendments-effective-from-29-september-2026#2026-09-08T15:59:06Z",
+      "source": "otsi"
+    },
+    {
+      "decided_on": "2026-11-05",
+      "decision": "baseline",
+      "first_seen_run": "baseline-2026-11-05",
+      "item_id": "https://www.gov.uk/government/publications/office-of-trade-sanctions-implementation-annual-review-2025-2026#2026-08-27T11:08:00Z",
+      "source": "otsi"
+    },
+    {
+      "decided_on": "2026-11-05",
+      "decision": "baseline",
+      "first_seen_run": "baseline-2026-11-05",
+      "item_id": "https://www.gov.uk/government/publications/providing-professional-and-business-services-to-a-person-connected-with-russia#2026-10-27T10:00:00Z",
+      "source": "otsi"
+    },
+    {
+      "decided_on": "2026-11-05",
+      "decision": "baseline",
+      "first_seen_run": "baseline-2026-11-05",
+      "item_id": "https://www.gov.uk/government/publications/republic-of-belarus-sanctions-guidance#2026-05-01T10:19:55Z",
+      "source": "otsi"
+    },
+    {
+      "decided_on": "2026-11-05",
+      "decision": "baseline",
+      "first_seen_run": "baseline-2026-11-05",
+      "item_id": "https://www.gov.uk/government/publications/russia-sanctions-guidance#2026-05-19T23:01:01Z",
+      "source": "otsi"
+    },
+    {
+      "decided_on": "2026-11-05",
+      "decision": "baseline",
+      "first_seen_run": "baseline-2026-11-05",
+      "item_id": "https://www.gov.uk/government/publications/sanctions-enforcement-cross-government-approach-march-2026#2026-05-08T08:40:08Z",
+      "source": "otsi"
+    },
+    {
+      "decided_on": "2026-11-05",
+      "decision": "baseline",
+      "first_seen_run": "baseline-2026-11-05",
+      "item_id": "https://www.gov.uk/government/publications/syria-sanctions-guidance#2026-05-01T10:19:41Z",
+      "source": "otsi"
+    },
+    {
+      "decided_on": "2026-11-05",
+      "decision": "baseline",
+      "first_seen_run": "baseline-2026-11-05",
+      "item_id": "https://www.gov.uk/government/publications/venezuela-sanctions-guidance#2026-05-01T10:19:37Z",
+      "source": "otsi"
+    },
+    {
+      "decided_on": "2026-11-05",
+      "decision": "baseline",
+      "first_seen_run": "baseline-2026-11-05",
+      "item_id": "https://www.gov.uk/guidance/apply-for-a-licence-to-carry-out-sanctioned-trade-through-otsi#2026-05-20T14:05:30Z",
+      "source": "otsi"
+    },
+    {
+      "decided_on": "2026-11-05",
+      "decision": "baseline",
+      "first_seen_run": "baseline-2026-11-05",
+      "item_id": "https://www.gov.uk/guidance/how-to-use-exceptions-and-licences-to-comply-with-sanctions#2026-04-23T11:26:39Z",
+      "source": "otsi"
+    },
+    {
+      "decided_on": "2026-11-05",
+      "decision": "baseline",
+      "first_seen_run": "baseline-2026-11-05",
+      "item_id": "https://www.gov.uk/guidance/trading-under-sanctions-with-russia#2026-04-23T11:26:40Z",
+      "source": "otsi"
+    },
+    {
+      "decided_on": "2026-11-05",
+      "decision": "baseline",
+      "first_seen_run": "baseline-2026-11-05",
+      "item_id": "guidance-on-the-provision-of-banking-services",
+      "source": "wolfsberg"
+    },
+    {
+      "decided_on": "2026-11-05",
+      "decision": "baseline",
+      "first_seen_run": "baseline-2026-11-05",
+      "item_id": "guidance-on-the-provision-of-banking-services-to-fiat-backed-stablecoin-issuers",
+      "source": "wolfsberg"
+    },
+    {
+      "decided_on": "2026-11-05",
+      "decision": "baseline",
+      "first_seen_run": "baseline-2026-11-05",
+      "item_id": "guidance-on-the-risk-based-approach",
+      "source": "wolfsberg"
+    },
+    {
+      "decided_on": "2026-11-05",
+      "decision": "baseline",
+      "first_seen_run": "baseline-2026-11-05",
+      "item_id": "htworldcup-a-note-from-the-wolfsberg-group-on-human-trafficking-disruption-via-314b-during-the-world-cup",
+      "source": "wolfsberg"
+    },
+    {
+      "decided_on": "2026-11-05",
+      "decision": "baseline",
+      "first_seen_run": "baseline-2026-11-05",
+      "item_id": "the-2026-wolfsberg-forum-demonstrating-effectiveness-through-innovation",
+      "source": "wolfsberg"
+    },
+    {
+      "decided_on": "2026-11-05",
+      "decision": "baseline",
+      "first_seen_run": "baseline-2026-11-05",
+      "item_id": "the-wolfsberg-group-celebrates-its-25th-anniversary-and-welcomes-new-management-committee-members",
+      "source": "wolfsberg"
+    },
+    {
+      "decided_on": "2026-11-05",
+      "decision": "baseline",
+      "first_seen_run": "baseline-2026-11-05",
+      "item_id": "the-wolfsberg-group-publishes-its-second-statement-on-effective-monitoring-for-suspicious-activity",
+      "source": "wolfsberg"
+    },
+    {
+      "decided_on": "2026-11-05",
+      "decision": "baseline",
+      "first_seen_run": "baseline-2026-11-05",
+      "item_id": "the-wolfsberg-group-releases-its-statement-on-the-risk-based-approach",
+      "source": "wolfsberg"
+    },
+    {
+      "decided_on": "2026-11-05",
+      "decision": "baseline",
+      "first_seen_run": "baseline-2026-11-05",
+      "item_id": "wolfsberg-group-announces-new-co-chair-and-management-committee-member",
+      "source": "wolfsberg"
+    },
+    {
+      "decided_on": "2026-11-05",
+      "decision": "baseline",
+      "first_seen_run": "baseline-2026-11-05",
+      "item_id": "wolfsberg-group-appoints-rachel-sloan-as-co-chair-and-debra-roberts-to-its-management-committee",
+      "source": "wolfsberg"
     }
   ],
   "schema": "fc08-seen-items/1"
