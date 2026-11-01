@@ -50,6 +50,23 @@ def crashed_extracting_nothing(folder: Path) -> bool:
     return not any(json.loads(l).get("status") == "extracted" for l in lines if l.strip())
 
 
+def failed_extracting_nothing(folder: Path) -> bool:
+    """An outcome is recorded and none is "extracted" (failed, refused): nothing in the run is worth deciding."""
+    try:
+        lines = [l for l in (folder / "extraction_runs.jsonl").read_text(encoding="utf-8").splitlines() if l.strip()]
+        return bool(lines) and not any(json.loads(l).get("status") == "extracted" for l in lines)
+    except (OSError, ValueError, AttributeError):
+        return False
+
+
+def is_manual(run_id: str, root: Path = inbox.INBOX_ROOT) -> bool:
+    """True for a run tools/intake_document.py wrote (items.json carries "manual")."""
+    try:
+        return bool(inbox.load(run_id, root).get("manual"))
+    except (OSError, ValueError):
+        return False
+
+
 def classify(run_id: str, root: Path = inbox.INBOX_ROOT) -> str:
     folder = inbox.run_dir(run_id, root)
     if not (folder / inbox.ITEMS).exists():
@@ -60,6 +77,8 @@ def classify(run_id: str, root: Path = inbox.INBOX_ROOT) -> str:
     if (folder / ACCEPTED).exists():
         return ACCEPTED_STATE
     if crashed_extracting_nothing(folder):
+        return NOTHING
+    if state.get("manual") and failed_extracting_nothing(folder):  # retry = run the intake again
         return NOTHING
     return PENDING if inbox.items(state) else NOTHING
 

@@ -15,6 +15,11 @@ quote rule every verdict is (plan R4) -- the extraction request, the advisory id
 US$1 cap, run.json and report.md. Then `python tools/accept_run.py <run_id>` decides it, as it decides every
 run: the ledger keeps its one writer.
 
+An unaccepted intake run whose item was EXTRACTED BLOCKS the next scheduled Friday run (runs.blocking, safe
+side): accept it straight away. One whose extraction failed is nothing-to-decide and blocks nothing: retry by
+running this script again. `accept_run --pending` lists it as "manual". Nothing re-lists a manual source, so accept_run refuses to
+defer its item (a deferred item would never return) and defaults an unextracted one to drop.
+
 Refused, exit 2, BEFORE anything is written: a source that is not manual; a URL that is not https on that
 source's hosts (the one allowlist predicate, feeds.http._check_host); a title, date or reason missing or
 malformed; a file that is not a PDF or is over the size cap; a PDF with no text; a quote on no page; a document
@@ -168,8 +173,9 @@ def _intake(item, body, pages, text_pages, args, root, advisory_lists, today, ex
                       "ceiling_usd": of.EXTRACTION_BUDGET_USD, "prompt_sha256": None, "model": of.MODEL})
     report.write(run_id, root)
     rec = reconcile.reconcile_run(run_id, root)
-    print("%s: %s, %s (%s). Next: python tools/accept_run.py %s" % (
-        run_id, item.key, outcome.get("status") if crash is None else "crashed", rec["status"], run_id))
+    print("%s: %s, %s (%s). Next: python tools/accept_run.py %s -- if extracted, this run BLOCKS the next Friday "
+          "run until it is accepted or expired" % (run_id, item.key, outcome.get("status") if crash is None else "crashed",
+                                   rec["status"], run_id))
     if interrupt is not None:
         raise interrupt
     return 0 if outcome.get("status") == "extracted" else 1

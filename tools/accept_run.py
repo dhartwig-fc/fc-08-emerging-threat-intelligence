@@ -257,6 +257,12 @@ def plan(run_id: str, decisions: dict, *, inbox_root: Path = inbox.INBOX_ROOT, s
     bad = sorted(k for k, v in decisions.items() if v not in DECISIONS)
     if bad:
         raise ValueError("these decisions are not accept, drop or defer: %s" % bad)
+    manual_defers = sorted(k for k, v in decisions.items() if v == "defer" and state.get("manual")
+                           and (listed[k]["source"], listed[k]["item_id"]) not in ledger.load(seen_path))
+    if manual_defers:
+        raise ValueError("%s: a manual intake item cannot be deferred -- nothing re-lists a manual source, so a deferred "
+                         "item never comes back; accept it, or drop it (a dropped document cannot be taken in again)"
+                         % ", ".join(manual_defers))
     if override is not None and len(override.strip()) < OVERRIDE_MIN:
         raise ValueError("an override needs a reason of at least %d characters" % OVERRIDE_MIN)
     rec = reconcile.reconcile_run(run_id, inbox_root)
@@ -309,7 +315,7 @@ def plan(run_id: str, decisions: dict, *, inbox_root: Path = inbox.INBOX_ROOT, s
             "folder": folder, "alist": alist, "override": override}
 
 
-def default_decision(outcome, verdict) -> str:
+def default_decision(outcome, verdict, manual: bool = False) -> str:
     """The interactive default for one item. Accept only what was extracted; drop only what triage called not
     relevant and nothing tried to extract; everything else is deferred, so it comes back next Friday."""
     status = (outcome or {}).get("status")
@@ -317,13 +323,16 @@ def default_decision(outcome, verdict) -> str:
         return "accept"
     if status is None and verdict == "not_relevant":
         return "drop"
+    if manual:  # nothing re-lists a manual source: a deferred item would be lost silently (plan() refuses it)
+        return "drop"
     return "defer"  # failed, deferred for budget, relevant but never queued, or unfinished
 
 
 def default_decisions(run_id: str, inbox_root: Path = inbox.INBOX_ROOT) -> dict:
     rec = reconcile.reconcile_run(run_id, inbox_root)
     outcomes = extraction.load_outcomes(run_id, inbox_root)
-    return {it["key"]: default_decision(outcomes.get(it["key"]), rec["verdicts"].get(it["key"], {}).get("verdict"))
+    manual = runs.is_manual(run_id, inbox_root)
+    return {it["key"]: default_decision(outcomes.get(it["key"]), rec["verdicts"].get(it["key"], {}).get("verdict"), manual)
             for it in inbox.items(inbox.load(run_id, inbox_root))}
 
 
@@ -465,7 +474,12 @@ def ask(run_id: str, inbox_root: Path, seen_path: Path = ledger.SEEN_PATH) -> di
             decisions[k] = "defer"
             continue
         v = rec["verdicts"].get(k, {}).get("verdict")
-        default = default_decision(outcomes.get(k), v)
+        manual = runs.is_manual(run_id, inbox_root)
+        default = default_decision(outcomes.get(k), v, manual)
+        if manual and default == "drop" and outcomes.get(k, {}).get("status") != "extracted":
+            print("   this manual intake did not extract; nothing re-lists a manual source, so it is dropped by "
+                  "default -- to retry, do not apply: this run does not block Friday; run tools/intake_document.py "
+                  "again. Drop means it can never be taken in.")
         answer = input("%s  %s\n   verdict %s, extraction %s  [a]ccept/[d]rop/de[f]er (default %s): " % (
             k, it["title"][:90], v, outcomes.get(k, {}).get("status", "-"), default)).strip().lower()
         decisions[k] = {"a": "accept", "d": "drop", "f": "defer", "": default}.get(answer[:1], answer)
@@ -548,7 +562,8 @@ def main(argv: list, *, inbox_root: Path = inbox.INBOX_ROOT, seen_path: Path = l
         return seed_catalogue(today, seen_path, catalogue, args.dry_run)
     if args.pending:
         for r in runs.run_ids(inbox_root):
-            print("%-26s %s" % (r, runs.classify(r, inbox_root)))
+            label = runs.classify(r, inbox_root)
+            print("%-26s %s" % (r, "manual" if label == runs.PENDING and runs.is_manual(r, inbox_root) else label))
         return 0
     if args.expire:
         from tools.friday_run import LOCK, run_lock  # the Friday run's OWN lock, never a second copy of it

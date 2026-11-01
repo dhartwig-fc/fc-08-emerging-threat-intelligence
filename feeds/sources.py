@@ -378,6 +378,12 @@ if set(MANUAL_SOURCES) & set(SOURCES):
     raise RuntimeError("feeds.sources: %s are declared both live and manual" % sorted(set(MANUAL_SOURCES) & set(SOURCES)))
 
 
+_live_hosts = {h for s in SOURCES.values() for h in set(s.hosts) | set(s.document_hosts)}
+_overlap = sorted(h for m in MANUAL_SOURCES.values() for h in m.hosts if h in _live_hosts)
+if _overlap:
+    raise RuntimeError("feeds.sources: %s is a manual source's host AND a live source's; nothing may fetch it" % _overlap)
+
+
 def named() -> str:
     """'ofsi, fincen and ofac': the sources in ORDER, as the prompt names them."""
     return ORDER[0] if len(ORDER) == 1 else ", ".join(ORDER[:-1]) + " and " + ORDER[-1]

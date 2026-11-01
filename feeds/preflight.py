@@ -82,11 +82,14 @@ def schedule_clone(repo: Path, run=subprocess.run) -> Optional[str]:
     return None
 
 
+MANUAL_NOTE = " [a MANUAL owner intake, not a Friday run]"
+
+
 def back_pressure(root: Path = inbox.INBOX_ROOT, today: date = None) -> Optional[str]:
     waiting = runs.blocking(root, today)
     if waiting:
         return ("an unaccepted run is still in the inbox: %s -- accept it (tools/accept_run.py) or, from 14 days, "
-                "expire it (tools/accept_run.py --expire)" % ", ".join("%s (%d days)" % (r, a) for r, a in waiting))
+                "expire it (tools/accept_run.py --expire)" % ", ".join("%s (%d days)%s" % (r, a, MANUAL_NOTE if runs.is_manual(r, root) else "") for r, a in waiting))
     return None
 
 

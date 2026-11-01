@@ -159,7 +159,7 @@ def render(run_id: str, root: Path = inbox.INBOX_ROOT) -> str:
 
     out += ["## Sources", "", "| source | status | listed | already decided | new | carried forward |",
             "|---|---|---|---|---|---|"]
-    for name in reconcile.SOURCES:
+    for name in (sorted(rec["sources"]) if inbox.load(run_id, root).get("manual") else reconcile.SOURCES):
         st = rec["sources"].get(name)
         if st is None:
             out.append("| %s | not listed | - | - | - | - |" % name)
