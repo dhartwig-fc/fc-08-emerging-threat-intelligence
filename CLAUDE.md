@@ -551,7 +551,7 @@ capability (doctrine corroboration, and re-review of the SAN006 case NEXUS alrea
   dropped by triage, accepted.json defers them. The page shows both facts (verdict not relevant, deferred at
   acceptance) and resolves neither.
 - **The only typed facts are cross-repository**: `FC10` (Global Metals Ltd, SAN006-TRD001, run
-  san006-ba55d5fa16, and the two portfolio links). `check_scan_demo` checks them against the portfolio's
+  san006-e84829d454, and the two portfolio links). `check_scan_demo` checks them against the portfolio's
   published case page when the checkout is present (NOT RUN otherwise).
 - Republishing follows the walkthrough's procedure with site/SCAN_PUBLISHED in place of site/PUBLISHED. A
   rebuilt, unrepublished page refuses every commit here, as the walkthrough's does.
