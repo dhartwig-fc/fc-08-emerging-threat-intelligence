@@ -1,0 +1,594 @@
+{
+  "run_id": "feeds-2026-11-06-389ebb",
+  "sources": {
+    "amla": {
+      "already_seen": 29,
+      "carried": 0,
+      "error": null,
+      "items": [
+        {
+          "document": {
+            "bytes": 77913,
+            "content_type": "text/html",
+            "fetched_at": "2026-11-06T09:02:07Z",
+            "final_url": "https://www.amla.europa.eu/news-media/news-articles/amla-executive-board-member-derville-rowland-attends-eurofi-financial-forum-dublin_en",
+            "linked_pdfs": [
+              "https://www.eurofi.net/wp-content/uploads/2026/09/eurofi-views-dublin-web.pdf#page=306"
+            ],
+            "page_error": null,
+            "pages": 1,
+            "path": "docs/6a8017c0b9cb85d7f315ab8362da7acd87056bc29b7be752734a97212d65c6f4.html",
+            "sha256": "6a8017c0b9cb85d7f315ab8362da7acd87056bc29b7be752734a97212d65c6f4",
+            "text_pages": 1
+          },
+          "item_id": "https://www.amla.europa.eu/news-media/news-articles/amla-executive-board-member-derville-rowland-attends-eurofi-financial-forum-dublin_en",
+          "key": "amla:bb4ae423b1c88114",
+          "published": "2026-11-04",
+          "source": "amla",
+          "summary": "",
+          "title": "AMLA Executive Board Member Derville Rowland attends Eurofi Financial Forum in Dublin",
+          "url": "https://www.amla.europa.eu/news-media/news-articles/amla-executive-board-member-derville-rowland-attends-eurofi-financial-forum-dublin_en"
+        }
+      ],
+      "listed": 30,
+      "listed_at": "2026-11-06T09:00:51Z",
+      "listing": "listings/amla.rss",
+      "listing_sha256": "d2636194830ffeaaf271f14371e383582e0c0f0183285dc6dcd3e06fb51db480",
+      "listing_url": "https://www.amla.europa.eu/node/19/rss_en",
+      "status": "ok"
+    },
+    "eba": {
+      "already_seen": 9,
+      "carried": 0,
+      "error": null,
+      "items": [
+        {
+          "document": {
+            "bytes": 56907,
+            "content_type": "text/html",
+            "fetched_at": "2026-11-06T09:02:05Z",
+            "final_url": "https://www.eba.europa.eu/publications-and-media/press-releases/eba-publishes-revised-guidelines-internal-governance-delivering-greater-proportionality-and",
+            "linked_pdfs": [
+              "https://www.eba.europa.eu/sites/default/files/2026-11/3c8b1810-c335-499a-803f-6d795ce3d196/Final%20report%20on%20Guidelines%20on%20internal%20governance.pdf"
+            ],
+            "page_error": null,
+            "pages": 1,
+            "path": "docs/cac39dc57ac6766bcf163315c2f22221a01a387cdab79aba175e467a62d07b25.html",
+            "sha256": "cac39dc57ac6766bcf163315c2f22221a01a387cdab79aba175e467a62d07b25",
+            "text_pages": 1
+          },
+          "item_id": "https://www.eba.europa.eu/publications-and-media/press-releases/eba-publishes-revised-guidelines-internal-governance-delivering-greater-proportionality-and",
+          "key": "eba:7c9622b75e2eacbf",
+          "published": "2026-11-05",
+          "source": "eba",
+          "summary": "",
+          "title": "The EBA publishes revised Guidelines on internal governance, delivering greater proportionality and simplification for banks",
+          "url": "https://www.eba.europa.eu/publications-and-media/press-releases/eba-publishes-revised-guidelines-internal-governance-delivering-greater-proportionality-and"
+        }
+      ],
+      "listed": 10,
+      "listed_at": "2026-11-06T09:00:48Z",
+      "listing": "listings/eba.rss",
+      "listing_sha256": "520a0bfa97fd6d5a7232c8cebe714ce336f344737d58d22167c8084f97ec377c",
+      "listing_url": "https://www.eba.europa.eu/news-press/news/rss.xml",
+      "status": "ok"
+    },
+    "eu_council": {
+      "already_seen": 4,
+      "carried": 0,
+      "error": null,
+      "items": [
+        {
+          "document": null,
+          "fetch_error": "https://www.consilium.europa.eu/en/press/press-releases/2026/11/05/joint-press-release-eu-western-balkans-ministerial-forum-on-justice-and-home-affairs-budva-montenegro-5-6-november-2026/ could not be fetched: Forbidden",
+          "item_id": "151983",
+          "key": "eu_council:bb73f588b1dcce72",
+          "published": "2026-11-05",
+          "source": "eu_council",
+          "summary": "",
+          "title": "Joint press release: EU – Western Balkans Ministerial Forum on Justice and Home Affairs (Budva, Montenegro, 5-6 November 2026)",
+          "url": "https://www.consilium.europa.eu/en/press/press-releases/2026/11/05/joint-press-release-eu-western-balkans-ministerial-forum-on-justice-and-home-affairs-budva-montenegro-5-6-november-2026/"
+        },
+        {
+          "document": null,
+          "fetch_error": "https://www.consilium.europa.eu/en/press/press-releases/2026/11/04/fight-against-illicit-drugs-council-backs-new-rules-for-chemicals-used-to-make-illegal-drugs/ could not be fetched: Forbidden",
+          "item_id": "151986",
+          "key": "eu_council:89775a13ae3d6d1d",
+          "published": "2026-11-04",
+          "source": "eu_council",
+          "summary": "",
+          "title": "Fight against illicit drugs: Council backs new rules for chemicals used to make illegal drugs",
+          "url": "https://www.consilium.europa.eu/en/press/press-releases/2026/11/04/fight-against-illicit-drugs-council-backs-new-rules-for-chemicals-used-to-make-illegal-drugs/"
+        },
+        {
+          "document": null,
+          "fetch_error": "https://www.consilium.europa.eu/en/press/press-releases/2026/11/04/speech-by-president-antonio-costa-at-the-plenary-session-of-the-30th-ibero-american-summit/ could not be fetched: Forbidden",
+          "item_id": "151978",
+          "key": "eu_council:76f3d89bf053b7cd",
+          "published": "2026-11-04",
+          "source": "eu_council",
+          "summary": "",
+          "title": "Speech by President António Costa at the plenary session of the XXX Ibero-American Summit",
+          "url": "https://www.consilium.europa.eu/en/press/press-releases/2026/11/04/speech-by-president-antonio-costa-at-the-plenary-session-of-the-30th-ibero-american-summit/"
+        },
+        {
+          "document": null,
+          "fetch_error": "https://www.consilium.europa.eu/en/press/press-releases/2026/11/04/press-briefing-economic-and-financial-affairs-and-budget-council-meetings/ could not be fetched: Forbidden",
+          "item_id": "151981",
+          "key": "eu_council:ca5830e18cd02f6c",
+          "published": "2026-11-04",
+          "source": "eu_council",
+          "summary": "",
+          "title": "Press briefing - Economic and Financial Affairs and Budget Council meetings",
+          "url": "https://www.consilium.europa.eu/en/press/press-releases/2026/11/04/press-briefing-economic-and-financial-affairs-and-budget-council-meetings/"
+        },
+        {
+          "document": null,
+          "fetch_error": "https://www.consilium.europa.eu/en/press/press-releases/2026/11/03/statement-by-president-costa-in-the-context-of-the-euronews-eu-enlargement-summit-2026/ could not be fetched: Forbidden",
+          "item_id": "151975",
+          "key": "eu_council:869c25c78d748e56",
+          "published": "2026-11-03",
+          "source": "eu_council",
+          "summary": "",
+          "title": "Statement by President António Costa in the context of the Euronews EU Enlargement Summit 2026",
+          "url": "https://www.consilium.europa.eu/en/press/press-releases/2026/11/03/statement-by-president-costa-in-the-context-of-the-euronews-eu-enlargement-summit-2026/"
+        },
+        {
+          "document": null,
+          "fetch_error": "https://www.consilium.europa.eu/en/press/press-releases/2026/11/03/informal-meeting-of-heads-of-state-or-government-of-13-november-2026-invitation-letter-by-president-antonio-costa-to-the-members-of-the-european-council/ could not be fetched: Forbidden",
+          "item_id": "151941",
+          "key": "eu_council:b51043e9da0626b0",
+          "published": "2026-11-03",
+          "source": "eu_council",
+          "summary": "",
+          "title": "Informal meeting of Heads of State or Government of 13 November 2026 - Invitation letter by President António Costa to the members of the European Council",
+          "url": "https://www.consilium.europa.eu/en/press/press-releases/2026/11/03/informal-meeting-of-heads-of-state-or-government-of-13-november-2026-invitation-letter-by-president-antonio-costa-to-the-members-of-the-european-council/"
+        },
+        {
+          "document": null,
+          "fetch_error": "https://www.consilium.europa.eu/en/press/press-releases/2026/11/03/statement-by-the-hr-on-behalf-of-the-eu-on-the-alignment-of-certain-countries-with-council-decision-cfsp-20262258-concerning-restrictive-measures-in-view-of-russia-s-destabilising-activities/ could not be fetched: Forbidden",
+          "item_id": "151969",
+          "key": "eu_council:07fcb0123672ebe1",
+          "published": "2026-11-03",
+          "source": "eu_council",
+          "summary": "",
+          "title": "Statement by the HR on behalf of the EU on the alignment of certain countries with Council Decision (CFSP) 2026/2258 concerning restrictive measures in view of Russia’s destabilising activities",
+          "url": "https://www.consilium.europa.eu/en/press/press-releases/2026/11/03/statement-by-the-hr-on-behalf-of-the-eu-on-the-alignment-of-certain-countries-with-council-decision-cfsp-20262258-concerning-restrictive-measures-in-view-of-russia-s-destabilising-activities/"
+        },
+        {
+          "document": null,
+          "fetch_error": "https://www.consilium.europa.eu/en/press/press-releases/2026/11/03/hr-statement-on-behalf-of-eu-on-alignment-with-decision-20262264-concerning-restrictive-measures-in-respect-of-actions-undermining-or-threatening-the-territorial-integrity-sovereignty-and-independence-of-ukraine/ could not be fetched: Forbidden",
+          "item_id": "151968",
+          "key": "eu_council:74395b37d677ec4e",
+          "published": "2026-11-03",
+          "source": "eu_council",
+          "summary": "",
+          "title": "HR statement on behalf of the EU on the alignment of certain countries with Council Decision (CFSP) 2026/2264 concerning restrictive measures in respect of actions undermining or threatening the territorial integrity, sovereignty and independence of Ukraine",
+          "url": "https://www.consilium.europa.eu/en/press/press-releases/2026/11/03/hr-statement-on-behalf-of-eu-on-alignment-with-decision-20262264-concerning-restrictive-measures-in-respect-of-actions-undermining-or-threatening-the-territorial-integrity-sovereignty-and-independence-of-ukraine/"
+        },
+        {
+          "document": null,
+          "fetch_error": "https://www.consilium.europa.eu/en/press/press-releases/2026/11/03/statement-by-the-hr-on-behalf-of-the-eu-on-the-alignment-of-certain-third-countries-with-council-decision-cfsp-20262192-concerning-restrictive-measures-in-view-of-the-situation-in-russia/ could not be fetched: Forbidden",
+          "item_id": "151966",
+          "key": "eu_council:ff0a210cef7ac3ad",
+          "published": "2026-11-03",
+          "source": "eu_council",
+          "summary": "",
+          "title": "Statement by the HR on behalf of the EU on the alignment of certain third countries with Council Decision (CFSP) 2026/2192 concerning restrictive measures in view of the situation in Russia",
+          "url": "https://www.consilium.europa.eu/en/press/press-releases/2026/11/03/statement-by-the-hr-on-behalf-of-the-eu-on-the-alignment-of-certain-third-countries-with-council-decision-cfsp-20262192-concerning-restrictive-measures-in-view-of-the-situation-in-russia/"
+        },
+        {
+          "document": null,
+          "fetch_error": "https://www.consilium.europa.eu/en/press/press-releases/2026/11/03/statement-by-the-hr-on-behalf-of-the-eu-on-the-alignment-of-certain-countries-with-council-decision-cfsp-20262164-concerning-restrictive-measures-in-view-of-russia-s-destabilising-activities/ could not be fetched: Forbidden",
+          "item_id": "151961",
+          "key": "eu_council:4ab38304738967c0",
+          "published": "2026-11-03",
+          "source": "eu_council",
+          "summary": "",
+          "title": "Statement by the HR on behalf of the EU on the alignment of certain countries with Council Decision (CFSP) 2026/2164 concerning restrictive measures in view of Russia’s destabilising activities",
+          "url": "https://www.consilium.europa.eu/en/press/press-releases/2026/11/03/statement-by-the-hr-on-behalf-of-the-eu-on-the-alignment-of-certain-countries-with-council-decision-cfsp-20262164-concerning-restrictive-measures-in-view-of-russia-s-destabilising-activities/"
+        },
+        {
+          "document": null,
+          "fetch_error": "https://www.consilium.europa.eu/en/press/press-releases/2026/11/03/hr-statement-on-behalf-of-eu-alignment-of-certain-countries-concerning-restrictive-measures-in-respect-of-actions-undermining-or-threatening-the-territorial-integrity-sovereignty-and-independence-of-ukraine/ could not be fetched: Forbidden",
+          "item_id": "151952",
+          "key": "eu_council:3fae6915d00d81a7",
+          "published": "2026-11-03",
+          "source": "eu_council",
+          "summary": "",
+          "title": "HR statement on behalf of the EU on the alignment of certain countries concerning restrictive measures in respect of actions undermining or threatening the territorial integrity, sovereignty and independence of Ukraine",
+          "url": "https://www.consilium.europa.eu/en/press/press-releases/2026/11/03/hr-statement-on-behalf-of-eu-alignment-of-certain-countries-concerning-restrictive-measures-in-respect-of-actions-undermining-or-threatening-the-territorial-integrity-sovereignty-and-independence-of-ukraine/"
+        },
+        {
+          "document": null,
+          "fetch_error": "https://www.consilium.europa.eu/en/press/press-releases/2026/11/03/hr-statement-on-behalf-of-eu-alignment-of-certain-countries-concerning-restrictive-measures-in-respect-of-actions-undermining-or-threatening-the-territorial-integrity-sovereignty-and-independence-of-ukraine/ could not be fetched: Forbidden",
+          "item_id": "151946",
+          "key": "eu_council:7527bbc7c9759518",
+          "published": "2026-11-03",
+          "source": "eu_council",
+          "summary": "",
+          "title": "Statement by the HR on behalf of the EU on the alignment of certain countries concerning restrictive measures in respect of actions undermining or threatening the territorial integrity, sovereignty and independence of Ukraine",
+          "url": "https://www.consilium.europa.eu/en/press/press-releases/2026/11/03/hr-statement-on-behalf-of-eu-alignment-of-certain-countries-concerning-restrictive-measures-in-respect-of-actions-undermining-or-threatening-the-territorial-integrity-sovereignty-and-independence-of-ukraine/"
+        },
+        {
+          "document": null,
+          "fetch_error": "https://www.consilium.europa.eu/en/press/press-releases/2026/11/03/statement-by-the-hr-on-behalf-of-the-eu-alignment-with-restrictive-measures-in-respect-of-actions-undermining-or-threatening-the-territorial-integrity-sovereignty-and-independence-of-ukraine/ could not be fetched: Forbidden",
+          "item_id": "151944",
+          "key": "eu_council:188c4733db3a0466",
+          "published": "2026-11-03",
+          "source": "eu_council",
+          "summary": "",
+          "title": "Statement by the HR on behalf of the EU on the alignment of certain countries concerning restrictive measures in respect of actions undermining or threatening the territorial integrity, sovereignty and independence of Ukraine",
+          "url": "https://www.consilium.europa.eu/en/press/press-releases/2026/11/03/statement-by-the-hr-on-behalf-of-the-eu-alignment-with-restrictive-measures-in-respect-of-actions-undermining-or-threatening-the-territorial-integrity-sovereignty-and-independence-of-ukraine/"
+        },
+        {
+          "document": null,
+          "fetch_error": "https://www.consilium.europa.eu/en/press/press-releases/2026/11/03/press-briefing-eurogroup-meeting-of-9-november-2026/ could not be fetched: Forbidden",
+          "item_id": "151933",
+          "key": "eu_council:0eadbac3318158a4",
+          "published": "2026-11-03",
+          "source": "eu_council",
+          "summary": "",
+          "title": "Press briefing - Eurogroup meeting of 9 November 2026",
+          "url": "https://www.consilium.europa.eu/en/press/press-releases/2026/11/03/press-briefing-eurogroup-meeting-of-9-november-2026/"
+        },
+        {
+          "document": null,
+          "fetch_error": "https://www.consilium.europa.eu/en/press/press-releases/2026/11/03/statement-by-the-hr-on-behalf-of-the-eu-on-the-alignment-of-certain-third-countries-concerning-restrictive-measures-in-respect-of-actions-undermining-or-threatening-the-territorial-integrity-sovereignty-and-independence-of-ukraine/ could not be fetched: Forbidden",
+          "item_id": "151935",
+          "key": "eu_council:01ee7d591231dabd",
+          "published": "2026-11-03",
+          "source": "eu_council",
+          "summary": "",
+          "title": "Statement by the HR on behalf of the EU on the alignment of certain third countries concerning restrictive measures in respect of actions undermining or threatening the territorial integrity, sovereignty and independence of Ukraine.",
+          "url": "https://www.consilium.europa.eu/en/press/press-releases/2026/11/03/statement-by-the-hr-on-behalf-of-the-eu-on-the-alignment-of-certain-third-countries-concerning-restrictive-measures-in-respect-of-actions-undermining-or-threatening-the-territorial-integrity-sovereignty-and-independence-of-ukraine/"
+        },
+        {
+          "document": null,
+          "fetch_error": "https://www.consilium.europa.eu/en/press/press-releases/2026/11/02/statement-of-the-high-representative-on-behalf-of-the-eu-on-the-situation-in-yemen/ could not be fetched: Forbidden",
+          "item_id": "151930",
+          "key": "eu_council:6e8dea1876a86b15",
+          "published": "2026-11-02",
+          "source": "eu_council",
+          "summary": "",
+          "title": "Statement by the High Representative on behalf of the European Union on the situation in Yemen",
+          "url": "https://www.consilium.europa.eu/en/press/press-releases/2026/11/02/statement-of-the-high-representative-on-behalf-of-the-eu-on-the-situation-in-yemen/"
+        }
+      ],
+      "listed": 20,
+      "listed_at": "2026-11-06T09:00:46Z",
+      "listing": "listings/eu_council.rss",
+      "listing_sha256": "6e6562ef15eb0ca390f47aab77b69bd9d3daf19ee06946f323ff8c25018dc390",
+      "listing_url": "https://www.consilium.europa.eu/en/rss/pressreleases.ashx",
+      "status": "ok"
+    },
+    "fca": {
+      "already_seen": 12,
+      "carried": 0,
+      "error": null,
+      "items": [
+        {
+          "document": {
+            "bytes": 174625,
+            "content_type": "text/html",
+            "fetched_at": "2026-11-06T09:01:33Z",
+            "final_url": "https://www.fca.org.uk/news/statements/fca-acts-protect-consumers-demands-disguised-remuneration-scheme-loan-repayments",
+            "linked_pdfs": [],
+            "page_error": null,
+            "pages": 1,
+            "path": "docs/95054277facbc3ddfe8c0b632b650e6781e25898043acaff4ef229db08041d18.html",
+            "sha256": "95054277facbc3ddfe8c0b632b650e6781e25898043acaff4ef229db08041d18",
+            "text_pages": 1
+          },
+          "item_id": "177311",
+          "key": "fca:0b29880ef5c4c3cf",
+          "published": "2026-11-05",
+          "source": "fca",
+          "summary": "",
+          "title": "FCA acts to protect consumers facing demands for disguised remuneration scheme loan repayments",
+          "url": "https://www.fca.org.uk/news/statements/fca-acts-protect-consumers-demands-disguised-remuneration-scheme-loan-repayments"
+        },
+        {
+          "document": {
+            "bytes": 182503,
+            "content_type": "text/html",
+            "fetched_at": "2026-11-06T09:01:35Z",
+            "final_url": "https://www.fca.org.uk/news/blogs/looking-back-move-forward-why-reviewing-our-rules-matters",
+            "linked_pdfs": [],
+            "page_error": null,
+            "pages": 3,
+            "path": "docs/4bd92c4a6306b52845aa31d87d6388486e95016e4c80574634aeaf79f6ee17c0.html",
+            "sha256": "4bd92c4a6306b52845aa31d87d6388486e95016e4c80574634aeaf79f6ee17c0",
+            "text_pages": 3
+          },
+          "item_id": "177246",
+          "key": "fca:df6f444958b7d1bd",
+          "published": "2026-11-05",
+          "source": "fca",
+          "summary": "",
+          "title": "Looking back to move forward: why reviewing our rules matters",
+          "url": "https://www.fca.org.uk/news/blogs/looking-back-move-forward-why-reviewing-our-rules-matters"
+        },
+        {
+          "document": {
+            "bytes": 175655,
+            "content_type": "text/html",
+            "fetched_at": "2026-11-06T09:01:38Z",
+            "final_url": "https://www.fca.org.uk/news/press-releases/fca-explore-quantum-computing-tackle-financial-crime",
+            "linked_pdfs": [],
+            "page_error": null,
+            "pages": 1,
+            "path": "docs/813ba05fd82744f5eaa96896fd9e62c889aec559d309de57f8ca09340947d809.html",
+            "sha256": "813ba05fd82744f5eaa96896fd9e62c889aec559d309de57f8ca09340947d809",
+            "text_pages": 1
+          },
+          "item_id": "177261",
+          "key": "fca:1bf748a7f545b1bc",
+          "published": "2026-11-05",
+          "source": "fca",
+          "summary": "",
+          "title": "FCA to explore quantum computing to tackle financial crime",
+          "url": "https://www.fca.org.uk/news/press-releases/fca-explore-quantum-computing-tackle-financial-crime"
+        },
+        {
+          "document": {
+            "bytes": 182726,
+            "content_type": "text/html",
+            "fetched_at": "2026-11-06T09:01:40Z",
+            "final_url": "https://www.fca.org.uk/news/blogs/act-now-be-resilient-quantum-future",
+            "linked_pdfs": [
+              "https://home.treasury.gov/system/files/136/G7-CEG-Quantum-Roadmap.pdf",
+              "https://www.cmorg.org.uk/sites/default/files/2026-08/CMORG%20-%20Guidance%20for%20Post-Quantum%20Cryptography%20-%20April%202025%20-%20TLP%20CLEAR.pdf"
+            ],
+            "page_error": null,
+            "pages": 2,
+            "path": "docs/fff24ef14c3a392116af81f8fdb6806bc7a7b95b5e26f66e7f4777b40ebda082.html",
+            "sha256": "fff24ef14c3a392116af81f8fdb6806bc7a7b95b5e26f66e7f4777b40ebda082",
+            "text_pages": 2
+          },
+          "item_id": "177221",
+          "key": "fca:8339064d24aaac21",
+          "published": "2026-11-04",
+          "source": "fca",
+          "summary": "",
+          "title": "Act now to be resilient in the quantum future",
+          "url": "https://www.fca.org.uk/news/blogs/act-now-be-resilient-quantum-future"
+        },
+        {
+          "document": {
+            "bytes": 178989,
+            "content_type": "text/html",
+            "fetched_at": "2026-11-06T09:01:42Z",
+            "final_url": "https://www.fca.org.uk/news/press-releases/new-fca-rules-bring-esg-rating-providers-uk-regulation-first-time",
+            "linked_pdfs": [
+              "https://www.iosco.org/library/pubdocs/pdf/IOSCOPD690.pdf",
+              "https://www.fca.org.uk/publication/consultation/cp25-34.pdf"
+            ],
+            "page_error": null,
+            "pages": 2,
+            "path": "docs/849a0c3b0ee84e7c8455b13f54b8ea1a1c5dff697697d1bae49239a3e363f644.html",
+            "sha256": "849a0c3b0ee84e7c8455b13f54b8ea1a1c5dff697697d1bae49239a3e363f644",
+            "text_pages": 2
+          },
+          "item_id": "177126",
+          "key": "fca:2e97c6b897e68d4c",
+          "published": "2026-11-03",
+          "source": "fca",
+          "summary": "",
+          "title": "New FCA rules bring ESG rating providers into UK regulation for the first time",
+          "url": "https://www.fca.org.uk/news/press-releases/new-fca-rules-bring-esg-rating-providers-uk-regulation-first-time"
+        },
+        {
+          "document": {
+            "bytes": 177774,
+            "content_type": "text/html",
+            "fetched_at": "2026-11-06T09:01:44Z",
+            "final_url": "https://www.fca.org.uk/news/press-releases/fca-sets-expectations-firms-making-car-finance-settlement-offers",
+            "linked_pdfs": [
+              "https://www.fca.org.uk/publication/information-sheets/car-finance-complaints-settlement-offers-faqs.pdf"
+            ],
+            "page_error": null,
+            "pages": 2,
+            "path": "docs/0a958b27c76a43843e475664385237bc5ff68c439c404a3f9f3d581ebe24b47c.html",
+            "sha256": "0a958b27c76a43843e475664385237bc5ff68c439c404a3f9f3d581ebe24b47c",
+            "text_pages": 2
+          },
+          "item_id": "177176",
+          "key": "fca:c94db7d5b62a3892",
+          "published": "2026-11-03",
+          "source": "fca",
+          "summary": "",
+          "title": "FCA sets expectations for firms making car finance settlement offers",
+          "url": "https://www.fca.org.uk/news/press-releases/fca-sets-expectations-firms-making-car-finance-settlement-offers"
+        },
+        {
+          "document": {
+            "bytes": 172560,
+            "content_type": "text/html",
+            "fetched_at": "2026-11-06T09:01:46Z",
+            "final_url": "https://www.fca.org.uk/news/statements/demands-disguised-remuneration-scheme-loan-repayments",
+            "linked_pdfs": [],
+            "page_error": null,
+            "pages": 1,
+            "path": "docs/81da202d0b2bca0b0b759ffed3035e1b7091f44d20261833e37ca732a463d4ff.html",
+            "sha256": "81da202d0b2bca0b0b759ffed3035e1b7091f44d20261833e37ca732a463d4ff",
+            "text_pages": 1
+          },
+          "item_id": "177166",
+          "key": "fca:10cc8a59d1265119",
+          "published": "2026-11-02",
+          "source": "fca",
+          "summary": "",
+          "title": "Demands for disguised remuneration scheme loan repayments",
+          "url": "https://www.fca.org.uk/news/statements/demands-disguised-remuneration-scheme-loan-repayments"
+        },
+        {
+          "document": {
+            "bytes": 172306,
+            "content_type": "text/html",
+            "fetched_at": "2026-11-06T09:01:49Z",
+            "final_url": "https://www.fca.org.uk/news/statements/fca-publishes-terms-reference-independent-review-concerning-mr-andriesz",
+            "linked_pdfs": [
+              "https://www.fca.org.uk/publication/documents/paterson-review-terms-of-reference.pdf"
+            ],
+            "page_error": null,
+            "pages": 1,
+            "path": "docs/91719e9ada841a0da076def575d1e44ea93356d8b4cfdcb844037586a44c5662.html",
+            "sha256": "91719e9ada841a0da076def575d1e44ea93356d8b4cfdcb844037586a44c5662",
+            "text_pages": 1
+          },
+          "item_id": "177156",
+          "key": "fca:f2e6318e17a105e6",
+          "published": "2026-11-02",
+          "source": "fca",
+          "summary": "",
+          "title": "FCA publishes terms of reference for independent review concerning Mr Andriesz",
+          "url": "https://www.fca.org.uk/news/statements/fca-publishes-terms-reference-independent-review-concerning-mr-andriesz"
+        }
+      ],
+      "listed": 20,
+      "listed_at": "2026-11-06T09:00:41Z",
+      "listing": "listings/fca.rss",
+      "listing_sha256": "8157333fc33d4625a7c02e4951b8bb0e24014553170b08747c5630df814d841d",
+      "listing_url": "https://www.fca.org.uk/news/rss.xml",
+      "status": "ok"
+    },
+    "fincen": {
+      "already_seen": 15,
+      "carried": 0,
+      "error": null,
+      "items": [],
+      "listed": 15,
+      "listed_at": "2026-11-06T09:00:16Z",
+      "listing": "listings/fincen.html",
+      "listing_sha256": "f8fb29ef167dc8c29edcb689276962254170077bb0cbf2f23659811ef1a53976",
+      "listing_url": "https://www.fincen.gov/resources/advisoriesbulletinsfact-sheets/advisories",
+      "status": "ok"
+    },
+    "nca": {
+      "already_seen": 19,
+      "carried": 0,
+      "error": null,
+      "items": [
+        {
+          "document": {
+            "bytes": 36464,
+            "content_type": "text/html",
+            "fetched_at": "2026-11-06T09:01:53Z",
+            "final_url": "https://www.nationalcrimeagency.gov.uk/news/man-arrested-as-part-of-nca-investigation-into-social-media-posts-linked-to-immigration-crime",
+            "linked_pdfs": [],
+            "page_error": null,
+            "pages": 1,
+            "path": "docs/aa6b13f910a1091980f5812a455727e0e055a3f0b2c7f9d3369bb1c63ff283c0.html",
+            "sha256": "aa6b13f910a1091980f5812a455727e0e055a3f0b2c7f9d3369bb1c63ff283c0",
+            "text_pages": 1
+          },
+          "item_id": "https://www.nationalcrimeagency.gov.uk/news/man-arrested-as-part-of-nca-investigation-into-social-media-posts-linked-to-immigration-crime",
+          "key": "nca:cf8a8b9435af3ef1",
+          "published": "2026-11-04",
+          "source": "nca",
+          "summary": "",
+          "title": "Man arrested as part of NCA investigation into social media posts linked to immigration crime",
+          "url": "https://www.nationalcrimeagency.gov.uk/news/man-arrested-as-part-of-nca-investigation-into-social-media-posts-linked-to-immigration-crime"
+        }
+      ],
+      "listed": 20,
+      "listed_at": "2026-11-06T09:00:44Z",
+      "listing": "listings/nca.rss",
+      "listing_sha256": "3040c3ee6b8a32c93fe087701aa47a742fa03a1e7686023be450ab09dcaf80bc",
+      "listing_url": "https://www.nationalcrimeagency.gov.uk/news?format=feed&type=rss",
+      "status": "ok"
+    },
+    "ofac": {
+      "already_seen": 8,
+      "carried": 0,
+      "error": null,
+      "items": [
+        {
+          "document": {
+            "bytes": 61913,
+            "content_type": "text/html",
+            "fetched_at": "2026-11-06T09:01:17Z",
+            "final_url": "https://ofac.treasury.gov/recent-actions/20261105",
+            "linked_pdfs": [],
+            "page_error": null,
+            "pages": 7,
+            "path": "docs/6c8e0d9d5a80b69436e4ee7b1ce2a6303795ff02b57de89fb6cb4c7d4d874a82.html",
+            "sha256": "6c8e0d9d5a80b69436e4ee7b1ce2a6303795ff02b57de89fb6cb4c7d4d874a82",
+            "text_pages": 7
+          },
+          "item_id": "20261105",
+          "key": "ofac:468368c9c0319cf5",
+          "published": "2026-11-05",
+          "source": "ofac",
+          "summary": "",
+          "title": "Cyber-related and Transnational Criminal Organizations Designations; Cuba Designations; Publication of Cuba-related Determination",
+          "url": "https://ofac.treasury.gov/recent-actions/20261105"
+        },
+        {
+          "document": {
+            "bytes": 820576,
+            "content_type": "text/html",
+            "fetched_at": "2026-11-06T09:01:31Z",
+            "final_url": "https://ofac.treasury.gov/recent-actions/20261104",
+            "linked_pdfs": [],
+            "page_error": null,
+            "pages": 264,
+            "path": "docs/9d314e4355fb1bbe8236d8f5010eea19932572d1d345d780b8bceb9fcc139070.html",
+            "sha256": "9d314e4355fb1bbe8236d8f5010eea19932572d1d345d780b8bceb9fcc139070",
+            "text_pages": 264
+          },
+          "item_id": "20261104",
+          "key": "ofac:1037f2edb4912104",
+          "published": "2026-11-04",
+          "source": "ofac",
+          "summary": "",
+          "title": "Iran-related Designations; Updates to Certain Iran-related Listings; Publication of Iran-related OFAC Alert; Issuance of Amended Venezuela-related General License and Frequently Asked Question",
+          "url": "https://ofac.treasury.gov/recent-actions/20261104"
+        }
+      ],
+      "listed": 10,
+      "listed_at": "2026-11-06T09:00:27Z",
+      "listing": "listings/ofac.html",
+      "listing_sha256": "7a327f6a3828955f839517675971a458ef08ee34cfcbcaa34d176bee71229093",
+      "listing_url": "https://ofac.treasury.gov/recent-actions",
+      "status": "ok"
+    },
+    "ofsi": {
+      "already_seen": 20,
+      "carried": 0,
+      "error": null,
+      "items": [],
+      "listed": 20,
+      "listed_at": "2026-11-06T09:00:15Z",
+      "listing": "listings/ofsi.atom",
+      "listing_sha256": "dcb9bff9bac2a45562d24461b429ff1d1298be7f0b5578274c815a90b8153c1c",
+      "listing_url": "https://www.gov.uk/government/organisations/office-of-financial-sanctions-implementation.atom",
+      "status": "ok"
+    },
+    "otsi": {
+      "already_seen": 20,
+      "carried": 0,
+      "error": null,
+      "items": [],
+      "listed": 20,
+      "listed_at": "2026-11-06T09:00:39Z",
+      "listing": "listings/otsi.atom",
+      "listing_sha256": "4989315d391a8e805fc54471a40d25be7ee8b33fe6db83bc991a1dcd55696737",
+      "listing_url": "https://www.gov.uk/government/organisations/office-of-trade-sanctions-implementation.atom",
+      "status": "ok"
+    },
+    "wolfsberg": {
+      "already_seen": 10,
+      "carried": 0,
+      "error": null,
+      "items": [],
+      "listed": 10,
+      "listed_at": "2026-11-06T09:00:53Z",
+      "listing": "listings/wolfsberg.html",
+      "listing_sha256": "0f8707eb271f1de4f61c5e77904490bf382a49852ed8e712e731516c5b47e2a1",
+      "listing_url": "https://wolfsberg-group.org/news",
+      "status": "ok"
+    }
+  }
+}

@@ -50,6 +50,13 @@
       "source": "amla"
     },
     {
+      "decided_on": "2026-11-06",
+      "decision": "drop",
+      "first_seen_run": "feeds-2026-11-06-389ebb",
+      "item_id": "https://www.amla.europa.eu/news-media/news-articles/amla-executive-board-member-derville-rowland-attends-eurofi-financial-forum-dublin_en",
+      "source": "amla"
+    },
+    {
       "decided_on": "2026-11-05",
       "decision": "baseline",
       "first_seen_run": "baseline-2026-11-05",
@@ -257,6 +264,13 @@
       "decision": "baseline",
       "first_seen_run": "baseline-2026-11-05",
       "item_id": "https://www.eba.europa.eu/publications-and-media/press-releases/eba-publishes-its-2027-work-programme",
+      "source": "eba"
+    },
+    {
+      "decided_on": "2026-11-06",
+      "decision": "drop",
+      "first_seen_run": "feeds-2026-11-06-389ebb",
+      "item_id": "https://www.eba.europa.eu/publications-and-media/press-releases/eba-publishes-revised-guidelines-internal-governance-delivering-greater-proportionality-and",
       "source": "eba"
     },
     {
@@ -561,6 +575,62 @@
       "source": "fca"
     },
     {
+      "decided_on": "2026-11-06",
+      "decision": "drop",
+      "first_seen_run": "feeds-2026-11-06-389ebb",
+      "item_id": "177126",
+      "source": "fca"
+    },
+    {
+      "decided_on": "2026-11-06",
+      "decision": "drop",
+      "first_seen_run": "feeds-2026-11-06-389ebb",
+      "item_id": "177156",
+      "source": "fca"
+    },
+    {
+      "decided_on": "2026-11-06",
+      "decision": "drop",
+      "first_seen_run": "feeds-2026-11-06-389ebb",
+      "item_id": "177166",
+      "source": "fca"
+    },
+    {
+      "decided_on": "2026-11-06",
+      "decision": "drop",
+      "first_seen_run": "feeds-2026-11-06-389ebb",
+      "item_id": "177176",
+      "source": "fca"
+    },
+    {
+      "decided_on": "2026-11-06",
+      "decision": "drop",
+      "first_seen_run": "feeds-2026-11-06-389ebb",
+      "item_id": "177221",
+      "source": "fca"
+    },
+    {
+      "decided_on": "2026-11-06",
+      "decision": "drop",
+      "first_seen_run": "feeds-2026-11-06-389ebb",
+      "item_id": "177246",
+      "source": "fca"
+    },
+    {
+      "decided_on": "2026-11-06",
+      "decision": "drop",
+      "first_seen_run": "feeds-2026-11-06-389ebb",
+      "item_id": "177261",
+      "source": "fca"
+    },
+    {
+      "decided_on": "2026-11-06",
+      "decision": "drop",
+      "first_seen_run": "feeds-2026-11-06-389ebb",
+      "item_id": "177311",
+      "source": "fca"
+    },
+    {
       "decided_on": "2026-09-29",
       "decision": "drop",
       "first_seen_run": "catalogue:90b57e8ba022",
@@ -782,6 +852,13 @@
       "decision": "baseline",
       "first_seen_run": "baseline-2026-11-05",
       "item_id": "https://www.nationalcrimeagency.gov.uk/news/lord-of-fraud-hugh-rodley-admits-child-sexual-abuse-offences",
+      "source": "nca"
+    },
+    {
+      "decided_on": "2026-11-06",
+      "decision": "drop",
+      "first_seen_run": "feeds-2026-11-06-389ebb",
+      "item_id": "https://www.nationalcrimeagency.gov.uk/news/man-arrested-as-part-of-nca-investigation-into-social-media-posts-linked-to-immigration-crime",
       "source": "nca"
     },
     {
@@ -1125,6 +1202,13 @@
       "decision": "drop",
       "first_seen_run": "feeds-2026-10-30-b2a3cf",
       "item_id": "20261029",
+      "source": "ofac"
+    },
+    {
+      "decided_on": "2026-11-06",
+      "decision": "accept",
+      "first_seen_run": "feeds-2026-11-06-389ebb",
+      "item_id": "20261105",
       "source": "ofac"
     },
     {

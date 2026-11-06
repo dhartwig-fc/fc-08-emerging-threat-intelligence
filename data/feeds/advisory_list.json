@@ -220,12 +220,34 @@
         "listed_url": "https://ofac.treasury.gov/recent-actions/20261021",
         "extraction_run_id": "adv-2026-0034-extractor-86f8c3e32a"
       }
+    },
+    {
+      "advisory_id": "ADV-2026-0037",
+      "file": "adv-2026-0037-ofac.html",
+      "publisher": "OFAC (US Treasury)",
+      "source_type": "ofac",
+      "title": "Cyber-related and Transnational Criminal Organizations Designations; Cuba Designations; Publication of Cuba-related Determination",
+      "published_on": "2026-11-05",
+      "published_on_precision": "day",
+      "url": "https://ofac.treasury.gov/recent-actions/20261105",
+      "source_matrix_tier": "live feed",
+      "sha256": "6c8e0d9d5a80b69436e4ee7b1ce2a6303795ff02b57de89fb6cb4c7d4d874a82",
+      "bytes": 61913,
+      "pages": 7,
+      "selection_rationale": "live feed run feeds-2026-11-06-389ebb, item ofac:468368c9c0319cf5: triaged relevant: Designates Prince Group TCO network members and their shell companies (e.g., BVI entity Celestial Drive Limited) used as corporate infrastructure enabling scam operations.",
+      "feed": {
+        "run_id": "feeds-2026-11-06-389ebb",
+        "key": "ofac:468368c9c0319cf5",
+        "item_id": "20261105",
+        "listed_url": "https://ofac.treasury.gov/recent-actions/20261105",
+        "extraction_run_id": "adv-2026-0037-extractor-8abe020f5a"
+      }
     }
   ],
   "counts": {
-    "advisories": 10,
+    "advisories": 11,
     "by_source_type": {
-      "ofac": 10
+      "ofac": 11
     }
   }
 }

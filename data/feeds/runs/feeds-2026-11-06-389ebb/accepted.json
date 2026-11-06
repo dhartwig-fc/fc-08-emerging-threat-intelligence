@@ -1,0 +1,53 @@
+{
+  "accepted": {
+    "ofac:468368c9c0319cf5": "ADV-2026-0037"
+  },
+  "allocated_not_accepted": {
+    "ofac:1037f2edb4912104": "ADV-2026-0036"
+  },
+  "allocated_not_accepted_note": "allocated when an extraction started and carried by no accepted record: never reused (owner decision 11)",
+  "already_decided": {},
+  "already_decided_note": "decided in an earlier run, named here by that run's id: never re-recorded and not a decision of this run (owner ruling A, 2026-09-29)",
+  "decided_on": "2026-11-06",
+  "deferred": [
+    "eu_council:01ee7d591231dabd",
+    "eu_council:07fcb0123672ebe1",
+    "eu_council:0eadbac3318158a4",
+    "eu_council:188c4733db3a0466",
+    "eu_council:3fae6915d00d81a7",
+    "eu_council:4ab38304738967c0",
+    "eu_council:6e8dea1876a86b15",
+    "eu_council:74395b37d677ec4e",
+    "eu_council:7527bbc7c9759518",
+    "eu_council:76f3d89bf053b7cd",
+    "eu_council:869c25c78d748e56",
+    "eu_council:89775a13ae3d6d1d",
+    "eu_council:b51043e9da0626b0",
+    "eu_council:bb73f588b1dcce72",
+    "eu_council:ca5830e18cd02f6c",
+    "eu_council:ff0a210cef7ac3ad",
+    "ofac:1037f2edb4912104"
+  ],
+  "dropped": [
+    "amla:https://www.amla.europa.eu/news-media/news-articles/amla-executive-board-member-derville-rowland-attends-eurofi-financial-forum-dublin_en",
+    "eba:https://www.eba.europa.eu/publications-and-media/press-releases/eba-publishes-revised-guidelines-internal-governance-delivering-greater-proportionality-and",
+    "fca:177126",
+    "fca:177156",
+    "fca:177166",
+    "fca:177176",
+    "fca:177221",
+    "fca:177246",
+    "fca:177261",
+    "fca:177311",
+    "nca:https://www.nationalcrimeagency.gov.uk/news/man-arrested-as-part-of-nca-investigation-into-social-media-posts-linked-to-immigration-crime"
+  ],
+  "override_reconciliation": "ADV-2026-0036 stopped at the US$1 extraction cap mid-call (264-page source); its item stays unfinished and returns next Friday",
+  "reconciliation": {
+    "crash": null,
+    "problems": [
+      "session adv-2026-0036-extractor-10af8e2078: 1 tool call(s) with no terminal event, 0 with more than one"
+    ]
+  },
+  "run_id": "feeds-2026-11-06-389ebb",
+  "status": "RECONCILIATION_FAILED"
+}
