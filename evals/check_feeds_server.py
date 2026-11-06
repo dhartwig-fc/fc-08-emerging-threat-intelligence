@@ -21,6 +21,9 @@ Usage:
     python evals/check_feeds_server.py --mutate bot-check-any-status  # a 404 with Cloudflare's page counts as one
     python evals/check_feeds_server.py --mutate httperror-after-urlerror  # HTTPError falls into URLError: never a BotCheck
     python evals/check_feeds_server.py --mutate bot-check-uncapped-body   # the body peek is no longer capped at 4096 bytes
+    python evals/check_feeds_server.py --mutate challenge-200-ignored     # a 200 challenge page is fetched as a document
+    python evals/check_feeds_server.py --mutate challenge-any-refresh     # any meta refresh on a 200 counts as a challenge
+    python evals/check_feeds_server.py --mutate challenge-before-host-check  # the challenge test runs before the final-URL host check
     python evals/check_feeds_server.py --mutate unreachable-any-refusal   # any refused fetch is marked unreachable
     python evals/check_feeds_server.py --mutate bot-check-unmarked        # a bot check is not marked on the item
 
@@ -44,6 +47,9 @@ WHAT IT HOLDS (spec section 1, and definition-of-done box 2 for the two tools A 
                through the real feeds.http.get against a local socket; a plain 403, a 404 and a challenge title
                beyond the 4096-byte peek are not; feeds_fetch marks ONLY a BotCheck item["unreachable"] and says
                "Unreachable:"; any other refusal stays "Failed:". Detection only: no retry, no header change;
+  challenge    a 200 text/html answer that is a challenge page (Akamai's meta refresh carrying bm-verify=, or Cloudflare's
+               cf-mitigated / title) is a BotCheck, proved through the real get over a local socket; an ordinary
+               meta refresh and a real article page are not; the final-URL host check runs first;
   citable      a fetched document with no text is pinned but recorded as "no text; not citable", and
                one that cannot be paged at all (bytes labelled PDF that are not a PDF) is pinned and
                reported NOT PAGED, with its page_error recorded.
@@ -72,6 +78,7 @@ import sys
 import tempfile
 import threading
 import types
+import urllib.request
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -125,6 +132,10 @@ HTTP_MUTATIONS = {
     "bot-check-any-status": ("    if code not in BOT_CHECK_CODES:\n        return False\n", "    pass\n"),
     "httperror-after-urlerror": ("    except urllib.error.HTTPError as exc:\n", "    except () as exc:\n"),
     "bot-check-uncapped-body": ("exc.read(BODY_PEEK_BYTES)", "exc.read()"),
+    "challenge-200-ignored": ('    if ctype == "text/html" and _is_challenge_page(resp_headers, body[:BODY_PEEK_BYTES]):\n',
+                              '    if False:\n'),
+    "challenge-any-refresh": ('bm-verify=", re.I)', 'refresh", re.I)'),
+    "challenge-before-host-check": ("    _check_host(final, allowed_hosts)\n    if ctype", "    if ctype"),
 }
 
 
@@ -322,6 +333,109 @@ def bot_check_checks(fs, real_get) -> list:
                         "feeds_fetch marks ONLY a BotCheck item['unreachable'] (reason bot_check) and tells the "
                         "orchestrator not to triage it; any other refusal is a plain 'Failed:' with no mark",
                         "%s | %s" % (said[a.key][:60], said[b.key][:60])))
+    finally:
+        fs.HTTP_GET, fs.INBOX_ROOT, fs.SEEN_PATH, fs.RUNS_DIR = saved
+        os.environ.pop(fs.RUN_ENV, None)
+    return out
+
+
+AKAMAI_BODY = (b'<!DOCTYPE html><html><head> <meta charset="utf-8"> <meta name="viewport" content="width=device-width"> '
+               b'<meta http-equiv="refresh" content="5; URL=\'/usao-ndga/pr/x?bm-verify=AAQAAAAO_____' + b"A" * 2000 +
+               b'\'" /><title>&nbsp;</title><script>var a=1;</script></head><body></body></html>')
+ARTICLE_BODY = (b'<!DOCTYPE html><html><head><title>Office of Public Affairs | A real headline</title></head><body>'
+                b'<article>' + b"The press release text. " * 300 + b'</article></body></html>')
+REFRESH_BODY = b'<html><head><meta http-equiv="refresh" content="360"><title>Moved</title></head><body>x</body></html>'
+# path -> (status, headers, body) for the 200 answers; "/hop" is a redirect to a second, off-list server
+CHALLENGE_ANSWERS = {
+    "/akamai": (200, {"Server": "AkamaiGHost"}, AKAMAI_BODY),
+    "/article": (200, {"Server": "nginx"}, ARTICLE_BODY),
+    "/refresh": (200, {"Server": "AkamaiGHost"}, REFRESH_BODY),
+    "/cfmit": (200, {"Server": "cloudflare", "cf-mitigated": "challenge"}, ARTICLE_BODY),
+}
+
+
+def challenge_checks(fs, real_get) -> list:
+    """A 200 text/html challenge page is a BotCheck (R4), through the REAL get over local sockets."""
+    out = []
+    http_mod = importlib.import_module("feeds.http")
+    other = {"/ch": (200, {"Server": "AkamaiGHost"}, AKAMAI_BODY)}
+
+    def make(answers, redirect_to=None):
+        class Handler(http.server.BaseHTTPRequestHandler):
+            def do_GET(self):
+                if self.path == "/hop":
+                    self.send_response_only(302)
+                    self.send_header("Location", redirect_to)
+                    self.send_header("Content-Length", "0")
+                    self.end_headers()
+                    return
+                code, headers, body = answers[self.path]
+                self.send_response_only(code)
+                for k, v in headers.items():
+                    self.send_header(k, v)
+                self.send_header("Content-Type", "text/html")
+                self.send_header("Content-Length", str(len(body)))
+                self.end_headers()
+                self.wfile.write(body)
+
+            def log_message(self, *a):
+                pass
+        srv = http.server.ThreadingHTTPServer(("127.0.0.1", 0), Handler)
+        threading.Thread(target=srv.serve_forever, daemon=True).start()
+        return srv, "127.0.0.1:%d" % srv.server_address[1]
+
+    srv_b, netloc_b = make(other)
+    srv_a, netloc_a = make(CHALLENGE_ANSWERS, "http://%s/ch" % netloc_b)
+    saved = http_mod.ALLOWED_SCHEMES, http_mod.REQUEST_GAP_SECONDS, http_mod._Redirects
+    got = {}
+
+    def fetch(path):
+        try:
+            real_get("http://%s%s" % (netloc_a, path), allowed_hosts=frozenset({netloc_a}),
+                     allowed_types=frozenset({"text/html"}), max_bytes=100000)
+            return ("fetched", "")
+        except http_mod.FetchRefused as exc:
+            return (type(exc).__name__, str(exc))
+    try:
+        http_mod.ALLOWED_SCHEMES, http_mod.REQUEST_GAP_SECONDS = ("http",), 0
+        for path in CHALLENGE_ANSWERS:
+            got[path] = fetch(path)
+
+        class _OpenRedirects(urllib.request.HTTPRedirectHandler):  # lets the redirect through: the FINAL check must hold
+            def __init__(self, allowed_hosts):
+                pass
+        http_mod._Redirects = _OpenRedirects
+        got["/hop"] = fetch("/hop")
+    finally:
+        http_mod.ALLOWED_SCHEMES, http_mod.REQUEST_GAP_SECONDS, http_mod._Redirects = saved
+        for srv in (srv_a, srv_b):
+            srv.shutdown()
+            srv.server_close()
+    out.append((got["/akamai"][0] == "BotCheck" and "HTTP 200 challenge page" in got["/akamai"][1]
+                and got["/cfmit"][0] == "BotCheck"
+                and got["/article"][0] == "fetched" and got["/refresh"][0] == "fetched",
+                "through the REAL feeds.http.get over a local socket: the measured Akamai 200 stub (meta refresh with "
+                "bm-verify=, '&nbsp;' title) and cf-mitigated: challenge are a BotCheck; a real article page and an "
+                "ordinary meta refresh without bm-verify are fetched", got))
+    out.append((got["/hop"][0] == "FetchRefused" and "allowlist" in got["/hop"][1],
+                "the final-URL host check runs BEFORE the challenge test: a challenge page served from off the "
+                "allowlist is refused as off-list, never classified as a bot check", got["/hop"]))
+
+    saved = fs.HTTP_GET, fs.INBOX_ROOT, fs.SEEN_PATH, fs.RUNS_DIR
+    try:
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp = Path(tmp)
+            fs.INBOX_ROOT, fs.SEEN_PATH, fs.RUNS_DIR = tmp / "inbox", tmp / "seen.json", tmp / "runs"
+            a = FeedItem("eu_council", "c", "Challenge page", "https://www.consilium.europa.eu/c", "2026-11-05")
+            fs.HTTP_GET = Stub({a.url: http_mod.BotCheck("%s answered a bot check (HTTP 200 challenge page)" % a.url)})
+            os.environ[fs.RUN_ENV] = RUN
+            inbox.save(RUN, {"run_id": RUN, "sources": {"eu_council": {"status": "ok", "items": [
+                dict(a.to_json(), document=None)]}}}, tmp / "inbox")
+            said = asyncio.run(fs.fetch(fs.FetchInput(item_key=a.key)))
+            item = inbox.items(inbox.load(RUN, tmp / "inbox"))[0]
+            out.append((said.startswith("Unreachable:") and item.get("unreachable", {}).get("reason") == "bot_check",
+                        "a 200 challenge page's BotCheck marks the item unreachable through the existing path",
+                        said[:60]))
     finally:
         fs.HTTP_GET, fs.INBOX_ROOT, fs.SEEN_PATH, fs.RUNS_DIR = saved
         os.environ.pop(fs.RUN_ENV, None)
@@ -576,6 +690,7 @@ def checks(fs) -> list:
     out += carry_checks(fs, snap)
     out += via_checks(fs)
     out += bot_check_checks(fs, real_get)
+    out += challenge_checks(fs, real_get)
     hint = lambda t, a, b: getattr(t.annotations, a, getattr(t.annotations, b, None))  # noqa: E731
     ro = {n: hint(t, "readOnlyHint", "read_only_hint") for n, t in tools.items()}
     ow = {n: hint(t, "openWorldHint", "open_world_hint") for n, t in tools.items()}

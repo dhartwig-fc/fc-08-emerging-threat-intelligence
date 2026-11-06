@@ -20,6 +20,8 @@ class BotCheck(FetchRefused):
 BOT_CHECK_CODES = (403, 429, 503)
 BOT_CHECK_TITLE = re.compile(r"<title[^>]*>[^<]*(Browser check|Just a moment|Attention Required)", re.I)
 BODY_PEEK_BYTES = 4096
+# Akamai Bot Manager answers HTTP 200 with a stub whose meta refresh carries a bm-verify token.
+AKAMAI_REFRESH = re.compile(r"<meta[^>]+http-equiv=[\"']?refresh[^>]+bm-verify=", re.I)
 
 
 def _is_bot_check(code: int, headers, body: bytes) -> bool:
@@ -29,6 +31,16 @@ def _is_bot_check(code: int, headers, body: bytes) -> bool:
         return True
     return ("cloudflare" in (headers.get("Server") or "").lower()
             and bool(BOT_CHECK_TITLE.search(body.decode("utf-8", "replace"))))
+
+
+def _is_challenge_page(headers, peek: bytes) -> bool:
+    """A 200 text/html answer that is a challenge page: Akamai's bm-verify refresh, or Cloudflare's."""
+    text = peek.decode("utf-8", "replace")
+    if AKAMAI_REFRESH.search(text):
+        return True
+    if (headers.get("cf-mitigated") or "").strip().lower() == "challenge":
+        return True
+    return "cloudflare" in (headers.get("Server") or "").lower() and bool(BOT_CHECK_TITLE.search(text))
 
 
 @dataclass(frozen=True)
@@ -71,6 +83,7 @@ def get(url: str, *, allowed_hosts: FrozenSet[str], allowed_types: FrozenSet[str
                 raise FetchRefused("%s answered %r, not one of %s" % (url, ctype, sorted(allowed_types)))
             body = resp.read(max_bytes + 1)
             final = resp.geturl()
+            resp_headers = resp.headers
     except urllib.error.HTTPError as exc:
         try:
             peek = exc.read(BODY_PEEK_BYTES)
@@ -91,4 +104,6 @@ def get(url: str, *, allowed_hosts: FrozenSet[str], allowed_types: FrozenSet[str
     if len(body) > max_bytes:
         raise FetchRefused("%s is larger than %d bytes" % (url, max_bytes))
     _check_host(final, allowed_hosts)
+    if ctype == "text/html" and _is_challenge_page(resp_headers, body[:BODY_PEEK_BYTES]):
+        raise BotCheck("%s answered a bot check (HTTP 200 challenge page); fc-08 does not get past one" % url)
     return Fetched(url, final, ctype, body)
