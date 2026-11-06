@@ -61,8 +61,8 @@ def refused(**kw) -> bool:
 
 def checks() -> list:
     out = []
-    out.append((SCHEMA_VERSION == "1.5.0", "schema version is 1.5.0",
-                "the pair shipped in 1.4.0 and 1.5.0 added source types; a bump without a pin is a silent contract change"))
+    out.append((SCHEMA_VERSION == "1.6.0", "schema version is 1.6.0",
+                "the pair shipped in 1.4.0, and 1.5.0 and 1.6.0 added source types; a bump without a pin is a silent contract change"))
 
     t = TypologyReference(**BASE)
     out.append((t.added_by is AddedBy.EXTRACTOR and t.review_justification is None,

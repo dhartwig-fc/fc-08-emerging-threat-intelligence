@@ -75,7 +75,7 @@ EVAL_RUN = of.FeedsRun("feeds-2026-10-02-fff666", catalogue=ROOT / "evals" / "fe
 TRIAGE = "mcp__feeds__feeds_triage"
 EXTRACT = "mcp__feeds__feeds_extract"
 SERVER = ROOT / "mcp_server" / "feeds_server.py"
-EVAL_PROMPT_SHA256 = "5200f0c7ecb090c7f2441b8b45426756b4e902128dbb22bd7ebe45adf6a071a2"  # re-pinned 2026-10-31 (Wolfsberg, was 402ebca9d6bd): the ten-source prompt (B measured 58333bd2 on three; re-measure is an owner decision)
+EVAL_PROMPT_SHA256 = "cf3c5f7eca7add834d4c77262e514d1eb081196f2da7ae684eb34d1403ac1b9a"  # re-pinned 2026-11-06 (IC3 and FBI, was 5200f0c7ecb0): the twelve-source prompt (B measured 58333bd2 on three; re-measure is an owner decision)
 PINNED = {"MAX_BUDGET_USD": 3.00, "MAX_TURNS": 160, "RUN_CEILING_USD": 10.00, "EXTRACTION_BUDGET_USD": 1.00,
           "EXTRACTION_MAX_TURNS": 60}
 
@@ -221,7 +221,7 @@ def checks(mutation) -> list:
                                             of.OFAC_DESIGNATION_RULE in o.system_prompt)))
     out.append((hashlib.sha256(o.system_prompt.encode("utf-8")).hexdigest() == EVAL_PROMPT_SHA256
                 and of.PROMPT_SHA256 == EVAL_PROMPT_SHA256,
-                "the eval prompt is byte-identical to the pinned bytes (PROMPT_SHA256, ten-source prompt)",
+                "the eval prompt is byte-identical to the pinned bytes (PROMPT_SHA256, twelve-source prompt)",
                 hashlib.sha256(o.system_prompt.encode("utf-8")).hexdigest()[:16]))
     # Prompt-sha brief (2026-09-29): run_session passes telemetry.run_started this exact constant for a
     # live run. Pinned here rather than at the call site -- see the docstring above.

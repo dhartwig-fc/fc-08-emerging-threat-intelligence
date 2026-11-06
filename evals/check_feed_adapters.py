@@ -22,6 +22,9 @@ Usage:
     python evals/check_feed_adapters.py --mutate rss-unsorted       # an RSS feed comes back in document order
     python evals/check_feed_adapters.py --mutate fca-host-open      # FCA's declared hosts gain an extra host
     python evals/check_feed_adapters.py --mutate publisher-missing  # a source without a PUBLISHERS entry
+    python evals/check_feed_adapters.py --mutate fbi-drops-guid-fallback  # fbi's items need a <link>, which they lack
+    python evals/check_feed_adapters.py --mutate fbi-keeps-field-offices  # fbi keeps every path, not only national ones
+    python evals/check_feed_adapters.py --mutate guid-fallback-for-all    # every RSS source falls back to its guid
 
 CONTRACT. Each adapter, run on the committed snapshot of its listing (tests/fixtures/feeds/, fetched
 2026-09-26, public government pages), must return the pinned items: count, the digest of their ids in
@@ -79,7 +82,9 @@ SNAPSHOTS = {"ofsi": ("ofsi.atom", "b63d891e06aceaaf42021a4637573ad16cedc7c6b84a
              "eu_council": ("eu_council.rss", "8ad8d9da81a433c4e91c6205f3b4c33fd655528517c993ac0f6a58eb2fbfef44"),
              "eba": ("eba.rss", "550eb52f4e5b25afec8fda7dc8137578ac1a581d0690a491223da56d83677b47"),
              "amla": ("amla.rss", "91e9ba1e45b2719bc2547d4fb61f57b5740daf441c8ad37376442868964eb57c"),
-             "wolfsberg": ("wolfsberg_news.html", "0f8707eb271f1de4f61c5e77904490bf382a49852ed8e712e731516c5b47e2a1"),}
+             "wolfsberg": ("wolfsberg_news.html", "0f8707eb271f1de4f61c5e77904490bf382a49852ed8e712e731516c5b47e2a1"),
+             "ic3": ("ic3.rss", "025734a65ecffe44638ef53279a67454aaeed479b1230b69ce998786ff07a179"),
+             "fbi": ("fbi.rss", "020a062ffdca21e6d2d3bf2108673c5df313b992a600587efca19ee00687b6ec"),}
 EXPECTED = {
     "ofsi": {"count": 20, "ids": "db1898e619e089de7649a2443ffbe1ca707fa31d623ebae87729f76e5916067e",
              "first": {"item_id": "https://www.gov.uk/government/publications/uk-financial-sanctions-faqs#2026-09-24T08:49:08Z",
@@ -140,6 +145,13 @@ EXPECTED = {
                            "url": "https://wolfsberg-group.org/news/the-wolfsberg-group-celebrates-its-25th-anniversary-"
                                   "and-welcomes-new-management-committee-members",
                            "published": "2025-06-17"}},
+    # fbi: 300 items in the snapshot, 13 kept (a national press release or an /investigate/ alert); no <link>, the guid is the URL.
+    "ic3": {"count": 5, "ids": "0234af073b3fdb60b20dec5c39afd37bdc1659283ebd22ed7ca70c0c1a9b17b3",
+            "first": {"item_id": "261023-2", "title": "Suspicious Letters Containing White Powder Mailed to State and Local Election Officials, Media Organizations, and Public and Private Polling Companies", "url": "https://www.ic3.gov/PSA/2026/PSA261023-2", "published": "2026-10-23", "summary": ""},
+            "last": {"item_id": "261015-2", "title": "FBI Warns Voters on Election Crimes Ahead of the November 2026 Midterm Election", "url": "https://www.ic3.gov/PSA/2026/PSA261015-2", "published": "2026-10-15"}},
+    "fbi": {"count": 13, "ids": "fb661deba907134ddce144e7c0299486e872e70f1859978cd422f90bd0a8ac24",
+            "first": {"item_id": "https://www.fbi.gov/news/press-releases/maryland-man-convicted-of-187m-medicare-fraud-for-respiratory-testing-scheme-targeting-nursing-homes", "title": "Maryland Man Convicted of $18.7 Million Medicare Fraud for Respiratory Testing Scheme Targeting Nursing Homes", "url": "https://www.fbi.gov/news/press-releases/maryland-man-convicted-of-187m-medicare-fraud-for-respiratory-testing-scheme-targeting-nursing-homes", "published": "2026-10-20", "summary": ""},
+            "last": {"item_id": "https://www.fbi.gov/news/press-releases/former-federal-employee-pleads-guilty-to-defrauding-the-federal-government-of-approximately-194-million", "title": "Former Federal Employee Pleads Guilty to Defrauding the Federal Government of Approximately $194 Million", "url": "https://www.fbi.gov/news/press-releases/former-federal-employee-pleads-guilty-to-defrauding-the-federal-government-of-approximately-194-million", "published": "2026-10-06"}},
 }
 # (label, source, regex, replacement), applied to EVERY match: each must make the adapter raise LayoutChanged.
 BREAKS = [
@@ -168,6 +180,9 @@ BREAKS = [
     ("an item without a date", "nca", r"<pubDate>[^<]*</pubDate>", ""),
     ("an item without a date", "eu_council", r"<a10:updated>[^<]*</a10:updated>", ""),
     ("an item with a date in no known format", "fca", r"<pubDate>[^<]*</pubDate>", "<pubDate>yesterday</pubDate>"),
+    ("an item without a date", "ic3", r"<pubDate>[^<]*</pubDate>", ""),
+    ("an item with neither a link nor a guid", "fbi", r"<guid>[^<]*</guid>", ""),
+    ("an item without its link (the guid is no fallback for a source that did not ask)", "fca", r"<link>[^<]*</link>", ""),
     # A body cut off inside the last row (the size cap, a dropped connection): nine rows parse, the
     # tenth is open when the input ends.
     ("a body ending inside an open views-row", "ofac", r'(?s)(<a href="/recent-actions/20260904" hreflang="en">).*',
@@ -194,6 +209,9 @@ MUTATIONS = {
     "rss-unsorted": (SOURCES_PY, "return sorted(items, key=", "return list(items) or sorted(items, key="),
     "fca-host-open": (SOURCES_PY, 'frozenset({"www.fca.org.uk"}), parse_fca',
                       'frozenset({"www.fca.org.uk", "evil.example"}), parse_fca'),
+    "fbi-drops-guid-fallback": (SOURCES_PY, 'parse_fbi = _rss("fbi", url_from_guid=True,', 'parse_fbi = _rss("fbi", url_from_guid=False,'),
+    "fbi-keeps-field-offices": (SOURCES_PY, 'FBI_KEEP_PREFIXES = ("/news/press-releases/", "/investigate/")', 'FBI_KEEP_PREFIXES = ("/",)'),
+    "guid-fallback-for-all": (SOURCES_PY, 'def _rss(source: str, url_from_guid: bool = False,', 'def _rss(source: str, url_from_guid: bool = True,'),
     "narrow-except": (HTTP_PY, "    except (OSError, http.client.HTTPException) as exc:\n", "    except () as exc:\n"),
 }
 
@@ -265,7 +283,9 @@ NEW_HOSTS = {"otsi": ({"www.gov.uk"}, {"assets.publishing.service.gov.uk"}),
              "eu_council": ({"www.consilium.europa.eu"}, {"www.consilium.europa.eu"}),
              "eba": ({"www.eba.europa.eu"}, {"www.eba.europa.eu"}),
              "amla": ({"www.amla.europa.eu"}, {"www.amla.europa.eu"}),
-             "wolfsberg": ({"wolfsberg-group.org"}, {"db.wolfsberg-group.org"})}
+             "wolfsberg": ({"wolfsberg-group.org"}, {"db.wolfsberg-group.org"}),
+             "ic3": ({"www.ic3.gov"}, {"www.ic3.gov"}),
+             "fbi": ({"www.fbi.gov", "www.justice.gov"}, {"www.fbi.gov", "www.justice.gov"})}
 
 
 def host_checks(sources) -> list:

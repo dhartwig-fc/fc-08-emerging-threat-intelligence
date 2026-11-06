@@ -15,7 +15,8 @@ from typing import List, Optional
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
-SCHEMA_VERSION = "1.5.0"
+SCHEMA_VERSION = "1.6.0"
+# 1.6.0 (2026-11-06, FBI and IC3): SourceType gains ic3, fbi. Additive: every existing record validates unchanged.
 # 1.5.0 (2026-10-31, six more regulators): SourceType gains otsi, eu_council, eba, amla. Additive: every existing
 #   record validates unchanged.
 # 1.4.0 (2026-09-13, week 4 additive reviewer): TypologyReference gains `added_by`
@@ -54,6 +55,8 @@ class SourceType(str, Enum):
     EU_COUNCIL = "eu_council"
     EBA = "eba"
     AMLA = "amla"
+    IC3 = "ic3"
+    FBI = "fbi"
     EUROPOL = "europol"
     WOLFSBERG = "wolfsberg"
     INDUSTRY = "industry"

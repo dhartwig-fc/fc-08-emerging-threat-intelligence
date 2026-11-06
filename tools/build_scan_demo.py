@@ -229,7 +229,7 @@ def _paths(inp: dict) -> dict:
 NOT_A_FEED = ("industry", "press", "other")
 DISPLAY = {"fincen": "FinCEN", "ofac": "OFAC", "ofsi": "OFSI", "fatf": "FATF", "fca": "FCA", "nca": "NCA",
            "otsi": "OTSI", "eu_council": "EU Council", "eba": "EBA", "amla": "AMLA",
-           "europol": "Europol", "wolfsberg": "Wolfsberg"}
+           "europol": "Europol", "wolfsberg": "Wolfsberg", "ic3": "IC3", "fbi": "FBI"}
 # Why a listed source is not scanned yet, where there is a reason to give (the guard pins that it is shown).
 NOT_YET_REASON = {"europol": "its articles render only with JavaScript"}
 # CLAUDE.md's triage band records no prompt hash, so the page cannot compare hashes; it states the band's date

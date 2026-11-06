@@ -121,6 +121,7 @@ PUBLISHERS = {"fincen": "FinCEN (US Treasury)", "ofsi": "OFSI (HM Treasury)", "o
               "eba": "European Banking Authority (EBA)",
               "amla": "Authority for Anti-Money Laundering and Countering the Financing of Terrorism (AMLA)",
               "wolfsberg": "The Wolfsberg Group",
+              "ic3": "FBI Internet Crime Complaint Center (IC3)", "fbi": "Federal Bureau of Investigation",
               "fatf": "Financial Action Task Force (FATF)"}
 OVERRIDE_MIN = 10
 RUN_FILES = ("items.json", "triage.jsonl", extraction.REQUESTS, extraction.ALLOCATIONS, extraction.OUTCOMES,

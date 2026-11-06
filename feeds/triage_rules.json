@@ -8,5 +8,7 @@
   "eu_council": "An EU Council press release is relevant when it is in the Sanctions category or describes how sanctions are evaded. Other policy news is not relevant.",
   "eba": "An EBA page is relevant when it is an AML/CFT guideline, risk opinion or peer review. Procedural, staffing and non-AML items are not relevant.",
   "amla": "An AMLA page is relevant when it is a risk assessment, guidance or a supervisory finding. Institutional and recruitment news is not relevant.",
+  "ic3": "An IC3 page is relevant when it is a public service announcement describing a fraud, scam, cyber-enabled financial crime or sanctions method. Election-security and non-financial alerts are not relevant.",
+  "fbi": "An FBI page is relevant when it is a press release describing a financial-crime case (fraud, money laundering, sanctions or export evasion, corruption, cyber-enabled theft). Violent crime, exploitation and personnel news are not relevant.",
   "wolfsberg": "A Wolfsberg Group page is relevant when it is guidance, a statement, principles or FAQs on financial crime controls or typologies, or a note on a specific crime. Governance news (appointments, anniversaries, membership and forum announcements) is not relevant."
 }

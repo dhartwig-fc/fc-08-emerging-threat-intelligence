@@ -100,7 +100,11 @@ def _rss_date(source: str, item, where: str) -> str:
     raise LayoutChanged("%s: the item %s has no date" % (source, where))
 
 
-def _parse_rss(source: str, raw: bytes) -> List[FeedItem]:
+def _parse_rss(source: str, raw: bytes, url_from_guid: bool = False,
+               keep: Callable[[str], bool] | None = None) -> List[FeedItem]:
+    """url_from_guid: an item with no <link> takes its <guid> as its URL (the FBI feed has no <link>). keep: items
+    whose URL path fails it are skipped, never listed; a feed whose every item is skipped is a quiet week, not a layout
+    change. Both default off, so every other source raises on a missing link exactly as before."""
     try:
         root = ET.fromstring(raw)
     except ET.ParseError as exc:
@@ -109,27 +113,46 @@ def _parse_rss(source: str, raw: bytes) -> List[FeedItem]:
     if root.tag != "rss" or channel is None:
         raise LayoutChanged("%s: the root element is %r, not an RSS channel" % (source, root.tag))
     items = []
+    skipped = 0
     for item in channel.findall("item"):
         link = (item.findtext("link") or "").strip()
+        if not link and url_from_guid:
+            link = (item.findtext("guid") or "").strip()
         if not link:
             raise LayoutChanged("%s: an item lacks its link" % source)
+        if keep is not None and not keep(urlsplit(link).path):
+            skipped += 1
+            continue
         title = _title(source, [item.findtext("title") or ""], link)
         guid = (item.findtext("guid") or "").strip() or link
         items.append(FeedItem(source, guid, title, link, _rss_date(source, item, link)))
-    if not items:
+    if not items and not skipped:
         raise LayoutChanged("%s: the channel is present but no item parsed" % source)
     return sorted(items, key=lambda i: getattr(i, DATE_FIELD), reverse=True)
 
 
-def _rss(source: str) -> Callable[[bytes], List[FeedItem]]:
+# The FBI feed lists every field-office release; only the national ones (press releases, which carry DOJ's national
+# cases, and /investigate/ alerts) are kept. The field-office pages redirect to a justice.gov district page that sits
+# behind a bot check.
+FBI_KEEP_PREFIXES = ("/news/press-releases/", "/investigate/")
+
+
+def _fbi_keep(path: str) -> bool:
+    return path.startswith(FBI_KEEP_PREFIXES)
+
+
+def _rss(source: str, url_from_guid: bool = False,
+         keep: Callable[[str], bool] | None = None) -> Callable[[bytes], List[FeedItem]]:
     def parse(raw: bytes) -> List[FeedItem]:
-        return _parse_rss(source, raw)
+        return _parse_rss(source, raw, url_from_guid, keep)
     parse.__name__ = "parse_" + source
     return parse
 
 
 parse_fca, parse_nca, parse_eu_council, parse_eba, parse_amla = (
     _rss(s) for s in ("fca", "nca", "eu_council", "eba", "amla"))
+parse_ic3 = _rss("ic3")
+parse_fbi = _rss("fbi", url_from_guid=True, keep=_fbi_keep)
 
 # ---------------------------------------------------------------------------- the HTML listings
 
@@ -350,6 +373,11 @@ SOURCES = {
                   frozenset({"www.eba.europa.eu"}), parse_eba, frozenset({"www.eba.europa.eu"})),
     "amla": Source("amla", "https://www.amla.europa.eu/node/19/rss_en", "rss", frozenset({"application/rss+xml"}),
                    frozenset({"www.amla.europa.eu"}), parse_amla, frozenset({"www.amla.europa.eu"})),
+    "ic3": Source("ic3", "https://www.ic3.gov/PSA/RSS", "rss", frozenset({"application/rss+xml"}),
+                  frozenset({"www.ic3.gov"}), parse_ic3, frozenset({"www.ic3.gov"})),
+    "fbi": Source("fbi", "https://www.fbi.gov/feeds/fbi-in-the-news/rss.xml", "rss",
+                  frozenset({"application/atom+xml"}), frozenset({"www.fbi.gov", "www.justice.gov"}), parse_fbi,
+                  frozenset({"www.fbi.gov", "www.justice.gov"})),
     "wolfsberg": Source("wolfsberg", "https://wolfsberg-group.org/news", "html", frozenset({"text/html"}),
                         frozenset({"wolfsberg-group.org"}), parse_wolfsberg, frozenset({"db.wolfsberg-group.org"}),
                         "/resources/"),
@@ -357,7 +385,7 @@ SOURCES = {
 
 # The order sources are named in the triage prompt and listed in a run. Appending keeps every earlier prompt's
 # bytes (plan R5); a source missing here, or one here but not in SOURCES, is refused at import.
-ORDER = ("ofsi", "fincen", "ofac", "otsi", "fca", "nca", "eu_council", "eba", "amla", "wolfsberg")
+ORDER = ("ofsi", "fincen", "ofac", "otsi", "fca", "nca", "eu_council", "eba", "amla", "wolfsberg", "ic3", "fbi")
 if set(ORDER) != set(SOURCES) or len(ORDER) != len(SOURCES):
     raise RuntimeError("feeds.sources: ORDER %r and SOURCES %r disagree" % (ORDER, sorted(SOURCES)))
 SOURCE_PATTERN = r"^(%s)$" % "|".join(ORDER)
