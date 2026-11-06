@@ -81,6 +81,8 @@ def summary_line(rec: dict, outcomes: dict = None) -> str:
         _usd(rec["spent_usd"]), CEILING_NOTE % _ceiling(rec))
     # AFTER every count, never between them: line 3's "N unfinished" still equals ## Unfinished.
     counts += citation_clause(rec, outcomes or {})
+    if rec.get("unreachable"):
+        counts += "; %d unreachable (bot check), dropped at acceptance" % len(rec["unreachable"])
     if rec["status"] == reconcile.FAILED:
         if rec.get("crash"):  # the session ran; say what it left, so a crashed run's unfinished items are counted
             return "The run failed after its session (%s): %s." % (_sentence(rec["crash"], 200), counts)
@@ -195,6 +197,10 @@ def render(run_id: str, root: Path = inbox.INBOX_ROOT) -> str:
     if not unfinished:
         out.append("None.")
 
+    unreachable = rec.get("unreachable") or []
+    if unreachable:
+        out += ["", "## Unreachable (the site answered a bot check): %d -- dropped at acceptance" % len(unreachable), ""]
+        out += ["- `%s` %s" % (k, _cell(items.get(k, {}).get("title"), 120)) for k in unreachable]
     out += ["", "## Extraction: %d queued, %d extracted, %d failed, %d deferred for budget, %d too long for one extraction" % (
         len(rec["queued"]), len(rec["extracted"]), len(rec["failed"]), len(rec["deferred_budget"]),
         len(rec["too_long"])), ""]

@@ -315,13 +315,15 @@ def plan(run_id: str, decisions: dict, *, inbox_root: Path = inbox.INBOX_ROOT, s
             "folder": folder, "alist": alist, "override": override}
 
 
-def default_decision(outcome, verdict, manual: bool = False) -> str:
+def default_decision(outcome, verdict, manual: bool = False, unreachable: bool = False) -> str:
     """The interactive default for one item. Accept only what was extracted; drop only what triage called not
     relevant and nothing tried to extract; everything else is deferred, so it comes back next Friday."""
     status = (outcome or {}).get("status")
     if status == "extracted":
         return "accept"
     if status is None and verdict == "not_relevant":
+        return "drop"
+    if status is None and unreachable:  # a bot check is terminal: the site will not open for us next Friday either
         return "drop"
     if manual:  # nothing re-lists a manual source: a deferred item would be lost silently (plan() refuses it)
         return "drop"
@@ -332,7 +334,8 @@ def default_decisions(run_id: str, inbox_root: Path = inbox.INBOX_ROOT) -> dict:
     rec = reconcile.reconcile_run(run_id, inbox_root)
     outcomes = extraction.load_outcomes(run_id, inbox_root)
     manual = runs.is_manual(run_id, inbox_root)
-    return {it["key"]: default_decision(outcomes.get(it["key"]), rec["verdicts"].get(it["key"], {}).get("verdict"), manual)
+    return {it["key"]: default_decision(outcomes.get(it["key"]), rec["verdicts"].get(it["key"], {}).get("verdict"), manual,
+                            bool(it.get("unreachable")))
             for it in inbox.items(inbox.load(run_id, inbox_root))}
 
 
@@ -475,7 +478,7 @@ def ask(run_id: str, inbox_root: Path, seen_path: Path = ledger.SEEN_PATH) -> di
             continue
         v = rec["verdicts"].get(k, {}).get("verdict")
         manual = runs.is_manual(run_id, inbox_root)
-        default = default_decision(outcomes.get(k), v, manual)
+        default = default_decision(outcomes.get(k), v, manual, bool(it.get("unreachable")))
         if manual and default == "drop" and outcomes.get(k, {}).get("status") != "extracted":
             print("   this manual intake did not extract; nothing re-lists a manual source, so it is dropped by "
                   "default -- to retry, do not apply: this run does not block Friday; run tools/intake_document.py "

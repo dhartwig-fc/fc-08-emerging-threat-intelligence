@@ -12,6 +12,9 @@ Usage:
     python evals/check_accept_run.py --mutate slice1-records      # an accepted record lands in data/records/
     python evals/check_accept_run.py --mutate rollback-leaves-dirs  # a rolled-back call leaves its folders, blocking a retry
     python evals/check_accept_run.py --mutate failed-default-drop   # a failed or budget-deferred item defaults to DROP
+    python evals/check_accept_run.py --mutate unreachable-default-defer  # an item that met a bot check defaults to defer
+    python evals/check_accept_run.py --mutate unreachable-not-passed     # default_decisions ignores the item's mark
+    python evals/check_accept_run.py --mutate unreachable-drops-failed   # an unreachable mark overrides a real outcome
     python evals/check_accept_run.py --mutate gap-unrecorded        # an allocated id nothing used is not named
     python evals/check_accept_run.py --mutate expire-unlocked       # --expire moves a run while a Friday run holds the lock
     python evals/check_accept_run.py --mutate register-after-copy   # a copy is registered for rollback only once complete
@@ -112,6 +115,7 @@ ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "evals"))
 from feeds import extraction, inbox, ledger, runs  # noqa: E402
+from feeds.model import FeedItem  # noqa: E402
 from schemas.proposal_contract import SCHEMA, proposal_id  # noqa: E402
 from check_friday_run import listed_run, load_all  # noqa: E402
 
@@ -131,6 +135,10 @@ MUTATIONS = {
                              "            pass\n"),
     "failed-default-drop": ('    return "defer"  # failed, deferred for budget, relevant but never queued, or unfinished\n',
                             '    return "drop"\n'),
+    "unreachable-default-defer": ('    if status is None and unreachable:', '    if False:'),
+    "unreachable-not-passed": ('rec["verdicts"].get(it["key"], {}).get("verdict"), manual,\n                            bool(it.get("unreachable")))',
+                               'rec["verdicts"].get(it["key"], {}).get("verdict"), manual)'),
+    "unreachable-drops-failed": ('    if status is None and unreachable:', '    if unreachable:'),
     "gap-unrecorded": ('"allocated_not_accepted": p["gaps"],', '"allocated_not_accepted": {},'),
     "expire-unlocked": ("            if not held:\n", "            if False:\n"),
     "register-after-copy": ("        created.append(dst)\n        fill(out)\n", "        fill(out)\n        created.append(dst)\n"),
@@ -520,6 +528,27 @@ def checks(mutation) -> list:
                     "the interactive default for an item deferred for SIZE is defer (it returns next Friday), never "
                     "accept or drop; plan() refuses to accept it, like any item that was not extracted (below)",
                     acc.default_decision({"status": "deferred_size"}, "relevant")))
+        # Owner decision 2026-11-06 (option A): an item whose fetch met a bot check (item["unreachable"]) and has no
+        # outcome defaults to DROP (it is terminal; deferring it only brings it back to fail again). A plain fetch
+        # failure is not marked and still defaults to defer; a real outcome is never overridden by the mark.
+        urid = "feeds-2026-10-02-bbb0a1"
+        make(urid, queue=1)
+        ustate = inbox.load(urid, box)
+        bot = FeedItem("fincen", "bot-bbb0a1", "Blocked", "https://www.fincen.gov/resources/advisories/b", "2026-10-01")
+        plain = FeedItem("fincen", "plain-bbb0a1", "Refused", "https://www.fincen.gov/resources/advisories/p", "2026-10-01")
+        ustate["sources"]["fincen"]["items"] += [
+            dict(bot.to_json(), document=None, fetch_error="HTTP 403", unreachable={"reason": "bot_check", "detail": "x"}),
+            dict(plain.to_json(), document=None, fetch_error="HTTP 404")]
+        inbox.save(urid, ustate, box)
+        udefaults = acc.default_decisions(urid, box)
+        out.append((acc.default_decision(None, None, unreachable=True) == "drop"
+                    and acc.default_decision(None, None) == "defer"
+                    and acc.default_decision({"status": "failed"}, "relevant", unreachable=True) == "defer"
+                    and acc.default_decision({"status": "extracted"}, "relevant", unreachable=True) == "accept"
+                    and udefaults[bot.key] == "drop" and udefaults[plain.key] == "defer",
+                    "an item that met a bot check defaults to DROP (read from the run's items by default_decisions); "
+                    "a plain fetch failure still defaults to defer, and the mark never overrides a real outcome",
+                    "%s | %s" % (udefaults[bot.key], udefaults[plain.key])))
         refusals = []
         for k in keys[1:3]:
             snap = {p: p.read_bytes() for p in data.rglob("*") if p.is_file()}

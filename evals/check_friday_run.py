@@ -19,6 +19,10 @@ Usage:
     python evals/check_friday_run.py --mutate report-hides-too-long  # the report omits the too-long items from ## Unfinished
     python evals/check_friday_run.py --mutate no-run-lock             # two Friday runs may allocate at once
     python evals/check_friday_run.py --mutate unfinished-omits-failed # line 3 counts a failure the section omits
+    python evals/check_friday_run.py --mutate unfinished-includes-unreachable # a bot-checked item is still Unfinished
+    python evals/check_friday_run.py --mutate unreachable-unfinishes-run # a bot check alone makes the run UNFINISHED
+    python evals/check_friday_run.py --mutate report-hides-unreachable   # no Unreachable section
+    python evals/check_friday_run.py --mutate line3-omits-unreachable    # line 3 does not count them
     python evals/check_friday_run.py --mutate rows-by-key             # report rows sorted by key, not queue order
     python evals/check_friday_run.py --mutate no-crash-report         # a run that raises leaves no run.json/report
     python evals/check_friday_run.py --mutate telemetry-elsewhere     # friday() leaves telemetry where it was
@@ -178,6 +182,12 @@ MUTATIONS = {
                              "                elif size[0] >= of.MAX_EXTRACTION_PROMPT_CHARS:\n"),
     "too-long-is-failed": ("reconcile", '        elif o["status"] == "deferred_size":\n', "        elif False:\n"),
     "report-hides-too-long": ("report", '                  + [(k, "too long for one extraction: %s;', '                  + [] and [(k, "too long for one extraction: %s;'),
+    "unfinished-includes-unreachable": ("reconcile", "    unfinished = sorted(k for k in listed if k not in verdicts and k not in unreachable)\n",
+                                        "    unfinished = sorted(k for k in listed if k not in verdicts)\n"),
+    "unreachable-unfinishes-run": ("reconcile", "    elif unfinished or not_queued or failed or deferred or too_long or source_failures or never_listed:\n",
+                                   "    elif unfinished or unreachable or not_queued or failed or deferred or too_long or source_failures or never_listed:\n"),
+    "report-hides-unreachable": ("report", "    if unreachable:\n        out += [\"\", \"## Unreachable", "    if False:\n        out += [\"\", \"## Unreachable"),
+    "line3-omits-unreachable": ("report", '    if rec.get("unreachable"):\n        counts +=', '    if False:\n        counts +='),
     "no-run-lock": ("friday", "        if not held:\n", "        if False:\n"),
     "unfinished-omits-failed": ("report", '                  + [(k, "extraction failed: %s" % _cell(rec["failed"][k], '
                                           'None)) for k in rec["failed"]]\n', "                  + []\n"),
@@ -899,6 +909,41 @@ def body(mutation) -> list:
                     and not rec.get("too_long") and rec.get("status") == "COMPLETE",
                     "a prompt exactly at the limit is extracted as before",
                     "%s; asked %s; %s" % ([outs.get(k, {}).get("status") for k in keys], asked, rec.get("status"))))
+
+        # Owner decision 2026-11-06 (option A): an item whose fetch met a bot check carries item["unreachable"]. It is
+        # a TERMINAL outcome -- dropped at acceptance -- so it is listed in its own section, is NOT Unfinished, and on
+        # its own does not make the run UNFINISHED. A plain fetch failure beside it still is.
+        rid = "feeds-2026-10-02-aaa050"
+        run, keys, session = listed_run(m, box, rid, n_relevant=1, n_dropped=0, queue=1, cost=0.3)
+        state = inbox.load(rid, box)
+        bot = FeedItem("fincen", "bot-aaa050", "Blocked bot", "https://www.fincen.gov/resources/advisories/b", "2026-10-01")
+        state["sources"]["fincen"]["items"].append(dict(bot.to_json(), document=None, fetch_error="HTTP 403", unreachable={
+            "reason": "bot_check", "detail": "answered a bot check"}))
+        inbox.save(rid, state, box)
+        extra = [bot.key]
+        rec = run_friday(box, run, session, extractor_with(m, [0.5]), alist)
+        text = (inbox.run_dir(rid, box) / "report.md").read_text(encoding="utf-8")
+        out.append((rec.get("unreachable") == extra and not rec.get("unfinished") and not rec.get("problems")
+                    and rec.get("status") == "COMPLETE"
+                    and unfinished_counts(text) == (0, 0, 0)
+                    and "## Unreachable (the site answered a bot check): 1 -- dropped at acceptance" in text
+                    and ("`%s` Blocked bot" % extra[0]) in text and "1 unreachable (bot check)" in text.splitlines()[2],
+                    "an item that met a bot check is Unreachable, not Unfinished: its own section, counted on line 3 "
+                    "WITHOUT being counted as unfinished, and it alone leaves the run COMPLETE",
+                    "%s; unfinished %s; line 3 / header / rows %s" % (rec.get("status"), rec.get("unfinished"),
+                                                                     unfinished_counts(text))))
+        rid = "feeds-2026-10-02-aaa051"
+        run, keys, session = listed_run(m, box, rid, n_relevant=1, n_dropped=0, queue=1, cost=0.3)
+        state = inbox.load(rid, box)
+        plain = FeedItem("fincen", "plain-aaa051", "Refused plainly", "https://www.fincen.gov/resources/advisories/p", "2026-10-01")
+        state["sources"]["fincen"]["items"].append(dict(plain.to_json(), document=None, fetch_error="HTTP 404"))
+        inbox.save(rid, state, box)
+        rec = run_friday(box, run, session, extractor_with(m, [0.5]), alist)
+        text = (inbox.run_dir(rid, box) / "report.md").read_text(encoding="utf-8")
+        out.append((rec.get("unfinished") == [plain.key] and not rec.get("unreachable") and rec.get("status") == "UNFINISHED"
+                    and unfinished_counts(text) == (1, 1, 1) and "## Unreachable" not in text,
+                    "a plain fetch failure (no bot check) is still Unfinished and makes the run UNFINISHED",
+                    "%s; line 3 / header / rows %s" % (rec.get("status"), unfinished_counts(text))))
 
         # Carried ruling 1: one Friday run at a time; the lock is held across the session and every extraction.
         rid = "feeds-2026-10-02-aaa010"

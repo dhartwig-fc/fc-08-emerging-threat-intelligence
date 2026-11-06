@@ -298,6 +298,12 @@ def _fetch(run_id: str, item_key: str) -> str:
         got = (_catalogue_document(cat, item) if cat is not None else
                HTTP_GET(item["url"], allowed_hosts=src.hosts, allowed_types=DOCUMENT_TYPES,
                         max_bytes=MAX_DOCUMENT_BYTES))
+    except feeds_http.BotCheck as exc:
+        item["fetch_error"] = str(exc)
+        item["unreachable"] = {"reason": "bot_check", "detail": str(exc)}
+        inbox.save(run_id, state, INBOX_ROOT)
+        return ("Unreachable: %s: the site answered a bot check (%s). Do not triage it; it is recorded as "
+                "unreachable and dropped at acceptance." % (item_key, exc))
     except feeds_http.FetchRefused as exc:
         item["fetch_error"] = str(exc)
         inbox.save(run_id, state, INBOX_ROOT)

@@ -17,6 +17,12 @@ Usage:
     python evals/check_feeds_server.py --mutate carry-decided     # an item decided since its deferral comes back
     python evals/check_feeds_server.py --mutate carry-twice       # a deferred item still listed appears twice
     python evals/check_feeds_server.py --mutate unmarked-carry    # a carried item does not say where it came from
+    python evals/check_feeds_server.py --mutate bot-check-any-403 # a plain 403 from any server counts as a bot check
+    python evals/check_feeds_server.py --mutate bot-check-any-status  # a 404 with Cloudflare's page counts as one
+    python evals/check_feeds_server.py --mutate httperror-after-urlerror  # HTTPError falls into URLError: never a BotCheck
+    python evals/check_feeds_server.py --mutate bot-check-uncapped-body   # the body peek is no longer capped at 4096 bytes
+    python evals/check_feeds_server.py --mutate unreachable-any-refusal   # any refused fetch is marked unreachable
+    python evals/check_feeds_server.py --mutate bot-check-unmarked        # a bot check is not marked on the item
 
 WHAT IT HOLDS (spec section 1, and definition-of-done box 2 for the two tools A builds):
   newness      an item in the seen-items ledger is never reported new;
@@ -34,6 +40,10 @@ WHAT IT HOLDS (spec section 1, and definition-of-done box 2 for the two tools A 
                proved END TO END through the real feeds.http.get against a local socket (no network);
   real fetch   an unmutated server's HTTP_GET IS feeds.http.get, so the allowlisted fetch the other
                checks' stub stands in for is the one the server really calls;
+  bot check    a 403/429/503 answered by Cloudflare's challenge page (or cf-mitigated: challenge) is a BotCheck, proved
+               through the real feeds.http.get against a local socket; a plain 403, a 404 and a challenge title
+               beyond the 4096-byte peek are not; feeds_fetch marks ONLY a BotCheck item["unreachable"] and says
+               "Unreachable:"; any other refusal stays "Failed:". Detection only: no retry, no header change;
   citable      a fetched document with no text is pinned but recorded as "no text; not citable", and
                one that cannot be paged at all (bytes labelled PDF that are not a PDF) is pinned and
                reported NOT PAGED, with its page_error recorded.
@@ -52,6 +62,7 @@ from __future__ import annotations
 import argparse
 import asyncio
 import hashlib
+import http.server
 import importlib
 import json
 import os
@@ -101,12 +112,19 @@ MUTATIONS = {
                         '        item["document"]["linked_pages"] = linked_pages(got.body, got.final_url, src.document_via)\n',
                         ""),
     "ungated-linked-pages": ("    if src.document_via and not is_pdf:", "    if not is_pdf:"),
+    "unreachable-any-refusal": ("    except feeds_http.BotCheck as exc:\n", "    except feeds_http.FetchRefused as exc:\n"),
+    "bot-check-unmarked": ('        item["unreachable"] = {"reason": "bot_check", "detail": str(exc)}\n', ""),
     "unmarked-carry": ("[dict(c, document=None) for c in carried]",
                        "[dict({k: v for k, v in c.items() if k != 'carried_from'}, document=None) for c in carried]"),
 }
 # Mutations of feeds/http.py, installed as feeds.http before the server is loaded.
 HTTP_MUTATIONS = {
     "narrow-transport": ("    except (OSError, http.client.HTTPException) as exc:\n", "    except () as exc:\n"),
+    "bot-check-any-403": ('    return ("cloudflare" in (headers.get("Server") or "").lower()\n'
+                          '            and bool(BOT_CHECK_TITLE.search(body.decode("utf-8", "replace"))))\n', "    return True\n"),
+    "bot-check-any-status": ("    if code not in BOT_CHECK_CODES:\n        return False\n", "    pass\n"),
+    "httperror-after-urlerror": ("    except urllib.error.HTTPError as exc:\n", "    except () as exc:\n"),
+    "bot-check-uncapped-body": ("exc.read(BODY_PEEK_BYTES)", "exc.read()"),
 }
 
 
@@ -208,6 +226,106 @@ def dropped_connection_check(fs, real_get, tmp: Path) -> tuple:
           and isinstance(again, str) and again.startswith("Rejected") and len(requested) == 1)
     return (ok, "a dropped connection (RemoteDisconnected, not a URLError) through the REAL feeds.http.get is "
             "recorded as unreachable, and the source is not listed again in the run", said[:120])
+
+
+CF_BODY = b"<!DOCTYPE html><html><head><title>Browser check - Consilium</title>" \
+          b"<meta http-equiv=\"refresh\" content=\"360\"></head><body></body></html>"
+# path -> (status, headers, body): the measured Consilium answer, and the near misses that must NOT be one
+LOCAL_ANSWERS = {
+    "/cf": (403, {"Server": "cloudflare", "cf-ray": "abc-LHR"}, CF_BODY),
+    "/plain": (403, {"Server": "nginx"}, CF_BODY),
+    "/gone": (404, {"Server": "cloudflare"}, CF_BODY),
+    "/late": (403, {"Server": "cloudflare"}, b"<html><head>" + b" " * 5000 + b"<title>Browser check</title>"),
+}
+
+
+def bot_check_checks(fs, real_get) -> list:
+    out = []
+    http_mod = importlib.import_module("feeds.http")
+    from email.message import Message
+
+    def hdrs(**kv):
+        m = Message()
+        for k, v in kv.items():
+            m[k.replace("_", "-")] = v
+        return m
+    cf = hdrs(Server="cloudflare", cf_ray="abc-LHR")
+    verdicts = [http_mod._is_bot_check(403, cf, CF_BODY),
+                http_mod._is_bot_check(403, hdrs(Server="nginx"), CF_BODY),
+                http_mod._is_bot_check(404, cf, CF_BODY),
+                http_mod._is_bot_check(403, hdrs(Server="cloudflare"), b"<html><title>Forbidden</title>"),
+                http_mod._is_bot_check(429, hdrs(cf_mitigated="challenge"), b""),
+                http_mod._is_bot_check(200, cf, CF_BODY)]
+    out.append((verdicts == [True, False, False, False, True, False],
+                "_is_bot_check: the measured Consilium answer (403, Server cloudflare, 'Browser check') and "
+                "cf-mitigated: challenge are bot checks; a plain 403 from another server, a 404, a Cloudflare 403 "
+                "without a challenge title and a 200 are not", verdicts))
+
+    class Handler(http.server.BaseHTTPRequestHandler):
+        def do_GET(self):
+            code, headers, body = LOCAL_ANSWERS[self.path]
+            self.send_response_only(code)  # no default Server header: the answer sets its own
+            for k, v in headers.items():
+                self.send_header(k, v)
+            self.send_header("Content-Type", "text/html")
+            self.send_header("Content-Length", str(len(body)))
+            self.end_headers()
+            self.wfile.write(body)
+
+        def log_message(self, *a):
+            pass
+
+    server = http.server.ThreadingHTTPServer(("127.0.0.1", 0), Handler)
+    threading.Thread(target=server.serve_forever, daemon=True).start()
+    netloc = "127.0.0.1:%d" % server.server_address[1]
+    saved = http_mod.ALLOWED_SCHEMES, http_mod.REQUEST_GAP_SECONDS
+    got = {}
+    try:
+        http_mod.ALLOWED_SCHEMES, http_mod.REQUEST_GAP_SECONDS = ("http",), 0
+        for path in LOCAL_ANSWERS:
+            try:
+                real_get("http://%s%s" % (netloc, path), allowed_hosts=frozenset({netloc}),
+                         allowed_types=frozenset({"text/html"}), max_bytes=1000)
+                got[path] = ("fetched", "")
+            except http_mod.FetchRefused as exc:
+                got[path] = (type(exc).__name__, str(exc))
+    finally:
+        http_mod.ALLOWED_SCHEMES, http_mod.REQUEST_GAP_SECONDS = saved
+        server.shutdown()
+        server.server_close()
+    out.append((got["/cf"][0] == "BotCheck" and "403" in got["/cf"][1]
+                and all(got[p][0] == "FetchRefused" for p in ("/plain", "/gone", "/late"))
+                and "403" in got["/plain"][1] and "404" in got["/gone"][1],
+                "through the REAL feeds.http.get over a local socket: the Cloudflare challenge is a BotCheck; a plain "
+                "403, a 404 and a challenge title past the 4096-byte peek stay FetchRefused, and name their status",
+                got))
+
+    saved = fs.HTTP_GET, fs.INBOX_ROOT, fs.SEEN_PATH, fs.RUNS_DIR
+    try:
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp = Path(tmp)
+            fs.INBOX_ROOT, fs.SEEN_PATH, fs.RUNS_DIR = tmp / "inbox", tmp / "seen.json", tmp / "runs"
+            a = FeedItem("eu_council", "a", "Blocked by a bot check", "https://www.consilium.europa.eu/a", "2026-11-05")
+            b = FeedItem("eu_council", "b", "Refused plainly", "https://www.consilium.europa.eu/b", "2026-11-05")
+            fs.HTTP_GET = Stub({a.url: http_mod.BotCheck("%s answered a bot check (HTTP 403)" % a.url),
+                                b.url: http_mod.FetchRefused("%s answered HTTP 403 Forbidden" % b.url)})
+            os.environ[fs.RUN_ENV] = RUN
+            inbox.save(RUN, {"run_id": RUN, "sources": {"eu_council": {"status": "ok", "items": [
+                dict(a.to_json(), document=None), dict(b.to_json(), document=None)]}}}, tmp / "inbox")
+            said = {it.key: asyncio.run(fs.fetch(fs.FetchInput(item_key=it.key))) for it in (a, b)}
+            items = {i["key"]: i for i in inbox.items(inbox.load(RUN, tmp / "inbox"))}
+            out.append((said[a.key].startswith("Unreachable:") and "Do not triage" in said[a.key]
+                        and items[a.key].get("unreachable", {}).get("reason") == "bot_check"
+                        and items[a.key].get("fetch_error") and not items[a.key].get("document")
+                        and said[b.key].startswith("Failed:") and "unreachable" not in items[b.key]
+                        and items[b.key].get("fetch_error"),
+                        "feeds_fetch marks ONLY a BotCheck item['unreachable'] (reason bot_check) and tells the "
+                        "orchestrator not to triage it; any other refusal is a plain 'Failed:' with no mark",
+                        "%s | %s" % (said[a.key][:60], said[b.key][:60])))
+    finally:
+        fs.HTTP_GET, fs.INBOX_ROOT, fs.SEEN_PATH, fs.RUNS_DIR = saved
+        os.environ.pop(fs.RUN_ENV, None)
+    return out
 
 
 def via_checks(fs) -> list:
@@ -457,6 +575,7 @@ def checks(fs) -> list:
     tools = {t.name: t for t in asyncio.run(fs.mcp.list_tools())}
     out += carry_checks(fs, snap)
     out += via_checks(fs)
+    out += bot_check_checks(fs, real_get)
     hint = lambda t, a, b: getattr(t.annotations, a, getattr(t.annotations, b, None))  # noqa: E731
     ro = {n: hint(t, "readOnlyHint", "read_only_hint") for n, t in tools.items()}
     ow = {n: hint(t, "openWorldHint", "open_world_hint") for n, t in tools.items()}

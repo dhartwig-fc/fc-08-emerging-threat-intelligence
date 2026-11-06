@@ -1,5 +1,5 @@
 from __future__ import annotations
-import http.client, time, urllib.request, urllib.error
+import http.client, re, time, urllib.request, urllib.error
 from dataclasses import dataclass
 from typing import FrozenSet
 from urllib.parse import urlsplit
@@ -11,6 +11,25 @@ _last_request = [0.0]
 
 class FetchRefused(Exception):
     pass
+
+class BotCheck(FetchRefused):
+    """The site answered a bot check (a challenge page). DETECTION ONLY: fc-08 never retries, never changes
+    its user agent or headers to get past one (evals/check_no_disguised_automation.py)."""
+
+
+BOT_CHECK_CODES = (403, 429, 503)
+BOT_CHECK_TITLE = re.compile(r"<title[^>]*>[^<]*(Browser check|Just a moment|Attention Required)", re.I)
+BODY_PEEK_BYTES = 4096
+
+
+def _is_bot_check(code: int, headers, body: bytes) -> bool:
+    if code not in BOT_CHECK_CODES:
+        return False
+    if (headers.get("cf-mitigated") or "").strip().lower() == "challenge":
+        return True
+    return ("cloudflare" in (headers.get("Server") or "").lower()
+            and bool(BOT_CHECK_TITLE.search(body.decode("utf-8", "replace"))))
+
 
 @dataclass(frozen=True)
 class Fetched:
@@ -52,6 +71,14 @@ def get(url: str, *, allowed_hosts: FrozenSet[str], allowed_types: FrozenSet[str
                 raise FetchRefused("%s answered %r, not one of %s" % (url, ctype, sorted(allowed_types)))
             body = resp.read(max_bytes + 1)
             final = resp.geturl()
+    except urllib.error.HTTPError as exc:
+        try:
+            peek = exc.read(BODY_PEEK_BYTES)
+        except (OSError, http.client.HTTPException):
+            peek = b""
+        if _is_bot_check(exc.code, exc.headers, peek):
+            raise BotCheck("%s answered a bot check (HTTP %d); fc-08 does not get past one" % (url, exc.code))
+        raise FetchRefused("%s answered HTTP %d %s" % (url, exc.code, exc.reason))
     except urllib.error.URLError as exc:
         raise FetchRefused("%s could not be fetched: %s" % (url, getattr(exc, "reason", exc)))
     except (OSError, http.client.HTTPException) as exc:

@@ -128,7 +128,10 @@ def reconcile_run(run_id: str, root: Path = inbox.INBOX_ROOT) -> dict:
                     for name, st in state["sources"].items()}
     never_listed = [] if manual else [s for s in SOURCES if s not in state["sources"]]
     source_failures = sorted(n for n, st in source_state.items() if st.get("status") not in (None, "ok"))
-    unfinished = sorted(k for k in listed if k not in verdicts)
+    # A bot check is a TERMINAL outcome (the item is dropped at acceptance), so it is neither unfinished nor
+    # a problem, and on its own it leaves the run COMPLETE.
+    unreachable = sorted(k for k, it in listed.items() if it.get("unreachable") and k not in verdicts)
+    unfinished = sorted(k for k in listed if k not in verdicts and k not in unreachable)
     not_queued = [k for k in relevant if k not in requests]
     known = [s["cost_usd"] for s in sessions if s["cost_usd"] is not None]
     if refusal is not None:
@@ -146,7 +149,7 @@ def reconcile_run(run_id: str, root: Path = inbox.INBOX_ROOT) -> dict:
     return {"run_id": run_id, "status": status, "refusal": refusal, "failure": run.get("failure"),
             "crash": run.get("crash"),
             "sources": source_state, "never_listed_sources": never_listed, "source_failures": source_failures,
-            "listed": sorted(listed), "verdicts": verdicts, "unfinished": unfinished, "relevant": relevant,
+            "listed": sorted(listed), "verdicts": verdicts, "unfinished": unfinished, "unreachable": unreachable, "relevant": relevant,
             "not_relevant": sorted(k for k, v in verdicts.items() if v["verdict"] == feeds_triage.NOT_RELEVANT),
             "queued": list(requests), "extracted": extracted, "failed": failed, "deferred_budget": deferred, "too_long": too_long,
             "not_queued": not_queued, "allocations": allocations, "sessions": sessions, "problems": problems,
