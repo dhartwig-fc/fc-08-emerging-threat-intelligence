@@ -1,0 +1,515 @@
+{
+  "schema_version": "1.5.0",
+  "advisory_id": "ADV-2026-0037",
+  "source": {
+    "source_type": "ofac",
+    "publisher": "U.S. Department of the Treasury, Office of Foreign Assets Control (OFAC)",
+    "title": "Cyber-related and Transnational Criminal Organizations Designations; Cuba Designations; Publication of Cuba-related Determination",
+    "published_on": "2026-11-05",
+    "published_on_precision": "day",
+    "url": null,
+    "document_sha256": "6c8e0d9d5a80b69436e4ee7b1ce2a6303795ff02b57de89fb6cb4c7d4d874a82",
+    "page_count": 7
+  },
+  "summary": "OFAC's 05 Nov 2026 SDN List update makes three sets of changes. First, it adds seven individuals and over two dozen Cambodian, Hong Kong, Singaporean, Malaysian, Mauritian and British Virgin Islands entities under the [TCO] tag, most 'Linked To' PRINCE GROUP TRANSNATIONAL CRIMINAL ORGANIZATION or to a small group of controlling individuals (QIU, Yong; CHEN, Bo; PANG, Visal; DAI, An) -- framed in the press release as targeting 'Global Scam Networks and the Corporate Infrastructure That Enables Them.' Several of these entities share identical registered addresses or offshore (BVI) incorporation. Second, OFAC adds Cuban individuals, Cuban state-owned enterprises and a Chinese state-owned electronics company (CEIEC) under the Cuba-related EO 14404 program, alongside publication of a sectoral determination covering electronics, manufacturing, marine and technology, and describes 'Further Sanctions on the Cuban Regime's Foreign Military Support and Illicit Revenue Networks.' Third, OFAC adds two new Cuba-flagged tankers and amends three existing Venezuela-sanctioned vessel entries to show renaming and reflagging to Cuba (same IMO numbers retained), all linked to CAROIL TRANSPORT MARINE LTD or PETROLEOS MARITIMOS DEL CARIBE S.A., while the pre-existing Venezuela sanctions tag is kept.",
+  "jurisdictions": [
+    "KH",
+    "CN",
+    "HK",
+    "SG",
+    "MY",
+    "MU",
+    "VG",
+    "PA",
+    "CU",
+    "CY",
+    "VE",
+    "MG"
+  ],
+  "typologies": [
+    {
+      "family": "network",
+      "typology_id": "PAT007",
+      "label": "Shell Company Network",
+      "emergent": false,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 1,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "Treasury Targets Global Scam Networks and the Corporate Infrastructure That Enables Them"
+        },
+        {
+          "page": 3,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "DIRECT ASTUTE LIMITED, Wickhams Cay II, Road Town, Tortola VG1110, Virgin Islands, British; Organization Established Date 15 Nov 2018; Company Number 1998307 (Virgin Islands, British) [TCO] (Linked To: QIU, Yong)."
+        },
+        {
+          "page": 4,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "GLAD HARVEST LIMITED (Chinese Traditional: 欣實有限公司), Room D17, 5/F. Mai Gar Industrial Building, 146 Wai Yip Street, Kwun Tong, Kowloon, Hong Kong, China; Organization Established Date 28 May 2019; Business Registration Number 70766761 (Hong Kong) [TCO] (Linked To: QIU, Yong)."
+        }
+      ],
+      "added_by": "extractor",
+      "review_justification": null
+    },
+    {
+      "family": "sanctions",
+      "typology_id": "SAN002",
+      "label": "Shadow Fleet",
+      "emergent": false,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 6,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "CARLOTA C Chemical/Products Tanker Panama flag; Vessel Registration Identification IMO 9502453 (vessel) [VENEZUELA-EO13850] (Linked To: CAROIL TRANSPORT MARINE LTD). -to- MARIA CRISTINA (CLBN) Chemical/Products Tanker Cuba flag; Vessel Year of Build 2010; Vessel Registration Identification IMO 9502453; MMSI 323147000 (vessel) [VENEZUELA-EO13850] [CUBA-EO14404] (Linked To: CAROIL TRANSPORT MARINE LTD)."
+        },
+        {
+          "page": 7,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "ESPERANZA (f.k.a. NEDAS) Crude Oil Tanker Cuba flag; Former Vessel Flag Greece; Vessel Registration Identification IMO 9289166 (vessel) [VENEZUELA-EO13850] (Linked To: CAROIL TRANSPORT MARINE LTD). -to- ESPERANZA (CLBM) Crude Oil Tanker Cuba flag; Vessel Year of Build 2005; Vessel Registration Identification IMO 9289166; MMSI 323142000 (vessel) [VENEZUELA-EO13850] [CUBA-EO14404] (Linked To: CAROIL TRANSPORT MARINE LTD)."
+        }
+      ],
+      "added_by": "extractor",
+      "review_justification": null
+    }
+  ],
+  "actors": [
+    {
+      "name": "QIU, Yong",
+      "actor_type": "person",
+      "aliases": [],
+      "jurisdiction": "KH",
+      "role": "Individual designated [TCO], Linked To Prince Group TCO; controls ~15 Cambodian/Hong Kong/BVI shell entities",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 1,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "QIU, Yong (Chinese Simplified: 邱用), Cambodia; DOB 09 Oct 1987; POB Fujian, China; nationality Cambodia; alt. nationality Turkey; alt. nationality Saint Lucia; Gender Male; Passport N01612777 (Cambodia) issued 08 May 2019 expires 08 May 2029; alt. Passport R229687 (Saint Lucia); alt. Passport U24268399 (Turkey) (individual) [TCO] (Linked To: PRINCE GROUP TRANSNATIONAL CRIMINAL ORGANIZATION)."
+        }
+      ]
+    },
+    {
+      "name": "PANG, Visal",
+      "actor_type": "person",
+      "aliases": [
+        "PANG, Weizhi",
+        "PANG, Wei Zei"
+      ],
+      "jurisdiction": "KH",
+      "role": "Individual designated [TCO], Linked To Prince Group TCO; controls several Cambodian entities",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 1,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "PANG, Visal (a.k.a. PANG, Weizhi (Chinese Simplified: 庞伟志); a.k.a. \"PANG, Wei Zei\"), Cambodia; DOB 20 Feb 1978; POB Taizhou, Zhejiang, China; nationality Cambodia; alt. nationality China; Gender Male; Passport E31455389 (China); alt. Passport N01124709 (Cambodia) issued 26 Jan 2018 expires 26 Jan 2028 (individual) [TCO] (Linked To: PRINCE GROUP TRANSNATIONAL CRIMINAL ORGANIZATION)."
+        }
+      ]
+    },
+    {
+      "name": "HE, Yujing",
+      "actor_type": "person",
+      "aliases": [],
+      "jurisdiction": "KH",
+      "role": "Individual designated [TCO], Linked To Prince Group TCO",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 1,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "HE, Yujing (Chinese Simplified: 何雨静), Cambodia; DOB 11 Jul 1992; POB Sichuan, China; nationality China; alt. nationality Vanuatu; Gender Female; Passport RV102799 (Vanuatu); alt. Passport ED1721149 (China) issued 16 May 2018 expires 15 May 2028; National ID No. 511302199207112546 (China) (individual) [TCO] (Linked To: PRINCE GROUP TRANSNATIONAL CRIMINAL ORGANIZATION)."
+        }
+      ]
+    },
+    {
+      "name": "ZHAO, Mengyao",
+      "actor_type": "person",
+      "aliases": [
+        "ZHAO, Amy"
+      ],
+      "jurisdiction": "HK",
+      "role": "Individual designated [TCO], Linked To QIU, Yong",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 1,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "ZHAO, Mengyao (Chinese Traditional: 趙梦瑶) (a.k.a. \"ZHAO, Amy\"), Hong Kong, China; DOB 26 May 1991; POB Guiyang, Guizhou, China; nationality Hong Kong; Gender Female; Passport HJ2100621 (Hong Kong) issued 27 Mar 2021 expires 27 Mar 2031; National ID No. M2640517 (Hong Kong) (individual) [TCO] (Linked To: QIU, Yong)."
+        }
+      ]
+    },
+    {
+      "name": "CHUI, Kok Wa",
+      "actor_type": "person",
+      "aliases": [],
+      "jurisdiction": "MG",
+      "role": "Individual designated [CYBER4]",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 1,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "CHUI, Kok Wa, Antananarivo, Madagascar; DOB 12 Jan 1976; POB Negeri Sembilan, Malaysia; nationality Malaysia; Gender Male; National ID No. 760112055295 (Malaysia) (individual) [CYBER4]."
+        }
+      ]
+    },
+    {
+      "name": "RODRIGUEZ LASTRES, Any",
+      "actor_type": "person",
+      "aliases": [],
+      "jurisdiction": "PA",
+      "role": "Individual designated [CUBA-EO14404], Linked To LASTRES MORERA, Ania Guillermina",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 1,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "RODRIGUEZ LASTRES, Any, Panama City, Panama; DOB 07 Oct 1991; POB Havana, Cuba; nationality Cuba; Gender Female; Passport L930596 (Cuba) expires 01 Apr 2028; National ID No. 91100730013 (Cuba) (individual) [CUBA-EO14404] (Linked To: LASTRES MORERA, Ania Guillermina)."
+        }
+      ]
+    },
+    {
+      "name": "RODRIGUEZ LOPEZ CALLEJA, Guillermo Faustino",
+      "actor_type": "person",
+      "aliases": [],
+      "jurisdiction": "CU",
+      "role": "Individual designated [CUBA-EO14404]",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 1,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "RODRIGUEZ LOPEZ CALLEJA, Guillermo Faustino, Havana, Cuba; DOB 31 Jan 1958; nationality Cuba; Gender Male (individual) [CUBA-EO14404]."
+        }
+      ]
+    },
+    {
+      "name": "LASTRES MORERA, Ania Guillermina",
+      "actor_type": "person",
+      "aliases": [],
+      "jurisdiction": null,
+      "role": "Named only as the party RODRIGUEZ LASTRES, Any is 'Linked To'; no independent entry in this document",
+      "confidence": "low",
+      "citations": [
+        {
+          "page": 1,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "RODRIGUEZ LASTRES, Any, Panama City, Panama; DOB 07 Oct 1991; POB Havana, Cuba; nationality Cuba; Gender Female; Passport L930596 (Cuba) expires 01 Apr 2028; National ID No. 91100730013 (Cuba) (individual) [CUBA-EO14404] (Linked To: LASTRES MORERA, Ania Guillermina)."
+        }
+      ]
+    },
+    {
+      "name": "CHEN, Bo",
+      "actor_type": "person",
+      "aliases": [],
+      "jurisdiction": null,
+      "role": "Named only as the controlling individual ('Linked To') behind multiple Cambodian [TCO] entities; no independent SDN entry in this document",
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 2,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "ASIAN WELFARE LOTTERIES CO LTD, Phnom Penh, Cambodia; Organization Established Date 05 Apr 2017; Organization Type: Gambling and betting activities; Tax ID No. L001-901704384 (Cambodia); Business Registration Number 00024286 (Cambodia) [TCO] (Linked To: CHEN, Bo)."
+        },
+        {
+          "page": 5,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "PRINCE INTERNATIONAL AIRLINES CO LTD, Phnom Penh, Cambodia; Organization Established Date 16 May 2017; Organization Type: Passenger air transport; Tax ID No. L001-901702994 (Cambodia); Business Registration Number 00025370 (Cambodia) [TCO] (Linked To: CHEN, Bo)."
+        }
+      ]
+    },
+    {
+      "name": "DAI, An",
+      "actor_type": "person",
+      "aliases": [],
+      "jurisdiction": null,
+      "role": "Named only as the controlling individual ('Linked To') behind Singaporean/Malaysian/Mauritian [TCO] entities; no independent SDN entry in this document",
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 3,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "CHEN HUA HOLDINGS PTE LTD, 3 Wallich Street, 41-07, Wallich Residence, Singapore 078882, Singapore; Organization Established Date 19 Dec 2018; Organization Type: Activities of holding companies; Registration Number 201842358M (Singapore) [TCO] (Linked To: DAI, An)."
+        }
+      ]
+    },
+    {
+      "name": "LI, Thet",
+      "actor_type": "person",
+      "aliases": [],
+      "jurisdiction": null,
+      "role": "Named only as the controlling individual ('Linked To') behind GREENBAY MULTI MEDIA PTE LTD; no independent SDN entry in this document",
+      "confidence": "low",
+      "citations": [
+        {
+          "page": 4,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "GREENBAY MULTI MEDIA PTE LTD, 2 Jalan Kilang Barat, #08-01, Singapore 159346, Singapore; Organization Established Date 03 Aug 2017; Company Number 201721913W (Singapore) [TCO] (Linked To: LI, Thet)."
+        }
+      ]
+    },
+    {
+      "name": "PRINCE GROUP TRANSNATIONAL CRIMINAL ORGANIZATION",
+      "actor_type": "network",
+      "aliases": [],
+      "jurisdiction": null,
+      "role": "Transnational criminal organization that multiple designated individuals and entities in this advisory are 'Linked To'",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 1,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "HE, Yujing (Chinese Simplified: 何雨静), Cambodia; DOB 11 Jul 1992; POB Sichuan, China; nationality China; alt. nationality Vanuatu; Gender Female; Passport RV102799 (Vanuatu); alt. Passport ED1721149 (China) issued 16 May 2018 expires 15 May 2028; National ID No. 511302199207112546 (China) (individual) [TCO] (Linked To: PRINCE GROUP TRANSNATIONAL CRIMINAL ORGANIZATION)."
+        }
+      ]
+    },
+    {
+      "name": "CAROIL TRANSPORT MARINE LTD",
+      "actor_type": "organisation",
+      "aliases": [
+        "CAROIL TRANSPORT MARINE LIMITED",
+        "FRISIAN FAITH SHIPPING COMPANY LIMITED"
+      ],
+      "jurisdiction": "CY",
+      "role": "Shipping/tanker operator under both VENEZUELA-EO13850 and newly added CUBA-EO14404 programs; linked to multiple renamed/reflagged vessels",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 7,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "CAROIL TRANSPORT MARINE LTD (a.k.a. CAROIL TRANSPORT MARINE LIMITED; a.k.a. FRISIAN FAITH SHIPPING COMPANY LIMITED), Arch Makariou III Avenue 284, Fortuna Court, Block B, 2nd Floor, Limassol, Cyprus; Entre 5ta y 7ma, Calle 20, Miramar, Playa, Havana, Cuba; Organization Established Date 04 Feb 1992; Organization Type: Sea and coastal freight water transport; Identification Number IMO 1869514; Registration Number HE 47364 (Cyprus) [VENEZUELA-EO13850] [CUBA-EO14404]."
+        }
+      ]
+    },
+    {
+      "name": "PETROLEOS MARITIMOS DEL CARIBE S.A.",
+      "actor_type": "organisation",
+      "aliases": [
+        "PETROMARCA S.A."
+      ],
+      "jurisdiction": "CU",
+      "role": "Cuban state tanker operator designated [CUBA-EO14404]; linked to EMILIA and LOURDES tankers",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 5,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "PETROLEOS MARITIMOS DEL CARIBE S.A. (a.k.a. PETROMARCA S.A.), Havana, Cuba; Organization Established Date 15 Jan 2020; Organization Type: Sea and coastal freight water transport; Identification Number IMO 6140351; Entity Code 60633 (Cuba) [CUBA-EO14404]."
+        }
+      ]
+    },
+    {
+      "name": "CEIEC",
+      "actor_type": "organisation",
+      "aliases": [
+        "CHINA NATIONAL ELECTRONIC IMPORT-EXPORT COMPANY",
+        "CHINA NATIONAL ELECTRONICS IMPORT AND EXPORT CORPORATION"
+      ],
+      "jurisdiction": "CN",
+      "role": "Chinese state-owned enterprise, existing VENEZUELA designation amended to add CUBA-EO14404 tag",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 7,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "Organization Established Date 15 Apr 1980; Target Type State-Owned Enterprise; Business Registration Number 100000000001068 (China); Registration Number 16382287 (China); Unified Social Credit Code (USCC) 9111000010000106X1 (China) [VENEZUELA] [CUBA-EO14404]."
+        }
+      ]
+    },
+    {
+      "name": "EMILIA",
+      "actor_type": "vessel",
+      "aliases": [],
+      "jurisdiction": "CU",
+      "role": "LPG tanker added to SDN List [CUBA-EO14404], Linked To PETROLEOS MARITIMOS DEL CARIBE S.A.",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 6,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "EMILIA (CLBS) LPG Tanker Cuba flag; Vessel Year of Build 2002; Vessel Registration Identification IMO 9242209; MMSI 323150000 (vessel) [CUBA-EO14404] (Linked To: PETROLEOS MARITIMOS DEL CARIBE S.A.)."
+        }
+      ]
+    },
+    {
+      "name": "GLORIA C",
+      "actor_type": "vessel",
+      "aliases": [],
+      "jurisdiction": "CU",
+      "role": "Chemical/Products Tanker added to SDN List [CUBA-EO14404], Linked To CAROIL TRANSPORT MARINE LTD",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 6,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "GLORIA C (CLBR) Chemical/Products Tanker Cuba flag; Vessel Year of Build 2010; Vessel Registration Identification IMO 9540273; MMSI 323145000 (vessel) [CUBA-EO14404] (Linked To: CAROIL TRANSPORT MARINE LTD)."
+        }
+      ]
+    },
+    {
+      "name": "MARIA CRISTINA",
+      "actor_type": "vessel",
+      "aliases": [
+        "CARLOTA C"
+      ],
+      "jurisdiction": "CU",
+      "role": "Chemical/Products Tanker, renamed and reflagged from Panama to Cuba (same IMO 9502453), Linked To CAROIL TRANSPORT MARINE LTD",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 6,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "CARLOTA C Chemical/Products Tanker Panama flag; Vessel Registration Identification IMO 9502453 (vessel) [VENEZUELA-EO13850] (Linked To: CAROIL TRANSPORT MARINE LTD). -to- MARIA CRISTINA (CLBN) Chemical/Products Tanker Cuba flag; Vessel Year of Build 2010; Vessel Registration Identification IMO 9502453; MMSI 323147000 (vessel) [VENEZUELA-EO13850] [CUBA-EO14404] (Linked To: CAROIL TRANSPORT MARINE LTD)."
+        }
+      ]
+    },
+    {
+      "name": "ESPERANZA",
+      "actor_type": "vessel",
+      "aliases": [
+        "NEDAS"
+      ],
+      "jurisdiction": "CU",
+      "role": "Crude Oil Tanker, formerly Greece-flagged as NEDAS, now Cuba flag (same IMO 9289166), Linked To CAROIL TRANSPORT MARINE LTD",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 7,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "ESPERANZA (f.k.a. NEDAS) Crude Oil Tanker Cuba flag; Former Vessel Flag Greece; Vessel Registration Identification IMO 9289166 (vessel) [VENEZUELA-EO13850] (Linked To: CAROIL TRANSPORT MARINE LTD). -to- ESPERANZA (CLBM) Crude Oil Tanker Cuba flag; Vessel Year of Build 2005; Vessel Registration Identification IMO 9289166; MMSI 323142000 (vessel) [VENEZUELA-EO13850] [CUBA-EO14404] (Linked To: CAROIL TRANSPORT MARINE LTD)."
+        }
+      ]
+    },
+    {
+      "name": "LOURDES",
+      "actor_type": "vessel",
+      "aliases": [
+        "GIRALT"
+      ],
+      "jurisdiction": "CU",
+      "role": "Crude Oil Tanker, renamed and reflagged from Panama to Cuba (same IMO 9259692), now Linked To PETROLEOS MARITIMOS DEL CARIBE S.A. (previously BLUELANE OVERSEAS SA)",
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 7,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "GIRALT Crude Oil Tanker Panama flag; Vessel Registration Identification IMO 9259692 (vessel) [VENEZUELA-EO13850] (Linked To: BLUELANE OVERSEAS SA). -to- LOURDES (CLBO) Crude Oil Tanker Cuba flag; Vessel Year of Build 2002; Vessel Registration Identification IMO 9259692; MMSI 323143000 (vessel) [VENEZUELA-EO13850] [CUBA-EO14404] (Linked To: PETROLEOS MARITIMOS DEL CARIBE S.A.)."
+        }
+      ]
+    }
+  ],
+  "indicators": [
+    {
+      "indicator_type": "documentary",
+      "description": "Multiple nominally unrelated offshore entities (Hong Kong) share the identical registered address, all under common ownership of one individual.",
+      "detectable_in_transaction_data": false,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 4,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "GLAD HARVEST LIMITED (Chinese Traditional: 欣實有限公司), Room D17, 5/F. Mai Gar Industrial Building, 146 Wai Yip Street, Kwun Tong, Kowloon, Hong Kong, China; Organization Established Date 28 May 2019; Business Registration Number 70766761 (Hong Kong) [TCO] (Linked To: QIU, Yong)."
+        }
+      ]
+    },
+    {
+      "indicator_type": "network",
+      "description": "A single beneficial owner controls a cluster of British Virgin Islands shell companies with no operating description, alongside Hong Kong and Cambodian entities in unrelated sectors.",
+      "detectable_in_transaction_data": false,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 3,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "DIRECT ASTUTE LIMITED, Wickhams Cay II, Road Town, Tortola VG1110, Virgin Islands, British; Organization Established Date 15 Nov 2018; Company Number 1998307 (Virgin Islands, British) [TCO] (Linked To: QIU, Yong)."
+        }
+      ]
+    },
+    {
+      "indicator_type": "network",
+      "description": "One individual is the common link behind multiple Cambodian entities operating across unrelated sectors (gambling, aviation, insurance, real estate, construction), consistent with using diverse front businesses to disguise criminal proceeds.",
+      "detectable_in_transaction_data": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 2,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "ASIAN WELFARE LOTTERIES CO LTD, Phnom Penh, Cambodia; Organization Established Date 05 Apr 2017; Organization Type: Gambling and betting activities; Tax ID No. L001-901704384 (Cambodia); Business Registration Number 00024286 (Cambodia) [TCO] (Linked To: CHEN, Bo)."
+        },
+        {
+          "page": 5,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "PRINCE INTERNATIONAL AIRLINES CO LTD, Phnom Penh, Cambodia; Organization Established Date 16 May 2017; Organization Type: Passenger air transport; Tax ID No. L001-901702994 (Cambodia); Business Registration Number 00025370 (Cambodia) [TCO] (Linked To: CHEN, Bo)."
+        }
+      ]
+    },
+    {
+      "indicator_type": "documentary",
+      "description": "Vessels are renamed and reflagged (Panama/Greece to Cuba) while retaining the same IMO registration number, obscuring continuity of ownership and sanctions exposure under a new flag.",
+      "detectable_in_transaction_data": false,
+      "confidence": "high",
+      "citations": [
+        {
+          "page": 6,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "CARLOTA C Chemical/Products Tanker Panama flag; Vessel Registration Identification IMO 9502453 (vessel) [VENEZUELA-EO13850] (Linked To: CAROIL TRANSPORT MARINE LTD). -to- MARIA CRISTINA (CLBN) Chemical/Products Tanker Cuba flag; Vessel Year of Build 2010; Vessel Registration Identification IMO 9502453; MMSI 323147000 (vessel) [VENEZUELA-EO13850] [CUBA-EO14404] (Linked To: CAROIL TRANSPORT MARINE LTD)."
+        }
+      ]
+    },
+    {
+      "indicator_type": "geographic",
+      "description": "Tankers already tied to Venezuela sanctions are reflagged to Cuba immediately coincident with a new Cuba sanctions program, while the original Venezuela sanctions tag is retained, suggesting the vessels continue the same sanctioned trade under cover of a different flag.",
+      "detectable_in_transaction_data": false,
+      "confidence": "medium",
+      "citations": [
+        {
+          "page": 7,
+          "printed_folio": null,
+          "paragraph": null,
+          "quote": "ESPERANZA (f.k.a. NEDAS) Crude Oil Tanker Cuba flag; Former Vessel Flag Greece; Vessel Registration Identification IMO 9289166 (vessel) [VENEZUELA-EO13850] (Linked To: CAROIL TRANSPORT MARINE LTD). -to- ESPERANZA (CLBM) Crude Oil Tanker Cuba flag; Vessel Year of Build 2005; Vessel Registration Identification IMO 9289166; MMSI 323142000 (vessel) [VENEZUELA-EO13850] [CUBA-EO14404] (Linked To: CAROIL TRANSPORT MARINE LTD)."
+        }
+      ]
+    }
+  ],
+  "suggested_desks": [
+    "sanctions_desk",
+    "fraud_desk",
+    "general_intel"
+  ],
+  "overall_confidence": "high",
+  "extraction_notes": "This is an OFAC SDN List update, not a narrative advisory; it lists ~45 designation/amendment entries (individuals, entities and vessels) across pages 1-7. This record captures a representative subset of named actors sufficient to evidence the two identified typologies (Shell Company Network for the Prince Group TCO corporate infrastructure; Shadow Fleet for the Cuba/Venezuela tanker renaming-and-reflagging pattern); it does not individually enumerate every one of the ~30 Cambodian/Hong Kong/BVI/Singapore/Malaysia/Mauritius entities added under the [TCO] tag, nor every Cuba-related individual/entity added under [CUBA-EO14404]. All actor names queried against the governed actor register returned 'Unresolved' (no existing identity match); none should be treated as resolved to an actor_id. CHEN, Bo; DAI, An; LI, Thet and LASTRES MORERA, Ania Guillermina appear in this document only as the party another entry is 'Linked To' -- they have no independent SDN entry text in this extract, so their own attributes (DOB, nationality, etc.) are not stated here. The Cuba-related sectoral Determination under EO 14404 (electronics, manufacturing, marine, technology sectors) and the BEIJING H AND C TECHNOLOGIES / EMPRESA COMERCIALIZADORA / CUBAELECTRONICA / INTERNACIONAL MARITIMA SA entries are noted in the source but were not linked to a typology because the document does not develop a laundering technique for them beyond bare designation; a human reviewer may wish to assess whether these belong under a sanctions/state-owned-enterprise typology not captured by this extraction."
+}
