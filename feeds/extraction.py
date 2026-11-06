@@ -3,7 +3,9 @@ Extraction for one feeds run (slice 2 C; spec sections 1 and 2): the agent REQUE
 
   inbox/<run_id>/extractions.jsonl      one REQUEST per item, appended by feeds_extract (the agent's tool)
   inbox/<run_id>/extraction_runs.jsonl  one OUTCOME per request, appended by tools/friday_run.py after the
-                                        orchestrator stops: extracted, failed, or deferred for budget
+                                        orchestrator stops: extracted, failed, deferred_budget (the run ceiling),
+                                        or deferred_size (the prompt passes of.MAX_EXTRACTION_PROMPT_CHARS; no id
+                                        is allocated and the extractor is never called)
   inbox/<run_id>/advisory_ids.jsonl     one line per advisory id ALLOCATED, written BEFORE its extraction starts
 
 Each rule is carried here, whatever the agent intends:

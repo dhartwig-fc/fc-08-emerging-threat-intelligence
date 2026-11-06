@@ -65,6 +65,12 @@ MAX_TURNS = 160
 # THE FRIDAY RUN'S BUDGET (spec section 1, owner decisions 2026-09-26), in the one place a guard reads it.
 RUN_CEILING_USD = 10.00       # the whole run: orchestrator session plus every extraction
 EXTRACTION_BUDGET_USD = 1.00  # each extraction's own max_budget_usd
+# The extractor inlines the WHOLE document in its first prompt (extract_advisory.build_prompt), with no page tool.
+# Measured 2026-11-06 over every document fc-08 has extracted: the largest success (ofac:528a733c96bd988a, 11 pages,
+# US$0.60) was 27,679 prompt characters; the OFAC Iran alert (264 pages) was 702,970 and cost US$1.55 in 2 turns against
+# the US$1.00 cap. 100,000 is 3.6x the largest success and 7x below the failure. A guard against the pathological
+# case, not a cost guarantee: cost is driven by turns as much as size.
+MAX_EXTRACTION_PROMPT_CHARS = 100_000
 EXTRACTION_MAX_TURNS = 60     # slice 1's extractor default
 # A session stopped by its own turn or budget cap COMPLETED: what it left is unfinished, and measured.
 # Anything else that ends a run in error (auth, credit, the CLI) is a failure.

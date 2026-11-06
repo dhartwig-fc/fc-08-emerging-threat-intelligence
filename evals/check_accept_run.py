@@ -515,6 +515,11 @@ def checks(mutation) -> list:
         out.append((statuses == ["extracted", "failed", "deferred_budget"] and defaults == want,
                     "the interactive default for a FAILED and a BUDGET-DEFERRED item is defer, never drop",
                     "%s | %s" % (statuses, [defaults.get(k) for k in keys])))
+        out.append((acc.default_decision({"status": "deferred_size"}, "relevant") == "defer"
+                    and acc.default_decision({"status": "deferred_size"}, "relevant", manual=False) == "defer",
+                    "the interactive default for an item deferred for SIZE is defer (it returns next Friday), never "
+                    "accept or drop; plan() refuses to accept it, like any item that was not extracted (below)",
+                    acc.default_decision({"status": "deferred_size"}, "relevant")))
         refusals = []
         for k in keys[1:3]:
             snap = {p: p.read_bytes() for p in data.rglob("*") if p.is_file()}

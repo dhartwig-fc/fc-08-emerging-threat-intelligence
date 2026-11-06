@@ -133,6 +133,22 @@ def _save(path: Path, obj: dict) -> None:
     os.replace(tmp, path)
 
 
+def prompt_chars(request: dict, root: Path, run_id: str) -> int:
+    """The length of the prompt the extractor WOULD send for this request's pinned document, by the extractor's
+    own functions (never a reimplementation). The advisory id is a placeholder of the real id's length."""
+    from agents import extract_advisory
+    doc = inbox.run_dir(run_id, root) / request["document"]["path"]
+    return len(extract_advisory.build_prompt("ADV-0000-0000", doc, extract_advisory.document_pages(doc)))
+
+
+def _measure(request: dict, root: Path, run_id: str):
+    """(characters, None), or (None, why) for a document that cannot be measured."""
+    try:
+        return prompt_chars(request, root, run_id), None
+    except Exception as exc:
+        return None, ("%s: %s" % (type(exc).__name__, exc))[:300]
+
+
 async def extract_one(run: of.FeedsRun, request: dict, advisory_id: str, root: Path) -> dict:
     """Slice 1's extraction on the pinned document, with its own identity; the outcome, never an exception."""
     from agents import extract_advisory
@@ -253,6 +269,13 @@ async def _locked_friday(run: of.FeedsRun, session, extractor, root: Path, advis
                 elif req.get("error") or not req.get("document"):
                     outcome = {"key": req["key"], "status": "failed", "error": req.get("error") or "no document",
                                "cost_usd": 0.0}
+                elif (size := _measure(req, root, run.run_id))[0] is None:
+                    outcome = {"key": req["key"], "status": "failed", "cost_usd": 0.0,
+                               "error": "the document could not be measured: %s" % size[1]}
+                elif size[0] > of.MAX_EXTRACTION_PROMPT_CHARS:
+                    outcome = {"key": req["key"], "status": "deferred_size", "cost_usd": 0.0,
+                               "error": "the extraction prompt is %d characters; the limit is %d (a document too "
+                                        "long for one extraction)" % (size[0], of.MAX_EXTRACTION_PROMPT_CHARS)}
                 elif not may_start(spent):
                     outcome = {"key": req["key"], "status": "deferred_budget", "cost_usd": 0.0,
                                "error": "US$%.2f spent; US$%.2f more would pass the US$%.2f ceiling" % (

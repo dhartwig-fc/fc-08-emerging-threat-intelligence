@@ -77,7 +77,7 @@ def summary_line(rec: dict, outcomes: dict = None) -> str:
     # (check_friday_run pins that they agree): C2's notification reads this line, a person reads the section.
     counts = "%d new item(s), %d kept, %d dropped by triage, %d extracted, %d unfinished; %s spent of the %s" % (
         len(rec["listed"]), len(rec["relevant"]), len(rec["not_relevant"]), len(rec["extracted"]),
-        len(rec["unfinished"]) + len(rec["not_queued"]) + len(rec["failed"]) + len(rec["deferred_budget"]),
+        len(rec["unfinished"]) + len(rec["not_queued"]) + len(rec["failed"]) + len(rec["deferred_budget"]) + len(rec["too_long"]),
         _usd(rec["spent_usd"]), CEILING_NOTE % _ceiling(rec))
     # AFTER every count, never between them: line 3's "N unfinished" still equals ## Unfinished.
     counts += citation_clause(rec, outcomes or {})
@@ -186,15 +186,18 @@ def render(run_id: str, root: Path = inbox.INBOX_ROOT) -> str:
     unfinished = ([(k, "no verdict") for k in rec["unfinished"]]
                   + [(k, "relevant, not queued for extraction") for k in rec["not_queued"]]
                   + [(k, "extraction failed: %s" % _cell(rec["failed"][k], None)) for k in rec["failed"]]
-                  + [(k, "deferred for budget: %s" % _cell(outcomes[k].get("error"), None)) for k in rec["deferred_budget"]])
+                  + [(k, "deferred for budget: %s" % _cell(outcomes[k].get("error"), None)) for k in rec["deferred_budget"]]
+                  + [(k, "too long for one extraction: %s; it returns next Friday and will be too long again until "
+                         "the limit or the extractor changes" % _cell(outcomes[k].get("error"), None)) for k in rec["too_long"]])
     unfinished = sorted(unfinished, key=lambda row: (rank.get(row[0], len(rank)), row[0]))
     out += ["", "## Unfinished: %d (they return next Friday unless dropped)" % len(unfinished), ""]
     out += ["- `%s` %s: %s" % (k, _cell(items.get(k, {}).get("title"), 120), why) for k, why in unfinished]
     if not unfinished:
         out.append("None.")
 
-    out += ["", "## Extraction: %d queued, %d extracted, %d failed, %d deferred for budget" % (
-        len(rec["queued"]), len(rec["extracted"]), len(rec["failed"]), len(rec["deferred_budget"])), ""]
+    out += ["", "## Extraction: %d queued, %d extracted, %d failed, %d deferred for budget, %d too long for one extraction" % (
+        len(rec["queued"]), len(rec["extracted"]), len(rec["failed"]), len(rec["deferred_budget"]),
+        len(rec["too_long"])), ""]
     if rec["queued"]:
         out += ["| item | advisory id | status | proposals | resolver calls (resolved) | record actors resolvable "
                 "| citations not on their page | cost |", "|---|---|---|---|---|---|---|---|"]

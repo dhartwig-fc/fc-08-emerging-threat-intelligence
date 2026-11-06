@@ -13,6 +13,10 @@ Usage:
     python evals/check_friday_run.py --mutate transcript-duplicates   # a call a hook recorded is terminated again
     python evals/check_friday_run.py --mutate invent-terminal         # a call with no hook and no result is terminated
     python evals/check_friday_run.py --mutate refused-extracted       # a refused request gets an id and an extraction
+    python evals/check_friday_run.py --mutate no-size-check          # a document over the prompt limit is extracted
+    python evals/check_friday_run.py --mutate size-limit-exclusive   # a prompt exactly at the limit is deferred
+    python evals/check_friday_run.py --mutate too-long-is-failed     # a too-long item reads as a failed extraction
+    python evals/check_friday_run.py --mutate report-hides-too-long  # the report omits the too-long items from ## Unfinished
     python evals/check_friday_run.py --mutate no-run-lock             # two Friday runs may allocate at once
     python evals/check_friday_run.py --mutate unfinished-omits-failed # line 3 counts a failure the section omits
     python evals/check_friday_run.py --mutate rows-by-key             # report rows sorted by key, not queue order
@@ -169,6 +173,11 @@ MUTATIONS = {
                         "        is_error, text = results.get(tool_use_id, (True, \"no result\"))\n"),
     "refused-extracted": ("friday", '                elif req.get("error") or not req.get("document"):\n',
                           "                elif False:\n"),
+    "no-size-check": ("friday", "                elif size[0] > of.MAX_EXTRACTION_PROMPT_CHARS:\n", "                elif False:\n"),
+    "size-limit-exclusive": ("friday", "                elif size[0] > of.MAX_EXTRACTION_PROMPT_CHARS:\n",
+                             "                elif size[0] >= of.MAX_EXTRACTION_PROMPT_CHARS:\n"),
+    "too-long-is-failed": ("reconcile", '        elif o["status"] == "deferred_size":\n', "        elif False:\n"),
+    "report-hides-too-long": ("report", '                  + [(k, "too long for one extraction: %s;', '                  + [] and [(k, "too long for one extraction: %s;'),
     "no-run-lock": ("friday", "        if not held:\n", "        if False:\n"),
     "unfinished-omits-failed": ("report", '                  + [(k, "extraction failed: %s" % _cell(rec["failed"][k], '
                                           'None)) for k in rec["failed"]]\n', "                  + []\n"),
@@ -853,6 +862,43 @@ def body(mutation) -> list:
                     "and the section agree; the items either side of it are extracted",
                     "extractor asked %s; allocated %s; line 3 / header / rows %s" % (
                         asked, sorted(alloc), unfinished_counts(text))))
+
+        # Owner decision 2026-11-06: a document whose extraction prompt passes of.MAX_EXTRACTION_PROMPT_CHARS is
+        # DEFERRED FOR SIZE before any id is allocated or any extractor is called; at the limit it is extracted.
+        rid = "feeds-2026-10-02-aaa040"
+        run, keys, session = listed_run(m, box, rid, n_relevant=2, n_dropped=0, queue=2, cost=0.3)
+        n = fr.prompt_chars(extraction.load_requests(rid, box)[0], box, rid)
+        m["of"].MAX_EXTRACTION_PROMPT_CHARS = n - 1
+        asked = []
+        rec = run_friday(box, run, session, extractor_with(m, [0.5, 0.5], calls=asked), alist)
+        outs, alloc = extraction.load_outcomes(rid, box), extraction.load_allocations(rid, box)
+        text = (inbox.run_dir(rid, box) / "report.md").read_text(encoding="utf-8")
+        out.append((n > 0 and [outs.get(k, {}).get("status") for k in keys] == ["deferred_size"] * 2
+                    and all(outs[k]["cost_usd"] == 0.0 for k in keys) and not alloc and not asked
+                    and rec.get("too_long") == keys and not rec.get("failed") and not rec.get("deferred_budget")
+                    and rec.get("status") == "UNFINISHED" and not rec.get("problems")
+                    and ("the extraction prompt is %d characters; the limit is %d" % (n, n - 1)) in outs[keys[0]]["error"],
+                    "a prompt one character over the limit is DEFERRED FOR SIZE: no advisory id, the extractor never "
+                    "called, cost 0, its own list in the reconciliation (not failed, not deferred_budget), and the run "
+                    "is UNFINISHED, not RECONCILIATION_FAILED",
+                    "%s; allocated %s; asked %s; %s" % ([outs.get(k, {}).get("status") for k in keys], alloc, asked,
+                                                         rec.get("status"))))
+        out.append((unfinished_counts(text) == (2, 2, 2) and "2 too long for one extraction" in text
+                    and ("too long for one extraction: the extraction prompt is %d characters" % n) in text
+                    and "it returns next Friday" in text,
+                    "the report counts the too-long items in the Extraction heading, in line 3 and in ## Unfinished, "
+                    "with the measured size and that they return next Friday",
+                    "line 3 / header / rows %s" % (unfinished_counts(text),)))
+        rid = "feeds-2026-10-02-aaa041"
+        run, keys, session = listed_run(m, box, rid, n_relevant=2, n_dropped=0, queue=2, cost=0.3)
+        m["of"].MAX_EXTRACTION_PROMPT_CHARS = n
+        asked = []
+        rec = run_friday(box, run, session, extractor_with(m, [0.5, 0.5], calls=asked), alist)
+        outs = extraction.load_outcomes(rid, box)
+        out.append(([outs.get(k, {}).get("status") for k in keys] == ["extracted"] * 2 and asked == keys
+                    and not rec.get("too_long") and rec.get("status") == "COMPLETE",
+                    "a prompt exactly at the limit is extracted as before",
+                    "%s; asked %s; %s" % ([outs.get(k, {}).get("status") for k in keys], asked, rec.get("status"))))
 
         # Carried ruling 1: one Friday run at a time; the lock is held across the session and every extraction.
         rid = "feeds-2026-10-02-aaa010"

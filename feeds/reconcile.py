@@ -90,7 +90,7 @@ def reconcile_run(run_id: str, root: Path = inbox.INBOX_ROOT) -> dict:
     if ended and (manual or orchestrator["status"] != "FAILURE"):
         for k in sorted(set(requests) - set(outcomes)):
             problems.append("the extraction request for %s has no outcome" % k)
-    extracted, failed, deferred = [], {}, []
+    extracted, failed, deferred, too_long = [], {}, [], []
     queue_rank = {k: i for i, k in enumerate(requests)}
     if len(requests) > extraction.MAX_PER_RUN:
         problems.append("%d extraction requests; a run queues at most %d" % (len(requests), extraction.MAX_PER_RUN))
@@ -108,6 +108,8 @@ def reconcile_run(run_id: str, root: Path = inbox.INBOX_ROOT) -> dict:
                 problems.append("%s's record is not of the document its request pinned" % k)
         elif o["status"] == "deferred_budget":
             deferred.append(k)
+        elif o["status"] == "deferred_size":
+            too_long.append(k)
         else:
             failed[k] = o.get("error") or o["status"]
     for s in sessions:
@@ -135,7 +137,7 @@ def reconcile_run(run_id: str, root: Path = inbox.INBOX_ROOT) -> dict:
         status = FAILED
     elif problems:
         status = RECON_FAILED
-    elif unfinished or not_queued or failed or deferred or source_failures or never_listed:
+    elif unfinished or not_queued or failed or deferred or too_long or source_failures or never_listed:
         status = UNFINISHED
     elif not listed:
         status = NOTHING_NEW
@@ -146,7 +148,7 @@ def reconcile_run(run_id: str, root: Path = inbox.INBOX_ROOT) -> dict:
             "sources": source_state, "never_listed_sources": never_listed, "source_failures": source_failures,
             "listed": sorted(listed), "verdicts": verdicts, "unfinished": unfinished, "relevant": relevant,
             "not_relevant": sorted(k for k, v in verdicts.items() if v["verdict"] == feeds_triage.NOT_RELEVANT),
-            "queued": list(requests), "extracted": extracted, "failed": failed, "deferred_budget": deferred,
+            "queued": list(requests), "extracted": extracted, "failed": failed, "deferred_budget": deferred, "too_long": too_long,
             "not_queued": not_queued, "allocations": allocations, "sessions": sessions, "problems": problems,
             "spent_usd": run.get("spent_usd"), "ceiling_usd": run.get("ceiling_usd"), "known_cost_usd": round(sum(known), 6),
             "unknown_cost_sessions": sum(1 for s in sessions if s["cost_usd"] is None)}
